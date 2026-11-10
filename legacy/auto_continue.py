@@ -30,7 +30,7 @@ ANNOUNCE = re.compile(
 # ---- Kev decision model (fake-stop oracle) -----------------------------------
 KEV_URL = os.environ.get("DGX_KEV_URL", "http://192.0.2.10:8008/v1/systemone")
 KEV_MODEL = os.environ.get("DGX_KEV_MODEL", "kev-latest")
-KEV_THRESHOLD = float(os.environ.get("DGX_KEV_THRESHOLD", "0.45"))
+KEV_THRESHOLD = float(os.environ.get("DGX_KEV_THRESHOLD", "0.40"))
 KEV_TIMEOUT = float(os.environ.get("DGX_KEV_TIMEOUT", "2.5"))
 KEV_MESSAGES = int(os.environ.get("DGX_KEV_MESSAGES", "14"))
 KEV_CHARS = int(os.environ.get("DGX_KEV_CHARS", "6000"))
