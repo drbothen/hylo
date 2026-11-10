@@ -40,7 +40,7 @@ try:
 except ImportError:  # CLI mode (`dgx_proxy.py trust ...`) needs no mitmproxy
     pass
 
-DGX_BLOCK_TYPES = {"text", "image", "tool_use", "tool_result", "tool_reference", "thinking", "redacted_thinking"}
+DGX_BLOCK_TYPES = {"text", "image", "tool_use", "tool_result", "thinking", "redacted_thinking"}
 _logged_unknown: set = set()
 log = logging.getLogger("dgx_proxy")
 
@@ -152,6 +152,20 @@ class DGXRouter:
         if flow.response.status_code >= 400:
             note("   DGX %s error body: %s", flow.response.status_code,
                  flow.response.get_text(strict=False)[:600])
+            # Keep the full offending request for post-mortem (e.g. FastAPI json_invalid
+            # truncation-style 400s on multi-MB bodies). Capped to 20 newest files.
+            try:
+                obs = Path.home() / "dgx-llm-obs"
+                obs.mkdir(exist_ok=True)
+                old = sorted(obs.glob("failed-req-*.json"))
+                for stale in old[:-19]:
+                    stale.unlink(missing_ok=True)
+                body_text = flow.request.get_text() or ""
+                if len(body_text) < 50_000_000:
+                    (obs / f"failed-req-{int(time.time() * 1000)}.json").write_text(body_text)
+                    note("   saved offending request (%d bytes) to dgx-llm-obs/", len(body_text))
+            except OSError:
+                pass
             return
         stop = "unknown"
         if flow.response.stream or "text/event-stream" in (flow.response.headers.get("content-type") or ""):
