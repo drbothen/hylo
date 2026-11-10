@@ -1,0 +1,144 @@
+#!/bin/zsh
+# Claude Code with SONNET served by the DGX (whatever model the DGX is serving: Flash / Warlock / GLM-5.3),
+# defaulting the session to Sonnet. Opus (e.g. an Agent/Task subagent with model: opus, or /model opus)
+# goes to real Claude Opus at Anthropic on your account, as do Haiku/background requests (normal login).
+# Starts the opus router on 127.0.0.1:4141 for this session only, and stops it on exit.
+set -u
+HERE=${0:A:h}
+# CA trust lifecycle: `claude-dgx trust <install|status|remove|rotate>` manages the mitmproxy
+# certificate without starting a session (no invisible proxy, no Claude launch). Bare `trust`
+# prints the manager's usage. Delegates to the standalone CLI in dgx_proxy.py.
+if [[ ${1:-} == trust ]]; then
+  shift
+  exec python3 "$HERE/dgx_proxy.py" trust "$@"
+fi
+# Each session gets its own router on its own free port (4141, 4142, ...) so parallel claude-dgx
+# sessions don't share one router that dies when the first session exits. Set ROUTER_PORT to pin one.
+if [[ -n ${ROUTER_PORT:-} ]]; then
+  PORT=$ROUTER_PORT
+else
+  PORT=4141
+  while nc -z 127.0.0.1 "$PORT" 2>/dev/null; do (( PORT++ )); (( PORT > 4199 )) && { echo "no free router port in 4141-4199" >&2; exit 1; }; done
+fi
+LOG=${TMPDIR:-/tmp}/opus-router.$$.log
+ROUTER_PID=""
+MITM_PID=""
+
+# �── Transport mode �───────────────────────────────────────────────────────────────────
+# DGX_INVISIBLE=1 (default since 2026-11-09): invisible proxy — no ANTHROPIC_BASE_URL; the session
+#   talks to api.anthropic.com via a local mitmproxy (transparent to Claude Code, so Remote Control
+#   works), which routes Sonnet -> DGX and Opus/Haiku/server-tools -> Anthropic.
+# DGX_INVISIBLE=0: visible router — ANTHROPIC_BASE_URL points at a local opus_router
+#   (127.0.0.1:4141+). Remote Control is NOT available in this mode (documented Claude Code
+#   requirement: it needs a direct api.anthropic.com connection).
+#   api.anthropic.com via a local mitmproxy (transparent to Claude Code, so Remote Control
+#   works), which routes Sonnet -> DGX and Opus/Haiku/server-tools -> Anthropic.
+#   Requires dgx-llm/.mitmenv (mitmproxy venv) and ~/.mitmproxy/mitmproxy-ca-cert.pem.
+# Router config must be exported BEFORE mitmdump starts so the dgx_proxy.py addon inherits it.
+export LOCAL_MODEL_PREFIXES=claude-sonnet     # router: this family -> DGX; Opus/Haiku -> Anthropic
+export DGX_SERVED_MODEL=claude-sonnet-5-5     # router rewrites DGX-bound model names to the server's served name
+if [[ ${DGX_INVISIBLE:-1} == 1 ]]; then
+  unset ANTHROPIC_BASE_URL
+  MITM_PORT=8090
+  while nc -z 127.0.0.1 "$MITM_PORT" 2>/dev/null; do (( MITM_PORT++ )); (( MITM_PORT > 8143 )) && { echo "no free mitm port in 8090-8143" >&2; exit 1; }; done
+  MLOG=${TMPDIR:-/tmp}/dgx-mitm.$$.$MITM_PORT.log
+  PYTHONUNBUFFERED=1 "$HERE/.mitmenv/bin/mitmdump" --set flow_detail=1 --listen-port "$MITM_PORT" -s "$HERE/dgx_proxy.py" >"$MLOG" 2>&1 &
+  MITM_PID=$!
+  for _ in {1..40}; do nc -z 127.0.0.1 "$MITM_PORT" 2>/dev/null && break; sleep 0.25; done
+  nc -z 127.0.0.1 "$MITM_PORT" 2>/dev/null || { echo "invisible proxy failed to start; see $MLOG" >&2; exit 1; }
+  export HTTPS_PROXY=http://127.0.0.1:$MITM_PORT
+  export NODE_EXTRA_CA_CERTS="$HOME/.mitmproxy/mitmproxy-ca-cert.pem"
+  echo "invisible proxy: 127.0.0.1:$MITM_PORT (log: $MLOG)"
+fi
+
+
+is_router() { curl -s -m 2 "http://127.0.0.1:$PORT/_opus_router/health" 2>/dev/null | grep -q opus-router; }
+if [[ ${DGX_INVISIBLE:-1} == 1 ]]; then
+  : # invisible mode: no local opus_router
+elif ! is_router; then
+  if nc -z 127.0.0.1 "$PORT" 2>/dev/null; then
+    echo "port $PORT is in use by something other than the opus router; set ROUTER_PORT" >&2; exit 1
+  fi
+  ROUTER_PORT=$PORT python3 "$HERE/opus_router.py" >"$LOG" 2>&1 &
+  ROUTER_PID=$!
+  for _ in {1..40}; do is_router && break; sleep 0.25; done
+  is_router || { echo "opus router failed to start; see $LOG" >&2; exit 1; }
+fi
+trap '[[ -n $ROUTER_PID ]] && kill $ROUTER_PID 2>/dev/null; [[ -n $MITM_PID ]] && kill $MITM_PID 2>/dev/null' EXIT INT TERM
+
+if [[ ${DGX_INVISIBLE:-1} == 1 ]]; then
+  unset ANTHROPIC_BASE_URL   # must stay unset: an inherited value (e.g. from a tmux server) disables Remote Control
+else
+  export ANTHROPIC_BASE_URL=http://127.0.0.1:$PORT
+fi
+export API_TIMEOUT_MS=1800000   # local 753B model is slow; allow long responses
+# The session model (Sonnet) goes to the DGX, which can't do Anthropic's server-side auto-mode checks (`safeguards`), so tell
+# Claude Code up front to use its own classifier requests (billed as before) instead of showing the
+# "this session isn't eligible" notice. See https://code.claude.com/docs/en/auto-mode-classifier-billing
+# (temporary setting; may be removed in a later Claude Code release).
+export CLAUDE_CODE_AUTO_MODE_SERVER=0
+
+# Per-backend limits (context window / max output). Edit ~/.config/dgx-llm/profile.env when the DGX
+# backend changes, e.g. vLLM NVFP4 @155k:  CLAUDE_CODE_AUTO_COMPACT_WINDOW=140000 / CLAUDE_CODE_MAX_OUTPUT_TOKENS=32000
+# Warlock llama.cpp @1M: leave both unset (Claude Code's 1M default matches).
+PROFILE=${DGX_PROFILE:-$HOME/.config/dgx-llm/profile.env}
+[[ -f $PROFILE ]] && { set -a; source "$PROFILE"; set +a; }
+
+# Permission checks are OFF by default here (user request 2026-11-05): every tool call runs with no prompt
+# and no auto-mode classifier. Combined with an uncensored model and `ssh dgx` root, nothing stops a bad
+# command. Run with DGX_SAFE=1 to get Claude Code's normal permission prompts back for a session.
+#
+# Bash sandbox is OFF by default (user choice 2026-11-05). Run with DGX_SANDBOX=1 to turn it on for a
+# session (OS-level: writes limited to the working directory, network through Claude Code's proxy).
+# allowUnsandboxedCommands=false means a command that fails in the sandbox can NOT retry outside it,
+# which matters because permissions are bypassed above. See https://code.claude.com/docs/en/sandboxing
+# Main-session model selector (DGX_MAIN_MODEL):
+#   sonnet (default) -> DGX Flash    |  opus -> real Anthropic Opus 5.5 main session
+# Subagents in either mode: "opus" -> Anthropic, "sonnet" -> DGX.
+case ${DGX_MAIN_MODEL:-sonnet} in
+  opus) ARGS+=(--model opus) ;;
+  *)    ARGS+=(--model sonnet) ;;
+esac
+# DGX_REMOTE=1 enables Remote Control at launch (pair from claude.ai or the mobile app).
+[[ ${DGX_REMOTE:-0} == 1 ]] && ARGS+=(--remote-control)
+# GLM models can drift into Chinese in long sessions; pin the language on every request.
+# DGX_ENGLISH=0 turns this off.
+if [[ ${DGX_ENGLISH:-1} != 0 ]]; then
+  ARGS+=(--append-system-prompt "LANGUAGE RULE (highest priority, applies for the entire session): The user reads only English. Write EVERYTHING in English: every reply, every sentence of your internal reasoning/thinking, progress notes between tool calls, summaries, tool-call descriptions, code comments, docstrings, log messages, documentation and commit messages. Do not use Chinese (or any non-English language or script) anywhere, not even a single phrase, heading or label, and not even after many turns or after reading files that contain Chinese. If earlier messages in this conversation contain Chinese, treat that as a mistake: do not continue in Chinese, answer in English. Before sending any reply, check that it is entirely in English; if you notice you have started writing in another language, stop and rewrite it in English. The only exception: quote non-English text verbatim when the user explicitly asks for it or when it is literal file content you must reproduce.")
+fi
+[[ ${DGX_SAFE:-0} == 1 ]] || ARGS+=(--dangerously-skip-permissions)
+# Session settings passed via --settings (merged on top of your normal settings files):
+#  - UserPromptSubmit hook (DGX_ENGLISH): re-states the English rule right next to every user prompt,
+#    where a long session weighs it far more than the system prompt.
+#  - Stop hook auto_continue.py, two checks (each can be turned off; the hook reads these env vars):
+#      DGX_ENGLISH:      reply has real Chinese/CJK text -> make the model rewrite it in English
+#      DGX_AUTOCONTINUE: reply ends right after announcing the next step -> tell it "continue"
+#    Log: ~/.cache/dgx-llm/auto-continue.log
+#  - optional Bash sandbox (DGX_SANDBOX=1)
+export DGX_ENGLISH=${DGX_ENGLISH:-1} DGX_AUTOCONTINUE=${DGX_AUTOCONTINUE:-1}
+# Fake-stop oracle: Kev-4B on the DGX (GPU 0, container kev-serve, port 8008).
+# Threshold 0.40: tuned 2026-11-10 after a 0.487 fake stop was allowed (borderline cluster
+# 0.47-0.49); lower catches them but nags more. Raise toward 0.45 if it over-continues.
+export DGX_KEV_THRESHOLD=${DGX_KEV_THRESHOLD:-0.40}
+# Fake-stop oracle: Kev-4B on the DGX (GPU 0, container kev-serve, port 8008).
+export DGX_KEV_URL=${DGX_KEV_URL:-http://192.0.2.10:8008/v1/systemone}
+export DGX_KEV_MODEL=${DGX_KEV_MODEL:-jaredpalmer/kev-4b@v1.0}
+HOOKS=()
+if [[ $DGX_ENGLISH != 0 ]]; then
+  HOOKS+=('"UserPromptSubmit":[{"hooks":[{"type":"command","command":"echo \"[Reminder: reply and think in English only. No Chinese anywhere, including your reasoning.]\"","timeout":5}]}]')
+fi
+if [[ $DGX_ENGLISH != 0 || $DGX_AUTOCONTINUE != 0 ]]; then
+  HOOKS+=("\"Stop\":[{\"hooks\":[{\"type\":\"command\",\"command\":\"python3 '$HERE/auto_continue.py'\",\"timeout\":30}]}]")
+fi
+SETTINGS=()
+(( ${#HOOKS} )) && SETTINGS+=("\"hooks\":{${(j:,:)HOOKS}}")
+if [[ ${DGX_SANDBOX:-0} == 1 ]]; then
+  SETTINGS+=('"sandbox":{"enabled":true,"allowUnsandboxedCommands":false}')
+fi
+if (( ${#SETTINGS} )); then
+  ARGS+=(--settings "{${(j:,:)SETTINGS}}")
+fi
+if [[ ${DGX_PRINT_ARGS:-0} == 1 ]]; then  # dry run: show exactly what would be launched
+  printf '%s\n' claude "${ARGS[@]}" "$@"; exit 0
+fi
+claude "${ARGS[@]}" "$@"
