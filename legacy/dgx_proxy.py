@@ -257,6 +257,20 @@ class DGXRouter:
                 pass  # unparseable body: leave the marker for the log
         note("   DGX reply: http=%s stop_reason=%s", flow.response.status_code, stop)
 
+    def error(self, flow: mitmproxy.http.HTTPFlow) -> None:
+        """Upstream failures never reach response(): mitmproxy answers the client with
+        its own 502 and fires this hook instead. Without it a dead or unreachable DGX
+        left no trace (2026-11-11: a terminal without macOS Local Network permission got
+        'No route to host' on every Sonnet request, silently)."""
+        if not flow.request.path.startswith("/v1/messages"):
+            return
+        attrib = getattr(flow, "_dgx", None) or getattr(flow, "_attrib", {})
+        lane = "dgx" if flow.request.host == self.dgx_host else "anthropic"
+        msg = str(flow.error) if flow.error else "unknown error"
+        note("   %s UPSTREAM ERROR (project=%s): %s", lane.upper(), attrib.get("project"), msg)
+        ledger(f"{lane}_upstream_error", error=msg[:300],
+               **{k: v for k, v in attrib.items() if k != "error"})
+
 
 def _account_hint(meta_user_id):
     """8-char account prefix from CC's metadata.user_id (stringified JSON) for the ledger."""
@@ -426,6 +440,10 @@ def responseheaders(flow: mitmproxy.http.HTTPFlow) -> None:
 
 def response(flow: mitmproxy.http.HTTPFlow) -> None:
     _router.response(flow)
+
+
+def error(flow: mitmproxy.http.HTTPFlow) -> None:
+    _router.error(flow)
 
 
 # ============================================================================

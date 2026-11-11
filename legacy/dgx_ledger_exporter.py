@@ -157,6 +157,9 @@ def rebuild() -> None:
                         sstats[s_id]["errors"] += 1
                 elif ev.get("event") == "anthropic_reply" and ev.get("status") == 200:
                     pt += 1
+                elif ev.get("event") == "dgx_upstream_error":
+                    # DGX unreachable (connection refused / no route): count as an error
+                    er[(ev.get("project") or "unknown", ev.get("user") or "unknown")] += 1
     except FileNotFoundError:
         pass
     # ------- fake-stop hook log -------

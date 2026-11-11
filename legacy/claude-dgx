@@ -52,6 +52,21 @@ else
 ${DGX_USER_HEADER}"
 fi
 unset DGX_USER_LABEL DGX_PROJECT_HEADER DGX_USER_HEADER
+
+# Preflight: can THIS terminal reach the DGX? Uses the same Python the proxy/router will
+# use, because macOS Local Network permission is per app and inherited by children. A
+# terminal without it fails every Sonnet request with a bare 502 (2026-11-11, stale
+# iTermServer-3.6.10). DGX_SKIP_PREFLIGHT=1 launches anyway.
+if [[ ${DGX_SKIP_PREFLIGHT:-0} != 1 ]]; then
+  PF_PY="$HERE/.mitmenv/bin/python"
+  [[ ${DGX_INVISIBLE:-1} == 1 ]] || PF_PY=python3
+  if ! PF_MSG=$("$PF_PY" "$HERE/dgx_preflight.py" "${DGX_UPSTREAM:-http://192.0.2.10:8080}" 2>&1); then
+    echo "claude-dgx: preflight failed: $PF_MSG" >&2
+    echo "  (DGX_SKIP_PREFLIGHT=1 claude-dgx launches anyway; Sonnet requests will then fail with 502)" >&2
+    exit 1
+  fi
+fi
+
 if [[ ${DGX_INVISIBLE:-1} == 1 ]]; then
   unset ANTHROPIC_BASE_URL
   MITM_PORT=8090
