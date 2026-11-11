@@ -118,6 +118,28 @@ class DGXRouter:
         if changed:
             flow.request.set_text(json.dumps(req))
 
+        # Observability attribution: CC >=2.1.86 always sends X-Claude-Code-Session-Id;
+        # X-DGX-Project / X-DGX-User come from the claude-dgx launcher
+        # (ANTHROPIC_CUSTOM_HEADERS); metadata.user_id is the official Messages-API
+        # opaque end-user id that CC populates in the body (account+session hashes).
+        meta = req.get("metadata") if isinstance(req.get("metadata"), dict) else {}
+        attrib = {
+            "project": flow.request.headers.get("X-DGX-Project"),
+            "user": flow.request.headers.get("X-DGX-User"),
+            "session": flow.request.headers.get("X-Claude-Code-Session-Id"),
+            "meta_user_id": meta.get("user_id"),
+            "model_req": model,
+            "model_served": req.get("model"),
+        }
+        flow._dgx = attrib
+        flow._dgx_t0 = time.time()
+        ledger("dgx_request", **attrib)
+        # Belt-and-braces: carry attribution to the serving side (vLLM logs/OTel).
+        flow.request.headers["X-DGX-Project"] = attrib["project"] or "unknown"
+        flow.request.headers["X-DGX-User"] = attrib["user"] or "unknown"
+        if attrib["session"]:
+            flow.request.headers["X-DGX-Session"] = attrib["session"]
+
         flow.request.scheme = self.dgx_scheme
         flow.request.host = self.dgx_host
         flow.request.port = self.dgx_port
@@ -149,11 +171,15 @@ class DGXRouter:
                    size=len(flow.response.raw_content or b""))
         if flow.request.host != self.dgx_host or not flow.request.path.startswith("/v1/messages"):
             return
+        attrib = getattr(flow, "_dgx", {})
+        ledger("dgx_reply", status=flow.response.status_code,
+               duration_s=round(time.time() - getattr(flow, "_dgx_t0", time.time()), 3),
+               **attrib)
         if flow.response.status_code >= 400:
-            note("   DGX %s error body: %s", flow.response.status_code,
-                 flow.response.get_text(strict=False)[:600])
             # Keep the full offending request for post-mortem (e.g. FastAPI json_invalid
             # truncation-style 400s on multi-MB bodies). Capped to 20 newest files.
+            note("   DGX %s error body: %s", flow.response.status_code,
+                 flow.response.get_text(strict=False)[:600])
             try:
                 obs = Path.home() / "dgx-llm-obs"
                 obs.mkdir(exist_ok=True)

@@ -37,6 +37,21 @@ MITM_PID=""
 # Router config must be exported BEFORE mitmdump starts so the dgx_proxy.py addon inherits it.
 export LOCAL_MODEL_PREFIXES=claude-sonnet     # router: this family -> DGX; Opus/Haiku -> Anthropic
 export DGX_SERVED_MODEL=claude-sonnet-5-5     # router rewrites DGX-bound model names to the server's served name
+# Observability attribution: CC stamps every API request with these (official
+# ANTHROPIC_CUSTOM_HEADERS); the proxy ledger groups stats by project + user.
+# DGX_USER overrides; default = OS username. Project = directory claude was STARTED in.
+DGX_USER_LABEL=${DGX_USER:-$(whoami)}
+DGX_PROJECT_HEADER="X-DGX-Project: $(basename "$PWD")"
+DGX_USER_HEADER="X-DGX-User: ${DGX_USER_LABEL}"
+if [[ -n ${ANTHROPIC_CUSTOM_HEADERS:-} ]]; then
+  export ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS}
+${DGX_PROJECT_HEADER}
+${DGX_USER_HEADER}"
+else
+  export ANTHROPIC_CUSTOM_HEADERS="${DGX_PROJECT_HEADER}
+${DGX_USER_HEADER}"
+fi
+unset DGX_USER_LABEL DGX_PROJECT_HEADER DGX_USER_HEADER
 if [[ ${DGX_INVISIBLE:-1} == 1 ]]; then
   unset ANTHROPIC_BASE_URL
   MITM_PORT=8090
