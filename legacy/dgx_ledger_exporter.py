@@ -28,6 +28,8 @@ est_prompt = defaultdict(float)        # (project,user,acct) -> est. prompt toke
 dur_sum = defaultdict(float)           # (project,user) -> seconds
 dur_count = defaultdict(int)
 errors = defaultdict(int)              # (project,user) -> n
+tok_in = defaultdict(int)              # (project,user,acct) -> TRUE input tokens (SSE usage)
+tok_out = defaultdict(int)             # (project,user,acct) -> TRUE output tokens
 passthrough = 0
 last_ts = 0.0
 
@@ -57,8 +59,9 @@ def _account_device(meta_user_id):
 
 def rebuild() -> None:
     global passthrough, last_ts
-    rt, ds, dc, er, et = (defaultdict(int), defaultdict(float), defaultdict(int),
-                          defaultdict(int), defaultdict(float))
+    rt, ds, dc, er, et, tin, tout = (defaultdict(int), defaultdict(float), defaultdict(int),
+                                     defaultdict(int), defaultdict(float),
+                                     defaultdict(int), defaultdict(int))
     pt = 0
     last = 0.0
     try:
@@ -76,7 +79,12 @@ def rebuild() -> None:
                         last = max(last, ts)
                     except ValueError:
                         pass
-                if ev.get("event") == "dgx_request":
+                if ev.get("event") == "dgx_usage":
+                    key_u = (ev.get("project") or "unknown", ev.get("user") or "unknown",
+                             ev.get("account") or "unknown")
+                    tin[key_u] += int(ev.get("in_tok") or 0)
+                    tout[key_u] += int(ev.get("out_tok") or 0)
+                elif ev.get("event") == "dgx_request":
                     acct, dev = _account_device(ev.get("meta_user_id"))
                     key = (ev.get("project") or "unknown", ev.get("user") or "unknown", ev.get("model_req") or "?", acct, dev)
                     rt[key] += 1
@@ -102,6 +110,8 @@ def rebuild() -> None:
         dur_count.clear(); dur_count.update(dc)
         errors.clear(); errors.update(er)
         est_prompt.clear(); est_prompt.update(et)
+        tok_in.clear(); tok_in.update(tin)
+        tok_out.clear(); tok_out.update(tout)
         passthrough = pt
         globals()["last_ts"] = last
 
@@ -125,6 +135,14 @@ class Handler(BaseHTTPRequestHandler):
                       "# TYPE dgx_llm_est_prompt_tokens_total counter"]
             for (proj, user, acct), v in sorted(est_prompt.items()):
                 lines.append(f'dgx_llm_est_prompt_tokens_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v:.0f}')
+            lines += ["# HELP dgx_llm_tokens_input_total true input tokens (SSE usage, vLLM-reported)",
+                      "# TYPE dgx_llm_tokens_input_total counter",
+                      "# HELP dgx_llm_tokens_output_total true output tokens (SSE usage, vLLM-reported)",
+                      "# TYPE dgx_llm_tokens_output_total counter"]
+            for (proj, user, acct), v in sorted(tok_in.items()):
+                lines.append(f'dgx_llm_tokens_input_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v}')
+            for (proj, user, acct), v in sorted(tok_out.items()):
+                lines.append(f'dgx_llm_tokens_output_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v}')
             lines += ["# HELP dgx_llm_request_duration_seconds_sum cumulative request seconds",
                       "# TYPE dgx_llm_request_duration_seconds_sum counter",
                       "# TYPE dgx_llm_request_duration_seconds_count counter"]

@@ -26,6 +26,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -157,7 +158,8 @@ class DGXRouter:
         # (relay polls, realtime channels) die if the proxy buffers mid-event.
         ctype = (flow.response.headers.get("content-type") or "") if flow.response else ""
         if flow.response is not None and "text/event-stream" in ctype:
-            flow.response.stream = True
+            flow._sse_tap = _SSETap()
+            flow.response.stream = flow._sse_tap.feed  # pass-through tap
             return
         if flow.request.path.startswith("/v1/messages") and flow.response is not None:
             flow.response.stream = flow.response.status_code < 400  # buffer error bodies for logging
@@ -173,9 +175,20 @@ class DGXRouter:
         if flow.request.host != self.dgx_host or not flow.request.path.startswith("/v1/messages"):
             return
         attrib = getattr(flow, "_dgx", {})
+        tap = getattr(flow, "_sse_tap", None)
+        if tap is not None and tap.usage:
+            attrib["in_tok"] = tap.usage[0]
+            attrib["out_tok"] = tap.usage[1]
+        if tap is not None and tap.stop_reason:
+            attrib["stream_stop_reason"] = tap.stop_reason
         ledger("dgx_reply", status=flow.response.status_code,
                duration_s=round(time.time() - getattr(flow, "_dgx_t0", time.time()), 3),
                **attrib)
+        if attrib.get("in_tok") is not None:
+            ledger("dgx_usage", project=attrib.get("project"), user=attrib.get("user"),
+                   session=attrib.get("session"), account=_account_hint(attrib.get("meta_user_id")),
+                   in_tok=attrib["in_tok"], out_tok=attrib["out_tok"],
+                   stop_reason=attrib.get("stream_stop_reason"))
         if flow.response.status_code >= 400:
             # Keep the full offending request for post-mortem (e.g. FastAPI json_invalid
             # truncation-style 400s on multi-MB bodies). Capped to 20 newest files.
@@ -205,8 +218,60 @@ class DGXRouter:
         note("   DGX reply: http=%s stop_reason=%s", flow.response.status_code, stop)
 
 
-_STOP_REASON_ALIASES = {
-    # OpenAI/vLLM finish_reason -> Anthropic stop_reason vocabulary, so the
+def _account_hint(meta_user_id):
+    """8-char account prefix from CC's metadata.user_id (stringified JSON) for the ledger."""
+    if isinstance(meta_user_id, str):
+        try:
+            m = json.loads(meta_user_id)
+            if isinstance(m, dict):
+                return (m.get("account_uuid") or "unknown")[:8]
+        except ValueError:
+            pass
+        return meta_user_id[:8]
+    return "unknown"
+
+
+class _SSETap:
+    """Pass-through SSE tap: mitmproxy calls feed() per chunk when response.stream
+    is a callable. Accumulates the tail, extracts usage{} from message_delta and
+    the final stop_reason, without buffering the whole body client-side."""
+
+    KEEP = 64_000  # tail bytes retained for line-safe parsing
+
+    def __init__(self):
+        self.buf = b""
+        self.usage = None       # (input_tokens, output_tokens)
+        self.stop_reason = None
+
+    def feed(self, chunk: bytes) -> bytes:
+        self.buf += chunk
+        # keep only complete trailing lines; parse the complete ones
+        nl = self.buf.rfind(b"\n")
+        if nl >= 0:
+            block, self.buf = self.buf[:nl], self.buf[nl + 1:]
+            try:
+                self._scan(block)
+            except Exception:
+                pass
+        if len(self.buf) > self.KEEP:  # runaway line guard
+            self.buf = self.buf[-self.KEEP:]
+        return chunk
+
+    def _scan(self, block: bytes) -> None:
+        for m in re.finditer(rb"data: ({.*})", block):
+            try:
+                obj = json.loads(m.group(1))
+            except ValueError:
+                continue
+            u = obj.get("usage") if isinstance(obj, dict) else None
+            if isinstance(u, dict) and "input_tokens" in u:
+                self.usage = (int(u.get("input_tokens") or 0), int(u.get("output_tokens") or 0))
+            sr = obj.get("delta", {}).get("stop_reason") if isinstance(obj, dict) else None
+            if sr:
+                self.stop_reason = sr
+
+
+_STOP_REASON_ALIASES = {    # OpenAI/vLLM finish_reason -> Anthropic stop_reason vocabulary, so the
     # decision log reads identically whichever lane produced the reply.
     "stop": "end_turn",
     "length": "max_tokens",
