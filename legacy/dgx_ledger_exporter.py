@@ -23,7 +23,8 @@ LEDGER = os.environ.get("DGX_OBS_LEDGER", os.path.expanduser("~/dgx-llm-obs.json
 PORT = int(os.environ.get("DGX_LEDGER_EXPORTER_PORT", "9210"))
 
 state_lock = __import__("threading").Lock()
-req_totals = defaultdict(int)          # (project,user,model) -> n
+req_totals = defaultdict(int)          # (project,user,model,acct,dev) -> n
+est_prompt = defaultdict(float)        # (project,user,acct) -> est. prompt tokens
 dur_sum = defaultdict(float)           # (project,user) -> seconds
 dur_count = defaultdict(int)
 errors = defaultdict(int)              # (project,user) -> n
@@ -35,9 +36,29 @@ def esc(s: str) -> str:
     return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
 
 
+def _account_device(meta_user_id):
+    """Split CC's metadata.user_id (stringified JSON {device_id, account_uuid, session_id})
+    into short stable labels; falls back to (raw-if-short, 'unknown')."""
+    acct = dev = "unknown"
+    if meta_user_id:
+        if isinstance(meta_user_id, str):
+            try:
+                m = json.loads(meta_user_id)
+                if isinstance(m, dict):
+                    acct = (m.get("account_uuid") or "unknown")[:8]
+                    dev = (m.get("device_id") or "unknown")[:8]
+            except ValueError:
+                acct, dev = (meta_user_id[:8], "unknown") if len(meta_user_id) > 8 else (meta_user_id, "unknown")
+        elif isinstance(meta_user_id, dict):
+            acct = (meta_user_id.get("account_uuid") or "unknown")[:8]
+            dev = (meta_user_id.get("device_id") or "unknown")[:8]
+    return acct, dev
+
+
 def rebuild() -> None:
     global passthrough, last_ts
-    rt, ds, dc, er = defaultdict(int), defaultdict(float), defaultdict(int), defaultdict(int)
+    rt, ds, dc, er, et = (defaultdict(int), defaultdict(float), defaultdict(int),
+                          defaultdict(int), defaultdict(float))
     pt = 0
     last = 0.0
     try:
@@ -56,8 +77,13 @@ def rebuild() -> None:
                     except ValueError:
                         pass
                 if ev.get("event") == "dgx_request":
-                    key = (ev.get("project") or "unknown", ev.get("user") or "unknown", ev.get("model_req") or "?")
+                    acct, dev = _account_device(ev.get("meta_user_id"))
+                    key = (ev.get("project") or "unknown", ev.get("user") or "unknown", ev.get("model_req") or "?", acct, dev)
                     rt[key] += 1
+                    nbytes = ev.get("req_bytes")
+                    if isinstance(nbytes, (int, float)) and nbytes > 0:
+                        # rough prompt-token estimate: ~4 chars per token for mixed code/prose
+                        et[(key[0], key[1], acct)] += nbytes / 4.0
                 elif ev.get("event") == "dgx_reply":
                     key = (ev.get("project") or "unknown", ev.get("user") or "unknown")
                     d = ev.get("duration_s")
@@ -75,6 +101,7 @@ def rebuild() -> None:
         dur_sum.clear(); dur_sum.update(ds)
         dur_count.clear(); dur_count.update(dc)
         errors.clear(); errors.update(er)
+        est_prompt.clear(); est_prompt.update(et)
         passthrough = pt
         globals()["last_ts"] = last
 
@@ -92,8 +119,12 @@ class Handler(BaseHTTPRequestHandler):
                 "# HELP dgx_llm_requests_total DGX-bound requests",
                 "# TYPE dgx_llm_requests_total counter",
             ]
-            for (proj, user, model), n in sorted(req_totals.items()):
-                lines.append(f'dgx_llm_requests_total{{project="{esc(proj)}",user="{esc(user)}",model="{esc(model)}"}} {n}')
+            for (proj, user, model, acct, dev), n in sorted(req_totals.items()):
+                lines.append(f'dgx_llm_requests_total{{project="{esc(proj)}",user="{esc(user)}",model="{esc(model)}",account="{esc(acct)}",device="{esc(dev)}"}} {n}')
+            lines += ["# HELP dgx_llm_est_prompt_tokens_total estimated prompt tokens (bytes/4 heuristic)",
+                      "# TYPE dgx_llm_est_prompt_tokens_total counter"]
+            for (proj, user, acct), v in sorted(est_prompt.items()):
+                lines.append(f'dgx_llm_est_prompt_tokens_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v:.0f}')
             lines += ["# HELP dgx_llm_request_duration_seconds_sum cumulative request seconds",
                       "# TYPE dgx_llm_request_duration_seconds_sum counter",
                       "# TYPE dgx_llm_request_duration_seconds_count counter"]

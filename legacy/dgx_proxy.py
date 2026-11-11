@@ -130,6 +130,7 @@ class DGXRouter:
             "meta_user_id": meta.get("user_id"),
             "model_req": model,
             "model_served": req.get("model"),
+            "req_bytes": len(flow.request.get_text() or ""),
         }
         flow._dgx = attrib
         flow._dgx_t0 = time.time()
