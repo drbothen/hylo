@@ -20,6 +20,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
 
 LEDGER = os.environ.get("DGX_OBS_LEDGER", os.path.expanduser("~/dgx-llm-obs.jsonl"))
+FAKESTOP_LOG = os.environ.get("DGX_FAKESTOP_LOG", os.path.expanduser("~/.cache/dgx-llm/auto-continue.log"))
+SESSION_LIMIT = int(os.environ.get("DGX_SESSION_LIMIT", "50"))  # most-recent sessions tracked
 PORT = int(os.environ.get("DGX_LEDGER_EXPORTER_PORT", "9210"))
 
 state_lock = __import__("threading").Lock()
@@ -36,6 +38,9 @@ anth_out = defaultdict(int)            # passthrough TRUE output tokens
 anth_ds = defaultdict(float)           # passthrough latency sum
 anth_dc = defaultdict(int)             # passthrough latency count
 anth_rqs = defaultdict(int)            # passthrough usage events (= completed requests)
+sess_meta = {}                         # session_id -> {project,user,last}  (recent N)
+sess_stats = {}                        # session_id -> {reqs,in,out,errors}
+fakestop = {}                          # tallies from auto-continue.log
 passthrough = 0
 last_ts = 0.0
 
@@ -64,12 +69,19 @@ def _account_device(meta_user_id):
 
 
 def rebuild() -> None:
-    global passthrough, last_ts
+    global passthrough, last_ts, sess_meta, sess_stats
     rt, ds, dc, er, et, tin, tout = (defaultdict(int), defaultdict(float), defaultdict(int),
                                      defaultdict(int), defaultdict(float),
                                      defaultdict(int), defaultdict(int))
     ara, ain, aout, ads, adc, arq = (defaultdict(int), defaultdict(int), defaultdict(int),
                                      defaultdict(float), defaultdict(int), defaultdict(int))
+    # session funnel: most recent SESSION_LIMIT sessions with any event
+    smeta = {}     # session_id -> {"project":..., "user":..., "last": epoch}
+    sstats = defaultdict(lambda: {"reqs": 0, "in": 0, "out": 0, "errors": 0})
+    # fake-stop log tallies
+    fs = {"caught": 0, "colon": 0, "heuristic": 0, "opus": 0, "allowed": 0,
+          "p_done_latest": None}
+    sess_proj = {}  # session uuid -> project (from ledger events)
     pt = 0
     last = 0.0
     try:
@@ -87,11 +99,28 @@ def rebuild() -> None:
                         last = max(last, ts)
                     except ValueError:
                         pass
+                s_id = ev.get("session")
+                if s_id and ev.get("project"):
+                    sess_proj[s_id] = (ev["project"], ev.get("user") or "unknown")
+                if s_id and ev.get("event") in ("dgx_request", "dgx_reply", "dgx_usage"):
+                    sm = smeta.setdefault(s_id, {"project": ev.get("project") or "unknown",
+                                                 "user": ev.get("user") or "unknown",
+                                                 "last": 0.0})
+                    if t:
+                        try:
+                            import datetime
+                            sm["last"] = max(sm["last"], datetime.datetime.strptime(
+                                t, "%Y-%m-%dT%H:%M:%S").timestamp())
+                        except ValueError:
+                            pass
                 if ev.get("event") == "dgx_usage":
                     key_u = (ev.get("project") or "unknown", ev.get("user") or "unknown",
                              ev.get("account") or "unknown")
                     tin[key_u] += int(ev.get("in_tok") or 0)
                     tout[key_u] += int(ev.get("out_tok") or 0)
+                    if s_id and s_id in smeta:
+                        sstats[s_id]["in"] += int(ev.get("in_tok") or 0)
+                        sstats[s_id]["out"] += int(ev.get("out_tok") or 0)
                 elif ev.get("event") == "anth_request":
                     key_a = (ev.get("project") or "unknown", ev.get("user") or "unknown",
                              ev.get("model_req") or "?", ev.get("account") or "unknown")
@@ -110,6 +139,8 @@ def rebuild() -> None:
                     acct, dev = _account_device(ev.get("meta_user_id"))
                     key = (ev.get("project") or "unknown", ev.get("user") or "unknown", ev.get("model_req") or "?", acct, dev)
                     rt[key] += 1
+                    if s_id and s_id in smeta:
+                        sstats[s_id]["reqs"] += 1
                     nbytes = ev.get("req_bytes")
                     if isinstance(nbytes, (int, float)) and nbytes > 0:
                         # rough prompt-token estimate: ~4 chars per token for mixed code/prose
@@ -122,10 +153,38 @@ def rebuild() -> None:
                         dc[key] += 1
                     if ev.get("status", 0) >= 400:
                         er[key] += 1
+                    if s_id and s_id in smeta and ev.get("status", 0) >= 400:
+                        sstats[s_id]["errors"] += 1
                 elif ev.get("event") == "anthropic_reply" and ev.get("status") == 200:
                     pt += 1
     except FileNotFoundError:
         pass
+    # ------- fake-stop hook log -------
+    try:
+        with open(FAKESTOP_LOG) as f:
+            for line in f:
+                if " [kev-continue]" in line:
+                    fs["caught"] += 1
+                elif " [kev-allow]" in line:
+                    fs["allowed"] += 1
+                elif " [kev+opus-continue]" in line:
+                    fs["opus"] += 1
+                elif " [colon-fake]" in line:
+                    fs["colon"] += 1
+                elif " [heuristic-continue]" in line:
+                    fs["heuristic"] += 1
+                if "p_done=" in line:
+                    try:
+                        import re as _re
+                        m = _re.search(r"p_done=([0-9.]+)", line)
+                        if m:
+                            fs["p_done_latest"] = float(m.group(1))
+                    except Exception:
+                        pass
+    except FileNotFoundError:
+        pass
+    # trim sessions to most recent N
+    recent = dict(sorted(smeta.items(), key=lambda kv: kv[1]["last"], reverse=True)[:SESSION_LIMIT])
     with state_lock:
         req_totals.clear(); req_totals.update(rt)
         dur_sum.clear(); dur_sum.update(ds)
@@ -140,6 +199,10 @@ def rebuild() -> None:
         anth_ds.clear(); anth_ds.update(ads)
         anth_dc.clear(); anth_dc.update(adc)
         anth_rqs.clear(); anth_rqs.update(arq)
+        sess_meta.clear(); sess_meta.update(recent)
+        for s_id in recent:
+            sess_stats[s_id] = dict(sstats.get(s_id, {"reqs": 0, "in": 0, "out": 0, "errors": 0}))
+        fakestop.clear(); fakestop.update(fs)
         passthrough = pt
         globals()["last_ts"] = last
 
@@ -207,6 +270,30 @@ class Handler(BaseHTTPRequestHandler):
                       "# HELP dgx_llm_last_request_timestamp_seconds newest ledger event (unix)",
                       "# TYPE dgx_llm_last_request_timestamp_seconds gauge",
                       f"dgx_llm_last_request_timestamp_seconds {last_ts:.0f}"]
+            # session funnel (most recent N sessions)
+            lines += ["# HELP dgx_llm_session_requests requests belonging to a session (recent)",
+                      "# TYPE dgx_llm_session_requests gauge",
+                      "# HELP dgx_llm_session_tokens tokens belonging to a session (recent)",
+                      "# TYPE dgx_llm_session_tokens gauge"]
+            for s_id, meta in sorted(sess_meta.items(), key=lambda kv: -kv[1]["last"]):
+                st = sess_stats.get(s_id, {})
+                lbl = (f'session="{esc(s_id[:8])}",'
+                       f'project="{esc(meta["project"])}",user="{esc(meta["user"])}"')
+                lines.append(f'dgx_llm_session_requests{{{lbl}}} {st.get("reqs", 0)}')
+                lines.append(f'dgx_llm_session_tokens_in{{{lbl}}} {st.get("in", 0)}')
+                lines.append(f'dgx_llm_session_tokens_out{{{lbl}}} {st.get("out", 0)}')
+                lines.append(f'dgx_llm_session_errors{{{lbl}}} {st.get("errors", 0)}')
+            # fake-stop oracle (auto-continue.log)
+            lines += ["# HELP dgx_llm_fakestop_events fake-stop oracle hook tallies",
+                      "# TYPE dgx_llm_fakestop_events counter",
+                      f'dgx_llm_fakestop_events{{kind="kev_caught"}} {fakestop.get("caught", 0)}',
+                      f'dgx_llm_fakestop_events{{kind="colon_caught"}} {fakestop.get("colon", 0)}',
+                      f'dgx_llm_fakestop_events{{kind="heuristic"}} {fakestop.get("heuristic", 0)}',
+                      f'dgx_llm_fakestop_events{{kind="kev_plus_opus"}} {fakestop.get("opus", 0)}',
+                      f'dgx_llm_fakestop_events{{kind="allowed"}} {fakestop.get("allowed", 0)}']
+            if fakestop.get("p_done_latest") is not None:
+                lines.append("# TYPE dgx_llm_fakestop_p_done_latest gauge")
+                lines.append(f'dgx_llm_fakestop_p_done_latest {fakestop["p_done_latest"]:.3f}')
         body = ("\n".join(lines) + "\n").encode()
         self.send_response(200)
         self.send_header("Content-Type", "text/plain; version=0.0.4")
