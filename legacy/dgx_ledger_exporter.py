@@ -30,6 +30,12 @@ dur_count = defaultdict(int)
 errors = defaultdict(int)              # (project,user) -> n
 tok_in = defaultdict(int)              # (project,user,acct) -> TRUE input tokens (SSE usage)
 tok_out = defaultdict(int)             # (project,user,acct) -> TRUE output tokens
+anth_req = defaultdict(int)            # (project,user,model,acct) -> n (passthrough)
+anth_in = defaultdict(int)             # passthrough TRUE input tokens
+anth_out = defaultdict(int)            # passthrough TRUE output tokens
+anth_ds = defaultdict(float)           # passthrough latency sum
+anth_dc = defaultdict(int)             # passthrough latency count
+anth_rqs = defaultdict(int)            # passthrough usage events (= completed requests)
 passthrough = 0
 last_ts = 0.0
 
@@ -62,6 +68,8 @@ def rebuild() -> None:
     rt, ds, dc, er, et, tin, tout = (defaultdict(int), defaultdict(float), defaultdict(int),
                                      defaultdict(int), defaultdict(float),
                                      defaultdict(int), defaultdict(int))
+    ara, ain, aout, ads, adc, arq = (defaultdict(int), defaultdict(int), defaultdict(int),
+                                     defaultdict(float), defaultdict(int), defaultdict(int))
     pt = 0
     last = 0.0
     try:
@@ -84,6 +92,20 @@ def rebuild() -> None:
                              ev.get("account") or "unknown")
                     tin[key_u] += int(ev.get("in_tok") or 0)
                     tout[key_u] += int(ev.get("out_tok") or 0)
+                elif ev.get("event") == "anth_request":
+                    key_a = (ev.get("project") or "unknown", ev.get("user") or "unknown",
+                             ev.get("model_req") or "?", ev.get("account") or "unknown")
+                    ara[key_a] += 1
+                elif ev.get("event") == "anth_usage":
+                    key_a = (ev.get("project") or "unknown", ev.get("user") or "unknown",
+                             ev.get("model") or "?", ev.get("account") or "unknown")
+                    ain[key_a] += int(ev.get("in_tok") or 0)
+                    aout[key_a] += int(ev.get("out_tok") or 0)
+                    d = ev.get("duration_s")
+                    if isinstance(d, (int, float)):
+                        ads[key_a] += d
+                        adc[key_a] += 1
+                    arq[key_a] += 1
                 elif ev.get("event") == "dgx_request":
                     acct, dev = _account_device(ev.get("meta_user_id"))
                     key = (ev.get("project") or "unknown", ev.get("user") or "unknown", ev.get("model_req") or "?", acct, dev)
@@ -112,6 +134,12 @@ def rebuild() -> None:
         est_prompt.clear(); est_prompt.update(et)
         tok_in.clear(); tok_in.update(tin)
         tok_out.clear(); tok_out.update(tout)
+        anth_req.clear(); anth_req.update(ara)
+        anth_in.clear(); anth_in.update(ain)
+        anth_out.clear(); anth_out.update(aout)
+        anth_ds.clear(); anth_ds.update(ads)
+        anth_dc.clear(); anth_dc.update(adc)
+        anth_rqs.clear(); anth_rqs.update(arq)
         passthrough = pt
         globals()["last_ts"] = last
 
@@ -143,6 +171,25 @@ class Handler(BaseHTTPRequestHandler):
                 lines.append(f'dgx_llm_tokens_input_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v}')
             for (proj, user, acct), v in sorted(tok_out.items()):
                 lines.append(f'dgx_llm_tokens_output_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v}')
+            lines += ["# HELP dgx_llm_anthropic_requests_total passthrough (Opus/Haiku) requests",
+                      "# TYPE dgx_llm_anthropic_requests_total counter"]
+            for (proj, user, model, acct), n in sorted(anth_req.items()):
+                lines.append(f'dgx_llm_anthropic_requests_total{{project="{esc(proj)}",user="{esc(user)}",model="{esc(model)}",account="{esc(acct)}"}} {n}')
+            lines += ["# HELP dgx_llm_anthropic_tokens_input_total passthrough true input tokens",
+                      "# TYPE dgx_llm_anthropic_tokens_input_total counter",
+                      "# HELP dgx_llm_anthropic_tokens_output_total passthrough true output tokens",
+                      "# TYPE dgx_llm_anthropic_tokens_output_total counter",
+                      "# HELP dgx_llm_anthropic_request_duration_seconds_sum passthrough latency",
+                      "# TYPE dgx_llm_anthropic_request_duration_seconds_sum counter",
+                      "# TYPE dgx_llm_anthropic_request_duration_seconds_count counter"]
+            for (proj, user, model, acct), v in sorted(anth_in.items()):
+                lbl = f'project="{esc(proj)}",user="{esc(user)}",model="{esc(model)}",account="{esc(acct)}"'
+                lines.append(f'dgx_llm_anthropic_tokens_input_total{{{lbl}}} {v}')
+                lines.append(f'dgx_llm_anthropic_tokens_output_total{{{lbl}}} {anth_out[(proj, user, model, acct)]}')
+                s = anth_ds[(proj, user, model, acct)]
+                c = anth_dc[(proj, user, model, acct)]
+                lines.append(f'dgx_llm_anthropic_request_duration_seconds_sum{{{lbl}}} {s:.3f}')
+                lines.append(f'dgx_llm_anthropic_request_duration_seconds_count{{{lbl}}} {c}')
             lines += ["# HELP dgx_llm_request_duration_seconds_sum cumulative request seconds",
                       "# TYPE dgx_llm_request_duration_seconds_sum counter",
                       "# TYPE dgx_llm_request_duration_seconds_count counter"]

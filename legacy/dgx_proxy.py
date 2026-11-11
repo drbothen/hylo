@@ -105,13 +105,35 @@ class DGXRouter:
         if not isinstance(req, dict):
             return
         model = req.get("model") or ""
+        # Attribution stash for BOTH lanes (parsed, never mutated on passthrough:
+        # CC applies ANTHROPIC_CUSTOM_HEADERS to every request it makes, so the
+        # Opus/Haiku lane carries the same X-DGX-Project/User + session headers).
+        meta = req.get("metadata") if isinstance(req.get("metadata"), dict) else {}
+        flow._attrib = {
+            "project": flow.request.headers.get("X-DGX-Project"),
+            "user": flow.request.headers.get("X-DGX-User"),
+            "session": flow.request.headers.get("X-Claude-Code-Session-Id"),
+            "meta_user_id": meta.get("user_id"),
+            "model_req": model,
+            "req_bytes": len(flow.request.get_text() or ""),
+        }
+        flow._t0 = time.time()
+        # Plain-text streaming on BOTH lanes so the SSE tap can read usage lines
+        # (gzip'd chunks would defeat the parser; LAN penalty is negligible).
+        flow.request.headers["Accept-Encoding"] = "identity"
         if not model.startswith(self.prefixes):
+            flow._attrib["lane"] = "anthropic"
+            ledger("anth_request", **flow._attrib)
             note("-> anthropic (%s)", model)
             return  # Opus / Haiku / unknown families: real Anthropic
         if uses_server_tool(req):
+            flow._attrib["lane"] = "anthropic-server-tools"
+            ledger("anth_request", **flow._attrib)
             note("-> anthropic (%s declares a server tool)", model)
             return
 
+        attrib = dict(flow._attrib)
+        attrib["model_served"] = req.get("model")
         changed = normalize_for_dgx(req)
         if self.served and model != self.served:
             req["model"] = self.served
@@ -119,22 +141,8 @@ class DGXRouter:
         if changed:
             flow.request.set_text(json.dumps(req))
 
-        # Observability attribution: CC >=2.1.86 always sends X-Claude-Code-Session-Id;
-        # X-DGX-Project / X-DGX-User come from the claude-dgx launcher
-        # (ANTHROPIC_CUSTOM_HEADERS); metadata.user_id is the official Messages-API
-        # opaque end-user id that CC populates in the body (account+session hashes).
-        meta = req.get("metadata") if isinstance(req.get("metadata"), dict) else {}
-        attrib = {
-            "project": flow.request.headers.get("X-DGX-Project"),
-            "user": flow.request.headers.get("X-DGX-User"),
-            "session": flow.request.headers.get("X-Claude-Code-Session-Id"),
-            "meta_user_id": meta.get("user_id"),
-            "model_req": model,
-            "model_served": req.get("model"),
-            "req_bytes": len(flow.request.get_text() or ""),
-        }
         flow._dgx = attrib
-        flow._dgx_t0 = time.time()
+        flow._dgx_t0 = flow._t0
         ledger("dgx_request", **attrib)
         # Belt-and-braces: carry attribution to the serving side (vLLM logs/OTel).
         flow.request.headers["X-DGX-Project"] = attrib["project"] or "unknown"
@@ -170,8 +178,40 @@ class DGXRouter:
             ledger("bridge_ws_close", duration_s=round(getattr(flow, "_bridge_dur", 0.0) or 0.0, 1))
             return
         if host == "api.anthropic.com" and flow.request.path.startswith("/v1/messages"):
-            ledger("anthropic_reply", host=host, status=flow.response.status_code,
-                   size=len(flow.response.raw_content or b""))
+            attrib = getattr(flow, "_attrib", {})
+            tap = getattr(flow, "_sse_tap", None)
+            in_tok = out_tok = None
+            stop = None
+            if tap is not None and tap.usage:
+                in_tok, out_tok = tap.usage
+                stop = tap.stop_reason
+            elif flow.response.status_code < 400:
+                try:
+                    body = json.loads(flow.response.get_text(strict=False))
+                    u = body.get("usage") if isinstance(body, dict) else None
+                    if isinstance(u, dict):
+                        in_tok = u.get("input_tokens")
+                        out_tok = u.get("output_tokens")
+                    stop = extract_stop_reason(body)
+                except (ValueError, TypeError):
+                    pass
+            ev = dict(attrib)
+            ev.update(status=flow.response.status_code,
+                      duration_s=round(time.time() - getattr(flow, "_t0", time.time()), 3))
+            if tap is not None:
+                note("   anth tap: buf=%d usage=%s ct=%s", len(tap.buf), tap.usage,
+                     flow.response.headers.get("content-type"))
+            if in_tok is not None:
+                ev.update(in_tok=int(in_tok or 0), out_tok=int(out_tok or 0), stop_reason=stop)
+            ledger("anth_reply", **ev)
+            if in_tok is not None:
+                ledger("anth_usage", lane=attrib.get("lane", "anthropic"),
+                       project=attrib.get("project"), user=attrib.get("user"),
+                       session=attrib.get("session"),
+                       account=_account_hint(attrib.get("meta_user_id")),
+                       model=attrib.get("model_req"),
+                       in_tok=int(in_tok or 0), out_tok=int(out_tok or 0),
+                       stop_reason=stop)
         if flow.request.host != self.dgx_host or not flow.request.path.startswith("/v1/messages"):
             return
         attrib = getattr(flow, "_dgx", {})
