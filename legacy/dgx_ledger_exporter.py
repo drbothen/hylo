@@ -42,7 +42,17 @@ sess_meta = {}                         # session_id -> {project,user,last}  (rec
 sess_stats = {}                        # session_id -> {reqs,in,out,errors}
 fakestop = {}                          # tallies from auto-continue.log
 passthrough = 0
-last_ts = 0.0
+last_ts = 0.0              # newest ledger event of ANY type (pipeline freshness)
+last_dgx_ts = 0.0          # newest DGX-lane request (dgx_request)
+last_anth_ts = 0.0         # newest Anthropic-passthrough request (anth_request)
+processed_size = -1        # ledger size covered by the in-memory state (-1 = none yet)
+
+
+def _current_size() -> int:
+    try:
+        return os.stat(LEDGER).st_size
+    except OSError:
+        return 0
 
 
 def esc(s: str) -> str:
@@ -84,6 +94,8 @@ def rebuild() -> None:
     sess_proj = {}  # session uuid -> project (from ledger events)
     pt = 0
     last = 0.0
+    last_dgx = 0.0
+    last_anth = 0.0
     try:
         with open(LEDGER) as f:
             for line in f:
@@ -97,6 +109,12 @@ def rebuild() -> None:
                         import datetime
                         ts = datetime.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S").timestamp()
                         last = max(last, ts)
+                        # Lane-specific: "the DGX is idle" must not be masked by
+                        # Opus/Haiku passthrough traffic (which also lands here).
+                        if ev.get("event") == "dgx_request":
+                            last_dgx = max(last_dgx, ts)
+                        elif ev.get("event") == "anth_request":
+                            last_anth = max(last_anth, ts)
                     except ValueError:
                         pass
                 s_id = ev.get("session")
@@ -208,6 +226,8 @@ def rebuild() -> None:
         fakestop.clear(); fakestop.update(fs)
         passthrough = pt
         globals()["last_ts"] = last
+        globals()["last_dgx_ts"] = last_dgx
+        globals()["last_anth_ts"] = last_anth
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -216,8 +236,19 @@ class Handler(BaseHTTPRequestHandler):
         if path != "/metrics":
             self.send_response(404); self.end_headers(); return
         params = parse_qs(qs)
-        if params.get("rebuild"):  # ?rebuild=1 forces a re-scan
+        # Rescan when the ledger grew since the last scrape. Without this the gauges
+        # (incl. dgx_llm_last_request_timestamp_seconds -> the statusline's "idle" meter)
+        # froze at process-boot state forever, because only an explicit ?rebuild=1
+        # triggered rebuild(). Cost: one stat() per scrape; the docstring already promises
+        # the ledger stays small (a few MB), so a full rescan on change is plenty cheap.
+        global processed_size
+        try:
+            grew = os.stat(LEDGER).st_size != processed_size
+        except OSError:
+            grew = False
+        if params.get("rebuild") or grew:
             rebuild()
+            processed_size = _current_size()
         with state_lock:
             lines = [
                 "# HELP dgx_llm_requests_total DGX-bound requests",
@@ -270,9 +301,19 @@ class Handler(BaseHTTPRequestHandler):
             lines += ["# HELP dgx_llm_anthropic_passthrough_total requests passed to real Anthropic",
                       "# TYPE dgx_llm_anthropic_passthrough_total counter",
                       f"dgx_llm_anthropic_passthrough_total {passthrough}",
-                      "# HELP dgx_llm_last_request_timestamp_seconds newest ledger event (unix)",
+                      "# HELP dgx_llm_last_request_timestamp_seconds newest ledger event of any type (unix; pipeline freshness)",
                       "# TYPE dgx_llm_last_request_timestamp_seconds gauge",
                       f"dgx_llm_last_request_timestamp_seconds {last_ts:.0f}"]
+            # Lane-specific recency. Emitted only once seen, so "never" is absent,
+            # not a misleading 1970 timestamp.
+            if last_dgx_ts > 0:
+                lines += ["# HELP dgx_llm_last_dgx_request_timestamp_seconds newest DGX-lane request (unix)",
+                          "# TYPE dgx_llm_last_dgx_request_timestamp_seconds gauge",
+                          f"dgx_llm_last_dgx_request_timestamp_seconds {last_dgx_ts:.0f}"]
+            if last_anth_ts > 0:
+                lines += ["# HELP dgx_llm_last_anthropic_request_timestamp_seconds newest Anthropic-passthrough request (unix)",
+                          "# TYPE dgx_llm_last_anthropic_request_timestamp_seconds gauge",
+                          f"dgx_llm_last_anthropic_request_timestamp_seconds {last_anth_ts:.0f}"]
             # session funnel (most recent N sessions)
             lines += ["# HELP dgx_llm_session_requests requests belonging to a session (recent)",
                       "# TYPE dgx_llm_session_requests gauge",
@@ -310,5 +351,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     rebuild()
+    processed_size = _current_size()
     print(f"dgx-ledger-exporter: serving :{PORT}, tailing {LEDGER}")
     HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
