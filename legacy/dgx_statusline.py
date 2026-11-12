@@ -83,7 +83,7 @@ NARROW_COLS = 72       # below this, auto-drop row 2 unless DGX_SL_ROWS forces i
 
 QUERY = (
     '{__name__=~"vllm:num_requests_running|vllm:num_requests_waiting|'
-    "vllm:kv_cache_usage_perc|vllm:kv_offload_cpu_cache_usage_perc|"
+    "vllm:kv_cache_usage_perc|dgx_kv:host_hit_share|"
     "dgx_tokens:gen_rate5m|dgx_ttft:p95_30m|dgx_preempt:rate5m|"
     "dgx_llm_last_dgx_request_timestamp_seconds|dgx_power:est_wall_watts|"
     "dgx_power:rate_usd_per_kwh|dgx_llm_session_tokens_out|"
@@ -538,11 +538,17 @@ def render_telemetry_fields(m, stale, hist, sess_rate=None):
         busy = (r and q) or m.get("dgx_preempt:rate5m", 0) > 0.01
         parts.append(f"{YELLOW if busy else GREEN}r{r:.0f}·q{q:.0f}{RESET}")
 
+    # KV gauge = blocks held by RUNNING requests (not occupancy; reads 85-96% in healthy
+    # 12-agent operation). The overflow signal is the host-tier share of reused history
+    # (dgx_kv:host_hit_share): 0% while every agent's history fits on the GPU, 80% at 13 agents,
+    # 100% at 14+. Yellow when > 5% (THRESHOLDS.md §8). Until 2026-11-12 this went yellow on
+    # gauge > 80% and showed "+host" from kv_offload_cpu_cache_usage_perc, which is memory
+    # pinned by in-flight transfers, not host-tier fill — both inconsistent with the dashboards.
     kv = m.get("vllm:kv_cache_usage_perc", 0) * 100
-    kv_host = m.get("vllm:kv_offload_cpu_cache_usage_perc", 0) * 100
+    host_share = m.get("dgx_kv:host_hit_share", 0) * 100
     n = max(min(int(kv / 20), 3), 0)
-    parts.append(f"{YELLOW if kv > 80 else CYAN}KV{'▰' * n}{'▱' * (3 - n)} {kv:.0f}%{RESET}"
-                 + (f"{DIM}+host {kv_host:.0f}%{RESET}" if kv_host > 0.5 else ""))
+    parts.append(f"{YELLOW if host_share > 5 else CYAN}KV{'▰' * n}{'▱' * (3 - n)} {kv:.0f}%{RESET}"
+                 + (f"{DIM}↺host {host_share:.0f}%{RESET}" if host_share > 0.5 else ""))
 
     rate = m.get("dgx_tokens:gen_rate5m")
     if rate is not None:
@@ -565,9 +571,12 @@ def render_telemetry_fields(m, stale, hist, sess_rate=None):
     w = m.get("DCGM_FI_DEV_POWER_USAGE")
     if w is not None:
         t = m.get("DCGM_FI_DEV_GPU_TEMP")
-        wc = RED if w > 1500 else YELLOW if w > 1200 else WHITE
-        txt = f"{wc}⚡{w:.0f}W{RESET}" + (f"{GREY} {t:.0f}°{RESET}" if t is not None else "")
         wall, rate_c = m.get("dgx_power:est_wall_watts"), m.get("dgx_power:rate_usd_per_kwh")
+        # Color = whole-box wall estimate vs the 1,600 W system rating (80% / 95%, THRESHOLDS.md
+        # §8); the number shown stays GPU watts. Until 2026-11-12 the 1,200/1,500 W cut-offs were
+        # applied to GPU-only watts, the wrong quantity for a system rating.
+        wc = (RED if wall > 1520 else YELLOW if wall > 1280 else WHITE) if wall else WHITE
+        txt = f"{wc}⚡{w:.0f}W{RESET}" + (f"{GREY} {t:.0f}°{RESET}" if t is not None else "")
         if wall and rate_c:                                    # whole-box estimate × tariff
             cents = wall / 1000 * rate_c * 100
             txt += f"{GREY} {cents:.0f}¢/h{RESET}"

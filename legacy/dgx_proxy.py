@@ -116,6 +116,9 @@ class DGXRouter:
             "meta_user_id": meta.get("user_id"),
             "model_req": model,
             "req_bytes": len(flow.request.get_text() or ""),
+            # endpoint, so e.g. /v1/messages/count_tokens (free, no usage{}) is distinguishable
+            # from billed /v1/messages calls in the ledger (added 2026-11-12). Query stripped.
+            "path": flow.request.path.split("?", 1)[0],
         }
         flow._t0 = time.time()
         # Plain-text streaming on BOTH lanes so the SSE tap can read usage lines
@@ -170,7 +173,14 @@ class DGXRouter:
             flow.response.stream = flow._sse_tap.feed  # pass-through tap
             return
         if flow.request.path.startswith("/v1/messages") and flow.response is not None:
-            flow.response.stream = flow.response.status_code < 400  # buffer error bodies for logging
+            # Non-streaming JSON replies are BUFFERED so response() can read usage{} from the
+            # body (2026-11-12): streaming them through left get_text() empty, so every
+            # non-streaming call was logged with no usage — i.e. priced at $0. They are small.
+            # Error bodies are buffered for logging, as before; anything else streams.
+            if "application/json" in ctype or flow.response.status_code >= 400:
+                flow.response.stream = False
+            else:
+                flow.response.stream = True
 
     def response(self, flow: mitmproxy.http.HTTPFlow) -> None:
         host = flow.request.host
