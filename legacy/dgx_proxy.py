@@ -182,8 +182,10 @@ class DGXRouter:
             tap = getattr(flow, "_sse_tap", None)
             in_tok = out_tok = None
             stop = None
+            cache = {}
             if tap is not None and tap.usage:
                 in_tok, out_tok = tap.usage
+                cache = dict(tap.cache)
                 stop = tap.stop_reason
             elif flow.response.status_code < 400:
                 try:
@@ -192,6 +194,7 @@ class DGXRouter:
                     if isinstance(u, dict):
                         in_tok = u.get("input_tokens")
                         out_tok = u.get("output_tokens")
+                        cache = cache_fields(u)
                     stop = extract_stop_reason(body)
                 except (ValueError, TypeError):
                     pass
@@ -202,7 +205,8 @@ class DGXRouter:
                 note("   anth tap: buf=%d usage=%s ct=%s", len(tap.buf), tap.usage,
                      flow.response.headers.get("content-type"))
             if in_tok is not None:
-                ev.update(in_tok=int(in_tok or 0), out_tok=int(out_tok or 0), stop_reason=stop)
+                ev.update(in_tok=int(in_tok or 0), out_tok=int(out_tok or 0), stop_reason=stop,
+                          **cache)
             ledger("anth_reply", **ev)
             if in_tok is not None:
                 ledger("anth_usage", lane=attrib.get("lane", "anthropic"),
@@ -211,13 +215,22 @@ class DGXRouter:
                        account=_account_hint(attrib.get("meta_user_id")),
                        model=attrib.get("model_req"),
                        in_tok=int(in_tok or 0), out_tok=int(out_tok or 0),
-                       stop_reason=stop)
+                       stop_reason=stop, **cache)
         if flow.request.host != self.dgx_host or not flow.request.path.startswith("/v1/messages"):
             return
         attrib = getattr(flow, "_dgx", {})
         tap = getattr(flow, "_sse_tap", None)
+        dcache = {}
         if tap is not None and tap.usage:
-            attrib["in_tok"] = tap.usage[0]
+            dcache = dict(tap.cache)
+            # in_tok on the DGX lane is ALWAYS the whole prompt. With vLLM's
+            # --enable-prompt-tokens-details its Anthropic endpoint reports input_tokens =
+            # prompt - cached - created (vllm/entrypoints/anthropic/serving.py), so the whole
+            # prompt is rebuilt here; every DGX token counter, $/MTok and the displacement
+            # rules depend on that meaning. Without the flag cache fields are absent and
+            # input_tokens is already the whole prompt (dcache == {}).
+            attrib["in_tok"] = (tap.usage[0] + dcache.get("cache_read_tok", 0)
+                                + dcache.get("cache_write_tok", 0))
             attrib["out_tok"] = tap.usage[1]
         if tap is not None and tap.stop_reason:
             attrib["stream_stop_reason"] = tap.stop_reason
@@ -228,7 +241,10 @@ class DGXRouter:
             ledger("dgx_usage", project=attrib.get("project"), user=attrib.get("user"),
                    session=attrib.get("session"), account=_account_hint(attrib.get("meta_user_id")),
                    in_tok=attrib["in_tok"], out_tok=attrib["out_tok"],
-                   stop_reason=attrib.get("stream_stop_reason"))
+                   stop_reason=attrib.get("stream_stop_reason"),
+                   # vLLM prefix-cache hits for THIS request (present only with the flag on);
+                   # cache_read_tok / in_tok is Claude Code's own hit ratio on the DGX.
+                   **({"cache_read_tok": dcache.get("cache_read_tok", 0)} if dcache else {}))
         if flow.response.status_code >= 400:
             # Keep the full offending request for post-mortem (e.g. FastAPI json_invalid
             # truncation-style 400s on multi-MB bodies). Capped to 20 newest files.
@@ -285,17 +301,64 @@ def _account_hint(meta_user_id):
     return "unknown"
 
 
+def cache_fields(u) -> dict:
+    """Prompt-cache token counts from an Anthropic usage{} object (backlog item 4).
+
+    Anthropic bills three input classes at different rates: uncached input_tokens,
+    cache_read_input_tokens and cache_creation_input_tokens (cache writes, priced by TTL).
+    Rates live in deploy/recording.yml (dgx_price:*_cache_hit / *_cache_write{5m,1h}),
+    never here. The TTL split lives in usage.cache_creation.ephemeral_{5m,1h}_input_tokens; when the
+    split is absent every write is attributed to 5m (the API default TTL). Invariant:
+    cache_write_5m_tok + cache_write_1h_tok == cache_write_tok. Returns {} when the
+    object carries no cache fields (e.g. the DGX lane / older responses)."""
+    if not isinstance(u, dict):
+        return {}
+    if "cache_read_input_tokens" not in u and "cache_creation_input_tokens" not in u:
+        return {}
+    read = int(u.get("cache_read_input_tokens") or 0)
+    write = int(u.get("cache_creation_input_tokens") or 0)
+    cc = u.get("cache_creation") if isinstance(u.get("cache_creation"), dict) else {}
+    w1h = min(int(cc.get("ephemeral_1h_input_tokens") or 0), write)
+    w5m = write - w1h            # remainder (incl. no-split case) -> default 5m TTL
+    return {"cache_read_tok": read, "cache_write_tok": write,
+            "cache_write_5m_tok": w5m, "cache_write_1h_tok": w1h}
+
+
 class _SSETap:
     """Pass-through SSE tap: mitmproxy calls feed() per chunk when response.stream
-    is a callable. Accumulates the tail, extracts usage{} from message_delta and
-    the final stop_reason, without buffering the whole body client-side."""
+    is a callable. Accumulates the tail, extracts usage{} from message_start /
+    message_delta and the final stop_reason, without buffering the whole body
+    client-side."""
 
     KEEP = 64_000  # tail bytes retained for line-safe parsing
 
     def __init__(self):
         self.buf = b""
         self.usage = None       # (input_tokens, output_tokens)
+        # Raw cache maxima across SSE events (counts are cumulative). The TTL split is taken
+        # ONLY from events that carry usage.cache_creation: message_delta repeats the write
+        # total without a split, and merging its "no split -> 5m" default per field would
+        # double-count writes (seen live 2026-11-12: 5m=949 AND 1h=949 for 949 written).
+        self._read = self._write = self._w1h = -1
         self.stop_reason = None
+
+    @property
+    def cache(self) -> dict:
+        if self._read < 0 and self._write < 0:
+            return {}
+        read, write = max(self._read, 0), max(self._write, 0)
+        w1h = min(max(self._w1h, 0), write)
+        return {"cache_read_tok": read, "cache_write_tok": write,
+                "cache_write_5m_tok": write - w1h, "cache_write_1h_tok": w1h}
+
+    def _absorb_cache(self, u) -> None:
+        if not cache_fields(u):
+            return
+        self._read = max(self._read, int(u.get("cache_read_input_tokens") or 0))
+        self._write = max(self._write, int(u.get("cache_creation_input_tokens") or 0))
+        cc = u.get("cache_creation")
+        if isinstance(cc, dict):
+            self._w1h = max(self._w1h, int(cc.get("ephemeral_1h_input_tokens") or 0))
 
     def feed(self, chunk: bytes) -> bytes:
         self.buf += chunk
@@ -320,6 +383,10 @@ class _SSETap:
             u = obj.get("usage") if isinstance(obj, dict) else None
             if isinstance(u, dict) and "input_tokens" in u:
                 self.usage = (int(u.get("input_tokens") or 0), int(u.get("output_tokens") or 0))
+            # usage may sit at top level (message_delta) or under message (message_start)
+            for uu in (u, (obj.get("message") or {}).get("usage") if isinstance(obj, dict)
+                       and isinstance(obj.get("message"), dict) else None):
+                self._absorb_cache(uu)
             sr = obj.get("delta", {}).get("stop_reason") if isinstance(obj, dict) else None
             if sr:
                 self.stop_reason = sr

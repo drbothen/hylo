@@ -38,6 +38,19 @@ anth_out = defaultdict(int)            # passthrough TRUE output tokens
 anth_ds = defaultdict(float)           # passthrough latency sum
 anth_dc = defaultdict(int)             # passthrough latency count
 anth_rqs = defaultdict(int)            # passthrough usage events (= completed requests)
+# Prompt-cache tokens (backlog item 4, 2026-11-12). Present only on anth_usage events written
+# by dgx_proxy.py after the cache-capture change; older events lack the fields, so
+# anth_cache_cov counts usage events that DID carry them (coverage, for honest panels).
+anth_cr = defaultdict(int)             # passthrough cache-read tokens
+anth_cw5 = defaultdict(int)            # passthrough cache-write tokens, 5-minute TTL
+anth_cw1 = defaultdict(int)            # passthrough cache-write tokens, 1-hour TTL
+anth_cache_cov = defaultdict(int)      # usage events carrying cache fields
+# DGX-lane prefix-cache hits (2026-11-12, needs vLLM --enable-prompt-tokens-details). in_tok on
+# dgx_usage is always the whole prompt; cache_read_tok is present only once the flag is on.
+# dgx_in_cap = prompt tokens of the requests that carried cache_read_tok, so
+# hit ratio = dgx_cr / dgx_in_cap is not diluted by older, uncaptured requests.
+dgx_cr = defaultdict(int)              # (project,user,acct) -> DGX cache-read (prefix-hit) tokens
+dgx_in_cap = defaultdict(int)          # (project,user,acct) -> prompt tokens of captured requests
 sess_meta = {}                         # session_id -> {project,user,last}  (recent N)
 sess_stats = {}                        # session_id -> {reqs,in,out,errors}
 fakestop = {}                          # tallies from auto-continue.log
@@ -80,11 +93,13 @@ def _account_device(meta_user_id):
 
 def rebuild() -> None:
     global passthrough, last_ts, sess_meta, sess_stats
+    dcr, dcap = defaultdict(int), defaultdict(int)
     rt, ds, dc, er, et, tin, tout = (defaultdict(int), defaultdict(float), defaultdict(int),
                                      defaultdict(int), defaultdict(float),
                                      defaultdict(int), defaultdict(int))
     ara, ain, aout, ads, adc, arq = (defaultdict(int), defaultdict(int), defaultdict(int),
                                      defaultdict(float), defaultdict(int), defaultdict(int))
+    acr, acw5, acw1, acov = defaultdict(int), defaultdict(int), defaultdict(int), defaultdict(int)
     # session funnel: most recent SESSION_LIMIT sessions with any event
     smeta = {}     # session_id -> {"project":..., "user":..., "last": epoch}
     sstats = defaultdict(lambda: {"reqs": 0, "in": 0, "out": 0, "errors": 0})
@@ -135,6 +150,9 @@ def rebuild() -> None:
                     key_u = (ev.get("project") or "unknown", ev.get("user") or "unknown",
                              ev.get("account") or "unknown")
                     tin[key_u] += int(ev.get("in_tok") or 0)
+                    if "cache_read_tok" in ev:
+                        dcr[key_u] += int(ev.get("cache_read_tok") or 0)
+                        dcap[key_u] += int(ev.get("in_tok") or 0)
                     tout[key_u] += int(ev.get("out_tok") or 0)
                     if s_id and s_id in smeta:
                         sstats[s_id]["in"] += int(ev.get("in_tok") or 0)
@@ -148,6 +166,16 @@ def rebuild() -> None:
                              ev.get("model") or "?", ev.get("account") or "unknown")
                     ain[key_a] += int(ev.get("in_tok") or 0)
                     aout[key_a] += int(ev.get("out_tok") or 0)
+                    if "cache_read_tok" in ev or "cache_write_tok" in ev:
+                        acov[key_a] += 1
+                        acr[key_a] += int(ev.get("cache_read_tok") or 0)
+                        # 5m is DERIVED (write total - 1h), never read from the event: proxy
+                        # builds deployed 13:31:52-fix on 2026-11-12 wrote 5m = total on
+                        # streamed replies (double count). Deriving keeps old events correct.
+                        cw = int(ev.get("cache_write_tok") or 0)
+                        c1 = min(int(ev.get("cache_write_1h_tok") or 0), cw)
+                        acw1[key_a] += c1
+                        acw5[key_a] += cw - c1
                     d = ev.get("duration_s")
                     if isinstance(d, (int, float)):
                         ads[key_a] += d
@@ -173,7 +201,9 @@ def rebuild() -> None:
                         er[key] += 1
                     if s_id and s_id in smeta and ev.get("status", 0) >= 400:
                         sstats[s_id]["errors"] += 1
-                elif ev.get("event") == "anthropic_reply" and ev.get("status") == 200:
+                # "anth_reply" since 2026-11-10 (proxy rename); "anthropic_reply" before. Counting
+                # only the legacy name froze this counter at 257 (found in the Grafana audit).
+                elif ev.get("event") in ("anth_reply", "anthropic_reply") and ev.get("status") == 200:
                     pt += 1
                 elif ev.get("event") == "dgx_upstream_error":
                     # DGX unreachable (connection refused / no route): count as an error
@@ -214,12 +244,18 @@ def rebuild() -> None:
         est_prompt.clear(); est_prompt.update(et)
         tok_in.clear(); tok_in.update(tin)
         tok_out.clear(); tok_out.update(tout)
+        dgx_cr.clear(); dgx_cr.update(dcr)
+        dgx_in_cap.clear(); dgx_in_cap.update(dcap)
         anth_req.clear(); anth_req.update(ara)
         anth_in.clear(); anth_in.update(ain)
         anth_out.clear(); anth_out.update(aout)
         anth_ds.clear(); anth_ds.update(ads)
         anth_dc.clear(); anth_dc.update(adc)
         anth_rqs.clear(); anth_rqs.update(arq)
+        anth_cr.clear(); anth_cr.update(acr)
+        anth_cw5.clear(); anth_cw5.update(acw5)
+        anth_cw1.clear(); anth_cw1.update(acw1)
+        anth_cache_cov.clear(); anth_cache_cov.update(acov)
         sess_meta.clear(); sess_meta.update(recent)
         for s_id in recent:
             sess_stats[s_id] = dict(sstats.get(s_id, {"reqs": 0, "in": 0, "out": 0, "errors": 0}))
@@ -268,6 +304,15 @@ class Handler(BaseHTTPRequestHandler):
                 lines.append(f'dgx_llm_tokens_input_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v}')
             for (proj, user, acct), v in sorted(tok_out.items()):
                 lines.append(f'dgx_llm_tokens_output_total{{project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"}} {v}')
+            lines += ["# HELP dgx_llm_tokens_cache_read_total DGX-lane prompt tokens served from vLLM's prefix cache (needs --enable-prompt-tokens-details)",
+                      "# TYPE dgx_llm_tokens_cache_read_total counter",
+                      "# HELP dgx_llm_tokens_input_captured_total prompt tokens of DGX requests that reported cache_read_tok (hit-ratio denominator)",
+                      "# TYPE dgx_llm_tokens_input_captured_total counter"]
+            for (proj, user, acct) in sorted(tok_in):
+                k = (proj, user, acct)
+                lbl = f'project="{esc(proj)}",user="{esc(user)}",account="{esc(acct)}"'
+                lines.append(f'dgx_llm_tokens_cache_read_total{{{lbl}}} {dgx_cr[k]}')
+                lines.append(f'dgx_llm_tokens_input_captured_total{{{lbl}}} {dgx_in_cap[k]}')
             lines += ["# HELP dgx_llm_anthropic_requests_total passthrough (Opus/Haiku) requests",
                       "# TYPE dgx_llm_anthropic_requests_total counter"]
             for (proj, user, model, acct), n in sorted(anth_req.items()):
@@ -287,6 +332,19 @@ class Handler(BaseHTTPRequestHandler):
                 c = anth_dc[(proj, user, model, acct)]
                 lines.append(f'dgx_llm_anthropic_request_duration_seconds_sum{{{lbl}}} {s:.3f}')
                 lines.append(f'dgx_llm_anthropic_request_duration_seconds_count{{{lbl}}} {c}')
+            lines += ["# HELP dgx_llm_anthropic_tokens_cache_read_total passthrough prompt-cache read tokens (usage.cache_read_input_tokens)",
+                      "# TYPE dgx_llm_anthropic_tokens_cache_read_total counter",
+                      "# HELP dgx_llm_anthropic_tokens_cache_write_total passthrough prompt-cache write tokens by TTL (usage.cache_creation)",
+                      "# TYPE dgx_llm_anthropic_tokens_cache_write_total counter",
+                      "# HELP dgx_llm_anthropic_usage_cache_captured_total passthrough usage events that carried cache fields (capture coverage)",
+                      "# TYPE dgx_llm_anthropic_usage_cache_captured_total counter"]
+            for (proj, user, model, acct) in sorted(anth_in):
+                k = (proj, user, model, acct)
+                lbl = f'project="{esc(proj)}",user="{esc(user)}",model="{esc(model)}",account="{esc(acct)}"'
+                lines.append(f'dgx_llm_anthropic_tokens_cache_read_total{{{lbl}}} {anth_cr[k]}')
+                lines.append(f'dgx_llm_anthropic_tokens_cache_write_total{{{lbl},ttl="5m"}} {anth_cw5[k]}')
+                lines.append(f'dgx_llm_anthropic_tokens_cache_write_total{{{lbl},ttl="1h"}} {anth_cw1[k]}')
+                lines.append(f'dgx_llm_anthropic_usage_cache_captured_total{{{lbl}}} {anth_cache_cov[k]}')
             lines += ["# HELP dgx_llm_request_duration_seconds_sum cumulative request seconds",
                       "# TYPE dgx_llm_request_duration_seconds_sum counter",
                       "# TYPE dgx_llm_request_duration_seconds_count counter"]
