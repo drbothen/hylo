@@ -162,8 +162,19 @@ if [[ $DGX_ENGLISH != 0 || $DGX_AUTOCONTINUE != 0 ]]; then
 fi
 SETTINGS=()
 (( ${#HOOKS} )) && SETTINGS+=("\"hooks\":{${(j:,:)HOOKS}}")
-if [[ ${DGX_SANDBOX:-0} == 1 ]]; then
+if [[ ${DGX_SANDBOX:-0} == 1 ]] ; then
   SETTINGS+=('"sandbox":{"enabled":true,"allowUnsandboxedCommands":false}')
+fi
+# Custom status line, scoped to claude-dgx sessions ONLY (defined here in --settings, not in
+# ~/.claude/settings.json, so plain `claude` sessions show nothing). Two rows: lane/session
+# thermometer + live GB300 telemetry (queue/KV/throughput-sparkline/TTFT/watts) pulled from
+# VictoriaMetrics with a 4s disk cache. refreshInterval=4 drives it between messages.
+# --subagent wires the agent-panel row bodies (name/model/tokens/elapsed/status glyphs).
+# DGX_STATUSLINE=0 suppresses both for a session. See dgx_statusline.py header + docs/
+# STATUSLINE-WIDGETS.md.
+if [[ ${DGX_STATUSLINE:-1} == 1 ]]; then
+  SETTINGS+=("\"statusLine\":{\"type\":\"command\",\"command\":\"python3 '$HERE/dgx_statusline.py'\",\"padding\":0,\"refreshInterval\":4}")
+  SETTINGS+=("\"subagentStatusLine\":{\"type\":\"command\",\"command\":\"python3 '$HERE/dgx_statusline.py' --subagent\"}")
 fi
 if (( ${#SETTINGS} )); then
   ARGS+=(--settings "{${(j:,:)SETTINGS}}")
