@@ -8,7 +8,7 @@ It is being ported from a working Python prototype (`legacy/`). Not affiliated w
 ## Read first, in this order
 
 1. **`docs/RESUME.md`** — current state, what was just done, the next concrete steps. Start here.
-2. **`docs/PLAN.md`** — the approved plan: decisions **D1–D15**, scope, architecture, phases
+2. **`docs/PLAN.md`** — the approved plan: decisions **D1–D16**, scope, architecture, phases
    **P0–P7** with exit criteria, testing strategy, risks. Decisions are settled; do not reopen
    them unless the owner asks.
 3. **`docs/STATUSLINE-WIDGETS.md`** — the status line's behavior, widget by widget (the spec the
