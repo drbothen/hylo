@@ -106,7 +106,9 @@ Claude Code's custom agent-panel rows (removed in Claude Code 2.1.323 — not po
   on every OS — no system trust store changes needed (same as today).
 - **Proxy model:** one long-lived proxy per user (port in a state file, lock), shared by
   every window; `hylo run` starts it on demand. Streaming end to end; SSE tap reads usage
-  without buffering; error bodies buffered for the ledger (today's behavior).
+  without buffering; error bodies buffered for the ledger (today's behavior). It intercepts
+  every host Claude Code contacts (D13); proxy settings are scoped to the Claude Code
+  process, not its children (D14).
 - **Dependencies:** Go standard library first (`crypto/tls`, `net/http`, `httputil`); a YAML
   library; nothing else without a reason.
 
@@ -155,6 +157,8 @@ runs (until it is scored, ~2026-11-14 17:00Z); P0–P2 are safe to do in paralle
 | D10 | **Keep the scrubbed Python under `legacy/`** until cutover (P5) — the parity harness runs it — then remove |
 | D11 | **Kev stays an optional integration** (a config URL for the Stop hook; the regex fallback works without it) |
 | D12 | **Distribution: GitHub Releases first**; Homebrew tap / Scoop / `go install` as follow-ups |
+| D13 | **Intercept all Claude Code traffic.** TLS is terminated for every host the Claude Code process contacts (as the prototype does today), not only `api.anthropic.com`. Only `POST /v1/messages` on `api.anthropic.com` is ever rewritten; every other host and path is forwarded unchanged. Consequence: the local CA cannot be name-constrained to one host, so it is trusted only by the Claude Code process (via `NODE_EXTRA_CA_CERTS`) and never added to an OS trust store |
+| D14 | **Proxy settings do not leak to child processes.** `HTTPS_PROXY` / `NODE_EXTRA_CA_CERTS` apply to the Claude Code process only, not to the commands it spawns (Bash tool commands, `git`/`gh`/`curl`, hooks, the status line), so those keep working when the proxy is down. An intentional, owner-approved deviation from the prototype, which exports both to the whole environment; the mechanism is chosen in P4 (`hylo run`) |
 
 ## 11. After the split — the private home-lab repository
 
