@@ -18,6 +18,10 @@ line to the LEDGER (~/dgx-llm-obs.jsonl). WebSocket lanes (bridge.claudeusercont
 life-cycle logged only: CONNECT/tls-establish/close with durations and byte counts — payloads are
 never touched or buffered, so realtime ping/pong latency is unaffected. Unknown hosts default to
 passthrough+tunnel; only api.anthropic.com /v1/messages is ever rewritten.
+
+PLAN LIMITS (2026-11-14): Anthropic's anthropic-ratelimit-unified-* response headers (the source of
+Claude Code's rate_limits) are logged as "anth_ratelimit" events, only when they change per session —
+read-only, never touches the response. Used to explain the status line's plan-limit widget.
 """
 from __future__ import annotations
 

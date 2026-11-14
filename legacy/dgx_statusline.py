@@ -7,12 +7,14 @@ Claude Code pipes session JSON to stdin on each refresh (after every assistant m
 + every refreshInterval tick); we print up to two rows:
 
     ◨ DGX · Sonnet 5.5 · ⎇ main · home-lab · ▰▰▰▰▱▱▱▱▱▱ 43%/1.0M · ▤30% ❙68% ◈ 2% · ♻ 94% · ▲31/▼4
-      · ⏱ 7h25m·1h52m ⌂1d07h · ↑88.0M[in500 ✍970k ⟳88.0M] ↓298k ↻1 · $32.62 $17.5/h ⛏n/a
+      · 7d44% ->4h18m · ⏱ 7h25m·1h52m ⌂1d07h · ↑88.0M[in500 ✍970k ⟳88.0M] ↓298k ↻1 · $32.62 $17.5/h ⛏n/a
     ◉ r3·q0 · KV▰▰▰▰ 92% · »113t/s · ▣204t/s ▅▆▇█ · ◔4.2s · ⚡1059W·1400W 66° 34¢/h · ☾ idle 2m
 
 Row-1 legend (the long tail): `⏱ elapsed·model-time ⌂window-age` (elapsed resets on /clear,
 ⌂ does not); tokens `↑all-sent[in ✍write ⟳read] ↓out ↻rebuilds` (session totals, in+✍+⟳ = ↑);
-`$ $/h` colored by your own same-lane p75/p95 over 30 days (cost-history.json).
+`$ $/h` colored by your own same-lane p75/p95 over 30 days (cost-history.json); plan limits
+`7d44% ->4h18m` = every window Claude Code reports (5h appears only when Anthropic sends it),
+colored by projected use at reset (grey < 80%, yellow 80-100%, red > 100%).
 
 Row-2 legend: `»113t/s` = THIS session's last completed API call (transcript, both
 lanes, prefill included; dimmed when the reply was < 200 tokens); `▣204t/s` = the DGX box,
@@ -23,7 +25,7 @@ sparkline after it plots that box rate, zero-anchored (≤ 12 pts, ~48 s). `⚡G
 Row 1 is the session: lane badge (DGX-served Flash = cyan ◨ DGX, Anthropic Opus/Haiku
 passthrough = magenta ◨ ANTH, unknown env = grey), model, git branch, project, a
 green→red truecolor context thermometer, prompt-cache hit ratio, lines added/removed,
-session wall time and (subscription accounts) the 5h rate-limit gauge. Lane flips live
+session time, tokens, cost and (subscription accounts) the plan limits. Lane flips live
 on a mid-session `/model opus` — it compares stdin's model.id against the launcher's
 LOCAL_MODEL_PREFIXES.
 
