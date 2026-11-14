@@ -1,0 +1,20 @@
+# .factory/autonomy-config.yaml — hylo (owner, 2026-11-14)
+# Budget: NO LIMIT (owner decision). No warn/alert/pause/hard-stop thresholds
+# apply, and no agent is downgraded to a cheaper model because of cost.
+# Costs are still logged (cost-summary.md) for visibility.
+
+budget:
+  unlimited: true
+  max_usd: null          # no cap
+  min_usd: null          # no underspend floor
+  warn_threshold: null
+  alert_threshold: null
+  pause_threshold: null
+
+  # Never downgraded (moot without a budget, kept for clarity)
+  protected_agents:
+    - adversary
+    - holdout-evaluator
+    - formal-verifier
+    - pr-reviewer
+    - security-reviewer

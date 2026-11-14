@@ -1,0 +1,302 @@
+# .factory/policies.yaml — Declarative governance policy registry
+#
+# Each project maintains its own policy list. The adversarial-review skill
+# auto-loads this file into the adversary's dispatch rubric. Lint hooks
+# read this file to determine which validators to run.
+#
+# Initialize with: /vsdd-factory:policy-registry init
+# Add policies with: /vsdd-factory:policy-add <name>
+# Validate with: /vsdd-factory:policy-registry validate
+#
+# Schema per entry:
+#   id: <integer>              # Sequential policy number
+#   name: <string>             # snake_case policy flag name
+#   description: <string>      # One-line human-readable description
+#   adopted: <string>          # Context where adopted (burst, pass, or date)
+#   severity: <HIGH|MEDIUM>    # Severity floor for violations
+#   enforced_by: [<string>]    # Enforcement mechanisms
+#   scope: [<string>]          # Artifact types this policy covers
+#   lint_hook: <string|null>   # Path to automated hook (relative to plugin root)
+#   verification_steps: [<string>]  # Step-by-step check procedure for the adversary
+#                                   # Baseline policies (1-9) have steps baked into agent
+#                                   # prompts. Custom policies (10+) MUST include steps
+#                                   # here so the adversary knows HOW to verify them.
+#
+# CHANGELOG
+# ---------
+# 1.1 (2026-05-06): POL-11 ci_positive_coverage_assertion added — origin
+#                   drbothen/prism#127 pass-13 F-PG-001 / TD-VSDD-057.
+#                   12-pass false-green CI on prism `perimeter-compile-fail`
+#                   driven by ANSI-color regex non-match was undetectable
+#                   by exit-code semantics alone. Codified as MEDIUM gate
+#                   for security-critical regression-detector CI jobs.
+# 1.0 (baseline):   Initial 10 baseline policies (POL-1..POL-10).
+
+metadata:
+  version: "1.1"
+  last_updated: "2026-05-06"
+
+policies:
+  - id: 1
+    name: append_only_numbering
+    description: "All VSDD identifiers are never renumbered or reused. Retired IDs stay in indexes. Filename slugs are immutable."
+    adopted: baseline
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [bc, vp, di, cap, story, hs]
+    lint_hook: null
+    verification_steps:
+      - "Scan all index files for retired/removed IDs — verify no active artifact reuses a retired ID"
+      - "Verify retired entries have replaced_by or removal justification"
+      - "Check that filename slugs match original creation (compare git log if available)"
+
+  - id: 2
+    name: lift_invariants_to_bcs
+    description: "Every domain invariant (DI-NNN) must be cited by at least one BC's Traceability L2 Invariants field. Orphan invariants are drift."
+    adopted: baseline
+    severity: MEDIUM
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [di, bc]
+    lint_hook: null
+    verification_steps:
+      - "Read domain-spec/invariants.md — extract all DI-NNN IDs"
+      - "For each DI-NNN, search BC files for citations in Traceability/L2 Invariants fields"
+      - "Report orphan invariants (DI declared but no BC enforces it)"
+      - "Verify invariant Scope/enforcer column names BCs that cite it back (bidirectional)"
+
+  - id: 3
+    name: state_manager_runs_last
+    description: "State-manager agent must be the last to commit in every burst, preventing version-race regressions."
+    adopted: baseline
+    severity: HIGH
+    enforced_by: [orchestrator-rule]
+    scope: [story, bc, vp, architecture]
+    lint_hook: null
+    verification_steps:
+      - "Review burst commit history — state-manager commits must come after all other agents"
+      - "Check for citation staleness — STORY-INDEX/BC-INDEX versions must match latest story-writer/PO output"
+
+  - id: 4
+    name: semantic_anchoring_integrity
+    description: "Every anchor claim must be semantically correct, not just syntactically valid. Mis-anchoring always blocks convergence."
+    adopted: baseline
+    severity: MEDIUM
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [bc, vp, story, architecture]
+    lint_hook: null
+    verification_steps:
+      - "For each BC, verify declared capability actually describes the BC's purpose per capabilities.md"
+      - "For each story, verify subsystems: field references subsystems that own the story's scope per ARCH-INDEX"
+      - "For each VP, verify anchor_story builds the test vehicle (not an architectural ancestor)"
+      - "For traceability table rows, verify descriptions match target artifact's actual title"
+
+  - id: 5
+    name: creators_justify_anchors
+    description: "Agents creating anchors must justify each choice against the source-of-truth artifact. Stop and ask rather than guess."
+    adopted: baseline
+    severity: MEDIUM
+    enforced_by: [adversary-prompt]
+    scope: [bc, vp, story, cap, architecture]
+    lint_hook: null
+    verification_steps:
+      - "Check that BC→CAP anchors include justification citing capabilities.md"
+      - "Check that story→subsystem anchors include justification citing ARCH-INDEX"
+      - "Check that VP→anchor_story assignments justify why that story builds the test vehicle"
+      - "Flag mechanical citations without body substantiation"
+
+  - id: 6
+    name: architecture_is_subsystem_name_source_of_truth
+    description: "ARCH-INDEX Subsystem Registry is the canonical source for subsystem names. All references must match verbatim."
+    adopted: baseline
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [bc, story, prd, architecture]
+    lint_hook: null
+    verification_steps:
+      - "Read ARCH-INDEX Subsystem Registry for canonical subsystem names"
+      - "For sampled BCs, verify subsystem: frontmatter matches registry exactly"
+      - "For sampled stories, verify subsystems: field uses registry names"
+      - "Check BC-INDEX subsystem column matches ARCH-INDEX"
+
+  - id: 7
+    name: bc_h1_is_title_source_of_truth
+    description: "BC file H1 heading is the authoritative BC title. All downstream references must match. Enrichment goes INTO the H1."
+    adopted: baseline
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [bc, story, prd]
+    lint_hook: null
+    verification_steps:
+      - "Sample 10+ BCs — read H1 heading and compare to BC-INDEX title column"
+      - "Check for downstream-only enrichment not present in H1"
+      - "Verify H1 accurately describes what the BC's postconditions specify"
+
+  - id: 8
+    name: bc_array_changes_propagate_to_body_and_acs
+    description: "When a story bcs: frontmatter changes, the same commit must update body BC table, ACs, and Token Budget count."
+    adopted: baseline
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [story, bc]
+    lint_hook: null
+    verification_steps:
+      - "Sample 5+ stories — for each BC in bcs: frontmatter, verify it appears in body BC table"
+      - "For each BC in bcs: frontmatter, verify at least one AC traces to it"
+      - "For each BC in body BC table or AC traces, verify it appears in bcs: frontmatter"
+      - "Verify Token Budget BC count matches len(bcs)"
+
+  - id: 9
+    name: vp_index_is_vp_catalog_source_of_truth
+    description: "VP-INDEX.md is authoritative. Changes must propagate same-burst to verification-architecture.md and verification-coverage-matrix.md."
+    adopted: baseline
+    severity: HIGH
+    enforced_by: [adversary-prompt, lint-hook, consistency-validator]
+    scope: [vp, architecture]
+    lint_hook: hooks/validate-vp-consistency.sh
+    verification_steps:
+      - "Verify VP-INDEX arithmetic: total = sum of per-tool counts = row count"
+      - "For each VP in VP-INDEX, verify it appears in verification-architecture.md Provable Properties Catalog"
+      - "For each VP in VP-INDEX, verify it appears in verification-coverage-matrix.md VP-to-Module table"
+      - "Sum coverage matrix per-tool columns — must equal VP-INDEX per-tool totals"
+      - "Reverse check: every VP in arch docs must exist in VP-INDEX"
+
+  - id: 10
+    name: demo_evidence_story_scoped
+    description: "All demo-recorder output MUST live under docs/demo-evidence/<STORY-ID>/. No flat files at docs/demo-evidence/*.md."
+    adopted: baseline
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator, pr-reviewer, lint-hook]
+    scope: [story, demo-evidence, pr]
+    lint_hook: hooks/validate-demo-evidence-story-scoped.sh
+    verification_steps:
+      - "For each story's feature branch, verify docs/demo-evidence/<STORY-ID>/ exists"
+      - "Verify NO files exist at docs/demo-evidence/*.md — only subfolders"
+      - "Cross-check: subfolder name matches the story's frontmatter story_id"
+
+  - id: 11
+    name: ci_positive_coverage_assertion
+    description: "Security-critical CI jobs (regression detectors) MUST emit a positive-coverage assertion in their log on every successful run, not just an exit code. Exit-0-without-log is a false-green signal."
+    adopted: 2026-05-06
+    severity: MEDIUM
+    enforced_by: [adversary-prompt, ci-author-review]
+    scope: [ci-workflow]
+    lint_hook: null
+    verification_steps:
+      - "Identify CI jobs whose value is regression detection (compile-fail, lint-as-test, fuzz-smoke, perimeter-violation, schema-drift)"
+      - "For each, verify the job's log contains a positive-coverage assertion of the form 'Check passed: N items validated'"
+      - "Verify the count N is computed at runtime, not hardcoded"
+      - "If the job uses text-parsing (regex extraction), verify the parsing is exercised by non-empty inputs"
+      - "Verify the job's timeout-minutes is generous enough to not kill the assertion phase before it runs"
+      - "Reject CI jobs whose only success indicator is exit-0 + green checkmark"
+      - "Origin: drbothen/prism#127 pass-13 F-PG-001 / TD-VSDD-057 (12-pass false-green from ANSI-color regex non-match)"
+
+  # ---------------------------------------------------------------------------
+  # hylo project policies (owner, 2026-11-14). Source: docs/PLAN.md, CLAUDE.md.
+  # ---------------------------------------------------------------------------
+
+  - id: 12
+    name: settled_decisions_are_constraints
+    description: "Owner decisions D1-D12 in docs/PLAN.md are fixed inputs. Specs, architecture and stories must conform to them; reviews flag violations of them, never propose reopening them. Only the owner may reopen a decision."
+    adopted: 2026-11-14
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator, orchestrator-rule]
+    scope: [prd, architecture, bc, story, nfr]
+    lint_hook: null
+    verification_steps:
+      - "Read docs/PLAN.md sections 2 and 10 (D1-D12)"
+      - "For each artifact under review, check that nothing contradicts a decision (e.g. a visible ANTHROPIC_BASE_URL router contradicts D6; a changed ledger schema before cutover contradicts D7; macOS-only code contradicts D5)"
+      - "A finding that argues a decision is wrong is out of scope: record it as an owner question, not a defect, and do not block convergence on it"
+
+  - id: 13
+    name: parity_before_behavior_change
+    description: "D4: until cutover (P5) the Go port reproduces legacy/ behavior exactly. Every BC for P1-P3 components cites the legacy/ source it was extracted from; any intentional deviation needs an owner-approved entry, and generalization belongs to P6."
+    adopted: 2026-11-14
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [bc, story, hs, prd]
+    lint_hook: null
+    verification_steps:
+      - "For each BC covering statusline, exporter or proxy, verify a Traceability entry cites a legacy/ file and function or line range"
+      - "Verify the BC postconditions match the cited legacy behavior, including quirks, not an idealized version"
+      - "Flag any BC, story or AC that adds configurability, new backends or behavior changes before P6 without an owner-approved deviation note"
+      - "Verify each P1-P3 story has an acceptance criterion expressed as a parity diff (legacy vs Go on the same recorded input)"
+
+  - id: 14
+    name: public_repo_hygiene
+    description: "Anything destined for the public repo (code, docs, testdata, commit messages, PR bodies, demo evidence) contains no real IPs (use 192.0.2.x), usernames, home paths, hostnames, account IDs, client names, emails, private session links, or real transcripts/ledgers/captures. Fixtures are synthetic or scrubbed by a committed script. No 'Claude' in names, binaries or logos."
+    adopted: 2026-11-14
+    severity: HIGH
+    enforced_by: [adversary-prompt, orchestrator-rule]
+    scope: [story, hs, architecture, prd, bc]
+    lint_hook: null
+    verification_steps:
+      - "Scan the artifact or diff for private IPv4 ranges (10/8, 172.16/12, 192.168/16) and any IP outside 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24"
+      - "Scan for absolute home paths (/Users/<name>, /home/<name>, C:\\Users\\<name>), real usernames, hostnames, email addresses, claude.ai session links"
+      - "Verify testdata/ fixtures are synthetic or produced by a committed scrub script; real captures belong only in the git-ignored captures/"
+      - "Verify no binary, package, command or logo name contains 'Claude'; product text says 'for Claude Code'"
+      - "Before any push: gitleaks detect --source . --log-opts=\"--all\" must be clean (CLAUDE.md)"
+
+  - id: 15
+    name: owner_gates_commit_push_pr
+    description: "No commit on main or any code branch, no git push to GitHub, no PR creation and no merge happens without the owner's explicit approval at that moment. The orchestrator stops and asks. Exception: state-manager commits on the private factory-artifacts branch (pushes there are redirected to a local private backup)."
+    adopted: 2026-11-14
+    severity: HIGH
+    enforced_by: [orchestrator-rule]
+    scope: [story]
+    lint_hook: null
+    verification_steps:
+      - "Before dispatching implementer, pr-manager, github-ops or devops-engineer for any commit, push, PR or merge, the orchestrator presents what will be committed or pushed and waits for owner approval"
+      - "Verify no agent used git push --no-verify (the local pre-push hook guards the public repo)"
+      - "merge-config.yaml autonomy_level stays 3 (human review before every merge)"
+
+  - id: 16
+    name: thresholds_are_explained
+    description: "Every numeric cut-off (timeouts, sizes, color thresholds, retry counts) carries its rationale: measured, derived, convention, or labeled judgment call, both in a code comment and in the docs."
+    adopted: 2026-11-14
+    severity: MEDIUM
+    enforced_by: [adversary-prompt]
+    scope: [bc, nfr, architecture, story]
+    lint_hook: null
+    verification_steps:
+      - "List every numeric threshold in the artifact or diff"
+      - "For each, verify a rationale with its category (measured / derived / convention / judgment call) is present"
+      - "For parity components, verify the value matches legacy/ and cites it"
+
+  - id: 17
+    name: ledger_format_frozen_until_cutover
+    description: "D7: ledger JSONL event names, fields and Prometheus metric names and labels stay byte-compatible with legacy/ until after cutover (redesign is P7)."
+    adopted: 2026-11-14
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [bc, architecture, story, prd]
+    lint_hook: null
+    verification_steps:
+      - "Extract ledger event names/fields and metric names/labels from legacy/ (proxy addon and exporter)"
+      - "Verify every BC, interface definition and story that writes or reads the ledger or exposes metrics uses exactly those names"
+      - "Flag any rename, removed field or new required field before P7"
+
+  - id: 18
+    name: cross_platform_from_day_one
+    description: "D5: macOS, Linux and Windows. OS-specific code lives only in internal/platform behind build tags; no shelling out to OS tools without a per-OS fallback; CI runs on all three OSes for every change."
+    adopted: 2026-11-14
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator]
+    scope: [architecture, story, bc, nfr]
+    lint_hook: null
+    verification_steps:
+      - "Verify OS-specific behavior (paths, process ancestry, service units, CA trust) is assigned to internal/platform"
+      - "Flag exec of ps, lsof, security, launchctl or similar without Windows/Linux equivalents"
+      - "Verify the CI matrix covers macos, ubuntu and windows runners"
+
+  - id: 19
+    name: go_hardening_toolchain
+    description: "The plugin's Rust hardening tools map to Go equivalents: Kani -> property-based tests (testing/quick or rapid) plus targeted proofs where tractable; cargo-fuzz -> native go test -fuzz; cargo-mutants -> a Go mutation tool (gremlins or go-mutesting); cargo-audit -> govulncheck; plus gosec/semgrep and go vet. Standard library first: each new dependency needs a stated reason."
+    adopted: 2026-11-14
+    severity: MEDIUM
+    enforced_by: [adversary-prompt, orchestrator-rule]
+    scope: [vp, architecture, story]
+    lint_hook: null
+    verification_steps:
+      - "Verify each VP names a Go tool from this mapping, not a Rust one"
+      - "Verify fuzz targets exist as FuzzXxx functions for parsers (SSE, JSONL ledger, transcript lines, status line stdin)"
+      - "Verify go.mod additions each have a recorded reason"

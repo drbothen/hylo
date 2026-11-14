@@ -1,0 +1,28 @@
+# .factory/merge-config.yaml — hylo (owner, 2026-11-14)
+# Public repository: every merge, push and PR needs the owner (policy 15).
+
+# 3 = all PRs require human review before merge
+autonomy_level: 3
+
+# hylo uses main only (no develop branch)
+default_branch: main
+branch_prefix: "feature/"
+
+squash_merge: true
+delete_branch_on_merge: true
+max_review_cycles: 3
+
+# Always flag for owner attention
+restricted_file_patterns:
+  - "go.mod"
+  - "go.sum"
+  - ".github/**"
+  - "legacy/**"        # read-only reference (CLAUDE.md); changes only to make it runnable for tests
+  - "testdata/**"      # must be synthetic or scrubbed (policy 14)
+  - ".gitignore"
+  - "LICENSE"
+  - ".env*"
+
+notifications:
+  # terminal only: github-issues would post to the PUBLIC repo
+  channel: terminal
