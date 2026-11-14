@@ -140,7 +140,7 @@ Server-side, outside the tree (PLAN §3 non-goal): VictoriaMetrics recording rul
 | `/bin/sh -c` | `dgx_proxy.py:722` | trust rotate + env only | `/bin/sh` | `cmd.exe` | none | R1 |
 | `git` | **none** (direct `.git` reads, `dgx_statusline.py:364-396`) | — | — | — | Go file reads | R1 |
 
-Spawn census: 10 Python sites, all above; no `os.system`/`Popen`/`exec*`/`spawn*` (R2, unchanged).
+Spawn census: 9 Python sites, all above; no `os.system`/`Popen`/`exec*`/`spawn*` (R2, unchanged; validated 2026-11-14 (B.6): grep finds 9 `subprocess.run` occurrences — `auto_continue.py:154`, `dgx_proxy.py:568,578,590,606,638,693,722`, `dgx_statusline.py:280` — and r2 §2.2's own itemization lists these same 9; the "10" there was an arithmetic slip)
 
 ### 2.6 Implicit host dependencies (not tools, not packages)
 

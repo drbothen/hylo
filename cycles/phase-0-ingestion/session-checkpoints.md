@@ -74,4 +74,26 @@ Archived verbatim from STATE.md when the convergence-deepening-COMPLETE checkpoi
 
 ---
 
+## Session Resume Checkpoint (2026-11-14) — Phase 0 convergence-deepening COMPLETE
+
+Archived verbatim from STATE.md when the final-analysis checkpoint replaced it (2026-11-14, final Phase 0 analysis burst).
+
+### 1. Where We Are
+
+- Phase 0 convergence-deepening **COMPLETE** — all six passes converged. Rounds: pass 0 = 3, pass 1 = 3, pass 2 = 9, pass 3 = 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22), pass 4 = 7 (r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact), pass 5 = 5. Every pass ended on a NITPICK round.
+- Canonical Phase 1 inputs locked — pointer table in Convergence Status above: inventory pass-0 r3 §2; architecture pass-1 r3 §B (two Mermaid diagrams); domain pass-2 r8 §7 (am. r9); BC index pass-3 r4 (am. r5-r8; 232 BCs); thresholds/NFR pass-4 r7 (147 thresholds; 120 rationales resolved; OD-57; OD-94 fact sheet); conventions pass-5 r3 (am. r4-r5).
+- Registers: OD-01..OD-94 (64 issued: 62 pending, 2 ruled OD-24/OD-27; unused/reserved 44, 49, 62-65, 67-73, 77-93; next free OD-95). Retractions: CONV-ABS through 94, next free 95; 101-104 unused.
+- Evidence captured: proxy venv `pyvenv.cfg` include-system-site-packages=false (proxy/preflight unaffected by the user site; parity harness runs shimmed Python cases under -s); mitmproxy 12.3.1 with no config.yaml; Go 1.26.5 h2 facts for OD-94.
+- Public repo main is 4 commits ahead of GitHub (b99082e D13/D14, a7b5e04 D15, 3e05cfe D16, plus f562477) — not pushed; push awaits owner.
+
+### 2. Next Steps
+
+1. coverage-audit
+2. extraction-validation (final)
+3. final-synthesis
+4. input-hash drift check over `.factory/` artifacts
+5. Phase 0 owner approval gate: present the OD-01..OD-94 decision list
+
+---
+
 <!-- Repeat for each archived checkpoint. Maintain chronological order. -->

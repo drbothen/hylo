@@ -177,4 +177,42 @@ Passes 2 (9 rounds) and 3 (8 rounds) converged in the prior burst; see the entry
 
 ---
 
+## Burst: final Phase 0 analysis — coverage audit PASS, extraction validation r2 PASS-WITH-FIXES, pass-8 definitive synthesis, owner decision list gate-ready (2026-11-14)
+
+**Parent-commit:** 66032bc (convergence-deepening complete)
+
+**Adversary verdict:** no adversary pass dispatched this burst (deepening rounds already closed on NITPICK). Analysis-verdicts recorded instead: coverage audit (step B.5) **PASS** — `semport/hylo-legacy/hylo-legacy-coverage-audit.md`. Extraction validation r2 (step B.6) **PASS-WITH-FIXES** — `semport/hylo-legacy/hylo-legacy-extraction-validation-r2.md`: 78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix (applied in-burst). Deep synthesis (step C) **DONE** — `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md` is the definitive synthesis, superseding pass-6; primary reference for create-brief / create-domain-spec / create-prd / semport-analyze. Owner decision list **GATE-READY** — `semport/hylo-legacy/hylo-legacy-owner-decisions.md`.
+
+**Owner decision list:** 64 issued ODs in groups A-F — A 12 (incl. 2 ruled: OD-24, OD-27), B 19, C 13, D 10, E 2, F 8. Recommendations: 23 KEEP (parity), 30 DEVIATE (approved deviations, incl. the 2 rulings), 11 NEW. Answer format in the file header (OD-06 a, or A: all recommended). **Owner flag: OD-14** now recommends (a) do not port --subagent — reversing the earlier Phase-0 toggle recommendation (PLAN §3 lists custom agent-panel rows as a non-goal; Claude Code 2.1.323 removed subagentStatusLine); confirmation requested at the gate.
+
+**Codifications:** pass-0 deep inventory corrected in place (spawn census 10 → 9, with a B.6 note). Lessons recorded in pass-8 §10: 53 total — 13 P0 (L0-01..L0-13), 13 P1, 9 P2, 18 P3. STATE.md canonical-pointer table extended with the synthesis and the owner-decision list as gate inputs. OD register summary advanced to the group form (A 12 / B 19 / C 13 / D 10 / E 2 / F 8 = 64; 23 KEEP / 30 DEVIATE / 11 NEW); no policies.yaml change this burst.
+
+**Files touched (Dim-1): 11 unique files**
+
+- .factory/semport/hylo-legacy/hylo-legacy-coverage-audit.md
+- .factory/semport/hylo-legacy/hylo-legacy-extraction-validation-r2.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md
+- .factory/semport/hylo-legacy/hylo-legacy-owner-decisions.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory-r3.md
+- .factory/STATE.md
+- .factory/sidecar-learning.md
+- .factory/logs/dispatcher-internal-2026-11-14.jsonl
+- .factory/logs/events-2026-11-14.jsonl
+- .factory/cycles/phase-0-ingestion/burst-log.md
+- .factory/cycles/phase-0-ingestion/session-checkpoints.md
+
+**Evictions:** Current Phase Steps row 3 (semport broad sweep passes 0-6 over legacy/) evicted from the last-5 window — durably recorded in the grounding and convergence entries above and in cycle-manifest.md. The convergence-deepening session checkpoint was archived to session-checkpoints.md.
+
+**Dim-2 Attestation:** verdict strings verified against the reports on disk (coverage-audit header; extraction-validation-r2 header; pass-8 confidence blockquote: coverage audit passed with 0 gaps, extraction validation r2 PASS-WITH-FIXES with 78/78 sampled BCs confirmed). OD group counts verified against the owner-decisions summary table: 12+19+13+10+2+8 = 64; KEEP 23 + DEVIATE 30 + NEW 11 = 64; ruled 2 (OD-24, OD-27); next free OD-95. Lesson counts verified in pass-8 §10: L0 13 + L1 13 + L2 9 + L3 18 = 53.
+
+**Dim-5 Attestation:** N/A — no compiled artifacts in this burst (markdown analysis/state files and JSONL log churn only).
+
+**Dim-6 Attestation:** N/A — no schema-structured file edited; policies.yaml untouched this burst.
+
+**Dim-7 Attestation:** no repo test suite in scope; the extraction validator's behavioral verification and the coverage-audit cross-checks are documented in their reports and summarized in the pass-8 confidence block.
+
+**Closes:** Phase 0 analysis — coverage-audit, extraction-validation (final), final-synthesis. Still open: input-hash drift check, fresh-context consistency audit, Phase 0 owner approval gate (present hylo-legacy-owner-decisions.md).
+
+---
+
 <!-- Repeat for each burst. Maintain chronological order. -->
