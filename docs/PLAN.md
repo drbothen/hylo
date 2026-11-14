@@ -101,7 +101,8 @@ Claude Code's custom agent-panel rows (removed in Claude Code 2.1.323 — not po
   paths, service units, CA trust) · `internal/hook`.
 - **Config:** `~/.config/hylo/config.yaml` (Windows: `%APPDATA%\hylo\config.yaml`), profiles,
   env overrides `HYLO_*`; secrets referenced by file path, never inline. Parity phase ships a
-  config whose defaults reproduce today's `claude-dgx` exactly.
+  config whose defaults reproduce today's `claude-dgx` exactly. Every behavior-shaping value
+  is a config key with a documented default (D15).
 - **CA trust:** Claude Code is a Node app and trusts the hylo CA via `NODE_EXTRA_CA_CERTS`
   on every OS — no system trust store changes needed (same as today).
 - **Proxy model:** one long-lived proxy per user (port in a state file, lock), shared by
@@ -159,6 +160,7 @@ runs (until it is scored, ~2026-11-14 17:00Z); P0–P2 are safe to do in paralle
 | D12 | **Distribution: GitHub Releases first**; Homebrew tap / Scoop / `go install` as follow-ups |
 | D13 | **Intercept all Claude Code traffic.** TLS is terminated for every host the Claude Code process contacts (as the prototype does today), not only `api.anthropic.com`. Only `POST /v1/messages` on `api.anthropic.com` is ever rewritten; every other host and path is forwarded unchanged. Consequence: the local CA cannot be name-constrained to one host, so it is trusted only by the Claude Code process (via `NODE_EXTRA_CA_CERTS`) and never added to an OS trust store |
 | D14 | **Proxy settings do not leak to child processes.** `HTTPS_PROXY` / `NODE_EXTRA_CA_CERTS` apply to the Claude Code process only, not to the commands it spawns (Bash tool commands, `git`/`gh`/`curl`, hooks, the status line), so those keep working when the proxy is down. An intentional, owner-approved deviation from the prototype, which exports both to the whole environment; the mechanism is chosen in P4 (`hylo run`) |
+| D15 | **Config over code (iron rule).** Every value that shapes behavior is configuration, not code: backends, hosts, ports, model prefixes, routing rules, prices, timeouts, paths, feature toggles, status line thresholds and colors. One schema in `internal/config`, resolved as config file → `HYLO_*` environment override → built-in default (the prototype's `DGX_*` names stay accepted until the P6 rename shim). Each default sits next to its rationale and, until cutover, equals the prototype's value exactly (D4), so the rule changes no behavior during parity. Logic never contains a magic number or a hard-coded host, model or price; it reads config. Exceptions are protocol and format constants (e.g. `POST /v1/messages`, SSE event and field names, the ledger schema frozen by D7): these are named constants, each with a comment saying why it is not configuration |
 
 ## 11. After the split — the private home-lab repository
 

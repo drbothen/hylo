@@ -8,7 +8,7 @@ It is being ported from a working Python prototype (`legacy/`). Not affiliated w
 ## Read first, in this order
 
 1. **`docs/RESUME.md`** — current state, what was just done, the next concrete steps. Start here.
-2. **`docs/PLAN.md`** — the approved plan: decisions **D1–D14**, scope, architecture, phases
+2. **`docs/PLAN.md`** — the approved plan: decisions **D1–D15**, scope, architecture, phases
    **P0–P7** with exit criteria, testing strategy, risks. Decisions are settled; do not reopen
    them unless the owner asks.
 3. **`docs/STATUSLINE-WIDGETS.md`** — the status line's behavior, widget by widget (the spec the
@@ -41,12 +41,19 @@ It is being ported from a working Python prototype (`legacy/`). Not affiliated w
 - **Parity first (D4):** the Go port must reproduce `legacy/` behavior on recorded inputs before
   any behavior change or generalization. A parity diff is the definition of done for P1–P3.
 - **Explain every threshold:** each numeric cut-off gets its rationale (measured, derived,
-  convention, or labeled judgment call) in a code comment and in the docs.
+  convention, or labeled judgment call) in a code comment and in the docs. The rationale lives
+  next to the config default (D15).
 - **Verify before claiming.** Run it, test it, read the source; say what was not verified.
 - Keep the ledger format and metric names unchanged until after cutover (D7).
 - Write everything in English.
 
 **Engineering.**
+- **Config over code (iron rule, D15):** every value that shapes behavior (hosts, ports, model
+  prefixes, routing, prices, timeouts, paths, toggles, thresholds, colors) is a key in the
+  `internal/config` schema with a default and its rationale; no magic numbers or hard-coded
+  hosts/models/prices in logic. Protocol and format constants (API paths, SSE names, the D7
+  ledger schema) are named constants with a comment saying why they are not config. Until
+  cutover, defaults equal `legacy/` exactly.
 - Go ≥ 1.26, standard library first (`crypto/tls`, `net/http`, `httputil`); add a dependency only
   with a reason.
 - Cross-platform from day one: macOS, Linux, Windows (D5). OS-specific code lives in
