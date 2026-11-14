@@ -6,13 +6,14 @@ Wired by the `claude-dgx` launcher through `--settings '{"statusLine":{"type":"c
 Claude Code pipes session JSON to stdin on each refresh (after every assistant message
 + every refreshInterval tick); we print up to two rows:
 
-    ◨ DGX · Sonnet 5.5 · ⎇ main · home-lab · ▰▰▰▱▱ 43%/1.0M · ♻ 94% · ▲31 ▼4 · ⏱ 12m
-    ◉ r3·q0 · KV▰▱▱ 6% · »38/204t/s ▁▂▃▅▇ · ◔4.2s · ⚡1059W 66° 34¢/h · ☾ idle 2m
+    ◨ DGX · Sonnet 5.5 · ⎇ main · home-lab · ▰▰▰▰▱▱▱▱▱▱ 43%/1.0M · ♻ 94% · ▲31/▼4 · ⏱ 12m
+    ◉ r3·q0 · KV▰▰▰▰ 92% · »113t/s · ▣204t/s ▅▆▇█ · ◔4.2s · ⚡1059W·1400W 66° 34¢/h · ☾ idle 2m
 
-Row-2 legend: `»38/204t/s` = THIS session's delivered-token rate / box-wide 5-min
-average (vLLM generation tokens summed over all sessions); the sparkline plots that
-box-wide rate (≤16 pts, ≤90 s of history, persisted per session). The session figure
-counts tokens when a stream closes, so it can legitimately read 0 mid-long-generation.
+Row-2 legend: `»113t/s` = THIS session's last completed API call (transcript, both
+lanes, prefill included; dimmed when the reply was < 200 tokens); `▣204t/s` = the DGX box,
+all clients, 1-minute vLLM generation rate — a different quantity, not a ratio; the
+sparkline after it plots that box rate, zero-anchored (≤ 12 pts, ~48 s). `⚡GPU·wall` — the wall estimate carries the color. Full reference and the
+2026-11-13 review: docs/STATUSLINE-WIDGETS.md, docs/STATUSLINE-REVIEW-2026-11-13.md.
 
 Row 1 is the session: lane badge (DGX-served Flash = cyan ◨ DGX, Anthropic Opus/Haiku
 passthrough = magenta ◨ ANTH, unknown env = grey), model, git branch, project, a
@@ -24,9 +25,10 @@ LOCAL_MODEL_PREFIXES.
 Row 2 is the GB300 telemetry strip, ONE VictoriaMetrics round trip per refresh (~25 ms
 LAN, disk-cached DGX_SL_TTL seconds keyed by session_id, atomic writes). Throughput
 history feeds a fading sparkline persisted in that same cache. Degradation ladder:
-fresh → green ◉; VM briefly unreachable → yellow ◉ with last-known numbers + (~Ns) age;
->KEEP_DEAD or never seen → red ◌ DGX ?. Never an error, never blank (blank = nonzero
-exit), every path ends in output + exit 0.
+fresh → green ◉; vLLM or (in-use) LMCache scrape down → red ◉ vLLM down / LMCache down;
+VM briefly unreachable → yellow ◉ with last-known numbers + (~Ns) age; >KEEP_DEAD or
+never seen → red ◌ DGX ?. Never an error, never blank (blank = nonzero exit), every
+path ends in output + exit 0.
 
 Contract notes (verified against code.claude.com docs, 2026-11-11):
   - stdout = one line per row; ANSI + truecolor OK; exit 0 required for display;
@@ -49,7 +51,9 @@ sparkline centered. Adds: git, timer, ±lines, rate-limit, idle marker, ¢/h.
 """
 
 import colorsys
+import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -71,13 +75,20 @@ HTTP_TIMEOUT = 1.5     # s; LAN round trip measured ~25 ms
 SPARK_PTS = 12         # sparkline width (kept short: long flats read as blobs)
 SPARK_MAX_AGE = 90.0   # s of history kept for the sparkline
 HIST_MIN_GAP = 2.0     # s between sparkline samples
-IDLE_MINE = 15.0       # s without counter movement -> session rate is ZERO (not EMA ghost)
 RL_KEEP = 1800.0       # s to keep displaying plan limits last reported by CC (no blinking)
 # Which signal the sparkline plots: rate (box tok/s) | kv (GPU KV%) | ttft | mine.
 # Rate is flat when the box is healthy — kv (pressure, predictive) and ttft (spiky)
 # tend to carry more information; mine moves per turn.
 TRACE = os.environ.get("DGX_SL_TRACE", "rate")
-IDLE_AFTER = 300.0     # show '☾ idle' when DGX last got a request longer ago than this (s)
+# show '☾ idle' when the DGX lane last got a request longer ago than this (s). 5 min is a
+# judgment call: longer than a normal think/tool gap between turns of an active session, so
+# it means "nobody is actively using the DGX lane" (review #20.2).
+IDLE_AFTER = 300.0
+# ⛏ guard: the cash basis is monthly cost / (trailing-24h DGX-lane tokens x month). Below
+# 1M DGX-lane tokens in 24 h (= 30.4 MTok/month, roughly one modest session a day) there is
+# no representative utilization to divide by — on 2026-11-13 a quiet day drove the basis to
+# $3.47M/MTok. Below the floor ⛏ shows 'n/a' instead of a number (review #11.1).
+MIN_BASIS_MTOK_MONTH = 30.4
 GIT_TTL = 5.0          # s between real .git/HEAD reads (docs' example pattern)
 NARROW_COLS = 72       # below this, auto-drop row 2 unless DGX_SL_ROWS forces it
 
@@ -86,11 +97,24 @@ QUERY = (
     "vllm:kv_cache_usage_perc|dgx_kv:host_hit_share|"
     "dgx_tokens:gen_rate5m|dgx_ttft:p95_30m|dgx_preempt:rate5m|"
     "dgx_llm_last_dgx_request_timestamp_seconds|dgx_power:est_wall_watts|"
-    "dgx_power:rate_usd_per_kwh|dgx_llm_session_tokens_out|"
-    "dgx_cost:dgx_usd_per_mtok|"
-    "vllm:prefix_cache_hits_total|vllm:prefix_cache_queries_total|"
+    "dgx_power:rate_usd_per_kwh|"
+    "dgx_cost:dgx_usd_per_mtok|dgx_tokens:rate_mtok_month|"
+    "vllm:lmcache_mp_lookup_duration_seconds_count|"
     'DCGM_FI_DEV_POWER_USAGE|DCGM_FI_DEV_GPU_TEMP"}'
+    # Serving health (review 2026-11-13, #13): scrape health of vLLM and the LMCache server,
+    # same round trip. Stored per job as "up:<job>" (see fetch_sample).
+    ' or up{job=~"vllm|lmcache"}'
+    # Sparkline 'rate' trace (review #17 A+): box tok/s over 1 MINUTE, so the ~48 s sparkline
+    # moves on its own timescale (the 5-min average barely moved). The extra label is
+    # REQUIRED: PromQL `or` matches label sets ignoring names, and an unlabeled series would
+    # collide with dgx_tokens:gen_rate5m and be dropped.
+    ' or label_set(alias(sum(rate(vllm:generation_tokens_total[1m])), "dgx_sl:gen_rate1m"),'
+    ' "sl", "1m")'
+    # TTFT sample size behind dgx_ttft:p95_30m (review #18): requests in the same 30-min window.
+    ' or label_set(alias(sum(increase(vllm:time_to_first_token_seconds_count[30m])),'
+    ' "dgx_sl:ttft_n30m"), "sl", "n30m")'
 )
+TTFT_MIN_N = 20        # below 20 samples the 95th percentile IS the maximum (1/20 = 5%)
 
 # ---------------------------------------------------------------- primitives ------------
 RESET, DIM, BOLD = "\033[0m", "\033[2m", "\033[1m"
@@ -139,24 +163,21 @@ def fetch_sample(sid8=None):
         with opener.open(url, timeout=HTTP_TIMEOUT) as resp:
             payload = json.loads(resp.read())
         if payload.get("status") != "success":
-            return None, {}
-        out, sess = {}, {}
+            return None
+        out = {}
         for s in payload["data"]["result"]:
             name = s["metric"].get("__name__", "")
             try:
                 val = float(s["value"][1])
             except (KeyError, ValueError, IndexError):
                 continue
-            if name == "dgx_llm_session_tokens_out":
-                lbl = s["metric"].get("session", "")
-                if lbl and lbl not in sess:
-                    sess[lbl] = val
-                continue
+            if name == "up":                          # one per job: keep them apart
+                name = "up:" + s["metric"].get("job", "")
             if name and name not in out:  # single-GPU/single-instance: first wins
                 out[name] = val
-        return (out or None), sess
+        return out or None
     except Exception:
-        return None, {}
+        return None
 
 
 def load_cache(path):
@@ -178,18 +199,6 @@ def save_cache(path, data):
         pass  # cache loss is cosmetic; the next refresh rewrites it
 
 
-def _sess_rate_from_state(st, now):
-    """Displayed session rate from stored state, WITHOUT a fetch (TTL-hit / stale paths).
-
-    Same idleness rule as the fetch path: counter stationary longer than IDLE_MINE ->
-    exactly 0 (no EMA ghosts), otherwise the stored EMA. None when never measured.
-    (st may be from an older cache without 'moved' -> falls back to 'ts'.)"""
-    if st.get("ema") is None:
-        return None
-    moved = st.get("moved", st.get("ts", 0))
-    return 0.0 if (now - moved) > IDLE_MINE else st["ema"]
-
-
 def effective_rl(cache_path, rl_stdin):
     """Smoothed plan limits: CC sends rate_limits only on subscription accounts and
     possibly not on every refresh — so remember the last-seen value (RL_KEEP s) and
@@ -207,106 +216,77 @@ def effective_rl(cache_path, rl_stdin):
     return rl if (isinstance(rl, dict) and now - ts < RL_KEEP) else None
 
 
-def get_sample(cache_path, sid8=None):
-    """TTL'd fetch w/ stale fallback.
+def get_sample(cache_path):
+    """TTL'd fetch w/ stale fallback -> (sample|None, age_s, up_bool, spark_hist).
 
-    -> (sample|None, age_s, up_bool, spark_hist, sess_rate|None)
-    sess_rate = THIS session's delivered-token rate (delta of the exporter's per-session
-    output-token counter, EMA-smoothed while moving; a hard 0 once the counter has been
-    stationary for IDLE_MINE seconds — no zombie EMA leftovers while the session idles;
-    None when unmeasurable this refresh).
+    (The per-session rate used to come from here — the delta of the ledger exporter's
+    per-session output counter. It is now the transcript's last-turn rate, see _mix_counts;
+    review 2026-11-13 #16.)
     """
     now = time.time()
     c = load_cache(cache_path)
     if c.get("fetch_ts", 0) > now - TTL:                       # fresh verdict, reuse it
-        return (c.get("sample"), now - c.get("ts", 9999), bool(c.get("up")),
-                c.get("hist", []), _sess_rate_from_state(c.get("sess_state") or {}, now))
-    sample, sess = fetch_sample()
+        return c.get("sample"), now - c.get("ts", 9999), bool(c.get("up")), c.get("hist", [])
+    sample = fetch_sample()
     entry = dict(c)                                            # preserves hist on failure
+    entry.pop("sess_state", None)                              # retired (#16)
     if sample:
         # History for the sparkline: one dict per observation holding EVERY plottable
         # signal, so DGX_SL_TRACE can pick retroactively. A missing series simply omits
         # its key — never a fabricated 0 (that once drew fake cliffs to the floor).
         # Point format: {"t": unix, "v": box tok/s, "k": gpu-kv fraction,
-        #                "f": ttft p95 s, "m": session delivered tok/s (instant),
-        #                "p": 1 when preemptions active}
+        #                "f": ttft p95 s, "p": 1 when preemptions active}
         hist = [_norm_pt(p) for p in c.get("hist", [])]
         hist = [p for p in hist if now - p.get("t", 0) < SPARK_MAX_AGE]
         if not hist or now - hist[-1]["t"] >= HIST_MIN_GAP:
             pt = {"t": now}
-            for key, series in (("v", "dgx_tokens:gen_rate5m"),
+            for key, series in (("v", "dgx_sl:gen_rate1m"),
                                 ("k", "vllm:kv_cache_usage_perc"),
                                 ("f", "dgx_ttft:p95_30m")):
                 if series in sample:
                     pt[key] = sample[series]
-            if sample.get("dgx_preempt:rate5m", 0) > 0.01:
+            if "v" not in pt and "dgx_tokens:gen_rate5m" in sample:
+                pt["v"] = sample["dgx_tokens:gen_rate5m"]        # fallback: 5-min average
+            if sample.get("dgx_preempt:rate5m", 0) > 0:          # same rule as the queue (#17.3)
                 pt["p"] = 1
             hist.append(pt)
-
-        # Per-session delivered rate from the exporter's monotonic counter. Exporter
-        # restarts shrink the counter -> reset the state instead of emitting nonsense.
-        # Idleness is FIRST-CLASS: 'moved' = last time the counter increased; when it
-        # has been stationary > IDLE_MINE, the rate is exactly 0 — the EMA never
-        # outlives real movement (fixes ghost tok/s while the session idles).
-        sess_rate = None
-        st = c.get("sess_state") or {}
-        cur = sess.get(sid8) if (sid8 and sess) else None
-        if cur is not None:
-            prev = st.get("c")
-            gap = now - st.get("ts", 0)
-            moved = st.get("moved", st.get("ts", 0))
-            if prev is None or cur < prev:
-                sess_rate = None                               # first sight or restart
-                moved = now
-            elif cur > prev:
-                if gap >= 1.0:
-                    inst = (cur - prev) / gap
-                    prev_ema = st.get("ema")
-                    sess_rate = inst if prev_ema is None else 0.5 * inst + 0.5 * prev_ema
-                    if hist and hist[-1].get("t") == now:
-                        hist[-1]["m"] = inst                   # instantaneous, not EMA
-                else:
-                    sess_rate = st.get("ema")                  # sample gap too small
-                moved = now
-            else:                                              # cur == prev: no delivery
-                sess_rate = st.get("ema")
-            if sess_rate is not None and (now - moved) > IDLE_MINE:
-                sess_rate = 0.0                                # stationary: hard zero
-            entry["sess_state"] = {"c": cur, "ts": now, "ema": sess_rate, "moved": moved}
-        else:
-            entry["sess_state"] = None
-
         entry.update({"fetch_ts": now, "up": True, "ts": now, "sample": sample,
                       "hist": hist[-32:]})
         save_cache(cache_path, entry)
-        return sample, 0.0, True, hist, sess_rate
+        return sample, 0.0, True, hist
     entry["fetch_ts"] = now                                    # remember we tried
     entry["up"] = False
     save_cache(cache_path, entry)
     age = now - c.get("ts", 0)
     if c.get("sample") and age < KEEP_DEAD:
-        # last-known sample, stale-flagged; session rate via the same no-ghost rule
-        return c["sample"], age, False, c.get("hist", []), \
-            _sess_rate_from_state(c.get("sess_state") or {}, now)
-    return None, age, False, [], None
+        return c["sample"], age, False, c.get("hist", [])     # last-known, stale-flagged
+    return None, age, False, []
 
 
 # ---------------------------------------------------------------- git (cached) -----------
 
 def git_branch(directory):
-    """Branch name (or short sha) for the first .git found upward; '' when none/error."""
+    """Branch name (or short sha) for the first repo found upward; '' when none/error.
+
+    Anchored on the directory passed in (render_lane passes workspace.project_dir — the
+    directory Claude Code was started in, by design; a non-repo start dir shows no branch).
+    A directory counts as a repo only when its .git (directory, or worktree/submodule
+    pointer file) holds a HEAD — a stray plain file named HEAD no longer ends the walk
+    (review 2026-11-13, #3.2). Walks up to the filesystem root (#3.3); cached by caller."""
     try:
         d = os.path.abspath(directory or os.getcwd())
-        for _ in range(6):                                     # walk up a few levels max
-            head = os.path.join(d, ".git")
-            if os.path.isfile(head):                           # worktree: .git is a pointer file
-                with open(head) as fh:
+        while True:
+            dotgit = os.path.join(d, ".git")
+            gitdir = None
+            if os.path.isdir(dotgit):
+                gitdir = dotgit
+            elif os.path.isfile(dotgit):                       # worktree: .git is a pointer file
+                with open(dotgit) as fh:
                     first = fh.readline().strip()
                 if first.startswith("gitdir:"):
-                    head = os.path.normpath(os.path.join(d, first[len("gitdir:"):].strip()))
-            if os.path.isfile(os.path.join(head if os.path.isdir(head) else d, "HEAD")) or \
-               os.path.isfile(os.path.join(head, "HEAD")):
-                with open(os.path.join(head, "HEAD")) as fh:
+                    gitdir = os.path.normpath(os.path.join(d, first[len("gitdir:"):].strip()))
+            if gitdir and os.path.isfile(os.path.join(gitdir, "HEAD")):
+                with open(os.path.join(gitdir, "HEAD")) as fh:
                     ref = fh.read().strip()
                 if ref.startswith("ref: refs/heads/"):
                     return ref[len("ref: refs/heads/"):]
@@ -323,9 +303,10 @@ def git_branch(directory):
 def git_segment(directory):
     if not GIT_ON:
         return None
-    # Stable filename (path-derived, NOT hash(): str hashes are salted per process, which
-    # made every invocation mint a new cache file and the cache never hit).
-    key = re.sub(r"[^A-Za-z0-9_.-]", "_", directory)[-40:] or "root"
+    # Stable filename from a digest of the FULL path (NOT hash(): str hashes are salted per
+    # process, so every invocation minted a new cache file). The previous key, the last 40
+    # chars of the path, let two dirs with the same tail share an entry (review #3.4).
+    key = hashlib.sha1(directory.encode("utf-8", "replace")).hexdigest()[:16]
     cache_path = os.path.join(CACHE_DIR, f"statusline-git-{key}.json")
     c = load_cache(cache_path)
     now = time.time()
@@ -344,17 +325,23 @@ def fmt_ctx(cw):
         return None
     pct = min(max(pct, 0.0), 100.0)
     total = cw.get("context_window_size") or 0
-    filled = int(round(pct / 100 * 10))
+    # Round half UP: round() is half-to-even, which gave 45% -> 4 cells but 55% -> 6
+    # (review 2026-11-13, #5.2).
+    filled = min(int(pct / 10 + 0.5), 10)
     bar = "".join(
         f"{truecolor(heat((i + 0.5) * 10))}▰" if i < filled else f"{GREY}▱"
         for i in range(10)) + RESET
+    # Thresholds: plain <= 50% (no action needed); heat color above 50% (past halfway);
+    # bold red from 85%. CC auto-compacts a native-1M model at ~967K (~96.7%), so 85% leaves
+    # ~117K tokens (~12 points, roughly 10 heavy turns) of runway — time to /compact or wrap
+    # on your own terms. Review 2026-11-13, #5.1.
     col = BOLDRED if pct >= 85 else (truecolor(heat(pct)) if pct > 50 else "")
     denom = f"{DIM}/{total / 1e6:.1f}M{RESET}" if total >= 1e6 else \
             (f"{DIM}/{total / 1000:.0f}K{RESET}" if total > 0 else "")
     return f"{bar} {col}{pct:.0f}%{RESET}{denom}"
 
 
-def render_lane(d, vm_cache=None, mix=None, dgx_mtok=None):
+def render_lane(d, mix=None, dgx_mtok=None, dgx_rate=None):
     model = d.get("model") or {}
     model_name = model.get("display_name") or model.get("id") or "?"
     model_id = model.get("id") or ""
@@ -372,7 +359,11 @@ def render_lane(d, vm_cache=None, mix=None, dgx_mtok=None):
         g = git_segment(proj_dir)
         if g:
             parts.append(g)
-        parts.append(f"{GREY}{os.path.basename(proj_dir)}{RESET}")
+        # normpath drops a trailing slash ("/x/p/" -> "p"); the root keeps "/" instead of
+        # an empty segment between two separators (review 2026-11-13, #4.1).
+        pname = os.path.basename(os.path.normpath(proj_dir)) or os.path.normpath(proj_dir)
+        if pname:
+            parts.append(f"{GREY}{pname}{RESET}")
     bar = fmt_ctx(d.get("context_window") or {})
     if bar:
         parts.append(bar)
@@ -380,18 +371,16 @@ def render_lane(d, vm_cache=None, mix=None, dgx_mtok=None):
     if mb:
         parts.append(mb)
 
-    # Cache hit: BOTH lanes serve from a cache, but only Anthropic echoes it back in the
-    # usage block CC's prompt_cache reads. vLLM reports zeros there (real DGX-lane
-    # transcripts show cache_* = 0), which would render a lying "♻ 0%". So on the DGX
-    # lane we show vLLM's OWN prefix-cache hit ratio (VM counters) instead, and reserve
-    # CC's prompt_cache figure for the Anthropic lane where it is measured honestly.
-    if on_dgx:
-        if isinstance(vm_cache, (int, float)) and vm_cache >= 0:
-            parts.append(f"{CYAN}♻{RESET} {vm_cache * 100:.0f}%")
-    else:
-        hr = (d.get("prompt_cache") or {}).get("hit_ratio")
-        if isinstance(hr, (int, float)):
-            parts.append(f"{CYAN}♻{RESET} {hr * 100:.0f}%")
+    # Cache hit = CC's prompt_cache.hit_ratio on BOTH lanes: this session's cache-read
+    # tokens / all input tokens (docs). Honest on the DGX lane since vLLM runs with
+    # --enable-prompt-tokens-details: its per-request cache_read_input_tokens =
+    # num_local_cached + num_external_cached (vLLM PrefillStats), i.e. GPU prefix-cache
+    # AND LMCache/host-tier hits. Until 2026-11-13 the DGX lane showed vLLM's box-wide
+    # prefix_cache_hits/queries instead — GPU-only, so ~0% under LMCache while ~96% of
+    # prompt tokens came from cache (review #7). Only whole 8,576-token blocks hit on DGX.
+    hr = (d.get("prompt_cache") or {}).get("hit_ratio")
+    if isinstance(hr, (int, float)):
+        parts.append(f"{CYAN}♻{RESET} {min(max(hr, 0.0), 1.0) * 100:.0f}%")
 
     # Plan limits (subscription accounts; API-key sessions omit the whole block).
     # Labels are PLAIN TEXT ('5h'/'7d') on purpose: emoji codepoints (⛽🗓️) render as
@@ -403,48 +392,61 @@ def render_lane(d, vm_cache=None, mix=None, dgx_mtok=None):
                       for p in prefixes)
     rl = {} if reroute_all else (d.get("rate_limits") or {})
     shown = []
+    now_rl = time.time()
     for label, key in (("5h", "five_hour"), ("7d", "seven_day")):
         w = rl.get(key) or {}
         pct = w.get("used_percentage")
+        reset = w.get("resets_at")
+        # CC drops a window once resets_at passes; the 30-min smoothing must too, or a
+        # refilled window kept showing e.g. a red 5h95% (review 2026-11-13, #12.1).
+        if isinstance(reset, (int, float)) and reset <= now_rl:
+            continue
         if isinstance(pct, (int, float)):
-            shown.append((label, min(max(pct, 0.0), 100.0), w.get("resets_at")))
+            shown.append((label, min(max(pct, 0.0), 100.0), reset))
     if shown:
         binding = max(shown, key=lambda t: t[1])[0]
         bits = []
         for label, pct, reset in shown:
+            # Bands: > 70% = pace yourself / plan around the reset; > 90% = throttling imminent.
             col = RED if pct > 90 else YELLOW if pct > 70 else GREY
             seg = f"{col}{label}{pct:.0f}%{RESET}"
             if label == binding and pct > 70 and isinstance(reset, (int, float)):
-                rem = reset - time.time()
-                if 0 < rem < 86400:                            # sane window: countdown useful
-                    seg += (" " + (f"{col}->{int(rem // 3600)}h{int((rem % 3600) // 60):02d}m{RESET}"
-                                   if rem >= 3600 else f"{col}->{int(rem // 60)}m{RESET}"))
+                rem = reset - now_rl
+                if 0 < rem <= 8 * 86400:                       # 7d window max + slack
+                    if rem >= 86400:                           # binding 7d: day-level (#12.2)
+                        cd = f"{int(rem // 86400)}d{int((rem % 86400) // 3600):02d}h"
+                    elif rem >= 3600:
+                        cd = f"{int(rem // 3600)}h{int((rem % 3600) // 60):02d}m"
+                    else:
+                        cd = f"{int(rem // 60)}m"
+                    seg += f" {col}->{cd}{RESET}"
             bits.append(seg)
         parts.append(" ".join(bits))
 
     cost = d.get("cost") or {}
     la, lr = cost.get("total_lines_added") or 0, cost.get("total_lines_removed") or 0
     if la or lr:
-        parts.append(f"{GREEN}▲{la}{RESET}{DIM}/{RESET}{RED}▼{lr}{RESET}")
+        parts.append(f"{GREEN}▲{_fmt_lines(la)}{RESET}{DIM}/{RESET}{RED}▼{_fmt_lines(lr)}{RESET}")
 
     dur = cost.get("total_duration_ms")
     if isinstance(dur, (int, float)) and dur > 60000:          # show timer after 1 minute
         mins = int(dur // 60000)
-        parts.append(f"{GREY}⏱ {mins // 60}h{mins % 100:02d}m{RESET}" if mins >= 60
+        # % 60, not % 100: 75 min rendered "1h75m" until review 2026-11-13 (#9.1)
+        parts.append(f"{GREY}⏱ {mins // 60}h{mins % 60:02d}m{RESET}" if mins >= 60
                      else f"{GREY}⏱ {mins}m{RESET}")
 
     # Session token totals + cost. Totals prefer CC's own stdin figures and fall back to
     # our transcript accumulation; cost is CC's list-price computation — on the DGX lane
     # we add the electricity-equivalent for the same tokens (dgx_cost:dgx_usd_per_mtok),
     # because $0.09-at-cost vs $X-at-list IS the displacement story this rig exists for.
-    cw2 = d.get("context_window") or {}
-    tin = cw2.get("total_input_tokens")
-    tout = cw2.get("total_output_tokens")
-    c_wr = c_rd = None
-    if mix and len(mix) >= 7:                                  # usage split (transcript)
-        c_wr, c_rd = mix[5], mix[6]
-        if not (isinstance(tin, (int, float)) and isinstance(tout, (int, float))):
-            tin, tout = mix[3], mix[4]                         # transcript-derived fallback
+    # SESSION totals come only from our transcript parse (each API message id counted once).
+    # CC's context_window.total_input/output_tokens are the LAST API response (current
+    # context: 353,850 = that call's input+cache_creation+cache_read), not the session —
+    # verified on live stdin, review 2026-11-13 #10.1. Main-session transcript only:
+    # subagents write their own files, so their tokens are not in these totals.
+    tin = tout = c_wr = c_rd = None
+    if mix and len(mix) >= 7:
+        tin, tout, c_wr, c_rd = mix[3], mix[4], mix[5], mix[6]
     have_t = isinstance(tin, (int, float)) or isinstance(tout, (int, float))
     if have_t and ((tin or 0) > 0 or (tout or 0) > 0):
         parts.append(f"{GREY}↑{RESET}{WHITE}{_fmt_tokens(tin or 0)}{RESET}"
@@ -458,20 +460,34 @@ def render_lane(d, vm_cache=None, mix=None, dgx_mtok=None):
         parts.append(f"{YELLOW}✍{_fmt_tokens(c_wr)}{RESET}")
     usd = cost.get("total_cost_usd")
     if isinstance(usd, (int, float)) and usd > 0:
+        # Bands: grey < $1 (a short session at list price), white $1-5, yellow >= $5
+        # (about a long Opus session at list price) — attention cue, not an alarm.
         col = YELLOW if usd >= 5 else WHITE if usd >= 1 else GREY
         cseg = f"{col}${usd:.2f}{RESET}"
         tot = (tin or 0) + (tout or 0)
-        if on_dgx and isinstance(dgx_mtok, (int, float)) and dgx_mtok > 0 and tot > 0:
-            eq = tot * dgx_mtok / 1e6
-            if eq >= 0.005:                                    # skip sub-half-cent noise
-                cseg += f"{GREY} ⛏{eq:.2f}{RESET}"
+        if on_dgx and tot > 0:
+            basis_ok = (isinstance(dgx_rate, (int, float)) and dgx_rate >= MIN_BASIS_MTOK_MONTH
+                        and isinstance(dgx_mtok, (int, float)) and dgx_mtok > 0)
+            if not basis_ok:
+                cseg += f"{GREY} ⛏n/a{RESET}"                 # no representative utilization
+            else:
+                eq = tot * dgx_mtok / 1e6
+                if eq >= 0.005:                                # skip sub-half-cent noise
+                    cseg += f"{GREY} ⛏{eq:.2f}{RESET}"
         parts.append(cseg)
     return parts
 
 
 # ---------------------------------------------------------------- row 2: DGX telemetry ---
 
-TRACE_KEYS = {"rate": "v", "kv": "k", "ttft": "f", "mine": "m"}
+# 'mine' retired 2026-11-13 (#17.4: its per-refresh counter source was removed in #16);
+# an unknown/retired name falls back to 'rate'.
+TRACE_KEYS = {"rate": "v", "kv": "k", "ttft": "f"}
+# Zero-anchored scale ceilings (review #17.1): bar height = value / max(window max, floor).
+# kv is a fraction with a FIXED 0-1 scale; the floors keep an idle box at the lowest bar
+# instead of magnifying noise (1 tok/s, 0.1 s).
+_SPARK_FIXED = {"k": 1.0}
+_SPARK_FLOOR = {"v": 1.0, "f": 0.1}
 
 
 def _norm_pt(p):
@@ -491,14 +507,13 @@ def sparkline(hist):
     if len(pts) < 2:
         return ""
     vals = [v for _, v, _ in pts]
-    lo, hi = min(vals), max(vals)
-    pad = (hi - lo) * 0.15 or abs(hi) * 0.15 or 1.0   # never peg bars to top/bottom
-    lo, hi = lo - pad, hi + pad
-    span = hi - lo
+    # Zero-anchored: height is proportional to the value, so a 0.3% drift stays flat and a
+    # doubling looks like one. The old min-max autoscale (+15% pad) drew both identically.
+    top = _SPARK_FIXED.get(key) or max(max(vals), _SPARK_FLOOR.get(key, 1e-9))
 
     def idx(v):
-        j = (v - lo) / span * (len(SPARK) - 1)     # span>0 by construction
-        return int(min(max(j, 0.0), len(SPARK) - 1) + 0.5)
+        j = max(v, 0.0) / top * (len(SPARK) - 1)
+        return int(min(j, len(SPARK) - 1) + 0.5)
 
     out = []
     for i, (_, v, pre) in enumerate(pts[:-1]):     # trail: muted, fades toward the left
@@ -528,14 +543,42 @@ def render_telemetry(sample, age, up, hist, sess_rate=None):
     return render_telemetry_fields(sample, stale=False, hist=hist, sess_rate=sess_rate)
 
 
+def serving_state(m):
+    """-> None (serving OK / unknown) | 'vLLM down' | 'LMCache down'.
+
+    The dot used to mean only "VictoriaMetrics answered", so a dead vLLM showed a green dot
+    over an idle-looking strip (review 2026-11-13, #13.1).
+      vLLM down    = its scrape reports up=0, or the up series is absent AND no vllm:* series
+                     came back (job missing entirely).
+      LMCache down = vLLM is running with the LMCache connector (only then does vLLM export
+                     vllm:lmcache_mp_lookup_duration_seconds) AND the lmcache scrape is up=0.
+                     Under native offload the lmcache job is permanently down by design, so
+                     it only counts when the connector is in use (#13 A+)."""
+    up_v = m.get("up:vllm")
+    has_vllm = any(k.startswith("vllm:") for k in m)
+    if up_v == 0 or (up_v is None and not has_vllm):
+        return "vLLM down"
+    if "vllm:lmcache_mp_lookup_duration_seconds_count" in m and m.get("up:lmcache") == 0:
+        return "LMCache down"
+    return None
+
+
 def render_telemetry_fields(m, stale, hist, sess_rate=None):
     dot = YELLOW if stale else GREEN
-    parts = [f"{dot}◉{RESET}"]
+    down = serving_state(m)
+    # Red text, not just a red dot: either failure stalls or fails DGX-lane requests
+    # (the LMCache connector waits on server lookups), so it must not read as "idle".
+    parts = [f"{RED}◉ {down}{RESET}" if down else f"{dot}◉{RESET}"]
 
     r = m.get("vllm:num_requests_running")
     if r is not None:
         q = m.get("vllm:num_requests_waiting", 0)
-        busy = (r and q) or m.get("dgx_preempt:rate5m", 0) > 0.01
+        # Yellow when ANYTHING waits (incl. r0·q>0 = stalled scheduler; was green until
+        # review 2026-11-13 #14.1, condition was `r and q`) or when ANY preemption happened
+        # in the last 5 min — the capacity contract's own failure signal (zero preemptions
+        # to pass; C2 failed on one). Was > 0.01/s = 3+ per 5 min (#14.2). Yellow, not red:
+        # "waiting" also holds requests briefly waiting for an LMCache load at admission.
+        busy = q > 0 or m.get("dgx_preempt:rate5m", 0) > 0
         parts.append(f"{YELLOW if busy else GREEN}r{r:.0f}·q{q:.0f}{RESET}")
 
     # KV gauge = blocks held by RUNNING requests (not occupancy; reads 85-96% in healthy
@@ -544,29 +587,57 @@ def render_telemetry_fields(m, stale, hist, sess_rate=None):
     # 100% at 14+. Yellow when > 5% (THRESHOLDS.md §8). Until 2026-11-12 this went yellow on
     # gauge > 80% and showed "+host" from kv_offload_cpu_cache_usage_perc, which is memory
     # pinned by in-flight transfers, not host-tier fill — both inconsistent with the dashboards.
-    kv = m.get("vllm:kv_cache_usage_perc", 0) * 100
-    host_share = m.get("dgx_kv:host_hit_share", 0) * 100
-    n = max(min(int(kv / 20), 3), 0)
-    parts.append(f"{YELLOW if host_share > 5 else CYAN}KV{'▰' * n}{'▱' * (3 - n)} {kv:.0f}%{RESET}"
-                 + (f"{DIM}↺host {host_share:.0f}%{RESET}" if host_share > 0.5 else ""))
+    # Review 2026-11-13 #15: hide when the series is missing (vLLM down/restarting used to
+    # render an invented "KV 0%"); 4 cells by CEILING quarters — 0% empty, 1-25 one cell,
+    # 26-50 two, 51-75 three, 76-100 four — so healthy busy operation (85-96%) is a steady
+    # full bar instead of flickering at a rounding boundary. "↺host" = native host offload
+    # OR LMCache L1 (vLLM credits both as external hits).
+    kv_raw = m.get("vllm:kv_cache_usage_perc")
+    hs_raw = m.get("dgx_kv:host_hit_share")
+    host_share = hs_raw * 100 if isinstance(hs_raw, (int, float)) else None
+    if isinstance(kv_raw, (int, float)):
+        kv = min(max(kv_raw * 100, 0.0), 100.0)
+        n = min(math.ceil(kv / 25), 4)
+        warn = host_share is not None and host_share > 5
+        parts.append(f"{YELLOW if warn else CYAN}KV{'▰' * n}{'▱' * (4 - n)} {kv:.0f}%{RESET}"
+                     + (f" {DIM}↺host {host_share:.0f}%{RESET}"
+                        if host_share is not None and host_share > 0.5 else ""))
 
-    rate = m.get("dgx_tokens:gen_rate5m")
+    # Two SEPARATE segments (owner decision 2026-11-14, review #16 follow-up): they measure
+    # different things in different units, so "mine/box" invited a false comparison.
+    #   »mine t/s  THIS session's last completed API call, output tokens / (trigger -> last
+    #              line), from the transcript — both lanes, prefill included; dimmed when the
+    #              reply was < 200 tokens (review #16).
+    #   ▣box t/s   the DGX box: every client's vLLM output tok/s over 1 MINUTE (same series the
+    #              sparkline beside it plots); 5-min rate only as a fallback.
+    rate = m.get("dgx_sl:gen_rate1m", m.get("dgx_tokens:gen_rate5m"))
+    # sess_rate = [rate, dim]; dim (reply < TURN_DIM_OUT tokens) renders grey: shown, but
+    # flagged as latency-dominated rather than throughput.
+    mine = ""
+    if isinstance(sess_rate, (list, tuple)) and sess_rate and isinstance(sess_rate[0], (int, float)):
+        dim = len(sess_rate) > 1 and bool(sess_rate[1])
+        mine = (f"{GREY}{sess_rate[0]:.0f}{RESET}" if dim
+                else f"{BOLD}{WHITE}{sess_rate[0]:.0f}{RESET}")
+    if mine:
+        parts.append(f"{GREY}»{RESET}{mine}{GREY}t/s{RESET}")
     if rate is not None:
-        # »mine/box t/s: this session's delivered-token rate over the box-wide 5-min
-        # average. Mine is delivered tokens (the exporter counts on stream close), so it
-        # can legitimately read 0 during one long uninterrupted generation.
-        if stale:
-            body = f"{GREY}»{rate:>3.0f}t/s{RESET}"
-        elif sess_rate is not None:
-            body = f"{BOLD}{WHITE}{sess_rate:>3.0f}{RESET}{GREY}/{rate:>3.0f}t/s{RESET}"
-        else:
-            body = f"{WHITE}»{rate:>3.0f}t/s{RESET}"
+        box = f"{GREY}▣{RESET}{GREY if stale else WHITE}{rate:.0f}{RESET}{GREY}t/s{RESET}"
         sp = "" if stale or not SPARK_ON else sparkline(hist)
-        parts.append((body + f" {sp}").rstrip())
+        parts.append((box + f" {sp}").rstrip())
 
+    # TTFT p95 over 30 min, box-wide (every DGX client incl. benchmarks and synthetic probes).
+    # Review #18: with < TTFT_MIN_N requests in the window the "p95" is the slowest request,
+    # so it renders dimmed as "max" and never triggers the yellow (> 8 s, THRESHOLDS §8b).
+    # Integer seconds from 10 s: buckets there are 20/40/80/160/640/2560 s, so decimals were
+    # interpolation, not precision. NaN (no data) hides the segment.
     ttft = m.get("dgx_ttft:p95_30m")
-    if ttft is not None:
-        parts.append(f"{YELLOW if ttft > 8 else GREY}◔{ttft:.1f}s{RESET}")
+    if isinstance(ttft, (int, float)) and not math.isnan(ttft):
+        n = m.get("dgx_sl:ttft_n30m")
+        val = f"{ttft:.0f}s" if ttft >= 10 else f"{ttft:.1f}s"
+        if isinstance(n, (int, float)) and n < TTFT_MIN_N:
+            parts.append(f"{GREY}◔max {val}{RESET}")
+        else:
+            parts.append(f"{YELLOW if ttft > 8 else GREY}◔{val}{RESET}")
 
     w = m.get("DCGM_FI_DEV_POWER_USAGE")
     if w is not None:
@@ -575,8 +646,15 @@ def render_telemetry_fields(m, stale, hist, sess_rate=None):
         # Color = whole-box wall estimate vs the 1,600 W system rating (80% / 95%, THRESHOLDS.md
         # §8); the number shown stays GPU watts. Until 2026-11-12 the 1,200/1,500 W cut-offs were
         # applied to GPU-only watts, the wrong quantity for a system rating.
+        # Review 2026-11-13 #19 (A+): "⚡<GPU>W·<wall>W" — the GPU number stays neutral and
+        # the whole-box wall estimate is shown next to it and carries the color, so the
+        # color is attached to the quantity it judges (a red ⚡900W used to mean the BOX,
+        # not the GPU, was over 1,520 W).
         wc = (RED if wall > 1520 else YELLOW if wall > 1280 else WHITE) if wall else WHITE
-        txt = f"{wc}⚡{w:.0f}W{RESET}" + (f"{GREY} {t:.0f}°{RESET}" if t is not None else "")
+        txt = f"{WHITE}⚡{w:.0f}W{RESET}"
+        if wall:
+            txt += f"{GREY}·{RESET}{wc}{wall:.0f}W{RESET}"
+        txt += (f"{GREY} {t:.0f}°{RESET}" if t is not None else "")
         if wall and rate_c:                                    # whole-box estimate × tariff
             cents = wall / 1000 * rate_c * 100
             txt += f"{GREY} {cents:.0f}¢/h{RESET}"
@@ -587,7 +665,14 @@ def render_telemetry_fields(m, stale, hist, sess_rate=None):
     last = m.get("dgx_llm_last_dgx_request_timestamp_seconds")
     if last and last > 0 and time.time() - last > IDLE_AFTER and (m.get("vllm:num_requests_running") or 0) < 1:
         idle_min = int((time.time() - last) // 60)
-        parts.append(f"{CYAN}☾ idle {idle_min}m{RESET}")
+        # 6m / 18h20m / 3d04h — minutes-only read "1100m" after a quiet day (review #20.1)
+        if idle_min >= 1440:
+            age = f"{idle_min // 1440}d{(idle_min % 1440) // 60:02d}h"
+        elif idle_min >= 60:
+            age = f"{idle_min // 60}h{idle_min % 60:02d}m"
+        else:
+            age = f"{idle_min}m"
+        parts.append(f"{CYAN}☾ idle {age}{RESET}")
     return parts
 
 # ------------------------------------------------------------- subagent panel row --------
@@ -600,6 +685,20 @@ def render_telemetry_fields(m, stale, hist, sess_rate=None):
 
 _SUB_GLYPH = {"running": ("»", YELLOW), "completed": ("✔", GREEN),
               "failed": ("✘", RED), "killed": ("◍", GREY)}
+
+
+def _fmt_lines(n):
+    """Line counts: exact below 10,000; whole thousands up to 1M ('184k'); then 1 decimal
+    ('1.2M'). Keeps row 1 narrow on big refactors (review 2026-11-13, #8.1)."""
+    try:
+        n = int(n)
+    except (TypeError, ValueError):
+        return "?"
+    if n >= 1_000_000:
+        return f"{n / 1e6:.1f}M"
+    if n >= 10_000:
+        return f"{n // 1000}k"
+    return str(n)
 
 
 def _fmt_tokens(n):
@@ -626,20 +725,27 @@ def render_subagent_rows(d):
 
         model = task.get("model")
         if model:
-            bits.append(f"{GREY}{model}{RESET}")
+            # Lane tag (review 2026-11-13 #21.4): same prefix rule as the main lane pill, so a
+            # Haiku subagent inside a DGX session shows it is served by Anthropic.
+            prefixes = [p.strip() for p in os.environ.get("LOCAL_MODEL_PREFIXES", "").split(",")
+                        if p.strip()]
+            lane = ""
+            if prefixes:
+                lane = (f"{CYAN}◨DGX{RESET} " if any(model.startswith(p) for p in prefixes)
+                        else f"{MAGENTA}◨ANTH{RESET} ")
+            bits.append(f"{lane}{GREY}{model}{RESET}")
         tok = task.get("tokenCount")
         if isinstance(tok, (int, float)) and tok > 0:
             bits.append(f"{CYAN}{_fmt_tokens(tok)} tok{RESET}")
-        # Context window of the subagent, as %, when CC reports both sizes.
-        cw = task.get("contextWindowSize")
+        st = task.get("status")
         start = task.get("startTime")
-        if isinstance(start, (int, float)) and start > 0:
+        # Elapsed clock ONLY while running: CC keeps finished rows in the panel and its
+        # contract (2.1.322) carries no end time, so a completed/failed row's clock used to
+        # keep counting up (review #21.2). (Dead contextUsedPercentage / unused
+        # contextWindowSize branches removed — neither is usable as sent, #21.3.)
+        if st == "running" and isinstance(start, (int, float)) and start > 0:
             secs = max(now_ms - start, 0) / 1000
             bits.append(f"{GREY}{int(secs // 60):02d}:{int(secs % 60):02d}{RESET}")
-        ctxp = task.get("contextUsedPercentage")            # not in docs today; future-proof
-        if isinstance(ctxp, (int, float)):
-            bits.append(f"{truecolor(heat(ctxp))}◍{ctxp:.0f}%{RESET}")
-        st = task.get("status")
         if st and st != "running":
             bits.append(f"{GREY}{st}{RESET}")
 
@@ -673,6 +779,45 @@ def main_subagent():
 _MIX_CACHE = "statusline-mix-%s.json"
 _READ_CAP = 524288          # max bytes of transcript parsed per refresh
 
+# Last-turn delivered rate (review 2026-11-13 #16), from the transcript, so it works on BOTH
+# lanes: output tokens of one API message / (its triggering user line -> its last line).
+# Includes prefill (the wait you actually experience). Replay 2026-11-13 (456 DGX-lane and
+# 193 Anthropic-lane messages; medians 81 / 85 tok/s):
+#   TURN_DIM_OUT 200 tokens: replies shorter than this are SHOWN but DIMMED — their time is
+#                mostly prefill/latency, not throughput. (They used to be skipped, which
+#                biased the shown value up 1.5-3% and left an older, faster turn on screen;
+#                owner decision 2026-11-13.)
+#   stale span:  span > TURN_STALE x out / TURN_FLOOR_TPS (effective < 3.75 tok/s) means the
+#                "trigger" line is not the real request (user stepped away, an approval prompt
+#                waited) — a measurement error, not slow service; skipped. 15 tok/s = the
+#                harness's per-agent decode floor, 4x = margin for slow prefill. Known edge: a
+#                very long prefill with a short reply (~85 s, 300 tokens) is skipped too.
+TURN_DIM_OUT = 200
+TURN_FLOOR_TPS = 15.0
+TURN_STALE = 4.0
+
+
+def _iso_ts(s):
+    """Transcript timestamp ('2026-11-13T20:18:04.123Z') -> unix seconds, or None."""
+    if not isinstance(s, str):
+        return None
+    try:
+        import datetime
+        return datetime.datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
+def _finish_turn(cur, lr):
+    """Close the current API message; return the new last-turn [rate, dim] (or keep lr).
+    dim = True when the reply was shorter than TURN_DIM_OUT (latency-dominated)."""
+    if not cur or cur.get("t0") is None:
+        return lr
+    out, span = cur.get("out") or 0, (cur.get("t1") or 0) - cur["t0"]
+    if out <= 0 or span <= 0 or span > TURN_STALE * out / TURN_FLOOR_TPS:
+        return lr
+    return [out / span, out < TURN_DIM_OUT]
+
 
 def _mix_counts(d):
     """Incrementally parse the transcript.
@@ -698,31 +843,84 @@ def _mix_counts(d):
     res, conv, think = c.get("res", 0), c.get("conv", 0), c.get("think", 0)
     tin, tout = c.get("tin", 0), c.get("tout", 0)
     c_wr, c_rd = c.get("c_wr", 0), c.get("c_rd", 0)
+    lr, lu, cur = c.get("lr"), c.get("lu"), c.get("cur")   # last-turn rate state (#16)
     need_reset = False
-    for key in ("tin", "c_wr"):                    # fields introduced post-launch
-        if key not in c and off > 0:
-            need_reset = True
+    for key in ("tin", "c_wr", "mixv5"):           # fields/semantics introduced post-launch
+        if key not in c and off > 0:               # (mixv5: compaction reset, usage dedup,
+            need_reset = True                      #  last-turn rate [rate, dim] — 2026-11-13)
+    # Usage dedup: CC writes ONE transcript line per content block of an API message and
+    # repeats the message's full usage on every line (93/106 messages split), so summing
+    # per line overcounted x2.91 (review #10.2). Count each message id once; ids of the
+    # same message are adjacent, a short memory of recent ids covers refresh boundaries.
+    recent_ids = list(c.get("ids", [])) if not (need_reset or size < off) else []
+    seen_ids = set(recent_ids)
     if need_reset or size < off:
         off, res, conv, think, tin, tout, c_wr, c_rd = 0, 0, 0, 0, 0, 0, 0, 0
+        lr = lu = cur = None
     if size == off:
-        return res, conv, think, tin, tout, c_wr, c_rd
+        return res, conv, think, tin, tout, c_wr, c_rd, lr
     try:
         with open(path, "rb") as fh:
             fh.seek(off)
             blob = fh.read(min(size - off, _READ_CAP))
+            # A single line longer than the cap (big tool results reach 1.36 MB; 28 of 200
+            # recent transcripts) used to yield no newline -> offset never advanced -> the
+            # parse froze for the rest of the session. Finish the line instead (review #6.5).
+            while b"\n" not in blob and off + len(blob) < size:
+                more = fh.read(_READ_CAP)
+                if not more:
+                    break
+                blob += more
     except OSError:
-        return res, conv, think, tin, tout, c_wr, c_rd
+        return res, conv, think, tin, tout, c_wr, c_rd, lr
     cut = blob.rfind(b"\n")                                    # complete lines only
     if cut < 0:
-        return res, conv, think, tin, tout, c_wr, c_rd
+        return res, conv, think, tin, tout, c_wr, c_rd, lr
     off += cut + 1
     for line in blob[:cut].splitlines():
         try:
             e = json.loads(line)
         except Exception:
             continue                                           # torn/partial line: skip
+        # Last-turn rate. A message's lines can be INTERLEAVED with tool_result user lines
+        # (CC runs a tool, then writes the message's next block), so turns are keyed on the
+        # message id: start = user line before its FIRST line, end = its LAST line. Close it
+        # on a newer message id, a system line (turn_duration / stop_hook_summary / compact)
+        # or a real user prompt — never on an interleaved tool_result.
+        typ, t_line = e.get("type"), _iso_ts(e.get("timestamp"))
+        if t_line is not None:
+            m_ = e.get("message") or {}
+            mid_ = m_.get("id")
+            if typ == "assistant" and mid_:
+                if cur and cur.get("id") == mid_:
+                    cur["t1"] = t_line
+                else:
+                    lr = _finish_turn(cur, lr)
+                    cur = {"id": mid_, "t0": lu, "t1": t_line,
+                           "out": (m_.get("usage") or {}).get("output_tokens") or 0}
+            elif typ == "user":
+                cont = m_.get("content")
+                if not (isinstance(cont, list) and any(
+                        isinstance(b, dict) and b.get("type") == "tool_result" for b in cont)):
+                    lr, cur = _finish_turn(cur, lr), None
+                lu = t_line
+            elif typ == "system":
+                lr, cur = _finish_turn(cur, lr), None
+        if e.get("type") == "system" and e.get("subtype") == "compact_boundary":
+            # Compaction APPENDS a boundary + summary; the file never shrinks. Everything
+            # before it left the context, so the composition buckets restart here. Session
+            # usage totals (tin/tout/c_wr/c_rd) are cumulative and deliberately NOT reset.
+            # (review 2026-11-13, #6.1: whole-file ▤17% ❙65% ◈18% vs real ▤4% ❙95% ◈1%)
+            res = conv = think = 0
+            continue
         msg = e.get("message") or {}
         u = msg.get("usage")
+        mid = msg.get("id")
+        if isinstance(u, dict) and mid and mid in seen_ids:
+            u = None                                           # same API call, already counted
+        elif isinstance(u, dict) and mid:
+            seen_ids.add(mid)
+            recent_ids.append(mid)
         if isinstance(u, dict):                                # true per-call usage
             _i = u.get("input_tokens") or 0
             _w = u.get("cache_creation_input_tokens") or 0
@@ -743,8 +941,15 @@ def _mix_counts(d):
             bt = blk.get("type")
             if bt == "tool_result":
                 inner = blk.get("content")
-                n = len(inner) if isinstance(inner, str) else \
-                    len(json.dumps(inner)) if inner is not None else 0
+                if isinstance(inner, str):
+                    n = len(inner)
+                elif isinstance(inner, list):
+                    # nested images (e.g. browser screenshots) count like top-level ones,
+                    # not as hundreds of KB of base64 JSON (review #6.3)
+                    n = sum(2000 if isinstance(it, dict) and it.get("type") == "image"
+                            else len(json.dumps(it)) for it in inner)
+                else:
+                    n = len(json.dumps(inner)) if inner is not None else 0
                 res += n
             elif bt == "text":
                 conv += len(blk.get("text") or "")
@@ -755,8 +960,9 @@ def _mix_counts(d):
             elif bt == "image":
                 res += 2000                                       # base64 estimate/blk
     save_cache(mcache, {"size": off, "res": res, "conv": conv, "think": think,
-                        "tin": tin, "tout": tout, "c_wr": c_wr, "c_rd": c_rd})
-    return res, conv, think, tin, tout, c_wr, c_rd
+                        "tin": tin, "tout": tout, "c_wr": c_wr, "c_rd": c_rd, "mixv5": 1,
+                        "ids": recent_ids[-256:], "lr": lr, "lu": lu, "cur": cur})
+    return res, conv, think, tin, tout, c_wr, c_rd, lr
 
 
 def mix_labels(counts):
@@ -814,27 +1020,24 @@ def main():
     cols = term_cols()
     rows = []
     cols = term_cols()
-    vm_cache = None
-    dgx_mtok = None
+    dgx_mtok = dgx_rate = None
     mix = _mix_counts(d)               # context composition (cheap incremental parse)
     sid = d.get("session_id") or "nosession"
     cache_path = os.path.join(CACHE_DIR, f"statusline-{sid}.json")
     d["rate_limits"] = effective_rl(cache_path, d.get("rate_limits"))  # smoothed plan state
     if rows_env >= 2:
-        sample, age, up, hist, sess_rate = get_sample(cache_path, sid[:8])
+        sample, age, up, hist = get_sample(cache_path)
         if isinstance(sample, dict):
-            h, q = (sample.get("vllm:prefix_cache_hits_total"),
-                    sample.get("vllm:prefix_cache_queries_total"))
-            if isinstance(h, (int, float)) and isinstance(q, (int, float)) and q > 0:
-                vm_cache = h / q
             dgx_mtok = sample.get("dgx_cost:dgx_usd_per_mtok")   # blended $/MTok at cost
             if not isinstance(dgx_mtok, (int, float)) or dgx_mtok <= 0:
                 dgx_mtok = None
+            dgx_rate = sample.get("dgx_tokens:rate_mtok_month")  # basis guard input
         if (rows_env > 2 or cols == 0 or cols >= NARROW_COLS):  # responsive: known-tight terminals drop row 2
+            last_turn = mix[7] if mix and len(mix) >= 8 else None   # transcript, both lanes
             rows.append(SEP.join(
-                render_telemetry(sample, age, up, hist if SPARK_ON else [], sess_rate)))
+                render_telemetry(sample, age, up, hist if SPARK_ON else [], last_turn)))
 
-    rows.insert(0, SEP.join(render_lane(d, vm_cache, mix, dgx_mtok)))
+    rows.insert(0, SEP.join(render_lane(d, mix, dgx_mtok, dgx_rate)))
 
     if cols > 0:
         rows = [trim_to_fit(r, cols) for r in rows]

@@ -3,6 +3,8 @@
 What every segment of the `claude-dgx` status line shows, where the number comes from,
 and how each behaves on the two serving lanes (DGX Flash vs Anthropic passthrough).
 Companion to the header comment in `../dgx_statusline.py`; this document is the long form.
+Every widget was re-reviewed on 2026-11-13 (findings, decisions and verification:
+`docs/STATUSLINE-REVIEW-2026-11-13.md`).
 
 ## How it runs
 
@@ -15,134 +17,92 @@ Companion to the header comment in `../dgx_statusline.py`; this document is the 
   /compact, on mode changes, plus every 4 s tick; debounced 300 ms, in-flight runs
   cancelled). We print up to two rows. Display requires exit 0 with stdout; stderr is
   invisible unless `claude --debug`. Every code path ends in output + exit 0.
-- The script is stateless between runs; all continuity lives in per-session cache
-  files `~/.cache/dgx-llm/statusline-<session_id>.json` (telemetry, sparkline history,
-  session-rate state) and `statusline-git-<dir>.json` (branch lookups, 5 s TTL).
-  Cache writes are atomic (`mkstemp` + `rename`).
-- DGX-side numbers come from **one** VictoriaMetrics instant query per refresh
-  (~25 ms on the LAN) spanning ~14 series; results older than `DGX_SL_TTL` (4 s) are
-  reused from cache instead of re-fetched. The query bypasses HTTP(S)_PROXY on
-  purpose: the launcher exports `HTTPS_PROXY` pointing at the local mitmproxy, and
-  metrics traffic must not traverse it.
+- The script is stateless between runs; continuity lives in per-session cache files under
+  `~/.cache/dgx-llm/`: `statusline-<session_id>.json` (telemetry sample, sparkline history,
+  smoothed plan limits), `statusline-mix-<session_id>.json` (incremental transcript parse:
+  composition, session token totals, last-turn rate) and `statusline-git-<hash>.json`
+  (branch lookups, 5 s TTL, keyed by a digest of the full path). Writes are atomic
+  (`mkstemp` + `rename`).
+- DGX-side numbers come from **one** VictoriaMetrics instant query per refresh (~25 ms on
+  the LAN), reused from cache for `DGX_SL_TTL` (4 s). The query is a `{__name__=~"…"}`
+  selector joined with `or` to `up{job=~"vllm|lmcache"}` and two inline series
+  (`dgx_sl:gen_rate1m`, `dgx_sl:ttft_n30m`). Inline series carry an extra `sl` label because
+  PromQL `or` matches label sets ignoring metric names — an unlabeled series would collide
+  with an unlabeled recording rule and be dropped. The query bypasses HTTP(S)_PROXY on
+  purpose: the launcher exports `HTTPS_PROXY` pointing at the local mitmproxy.
+- Session-scoped numbers (tokens, composition, last-turn rate) come from Claude Code's own
+  transcript (`transcript_path`), so they work identically on both lanes. Parsing is
+  incremental (only new complete lines; 512 KB per refresh, but a single longer line is
+  always finished — lines reach 1.36 MB), deduplicated by API message id (Claude Code
+  writes one line per content block and repeats the message's `usage` on every line).
 
 ## Row 1 — session & lane
 
-Rendered purely from Claude Code's stdin JSON (plus git).
-
-| Widget | Example | Measures | Source | DGX lane | ANTH lane |
+| Widget | Example | Measures | Source / rule | DGX lane | ANTH lane |
 |---|---|---|---|---|---|
-| Lane pill | `(details in table below)` | Which backend is serving this session's main model | stdin `model.id` compared against the launcher's `LOCAL_MODEL_PREFIXES` | Cyan pill `◨ DGX` | Magenta pill `◨ ANTH` |
-| Model | `Sonnet 5.5` | Display name of the session model | stdin `model.display_name` (falls back to `model.id`) | same | same |
-| Branch | `main` | Git branch of the workspace (short SHA when detached) | `.git/HEAD` walk-up, cached 5 s | same | same |
-| Project | `dgx-llm` | Basename of the project dir | stdin `workspace.project_dir` → `current_dir` → `cwd` | same | same |
-| Context thermometer | `▰▰▰▱▱▱▱▱▱▱ 43%/1.0M` | How full Claude Code believes the context window is | stdin `context_window.used_percentage` / `context_window_size` (see math below) | yes | yes |
-| Composition `▤❙◈` | `▤30% ❙50% ◈20%` | What the context is MADE OF, byte-proportional over the three movable buckets: **▤ tool results** (file reads, command output — usually the whale), **❙ conversation** (user + assistant text + tool-call payloads), **◈ thinking**. Glyph-tagged fixed-width percents, `<1%` for present-but-tiny buckets, zero-content buckets omitted. A proportional bar variant preceded this and was removed — percents alone are cleaner. | Incremental parse of the session transcript (stdin `transcript_path`); ~tokens/4 byte heuristic, the same one the ledger exporter uses. System prompt / tool definitions are not in the transcript file and are out of scope by construction. Byte-offset is cached, so each refresh parses only NEW complete lines (capped 512 KB/refresh — on very large transcripts the bar converges within ~5 refreshes; a transcript reset/shrink re-bases automatically). Colors: cyan / green / magenta. Identical on both lanes (it reads the local transcript either way) | yes | yes |
-| Cache hit `♻` | `♻ 93%` | Share of prompt tokens served from cache | **Lane-aware** (below) | vLLM prefix-cache ratio from VictoriaMetrics | stdin `prompt_cache.hit_ratio` |
-| Lines `▲▼` | `▲870/▼351` | Cumulative lines added/removed this session | stdin `cost.total_lines_added` / `total_lines_removed` | same | same |
-| Timer `⏱` | `⏱ 33m` | Wall-clock age of the session (shown after 1 min) | stdin `cost.total_duration_ms` | same | same |
-| Tokens `↑↓` | `↑1.4M ↓53k ⟳1.1M ✍906k` | Cumulative session usage. ↑ = input incl. cache-creation + cache-read (each turn re-sends the growing context — real billed-equivalent volume); ↓ = output. **⟳** = cache-READ tokens (0.1x priced — the cheap bulk), **✍** = cache-WRITE tokens (1.25x premium). Split renders only when the lane reports it (Anthropic does; vLLM's zero cache fields auto-hide it) | stdin `context_window.total_*_tokens` for ↑↓; split + fallback from our incremental transcript usage parse. Also feeds the ⛏ equivalence | yes | yes || Cumulative tokens this session: ↑ = input incl. cache-creation and cache-read (each turn re-sends the growing context, so ↑ grows super-linearly — that is real billed-equivalent volume); ↓ = output | stdin `context_window.total_input_tokens` / `total_output_tokens`; fallback = our incremental transcript parse (usage blocks). Also feeds the DGX ⛏ equivalence | yes | yes |
-| Cost `$` | `$2.10 ⛏0.09` | Session cost at Anthropic LIST prices (⚠ on the DGX lane this is what the same tokens would have cost at Anthropic, not what they cost here), plus **⛏** = owned-hardware cost of the same tokens on the **cash** basis (capital $123,108.28 over 36 months + power, ÷ measured MTok): `(↑+↓) × dgx_cost:dgx_usd_per_mtok / 1M`. The economic basis (15% cost of capital, `dgx_cost:dgx_usd_per_mtok_economic`, ~25% higher) is on Grafana. Color bands: grey < $1, white $1–5, yellow ≥ $5. Equivalence only on the DGX lane, sub-half-cent suppressed | stdin `cost.total_cost_usd`; ⛏ rate from VictoriaMetrics `dgx_cost:dgx_usd_per_mtok` (capex amortization + measured wall power ÷ measured MTok) | ⛪ shows ⛏ | $ only |
-| Limits `⛽🗓` | `5h78% ->1h23m 7d12%` | Consumption of the Anthropic PLAN windows: **5h** five-hour rolling, **7d** seven-day weekly. Plain-text labels deliberately (emoji ⛽🗓 render as huge colored glyphs in some terminals). Color bands: grey <70%, yellow 70–90, >90 red. Binding window (higher %) gets a `->MM:SS` refill countdown past 70%. Hidden when never reported (API-key sessions), stale >30 min, or rerouting ALL Claude models (bare 'claude' prefix) | stdin `rate_limits.five_hour` / `.seven_day` (`used_percentage`, `resets_at`), cached 30 min | yes | yes || Consumption of the Anthropic PLAN windows: ⛽ five-hour rolling, 🗺 seven-day weekly. Color bands per window: grey <70%, yellow 70–90, >90 red. The BINDING window (higher %) gains a live refill countdown past 70%. POLICY: shown on BOTH lanes (plan state, not lane state) and SMOOTHED —last-seen values persist 30 min so CC's intermittent reporting can't blink it. Hidden only when never reported (API-key/pay-per-token sessions), stale >30 min, or rerouting ALL Claude models to the DGX (LOCAL_MODEL_PREFIXES contains bare 'claude')| stdin `rate_limits.five_hour` / `.seven_day` (`used_percentage`, `resets_at`), cached 30 min | yes | yes || stdin `rate_limits.five_hour` / `.seven_day` (`used_percentage`, `resets_at`) | yes | yes |
-
-Lane-pill edge cases: empty `model.id` (before the first API call) renders a neutral
-grey `◨ ?` rather than guessing; an unknown env setup (no `LOCAL_MODEL_PREFIXES`)
-does the same. Badges flip live mid-session if you `/model opus` → `◨ ANTH`.
-
-### Context math, both lanes
-
-Claude Code computes `used_percentage` itself and we display it verbatim — we never
-recompute. Its numerator is input-only: `input_tokens + cache_creation_input_tokens +
-cache_read_input_tokens`; output tokens are excluded. Denominator is the model's
-declared window. Verified on both lanes:
-
-- **DGX lane:** since 2026-11-12 vLLM runs with `--enable-prompt-tokens-details`, so it
-  splits usage like Anthropic: `input_tokens` = uncached remainder, plus
-  `cache_read_input_tokens` / `cache_creation_input_tokens` (probe: one 25,018-token prompt
-  reported 7,866 + 17,152 written, then 7,866 + 17,152 read). The three-way sum still equals
-  true occupancy, and the `⟳ ✍` split now renders on the DGX lane too. (Before the flag: whole
-  prompt in `input_tokens`, cache fields absent — 3-pass probe 2632/2632/2632.) Note: vLLM
-  caches only whole 8,576-token blocks, so prompts under one block never show a hit. vLLM's
-  `--max-model-len 1048576` sits ~4.6% above Claude Code's 1M belief, so the estimate
-  errs slightly conservative — never a premature auto-compact.
-- **ANTH lane:** Anthropic splits usage (`input 2 + cache_creation 798 + cache_read
-  873548` on a real Opus turn); the three-way sum equals occupancy the same way.
-- Current Anthropic lineup is 1M-window across the board (Opus 5.5, Sonnet 5.5,
-  Fable 5.2, Haiku 5.5); only older Haiku 4.5 is 200K. The denominator shown
-  (`/1.0M`, `/200K`) mirrors whatever Claude Code reports, so nothing is hard-coded.
-- `used_percentage` is `null` before the session's first API response — the whole
-  thermometer is suppressed then, no `/0` / `nan` leaks.
-
-### Cache-hit ratio, why it is lane-aware
-
-CC's `prompt_cache.hit_ratio` is derived from the Anthropic usage fields. vLLM does
-not populate them (zeros), so on the DGX lane that figure would be a lying `♻ 0%`.
-Instead the DGX lane shows **vLLM's own** prefix-cache effectiveness:
-`vllm:prefix_cache_hits_total / vllm:prefix_cache_queries_total` (population across
-all requests; live at the time of writing: 50.5M/54.2M ≈ 93%). On the ANTH lane
-CC's figure is honest and used directly. Unknown lane → whichever data exists.
+| Lane pill | `◨ DGX` / `◨ ANTH` / `◨ ?` | Which backend serves this session's **main** model | stdin `model.id` starts with one of the launcher's `LOCAL_MODEL_PREFIXES` (same env, parsing and case-sensitive rule as `dgx_proxy.py`). Grey `?` before the first API call or when the env is unset. Exception: the proxy also sends a Sonnet request that declares an Anthropic server tool (web search/fetch, code execution) to Anthropic — the pill does not see that (0 occurrences in 9,927 requests, Nov 10–13). Background Haiku calls always go to Anthropic regardless | cyan | magenta |
+| Model | `Sonnet 5.5` | Claude Code's display name for the session model | stdin `model.display_name` → `model.id`. **On the DGX lane this is the alias Claude Code believes in, not the served model:** vLLM serves GLM-5.3 Flash (dealigned; experts NVFP4, rest BF16, KV FP8) as `claude-sonnet-5-5` (backlog RESUME TODO #29) | alias | accurate |
+| Branch | `⎇ main` | Git branch (short SHA when detached) | Walks up from `workspace.project_dir` — the directory Claude Code was **started** in, by design (a non-repo start dir such as `home-lab` shows no branch) — to the filesystem root; a directory counts only if its `.git` (dir or worktree pointer) holds `HEAD`. Cached 5 s | same | same |
+| Project | `home-lab` | Basename of the start directory | `project_dir` → `current_dir` → `cwd`, normalized (trailing slash ignored; root shows `/`). Equals the ledger/Grafana `project` label (launcher `basename "$PWD"`); a symlinked start dir may differ | same | same |
+| Context thermometer | `▰▰▰▰▱▱▱▱▱▱ 43%/1.0M` | How full Claude Code believes the context window is | stdin `context_window.used_percentage` verbatim (= (input + cache_creation + cache_read) ÷ window, output excluded — official docs) and `context_window_size`. 10 cells, halves round up. Number plain ≤ 50%, heat-colored above, **bold red from 85%**: Claude Code auto-compacts a native-1M model at ~967K (~96.7%), so 85% leaves ~117K tokens (~10 heavy turns) to compact or wrap deliberately | served-model tokens | Anthropic tokens |
+| Composition `▤❙◈` | `▤30% ❙50% ◈20%` | What the current context is made of, by bytes | Transcript: ▤ tool results, ❙ conversation (text + tool-call arguments), ◈ thinking text **as stored** (often empty — signature only — so ◈ is understated). **Restarts at every `compact_boundary`** (compaction appends; the file never shrinks). Images count 2,000 bytes, also inside tool results. System prompt and tool definitions are not in the transcript | same | same |
+| Cache hit `♻` | `♻ 96%` | Share of this session's input tokens served from cache | Claude Code's `prompt_cache.hit_ratio` on **both** lanes. On the DGX lane vLLM (`--enable-prompt-tokens-details`) reports per-request `cache_read_input_tokens` = GPU prefix-cache hits **+** LMCache/host-tier hits (`PrefillStats`), so this is the DGX's cache rate for your requests; only whole 8,576-token blocks hit. A session that switches lanes blends both. (Until 2026-11-13 the DGX lane showed vLLM's box-wide GPU-only ratio — ~0% under LMCache.) Box-wide view: Grafana vLLM panel 10 | DGX cache, this session | Anthropic cache |
+| Lines `▲▼` | `▲870/▼351`, `▲184k/▼97k` | Lines added/removed this session | stdin `cost.total_lines_added/removed`; exact below 10,000, then `k`, then `M` | same | same |
+| Timer `⏱` | `⏱ 33m`, `⏱ 1h15m` | Wall-clock age of the session, idle included | stdin `cost.total_duration_ms`; shown after 1 min | same | same |
+| Tokens | `↑33.2M ↓156k ⟳32.9M ✍308k` | **Session totals** of the main transcript | Each API message counted once: ↑ input + cache-creation + cache-read, ↓ output, ⟳ cache reads, ✍ cache writes. ✍ equals Claude Code's own `prompt_cache.cache_write_tokens` exactly (cross-check). Subagents write their own transcripts and are not included. (Claude Code's `context_window.total_*_tokens` are the **last** API response, not the session — not used here) | yes | yes |
+| Cost `$ ⛏` | `$2.10 ⛏0.09`, `$13.78 ⛏n/a` | `$` = Claude Code's list-price session cost; `⛏` (DGX lane only) = the same session tokens at the owned-hardware **cash** basis | `$`: stdin `cost.total_cost_usd` (client-side list price; includes subagents and background calls). Bands: grey < $1 (a short session), white $1–5, yellow ≥ $5 (about a long Opus session). `⛏` = (↑ + ↓) × `dgx_cost:dgx_usd_per_mtok` ÷ 1M, where the basis = monthly capital + power ÷ trailing-24 h DGX-lane token rate. **`⛏n/a` below 30.4 MTok/month** (1M DGX-lane tokens in 24 h): there is no representative utilization to divide by (a quiet day drove the basis to $3.47M/MTok; backlog TODO #30). At low utilization ⛏ ≫ $ is real: Anthropic bills cache reads at $0.10–0.20/MTok, the DGX's cash cost spreads over every processed token | `$` + `⛏` | `$` only |
+| Limits | `5h78% ->1h23m 7d12%`, `7d85% ->3d04h` | Anthropic plan windows (5-hour, 7-day) | stdin `rate_limits.{five_hour,seven_day}`; last-seen values kept 30 min so they don't blink, but a window whose `resets_at` has passed is dropped (as Claude Code does). Grey ≤ 70%, yellow > 70% (pace yourself / plan around the reset), red > 90% (throttling imminent). The binding window gets a countdown past 70%: `->Nm`, `->HhMMm`, or `->DdHHh` beyond a day. Hidden for API-key sessions or when all Claude models are rerouted (bare `claude` prefix) | yes | yes |
 
 ## Row 2 — GB300 telemetry strip
 
-All values from the single VictoriaMetrics query against the DGX (`192.0.2.10`),
-via recording rules maintained by vmalert, the vLLM exporter, DCGM and the ledger
-exporter. Numbers describe the whole box (every session), except the session rate.
+The whole box (every client, incl. benchmarks), except `»mine`. Identical on both lanes —
+while you work on `◨ ANTH`, the strip keeps showing what the Flash box is doing.
 
-| Widget | Example | Measures | Underlying series / derivation |
+| Widget | Example | Measures | Source / rule |
 |---|---|---|---|
-| Health dot | `◉` green / yellow / `◌` red | Freshness of DGX data; degradation ladder | Green: last good sample < 15 s old. Yellow: showing last-known values, tagged `(~Ns old)`. Red `◌ DGX ?`: nothing known for > 300 s or ever |
-| Queue | `r2·q0` | Requests running on vLLM · queued waiting | `vllm:num_requests_running`, `vllm:num_requests_waiting`; turns yellow when queue > 0 or `dgx_preempt:rate5m` > 0.01 (preemption thrash) |
-| KV gauge | `KV▰▰▱ 92% ↺host 80%` | GPU KV blocks held by **running** requests (not occupancy) and, when nonzero, the **share of reused history served from the host tier** | `vllm:kv_cache_usage_perc`; `dgx_kv:host_hit_share`. **Yellow when host share > 5%** = agents' history no longer fits on the GPU (0% ≤ 12 agents, 80% at 13). *Changed 2026-11-12:* was yellow at gauge > 80% (reads 85–96% in healthy operation) and showed `+host` from `kv_offload_cpu_cache_usage_perc`, which is transfer-pinned memory, not host-tier fill — both inconsistent with the dashboards |
-| Throughput | `»174/116t/s` + sparkline | **Mine / box** tokens-per-second | Mine: per-session delta of the exporter's `dgx_llm_session_tokens_out` counter, EMA(α=0.5) between refreshes; **hard 0 once the counter has been stationary > 15 s** (idleness is tracked directly, so no EMA ghosts linger while the session idles — across sleep/wake, TTL hits and VM outages alike); counted when a stream CLOSES, so it can read 0 mid-generation. Box: `dgx_tokens:gen_rate5m` = `sum(rate(vllm:generation_tokens_total[5m]))`, all sessions, 5-min rolling — stays nonzero while OTHER sessions generate, by design |
-| Sparkline | `▂▃▅▇` | Selected trace history | Default `rate` (box tok/s). **Multi-trace**: `DGX_SL_TRACE` picks the signal — `rate` box tok/s, `kv` GPU KV fraction (pressure trend, predictive), `ttft` latency p95, `mine` this session's delivered rate. Every signal is recorded per sample regardless of which is displayed, so you can switch traces without losing history. Cells sampled while preemptions were active flash amber in any trace. Last ≤12 samples ≤ 90 s old (≥ 2 s apart), 15% range padding so flat periods stay legible; trail fades left, head brightest. History persists in the session cache and only appends REAL observations — a missing series never fabricates a 0 |
-| Latency | `◔2.2s` | TTFT p95 over 30 min, all requests | `dgx_ttft:p95_30m` = `histogram_quantile(0.95, sum(rate(vllm:time_to_first_token_seconds_bucket[30m])))`; yellow > 8 s |
-| Power | `⚡627W 52° 34¢/h` | GB300 GPU power draw, temperature, and electricity cost | `DCGM_FI_DEV_POWER_USAGE`, `DCGM_FI_DEV_GPU_TEMP`; ¢/h = whole-box wall estimate (`dgx_power:est_wall_watts` /1000 × `dgx_power:rate_usd_per_kWh` × 100). Color = whole-box wall estimate vs the 1,600 W system rating: yellow > 80% (1,280 W), red > 95% (1,520 W); the number shown stays GPU watts (*changed 2026-11-12* from 1,200/1,500 W applied to GPU-only watts) |
-| Idle | `☾ idle 12m` | Minutes since any Claude Code session last sent a request to the DGX lane | `now − dgx_llm_last_dgx_request_timestamp_seconds` (newest `dgx_request` ledger event, all sessions); shown when > 5 min AND `num_requests_running` < 1. Lane-specific since 2026-11-11: the previous any-event timestamp counted Opus/Haiku passthrough too, so Anthropic traffic hid a truly idle DGX. Traffic that bypasses the proxy (benchmarks, synthetic probes) is not in the ledger; the running<1 gate keeps the marker off while it runs |
+| Health dot | `◉` / `◉ vLLM down` / `◉ LMCache down` / `◌ DGX ?` | Metrics fresh **and** serving up | Green: VM sample < 15 s old and serving healthy. Yellow `◉ … (~Ns old)`: last-known values up to 5 min. **Red `◉ vLLM down`**: `up{job="vllm"}` = 0, or no vLLM series at all. **Red `◉ LMCache down`**: vLLM runs the LMCache connector (`vllm:lmcache_mp_lookup_duration_seconds` present) and `up{job="lmcache"}` = 0 — not raised under native offload, where that job is down by design. Red `◌ DGX ?`: nothing known for > 5 min |
+| Queue | `r2·q0` | vLLM requests running · waiting | Yellow when **anything waits** (`q > 0`, incl. `r0·q>0` = stalled scheduler) or **any** preemption in the last 5 min (`dgx_preempt:rate5m > 0`) — the capacity contract fails on a single preemption. Yellow, not red: "waiting" also holds requests briefly loading from LMCache at admission |
+| KV gauge | `KV▰▰▰▰ 92% ↺host 80%` | GPU KV blocks held by **running** requests (not occupancy) and, when > 0.5%, the share of reused history served from the host tier | `vllm:kv_cache_usage_perc` — **hidden when missing** (no invented 0%). 4 cells by ceiling quarters: 0% empty, 1–25 / 26–50 / 51–75 / 76–100 → 1–4 cells (healthy busy operation, 85–96%, is a steady full bar). `↺host` = `dgx_kv:host_hit_share` (host tier = native offload **or** LMCache L1; vLLM credits both as external hits). Yellow when host share > 5% (THRESHOLDS §8b: measured cliff 0% ≤ 12 agents, 80% at 13; measured under native offload — re-validate from C4) |
+| Throughput | `»113t/s` · `▣120t/s` | Two separate numbers (owner decision 2026-11-14): **»** = your speed, **▣** = the DGX box | **»mine** = this session's **last completed API call**, output tokens ÷ (triggering line → its last line), from the transcript — **both lanes**, prefill included. Replies < 200 tokens are shown **dimmed** (latency-dominated). Spans longer than 4 × out/15 (effective < 3.75 tok/s) are skipped as measurement errors (the trigger line is not the real request); the previous value stays. Known edge: a very long prefill with a short reply is skipped too. Replay 2026-11-13: DGX median 81 / p95 114, Anthropic median 85 / p95 115 tok/s. **▣box** = every DGX client's vLLM output tok/s over **1 minute** (`sum(rate(vllm:generation_tokens_total[1m]))`, the series the sparkline plots; 5-min `dgx_tokens:gen_rate5m` as fallback), benchmarks and probes included. They are **not comparable**: one stream vs the sum of all streams — `»121` beside `▣12` (fast stream, idle box) and `»27` beside `▣350` (13 busy agents) are both normal; on the Anthropic lane they are unrelated |
+| Sparkline | `▅▅▆▆▇▇██` (after `▣`) | History of one DGX box signal (both lanes) | `DGX_SL_TRACE`: `rate` (default, box tok/s over **1 minute**), `kv` (GPU KV fraction, fixed 0–100% scale), `ttft` (p95). **Zero-anchored**: height ∝ value ÷ window max (floors 1 tok/s, 0.1 s), so a 0.3% drift stays flat and a doubling looks like one. Last ≤ 12 samples ≥ 2 s apart — about 48 s at the 4 s fetch. Amber cells = any preemption in the last 5 min. Real observations only; hidden on the stale path. A session-following `turns` trace is backlog TODO #31 |
+| Latency | `◔2.2s`, `◔116s`, `◔max 0.1s` | TTFT p95 over 30 min, all requests (incl. benchmarks and synthetic probes) | `dgx_ttft:p95_30m`. With **fewer than 20 requests** in the window the "p95" is the slowest request, so it shows dimmed as `◔max …` and never turns yellow. Yellow > 8 s otherwise (THRESHOLDS §8b). Integer seconds from 10 s (buckets there are 20/40/80/160/640/2560 s). NaN hides it |
+| Power | `⚡207W·349W 36° 4¢/h` | GPU watts · whole-box wall estimate · GPU temperature · cost per hour | `⚡207W` = GB300 (`DCGM_FI_DEV_POWER_USAGE`, neutral). `·349W` = `dgx_power:est_wall_watts` = (GB300 + Grace socket) × 1.25 fill factor (fans/NVMe/BMC unmeasured; CPU and SysIO are sub-rails of Grace, not added) — **this number carries the color**: yellow > 1,280 W, red > 1,520 W (80% / 95% of the 1,600 W rating, THRESHOLDS §8b). `36°` = `DCGM_FI_DEV_GPU_TEMP` (no threshold: DCGM exports no slowdown limit). `¢/h` = wall ÷ 1000 × `dgx_power:rate_usd_per_kwh` (local utility $0.12, $0.14 Jun–Sep; ECONOMICS-BRIEF) |
+| Idle | `☾ idle 6m`, `☾ idle 18h20m`, `☾ idle 3d04h` | Time since any Claude Code session last sent a request to the DGX lane | `now − dgx_llm_last_dgx_request_timestamp_seconds`; shown when > 5 min (longer than a normal think/tool gap — a judgment call meaning "nobody is actively using the DGX lane") **and** nothing runs on vLLM. Benchmarks bypass the proxy, so they don't reset it |
 
-### Lane behavior on row 2
+## Agent-panel subagent rows (`--subagent`)
 
-Identical data on both lanes — it is DGX telemetry either way, and that's the point:
-while you work in an `◨ ANTH` stretch (Opus subagents etc.), the strip keeps telling
-you what the Flash box is doing for your other sessions. Differences are minor: the
-session-rate figure (`mine`) can only match on the DGX lane if the session_id matches
-an exporter-tracked session (it normally does for claude-dgx sessions); on unknown
-IDs only the box rate renders. On the stale path the sparkline is dropped and the
-rate renders grey.
+The launcher also passes `subagentStatusLine` (same script, `--subagent`), which rewrites
+the row bodies in Claude Code's agent panel.
 
-## Agent-panel subagent rows (--subagent)
+**Version note:** this works in Claude Code **≤ 2.1.322** (all sessions running on
+2026-11-14). **2.1.323 removed it** — its schema reads "Deprecated: no longer has any
+effect. Subagent rows always use the default look", and the runtime caller is gone. Sessions
+started on 2.1.323 show default rows; the setting is then inert (RESUME TODO #32). The
+contract is not in the public docs; it was read from the 2.1.322 bundle.
 
-The launcher also passes a `subagentStatusLine` (same script, `--subagent`), which
-rewrites the row bodies in Claude Code's **agent panel** — the rows you see while
-Agent/Task subagents run. Contract (docs, 2026-11-11): stdin = one JSON with `columns`
-and a `tasks[]` array covering every visible row; output = one JSON line per row,
-`{"id": "<task id>", "content": "<body>"}`; a row we skip keeps CC's default body
-(`name · description · tokens`).
-
-Each rendered row:
+Contract (2.1.322): stdin = session fields + `columns` + `tasks[]`, each with `id, name, type,
+agentType, status, description, label` (live progress summary, else description), `startTime`
+(ms), `model, effort, contextWindowSize, tokenCount, tokenSamples` (last 16) and `cwd`. No end
+time; finished rows stay in the panel for a while. Output = one `{"id": …, "content": …}` JSON
+line per row; omitted rows keep the default body; 5 s timeout; a non-zero exit drops all
+custom rows; skipped before workspace trust.
 
 | Element | Example | Source |
 |---|---|---|
-| Status glyph | `»` running (yellow) · `✔` completed (green) · `✘` failed (red) · `◍` killed/unknown (grey) | `tasks[].status` |
-| Name | `fix-auth-bug` | `name` → `label` → `description` → `agentType` fallback chain |
-| Model | `Sonnet 5.5` | `tasks[].model` (when CC reports it) |
-| Tokens | `12.4k tok` | `tasks[].tokenCount` |
-| Wall clock | `02:11` | `now − startTime` (mm:ss, running) |
-| Status text | `failed` | shown only for non-running rows |
-
-Rows for which CC supplies no id (shouldn't happen) are skipped defensively; malformed
-stdin emits nothing rather than crashing (same exit-0 discipline as the main line).
-Note: the main line's `agent.name` stdin field is *not* set by Agent/Task subagent
-runs — it is only for `--agent` sessions — which is why subagent awareness lives in
-this separate setting rather than in row 1.
+| Status glyph + name | `» fix-auth` | `status` (`»` running, `✔` completed, `✘` failed, `◍` other) and `name` → `label` → `description` → `agentType` |
+| Lane + model | `◨DGX claude-sonnet-5-5` | `model`, tagged with the same prefix rule as the main lane pill |
+| Tokens | `12.4k tok` | `tokenCount` |
+| Elapsed | `02:11` | `now − startTime`, **running rows only** (no end time is sent) |
+| Status text | `completed` | non-running rows |
 
 ## Both-lane support matrix
 
 | Concern | DGX lane | ANTH lane |
 |---|---|---|
-| Numerator correctness | ✅ full prompt in `input_tokens` (probe-verified) | ✅ split-fields sum |
-| Denominator | CC's 1M belief (vLLM allows 4.6% more) | CC's 1M (200K for Haiku 4.5) |
-| `♻` cache ratio source | vLLM counters (VM) | CC `prompt_cache` |
-| Fires ⛽ rate-limit gauge | only if stdin includes it | same |
-| Session rate `»mine` | ✅ when session tracked by ledger | usually absent (not DGX-bound) |
+| Context numerator | served-model tokens from vLLM usage | Anthropic usage |
+| `♻` cache ratio | CC `prompt_cache` (vLLM GPU + LMCache hits) | CC `prompt_cache` |
+| Tokens, composition, last-turn rate | transcript | transcript |
+| `⛏` owned-hardware cost | yes (n/a below the utilization floor) | — |
 | Telemetry strip | live DGX | live DGX (unchanged) |
 
 ## Tunables
@@ -151,11 +111,12 @@ this separate setting rather than in row 1.
 |---|---|---|
 | `DGX_SL_VM_URL` | `http://192.0.2.10:8428` | VictoriaMetrics base URL |
 | `DGX_SL_TTL` | `4` | Seconds between real VM fetches (match refreshInterval) |
-| `DGX_SL_ROWS` | `2` | 1 = lane row only; >2 = force row 2 even on narrow terminals |
-| `DGX_SL_SPARK` | `1` | `0` disables the throughput sparkline |
+| `DGX_SL_ROWS` | `2` | 1 = row 1 only; > 2 = force row 2 even on narrow terminals (< 72 cols drops it) |
+| `DGX_SL_SPARK` | `1` | `0` disables the sparkline |
+| `DGX_SL_TRACE` | `rate` | Sparkline signal: `rate`, `kv`, `ttft` (`mine` retired → `rate`) |
 | `DGX_SL_GIT` | `1` | `0` disables the git branch segment |
 
-Launcher side: `DGX_STATUSLINE=0` omits the statusLine setting entirely.
+Launcher side: `DGX_STATUSLINE=0` omits both settings entirely.
 
 ## Troubleshooting
 
@@ -164,11 +125,13 @@ Launcher side: `DGX_STATUSLINE=0` omits the statusLine setting entirely.
 - **Nothing until trust:** the workspace-trust dialog must be accepted first; CC
   skips the status line before that (`Status line command skipped: workspace trust
   not accepted` under --debug).
-- **`◌ DGX ?` for a while:** the DGX or its VM is unreachable from the laptop, or the
-  `ssh -R` tunnel for the ledger exporter is down. Check `launchctl list | grep dgx`
-  and `curl http://192.0.2.10:8428/api/v1/query?query=up` from the laptop.
-- **`💤` stuck on / absurd age:** the ledger exporter froze — pre-2026-11-11 builds
-  only rebuilt on `?rebuild=1`; current code rescans when the ledger grows. Restart
-  with `launchctl kickstart -k gui/$(id -u)/io.hylo.ledger-exporter`.
-- **Reset per-session telemetry (sparkline/rates):** delete
-  `~/.cache/dgx-llm/statusline-<session_id prefix>*.json`.
+- **`◌ DGX ?` for a while:** the DGX or its VM is unreachable from the laptop. Check
+  `curl --noproxy '*' http://192.0.2.10:8428/api/v1/query?query=up`.
+- **`◉ vLLM down` / `◉ LMCache down`:** the named scrape target is down — check
+  `sudo docker ps` on the DGX before assuming the status line is wrong.
+- **`☾ idle` stuck on / absurd age:** the ledger exporter froze or its `ssh -R` tunnel is
+  down. Check `launchctl list | grep dgx`; restart with
+  `launchctl kickstart -k gui/$(id -u)/io.hylo.ledger-exporter`.
+- **Agent-panel rows look default:** the session runs Claude Code ≥ 2.1.323 (see the
+  version note above).
+- **Reset per-session state:** delete `~/.cache/dgx-llm/statusline-*<session_id prefix>*.json`.
