@@ -22,12 +22,16 @@ traces_to: STATE.md
 
 | Pass | Date | Total (deep rounds) | CRIT | HIGH | MED | LOW | Novelty | Score | Counter | Verdict |
 |------|------|---------------------|------|------|-----|-----|---------|-------|---------|---------|
+| 0 (deep inventory) | 2026-11-14 | 3 (r1-r3) | — | — | — | — | decayed to NITPICK | — | — | CONVERGED (r3 NITPICK) |
+| 1 (deep architecture) | 2026-11-14 | 3 (r1-r3) | — | — | — | — | decayed to NITPICK | — | — | CONVERGED (r3 NITPICK) |
 | 2 (deep domain) | 2026-11-14 | 9 (r1-r9) | — | — | — | — | decayed to NITPICK | — | — | CONVERGED (r9 NITPICK) |
 | 3 (deep behavioral contracts) | 2026-11-14 | 8 (r1-r8) | — | — | — | — | decayed to NITPICK | — | — | CONVERGED (r8 NITPICK) |
+| 4 (deep NFR/thresholds) | 2026-11-14 | 7 (r1-r7) | — | — | — | — | decayed to NITPICK | — | — | CONVERGED (r7 NITPICK) |
+| 5 (deep conventions) | 2026-11-14 | 5 (r1-r5) | — | — | — | — | decayed to NITPICK | — | — | CONVERGED (r5 NITPICK) |
 
 ## Trajectory Shorthand
 
-`9→NITPICK` (pass 2); `8→NITPICK` (pass 3) — qualitative deepening series; the →0→0→0→0 formal finding-series placeholder in STATE.md is retained until the first tally-based adversary pass.
+`3→NITPICK` (pass 0); `3→NITPICK` (pass 1); `9→NITPICK` (pass 2); `8→NITPICK` (pass 3); `7→NITPICK` (pass 4); `5→NITPICK` (pass 5) — qualitative deepening series; the →0→0→0→0 formal finding-series placeholder in STATE.md is retained until the first tally-based adversary pass. Deepening order was 2, 3, then 0, 1, 4, 5; the table is sorted by pass number.
 
 ## Per-Pass Details
 
@@ -51,6 +55,43 @@ Statement partition contribution: of the 1,809 Python statements, 903 re-read an
 **Canonical artifact:** pass-3 r4 canonical BC index, amended by r5-r8 — `semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md`
 
 Index totals at convergence: 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 out of scope + 6 approved deviation + 35 pending owner decision. Retraction ledger: RET crosswalk in pass-3 r4; CONV-ABS 12-28; next free CONV-ABS 29.
+
+---
+
+### Pass 0 — deep inventory (2026-11-14)
+
+**Rounds:** 3 (SUBSTANTIVE r1-r2, NITPICK r3)
+**Novelty:** decayed to NITPICK
+**Verdict:** CONVERGED (declaration on disk: "Rounds: r1 SUBSTANTIVE, r2 SUBSTANTIVE, r3 NITPICK")
+**Canonical artifact:** r3 §2 — `semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory-r3.md`
+
+---
+
+### Pass 1 — deep architecture (2026-11-14)
+
+**Rounds:** 3 (SUBSTANTIVE r1-r2, NITPICK r3)
+**Novelty:** decayed to NITPICK
+**Verdict:** CONVERGED (declaration on disk: "Rounds: r1 SUBSTANTIVE, r2 SUBSTANTIVE, r3 NITPICK")
+**Canonical artifact:** r3 §B, including two Mermaid diagrams — `semport/hylo-legacy/hylo-legacy-pass-1-deep-architecture-r3.md`
+
+---
+
+### Pass 4 — deep NFR/thresholds (2026-11-14)
+
+**Rounds:** 7 (SUBSTANTIVE r1-r6, NITPICK r7)
+**Novelty:** decayed to NITPICK
+**Verdict:** CONVERGED
+**Override note:** the orchestrator overrode r4's self-declared NITPICK — r4 contained retractions and relied on a retracted HTTP/2 fact, so it was treated as SUBSTANTIVE.
+**Canonical artifact:** r7 final catalogue — `semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md` (147 thresholds; 120 rationales resolved; OD-57: 18 bulk-confirm + 27 owner-rationale in 7 groups; OD-94 fact sheet carrying the Go 1.26.5 h2 facts).
+
+---
+
+### Pass 5 — deep conventions/env/determinism/pitfalls (2026-11-14)
+
+**Rounds:** 5 (SUBSTANTIVE r1-r4, NITPICK r5)
+**Novelty:** decayed to NITPICK
+**Verdict:** CONVERGED
+**Canonical artifact:** r3 consolidated, amended by r4-r5 — `semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md` (43 explicit + 21 implicit env inputs; 54 determinism rows + 6 Go-side pins; 19 conventions; 22 pitfalls).
 
 ---
 

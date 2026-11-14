@@ -4,7 +4,7 @@ level: ops
 version: "2.0"
 status: draft
 producer: state-manager
-timestamp: 2026-11-14T08:15:46Z
+timestamp: 2026-11-14T09:52:35Z
 last_amended: 2026-11-14
 phase: 0
 pipeline: IN_PROGRESS
@@ -14,14 +14,14 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "phase-0 convergence-deepening — broad-sweep passes 2 and 3 CONVERGED (9 and 8 deep rounds, novelty decayed to NITPICK); next: deepen passes 0, 1, 4, 5 (at least 2 rounds each), then coverage-audit, final-synthesis, input-hash drift check, owner approval gate; D-chain cite D-446 latest brownfield; owner rulings 2026-11-14 recorded (D16/D15 on main, OD-24/OD-27 ruled); trajectory-tail →0→0→0→0"
+current_step: "phase-0 convergence-deepening COMPLETE — all six passes converged (rounds: pass 0 = 3, pass 1 = 3, pass 2 = 9, pass 3 = 8, pass 4 = 7, pass 5 = 5; every pass ended on a NITPICK round); next: coverage-audit → extraction-validation → final-synthesis → input-hash drift check → owner approval gate; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 dtu_required: false
 ---
 
 <!--
   STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation):
-  Soft target: ≤200 lines; actual 161 lines (wc-l) at phase-0 convergence-deepening burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 161 = 339 (D-446(c) dual-margin form).
+  Soft target: <=200 lines; actual 170 lines (wc-l) at phase-0 convergence-deepening completion burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 170 = 330 (D-446(c) dual-margin form).
   Hard cap: 500 lines (validate-state-md-size hook enforcement).
   Historical content belongs in cycle files, NOT here.
 -->
@@ -38,7 +38,7 @@ dtu_required: false
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-14 — phase-0 convergence-deepening burst: pass 2 (9 rounds) and pass 3 (8 rounds) CONVERGED at NITPICK; 232-BC canonical index; OD-01..OD-45 list + owner rulings recorded; captures done. Next: deepen passes 0, 1, 4, 5. trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-14 — Phase 0 convergence-deepening COMPLETE: all six passes converged (0:3, 1:3, 2:9, 3:8, 4:7, 5:5 rounds). Canonical Phase 1 inputs pointer-tabled; OD-01..OD-94 registered. Next: coverage-audit → extraction-validation → final-synthesis → input-hash drift check → owner approval gate; trajectory-tail →0→0→0→0 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-20)
 
@@ -55,30 +55,38 @@ dtu_required: false
 | Phase | Status | Notes |
 |-------|--------|-------|
 | pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (5007a34) |
-| Phase 0 brownfield ingestion of `legacy/` | **IN_PROGRESS** — broad sweep passes 0-6 DONE; extraction validation PASS-WITH-FIXES; convergence-deepening: passes 2 and 3 CONVERGED | Canonical index: 232 BCs (137 byte-exact, 44 JSON-equivalent, 10 out of scope, 6 approved deviation, 35 pending owner decision). Remaining: deepen passes 0, 1, 4, 5 (≥2 rounds each), coverage-audit, final-synthesis, input-hash drift check, owner approval gate |
+| Phase 0 brownfield ingestion of `legacy/` | **IN_PROGRESS** — broad sweep passes 0-6 DONE; extraction validation PASS-WITH-FIXES; **convergence-deepening COMPLETE (all six passes)** | Remaining: coverage-audit → extraction-validation (final) → final-synthesis → input-hash drift check → owner approval gate |
 | Phases 1-7 (spec crystallization .. convergence) | PENDING | gated on Phase 0 owner approval |
-| Adversary passes (Phase 0) | **CONVERGENCE-DEEPENING ACTIVE** — pass 2: 9 rounds (SUBSTANTIVE r1-r8, NITPICK r9); pass 3: 8 rounds (SUBSTANTIVE r1-r7, NITPICK r8; r7 self-declared NITPICK overridden — crash path H-09, retraction CONV-ABS-22) | round record in cycles/phase-0-ingestion/convergence-trajectory.md; trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
+| Adversary passes (Phase 0) | **ALL SIX CONVERGED** — p0: 3 rounds (NITPICK r3); p1: 3 (NITPICK r3); p2: 9 (NITPICK r9); p3: 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22); p4: 7 (NITPICK r7; r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact); p5: 5 (NITPICK r5) | round record in cycles/phase-0-ingestion/convergence-trajectory.md; trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
 | Fix bursts (Phase 0) | **NONE** — no fix burst required yet; extraction-validation fixes were applied in-burst during the sweep | narrative in cycles/phase-0-ingestion/burst-log.md |
 
 ## Current Phase Steps (last 5)
 
 | # | Step | Outcome |
 |---|------|---------|
-| 2 | research: 4 reports + RESEARCH-INDEX verification (one row per report) | COMPLETE |
 | 3 | semport broad sweep passes 0-6 over `legacy/` | COMPLETE |
 | 4 | extraction validation (exhaustive; 0 hallucinations) | PASS-WITH-FIXES |
 | 5 | grounding burst: STATE.md + policies.yaml + cycle dir committed on factory-artifacts | COMPLETE |
 | 6 | convergence-deepening: pass 2 (9 rounds) + pass 3 (8 rounds) | CONVERGED (NITPICK) |
+| 7 | convergence-deepening: passes 0, 1, 4, 5 (3/3/7/5 rounds) — all six passes converged | CONVERGED (NITPICK) |
 
 ## Convergence Status
 
-- Broad-sweep pass 2 (deep domain): **CONVERGED** at deep round r9 — SUBSTANTIVE r1-r8, NITPICK r9. Canonical artifact: pass-2 r8 §7 combined pointer table, amended by r9 (`semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r8.md`).
-- Broad-sweep pass 3 (deep behavioral contracts): **CONVERGED** at deep round r8 — SUBSTANTIVE r1-r7, NITPICK r8. The orchestrator overrode r7's self-declared NITPICK: new crash path H-09 and retraction CONV-ABS-22 were substantive. Canonical artifact: pass-3 r4 canonical BC index, amended by r5-r8 (`semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md`).
-- BC index totals: 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 out of scope + 6 approved deviation + 35 pending owner decision.
-- Statement partition (1,809 Python statements): 903 re-read + 422 covered by pinned tables + 133 out of scope + 351 read in r8 = 1,809; 0 uncovered.
-- Retractions: RET crosswalk (pass-3 r4) plus CONV-ABS 12-28; next free CONV-ABS 29.
-- Extraction validation (validate-extraction, not a deepening round): PASS-WITH-FIXES; exhaustive; 0 hallucinations.
-- Trajectory-tail (D-433(e) LENGTH=4): →0→0→0→0 — placeholder retained until the formal per-pass finding series begins.
+- **All six passes CONVERGED.** Rounds: pass 0 — 3 (SUBSTANTIVE r1-r2, NITPICK r3); pass 1 — 3 (SUBSTANTIVE r1-r2, NITPICK r3); pass 2 — 9 (SUBSTANTIVE r1-r8, NITPICK r9); pass 3 — 8 (SUBSTANTIVE r1-r7, NITPICK r8; r7 self-declared NITPICK overridden by the orchestrator — new crash path H-09, retraction CONV-ABS-22); pass 4 — 7 (SUBSTANTIVE r1-r6, NITPICK r7; r4 self-declared NITPICK overridden — retractions and reliance on a retracted HTTP/2 fact); pass 5 — 5 (SUBSTANTIVE r1-r4, NITPICK r5).
+- Round-disposition declarations verified on disk in the final-round files (pass-0/1 r3 declarations; pass-4 r7 / pass-5 r5 "findings are nitpicks, not gaps").
+
+## Canonical Phase 1 Inputs (pointer table)
+
+| Artifact | Canonical source |
+|----------|------------------|
+| Inventory | pass-0 r3 §2 — `semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory-r3.md` |
+| Architecture | pass-1 r3 §B, two Mermaid diagrams — `hylo-legacy-pass-1-deep-architecture-r3.md` |
+| Domain | pass-2 r8 §7, amended by r9 — `hylo-legacy-pass-2-deep-domain-r8.md` |
+| BC index | pass-3 r4, amended by r5-r8 — 232 BCs — `hylo-legacy-pass-3-deep-behavioral-contracts-r4.md` |
+| Thresholds / NFR | pass-4 r7 final catalogue — 147 thresholds; 120 rationales resolved; OD-57 (18 bulk-confirm + 27 owner-rationale in 7 groups); OD-94 fact sheet — `hylo-legacy-pass-4-deep-nfr-r7.md` |
+| Conventions / env / determinism / pitfalls | pass-5 r3 consolidated, amended by r4-r5 — 43 explicit + 21 implicit env inputs; 54 determinism rows + 6 Go-side pins; 19 conventions; 22 pitfalls — `hylo-legacy-pass-5-deep-conventions-r3.md` |
+
+Registers: BC index totals 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 out of scope + 6 approved deviation + 35 pending owner decision. Statement partition (1,809 Python statements): 903 re-read + 422 covered by pinned tables + 133 out of scope + 351 read in pass-2 r8; 0 uncovered. Retractions: RET crosswalk (pass-3 r4) plus CONV-ABS through 94; next free CONV-ABS 95; IDs 101-104 unused. Extraction validation (validate-extraction, not a deepening round): PASS-WITH-FIXES; exhaustive; 0 hallucinations; final re-run queued after coverage-audit. Evidence captured this burst: proxy venv `pyvenv.cfg` include-system-site-packages=false (proxy and preflight not affected by the user site; parity harness runs shimmed Python cases under -s); mitmproxy 12.3.1 with no config.yaml; Go 1.26.5 h2 facts recorded for OD-94. Trajectory-tail (D-433(e) LENGTH=4): →0→0→0→0 placeholder retained until the formal finding series begins.
 
 ## Owner Decisions — rulings recorded 2026-11-14
 
@@ -91,7 +99,7 @@ dtu_required: false
 - **Q-b:** foreign-cache crash paths CP-C01..C10 are out of parity scope; the Go writer must produce legacy's exact cache format.
 - **Q-c = D4-EX-2:** fix the sticky transcript crash. Skip wrong-shape JSON lines as legacy skips invalid JSON (dgx_statusline.py:1060-1063); excluded from the parity diff; covered by Go table tests (BC-SL-098/099).
 - **LAN exposure** of the live legacy proxies/exporter: accepted by the owner until cutover (ruled via OD-24/OD-27). hylo proxy, UI and exporter bind to loopback by default (HY-BIND).
-- **OD-01..OD-45** decision list recorded (OD-44 unused): 42 pending, 2 ruled; next free OD-46. Presented at the Phase 0 gate. D13/D14 remain recorded in the Decisions Log below.
+- **OD-01..OD-94 decision list** registered. Issued (64): OD-01..OD-43, OD-45, OD-46-48, OD-50-53, OD-54-57, OD-58-61, OD-66, OD-74-76, OD-94. Unused or reserved (30): OD-44, OD-49, OD-62-65, OD-67-73, OD-77-93. Status: 62 pending, 2 ruled (OD-24/OD-27); next free OD-95. Presented at the Phase 0 gate. D13/D14 remain recorded in the Decisions Log below.
 
 ## Decisions Log
 
@@ -115,7 +123,7 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 ## Open Owner Questions
 
-- **OD-01..OD-45 decision list** — presented at the Phase 0 gate (42 pending, 2 ruled (OD-24/OD-27); OD-44 unused; next free OD-46).
+- **OD-01..OD-94 decision list** — presented at the Phase 0 gate (64 issued: 62 pending, 2 ruled (OD-24/OD-27); unused/reserved 44, 49, 62-65, 67-73, 77-93; next free OD-95).
 - Optional checks (deferred, non-blocking): Grafana per-session cost panel; offline promtool rule validation.
 - Policy risk (owner awareness): Anthropic Usage Policy 2026-11-12 language on routing through consumer subscriptions.
 
@@ -123,26 +131,27 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 | Cycle | Type | Status | Notes |
 |-------|------|--------|-------|
-| phase-0-ingestion | brownfield-ingestion | **ACTIVE** — convergence-deepening: passes 2-3 converged; deepen passes 0, 1, 4, 5 next | Deep-burst committed: 17 semport deep files, 232-BC index, OD-01..OD-45, owner rulings, captures. Rounds: 9 + 8 → NITPICK |
+| phase-0-ingestion | brownfield-ingestion | **ACTIVE** — convergence-deepening COMPLETE (all six passes converged); coverage-audit → extraction-validation → final-synthesis next | Commits: 560a861 (passes 2-3: 9 + 8 rounds) + this burst (passes 0/1/4/5: 3/3/7/5 rounds). 18 new semport deep-pass files |
 
-## Session Resume Checkpoint (2026-11-14 — convergence-deepening passes 2-3 converged)
+## Session Resume Checkpoint (2026-11-14 — Phase 0 convergence-deepening COMPLETE)
 
 > **SELF-SUFFICIENT RESUME CONTEXT** — read this section alone to resume after a session CLEAR.
 
 ### 1. Where We Are
 
-- Phase 0 convergence-deepening: pass 2 **CONVERGED** (9 rounds: SUBSTANTIVE r1-r8, NITPICK r9); pass 3 **CONVERGED** (8 rounds: SUBSTANTIVE r1-r7, NITPICK r8; the orchestrator overrode r7's self-declared NITPICK — new crash path H-09 and retraction CONV-ABS-22 forced one more round).
-- Canonical Phase 1 inputs: pass-2 r8 §7 combined pointer table (amended by r9); pass-3 r4 canonical BC index (amended by r5-r8). 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 out of scope + 6 approved deviation + 35 pending owner decision.
-- Statement partition (1,809 Python statements): 903 re-read + 422 covered by pinned tables + 133 out of scope + 351 read in r8; 0 uncovered. Retractions: RET crosswalk (pass-3 r4) + CONV-ABS 12-28; next free 29.
-- Owner rulings 2026-11-14 (see Owner Decisions section): D16 committed on main (3e05cfe) + D15 (a7b5e04); policy 12 now D1-D16. O1/O2/O3/O5 and Q-a/Q-b/Q-c ruled; LAN exposure accepted until cutover (OD-24/OD-27). OD-01..OD-45 list (42 pending, OD-44 unused); next free OD-46.
-- Captures done: env probe (stdio STRICT; Python 3.11.7 statusline / 3.12.10 proxy venv); VictoriaMetrics post-soak capture (19 series, all finite; idle windows ABSENT rather than NaN → CP-N01/N02 latent). DGX 24 h soak over.
+- Phase 0 convergence-deepening **COMPLETE** — all six passes converged. Rounds: pass 0 = 3, pass 1 = 3, pass 2 = 9, pass 3 = 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22), pass 4 = 7 (r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact), pass 5 = 5. Every pass ended on a NITPICK round.
+- Canonical Phase 1 inputs locked — pointer table in Convergence Status above: inventory pass-0 r3 §2; architecture pass-1 r3 §B (two Mermaid diagrams); domain pass-2 r8 §7 (am. r9); BC index pass-3 r4 (am. r5-r8; 232 BCs); thresholds/NFR pass-4 r7 (147 thresholds; 120 rationales resolved; OD-57; OD-94 fact sheet); conventions pass-5 r3 (am. r4-r5).
+- Registers: OD-01..OD-94 (64 issued: 62 pending, 2 ruled OD-24/OD-27; unused/reserved 44, 49, 62-65, 67-73, 77-93; next free OD-95). Retractions: CONV-ABS through 94, next free 95; 101-104 unused.
+- Evidence captured: proxy venv `pyvenv.cfg` include-system-site-packages=false (proxy/preflight unaffected by the user site; parity harness runs shimmed Python cases under -s); mitmproxy 12.3.1 with no config.yaml; Go 1.26.5 h2 facts for OD-94.
+- Public repo main is 4 commits ahead of GitHub (b99082e D13/D14, a7b5e04 D15, 3e05cfe D16, plus f562477) — not pushed; push awaits owner.
 
 ### 2. Next Steps
 
-1. Deepen broad-sweep passes 0, 1, 4, 5 — at least 2 rounds each.
-2. coverage-audit, then final-synthesis.
-3. input-hash drift check over `.factory/` artifacts.
-4. Phase 0 owner approval gate: present the OD-01..OD-45 decision list.
+1. coverage-audit
+2. extraction-validation (final)
+3. final-synthesis
+4. input-hash drift check over `.factory/` artifacts
+5. Phase 0 owner approval gate: present the OD-01..OD-94 decision list
 
 ## Skip Log
 
@@ -154,7 +163,7 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 | Content | Location |
 |---------|----------|
-| Burst narratives, adversarial passes, lessons, session checkpoints | `cycles/phase-0-ingestion/` (burst-log.md, cycle-manifest.md) |
+| Burst narratives, convergence records, lessons, session checkpoints | `cycles/phase-0-ingestion/` (burst-log.md, convergence-trajectory.md, cycle-manifest.md, session-checkpoints.md) |
 
 ## Blocking Issues
 

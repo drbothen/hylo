@@ -116,4 +116,65 @@ traces_to: STATE.md
 
 ---
 
+## Burst: convergence-deepening COMPLETE — passes 0/1/4/5 converged; canonical Phase 1 input catalogues locked (2026-11-14)
+
+**Parent-commit:** 560a861 (convergence-deepening passes 2-3)
+
+**Adversary verdict:** convergence-deepening COMPLETE — all six broad-sweep passes converged. Round dispositions verified against the convergence declarations on disk.
+
+- Pass 0 (deep inventory): 3 rounds — SUBSTANTIVE r1-r2, NITPICK r3. **CONVERGED.** Canonical artifact: r3 §2 (`semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory-r3.md`).
+- Pass 1 (deep architecture): 3 rounds — SUBSTANTIVE r1-r2, NITPICK r3. **CONVERGED.** Canonical artifact: r3 §B with two Mermaid diagrams (`semport/hylo-legacy/hylo-legacy-pass-1-deep-architecture-r3.md`).
+- Pass 4 (deep NFR/thresholds): 7 rounds — SUBSTANTIVE r1-r6, NITPICK r7. **CONVERGED.** The orchestrator overrode r4's self-declared NITPICK: r4 contained retractions and relied on a retracted HTTP/2 fact. Canonical artifact: r7 final catalogue — 147 thresholds; 120 rationales resolved; OD-57 (18 bulk-confirm + 27 owner-rationale in 7 groups); OD-94 fact sheet (`semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md`).
+- Pass 5 (deep conventions/env/determinism/pitfalls): 5 rounds — SUBSTANTIVE r1-r4, NITPICK r5. **CONVERGED.** Canonical artifact: r3 consolidated, amended by r4-r5 — 43 explicit + 21 implicit env inputs; 54 determinism rows + 6 Go-side pins; 19 conventions; 22 pitfalls (`semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md`).
+
+Passes 2 (9 rounds) and 3 (8 rounds) converged in the prior burst; see the entry above.
+
+**Counts:** 232 BCs unchanged (137 byte-exact + 44 JSON-equivalent + 10 out of scope + 6 approved deviation + 35 pending owner decision). OD register extended to OD-01..OD-94: 64 issued (62 pending, 2 ruled — OD-24/OD-27); unused or reserved: OD-44, OD-49, OD-62-65, OD-67-73, OD-77-93; next free OD-95. Retraction ledger: CONV-ABS through 94; next free CONV-ABS 95; IDs 101-104 unused.
+
+**Evidence captured:** proxy venv `pyvenv.cfg` include-system-site-packages=false — the proxy and preflight are not affected by the user site, and the parity harness runs shimmed Python cases under -s; mitmproxy 12.3.1 running with no config.yaml; Go 1.26.5 h2 facts recorded for OD-94.
+
+**Codifications:** canonical Phase 1 input sources locked in STATE.md as a pointer table (inventory pass-0 r3 §2; architecture pass-1 r3 §B; domain pass-2 r8 §7 am. r9; BC index pass-3 r4 am. r5-r8, 232 BCs; thresholds/NFR pass-4 r7; conventions pass-5 r3 am. r4-r5). OD register extended to OD-01..OD-94 with the issued/unused-reserved partition. Retraction ledger bounds advanced (CONV-ABS through 94; next free 95; 101-104 unused). Evidence facts recorded (proxy venv isolation, mitmproxy 12.3.1 without config.yaml, Go 1.26.5 h2 facts for OD-94). No policies.yaml change this burst.
+
+**Files touched (Dim-1): 25 unique files** — 18 semport deep-pass files (enumerated set, matches git-status untracked set), plus STATE.md, sidecar-learning.md, 2 log files, and 3 cycle files
+
+- .factory/semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory-r2.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory-r3.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-1-deep-architecture.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-1-deep-architecture-r2.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-1-deep-architecture-r3.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r2.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r3.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r4.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r5.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r6.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md
+- .factory/semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
+- .factory/STATE.md
+- .factory/sidecar-learning.md
+- .factory/logs/dispatcher-internal-2026-11-14.jsonl
+- .factory/logs/events-2026-11-14.jsonl
+- .factory/cycles/phase-0-ingestion/burst-log.md
+- .factory/cycles/phase-0-ingestion/convergence-trajectory.md
+- .factory/cycles/phase-0-ingestion/session-checkpoints.md
+
+**Evictions:** Current Phase Steps row 2 (research: 4 reports + RESEARCH-INDEX verification) evicted from the last-5 window — already durably recorded in the grounding entry above and cycle-manifest.md. The passes-2-3 session checkpoint was archived to session-checkpoints.md.
+
+**Dim-2 Attestation:** round counts and final-round NITPICK dispositions cross-checked against the convergence declarations in the final-round files on disk (pass-0 r3: "r1 SUBSTANTIVE, r2 SUBSTANTIVE, r3 NITPICK"; pass-1 r3: same split; pass-4 r7 and pass-5 r5: "findings are nitpicks, not gaps"). OD issued/unused partition verified arithmetically: 64 issued + 30 unused/reserved = 94; next free OD-95.
+
+**Dim-5 Attestation:** N/A — no compiled artifacts in this burst (markdown analysis/state files and JSONL log churn only).
+
+**Dim-6 Attestation:** N/A — no schema-structured file edited; policies.yaml untouched this burst.
+
+**Dim-7 Attestation:** no repo test suite in scope; convergence verdicts are documented in the respective pass/deep-round files and summarized in convergence-trajectory.md.
+
+**Closes:** convergence-deepening for ALL six passes. Still open: coverage-audit, extraction-validation (final), final-synthesis, input-hash drift check, Phase 0 owner approval gate (present the OD-01..OD-94 decision list).
+
+---
+
 <!-- Repeat for each burst. Maintain chronological order. -->
