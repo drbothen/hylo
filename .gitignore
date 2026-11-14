@@ -1,0 +1,27 @@
+# Machine-specific Claude Code context and settings (never public)
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Build output
+/bin/
+/dist/
+/hylo
+/hylo.exe
+
+# Go test artifacts
+*.test
+*.out
+coverage.*
+
+# Python prototype artifacts
+__pycache__/
+*.pyc
+
+# Never commit real captures (fixtures must be synthetic or scrubbed)
+/captures/
+*.jsonl.local
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
