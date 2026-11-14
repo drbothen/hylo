@@ -41,6 +41,7 @@ try:
 except ImportError:  # CLI mode (`dgx_proxy.py trust ...`) needs no mitmproxy
     pass
 
+RL_PREFIX = "anthropic-ratelimit-unified-"   # plan rate-limit headers (see responseheaders)
 DGX_BLOCK_TYPES = {"text", "image", "tool_use", "tool_result", "thinking", "redacted_thinking"}
 _logged_unknown: set = set()
 log = logging.getLogger("dgx_proxy")
@@ -163,6 +164,26 @@ class DGXRouter:
 
     # ---- response handling ------------------------------------------------------
     def responseheaders(self, flow: mitmproxy.http.HTTPFlow) -> None:
+        # Plan rate-limit capture (2026-11-14, status line review #12): copy Anthropic's
+        # anthropic-ratelimit-unified-* response headers (the source of Claude Code's
+        # rate_limits.five_hour / seven_day) into the ledger as "anth_ratelimit" — only when
+        # they CHANGE for a session, to keep the ledger small. Read-only on the traffic and
+        # fully guarded: a failure here must never affect a response.
+        try:
+            if flow.response is not None and flow.request.host == "api.anthropic.com":
+                rl = {k.lower()[len(RL_PREFIX):]: v for k, v in flow.response.headers.items()
+                      if k.lower().startswith(RL_PREFIX)}
+                if rl:
+                    last = getattr(self, "_last_rl", None)
+                    if last is None:
+                        last = self._last_rl = {}
+                    sess = (getattr(flow, "_attrib", None) or {}).get("session")
+                    key = json.dumps(rl, sort_keys=True)
+                    if last.get(sess) != key:
+                        last[sess] = key
+                        ledger("anth_ratelimit", session=sess, headers=rl)
+        except Exception:
+            pass
         # Stream /v1/messages bodies so Claude Code sees tokens as they are generated —
         # EXCEPT error responses, which we buffer so the error body can be logged.
         # Any response declaring text/event-stream is ALSO streamed unconditionally: SSE lanes

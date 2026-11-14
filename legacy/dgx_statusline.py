@@ -485,37 +485,49 @@ def render_lane(d, mix=None, dgx_mtok=None, dgx_rate=None, win_start=None):
     reroute_all = any(p.rstrip("*") in ("claude", "claude-")
                       for p in prefixes)
     rl = {} if reroute_all else (d.get("rate_limits") or {})
-    shown = []
+    # Owner redesign 2026-11-14 (review #12 revisit): every REPORTED window shown, each with
+    # its reset time, colored by PROJECTED use at reset = used% / share of the window already
+    # elapsed — grey < 80% (on track), yellow 80-100% (will use nearly all), red > 100%
+    # (runs out before the reset). In the first 10% of a window the projection is noise, so
+    # absolute bands apply there (yellow > 70%, red > 90%). A window Claude Code does not
+    # report is HIDDEN until it appears (owner 2026-11-14): Anthropic sends no 5-hour window
+    # for this account today (proxy header capture: only anthropic-ratelimit-unified-7d-*;
+    # raw headers stay in the ledger as anth_ratelimit). The whole widget is hidden when
+    # neither window is reported (API-key sessions) or all Claude models are rerouted.
     now_rl = time.time()
-    for label, key in (("5h", "five_hour"), ("7d", "seven_day")):
+    wins = []
+    for label, key, length in (("5h", "five_hour", 5 * 3600), ("7d", "seven_day", 7 * 86400)):
         w = rl.get(key) or {}
         pct = w.get("used_percentage")
         reset = w.get("resets_at")
-        # CC drops a window once resets_at passes; the 30-min smoothing must too, or a
-        # refilled window kept showing e.g. a red 5h95% (review 2026-11-13, #12.1).
+        # CC drops a window once resets_at passes; the 30-min smoothing must too (#12.1).
         if isinstance(reset, (int, float)) and reset <= now_rl:
-            continue
-        if isinstance(pct, (int, float)):
-            shown.append((label, min(max(pct, 0.0), 100.0), reset))
-    if shown:
-        binding = max(shown, key=lambda t: t[1])[0]
+            pct = None
+        wins.append((label, length, min(max(pct, 0.0), 100.0) if isinstance(pct, (int, float)) else None,
+                     reset if isinstance(reset, (int, float)) else None))
+    if any(p is not None for _, _, p, _ in wins):
         bits = []
-        for label, pct, reset in shown:
-            # Bands: > 70% = pace yourself / plan around the reset; > 90% = throttling imminent.
-            col = RED if pct > 90 else YELLOW if pct > 70 else GREY
+        for label, length, pct, reset in wins:
+            if pct is None:
+                continue          # unreported window hidden until Claude Code sends it (owner)
+            rem = (reset - now_rl) if reset is not None else None
+            elapsed = (1.0 - rem / length) if rem is not None else None
+            if elapsed is not None and 0.10 <= elapsed <= 1.0:
+                proj = pct / elapsed
+                col = RED if proj > 100 else YELLOW if proj >= 80 else GREY
+            else:
+                col = RED if pct > 90 else YELLOW if pct > 70 else GREY
             seg = f"{col}{label}{pct:.0f}%{RESET}"
-            if label == binding and pct > 70 and isinstance(reset, (int, float)):
-                rem = reset - now_rl
-                if 0 < rem <= 8 * 86400:                       # 7d window max + slack
-                    if rem >= 86400:                           # binding 7d: day-level (#12.2)
-                        cd = f"{int(rem // 86400)}d{int((rem % 86400) // 3600):02d}h"
-                    elif rem >= 3600:
-                        cd = f"{int(rem // 3600)}h{int((rem % 3600) // 60):02d}m"
-                    else:
-                        cd = f"{int(rem // 60)}m"
-                    seg += f" {col}->{cd}{RESET}"
+            if rem is not None and 0 < rem <= length * 1.15:
+                if rem >= 86400:
+                    cd = f"{int(rem // 86400)}d{int((rem % 86400) // 3600):02d}h"
+                elif rem >= 3600:
+                    cd = f"{int(rem // 3600)}h{int((rem % 3600) // 60):02d}m"
+                else:
+                    cd = f"{int(rem // 60)}m"
+                seg += f" {col}->{cd}{RESET}"
             bits.append(seg)
-        parts.append(" ".join(bits))
+        parts.append("  ".join(bits))
 
     cost = d.get("cost") or {}
     la, lr = cost.get("total_lines_added") or 0, cost.get("total_lines_removed") or 0
