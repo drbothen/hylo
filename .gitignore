@@ -25,3 +25,6 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+
+# VSDD factory worktree (factory-artifacts branch; never pushed to the public repo)
+.factory/
