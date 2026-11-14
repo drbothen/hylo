@@ -6,8 +6,13 @@ Wired by the `claude-dgx` launcher through `--settings '{"statusLine":{"type":"c
 Claude Code pipes session JSON to stdin on each refresh (after every assistant message
 + every refreshInterval tick); we print up to two rows:
 
-    ◨ DGX · Sonnet 5.5 · ⎇ main · home-lab · ▰▰▰▰▱▱▱▱▱▱ 43%/1.0M · ♻ 94% · ▲31/▼4 · ⏱ 12m
+    ◨ DGX · Sonnet 5.5 · ⎇ main · home-lab · ▰▰▰▰▱▱▱▱▱▱ 43%/1.0M · ▤30% ❙68% ◈ 2% · ♻ 94% · ▲31/▼4
+      · ⏱ 7h25m·1h52m ⌂1d07h · ↑88.0M[in500 ✍970k ⟳88.0M] ↓298k ↻1 · $32.62 $17.5/h ⛏n/a
     ◉ r3·q0 · KV▰▰▰▰ 92% · »113t/s · ▣204t/s ▅▆▇█ · ◔4.2s · ⚡1059W·1400W 66° 34¢/h · ☾ idle 2m
+
+Row-1 legend (the long tail): `⏱ elapsed·model-time ⌂window-age` (elapsed resets on /clear,
+⌂ does not); tokens `↑all-sent[in ✍write ⟳read] ↓out ↻rebuilds` (session totals, in+✍+⟳ = ↑);
+`$ $/h` colored by your own same-lane p75/p95 over 30 days (cost-history.json).
 
 Row-2 legend: `»113t/s` = THIS session's last completed API call (transcript, both
 lanes, prefill included; dimmed when the reply was < 200 tokens); `▣204t/s` = the DGX box,
@@ -199,6 +204,95 @@ def save_cache(path, data):
         pass  # cache loss is cosmetic; the next refresh rewrites it
 
 
+# ---- dynamic cost colors (review #11 revisit, owner design 2026-11-14) -------------------
+# $ and $/h are colored against YOUR OWN past sessions on the same lane over the last 30
+# days: yellow >= p75, red >= p95. History = ~/.cache/dgx-llm/cost-history.json, seeded by
+# tools/backfill_cost_history.py and kept current by record_cost() with Claude Code's exact
+# figures. Only sessions >= $1 count (below that: short checks, not work sessions). A
+# backfilled burn rate counts only with >= 30 min of model time (approximate spans); an
+# exact one from 5 min (same as the display). < 10 qualifying sessions in the lane -> cold
+# start: $ yellow at a fixed $25, $/h uncolored.
+COST_HIST = os.path.join(CACHE_DIR, "cost-history.json")
+COST_WINDOW_S = 30 * 86400
+COST_MIN_USD = 1.0
+COST_MIN_N = 10
+COST_FALLBACK_YELLOW = 25.0
+
+
+def record_cost(sid, lane, usd, api_ms):
+    """Store this session's exact cost (src 'cc'); throttled to one write per minute."""
+    if not sid or lane not in ("dgx", "anth") or not isinstance(usd, (int, float)):
+        return
+    h = load_cache(COST_HIST)
+    s = h.setdefault("sessions", {})
+    e = s.get(sid) or {}
+    now = time.time()
+    if e.get("src") == "cc" and now - e.get("ts", 0) < 60:
+        return                                     # throttle: one write per session-minute
+    s[sid] = {"lane": lane, "usd": round(usd, 4),
+              "api_ms": api_ms if isinstance(api_ms, (int, float)) else None,
+              "ts": now, "src": "cc"}
+    save_cache(COST_HIST, h)
+
+
+def cost_thresholds(lane, sid):
+    """-> ((usd_p75, usd_p95) | None, (rate_p75, rate_p95) | None) for this lane, excluding
+    the current session. None = fewer than COST_MIN_N qualifying sessions (cold start)."""
+    now = time.time()
+    tot, rate = [], []
+    for k, e in (load_cache(COST_HIST).get("sessions") or {}).items():
+        if k == sid or e.get("lane") != lane or now - e.get("ts", 0) > COST_WINDOW_S:
+            continue
+        usd = e.get("usd")
+        if not isinstance(usd, (int, float)) or usd < COST_MIN_USD:
+            continue
+        tot.append(usd)
+        api = e.get("api_ms")
+        need = 300000 if e.get("src") == "cc" else 1800000
+        if isinstance(api, (int, float)) and api >= need:
+            rate.append(usd / (api / 3.6e6))
+
+    def pct(v):
+        if len(v) < COST_MIN_N:
+            return None
+        v = sorted(v)
+        return v[int(0.75 * (len(v) - 1))], v[int(0.95 * (len(v) - 1))]
+    return pct(tot), pct(rate)
+
+
+def claude_window_start(cache_path):
+    """Unix start time of the Claude Code process running this status line, or None.
+
+    Claude Code's stdin restarts every clock on /clear (a new session), so "how long has
+    this window been open" must come from the process itself (owner request 2026-11-14):
+    walk up from our parent (a per-refresh shell) to the ancestor whose command is
+    `claude` and read its start time. Cached in the session file -> one ps walk per
+    session, none on normal refreshes."""
+    c = load_cache(cache_path)
+    if isinstance(c.get("proc_start"), (int, float)):
+        return c["proc_start"]
+    try:
+        import subprocess
+        pid = os.getppid()
+        for _ in range(6):
+            out = subprocess.run(["ps", "-o", "ppid=,comm=,lstart=", "-p", str(pid)],
+                                 capture_output=True, text=True, timeout=1).stdout.strip()
+            if not out:
+                return None
+            ppid, comm, *rest = out.split(None, 2)
+            if os.path.basename(comm) == "claude" and rest:
+                start = time.mktime(time.strptime(rest[0].strip(), "%a %b %d %H:%M:%S %Y"))
+                c["proc_start"] = start
+                save_cache(cache_path, c)
+                return start
+            pid = int(ppid)
+            if pid <= 1:
+                return None
+    except Exception:
+        return None
+    return None
+
+
 def effective_rl(cache_path, rl_stdin):
     """Smoothed plan limits: CC sends rate_limits only on subscription accounts and
     possibly not on every refresh — so remember the last-seen value (RL_KEEP s) and
@@ -341,7 +435,7 @@ def fmt_ctx(cw):
     return f"{bar} {col}{pct:.0f}%{RESET}{denom}"
 
 
-def render_lane(d, mix=None, dgx_mtok=None, dgx_rate=None):
+def render_lane(d, mix=None, dgx_mtok=None, dgx_rate=None, win_start=None):
     model = d.get("model") or {}
     model_name = model.get("display_name") or model.get("id") or "?"
     model_id = model.get("id") or ""
@@ -430,10 +524,29 @@ def render_lane(d, mix=None, dgx_mtok=None, dgx_rate=None):
 
     dur = cost.get("total_duration_ms")
     if isinstance(dur, (int, float)) and dur > 60000:          # show timer after 1 minute
-        mins = int(dur // 60000)
-        # % 60, not % 100: 75 min rendered "1h75m" until review 2026-11-13 (#9.1)
-        parts.append(f"{GREY}⏱ {mins // 60}h{mins % 60:02d}m{RESET}" if mins >= 60
-                     else f"{GREY}⏱ {mins}m{RESET}")
+        # "⏱ <elapsed>·<api>": elapsed = wall clock since THIS session started (CC resets it
+        # on /clear, which starts a new session — not since the window opened); api = time
+        # spent waiting on the model (cost.total_api_duration_ms), dimmed. Review #9 follow-up
+        # 2026-11-14: elapsed alone could not tell a long working session from an idle one.
+        def _hm(ms):
+            mins = int(ms // 60000)
+            # % 60, not % 100: 75 min rendered "1h75m" until review 2026-11-13 (#9.1)
+            return f"{mins // 60}h{mins % 60:02d}m" if mins >= 60 else f"{mins}m"
+        seg = f"{GREY}⏱ {_hm(dur)}{RESET}"
+        api = cost.get("total_api_duration_ms")
+        if isinstance(api, (int, float)) and api >= 60000:
+            # not capped at elapsed: concurrent (subagent) API calls can sum past wall time
+            seg += f"{DIM}·{_hm(api)}{RESET}"
+        # ⌂ = how long this Claude Code window has been open (process age, survives /clear);
+        # shown only when it exceeds the session's elapsed time by >= 5 min, i.e. after a
+        # /clear or resume — otherwise it would repeat the elapsed figure.
+        if isinstance(win_start, (int, float)):
+            win_ms = (time.time() - win_start) * 1000
+            if win_ms - dur >= 300000:
+                wm = int(win_ms // 60000)
+                wtxt = f"{wm // 1440}d{(wm % 1440) // 60:02d}h" if wm >= 1440 else _hm(win_ms)
+                seg += f"{GREY} ⌂{wtxt}{RESET}"
+        parts.append(seg)
 
     # Session token totals + cost. Totals prefer CC's own stdin figures and fall back to
     # our transcript accumulation; cost is CC's list-price computation — on the DGX lane
@@ -444,26 +557,58 @@ def render_lane(d, mix=None, dgx_mtok=None, dgx_rate=None):
     # context: 353,850 = that call's input+cache_creation+cache_read), not the session —
     # verified on live stdin, review 2026-11-13 #10.1. Main-session transcript only:
     # subagents write their own files, so their tokens are not in these totals.
-    tin = tout = c_wr = c_rd = None
+    tin = tout = c_wr = c_rd = c_in = rb = None
     if mix and len(mix) >= 7:
         tin, tout, c_wr, c_rd = mix[3], mix[4], mix[5], mix[6]
+    if mix and len(mix) >= 10:
+        c_in, rb = mix[8], mix[9]
+    # Owner-approved layout (review #10 revisit, 2026-11-14): "↑total[in ✍ ⟳] ↓out ↻n".
+    #   ↑  all prompt tokens sent (the context re-sent on every call)  = in + ✍ + ⟳ exactly
+    #   in fresh uncached input  ($4/MTok Opus 5.5)     ✍ cache writes ($8/MTok, 1-h TTL)
+    #   ⟳  cache reads ($0.20/MTok)                     ↓ output ($20/MTok)
+    #   ↻  cache rebuilds (REBUILD_EXCESS rule), hidden when 0
+    # The bracketed parts are non-overlapping price classes; zero parts are omitted.
     have_t = isinstance(tin, (int, float)) or isinstance(tout, (int, float))
     if have_t and ((tin or 0) > 0 or (tout or 0) > 0):
-        parts.append(f"{GREY}↑{RESET}{WHITE}{_fmt_tokens(tin or 0)}{RESET}"
-                     f"{GREY} ↓{RESET}{WHITE}{_fmt_tokens(tout or 0)}{RESET}")
-    # Usage split: ⟳ cache-read volume (cheap, 0.1x) and ✍ cache-write volume (premium,
-    # 1.25x). Only meaningful where the lane reports the split (Anthropic does; vLLM's
-    # zeros hide them automatically on the DGX lane).
-    if isinstance(c_rd, (int, float)) and c_rd > 0:
-        parts.append(f"{CYAN}⟳{_fmt_tokens(c_rd)}{RESET}")
-    if isinstance(c_wr, (int, float)) and c_wr > 0:
-        parts.append(f"{YELLOW}✍{_fmt_tokens(c_wr)}{RESET}")
+        seg = f"{GREY}↑{RESET}{WHITE}{_fmt_tok_c(tin or 0)}{RESET}"
+        inner = []
+        if isinstance(c_in, (int, float)) and c_in > 0:
+            inner.append(f"{WHITE}in{_fmt_tok_c(c_in)}{RESET}")
+        if isinstance(c_wr, (int, float)) and c_wr > 0:
+            inner.append(f"{YELLOW}✍{_fmt_tok_c(c_wr)}{RESET}")
+        if isinstance(c_rd, (int, float)) and c_rd > 0:
+            inner.append(f"{CYAN}⟳{_fmt_tok_c(c_rd)}{RESET}")
+        if len(inner) >= 2:                  # one part alone always equals ↑: no brackets
+            seg += f"{DIM}[{RESET}" + " ".join(inner) + f"{DIM}]{RESET}"
+        seg += f"{GREY} ↓{RESET}{WHITE}{_fmt_tok_c(tout or 0)}{RESET}"
+        if isinstance(rb, (int, float)) and rb > 0:
+            seg += f" {DIM}{YELLOW}↻{rb:.0f}{RESET}"
+        parts.append(seg)
     usd = cost.get("total_cost_usd")
     if isinstance(usd, (int, float)) and usd > 0:
-        # Bands: grey < $1 (a short session at list price), white $1-5, yellow >= $5
-        # (about a long Opus session at list price) — attention cue, not an alarm.
-        col = YELLOW if usd >= 5 else WHITE if usd >= 1 else GREY
+        api_ms = cost.get("total_api_duration_ms")
+        lane = "dgx" if on_dgx else ("anth" if on_dgx is False else None)
+        sid = d.get("session_id")
+        record_cost(sid, lane, usd, api_ms)
+        th_usd, th_rate = cost_thresholds(lane, sid) if lane else (None, None)
+        # $ color: grey < $1 (a short check); then YOUR p75/p95 on this lane (yellow/red);
+        # cold start (< 10 sessions) -> yellow at a fixed $25.
+        if usd < COST_MIN_USD:
+            col = GREY
+        elif th_usd:
+            col = RED if usd >= th_usd[1] else YELLOW if usd >= th_usd[0] else WHITE
+        else:
+            col = YELLOW if usd >= COST_FALLBACK_YELLOW else WHITE
         cseg = f"{col}${usd:.2f}{RESET}"
+        # Burn rate (review #11 revisit, owner 2026-11-14): $ per hour of MODEL work =
+        # total_cost_usd / total_api_duration_ms — "is this session expensive per unit of
+        # work", not just big. From 5 min of API time (below that the ratio is noise). Same
+        # caveat as $: list price, incl. subagents/background; counterfactual on the DGX lane.
+        # Colored by YOUR $/h p75/p95 on this lane; uncolored at cold start.
+        if isinstance(api_ms, (int, float)) and api_ms >= 300000:
+            r = usd / (api_ms / 3.6e6)
+            rc = (RED if r >= th_rate[1] else YELLOW if r >= th_rate[0] else GREY) if th_rate else GREY
+            cseg += f"{rc} ${r:.1f}/h{RESET}"
         tot = (tin or 0) + (tout or 0)
         if on_dgx and tot > 0:
             basis_ok = (isinstance(dgx_rate, (int, float)) and dgx_rate >= MIN_BASIS_MTOK_MONTH
@@ -701,6 +846,19 @@ def _fmt_lines(n):
     return str(n)
 
 
+def _fmt_tok_c(n):
+    """Compact tokens for the row-1 token segment: 500, 970k, 88.0M (approved mockup)."""
+    try:
+        n = float(n)
+    except (TypeError, ValueError):
+        return "?"
+    if n >= 1e6:
+        return f"{n / 1e6:.1f}M"
+    if n >= 1000:
+        return f"{n / 1000:.0f}k"
+    return f"{n:.0f}"
+
+
 def _fmt_tokens(n):
     try:
         n = float(n)
@@ -793,6 +951,11 @@ _READ_CAP = 524288          # max bytes of transcript parsed per refresh
 #                harness's per-agent decode floor, 4x = margin for slow prefill. Known edge: a
 #                very long prefill with a short reply (~85 s, 300 tokens) is skipped too.
 TURN_DIM_OUT = 200
+# Cache rebuild detector (review #10 revisit, 2026-11-14): a call whose cache WRITE exceeds its
+# context GROWTH by more than this re-wrote already-cached context. Validated on 9,650 calls in
+# 120 transcripts: normal calls max 4,145 excess (99.9% under 577); smallest rebuild 61,901 —
+# 20K sits ~5x above the worst normal call and ~3x below the smallest rebuild.
+REBUILD_EXCESS = 20000
 TURN_FLOOR_TPS = 15.0
 TURN_STALE = 4.0
 
@@ -844,10 +1007,11 @@ def _mix_counts(d):
     tin, tout = c.get("tin", 0), c.get("tout", 0)
     c_wr, c_rd = c.get("c_wr", 0), c.get("c_rd", 0)
     lr, lu, cur = c.get("lr"), c.get("lu"), c.get("cur")   # last-turn rate state (#16)
+    c_in, rb, pp = c.get("c_in", 0), c.get("rb", 0), c.get("pp")  # fresh input, rebuilds (#10)
     need_reset = False
-    for key in ("tin", "c_wr", "mixv5"):           # fields/semantics introduced post-launch
-        if key not in c and off > 0:               # (mixv5: compaction reset, usage dedup,
-            need_reset = True                      #  last-turn rate [rate, dim] — 2026-11-13)
+    for key in ("tin", "c_wr", "mixv6"):           # fields/semantics introduced post-launch
+        if key not in c and off > 0:               # (mixv6: compaction reset, usage dedup,
+            need_reset = True                      #  last-turn rate, fresh input + rebuilds)
     # Usage dedup: CC writes ONE transcript line per content block of an API message and
     # repeats the message's full usage on every line (93/106 messages split), so summing
     # per line overcounted x2.91 (review #10.2). Count each message id once; ids of the
@@ -856,9 +1020,10 @@ def _mix_counts(d):
     seen_ids = set(recent_ids)
     if need_reset or size < off:
         off, res, conv, think, tin, tout, c_wr, c_rd = 0, 0, 0, 0, 0, 0, 0, 0
-        lr = lu = cur = None
+        lr = lu = cur = pp = None
+        c_in = rb = 0
     if size == off:
-        return res, conv, think, tin, tout, c_wr, c_rd, lr
+        return res, conv, think, tin, tout, c_wr, c_rd, lr, c_in, rb
     try:
         with open(path, "rb") as fh:
             fh.seek(off)
@@ -872,10 +1037,10 @@ def _mix_counts(d):
                     break
                 blob += more
     except OSError:
-        return res, conv, think, tin, tout, c_wr, c_rd, lr
+        return res, conv, think, tin, tout, c_wr, c_rd, lr, c_in, rb
     cut = blob.rfind(b"\n")                                    # complete lines only
     if cut < 0:
-        return res, conv, think, tin, tout, c_wr, c_rd, lr
+        return res, conv, think, tin, tout, c_wr, c_rd, lr, c_in, rb
     off += cut + 1
     for line in blob[:cut].splitlines():
         try:
@@ -912,6 +1077,7 @@ def _mix_counts(d):
             # usage totals (tin/tout/c_wr/c_rd) are cumulative and deliberately NOT reset.
             # (review 2026-11-13, #6.1: whole-file ▤17% ❙65% ◈18% vs real ▤4% ❙95% ◈1%)
             res = conv = think = 0
+            pp = None              # new context: the next call's write is not a rebuild
             continue
         msg = e.get("message") or {}
         u = msg.get("usage")
@@ -926,9 +1092,17 @@ def _mix_counts(d):
             _w = u.get("cache_creation_input_tokens") or 0
             _r = u.get("cache_read_input_tokens") or 0
             tin += _i + _w + _r
+            c_in += _i
             c_wr += _w
             c_rd += _r
             tout += u.get("output_tokens") or 0
+            # Rebuild = this call wrote more than its context grew, by > REBUILD_EXCESS: it
+            # re-wrote context that was already cached (expired after > 1 h idle, or the
+            # cached prefix changed — tool list / system prompt / model).
+            prompt = _i + _w + _r
+            if pp is not None and _w - max(0, prompt - pp) > REBUILD_EXCESS:
+                rb += 1
+            pp = prompt
         content = msg.get("content")
         if isinstance(content, str):
             conv += len(content)
@@ -960,9 +1134,10 @@ def _mix_counts(d):
             elif bt == "image":
                 res += 2000                                       # base64 estimate/blk
     save_cache(mcache, {"size": off, "res": res, "conv": conv, "think": think,
-                        "tin": tin, "tout": tout, "c_wr": c_wr, "c_rd": c_rd, "mixv5": 1,
+                        "tin": tin, "tout": tout, "c_wr": c_wr, "c_rd": c_rd, "mixv6": 1,
+                        "c_in": c_in, "rb": rb, "pp": pp,
                         "ids": recent_ids[-256:], "lr": lr, "lu": lu, "cur": cur})
-    return res, conv, think, tin, tout, c_wr, c_rd, lr
+    return res, conv, think, tin, tout, c_wr, c_rd, lr, c_in, rb
 
 
 def mix_labels(counts):
@@ -1037,7 +1212,8 @@ def main():
             rows.append(SEP.join(
                 render_telemetry(sample, age, up, hist if SPARK_ON else [], last_turn)))
 
-    rows.insert(0, SEP.join(render_lane(d, mix, dgx_mtok, dgx_rate)))
+    win_start = claude_window_start(cache_path) if d.get("session_id") else None
+    rows.insert(0, SEP.join(render_lane(d, mix, dgx_mtok, dgx_rate, win_start)))
 
     if cols > 0:
         rows = [trim_to_fit(r, cols) for r in rows]
