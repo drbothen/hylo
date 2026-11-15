@@ -4,7 +4,7 @@ level: ops
 version: "2.1"
 status: draft
 producer: state-manager
-timestamp: 2026-11-15T22:43:12Z
+timestamp: 2026-11-15T22:44:39Z
 last_amended: "2026-11-15 (v2.1) — state-manager — session wrap pause after Phase 0 gate"
 phase: 1
 phase_position: "PAUSED 2026-11-15. Phase 1 (spec crystallization), not started; Phase 0 PASSED 2026-11-14"
@@ -44,7 +44,7 @@ dtu_required: false
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
 1. **Commit / push / PR / merge only with explicit owner approval at that moment** (policy 15). The only exception is state-manager commits on `factory-artifacts`.
-2. **Public repo.** `factory-artifacts` never goes to GitHub: inside `.factory/`, `origin` resolves to a local private backup, and a pre-push hook blocks factory history to the public remote. Never use `--no-verify`. Public-bound content follows policy 14.
+2. **Public repo.** `factory-artifacts` is published as an orphan branch on the public GitHub repo (owner decision 2026-11-15). Every factory push is scanned by the local pre-push hook (gitleaks + hygiene patterns + a local private-terms file) and blocked on any hit; factory history may never reach `main` or any other ref. Never use `--no-verify`. All factory content follows policy 21 (public_artifact_hygiene); public-bound product content follows policy 14.
 3. **D1-D16 are settled** (policy 12). Adversary findings that challenge a decision become owner questions, not defects.
 4. **Parity first** (D4, policy 13): BCs for statusline, exporter and proxy are extracted from `legacy/`; parity diffs are the acceptance criteria for P1-P3.
 5. **Go hardening mapping** (policy 19) replaces Kani/cargo-fuzz/cargo-mutants.
@@ -170,14 +170,14 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 ### Pending Owner Decisions
 
 1. Start Phase 1 now, scoped to P1?
-2. Push public main to GitHub: now or later? It is 5 commits ahead (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6); run full-history gitleaks plus the pattern scan before any push.
+2. DONE 2026-11-15 — public main pushed to GitHub (the 5 commits f562477, b99082e, a7b5e04, 3e05cfe, c023bc6; full-history gitleaks plus the pattern scan ran clean). Off-machine durability is resolved: factory-artifacts is published on GitHub as an orphan branch.
 3. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
 
 No blockers.
 
 ### WIP Branches
 
-- None. Public main @ c023bc6 (local only, not pushed). factory-artifacts @ this commit (pushed to the private local backup; never to GitHub).
+- None. Public main @ c023bc6 (pushed to GitHub 2026-11-15). factory-artifacts: scrubbed history, published on GitHub as an orphan branch (the local bare repo is now an archive holding the local-only pre-scrub tag).
 
 ### Resume
 
