@@ -40,7 +40,9 @@ live prototype runs, paths, endpoints) is in the git-ignored `CLAUDE.local.md`.
    directory. The harness must pin all four:
    - clock: a test-only env var (e.g. `HYLO_TEST_NOW`) honored by the Go code, and injected into
      the Python run via a `sitecustomize.py` shim that patches `time.time` (the shim lives in the
-     harness, so `legacy/` stays unmodified);
+     harness, so `legacy/` stays unmodified; the shim must freeze `time.strftime`/`localtime`/
+     `gmtime` as well as `time.time`, and run the Python side with `-s` so user site-packages
+     cannot interfere);
    - metrics: a local fake VictoriaMetrics HTTP server returning canned query results;
    - process tree / window age: an injected start time in tests;
    - cache: a fresh temp directory per case (`HOME`/cache dir override).
@@ -57,10 +59,13 @@ live prototype runs, paths, endpoints) is in the git-ignored `CLAUDE.local.md`.
 6. **Exit criterion (P1):** byte-identical output, Python vs Go, across the whole fixture
    corpus on all three OSes in CI; a table test for every rule in the review doc.
 
-After P1: P2 exporter, P3 proxy (+ shadow week), P4 run/hook/doctor/ca, P5 cutover, P6
+After P1: P2 exporter, P3 proxy (replay; no shadow week), P4 run/hook/doctor/ca, P5 full cutover, P6
 generalize, P7 ledger/metrics redesign — see `docs/PLAN.md` §7.
 
 ## Open questions for the owner
 
-None blocking P1. (Release tooling — GitHub Releases first, per D12 — is set up when there is
-something to release.)
+Phase 0 (analysis of `legacy/` with the private VSDD factory) is complete and the owner
+decided every open item on 2026-11-14 (no `DGX_*` aliases; no shadow week, full cutover;
+`--subagent` not ported; config under `~/.config/hylo`). Next: Phase 1 specification, then
+the P1 steps above. (Release tooling — GitHub Releases first, per D12 — is set up when there
+is something to release.)
