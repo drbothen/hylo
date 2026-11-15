@@ -4,9 +4,9 @@ level: ops
 version: "2.0"
 status: draft
 producer: state-manager
-timestamp: 2026-11-15T04:44:03Z
-last_amended: "2026-11-14 (v2.0) — phase-0 final analysis burst: coverage audit PASS, extraction-validation r2 PASS-WITH-FIXES, pass-8 definitive synthesis, owner decision list A-F gate-ready"
-phase: 0
+timestamp: 2026-11-15T04:58:34Z
+last_amended: "2026-11-14 (v2.0) — phase-0 gate PASSED (owner approval 2026-11-14); phase 1 starting, P1 (hylo statusline) scope first"
+phase: 1
 pipeline: IN_PROGRESS
 inputs: []
 input-hash: "[live-state]"
@@ -14,14 +14,14 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "Phase 0 owner decisions COMPLETE (64 + OD-95). Next: owner Phase 0 gate approval, then Phase 1 spec crystallization (P1 statusline first). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "Phase 0 PASSED (owner approved 2026-11-14). Next: Phase 1 spec crystallization, P1 (hylo statusline) scope first: brownfield-market-intel step, then semport translation planning and the PRD/BC/architecture for the status line. D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 dtu_required: false
 ---
 
 <!--
   STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation):
-  Soft target: <=200 lines; actual 180 lines (wc-l) at phase-0 owner-decisions recording burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 180 = 320 (D-446(c) dual-margin form).
+  Soft target: <=200 lines; actual 181 lines (wc-l) at phase-0 gate-PASSED transition burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 181 = 319 (D-446(c) dual-margin form).
   Hard cap: 500 lines (validate-state-md-size hook enforcement).
   Historical content belongs in cycle files, NOT here.
 -->
@@ -38,7 +38,7 @@ dtu_required: false
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-14 — Phase 0 final analysis COMPLETE: coverage-audit PASS (0 gaps); extraction-validation r2 PASS-WITH-FIXES (78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix); pass-8 definitive synthesis (supersedes pass-6); owner decision list gate-ready (64 ODs, groups A-F). Next: input-hash drift check → fresh-context consistency audit → owner approval gate; trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-14 — Phase 0 final analysis COMPLETE: coverage-audit PASS (0 gaps); extraction-validation r2 PASS-WITH-FIXES (78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix); pass-8 definitive synthesis (supersedes pass-6); owner decision list gate-ready (64 ODs, groups A-F). Next: Phase 1 spec crystallization (P1 statusline first); trajectory-tail →0→0→0→0 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-20)
 
@@ -55,8 +55,8 @@ dtu_required: false
 | Phase | Status | Notes |
 |-------|--------|-------|
 | pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (5007a34) |
-| Phase 0 brownfield ingestion of `legacy/` | **IN_PROGRESS** — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Remaining: input-hash drift check → fresh-context consistency audit → owner approval gate (present hylo-legacy-owner-decisions.md) |
-| Phases 1-7 (spec crystallization .. convergence) | PENDING | gated on Phase 0 owner approval |
+| Phase 0 brownfield ingestion of `legacy/` | **PASSED 2026-11-14** (owner approval) — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Gate passed: OD list presented and ruled; next Phase 1 spec crystallization |
+| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** | Phase 0 gate PASSED 2026-11-14; P1 (hylo statusline) scope first |
 | Adversary passes (Phase 0) | **ALL SIX CONVERGED** — p0: 3 rounds (NITPICK r3); p1: 3 (NITPICK r3); p2: 9 (NITPICK r9); p3: 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22); p4: 7 (NITPICK r7; r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact); p5: 5 (NITPICK r5) | round record in cycles/phase-0-ingestion/convergence-trajectory.md; trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
 | Fix bursts (Phase 0) | **NONE** — no fix burst required yet; extraction-validation fixes were applied in-burst during the sweep | narrative in cycles/phase-0-ingestion/burst-log.md |
 
@@ -111,7 +111,8 @@ Registers: BC index totals 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 ou
   - HTTP/1.1 only OD-94
   - Proxy lifecycle OD-66/50/38
   - Config paths OD-95
-  - Public doc edits drafted in the main working tree (PLAN, STATUSLINE-WIDGETS, RESUME), awaiting owner commit approval.
+  - Public doc edits drafted in the main working tree (PLAN, STATUSLINE-WIDGETS, RESUME) → committed on main as c023bc6 (ruling below).
+- **Public doc edits committed on main as c023bc6** (PLAN D13/D15/P3/P5/P6/§6/§9, STATUSLINE-WIDGETS health dot, RESUME). Public main is 5 commits ahead of GitHub (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6), not pushed.
 
 ## Decisions Log
 
