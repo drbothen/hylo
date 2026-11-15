@@ -4,7 +4,7 @@ level: ops
 version: "2.1"
 status: draft
 producer: state-manager
-timestamp: 2026-11-15T05:12:15Z
+timestamp: 2026-11-15T22:43:12Z
 last_amended: "2026-11-15 (v2.1) — state-manager — session wrap pause after Phase 0 gate"
 phase: 1
 phase_position: "PAUSED 2026-11-15. Phase 1 (spec crystallization), not started; Phase 0 PASSED 2026-11-14"
@@ -22,7 +22,7 @@ dtu_required: false
 
 <!--
   STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation):
-  Soft target: <=200 lines; actual 199 lines (wc-l) at the 2026-11-15 session-wrap pause burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 199 = 301 (D-446(c) dual-margin form).
+  Soft target: <=200 lines; actual 200 lines (wc-l) at the 2026-11-15 post-scrub burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 200 = 300 (D-446(c) dual-margin form).
   Hard cap: 500 lines (validate-state-md-size hook enforcement).
   Historical content belongs in cycle files, NOT here.
 -->
@@ -41,7 +41,7 @@ dtu_required: false
 | **Default branch** | main (no develop) |
 | **Last Updated** | 2026-11-14 — Phase 0 final analysis COMPLETE: coverage-audit PASS (0 gaps); extraction-validation r2 PASS-WITH-FIXES (78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix); pass-8 definitive synthesis (supersedes pass-6); owner decision list gate-ready (64 ODs, groups A-F). Next: Phase 1 spec crystallization (P1 statusline first); trajectory-tail →0→0→0→0 |
 
-## Owner Guardrails (standing; see policies.yaml 12-20)
+## Owner Guardrails (standing; see policies.yaml 12-21)
 
 1. **Commit / push / PR / merge only with explicit owner approval at that moment** (policy 15). The only exception is state-manager commits on `factory-artifacts`.
 2. **Public repo.** `factory-artifacts` never goes to GitHub: inside `.factory/`, `origin` resolves to a local private backup, and a pre-push hook blocks factory history to the public remote. Never use `--no-verify`. Public-bound content follows policy 14.
@@ -55,7 +55,7 @@ dtu_required: false
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (5007a34) |
+| pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (47e4c37) |
 | Phase 0 brownfield ingestion of `legacy/` | **PASSED 2026-11-14** (owner approval) — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Gate passed: OD list presented and ruled; next Phase 1 spec crystallization |
 | Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** | Phase 0 gate PASSED 2026-11-14; P1 (hylo statusline) scope first |
 | Adversary passes (Phase 0) | **ALL SIX CONVERGED** — p0: 3 rounds (NITPICK r3); p1: 3 (NITPICK r3); p2: 9 (NITPICK r9); p3: 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22); p4: 7 (NITPICK r7; r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact); p5: 5 (NITPICK r5) | round record in cycles/phase-0-ingestion/convergence-trajectory.md; trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
@@ -125,6 +125,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 | D14 | Proxy settings do not leak to child processes | docs/PLAN.md on main (b99082e); mechanism chosen in P4 | 2026-11-14 |
 | D15 | Config over code iron rule | docs/PLAN.md + CLAUDE.md working tree; enforced via policy 20 | 2026-11-14 |
 | policy 20 | config_over_code policy entry (policies.yaml v1.2) | this factory, grounding burst | 2026-11-14 |
+| post-scrub publish | factory-artifacts history scrubbed and rewritten 2026-11-15 (owner-approved): private details removed, logs/ untracked and gitignored, stale SHA citations remapped to post-rewrite SHAs; pre-scrub tag (pre-scrub-2026-11-15) kept local, never pushed; branch to be published on the public repository as an orphan branch; policy 21 public_artifact_hygiene adopted | owner ruling at session wrap | 2026-11-15 |
 
 ## Research (2026-11-14)
 
@@ -145,7 +146,7 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 | Cycle | Type | Status | Notes |
 |-------|------|--------|-------|
-| phase-0-ingestion | brownfield-ingestion | **ACTIVE** — analysis COMPLETE (all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; pass-8 synthesis + OD list done); drift check → consistency audit → owner gate next | Commits: 560a861 (passes 2-3) + 66032bc (passes 0/1/4/5) + this burst (coverage audit, validation r2, synthesis, OD list) |
+| phase-0-ingestion | brownfield-ingestion | **ACTIVE** — analysis COMPLETE (all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; pass-8 synthesis + OD list done); drift check → consistency audit → owner gate next | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + this burst (coverage audit, validation r2, synthesis, OD list) |
 
 ## Session Resume Checkpoint (2026-11-15 — SESSION-WRAP-PAUSE: Phase 0 PASSED, Phase 1 not started)
 

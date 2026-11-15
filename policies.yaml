@@ -1,7 +1,7 @@
 ---
 document_type: governance-policy-registry
-version: "1.3"
-last_amended: "2026-11-14"
+version: "1.4"
+last_amended: "2026-11-15"
 ---
 
 # .factory/policies.yaml — Declarative governance policy registry
@@ -30,6 +30,10 @@ last_amended: "2026-11-14"
 #
 # CHANGELOG
 # ---------
+# 1.4 (2026-11-15): POL-21 public_artifact_hygiene added (factory-artifacts
+#                   history scrubbed and rewritten 2026-11-15, then published
+#                   as a public orphan branch on the hylo GitHub repository;
+#                   enforced at push time by the local pre-push hook).
 # 1.3 (2026-11-14): POL-12 settled-decision range amended D1-D15 -> D1-D16
 #                   (hylo D16 web/terminal UI committed on main 3e05cfe).
 # 1.2 (2026-11-14): POL-20 config_over_code added (hylo D15 iron rule:
@@ -344,3 +348,19 @@ policies:
       - "Verify legacy DGX_* environment variable names are accepted until the P6 rename shim, flagged for rename rather than silently dropped"
       - "Verify apparent exceptions are protocol or format constants (API paths, SSE event/field names, the D7 ledger schema) declared as named constants, each with a comment saying why it is not config"
       - "Flag any behavior-shaping literal outside internal/config defaults as a violation"
+
+  - id: 21
+    name: public_artifact_hygiene
+    description: "factory-artifacts is published on the public GitHub repository. Every factory artifact (specs, BCs, stories, reviews, STATE.md, cycle files, commit messages) uses repo-relative paths, or $HOME / $PROTOTYPE / $SCRATCH placeholders, never absolute home paths, scratchpad or session-temp paths, session IDs or UUIDs that identify sessions, usernames, email addresses (except the GitHub no-reply commit identity), private LAN IPs (use RFC 5737 192.0.2.x), private hostnames, client or project names, or private repository names not already public in legacy/. Hook telemetry (logs/) stays local and gitignored. Enforced at push time by the local pre-push hook (gitleaks + hygiene pattern scan with a local private-terms file); adversary and consistency-validator flag violations earlier."
+    adopted: 2026-11-15
+    severity: HIGH
+    enforced_by: [adversary-prompt, consistency-validator, pre-push-hook]
+    scope: [all-factory-artifacts]
+    lint_hook: null
+    codified_at: "2026-11-15"
+    verification_steps:
+      - "Scan the artifact for absolute home paths (/Users/<name>, /home/<name>, C:\\Users\\<name>) and for scratchpad or session-temp paths"
+      - "Scan for UUIDs and session IDs that identify sessions"
+      - "Scan for email addresses other than the GitHub no-reply commit identity"
+      - "Scan for private LAN IPs (RFC 1918: 10/8, 172.16/12, 192.168/16) and private hostnames"
+      - "Flag any of the above as a violation with file:line"

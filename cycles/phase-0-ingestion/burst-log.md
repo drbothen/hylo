@@ -15,7 +15,7 @@ traces_to: STATE.md
 
 ## Burst: Grounding burst 1 — research, legacy broad sweep + validation, D13-D15, policy 20 (2026-11-14)
 
-**Parent-commit:** 5007a346d58d5cf1309e2f3cc634f40e820e0e49
+**Parent-commit:** 47e4c3732ffbef8dded4225f0ce75a2a4867dadc
 
 **Adversary verdict:** N/A — grounding burst, no adversary pass dispatched. Extraction validation verdict recorded instead: PASS-WITH-FIXES (exhaustive; 0 hallucinations). Adversary passes begin at convergence-deepening.
 
@@ -58,7 +58,7 @@ traces_to: STATE.md
 
 ## Burst: convergence-deepening — passes 2-3 CONVERGED, 232-BC index, OD-01..OD-45, owner rulings, captures (2026-11-14)
 
-**Parent-commit:** 535b6ae (grounding burst 1)
+**Parent-commit:** 9692c07 (grounding burst 1)
 
 **Adversary verdict:** deepening rounds for broad-sweep passes 2 and 3 reached convergence.
 
@@ -118,7 +118,7 @@ traces_to: STATE.md
 
 ## Burst: convergence-deepening COMPLETE — passes 0/1/4/5 converged; canonical Phase 1 input catalogues locked (2026-11-14)
 
-**Parent-commit:** 560a861 (convergence-deepening passes 2-3)
+**Parent-commit:** dff1f56 (convergence-deepening passes 2-3)
 
 **Adversary verdict:** convergence-deepening COMPLETE — all six broad-sweep passes converged. Round dispositions verified against the convergence declarations on disk.
 
@@ -179,7 +179,7 @@ Passes 2 (9 rounds) and 3 (8 rounds) converged in the prior burst; see the entry
 
 ## Burst: final Phase 0 analysis — coverage audit PASS, extraction validation r2 PASS-WITH-FIXES, pass-8 definitive synthesis, owner decision list gate-ready (2026-11-14)
 
-**Parent-commit:** 66032bc (convergence-deepening complete)
+**Parent-commit:** be38c50 (convergence-deepening complete)
 
 **Adversary verdict:** no adversary pass dispatched this burst (deepening rounds already closed on NITPICK). Analysis-verdicts recorded instead: coverage audit (step B.5) **PASS** — `semport/hylo-legacy/hylo-legacy-coverage-audit.md`. Extraction validation r2 (step B.6) **PASS-WITH-FIXES** — `semport/hylo-legacy/hylo-legacy-extraction-validation-r2.md`: 78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix (applied in-burst). Deep synthesis (step C) **DONE** — `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md` is the definitive synthesis, superseding pass-6; primary reference for create-brief / create-domain-spec / create-prd / semport-analyze. Owner decision list **GATE-READY** — `semport/hylo-legacy/hylo-legacy-owner-decisions.md`.
 

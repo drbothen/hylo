@@ -26,7 +26,7 @@ Archived verbatim from STATE.md when the convergence-deepening checkpoint replac
 | Field | Value |
 |-------|-------|
 | **Date** | 2026-11-14 |
-| **Position** | Phase 0, post-grounding-burst (research + broad sweep passes 0-6 + extraction validation committed on factory-artifacts 535b6ae); convergence-deepening was next |
+| **Position** | Phase 0, post-grounding-burst (research + broad sweep passes 0-6 + extraction validation committed on factory-artifacts 9692c07); convergence-deepening was next |
 | **Convergence counter** | pre-adversary placeholder (→0→0→0→0) |
 | **Next step** | convergence-deepening, beginning with broad-sweep passes 2 and 3 |
 
