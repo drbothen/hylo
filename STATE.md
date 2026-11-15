@@ -4,28 +4,27 @@ level: ops
 version: "2.1"
 status: draft
 producer: state-manager
-timestamp: 2026-11-15T22:44:39Z
-last_amended: "2026-11-15 (v2.1) — state-manager — session wrap pause after Phase 0 gate"
+timestamp: 2026-11-15T23:33:36Z
+last_amended: "2026-11-15 (v2.1) — state-manager — Phase 1 started (feature routing, P1 statusline); market intel GO approved; porting decision Python->Go"
 phase: 1
-phase_position: "PAUSED 2026-11-15. Phase 1 (spec crystallization), not started; Phase 0 PASSED 2026-11-14"
-pipeline: PAUSED
+phase_position: "IN_PROGRESS 2026-11-15. Phase 1 (spec crystallization) brownfield path underway; Phase 0 PASSED 2026-11-14"
+pipeline: ACTIVE
 inputs: []
 input-hash: "[live-state]"
 traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "SESSION-WRAP-PAUSE-2026-11-15: factory paused after the Phase 0 gate; next is Phase 1 spec crystallization scoped to P1 (hylo statusline). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "SEMPORT-TRANSLATION NEXT: post-phase-0 routing (feature, P1 hylo statusline) -> market-intel GO (owner-approved) -> detect-cross-language-porting DONE (brownfield/porting-decision.md, needs_semport true); semport-translation awaits owner rulings on the 6 porting tensions. D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
+market_intel:
+  recommendation: GO
+  human_decision: approved
+  notes: "P1 only. Owner rulings: (1) P1 success criterion = owner's own daily use (byte parity on the owner's setup); community adoption is a P6 concern. (2) README positioning 'lane-aware with backend telemetry and owned-hardware cost' + honest Alternatives section approved in principle, written at P6. (3) no stdin `version` session-cache key until after parity (D4). (4) `7d_oi` Fable-only claim stays a watch note, no work. feature_type = cli, so brownfield-design-system-extract is skipped (condition not met). Allocated OD-96..OD-100."
 dtu_required: false
 ---
 
-<!--
-  STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation):
-  Soft target: <=200 lines; actual 200 lines (wc-l) at the 2026-11-15 post-scrub burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 200 = 300 (D-446(c) dual-margin form).
-  Hard cap: 500 lines (validate-state-md-size hook enforcement).
-  Historical content belongs in cycle files, NOT here.
--->
+<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 200 lines (wc-l) at the 2026-11-15 phase-1 routing burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 200 = 300 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
 
 # Pipeline State: hylo
 
@@ -39,7 +38,7 @@ dtu_required: false
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-14 — Phase 0 final analysis COMPLETE: coverage-audit PASS (0 gaps); extraction-validation r2 PASS-WITH-FIXES (78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix); pass-8 definitive synthesis (supersedes pass-6); owner decision list gate-ready (64 ODs, groups A-F). Next: Phase 1 spec crystallization (P1 statusline first); trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-15 — Phase 1 started: owner routed feature mode scoped to P1 (hylo statusline); market-intel GO APPROVED by the owner (OD-96..OD-100); detect-cross-language-porting DONE (needs_semport true; P1 modules only). Next: semport-translation after the owner rules on the 6 porting tensions; trajectory-tail →0→0→0→0 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
@@ -57,7 +56,7 @@ dtu_required: false
 |-------|--------|-------|
 | pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (47e4c37) |
 | Phase 0 brownfield ingestion of `legacy/` | **PASSED 2026-11-14** (owner approval) — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Gate passed: OD list presented and ruled; next Phase 1 spec crystallization |
-| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** | Phase 0 gate PASSED 2026-11-14; P1 (hylo statusline) scope first |
+| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** | Owner routed feature 2026-11-15, scope P1 (hylo statusline); market-intel gate APPROVED; porting decision DONE; next semport-translation |
 | Adversary passes (Phase 0) | **ALL SIX CONVERGED** — p0: 3 rounds (NITPICK r3); p1: 3 (NITPICK r3); p2: 9 (NITPICK r9); p3: 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22); p4: 7 (NITPICK r7; r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact); p5: 5 (NITPICK r5) | round record in cycles/phase-0-ingestion/convergence-trajectory.md; trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
 | Fix bursts (Phase 0) | **NONE** — no fix burst required yet; extraction-validation fixes were applied in-burst during the sweep | narrative in cycles/phase-0-ingestion/burst-log.md |
 
@@ -65,11 +64,11 @@ dtu_required: false
 
 | # | Step | Outcome |
 |---|------|---------|
-| 5 | grounding burst: STATE.md + policies.yaml + cycle dir committed on factory-artifacts | COMPLETE |
 | 6 | convergence-deepening: pass 2 (9 rounds) + pass 3 (8 rounds) | CONVERGED (NITPICK) |
 | 7 | convergence-deepening: passes 0, 1, 4, 5 (3/3/7/5 rounds) — all six passes converged | CONVERGED (NITPICK) |
 | 8 | final analysis burst: coverage-audit (PASS) + extraction-validation r2 (PASS-WITH-FIXES) + pass-8 definitive synthesis + OD list A-F gate-ready | COMPLETE |
 | 9 | SESSION-WRAP-PAUSE-2026-11-15 | COMPLETE — state-manager: factory paused, checkpoint written |
+| 10 | Phase 1 routing (feature, P1) + market-intel gate APPROVED + detect-cross-language-porting (needs_semport true) | COMPLETE — next: semport-translation |
 
 ## Convergence Status
 
@@ -114,6 +113,7 @@ Registers: BC index totals 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 ou
   - Config paths OD-95
   - Public doc edits drafted in the main working tree (PLAN, STATUSLINE-WIDGETS, RESUME) → committed on main as c023bc6 (ruling below).
 - **Public doc edits committed on main as c023bc6** (PLAN D13/D15/P3/P5/P6/§6/§9, STATUSLINE-WIDGETS health dot, RESUME). Public main is 5 commits ahead of GitHub (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6), not pushed.
+- **DECIDED 2026-11-15 (market-intel human gate; rows in `specs/owner-decisions-log-2026-11-14.md`):** rulings OD-96..OD-100, summarized in the market_intel frontmatter block above.
 
 ## Decisions Log
 
@@ -131,14 +131,13 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 
 Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md` (verified: exactly one row per report):
 
-- `domain-hybrid-routing-claude-code-2026-11-14.md` — domain landscape, config surfaces, Messages API facts, policy risks, OpenAI translation.
-- `general-go-port-parity-crossplatform-2026-11-14.md` — Python->Go byte-parity pitfalls, parity harness, cross-platform, deps, hardening, CI/release.
-- `general-go-tls-intercepting-proxy-2026-11-14.md` — stdlib vs goproxy/martian/go-mitmproxy, selective interception + Remote Control, ALPN/SSE/WebSocket, CA semantics, mitmproxy parity behaviors, testing.
-- `peer-tool-lessons-2026-11-14.md` — peer-tool lessons L1-L7; owner decisions OD-1 (= D13) and OD-2 (= D14).
+- `domain-hybrid-routing-claude-code-2026-11-14.md` (domain landscape, config surfaces, Messages API facts, policy risks, OpenAI translation); `general-go-port-parity-crossplatform-2026-11-14.md` (Python->Go byte-parity pitfalls, parity harness, cross-platform, deps, hardening, CI/release).
+- `general-go-tls-intercepting-proxy-2026-11-14.md` (stdlib vs goproxy/martian/go-mitmproxy, selective interception + Remote Control, ALPN/SSE/WebSocket, CA semantics, mitmproxy parity behaviors, testing); `peer-tool-lessons-2026-11-14.md` (peer lessons L1-L7; owner decisions OD-1 = D13, OD-2 = D14).
+- `domain-statusline-landscape-2026-11-15.md` (2026-11-15, domain): status line peer landscape + freshness delta since 11-14 + P1 risk signals — the market-intel input; row in `specs/research/RESEARCH-INDEX.md`.
 
 ## Open Owner Questions
 
-- **OD-01..OD-94 decision list** — gate-ready in `semport/hylo-legacy/hylo-legacy-owner-decisions.md`; present at the Phase 0 gate (64 issued in groups A-F: 2 ruled, 62 pending; next free OD-95).
+- OD numbering: OD-01..OD-100 allocated (Phase 0 gate list + 2026-11-15 market-intel review); next free OD-101 — log: `specs/owner-decisions-log-2026-11-14.md`.
 - Optional checks (deferred, non-blocking): Grafana per-session cost panel; offline promtool rule validation.
 - Policy risk (owner awareness): Anthropic Usage Policy 2026-11-12 language on routing through consumer subscriptions.
 
@@ -148,15 +147,15 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 |-------|------|--------|-------|
 | phase-0-ingestion | brownfield-ingestion | **ACTIVE** — analysis COMPLETE (all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; pass-8 synthesis + OD list done); drift check → consistency audit → owner gate next | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + this burst (coverage audit, validation r2, synthesis, OD list) |
 
-## Session Resume Checkpoint (2026-11-15 — SESSION-WRAP-PAUSE: Phase 0 PASSED, Phase 1 not started)
+## Session Resume Checkpoint (2026-11-15 — Phase 1 IN PROGRESS: market intel GO, porting decision done; next semport-translation)
 
 > **SELF-SUFFICIENT RESUME CONTEXT** — read this section alone to resume after a session CLEAR.
 
 ### Where We Are
 
-- Date 2026-11-15. Position: Phase 0 **PASSED** (owner approved 2026-11-14); Phase 1 **not started**. Factory PAUSED at the session-wrap pause.
-- Next: Phase 1 spec crystallization scoped to P1 (hylo statusline): the brownfield-market-intel confirmation (the domain research already covers the landscape), the semport translation plan Python→Go, then the status line spec package (PRD, BCs from the 103 BC-SL contracts, D15 config keys, parity-harness spec, internal/pyfmt helpers).
-- Gate inputs: `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (64 + OD-95; next free OD-96, next free CONV-ABS 95).
+- Date 2026-11-15. Position: Phase 1 **IN_PROGRESS** — brownfield path, feature routing (scope P1 = `hylo statusline`). Phase 0 PASSED 2026-11-14.
+- Done: market-intel GO + human APPROVAL (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL; backfill tool out until P6). Next: semport-translation once the owner rules on the 6 porting tensions; then the status line spec package (PRD, BCs from the 103 BC-SL contracts, D15 config keys, parity-harness spec, internal/pyfmt helpers).
+- Gate inputs: `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-100; next free OD-101, next free CONV-ABS 95).
 
 ### Convergence
 
@@ -169,9 +168,10 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 ### Pending Owner Decisions
 
-1. Start Phase 1 now, scoped to P1?
+1. DONE 2026-11-15 — Start Phase 1 scoped to P1? YES: feature routing recorded.
 2. DONE 2026-11-15 — public main pushed to GitHub (the 5 commits f562477, b99082e, a7b5e04, 3e05cfe, c023bc6; full-history gitleaks plus the pattern scan ran clean). Off-machine durability is resolved: factory-artifacts is published on GitHub as an orphan branch.
 3. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
+4. Rule on the 6 porting tensions in `brownfield/porting-decision.md` §8 — to present before semport-translation. Registry note: `artifact-path-registry.yaml` does not exist in this factory; `brownfield/{filename}` stays workflow-canonical (brownfield.lobster:252) but unregistered (tension 6, noted not resolved).
 
 No blockers.
 

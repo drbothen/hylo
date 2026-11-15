@@ -39,3 +39,11 @@
 | OD-24 / OD-27 | RULED earlier: legacy LAN exposure accepted until cutover; hylo binds loopback by default (HY-BIND) | |
 | OD-74 | (a) approve harmonized key table (run.preflight.enabled/timeout_s, paths.failed_capture_dir, DGX_PROFILE -> --profile) + comma-list encoding for list values in env; maps config-file only; HYLO_PROFILE decided in P4 profile design | |
 | OD-95 (new, from consistency audit F-01) | (a) keep PLAN paths, built explicitly in internal/platform: ~/.config/hylo, ~/.cache/hylo, ~/.local/state/hylo honoring XDG_CONFIG_HOME/XDG_CACHE_HOME/XDG_STATE_HOME on macOS+Linux; %APPDATA%/%LOCALAPPDATA% on Windows; HYLO_CONFIG / --config override; hylo config path prints paths | |
+
+<!-- Phase 1 market-intel review rulings by the owner, 2026-11-15 -->
+
+| OD-96 | (a) P1 success criterion = the owner's own daily use (byte parity on the owner's setup) | community adoption is a P6 concern, not a P1 gate |
+| OD-97 | (a) README positioning "lane-aware with backend telemetry and owned-hardware cost" + honest Alternatives section, approved in principle | written at P6 |
+| OD-98 | (a) no stdin `version` session-cache key until after parity | D4; session cache schema stays legacy (mixv6 marker, raw-sid session cache name) |
+| OD-99 | (a) `7d_oi` Fable-only claim stays a watch note | no work scheduled |
+| OD-100 | feature_type = cli | brownfield-design-system-extract skipped (condition not met) |
