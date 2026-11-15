@@ -1,27 +1,28 @@
 ---
 document_type: pipeline-state
 level: ops
-version: "2.0"
+version: "2.1"
 status: draft
 producer: state-manager
-timestamp: 2026-11-15T04:58:34Z
-last_amended: "2026-11-14 (v2.0) — phase-0 gate PASSED (owner approval 2026-11-14); phase 1 starting, P1 (hylo statusline) scope first"
+timestamp: 2026-11-15T05:12:15Z
+last_amended: "2026-11-15 (v2.1) — state-manager — session wrap pause after Phase 0 gate"
 phase: 1
-pipeline: IN_PROGRESS
+phase_position: "PAUSED 2026-11-15. Phase 1 (spec crystallization), not started; Phase 0 PASSED 2026-11-14"
+pipeline: PAUSED
 inputs: []
 input-hash: "[live-state]"
 traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "Phase 0 PASSED (owner approved 2026-11-14). Next: Phase 1 spec crystallization, P1 (hylo statusline) scope first: brownfield-market-intel step, then semport translation planning and the PRD/BC/architecture for the status line. D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "SESSION-WRAP-PAUSE-2026-11-15: factory paused after the Phase 0 gate; next is Phase 1 spec crystallization scoped to P1 (hylo statusline). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 dtu_required: false
 ---
 
 <!--
   STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation):
-  Soft target: <=200 lines; actual 181 lines (wc-l) at phase-0 gate-PASSED transition burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 181 = 319 (D-446(c) dual-margin form).
+  Soft target: <=200 lines; actual 199 lines (wc-l) at the 2026-11-15 session-wrap pause burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 199 = 301 (D-446(c) dual-margin form).
   Hard cap: 500 lines (validate-state-md-size hook enforcement).
   Historical content belongs in cycle files, NOT here.
 -->
@@ -64,11 +65,11 @@ dtu_required: false
 
 | # | Step | Outcome |
 |---|------|---------|
-| 4 | extraction validation (exhaustive; 0 hallucinations) | PASS-WITH-FIXES |
 | 5 | grounding burst: STATE.md + policies.yaml + cycle dir committed on factory-artifacts | COMPLETE |
 | 6 | convergence-deepening: pass 2 (9 rounds) + pass 3 (8 rounds) | CONVERGED (NITPICK) |
 | 7 | convergence-deepening: passes 0, 1, 4, 5 (3/3/7/5 rounds) — all six passes converged | CONVERGED (NITPICK) |
 | 8 | final analysis burst: coverage-audit (PASS) + extraction-validation r2 (PASS-WITH-FIXES) + pass-8 definitive synthesis + OD list A-F gate-ready | COMPLETE |
+| 9 | SESSION-WRAP-PAUSE-2026-11-15 | COMPLETE — state-manager: factory paused, checkpoint written |
 
 ## Convergence Status
 
@@ -146,23 +147,40 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 |-------|------|--------|-------|
 | phase-0-ingestion | brownfield-ingestion | **ACTIVE** — analysis COMPLETE (all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; pass-8 synthesis + OD list done); drift check → consistency audit → owner gate next | Commits: 560a861 (passes 2-3) + 66032bc (passes 0/1/4/5) + this burst (coverage audit, validation r2, synthesis, OD list) |
 
-## Session Resume Checkpoint (2026-11-14 — Phase 0 final analysis COMPLETE)
+## Session Resume Checkpoint (2026-11-15 — SESSION-WRAP-PAUSE: Phase 0 PASSED, Phase 1 not started)
 
 > **SELF-SUFFICIENT RESUME CONTEXT** — read this section alone to resume after a session CLEAR.
 
-### 1. Where We Are
+### Where We Are
 
-- Phase 0 final analysis **COMPLETE**: coverage audit **PASS** (step B.5, 0 gaps — `hylo-legacy-coverage-audit.md`); extraction validation r2 **PASS-WITH-FIXES** (step B.6 — 78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix applied in-burst — `hylo-legacy-extraction-validation-r2.md`); deep synthesis **DONE** — `hylo-legacy-pass-8-deep-synthesis.md` is the DEFINITIVE synthesis, supersedes pass-6; primary reference for create-brief / create-domain-spec / create-prd / semport-analyze.
-- Owner decision list **gate-ready**: `semport/hylo-legacy/hylo-legacy-owner-decisions.md` — 64 issued ODs in groups A-F (A 12 incl. 2 ruled OD-24/OD-27, B 19, C 13, D 10, E 2, F 8); recommendations 23 KEEP / 30 DEVIATE / 11 NEW; answer format in the file header; next free OD-95.
-- **OWNER FLAG (confirm at the gate):** OD-14 now recommends (a) do not port --subagent — reverses the earlier Phase-0 toggle recommendation (PLAN §3 lists custom agent-panel rows as a non-goal; Claude Code 2.1.323 removed subagentStatusLine).
-- Lessons recorded in pass-8 §10: 53 total — 13 P0 (L0-01..L0-13), 13 P1, 9 P2, 18 P3. Pass-0 deep inventory corrected in place (spawn census 10 → 9, B.6 note).
-- Public repo main is 4 commits ahead of GitHub (b99082e D13/D14, a7b5e04 D15, 3e05cfe D16, plus f562477) — not pushed; push awaits owner.
+- Date 2026-11-15. Position: Phase 0 **PASSED** (owner approved 2026-11-14); Phase 1 **not started**. Factory PAUSED at the session-wrap pause.
+- Next: Phase 1 spec crystallization scoped to P1 (hylo statusline): the brownfield-market-intel confirmation (the domain research already covers the landscape), the semport translation plan Python→Go, then the status line spec package (PRD, BCs from the 103 BC-SL contracts, D15 config keys, parity-harness spec, internal/pyfmt helpers).
+- Gate inputs: `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (64 + OD-95; next free OD-96, next free CONV-ABS 95).
 
-### 2. Next Steps
+### Convergence
 
-1. input-hash drift check over `.factory/` artifacts
-2. fresh-context consistency audit
-3. Phase 0 owner approval gate: present `semport/hylo-legacy/hylo-legacy-owner-decisions.md` (answer format: OD-06 a, or A: all recommended)
+- None active. Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5.
+
+### In Flight
+
+- None. No sub-agents running, nothing abandoned.
+- Public repo main is clean except pre-existing untracked local config (.claude/, .mcp.json), intentionally uncommitted.
+
+### Pending Owner Decisions
+
+1. Start Phase 1 now, scoped to P1?
+2. Push public main to GitHub: now or later? It is 5 commits ahead (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6); run full-history gitleaks plus the pattern scan before any push.
+3. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
+
+No blockers.
+
+### WIP Branches
+
+- None. Public main @ c023bc6 (local only, not pushed). factory-artifacts @ this commit (pushed to the private local backup; never to GitHub).
+
+### Resume
+
+Open a new session in $HOME/Dev/hylo, read docs/RESUME.md and .factory/STATE.md, then run /vsdd-factory:rehydrate-wave then /vsdd-factory:next-step.
 
 ## Skip Log
 

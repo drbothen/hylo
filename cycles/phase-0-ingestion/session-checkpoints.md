@@ -96,4 +96,24 @@ Archived verbatim from STATE.md when the final-analysis checkpoint replaced it (
 
 ---
 
+## Session Resume Checkpoint (2026-11-14 — Phase 0 final analysis COMPLETE)
+
+Archived verbatim from STATE.md when the SESSION-WRAP-PAUSE checkpoint replaced it (2026-11-15, session-wrap pause burst).
+
+### 1. Where We Are
+
+- Phase 0 final analysis **COMPLETE**: coverage audit **PASS** (step B.5, 0 gaps — `hylo-legacy-coverage-audit.md`); extraction validation r2 **PASS-WITH-FIXES** (step B.6 — 78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix applied in-burst — `hylo-legacy-extraction-validation-r2.md`); deep synthesis **DONE** — `hylo-legacy-pass-8-deep-synthesis.md` is the DEFINITIVE synthesis, supersedes pass-6; primary reference for create-brief / create-domain-spec / create-prd / semport-analyze.
+- Owner decision list **gate-ready**: `semport/hylo-legacy/hylo-legacy-owner-decisions.md` — 64 issued ODs in groups A-F (A 12 incl. 2 ruled OD-24/OD-27, B 19, C 13, D 10, E 2, F 8); recommendations 23 KEEP / 30 DEVIATE / 11 NEW; answer format in the file header; next free OD-95.
+- **OWNER FLAG (confirm at the gate):** OD-14 now recommends (a) do not port --subagent — reverses the earlier Phase-0 toggle recommendation (PLAN §3 lists custom agent-panel rows as a non-goal; Claude Code 2.1.323 removed subagentStatusLine).
+- Lessons recorded in pass-8 §10: 53 total — 13 P0 (L0-01..L0-13), 13 P1, 9 P2, 18 P3. Pass-0 deep inventory corrected in place (spawn census 10 → 9, B.6 note).
+- Public repo main is 4 commits ahead of GitHub (b99082e D13/D14, a7b5e04 D15, 3e05cfe D16, plus f562477) — not pushed; push awaits owner.
+
+### 2. Next Steps
+
+1. input-hash drift check over `.factory/` artifacts
+2. fresh-context consistency audit
+3. Phase 0 owner approval gate: present `semport/hylo-legacy/hylo-legacy-owner-decisions.md` (answer format: OD-06 a, or A: all recommended)
+
+---
+
 <!-- Repeat for each archived checkpoint. Maintain chronological order. -->
