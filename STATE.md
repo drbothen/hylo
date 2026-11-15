@@ -4,7 +4,7 @@ level: ops
 version: "2.0"
 status: draft
 producer: state-manager
-timestamp: 2026-11-14T10:35:44Z
+timestamp: 2026-11-15T04:44:03Z
 last_amended: "2026-11-14 (v2.0) — phase-0 final analysis burst: coverage audit PASS, extraction-validation r2 PASS-WITH-FIXES, pass-8 definitive synthesis, owner decision list A-F gate-ready"
 phase: 0
 pipeline: IN_PROGRESS
@@ -14,14 +14,14 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "phase-0 coverage-audit PASS, extraction-validation PASS-WITH-FIXES, final-synthesis DONE (pass-8 definitive synthesis supersedes pass-6; owner decision list A-F gate-ready); next: input-hash drift check → fresh-context consistency audit → owner approval gate (present semport/hylo-legacy/hylo-legacy-owner-decisions.md); owner flag: OD-14 now recommends not porting --subagent, reversing the earlier toggle recommendation; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "Phase 0 owner decisions COMPLETE (64 + OD-95). Next: owner Phase 0 gate approval, then Phase 1 spec crystallization (P1 statusline first). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 dtu_required: false
 ---
 
 <!--
   STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation):
-  Soft target: <=200 lines; actual 170 lines (wc-l) at phase-0 convergence-deepening completion burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 170 = 330 (D-446(c) dual-margin form).
+  Soft target: <=200 lines; actual 180 lines (wc-l) at phase-0 owner-decisions recording burst; margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 180 = 320 (D-446(c) dual-margin form).
   Hard cap: 500 lines (validate-state-md-size hook enforcement).
   Historical content belongs in cycle files, NOT here.
 -->
@@ -102,6 +102,16 @@ Registers: BC index totals 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 ou
 - **Q-c = D4-EX-2:** fix the sticky transcript crash. Skip wrong-shape JSON lines as legacy skips invalid JSON (dgx_statusline.py:1060-1063); excluded from the parity diff; covered by Go table tests (BC-SL-098/099).
 - **LAN exposure** of the live legacy proxies/exporter: accepted by the owner until cutover (ruled via OD-24/OD-27). hylo proxy, UI and exporter bind to loopback by default (HY-BIND).
 - **OD-01..OD-94 decision list gate-ready** — `semport/hylo-legacy/hylo-legacy-owner-decisions.md`. Groups A-F: A 12 (incl. 2 ruled: OD-24/OD-27), B 19, C 13, D 10, E 2, F 8 = 64 issued; unused or reserved (30): OD-44, OD-49, OD-62-65, OD-67-73, OD-77-93; next free OD-95. Recommendations: 23 KEEP / 30 DEVIATE / 11 NEW. **Owner flag: OD-14** now recommends (a) do not port --subagent, reversing the earlier Phase-0 toggle recommendation (PLAN §3 non-goal; CC 2.1.323 removed subagentStatusLine) — confirm at the gate. D13/D14 remain recorded in the Decisions Log below.
+- **DECIDED 2026-11-14 (gate rulings; full log in `specs/owner-decisions-log-2026-11-14.md`):**
+  - No DGX_* aliases / no backwards compatibility (OD-05)
+  - No shadow week, full cutover (OD-52 moot)
+  - --subagent not ported (OD-14)
+  - Credential hygiene OD-06/07
+  - Upstream TLS OD-41
+  - HTTP/1.1 only OD-94
+  - Proxy lifecycle OD-66/50/38
+  - Config paths OD-95
+  - Public doc edits drafted in the main working tree (PLAN, STATUSLINE-WIDGETS, RESUME), awaiting owner commit approval.
 
 ## Decisions Log
 

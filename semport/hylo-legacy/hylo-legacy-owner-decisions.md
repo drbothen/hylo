@@ -1,4 +1,5 @@
 # Owner decision list (Phase 0 gate) — hylo-legacy
+**Status (2026-11-14):** all 64 issued items DECIDED, plus OD-95 (config/cache/state paths) DECIDED; log in `specs/owner-decisions-log-2026-11-14.md`. Numbering: IDs declared unused stay free; next free OD is OD-96, next free CONV-ABS is 95.
 
 - **Purpose:** every owner decision (OD) issued during Phase 0, ready for one sitting. Each item has a one-line question, the component, the
   phase where it first matters, lettered options, **one** recommendation with a one-line reason, and the evidence location.
