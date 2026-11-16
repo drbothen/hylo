@@ -132,3 +132,15 @@ TBD — pyfmt time (design step S1)
 ## VP Anchors (Recommended)
 
 - VP-026 — `_mktime` port equals CPython goldens
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | none |
+| **Global state access** | none |
+| **Deterministic** | yes |
+| **Thread safety** | Send + Sync (stateless functions) |
+| **Overall classification** | pure core |
+
+Owning component `py/time.go (LocalToUnix _mktime port)` (BC-COMPONENT-MAP: py/time.go (LocalToUnix _mktime port) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

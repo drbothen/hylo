@@ -135,3 +135,15 @@ S-TBD — config subcommands
 ## VP Anchors (Recommended)
 
 - VP-004, VP-032 — per-OS path table
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | `os.Args`/`os.Std*`, `os.Exit` |
+| **Global state access** | process exit status |
+| **Deterministic** | no (process boundary) |
+| **Thread safety** | n.a. |
+| **Overall classification** | effectful shell |
+
+Owning component `cmd/hylo` (BC-COMPONENT-MAP: cmd/hylo/config.go (path printing, OD-132) - ARCH-01); the ARCH-00 package table classifies the package effectful shell - `os.Args`/`os.Std*`, `os.Exit`, no logic.

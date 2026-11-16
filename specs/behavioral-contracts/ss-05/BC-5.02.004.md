@@ -123,3 +123,15 @@ TBD — pyfmt json (design step S1)
 ## VP Anchors (Recommended)
 
 - VP-024 — dict-order equivalence
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | none |
+| **Global state access** | none |
+| **Deterministic** | yes |
+| **Thread safety** | Send + Sync (stateless functions) |
+| **Overall classification** | pure core |
+
+Owning component `py/json.go (ordered Value)` (BC-COMPONENT-MAP: py/json.go (ordered Value) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

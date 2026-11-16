@@ -126,3 +126,15 @@ S-TBD — skeleton + dispatch (RESUME P1 step 1)
 ## VP Anchors (Recommended)
 
 - VP-004 — statusline always exits 0
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | `os.Args`/`os.Std*`, `os.Exit` |
+| **Global state access** | process exit status |
+| **Deterministic** | no (process boundary) |
+| **Thread safety** | n.a. |
+| **Overall classification** | effectful shell |
+
+Owning component `cmd/hylo` (BC-COMPONENT-MAP: cmd/hylo/main.go + statusline.go (dispatch) - ARCH-01); the ARCH-00 package table classifies the package effectful shell - `os.Args`/`os.Std*`, `os.Exit`, no logic.

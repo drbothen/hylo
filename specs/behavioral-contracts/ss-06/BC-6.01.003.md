@@ -158,3 +158,15 @@ TBD (filled by story-writer)
 > create-architecture, subject to adversarial review. No behavior change.
 
 - VP-034 — clock freeze and canary properties above
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | spawns interpreters/builds; replay corpus and cache-swap I/O |
+| **Global state access** | builds the child environment from scratch |
+| **Deterministic** | stepped clock; seeded synthetic corpus |
+| **Thread safety** | test-only, single-shot |
+| **Overall classification** | infrastructure |
+
+Owning component `internal/parity` (BC-COMPONENT-MAP: par/shim_canary.go + sl/testdata/pyhooks/sitecustomize.py - ARCH-07); the ARCH-00 package table classifies the package infrastructure - spawns interpreters/builds; test-only, never shipped in the render path.

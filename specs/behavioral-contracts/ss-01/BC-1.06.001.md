@@ -147,3 +147,15 @@ S-N.MM — cache store (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-018, VP-001, VP-022, VP-019 — never-raise load/save
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | only via injected `Env` seams |
+| **Global state access** | none (seam-injected) |
+| **Deterministic** | yes for widgets, given inputs and fake seams |
+| **Thread safety** | single-threaded render loop |
+| **Overall classification** | mixed (core-dominant) |
+
+Owning component `internal/statusline` (BC-COMPONENT-MAP: sl/cache.go (never-raise, raw sid) - ARCH-04); the ARCH-00 package table classifies the package mixed (core-dominant) - pure widgets plus the effect script (AD-03), I/O only via `Env` seams.

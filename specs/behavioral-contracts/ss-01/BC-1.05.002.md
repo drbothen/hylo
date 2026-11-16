@@ -135,3 +135,15 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `$/h` presence and colour rule
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | only via injected `Env` seams |
+| **Global state access** | none (seam-injected) |
+| **Deterministic** | yes for widgets, given inputs and fake seams |
+| **Thread safety** | single-threaded render loop |
+| **Overall classification** | mixed (core-dominant) |
+
+Owning component `internal/statusline` (BC-COMPONENT-MAP: sl/cost.go ($/h thresholds) - ARCH-03); the ARCH-00 package table classifies the package mixed (core-dominant) - pure widgets plus the effect script (AD-03), I/O only via `Env` seams.

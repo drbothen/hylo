@@ -156,3 +156,15 @@ S-N.MM — cost colouring (filled by story-writer)
 > create-architecture, subject to adversarial review. No behavior change.
 
 - VP-021 — golden equality
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | only via injected `Env` seams |
+| **Global state access** | none (seam-injected) |
+| **Deterministic** | yes for widgets, given inputs and fake seams |
+| **Thread safety** | single-threaded render loop |
+| **Overall classification** | mixed (core-dominant) |
+
+Owning components `internal/statusline` and `internal/cost` (BC-COMPONENT-MAP: sl/cost.go + cost/history.go (goldens) - ARCH-03); ARCH-00 classifies the former mixed (core-dominant) and the latter boundary, so the contract's render-side logic stays `Env`-seam pure with store writes behind the `Store` seam.

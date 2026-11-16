@@ -149,3 +149,15 @@ S-N.MM — cost history (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-020, VP-019 — Dumps differential equivalence
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | writes via the injected `Store` seam |
+| **Global state access** | none |
+| **Deterministic** | yes (given samples and a store fake) |
+| **Thread safety** | Send + Sync (store injected) |
+| **Overall classification** | boundary |
+
+Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (exact write format) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.

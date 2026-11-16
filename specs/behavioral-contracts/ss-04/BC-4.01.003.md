@@ -108,3 +108,15 @@ S-TBD — skeleton + dispatch
 ## VP Anchors (Recommended)
 
 - VP-004 — version line shape
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | `os.Args`/`os.Std*`, `os.Exit` |
+| **Global state access** | process exit status |
+| **Deterministic** | no (process boundary) |
+| **Thread safety** | n.a. |
+| **Overall classification** | effectful shell |
+
+Owning component `cmd/hylo` (BC-COMPONENT-MAP: cmd/hylo/version.go - ARCH-01); the ARCH-00 package table classifies the package effectful shell - `os.Args`/`os.Std*`, `os.Exit`, no logic.

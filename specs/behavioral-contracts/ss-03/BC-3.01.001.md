@@ -128,3 +128,15 @@ TBD — platform paths (design step S7)
 ## VP Anchors (Recommended)
 
 - VP-032 — no `dgx-llm` path is ever produced
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | syscalls, `/proc`, `sysctl`, Win32 |
+| **Global state access** | none beyond OS probes |
+| **Deterministic** | no (live OS state) |
+| **Thread safety** | build-tag confined per OS |
+| **Overall classification** | infrastructure |
+
+Owning component `internal/platform` (BC-COMPONENT-MAP: plat/paths*.go (per-OS dirs, OD-144) - ARCH-05); the ARCH-00 package table classifies the package infrastructure - syscalls, `/proc`, `sysctl`, Win32, build-tag confined.

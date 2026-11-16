@@ -134,3 +134,15 @@ S-TBD — D4-EX-3 table tests
 ## VP Anchors (Recommended)
 
 - VP-016, VP-012 — in-domain values parse as CPython
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | reads the environment once at startup (`Load`) |
+| **Global state access** | none (resolved config immutable) |
+| **Deterministic** | yes (given the environment) |
+| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Overall classification** | boundary |
+
+Owning component `internal/config` (BC-COMPONENT-MAP: cfg/errors.go (number-grammar class) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

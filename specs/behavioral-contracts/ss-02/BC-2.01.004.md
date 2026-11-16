@@ -146,3 +146,15 @@ S-TBD — config registry
 ## VP Anchors (Recommended)
 
 - VP-015 — EnvName injective; defaults self-validate
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | reads the environment once at startup (`Load`) |
+| **Global state access** | none (resolved config immutable) |
+| **Deterministic** | yes (given the environment) |
+| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Overall classification** | boundary |
+
+Owning component `internal/config` (BC-COMPONENT-MAP: cfg/registry.go (key registry) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

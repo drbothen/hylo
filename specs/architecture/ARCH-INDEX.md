@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-16T00:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "6dbe8d5"
+input-hash: "c243f11"
 traces_to: ../prd.md
 deployment_topology: single-service
 ---
@@ -113,4 +113,4 @@ provable-grade pure cores are verified by exhaustive oracle tables + property/fu
 declared per VP). Aggregate VP mapping by home: ARCH-01 → VP-002/004; ARCH-02 →
 VP-015/016/017; ARCH-03 (+ARCH-04 stores) → VP-001/003/005/006/007/008/018/020/021/
 027/028/029/030/031/036; ARCH-05 → VP-014/032/033; ARCH-06 → VP-006/023/024/025/026;
-ARCH-07/08 → VP-009/010/011/012/013/019/022/034/035/037.
+ARCH-04/09 → VP-022; ARCH-07/08 → VP-009/010/011/012/013/019/034/035/037.

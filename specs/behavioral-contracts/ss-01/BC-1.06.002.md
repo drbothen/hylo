@@ -141,3 +141,15 @@ S-N.MM — cache store (filled by story-writer)
 > create-architecture, subject to adversarial review. No behavior change.
 
 - VP-018, VP-012 — temp cleanup
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | only via injected `Env` seams |
+| **Global state access** | none (seam-injected) |
+| **Deterministic** | yes for widgets, given inputs and fake seams |
+| **Thread safety** | single-threaded render loop |
+| **Overall classification** | mixed (core-dominant) |
+
+Owning component `internal/statusline` (BC-COMPONENT-MAP: sl/cache.go (failed replace, temp handling) - ARCH-04); the ARCH-00 package table classifies the package mixed (core-dominant) - pure widgets plus the effect script (AD-03), I/O only via `Env` seams.

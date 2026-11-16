@@ -122,3 +122,15 @@ TBD — pyfmt str (design step S1)
 ## VP Anchors (Recommended)
 
 - VP-025 — normpath equals the oracle per OS
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | none |
+| **Global state access** | none |
+| **Deterministic** | yes |
+| **Thread safety** | Send + Sync (stateless functions) |
+| **Overall classification** | pure core |
+
+Owning component `py/str.go (Posix/Nt Normpath, Basename)` (BC-COMPONENT-MAP: py/str.go (Posix/Nt Normpath, Basename) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

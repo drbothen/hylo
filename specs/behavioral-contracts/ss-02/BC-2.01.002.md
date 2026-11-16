@@ -143,3 +143,15 @@ S-TBD — config subset (design §4 step S2)
 ## VP Anchors (Recommended)
 
 - VP-017 — exactly one backend entry
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | reads the environment once at startup (`Load`) |
+| **Global state access** | none (resolved config immutable) |
+| **Deterministic** | yes (given the environment) |
+| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Overall classification** | boundary |
+
+Owning component `internal/config` (BC-COMPONENT-MAP: cfg/statusline_keys.go (backends[0] validator) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.
