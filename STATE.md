@@ -4,10 +4,10 @@ level: ops
 version: "2.1"
 status: draft
 producer: state-manager
-timestamp: 2026-11-16T01:02:13Z
-last_amended: "2026-11-15 (v2.1) — state-manager — owner rulings OD-101..106 on the 6 porting tensions (cache path, D4-EX-3, pyfmt, oracle 3.11, exclusion list, cost-history copy); semport-translation next"
+timestamp: 2026-11-16T02:36:45Z
+last_amended: "2026-11-15 (v2.1) — state-manager — semport-translation DONE + validation gate PASSED (103/103 BCs, 0 hallucinations); owner rulings OD-107..114 on semport tensions T1-T10; brownfield-to-greenfield transition performed; GREENFIELD-PIPELINE NEXT (phase-1 spec crystallization, P1 statusline)"
 phase: 1
-phase_position: "IN_PROGRESS 2026-11-15. Phase 1 (spec crystallization) brownfield path underway; Phase 0 PASSED 2026-11-14"
+phase_position: "TRANSITIONING 2026-11-15: brownfield-to-greenfield transition performed; Phase 1 (spec crystallization) resumes via the greenfield-pipeline sub-workflow, scoped to P1 statusline; Phase 0 PASSED 2026-11-14"
 pipeline: ACTIVE
 inputs: []
 input-hash: "[live-state]"
@@ -15,7 +15,7 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "SEMPORT-TRANSLATION NEXT (all prerequisites ruled): post-phase-0 routing (feature, P1 hylo statusline) -> market-intel GO -> detect-cross-language-porting DONE (brownfield/porting-decision.md, needs_semport true) -> owner ruled all 6 porting tensions (OD-101..OD-106, 2026-11-15; §9 appended; tension 6 closed as noted). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "GREENFIELD-PIPELINE NEXT (phase-1 spec crystallization for P1 statusline): brownfield-to-greenfield transition performed 2026-11-15; semport-translation DONE; validation gate PASSED; owner ruled T1-T10 (OD-107..OD-114). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 market_intel:
   recommendation: GO
@@ -24,7 +24,7 @@ market_intel:
 dtu_required: false
 ---
 
-<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 200 lines (wc-l) at the 2026-11-15 porting-rulings burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 200 = 300 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
+<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 202 lines (wc-l) at the 2026-11-15 semport-rulings + brownfield-to-greenfield transition burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin from soft-target = 500 - 202 = 298; margin from actual = 500 - 202 = 298 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
 
 # Pipeline State: hylo
 
@@ -38,7 +38,7 @@ dtu_required: false
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-15 — Phase 1 started: feature routing P1 (hylo statusline); market-intel GO APPROVED (OD-96..OD-100); porting decision DONE; owner ruled the 6 porting tensions (OD-101..OD-106; porting-decision.md §9). Next: semport-translation — all prerequisites ruled; trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-15 — semport-translation DONE (`semport/hylo-legacy/statusline-target-design.md` + `semport-assessment.md`: 103/103 BCs, 84 H/18 M, S0-S8, ~62 eng-days range 50-80); validation gate PASSED (PASS-WITH-FIXES, 0 hallucinations); owner ruled T1-T10 (OD-107..114); brownfield-to-greenfield transition performed. Next: phase-1 spec crystallization (greenfield-pipeline sub-workflow, P1 statusline); trajectory-tail →0→0→0→0 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
@@ -56,7 +56,7 @@ dtu_required: false
 |-------|--------|-------|
 | pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (47e4c37) |
 | Phase 0 brownfield ingestion of `legacy/` | **PASSED 2026-11-14** (owner approval) — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Gate passed: OD list presented and ruled; next Phase 1 spec crystallization |
-| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** | Owner routed feature 2026-11-15, scope P1 (hylo statusline); market-intel gate APPROVED; porting decision DONE; next semport-translation |
+| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS — TRANSITIONED** to the greenfield-pipeline sub-workflow 2026-11-15 | semport-translation DONE; validation gate PASSED; owner rulings OD-107..114; no design system (OD-100); next phase-1 spec crystallization scoped to P1 (hylo statusline) |
 | Adversary passes (Phase 0) | **ALL SIX CONVERGED** — p0: 3 rounds (NITPICK r3); p1: 3 (NITPICK r3); p2: 9 (NITPICK r9); p3: 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22); p4: 7 (NITPICK r7; r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact); p5: 5 (NITPICK r5) | round record in cycles/phase-0-ingestion/convergence-trajectory.md; trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
 | Fix bursts (Phase 0) | **NONE** — no fix burst required yet; extraction-validation fixes were applied in-burst during the sweep | narrative in cycles/phase-0-ingestion/burst-log.md |
 
@@ -64,11 +64,11 @@ dtu_required: false
 
 | # | Step | Outcome |
 |---|------|---------|
-| 7 | convergence-deepening: passes 0, 1, 4, 5 (3/3/7/5 rounds) — all six passes converged | CONVERGED (NITPICK) |
 | 8 | final analysis burst: coverage-audit (PASS) + extraction-validation r2 (PASS-WITH-FIXES) + pass-8 definitive synthesis + OD list A-F gate-ready | COMPLETE |
 | 9 | SESSION-WRAP-PAUSE-2026-11-15 | COMPLETE — state-manager: factory paused, checkpoint written |
 | 10 | Phase 1 routing (feature, P1) + market-intel gate APPROVED + detect-cross-language-porting (needs_semport true) | COMPLETE |
 | 11 | state-manager burst: owner rulings OD-101..OD-106 on the 6 porting tensions (porting-decision.md §9 + OD log; input-hash updated) | COMPLETE — semport-translation unblocked |
+| 12 | semport-translation DONE (design doc + companion assessment; 103/103 BCs: 84 H/18 M; steps S0-S8; ~62 ideal eng-days range 50-80; tensions T1-T10 §7.1) + validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains, 3 citation fixes, 1 Python-semantics fix, tally fix, 0 hallucinations) + owner rulings OD-107..114 on T1-T10 + brownfield-to-greenfield transition performed | COMPLETE — GREENFIELD-PIPELINE NEXT |
 
 ## Convergence Status
 
@@ -87,6 +87,9 @@ dtu_required: false
 | Conventions / env / determinism / pitfalls | pass-5 r3 consolidated, amended by r4-r5 — 43 explicit + 21 implicit env inputs; 54 determinism rows + 6 Go-side pins; 19 conventions; 22 pitfalls — `hylo-legacy-pass-5-deep-conventions-r3.md` |
 | Synthesis (definitive) | pass-8 deep synthesis — supersedes pass-6; primary reference for create-brief / create-domain-spec / create-prd / semport-analyze — `hylo-legacy-pass-8-deep-synthesis.md` |
 | Owner decision list (gate input) | 64 issued ODs in groups A-F; one recommendation + evidence per item; answer format in the file header — `hylo-legacy-owner-decisions.md` |
+| Market intel (GO, approved) | `planning/market-intel.md` |
+| Porting decision (needs_semport true; Python 3 + zsh -> Go 1.26) | `brownfield/porting-decision.md` |
+| Semport target design (P1 status line; 103/103 BCs; tensions resolved) | `semport/hylo-legacy/statusline-target-design.md` + companion `semport/hylo-legacy/semport-assessment.md` |
 
 Registers: BC index totals 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 out of scope + 6 approved deviation + 35 pending owner decision. Statement partition (1,809 Python statements): 903 re-read + 422 covered by pinned tables + 133 out of scope + 351 read in pass-2 r8; 0 uncovered. Retractions: RET crosswalk (pass-3 r4) plus CONV-ABS through 94; next free CONV-ABS 95; IDs 101-104 unused. Extraction validation (validate-extraction, not a deepening round): PASS-WITH-FIXES; exhaustive; 0 hallucinations. Final analysis (this burst): coverage audit PASS (step B.5, 0 gaps); extraction validation r2 PASS-WITH-FIXES (step B.6: 78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix applied in-burst); definitive synthesis pass-8 (supersedes pass-6); lessons 53 — 13 P0 (L0-01..L0-13), 13 P1, 9 P2, 18 P3 — recorded in pass-8 §10. Evidence captured this burst: proxy venv `pyvenv.cfg` include-system-site-packages=false (proxy and preflight not affected by the user site; parity harness runs shimmed Python cases under -s); mitmproxy 12.3.1 with no config.yaml; Go 1.26.5 h2 facts recorded for OD-94. Trajectory-tail (D-433(e) LENGTH=4): →0→0→0→0 placeholder retained until the formal finding series begins.
 
@@ -137,7 +140,7 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 ## Open Owner Questions
 
-- OD numbering: OD-01..OD-106 allocated (Phase 0 gate list + 2026-11-15 market-intel review + 2026-11-15 porting-tension rulings); next free OD-107 — log: `specs/owner-decisions-log-2026-11-14.md`.
+- OD numbering: OD-01..OD-114 allocated (Phase 0 gate list + 2026-11-15 market-intel review + porting-tension rulings OD-101..106 + semport-tension rulings OD-107..114); next free OD-115 — log: `specs/owner-decisions-log-2026-11-14.md`.
 - Optional checks (deferred, non-blocking): Grafana per-session cost panel; offline promtool rule validation.
 - Policy risk (owner awareness): Anthropic Usage Policy 2026-11-12 language on routing through consumer subscriptions.
 
@@ -145,17 +148,17 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 | Cycle | Type | Status | Notes |
 |-------|------|--------|-------|
-| phase-0-ingestion | brownfield-ingestion | **ACTIVE** — analysis COMPLETE (all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; pass-8 synthesis + OD list done); drift check → consistency audit → owner gate next | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + this burst (coverage audit, validation r2, synthesis, OD list) |
+| phase-0-ingestion | brownfield-ingestion | **COMPLETE** — Phase 0 PASSED 2026-11-14; analysis converged; artifacts serve as Phase 1 context (pointer table above); transition to the greenfield sub-workflow performed 2026-11-15 | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + 5e83b63 (porting rulings) + this burst (semport design, OD-107..114, transition) |
 
-## Session Resume Checkpoint (2026-11-15 — Phase 1 IN PROGRESS: market intel GO, porting decision done; next semport-translation)
+## Session Resume Checkpoint (2026-11-15 — brownfield-to-greenfield transition PERFORMED; GREENFIELD-PIPELINE NEXT: phase-1 spec crystallization for P1 statusline)
 
 > **SELF-SUFFICIENT RESUME CONTEXT** — read this section alone to resume after a session CLEAR.
 
 ### Where We Are
 
-- Date 2026-11-15. Position: Phase 1 **IN_PROGRESS** — brownfield path, feature routing (scope P1 = `hylo statusline`). Phase 0 PASSED 2026-11-14.
-- Done: market-intel GO + human APPROVAL (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL; backfill tool out until P6). Owner ruled the 6 porting tensions 2026-11-15 (OD-101..OD-106; §9; tension 6 closed as noted; OD-101 = OD-95 cache paths from P1 with a D15 exception, OD-102 = D4-EX-3 config-error line, OD-103 = one internal/pyfmt package, OD-104 = CPython 3.11.x oracle resolving research O1, OD-105 = named exclusion list, OD-106 = one-time cost-history copy at P5). Next: semport-translation — all prerequisites ruled; then the status line spec package (PRD, BCs from the 103 BC-SL contracts, D15 config keys, parity-harness spec, internal/pyfmt helpers).
-- Gate inputs: `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-106; next free OD-107, next free CONV-ABS 95).
+- Date 2026-11-15. Position: Phase 1 **IN_PROGRESS** — brownfield-to-greenfield transition performed; the pipeline now runs the greenfield-pipeline sub-workflow scoped to P1 = `hylo statusline`. Phase 0 PASSED 2026-11-14.
+- Done: market-intel GO + approval (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL). Owner ruled the 6 porting tensions 2026-11-15 (OD-101..OD-106; §9). semport-translation DONE (`semport/hylo-legacy/statusline-target-design.md` + `semport-assessment.md`: 103/103 BCs mapped, 84 H/18 M, steps S0-S8, ~62 ideal engineer-days range 50-80; tensions T1-T10 listed §7.1); validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains checked, 3 citation fixes, 1 Python-semantics fix, per-step tally fix, 0 hallucinations; design doc Validation log); owner ruled the 10 semport tensions (OD-107..OD-114; resolutions appended to the design doc). Next: phase-1 spec crystallization — PRD, BCs from the 103 BC-SL contracts, D15 config registry (incl. `statusline.theme.*`, OD-113), parity-harness spec, internal/pyfmt spec.
+- Gate inputs (Phase 0 artifacts verified accessible as Phase 1 context, 2026-11-15): `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; `planning/market-intel.md`; `brownfield/porting-decision.md`; `semport/hylo-legacy/statusline-target-design.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-114; next free OD-115, next free CONV-ABS 95).
 
 ### Convergence
 
@@ -168,10 +171,9 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 ### Pending Owner Decisions
 
-1. DONE 2026-11-15 — Start Phase 1 scoped to P1? YES: feature routing recorded.
-2. DONE 2026-11-15 — public main pushed to GitHub (the 5 commits f562477, b99082e, a7b5e04, 3e05cfe, c023bc6; full-history gitleaks plus the pattern scan ran clean). Off-machine durability is resolved: factory-artifacts is published on GitHub as an orphan branch.
-3. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
-4. DONE 2026-11-15 — the 6 porting tensions in `brownfield/porting-decision.md` §8 ruled (OD-101..OD-106; tension 6 closed as noted: no artifact-path-registry.yaml in this factory). Pending: PUBLIC DOC EDITS PENDING — PLAN D15 exception (OD-101) and D4-EX-3 (OD-102) — commit to public main only when the owner asks.
+1. DONE 2026-11-15 — Phase 1 start scoped to P1: YES (feature routing recorded); public main pushed to GitHub (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6; full-history gitleaks + pattern scan clean); 6 porting tensions ruled (OD-101..106); 10 semport tensions ruled (OD-107..114; resolutions in the design doc).
+2. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
+3. PUBLIC DOC EDITS PENDING — PLAN D15 exception (OD-101), D4-EX-3 (OD-102), expanded named exclusion list (OD-110); commit to public main only when the owner asks.
 
 No blockers.
 
@@ -187,7 +189,7 @@ Open a new session in $HOME/Dev/hylo, read docs/RESUME.md and .factory/STATE.md,
 
 | Step | Skipped | Justification |
 |------|---------|---------------|
-| (none to date) | — | — |
+| brownfield-design-system-extract | 2026-11-15 | OD-100: feature_type = cli — design-system extraction condition not met; this factory runs with no design system |
 
 ## Historical Content
 
