@@ -26,5 +26,8 @@ __pycache__/
 .idea/
 .vscode/
 
-# VSDD factory worktree (factory-artifacts branch; never pushed to the public repo)
+# VSDD factory worktree (the factory-artifacts orphan branch is checked out here; it is pushed separately, never merged into main)
 .factory/
+
+# Per-branch worktrees (e.g. ci/phase-1-setup); local only
+.worktrees/

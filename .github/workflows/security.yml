@@ -1,0 +1,76 @@
+name: security
+
+# Scheduled + PR-triggered security audits. Blocking scans (gitleaks, pattern
+# scan) also run per-push inside ci.yml; this workflow adds the dependency /
+# vulnerability audit (govulncheck) on a weekly cadence and on PRs so findings
+# surface before merge. Tool versions are pinned exactly like actions.
+
+on:
+  pull_request:
+  schedule:
+    # Mondays 04:17 UTC (odd minute avoids top-of-hour scheduler load).
+    - cron: '17 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: Run govulncheck (stdlib + module graph)
+        run: |
+          if [ -z "$(git ls-files '*.go')" ]; then
+            echo "Module skeleton has no Go sources yet; nothing to audit."
+            exit 0
+          fi
+          go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
+  gitleaks:
+    name: gitleaks (weekly)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository (full history for --log-opts=--all)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Go (used to run the pinned gitleaks binary)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: gitleaks detect over full history
+        run: |
+          go run github.com/gitleaks/gitleaks/v8@v8.30.1 detect \
+            --source . --log-opts="--all" --no-banner --redact
+      - name: Category pattern scan (tracked files)
+        # Same policy-21 / NFR-006 category scan as ci.yml (private IP
+        # literals, home paths, personal emails).
+        run: |
+          set -euo pipefail
+          ip_pat='(^|[^0-9])((10([.]([0-9]{1,3})){3})|(192[.]168([.]([0-9]{1,3})){2})|(172[.](1[6-9]|2[0-9]|3[0-1])([.]([0-9]{1,3})){2}))'
+          home_pat='(/Users/[A-Za-z0-9._~-]+|/home/[A-Za-z0-9._~-]+|[Cc]:[\\/]Users)'
+          email_pat='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}'
+          # git grep over tracked files avoids filename word-splitting; exit 1
+          # means "no match" (clean).
+          hits="$(git grep -En -e "$ip_pat" -e "$home_pat" -e "$email_pat" -- . 2>/dev/null \
+            | grep -Ev 'users[.]noreply[.]github[.]com|@example' || true)"
+          if [ -n "$hits" ]; then
+            echo '::error::Pattern scan found possible private infrastructure details:'
+            printf '%s\n' "$hits"
+            exit 1
+          fi
+          echo "Pattern scan clean (private IPs, home paths, personal emails)."

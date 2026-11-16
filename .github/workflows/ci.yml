@@ -1,0 +1,316 @@
+name: CI
+
+# BC-6.04.001: full three-OS matrix on every change (D5).
+# Design: .factory/specs/architecture/ARCH-08-build-ci-release.md.
+#
+# Empty-module handling: until Phase 3 lands the first Go sources, `go vet ./...`
+# and `go test ./...` exit 1 with "matched no packages" (verified with go1.26),
+# so the Go jobs guard on `git ls-files '*.go'` and pass (with a notice) while
+# the module is only a skeleton. Parity/timing jobs are placeholders: they stay
+# skipped until their code exists (they gate on the probe job's package-presence
+# outputs; see `locate harness packages` below) and count as
+# "skipped" (= success) for branch protection.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # workflow_dispatch allows manual nightly-equivalent runs (Tier C soak
+  # verification without waiting for the cron).
+  workflow_dispatch:
+  # Nightly run executes the full matrix on main; the Tier C differential-fuzz
+  # job activates below once internal/parity exists (OD-149).
+  schedule:
+    # 03:30 UTC daily. Schedules are interpreted in UTC by GitHub.
+    - cron: '30 3 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint (gofmt + vet)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: gofmt -l (fails on any unformatted file)
+        run: |
+          out="$(gofmt -l .)"
+          if [ -n "$out" ]; then
+            echo '::error::gofmt -l reported unformatted files:'
+            printf '%s\n' "$out"
+            exit 1
+          fi
+      - name: go vet ./...
+        run: |
+          if [ -z "$(git ls-files '*.go')" ]; then
+            echo "Module skeleton has no Go sources yet; nothing to vet."
+            echo "('go vet ./...' exits 1 on an empty module: './...' matched no packages; verified with go1.26.)"
+            exit 0
+          fi
+          go vet ./...
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: go test (with -race on Linux/macOS; ARCH-08)
+        run: |
+          if [ -z "$(git ls-files '*.go')" ]; then
+            echo "Module skeleton has no Go sources yet; nothing to test."
+            echo "('go test ./...' exits 1 on an empty module: './...' matched no packages; verified with go1.26.)"
+            exit 0
+          fi
+          args=(-count=1)
+          # Race detector on Linux and macOS only, per ARCH-08.
+          if [ "${RUNNER_OS}" != "Windows" ]; then
+            args+=(-race)
+          fi
+          go test "${args[@]}" ./...
+
+  gitleaks:
+    name: gitleaks (full history)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository (full history for --log-opts=--all)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Go (used to run the pinned gitleaks binary)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: gitleaks detect over full history
+        run: |
+          go run github.com/gitleaks/gitleaks/v8@v8.30.1 detect \
+            --source . --log-opts="--all" --no-banner --redact
+      - name: Category pattern scan (tracked files)
+        # Public-repo hygiene (policy 21 / NFR-006): no private IP literals, home
+        # paths, or personal emails in committed files. Documentation-safe
+        # ranges (RFC 5737, e.g. 192.0.2.x), loopback, and GitHub no-reply
+        # identities are allowed.
+        run: |
+          set -euo pipefail
+          # Private-use IP literals (10/8, 192.168/16, 172.16-31/12). The
+          # (^|[^0-9]) guard prevents matches inside longer dotted-number
+          # chains (e.g. "010.020.030.040").
+          ip_pat='(^|[^0-9])((10([.]([0-9]{1,3})){3})|(192[.]168([.]([0-9]{1,3})){2})|(172[.](1[6-9]|2[0-9]|3[0-1])([.]([0-9]{1,3})){2}))'
+          # POSIX home paths and Windows drive paths ([\\/] = one literal
+          # backslash or forward slash in grep -E).
+          home_pat='(/Users/[A-Za-z0-9._~-]+|/home/[A-Za-z0-9._~-]+|[Cc]:[\\/]Users)'
+          email_pat='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}'
+          # git grep over tracked files avoids filename word-splitting; exit 1
+          # means "no match" (clean).
+          hits="$(git grep -En -e "$ip_pat" -e "$home_pat" -e "$email_pat" -- . 2>/dev/null \
+            | grep -Ev 'users[.]noreply[.]github[.]com|@example' || true)"
+          if [ -n "$hits" ]; then
+            echo '::error::Pattern scan found possible private infrastructure details:'
+            printf '%s\n' "$hits"
+            exit 1
+          fi
+          echo "Pattern scan clean (private IPs, home paths, personal emails)."
+
+  # ---------------------------------------------------------------------------
+  # Parity harness placeholders (ARCH-07/ARCH-08). These jobs stay SKIPPED until
+  # the harness code lands in Phase 3; a skipped job reports "skipped", which
+  # counts as success for branch protection. Step bodies match the designed
+  # invocation so Phase 3 activates them by adding code, not edits here.
+  #
+  # Placement probes live in a separate tiny job because hashFiles() is not
+  # allowed in job-level `if` expressions (actionlint-checked); job-level `if`
+  # CAN read `needs.*.outputs`.
+  # ---------------------------------------------------------------------------
+
+  probe:
+    name: locate harness packages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      parity: ${{ steps.probe.outputs.parity }}
+      statusline: ${{ steps.probe.outputs.statusline }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Probe for harness packages
+        id: probe
+        run: |
+          # Package-presence probe: -print -quit stops at the first hit; the
+          # pipe yields nothing when a package is absent. Verified locally on
+          # an empty module and on populated layouts.
+          if find internal/parity -maxdepth 1 -name '*.go' -print -quit 2>/dev/null | grep -q .; then
+            parity=true
+          else
+            parity=false
+          fi
+          if find internal/statusline -maxdepth 1 -name '*.go' -print -quit 2>/dev/null | grep -q .; then
+            statusline=true
+          else
+            statusline=false
+          fi
+          echo "parity=${parity}" >> "$GITHUB_OUTPUT"
+          echo "statusline=${statusline}" >> "$GITHUB_OUTPUT"
+          echo "probes: parity=${parity} statusline=${statusline}"
+
+  parity-tier-a:
+    name: parity tier A (live corpus)
+    # Activates when internal/parity (runner + Tier A test) exists.
+    if: needs.probe.outputs.parity == 'true'
+    needs: [test, probe]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: Set up CPython 3.11.x (oracle interpreter)
+        id: py
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11.x'
+      - name: Tier A — live differential parity vs legacy/ oracle
+        env:
+          # OD-108: absolute interpreter path from setup-python; never PATH discovery.
+          HYLO_PARITY_PYTHON: ${{ steps.py.outputs.python-path }}
+        run: |
+          go test -count=1 ./internal/parity \
+            -run 'TestParityTierA_Corpus|TestParityCanary_ShimLoaded|TestCorpusHygiene'
+
+  parity-tier-b:
+    name: parity tier B (committed goldens)
+    # Activates when internal/parity (runner + Tier B test) exists. Goldens are
+    # committed, so no Python is needed on any leg (including Windows).
+    if: needs.probe.outputs.parity == 'true'
+    needs: [test, probe]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: Tier B — committed golden parity on every OS
+        run: |
+          go test -count=1 ./internal/parity \
+            -run 'TestParityTierB_Goldens|TestParityExclusions_ClosedSet'
+
+  parity-tier-c-nightly:
+    name: parity tier C (nightly differential fuzz)
+    # Nightly only (OD-149): one clean nightly run on all three OSes, 30 min per
+    # OS (HYLO_PARITY_FUZZSECONDS=1800). Non-gating: not in required checks.
+    if: github.event_name == 'schedule' && needs.probe.outputs.parity == 'true'
+    needs: [test, probe]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: Tier C — differential fuzz, 30 min per OS (OD-149)
+        env:
+          HYLO_PARITY_FUZZSECONDS: '1800'
+        run: |
+          go test -count=1 -timeout 55m ./internal/parity \
+            -run 'TestParityTierC_DiffFuzz'
+
+  timing-report:
+    name: timing report (non-gating)
+    # NFR-001 / BC-6.04.002 (OD-117): every leg prints the per-OS timing report;
+    # the p95 <= 25 ms gate binds ONLY with HYLO_TIMING_GATE=1, which CI does
+    # not set (the gate binds on the owner's Mac target). Non-gating here.
+    if: needs.probe.outputs.statusline == 'true'
+    needs: [test, probe]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: Timing report placeholder (real invocation lands with Phase 3)
+        run: |
+          echo "internal/statusline exists; the per-OS timing report test"
+          echo "(1 warm-up + 5 timed runs, nearest-rank p95, fake-VM handling"
+          echo "time subtracted) replaces this step in Phase 3."
+          echo "HYLO_TIMING_GATE is intentionally unset: reporting only."
