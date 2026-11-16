@@ -15,7 +15,7 @@ inputs:
   - .factory/specs/owner-decisions-log-2026-11-14.md
   - .factory/specs/research/general-go-port-parity-crossplatform-2026-11-14.md
   - .factory/planning/market-intel.md
-input-hash: "76a999d"
+input-hash: "90b99b0"
 ---
 
 # Porting decision — Python/zsh to Go
@@ -232,3 +232,23 @@ Q-b). Until P6 the legacy script remains the seeding path.
 6. **Registry gap.** `artifact-path-registry.yaml` has no `brownfield/{filename}` entry; this
    file's path is workflow-canonical (brownfield.lobster:252) but unregistered — registering it
    is state-manager's call.
+
+## 9. Owner resolutions (2026-11-15)
+
+Owner rulings recorded 2026-11-15 as rows OD-101..OD-106 in `specs/owner-decisions-log-2026-11-14.md`;
+§1-§8 above is unchanged. One line per §8 tension:
+
+| §8 tension | Resolution |
+|---|---|
+| 1. BC-SL-087 grammar vs OD-05 | OD-102 — approved deviation **D4-EX-3**: any invalid setting (malformed number, non-typed boolean, bad URL/enum) renders a one-line `hylo: config error: <key>=<value> (<reason>)` status line, exit 0, details on stderr, via the degraded-ladder output path; excluded from the parity diff; one table test per key class (number, boolean, URL, enum); `hylo config validate` exits non-zero for the same errors |
+| 2. Helper-package granularity | OD-103 — parity helpers are ONE Go package `internal/pyfmt` with four files (number formatting/rounding, json.dumps bytes, code-point string ops, strftime/localtime) |
+| 3. Oracle version pin | OD-104 — P1 parity oracle = CPython 3.11.x; the harness never discovers Python from PATH (the interpreter is an explicit harness setting; verified locally 2026-11-15 that an interactive terminal and a login shell resolve different interpreters); CI installs 3.11 on all three OSes; research open question O1 resolved; the P2 exporter keeps its separate 3.9.6 oracle (OD-15) |
+| 4. Two approved differences inside a byte-parity phase | OD-105 — the harness carries a named exclusion list (D4-EX-1 ⌂ on Windows, D4-EX-2 wrong-shape transcript lines, D4-EX-3 config-error line); each excluded case must match its own expected output in dedicated table tests; an exclusion without a test fails the harness; no blanket exclusions |
+| 5. Cache location in P1 | OD-101 — OD-95 hylo-owned paths from P1 on (~/.cache/hylo honoring XDG_CACHE_HOME on macOS+Linux, %LOCALAPPDATA%\hylo on Windows, built in internal/platform); owner rationale: "cut over is instant"; explicit owner exception to D15's "defaults equal legacy/ until cutover" for this one key; paths.cache_dir remains a config key |
+| 6. Registry gap | Closed as noted — no `artifact-path-registry.yaml` in this factory; `brownfield/{filename}` stays workflow-canonical (brownfield.lobster:252) but unregistered |
+
+OD-106 additionally rules the cost-history consequence of OD-101: a documented one-time copy of
+cost-history.json from the legacy cache dir to hylo's cache dir at cutover is a P5 acceptance
+criterion; no import code in hylo; `hylo cost backfill` (P6) can rebuild from the ledger.
+PUBLIC DOC EDIT PENDING (rows OD-101, OD-102): the PLAN D15 exception and the D4-EX-3 entry in
+the approved-differences lists are drafted but not committed to public main until the owner asks.

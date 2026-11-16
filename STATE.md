@@ -4,8 +4,8 @@ level: ops
 version: "2.1"
 status: draft
 producer: state-manager
-timestamp: 2026-11-15T23:33:36Z
-last_amended: "2026-11-15 (v2.1) — state-manager — Phase 1 started (feature routing, P1 statusline); market intel GO approved; porting decision Python->Go"
+timestamp: 2026-11-16T01:02:13Z
+last_amended: "2026-11-15 (v2.1) — state-manager — owner rulings OD-101..106 on the 6 porting tensions (cache path, D4-EX-3, pyfmt, oracle 3.11, exclusion list, cost-history copy); semport-translation next"
 phase: 1
 phase_position: "IN_PROGRESS 2026-11-15. Phase 1 (spec crystallization) brownfield path underway; Phase 0 PASSED 2026-11-14"
 pipeline: ACTIVE
@@ -15,7 +15,7 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "SEMPORT-TRANSLATION NEXT: post-phase-0 routing (feature, P1 hylo statusline) -> market-intel GO (owner-approved) -> detect-cross-language-porting DONE (brownfield/porting-decision.md, needs_semport true); semport-translation awaits owner rulings on the 6 porting tensions. D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "SEMPORT-TRANSLATION NEXT (all prerequisites ruled): post-phase-0 routing (feature, P1 hylo statusline) -> market-intel GO -> detect-cross-language-porting DONE (brownfield/porting-decision.md, needs_semport true) -> owner ruled all 6 porting tensions (OD-101..OD-106, 2026-11-15; §9 appended; tension 6 closed as noted). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 market_intel:
   recommendation: GO
@@ -24,7 +24,7 @@ market_intel:
 dtu_required: false
 ---
 
-<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 200 lines (wc-l) at the 2026-11-15 phase-1 routing burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 200 = 300 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
+<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 200 lines (wc-l) at the 2026-11-15 porting-rulings burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 200 = 300 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
 
 # Pipeline State: hylo
 
@@ -38,7 +38,7 @@ dtu_required: false
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-15 — Phase 1 started: owner routed feature mode scoped to P1 (hylo statusline); market-intel GO APPROVED by the owner (OD-96..OD-100); detect-cross-language-porting DONE (needs_semport true; P1 modules only). Next: semport-translation after the owner rules on the 6 porting tensions; trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-15 — Phase 1 started: feature routing P1 (hylo statusline); market-intel GO APPROVED (OD-96..OD-100); porting decision DONE; owner ruled the 6 porting tensions (OD-101..OD-106; porting-decision.md §9). Next: semport-translation — all prerequisites ruled; trajectory-tail →0→0→0→0 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
@@ -64,11 +64,11 @@ dtu_required: false
 
 | # | Step | Outcome |
 |---|------|---------|
-| 6 | convergence-deepening: pass 2 (9 rounds) + pass 3 (8 rounds) | CONVERGED (NITPICK) |
 | 7 | convergence-deepening: passes 0, 1, 4, 5 (3/3/7/5 rounds) — all six passes converged | CONVERGED (NITPICK) |
 | 8 | final analysis burst: coverage-audit (PASS) + extraction-validation r2 (PASS-WITH-FIXES) + pass-8 definitive synthesis + OD list A-F gate-ready | COMPLETE |
 | 9 | SESSION-WRAP-PAUSE-2026-11-15 | COMPLETE — state-manager: factory paused, checkpoint written |
-| 10 | Phase 1 routing (feature, P1) + market-intel gate APPROVED + detect-cross-language-porting (needs_semport true) | COMPLETE — next: semport-translation |
+| 10 | Phase 1 routing (feature, P1) + market-intel gate APPROVED + detect-cross-language-porting (needs_semport true) | COMPLETE |
+| 11 | state-manager burst: owner rulings OD-101..OD-106 on the 6 porting tensions (porting-decision.md §9 + OD log; input-hash updated) | COMPLETE — semport-translation unblocked |
 
 ## Convergence Status
 
@@ -137,7 +137,7 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 ## Open Owner Questions
 
-- OD numbering: OD-01..OD-100 allocated (Phase 0 gate list + 2026-11-15 market-intel review); next free OD-101 — log: `specs/owner-decisions-log-2026-11-14.md`.
+- OD numbering: OD-01..OD-106 allocated (Phase 0 gate list + 2026-11-15 market-intel review + 2026-11-15 porting-tension rulings); next free OD-107 — log: `specs/owner-decisions-log-2026-11-14.md`.
 - Optional checks (deferred, non-blocking): Grafana per-session cost panel; offline promtool rule validation.
 - Policy risk (owner awareness): Anthropic Usage Policy 2026-11-12 language on routing through consumer subscriptions.
 
@@ -154,8 +154,8 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 ### Where We Are
 
 - Date 2026-11-15. Position: Phase 1 **IN_PROGRESS** — brownfield path, feature routing (scope P1 = `hylo statusline`). Phase 0 PASSED 2026-11-14.
-- Done: market-intel GO + human APPROVAL (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL; backfill tool out until P6). Next: semport-translation once the owner rules on the 6 porting tensions; then the status line spec package (PRD, BCs from the 103 BC-SL contracts, D15 config keys, parity-harness spec, internal/pyfmt helpers).
-- Gate inputs: `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-100; next free OD-101, next free CONV-ABS 95).
+- Done: market-intel GO + human APPROVAL (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL; backfill tool out until P6). Owner ruled the 6 porting tensions 2026-11-15 (OD-101..OD-106; §9; tension 6 closed as noted; OD-101 = OD-95 cache paths from P1 with a D15 exception, OD-102 = D4-EX-3 config-error line, OD-103 = one internal/pyfmt package, OD-104 = CPython 3.11.x oracle resolving research O1, OD-105 = named exclusion list, OD-106 = one-time cost-history copy at P5). Next: semport-translation — all prerequisites ruled; then the status line spec package (PRD, BCs from the 103 BC-SL contracts, D15 config keys, parity-harness spec, internal/pyfmt helpers).
+- Gate inputs: `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-106; next free OD-107, next free CONV-ABS 95).
 
 ### Convergence
 
@@ -171,7 +171,7 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 1. DONE 2026-11-15 — Start Phase 1 scoped to P1? YES: feature routing recorded.
 2. DONE 2026-11-15 — public main pushed to GitHub (the 5 commits f562477, b99082e, a7b5e04, 3e05cfe, c023bc6; full-history gitleaks plus the pattern scan ran clean). Off-machine durability is resolved: factory-artifacts is published on GitHub as an orphan branch.
 3. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
-4. Rule on the 6 porting tensions in `brownfield/porting-decision.md` §8 — to present before semport-translation. Registry note: `artifact-path-registry.yaml` does not exist in this factory; `brownfield/{filename}` stays workflow-canonical (brownfield.lobster:252) but unregistered (tension 6, noted not resolved).
+4. DONE 2026-11-15 — the 6 porting tensions in `brownfield/porting-decision.md` §8 ruled (OD-101..OD-106; tension 6 closed as noted: no artifact-path-registry.yaml in this factory). Pending: PUBLIC DOC EDITS PENDING — PLAN D15 exception (OD-101) and D4-EX-3 (OD-102) — commit to public main only when the owner asks.
 
 No blockers.
 
