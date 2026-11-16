@@ -117,3 +117,7 @@
 | OD-147 | (a) inert key statusline.window_age.ps_timeout_s removed | |
 | OD-148 | (a) parity fixtures stay with the subject package; runner internal/parity is generic (AD-13) | |
 | OD-149 | (a) Tier C exit = one clean nightly fuzz run on all three OSes, 30 min per OS | owner judgment call |
+
+<!-- CI/CD ruling by the owner, 2026-11-16 (next free OD-151) -->
+
+| OD-150 | (a) phase-1-cicd-setup lands via branch ci/phase-1-setup in a worktree; the owner reviews before commit; branch protection on main applied only after the first green CI run, requiring the checks lint (gofmt + vet), test (ubuntu-24.04), test (macos-15), test (windows-2025), gitleaks (full history), with admin bypass (enforce_admins false) | |
