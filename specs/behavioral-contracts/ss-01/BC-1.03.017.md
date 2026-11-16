@@ -81,7 +81,7 @@ opening line's `usage.output_tokens`, even though that usage is not counted agai
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Turn state is invariant under pre-seeding arbitrary ids into the dedup memory | proptest |
+| VP-029 | Turn state is invariant under pre-seeding arbitrary ids into the dedup memory | proptest |
 
 ## Traceability
 
@@ -103,7 +103,7 @@ opening line's `usage.output_tokens`, even though that usage is not counted agai
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#turn-machine`
+- `architecture/ARCH-03-statusline.md#turn-machine` — internal/statusline/transcript_turn.go (turn identity) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -111,7 +111,7 @@ S-TBD — turn machine
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — turn/dedup independence
+- VP-029 — turn/dedup independence
 
 ---
 

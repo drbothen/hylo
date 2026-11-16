@@ -84,8 +84,8 @@ Pass-3 r1 pinned the same mechanism with a 600,089 B file (refresh 1 → offset 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For `len(S) < step < len(S)+len(G)`, refresh 1 size = `len(S)`, refresh 2 size = `len(S)+len(G)` | proptest over `len(S)`, `len(G)` |
-| VP-TBD | Multi-step harness case matches legacy per step | M (multi-step parity case) |
+| VP-029 | For `len(S) < step < len(S)+len(G)`, refresh 1 size = `len(S)`, refresh 2 size = `len(S)+len(G)` | proptest over `len(S)`, `len(G)` |
+| VP-029 | Multi-step harness case matches legacy per step | M (multi-step parity case) |
 
 ## Traceability
 
@@ -106,7 +106,7 @@ Pass-3 r1 pinned the same mechanism with a 600,089 B file (refresh 1 → offset 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-read-window`
+- `architecture/ARCH-03-statusline.md#transcript-read-window` — internal/statusline/transcript.go (two-refresh completion) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -114,7 +114,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — two-refresh completion
+- VP-029 — two-refresh completion
 
 ---
 

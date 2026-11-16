@@ -102,8 +102,8 @@ Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every CP site k, the set of files written equals the writes of steps < k | table test over CP-S/CP-N triggers (multi-step harness, design §5.3) |
-| VP-TBD | Per-step cache bytes match legacy across the corpus | Tier A differential |
+| VP-007, VP-008 | For every CP site k, the set of files written equals the writes of steps < k | table test over CP-S/CP-N triggers (multi-step harness, design §5.3) |
+| VP-007, VP-008 | Per-step cache bytes match legacy across the corpus | Tier A differential |
 
 ## Traceability
 
@@ -111,7 +111,7 @@ Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<
 |-------|-------|
 | L2 Capability | CAP-009, CAP-011 |
 | L2 Domain Invariants | DI-007, DI-008 |
-| Architecture Module | `internal/statusline` orchestrator `Render` (`statusline.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` orchestrator `Render` (`statusline.go`) (BC-COMPONENT-MAP: internal/statusline/statusline.go (side-effect order) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`main` (SL:1200-1235); write sites SL:1150, 307-308, 351/355, 287-288, 411, 606 |
 | Legacy contract | BC-SL-077 (new P3r1 §A8; index P3r4 §7.3); crash catalogue P3r1 §B |
@@ -129,7 +129,7 @@ Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-effect-script` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-effect-script` — internal/statusline/statusline.go (side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -137,7 +137,7 @@ TBD — frame skeleton (design step S2), completed in goldens/burn-down (step S8
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — writes-before-fault property
+- VP-007, VP-008 — writes-before-fault property
 
 ---
 

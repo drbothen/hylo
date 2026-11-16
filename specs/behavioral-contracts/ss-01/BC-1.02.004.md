@@ -114,9 +114,9 @@ temp root `<T>` that has no repository above it.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Walk terminates for every start path (strictly shorter `d` each step until `dirname(d)==d`) | table test + reasoning |
-| VP-TBD | No write syscalls during the walk | fake FileSystem test |
-| VP-TBD | Results equal the oracle on the 10-layout table (pass-3 #3) on all three OSes | table test against CPython goldens |
+| VP-028 | Walk terminates for every start path (strictly shorter `d` each step until `dirname(d)==d`) | table test + reasoning |
+| VP-028 | No write syscalls during the walk | fake FileSystem test |
+| VP-028 | Results equal the oracle on the 10-layout table (pass-3 #3) on all three OSes | table test against CPython goldens |
 
 ## Traceability
 
@@ -142,7 +142,7 @@ temp root `<T>` that has no repository above it.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#git` — TBD by architect
+- `architecture/ARCH-03-statusline.md#git` — internal/statusline/git.go (.git/HEAD walk; py sha1 key) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -150,7 +150,7 @@ TBD — branch segment story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — walk termination and read-only property
+- VP-028 — walk termination and read-only property
 
 ---
 

@@ -96,9 +96,9 @@ All values verified 2026-11-15 against CPython 3.11.7 (`round`, `format`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `F(x, p)` equals the CPython oracle for every finite x in a 2M-sample random set and all boundary rows | proptest + oracle table |
-| VP-TBD | `Round(x)` equals `math.RoundToEven(x)` for finite x with magnitude below 2^53 and is exact beyond | proptest |
-| VP-TBD | `RoundN(RoundN(x, n), n) == RoundN(x, n)` | proptest |
+| VP-023 | `F(x, p)` equals the CPython oracle for every finite x in a 2M-sample random set and all boundary rows | proptest + oracle table |
+| VP-023 | `Round(x)` equals `math.RoundToEven(x)` for finite x with magnitude below 2^53 and is exact beyond | proptest |
+| VP-023 | `RoundN(RoundN(x, n), n) == RoundN(x, n)` | proptest |
 
 ## Traceability
 
@@ -106,7 +106,7 @@ All values verified 2026-11-15 against CPython 3.11.7 (`round`, `format`).
 |-------|-------|
 | L2 Capability | CAP-009 (byte parity of rendered numbers) |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/num.go` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/num.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/num.go (Round/RoundN/F) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103 (one `internal/pyfmt` package, four files); design IM-05, IM-06; pitfalls PR-01, PR-02. Legacy call sites it serves: SL:1171 (`round`), SL:234 (`round(usd, 4)`), `.Nf` sites SL:435-437, 479, 522, 599, 616, 625, 635, 700, 741, 761-762, 778-783, 795, 813-819, 857, 870-873 |
 
@@ -119,7 +119,7 @@ All values verified 2026-11-15 against CPython 3.11.7 (`round`, `format`).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-num` — Python number helpers (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-num` — internal/pyfmt/num.go (Round/RoundN/F) (Python number helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -127,4 +127,4 @@ TBD — pyfmt num (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `F` equals CPython on finite values
+- VP-023 — `F` equals CPython on finite values

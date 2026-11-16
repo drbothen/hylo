@@ -99,8 +99,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15 (`mix_segment`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all non-negative int triples with positive sum, each pct equals CPython `round(n/total*100)` | property test against `pyfmt.Round` + CPython goldens |
-| VP-TBD | Bytes equal the oracle on the pass-3 r1 vector table | table test |
+| VP-028 | For all non-negative int triples with positive sum, each pct equals CPython `round(n/total*100)` | property test against `pyfmt.Round` + CPython goldens |
+| VP-028 | Bytes equal the oracle on the pass-3 r1 vector table | table test |
 
 ## Traceability
 
@@ -124,7 +124,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15 (`mix_segment`).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#context` — TBD by architect
+- `architecture/ARCH-03-statusline.md#context` — internal/statusline/context.go (half-even percentage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -132,7 +132,7 @@ TBD — context widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — half-even percentage property
+- VP-028 — half-even percentage property
 
 ---
 

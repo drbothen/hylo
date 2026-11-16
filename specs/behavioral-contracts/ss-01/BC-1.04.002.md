@@ -100,8 +100,8 @@ TTL 4, frozen clock, fetch outcome injected (full 11-step table with exact JSON:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Same `(sample, age, up, hist)` and same cache bytes as legacy for every step of the pinned sequence | manual (multi-step table, BC-1.04.020) |
-| VP-TBD | Cached path performs zero fetches and zero writes | proptest (fake metrics counter) |
+| VP-030 | Same `(sample, age, up, hist)` and same cache bytes as legacy for every step of the pinned sequence | manual (multi-step table, BC-1.04.020) |
+| VP-030 | Cached path performs zero fetches and zero writes | proptest (fake metrics counter) |
 
 ## Traceability
 
@@ -126,7 +126,7 @@ TTL 4, frozen clock, fetch outcome injected (full 11-step table with exact JSON:
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#session-cache` — session cache state machine (TBD)
+- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (TTL/KEEP_DEAD) (session cache state machine) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,7 +134,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — state-machine equivalence
+- VP-030 — state-machine equivalence
 
 ---
 

@@ -83,8 +83,8 @@ paths. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Go degrades iff legacy raises at SL:675, for every trace × value class (finite, NaN, +Inf, -Inf) | manual (table) |
-| VP-TBD | Cache files after a degraded run equal legacy's byte for byte | manual (multi-step) |
+| VP-030, VP-001 | Go degrades iff legacy raises at SL:675, for every trace × value class (finite, NaN, +Inf, -Inf) | manual (table) |
+| VP-030, VP-001 | Cache files after a degraded run equal legacy's byte for byte | manual (multi-step) |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ paths. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#degraded-ladder` — errDegraded sites (TBD)
+- `architecture/ARCH-03-statusline.md#degraded-ladder` — internal/statusline/sparkline.go (CP-N02) (errDegraded sites) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -115,7 +115,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — CP-N02 equivalence
+- VP-030, VP-001 — CP-N02 equivalence
 
 ---
 

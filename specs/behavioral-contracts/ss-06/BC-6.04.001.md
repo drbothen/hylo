@@ -111,8 +111,8 @@ gitleaks scans the full history. The workflow is gating: any red leg blocks the 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | The workflow file pins exactly the three OS labels, includes the Go 1.26.x leg, `-race` on Linux/macOS, and the gitleaks full-history step | manual review + a repository test that parses `ci.yml` |
-| VP-TBD | Every CI parity run uses an absolute interpreter path with `CI=true` | CI log check + BC-6.01.001 tests |
+| VP-037, VP-035 | The workflow file pins exactly the three OS labels, includes the Go 1.26.x leg, `-race` on Linux/macOS, and the gitleaks full-history step | manual review + a repository test that parses `ci.yml` |
+| VP-037, VP-035 | Every CI parity run uses an absolute interpreter path with `CI=true` | CI log check + BC-6.01.001 tests |
 
 ## Traceability
 
@@ -122,7 +122,7 @@ gitleaks scans the full history. The workflow is gating: any red leg blocks the 
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `.github/workflows/ci.yml` (filled by architect) |
+| Architecture Module | `.github/workflows/ci.yml` (BC-COMPONENT-MAP: CI matrix (ARCH-08 workflow) + internal/parity/ci.go — ARCH-07, ARCH-08) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -134,7 +134,7 @@ gitleaks scans the full history. The workflow is gating: any red leg blocks the 
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — CI workflow
+- `architecture/ARCH-07-parity-harness.md` — CI matrix (ARCH-08 workflow) + internal/parity/ci.go (CI workflow) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md), ARCH-08 (ARCH-08-build-ci-release.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,4 +142,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — CI matrix properties above
+- VP-037, VP-035 — CI matrix properties above

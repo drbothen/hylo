@@ -101,8 +101,8 @@ All rows verified 2026-11-15 against CPython 3.11.7 running the `_iso_ts` expres
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `FromISOFormat` equals the oracle `_iso_ts` on fuzzed strings under the committed TZ grid | fuzz (`FromISOFormat` target) + oracle |
-| VP-TBD | Aware inputs are independent of `loc` | proptest |
+| VP-026 | `FromISOFormat` equals the oracle `_iso_ts` on fuzzed strings under the committed TZ grid | fuzz (`FromISOFormat` target) + oracle |
+| VP-026 | Aware inputs are independent of `loc` | proptest |
 
 ## Traceability
 
@@ -110,7 +110,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 running the `_iso_ts` expres
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/time.go` `FromISOFormat` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/time.go` `FromISOFormat` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/time.go (FromISOFormat) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_iso_ts (SL:977-985; parse at SL:983) |
 | Legacy contract | BC-SL-069 (new in P3r1; amended P3r8 R-3 "TZ-dependent None near the range ends; no exception other than ValueError"; index P3r4 §7.3) |
@@ -123,7 +123,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 running the `_iso_ts` expres
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-time` — ISO timestamp parsing (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-time` — internal/pyfmt/time.go (FromISOFormat) (ISO timestamp parsing) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -131,7 +131,7 @@ TBD — pyfmt time (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `FromISOFormat` equals the oracle
+- VP-026 — `FromISOFormat` equals the oracle
 
 ---
 

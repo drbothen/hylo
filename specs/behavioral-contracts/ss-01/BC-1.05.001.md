@@ -114,8 +114,8 @@ Thresholds pinned from the BC-1.05.008 seed: `th_usd = (24.0, 30.0)`.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every finite usd > 0 and pair p75 ≤ p95, the colour equals the three-way rule above | proptest (Go testing/quick vs the oracle table) |
-| VP-TBD | The `$` part bytes equal legacy on the BC-1.05.008 goldens | manual (golden table test) |
+| VP-021 | For every finite usd > 0 and pair p75 ≤ p95, the colour equals the three-way rule above | proptest (Go testing/quick vs the oracle table) |
+| VP-021 | The `$` part bytes equal legacy on the BC-1.05.008 goldens | manual (golden table test) |
 
 ## Traceability
 
@@ -123,7 +123,7 @@ Thresholds pinned from the BC-1.05.008 seed: `th_usd = (24.0, 30.0)`.
 |-------|-------|
 | L2 Capability | CAP-011 (cost accounting), CAP-009 |
 | L2 Domain Invariants | DI-007 (status line inputs are stdin, transcript, metrics, its own caches) |
-| Architecture Module | `internal/statusline` cost.go (design §2.3; filled by architect) |
+| Architecture Module | `internal/statusline` cost.go (design §2.3; BC-COMPONENT-MAP: internal/statusline/cost.go ($ percentile colors) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-616); constants COST_MIN_USD, COST_FALLBACK_YELLOW (SL:219, 221) |
 | Legacy contract | BC-SL-025 (P3r1 §D row 54; refined P3 deep r1) |
@@ -142,7 +142,7 @@ Thresholds pinned from the BC-1.05.008 seed: `th_usd = (24.0, 30.0)`.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[statusline].md#cost-segment` — `$`/`$/h`/`⛏` built as one segment under one `usd > 0` guard (filled by architect)
+- `architecture/ARCH-03-statusline.md#cost-segment` — internal/statusline/cost.go ($ percentile colors) (`$`/`$/h`/`⛏` built as one segment under one `usd > 0` guard) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -150,4 +150,4 @@ S-N.MM — cost segment (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `$` colour rule
+- VP-021 — `$` colour rule

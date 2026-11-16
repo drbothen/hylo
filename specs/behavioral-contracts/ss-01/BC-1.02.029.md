@@ -99,8 +99,8 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | With a valid basis, `⛏` present iff `(tot*mtok)/1e6 >= 0.005` | generated table vs oracle |
-| VP-TBD | Below threshold never renders `n/a` | table test |
+| VP-028 | With a valid basis, `⛏` present iff `(tot*mtok)/1e6 >= 0.005` | generated table vs oracle |
+| VP-028 | Below threshold never renders `n/a` | table test |
 
 ## Traceability
 
@@ -108,7 +108,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 |-------|-------|
 | L2 Capability | CAP-011 (owned-hardware cost), CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/cost.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/cost.go`; BC-COMPONENT-MAP: internal/statusline/cost.go (pick eq 0.005) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:633-635, inside the ⛏ block SL:626-636) |
 | Legacy contract | BC-SL-083 (deep pass-3 round 1, new) |
@@ -124,7 +124,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/cost.go (pick eq 0.005) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -132,7 +132,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — threshold presence
+- VP-028 — threshold presence
 
 ---
 

@@ -101,8 +101,8 @@ expectation = legacy run on the seed with `cur` replaced by null).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Rule fires iff `cur` is an object, `t0` is a number, `out` is not a number | table test |
-| VP-TBD | After the rule and one turn event, turn state equals native hylo's | table test (C1/C2 vs BC-1.03.019 row 13) |
+| VP-029, VP-013, VP-012 (frontmatter closure) | Rule fires iff `cur` is an object, `t0` is a number, `out` is not a number | table test |
+| VP-029, VP-013, VP-012 (frontmatter closure) | After the rule and one turn event, turn state equals native hylo's | table test (C1/C2 vs BC-1.03.019 row 13) |
 
 ## Traceability
 
@@ -128,7 +128,7 @@ expectation = legacy run on the seed with `cur` replaced by null).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#mix-cache` — reader rule in `mixcache.go`
+- `architecture/ARCH-03-statusline.md#mix-cache` — internal/statusline/mixcache.go (OD-32 reader rule) (reader rule in `mixcache.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -136,7 +136,7 @@ S-TBD — mix cache
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — reader-rule predicate
+- VP-029, VP-013, VP-012 — reader-rule predicate
 
 ---
 

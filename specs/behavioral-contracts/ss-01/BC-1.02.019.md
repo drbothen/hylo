@@ -91,8 +91,8 @@ Pinned 2026-11-15 by calling the legacy `heat` under CPython 3.11 (oracle, OD-10
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all float64 `pct` in a dense grid over [-10, 110] the Go triple equals the CPython triple | generated table vs oracle (arm64) |
-| VP-TBD | Blue channel is 30 for all finite inputs | proptest |
+| VP-028 | For all float64 `pct` in a dense grid over [-10, 110] the Go triple equals the CPython triple | generated table vs oracle (arm64) |
+| VP-028 | Blue channel is 30 for all finite inputs | proptest |
 
 ## Traceability
 
@@ -100,7 +100,7 @@ Pinned 2026-11-15 by calling the legacy `heat` under CPython 3.11 (oracle, OD-10
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; BC-COMPONENT-MAP: internal/statusline/context.go (heat HSV; arm64) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:heat (SL:144-148) and legacy/dgx_statusline.py:truecolor (SL:140-141) |
 | Legacy contract | BC-SL-056 (deep pass-3 round 1, new) |
@@ -115,7 +115,7 @@ Pinned 2026-11-15 by calling the legacy `heat` under CPython 3.11 (oracle, OD-10
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect (FMA no-fuse convention)
+- `architecture/ARCH-03-statusline.md` — internal/statusline/context.go (heat HSV; arm64) (FMA no-fuse convention) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -123,7 +123,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — grid equality vs CPython
+- VP-028 — grid equality vs CPython
 
 ---
 

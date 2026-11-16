@@ -84,7 +84,7 @@ verified `COLUMNS` unset/0 behavior; row 5 pinned in P3r2 §A1 (`cols.py`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all cols < 0: output rows are untrimmed and row 2 present iff rows > 2 | proptest |
+| VP-027 | For all cols < 0: output rows are untrimmed and row 2 present iff rows > 2 | proptest |
 
 ## Traceability
 
@@ -92,7 +92,7 @@ verified `COLUMNS` unset/0 behavior; row 5 pinned in P3r2 §A1 (`cols.py`).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` width + orchestrator (filled by architect) |
+| Architecture Module | `internal/statusline` width + orchestrator (BC-COMPONENT-MAP: internal/statusline/width.go (negative COLUMNS) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`term_cols` (SL:1188-1190) feeding `main` row-2 rule (SL:1224) and trim gate (SL:1232) |
 | Legacy contract | BC-SL-055 (new in P3r1 §A1; index P3r4 §7.3) |
@@ -106,7 +106,7 @@ verified `COLUMNS` unset/0 behavior; row 5 pinned in P3r2 §A1 (`cols.py`).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-width` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-width` — internal/statusline/width.go (negative COLUMNS) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -114,7 +114,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — negative-width behavior
+- VP-027 — negative-width behavior
 
 ---
 

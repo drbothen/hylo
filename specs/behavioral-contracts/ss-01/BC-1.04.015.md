@@ -80,7 +80,7 @@ Cyan prefix `\e[36m`, suffix `\e[0m` unless noted.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Go degrades iff kv is NaN; finite/±Inf rows equal legacy bytes | proptest + table |
+| VP-030, VP-001 | Go degrades iff kv is NaN; finite/±Inf rows equal legacy bytes | proptest + table |
 
 ## Traceability
 
@@ -102,7 +102,7 @@ Cyan prefix `\e[36m`, suffix `\e[0m` unless noted.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#degraded-ladder` — errDegraded sites (TBD)
+- `architecture/ARCH-03-statusline.md#degraded-ladder` — internal/statusline/row2.go (CP-N01, cell math) (errDegraded sites) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -110,7 +110,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — CP-N01 equivalence
+- VP-030, VP-001 — CP-N01 equivalence
 
 ---
 

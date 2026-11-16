@@ -107,8 +107,8 @@ The 21-row table with exact expected caches is BC-1.03.019. Representative rows:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every W-line, parser state after = state before (bit-identical) | proptest with generated W-lines per CP |
-| VP-TBD | Delete-the-line equivalence holds on random transcripts with injected W-lines | fuzz (oracle on the transcript with W deleted) |
+| VP-029, VP-013, VP-012 (frontmatter closure) | For every W-line, parser state after = state before (bit-identical) | proptest with generated W-lines per CP |
+| VP-029, VP-013, VP-012 (frontmatter closure) | Delete-the-line equivalence holds on random transcripts with injected W-lines | fuzz (oracle on the transcript with W deleted) |
 
 ## Traceability
 
@@ -134,7 +134,7 @@ The 21-row table with exact expected caches is BC-1.03.019. Representative rows:
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#d4-ex-2` — `transcript_wshape.go`
+- `architecture/ARCH-03-statusline.md#d4-ex-2` — internal/statusline/transcript_wshape.go (W-predicates) (`transcript_wshape.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,7 +142,7 @@ S-TBD — D4-EX-2 wrong-shape skip
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — no partial mutation
+- VP-029, VP-013, VP-012 — no partial mutation
 
 ---
 

@@ -177,8 +177,8 @@ Go must reproduce them on every OS without Python installed. OS-dependent cases 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Go renders goldens A/B/C byte-identical to the Python-written committed files on all three OSes | golden test (Tier B) |
-| VP-TBD | No code path writes a golden from Go output | table test on the `-update` path |
+| VP-010 | Go renders goldens A/B/C byte-identical to the Python-written committed files on all three OSes | golden test (Tier B) |
+| VP-010 | No code path writes a golden from Go output | table test on the `-update` path |
 
 ## Traceability
 
@@ -190,7 +190,7 @@ Go must reproduce them on every OS without Python installed. OS-dependent cases 
 | Parity class | byte-exact |
 | L2 Capability | CAP-009, CAP-010, CAP-011 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline/testdata/goldens/` (filled by architect) |
+| Architecture Module | `internal/statusline/testdata/goldens/` (BC-COMPONENT-MAP: internal/statusline/testdata/goldens (Tier B, Python-written) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -204,7 +204,7 @@ Go must reproduce them on every OS without Python installed. OS-dependent cases 
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — Tier B golden store
+- `architecture/ARCH-07-parity-harness.md` — internal/statusline/testdata/goldens (Tier B, Python-written) (Tier B golden store) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -212,7 +212,7 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — golden byte-equality properties above
+- VP-010 — golden byte-equality properties above
 
 ---
 

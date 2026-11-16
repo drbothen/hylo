@@ -93,9 +93,9 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | After a write, `size` = offset just past an LF, and `size ≤` the stat size | proptest over random line lengths around the step boundary |
-| VP-TBD | Extension reads occur iff the first step contains no LF | proptest with an instrumented `FileSystem` |
-| VP-TBD | Go and legacy offsets agree for random line-length sequences | fuzz (Tier C differential) |
+| VP-029, VP-031 | After a write, `size` = offset just past an LF, and `size ≤` the stat size | proptest over random line lengths around the step boundary |
+| VP-029, VP-031 | Extension reads occur iff the first step contains no LF | proptest with an instrumented `FileSystem` |
+| VP-029, VP-031 | Go and legacy offsets agree for random line-length sequences | fuzz (Tier C differential) |
 
 ## Traceability
 
@@ -118,7 +118,7 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-read-window` — `FileSystem.ReadFrom` seam (design §2.2)
+- `architecture/ARCH-03-statusline.md#transcript-read-window` — internal/statusline/transcript.go (512 KB step) (`FileSystem.ReadFrom` seam (design §2.2)) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -126,7 +126,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — offset always just past an LF
+- VP-029, VP-031 — offset always just past an LF
 
 ---
 

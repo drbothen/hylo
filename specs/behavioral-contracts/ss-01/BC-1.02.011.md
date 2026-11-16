@@ -108,8 +108,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; `rate_limits` shown,
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Colour equals the oracle over a grid pct ∈ {0..100 step 0.5} × rem/length ∈ {0.0001..1.2 step 0.01} for both windows | table test vs CPython goldens |
-| VP-TBD | Windows joined by exactly two spaces, 5h before 7d | table test |
+| VP-028 | Colour equals the oracle over a grid pct ∈ {0..100 step 0.5} × rem/length ∈ {0.0001..1.2 step 0.01} for both windows | table test vs CPython goldens |
+| VP-028 | Windows joined by exactly two spaces, 5h before 7d | table test |
 
 ## Traceability
 
@@ -134,7 +134,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; `rate_limits` shown,
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#limits` — TBD by architect
+- `architecture/ARCH-03-statusline.md#limits` — internal/statusline/limits.go (pace/absolute bands) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,7 +142,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — band grid parity
+- VP-028 — band grid parity
 
 ---
 

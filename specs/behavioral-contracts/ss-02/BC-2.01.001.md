@@ -110,8 +110,8 @@ happens once per process, before any side effect.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Adding or changing any non-`HYLO_*` variable (except OS-level ones read by `internal/platform` for paths) never changes the resolved config | proptest |
-| VP-TBD | Unset `EnvName(k)` ⇒ effective value == registry default for every k | table test over `Registry()` |
+| VP-015 | Adding or changing any non-`HYLO_*` variable (except OS-level ones read by `internal/platform` for paths) never changes the resolved config | proptest |
+| VP-015 | Unset `EnvName(k)` ⇒ effective value == registry default for every k | table test over `Registry()` |
 
 ## Traceability
 
@@ -121,7 +121,7 @@ happens once per process, before any side effect.
 | Parity / exclusion | n.a. (no output change for equal effective values; harness sets HYLO_* on the Go side and DGX_* on the legacy side, design §3.2) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `internal/config/load.go` (filled by architect) |
+| Architecture Module | `internal/config/load.go` (BC-COMPONENT-MAP: internal/config/load.go (env -> defaults) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -135,7 +135,7 @@ happens once per process, before any side effect.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#load` — resolution order (TBD)
+- `architecture/ARCH-02-configuration.md#load` — internal/config/load.go (env -> defaults) (resolution order) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -143,4 +143,4 @@ S-TBD — config subset (design §4 step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — legacy names never read
+- VP-015 — legacy names never read

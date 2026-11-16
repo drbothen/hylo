@@ -108,8 +108,8 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For any non-string hashable sid, Go output equals legacy output for `str_form(sid)` as a string sid | manual (paired oracle runs) |
-| VP-TBD | No Go-written cost history contains a duplicate key | proptest |
+| VP-020 | For any non-string hashable sid, Go output equals legacy output for `str_form(sid)` as a string sid | manual (paired oracle runs) |
+| VP-020 | No Go-written cost history contains a duplicate key | proptest |
 
 ## Traceability
 
@@ -117,7 +117,7 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 |-------|-------|
 | L2 Capability | CAP-011 |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/cost` history.go (`Record`/`ForLane` take the sid as a raw `pyfmt.Value`, design §2.3; filled by architect) |
+| Architecture Module | `internal/cost` history.go (`Record`/`ForLane` take the sid as a raw `pyfmt.Value`, design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (numeric sid, OD-30) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237, lookup SL:230); cost_thresholds (SL:240-262, compare SL:246) |
 | Legacy contract | BC-SL-079 (P3 deep r1; refined P3r3 §4.2; re-confirmed P3r4 §1.1 with sid 777) |
@@ -136,7 +136,7 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[cost].md#sid-key` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#sid-key` — internal/cost/history.go (numeric sid, OD-30) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -144,4 +144,4 @@ S-N.MM — cost history (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — string-form equivalence
+- VP-020 — string-form equivalence

@@ -95,7 +95,7 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0 and stdout ends with `\n` and is non-empty | fuzz (`go test -fuzz`) |
+| VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0 and stdout ends with `\n` and is non-empty | fuzz (`go test -fuzz`) |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 | Parity / exclusion | n.a. (dispatch adds no status line bytes; the statusline path's output is governed by S1 BCs) |
 | L2 Capability | CAP-009, CAP-015 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `cmd/hylo/main.go`, `statusline.go` (filled by architect) |
+| Architecture Module | `cmd/hylo/main.go`, `statusline.go` (BC-COMPONENT-MAP: cmd/hylo/main.go + statusline.go (dispatch) — ARCH-01) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -117,7 +117,7 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-04-cli.md#dispatch` — subcommand dispatch (TBD)
+- `architecture/ARCH-01-binary-cli.md#dispatch` — cmd/hylo/main.go + statusline.go (dispatch) (subcommand dispatch) (BC-COMPONENT-MAP: ARCH-01 (ARCH-01-binary-cli.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,4 +125,4 @@ S-TBD — skeleton + dispatch (RESUME P1 step 1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — statusline always exits 0
+- VP-004 — statusline always exits 0

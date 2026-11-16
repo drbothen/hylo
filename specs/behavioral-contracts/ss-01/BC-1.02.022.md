@@ -94,8 +94,8 @@ oracle on the Windows CI leg.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `PosixNormpath`/`NtNormpath` + `Basename` equal CPython for generated path strings | fuzz vs oracle (per OS flavour) |
-| VP-TBD | Label never produced via `filepath.Clean` | lint / code review |
+| VP-028 | `PosixNormpath`/`NtNormpath` + `Basename` equal CPython for generated path strings | fuzz vs oracle (per OS flavour) |
+| VP-028 | Label never produced via `filepath.Clean` | lint / code review |
 
 ## Traceability
 
@@ -103,7 +103,7 @@ oracle on the Windows CI leg.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/lane.go`); path ports in `internal/pyfmt` str file (filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/lane.go`); path ports in `internal/pyfmt` str file (BC-COMPONENT-MAP: internal/statusline/lane.go (POSIX normpath //) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:460; append SL:461-462) |
 | Legacy contract | BC-SL-059 (deep pass-3 round 1, new) |
@@ -118,7 +118,7 @@ oracle on the Windows CI leg.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/lane.go (POSIX normpath //) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -126,7 +126,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — normpath equality per flavour
+- VP-028 — normpath equality per flavour
 
 ---
 

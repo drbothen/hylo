@@ -95,8 +95,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15, `T = 1800000000.0`, 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `reroute_all(prefixes)` equals the oracle for all prefixes built from `{claude, claude-, Claude, claude-s, *, space, NBSP}` up to length 3 | exhaustive table test |
-| VP-TBD | When `reroute_all`, row 1 contains no limits segment for any stdin | property test |
+| VP-028 | `reroute_all(prefixes)` equals the oracle for all prefixes built from `{claude, claude-, Claude, claude-s, *, space, NBSP}` up to length 3 | exhaustive table test |
+| VP-028 | When `reroute_all`, row 1 contains no limits segment for any stdin | property test |
 
 ## Traceability
 
@@ -121,7 +121,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15, `T = 1800000000.0`, 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#limits` — TBD by architect
+- `architecture/ARCH-03-statusline.md#limits` — internal/statusline/limits.go (reroute-all hides limits) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -129,7 +129,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — reroute-all predicate
+- VP-028 — reroute-all predicate
 
 ---
 

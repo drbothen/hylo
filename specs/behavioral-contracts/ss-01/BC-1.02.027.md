@@ -89,8 +89,8 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `+Infinity` in `dur`, or in `api` with a shown timer, degrades; NaN/`-Infinity` never degrade | table test |
-| VP-TBD | `_hm` output equals CPython for finite float64 inputs across the full range | fuzz vs oracle |
+| VP-028, VP-001 | `+Infinity` in `dur`, or in `api` with a shown timer, degrades; NaN/`-Infinity` never degrade | table test |
+| VP-028, VP-001 | `_hm` output equals CPython for finite float64 inputs across the full range | fuzz vs oracle |
 
 ## Traceability
 
@@ -98,7 +98,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (CP-S12/S13 degrade) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane `_hm` (SL:545-548; crash at SL:546 via SL:549 for CP-S12 and SL:553 for CP-S13), timer block SL:534-563 |
 | Legacy contract | BC-SL-064 (deep pass-3 round 1, new; crash paths CP-S12, CP-S13) |
@@ -115,7 +115,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect (degraded ladder)
+- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (CP-S12/S13 degrade) (degraded ladder) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -123,7 +123,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `+Infinity` degrades
+- VP-028, VP-001 — `+Infinity` degrades
 
 ---
 

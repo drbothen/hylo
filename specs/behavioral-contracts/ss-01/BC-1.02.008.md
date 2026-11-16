@@ -92,8 +92,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For finite hr, text equals CPython `f"{min(max(hr,0.0),1.0)*100:.0f}%"` | property test vs CPython goldens (sweep 0..1 step 0.0005) |
-| VP-TBD | Segment absent iff hr is not a number | table test |
+| VP-028 | For finite hr, text equals CPython `f"{min(max(hr,0.0),1.0)*100:.0f}%"` | property test vs CPython goldens (sweep 0..1 step 0.0005) |
+| VP-028 | Segment absent iff hr is not a number | table test |
 
 ## Traceability
 
@@ -117,7 +117,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#context` — TBD by architect
+- `architecture/ARCH-03-statusline.md#context` — internal/statusline/context.go (cache-hit segment) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,7 +125,7 @@ TBD — context widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — cache-hit formatting property
+- VP-028 — cache-hit formatting property
 
 ---
 

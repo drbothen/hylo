@@ -100,7 +100,7 @@ every staircase width from the segment widths (all match) but did not re-run the
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every COLUMNS in 1..max+1, Go trim of each golden row equals the pinned staircase entry | table test (exhaustive over the range) |
+| VP-027 | For every COLUMNS in 1..max+1, Go trim of each golden row equals the pinned staircase entry | table test (exhaustive over the range) |
 
 ## Traceability
 
@@ -108,7 +108,7 @@ every staircase width from the segment widths (all match) but did not re-run the
 |-------|-------|
 | L2 Capability | CAP-009, CAP-010 |
 | L2 Domain Invariants | — |
-| Architecture Module | `internal/statusline` width (`width.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` width (`width.go`) (BC-COMPONENT-MAP: internal/statusline/width.go (trim breakpoint matrix) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`trim_to_fit` (SL:1193-1197); `main` trim and row-2 gates SL:1224, 1232-1233 |
 | Legacy contract | BC-SL-090 (new P3r2 §A1; index P3r4 §7.3) |
@@ -122,7 +122,7 @@ every staircase width from the segment widths (all match) but did not re-run the
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-width` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-width` — internal/statusline/width.go (trim breakpoint matrix) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -130,7 +130,7 @@ TBD — frame (design step S2) and goldens/burn-down (step S8)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — staircase table
+- VP-027 — staircase table
 
 ---
 

@@ -97,7 +97,7 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Accepted URL ⇒ scheme ∈ {http, https}, host ≠ "", no trailing `/` | proptest / fuzz |
+| VP-016, VP-012 (frontmatter closure) | Accepted URL ⇒ scheme ∈ {http, https}, host ≠ "", no trailing `/` | proptest / fuzz |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
 | Parity / exclusion | **Approved deviation D4-EX-3 (URL class).** Named exclusion entry id `D4-EX-3`, cases `ftp://192.0.2.10:8428`, `192.0.2.10:8428`, `http://`, `""`, each with its expected output file; dedicated table test `TestConfigError_D4EX3_URL` (OD-105, OD-110) |
 | L2 Capability | CAP-015 (supports CAP-010) |
 | L2 Domain Invariants | DI-008, DI-010 |
-| Architecture Module | `internal/config/types.go` (`URL`) (filled by architect) |
+| Architecture Module | `internal/config/types.go` (`URL`) (BC-COMPONENT-MAP: internal/config/errors.go (URL class) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -117,7 +117,7 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#url` — URL type (TBD)
+- `architecture/ARCH-02-configuration.md#url` — internal/config/errors.go (URL class) (URL type) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,4 +125,4 @@ S-TBD — D4-EX-3 table tests
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — accepted URL shape
+- VP-016, VP-012 — accepted URL shape

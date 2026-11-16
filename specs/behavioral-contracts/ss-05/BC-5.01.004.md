@@ -89,8 +89,8 @@ Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle di
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | D equals CPython for every (n, width, zeroPad) in the generated table | CPython oracle table |
-| VP-TBD | Sign placement holds for every negative int64 minimum | proptest |
+| VP-023 | D equals CPython for every (n, width, zeroPad) in the generated table | CPython oracle table |
+| VP-023 | Sign placement holds for every negative int64 minimum | proptest |
 
 ## Traceability
 
@@ -100,7 +100,7 @@ Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle di
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
 | L2 Domain Invariants | DI-012 (byte parity machinery) |
-| Architecture Module | `internal/pyfmt` num.go (filled by architect) |
+| Architecture Module | `internal/pyfmt` num.go (BC-COMPONENT-MAP: internal/pyfmt/num.go (D) — ARCH-06) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -111,7 +111,7 @@ Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle di
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-05-pyfmt.md#num` — num.go helpers (TBD)
+- `architecture/ARCH-06-pyfmt.md#num` — internal/pyfmt/num.go (D) (num.go helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -119,4 +119,4 @@ S-TBD — pyfmt num helpers
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — oracle-table equality
+- VP-023 — oracle-table equality

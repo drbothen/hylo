@@ -1,0 +1,104 @@
+---
+document_type: verification-property
+level: L4
+version: "1.0"
+status: draft
+producer: architect
+timestamp: 2026-11-16T00:00:00Z
+phase: 1b
+inputs: [prd.md, architecture/ARCH-05-platform.md, behavioral-contracts/ss-03/BC-3.02.001.md, behavioral-contracts/ss-03/BC-3.02.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
+input-hash: "2ed5662"
+traces_to: prd.md
+source_bc: BC-3.02.002
+bcs: [BC-3.02.001, BC-3.02.002]
+module: internal/platform (proc_*.go)
+proof_method: manual
+feasibility: feasible
+verification_lock: false
+proof_completed_date: null
+proof_file_hash: null
+lifecycle_status: active
+introduced: "1.0"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+withdrawn: null
+withdrawal_reason: null
+removed: null
+removal_reason: null
+---
+
+# VP-033: Native process probe correctness per OS
+
+## Property Statement
+
+`FindAncestor` obeys the register of named rules identically in unit on every OS leg:
+walk from `os.Getppid()` checking the parent first; at most 6 levels; stop at pid <= 1;
+`basename(comm)` match with case-insensitive `.exe` stripping on Windows; start time
+truncated to whole seconds returned as float under the legacy `proc_start` key; PID-reuse
+guard (parent created before child) on Windows. Probe-result differences between
+macOS/Linux are the ruled OD-76 exclusion entries; the symlinked-binary name case is
+measured in the probe test (OD-139 deferral).
+
+## Source Contract
+
+- **Primary BC:** BC-3.02.002 — ps-parse replacement: named per-OS edge differences
+  (macOS/Linux).
+- **Partial coverage:** BC-3.02.001 (whole-second truncation; `proc_start` key first).
+- **Invariant verified:** DI-012 (OD-76 differences are named, never runtime-discovered);
+  AD-07 (native probe replaces ps; removes the up-to-6 s latency tail).
+
+## Property Class and Verification Method
+
+- **Class:** invariant.
+- **Method:** unit/table test per OS with fake PID chains — depth/stop/name rules, the
+  PID-reuse guard, truncation; parity flows through seeded `proc_start` cases (probe
+  not exercised in parity); the real-syscall legs live in the per-OS CI matrix.
+- **Honesty:** testable-only (real syscalls); unit rules table-covered, syscall legs
+  observed in CI.
+
+## Proof Method
+
+| Method | Tool | Bounded? | Coverage |
+|--------|------|----------|----------|
+| Fake-chain tables | Go test per build tag | yes — depth 0..7, stop, name rules | rule register |
+| Seeded parity | proc_start cases (VP-009) | corpus-bounded | end-to-end ⌂ bytes |
+| Real-syscall observation | windows-2025 / macos-15 / ubuntu CI legs | process | probe smoke rows |
+
+## Proof Harness Skeleton
+
+```go
+func TestFindAncestor_RuleRegister(t *testing.T) {
+    for _, tc := range FakePIDChains {
+        start, ok := FindAncestor(tc.PID, tc.Name, 6)
+        if ok != tc.WantOK || (ok && int(start) != int(tc.WantStart)) {
+            t.Fatalf("%s: ok=%v start=%v", tc.Name, ok, start)
+        }
+    }
+}
+```
+
+## Named Tests (OD-145 table where applicable)
+
+`platform` parity family for seeded cases; in-tree `TestFindAncestor_RuleRegister`;
+D4-EX-1 Windows difference is VP-014's fake-probe test.
+
+## Feasibility Assessment
+
+| Factor | Assessment | Notes |
+|--------|-----------|-------|
+| Input space size | Rule register + chains | bounded |
+| Proof complexity | N/A | |
+| Tool support | Full | |
+| Estimated proof time | Days | three-OS syscall smoke legs |
+
+## Lifecycle
+
+| Event | Date | Actor |
+|-------|------|-------|
+| Created | 2026-11-16 | architect |
+| Proof harness committed | — | formal-verifier |
+| Proof first passed | — | formal-verifier |
+| Locked (VERIFIED) | — | formal-verifier |

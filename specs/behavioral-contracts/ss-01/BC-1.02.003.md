@@ -100,8 +100,8 @@ disabled so only the label varies.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all non-empty strings, label = `pyfmt.Basename(pyfmt.Normpath(s))` or the normpath when empty, per host OS | property test against CPython goldens (BC-5.03.004) |
-| VP-TBD | Label bytes equal the oracle on Tier A cases, per OS | parity harness |
+| VP-028 | For all non-empty strings, label = `pyfmt.Basename(pyfmt.Normpath(s))` or the normpath when empty, per host OS | property test against CPython goldens (BC-5.03.004) |
+| VP-028 | Label bytes equal the oracle on Tier A cases, per OS | parity harness |
 
 ## Traceability
 
@@ -126,7 +126,7 @@ disabled so only the label varies.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#lane` — TBD by architect
+- `architecture/ARCH-03-statusline.md#lane` — internal/statusline/lane.go (project basename) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,7 +134,7 @@ TBD — row-1 lane segments story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — label derivation property
+- VP-028 — label derivation property
 
 ---
 

@@ -108,9 +108,9 @@ All vectors verified against the oracle (`legacy/dgx_statusline.py`, CPython 3.1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all string ids and prefix lists, `on_local == any(strings.HasPrefix(id, p))` when both are non-empty, else None | property test (Go `testing/quick`) + table test |
-| VP-TBD | Pill bytes are one of exactly three constants (with default theme) | table test |
-| VP-TBD | Go pill bytes equal oracle pill bytes on the Tier A corpus | parity harness (BC-6.03.002) |
+| VP-028 | For all string ids and prefix lists, `on_local == any(strings.HasPrefix(id, p))` when both are non-empty, else None | property test (Go `testing/quick`) + table test |
+| VP-028 | Pill bytes are one of exactly three constants (with default theme) | table test |
+| VP-028 | Go pill bytes equal oracle pill bytes on the Tier A corpus | parity harness (BC-6.03.002) |
 
 ## Traceability
 
@@ -123,7 +123,7 @@ All vectors verified against the oracle (`legacy/dgx_statusline.py`, CPython 3.1
 | L2 Domain Invariants | DI-008 (degrade on fault), DI-012 (no unnamed deviations) |
 | Owner decisions | OD-111 / OD-123 (prefix key and default `claude-sonnet`; empty value expressible), OD-113 (theme keys), OD-121 (client-view lane), OD-05 (no `DGX_*` env) |
 | Config keys | `backends[0].model_prefixes`, `statusline.theme.*` (pill codes), `statusline.glyphs.*` |
-| Architecture Module | `internal/statusline/lane.go` (design §2.2; filled by architect) |
+| Architecture Module | `internal/statusline/lane.go` (design §2.2; BC-COMPONENT-MAP: internal/statusline/lane.go (prefix startswith pill) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -138,7 +138,7 @@ All vectors verified against the oracle (`legacy/dgx_statusline.py`, CPython 3.1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#lane` — pill, model and project segments (TBD by architect)
+- `architecture/ARCH-03-statusline.md#lane` — internal/statusline/lane.go (prefix startswith pill) (pill, model and project segments) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -146,7 +146,7 @@ TBD — row-1 lane segments story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — pill classification property
+- VP-028 — pill classification property
 
 ---
 

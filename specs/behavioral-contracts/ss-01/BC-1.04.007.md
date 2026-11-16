@@ -88,8 +88,8 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Cell count = `min(ceil(clamp(kv*100)/25), 4)` for finite and ±inf inputs | proptest |
-| VP-TBD | 11-case review #15 table reproduces legacy bytes | manual (table) |
+| VP-030 | Cell count = `min(ceil(clamp(kv*100)/25), 4)` for finite and ±inf inputs | proptest |
+| VP-030 | 11-case review #15 table reproduces legacy bytes | manual (table) |
 
 ## Traceability
 
@@ -110,7 +110,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (KV) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -118,7 +118,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — KV cell math
+- VP-030 — KV cell math
 
 ---
 

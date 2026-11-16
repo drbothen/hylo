@@ -83,8 +83,8 @@ legacy oracle (hylo must produce identical bytes).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `cur.out` round-trips verbatim through load/save for any JSON value | proptest |
-| VP-TBD | `finishTurn` never errors when `t0` is null | proptest |
+| VP-029 | `cur.out` round-trips verbatim through load/save for any JSON value | proptest |
+| VP-029 | `finishTurn` never errors when `t0` is null | proptest |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ legacy oracle (hylo must produce identical bytes).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#mix-cache`
+- `architecture/ARCH-03-statusline.md#mix-cache` — internal/statusline/mixcache.go (t0 null, out verbatim) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -115,7 +115,7 @@ S-TBD — mix cache
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — raw `cur.out` round-trip
+- VP-029 — raw `cur.out` round-trip
 
 ---
 

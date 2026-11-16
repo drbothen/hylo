@@ -90,7 +90,7 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Rung selection is a total function of `(truthy(sample), up, age > fresh_s, age > 0)` matching legacy | proptest |
+| VP-030 | Rung selection is a total function of `(truthy(sample), up, age > fresh_s, age > 0)` matching legacy | proptest |
 
 ## Traceability
 
@@ -112,7 +112,7 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (freshness ladder) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -120,7 +120,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — ladder totality
+- VP-030 — ladder totality
 
 ---
 

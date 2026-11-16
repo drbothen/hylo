@@ -92,8 +92,8 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`json.loads`, dict assignment/d
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For random op sequences (Set/Delete), member order equals a Python dict driven by the same ops | proptest vs oracle replay |
-| VP-TBD | `Dumps(Decode(b))` equals `json.dumps(json.loads(b))` byte for byte | fuzz + oracle |
+| VP-024 | For random op sequences (Set/Delete), member order equals a Python dict driven by the same ops | proptest vs oracle replay |
+| VP-024 | `Dumps(Decode(b))` equals `json.dumps(json.loads(b))` byte for byte | fuzz + oracle |
 
 ## Traceability
 
@@ -101,7 +101,7 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`json.loads`, dict assignment/d
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/json.go` `Value`, `Member`, `Kind`, `Get/Set/Delete` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/json.go` `Value`, `Member`, `Kind`, `Get/Set/Delete` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/json.go (ordered Value) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-01 (ordered objects, WTF-8 strings), IM-03 (insertion order in caches); pitfalls PR-11, PR-19. Legacy semantics it reproduces: dict copy SL:327, cache writes SL:203 via `save_cache` |
 
@@ -114,7 +114,7 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`json.loads`, dict assignment/d
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-json` — Value model (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-json` — internal/pyfmt/json.go (ordered Value) (Value model) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -122,4 +122,4 @@ TBD — pyfmt json (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — dict-order equivalence
+- VP-024 — dict-order equivalence

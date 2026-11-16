@@ -105,7 +105,7 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Per-OS default table holds on each CI OS (ubuntu, macos, windows) | table test with injected env |
+| VP-004, VP-032 | Per-OS default table holds on each CI OS (ubuntu, macos, windows) | table test with injected env |
 
 ## Traceability
 
@@ -115,7 +115,7 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 | Parity / exclusion | n.a. |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `cmd/hylo/config.go`, `internal/platform/paths*.go` (filled by architect) |
+| Architecture Module | `cmd/hylo/config.go`, `internal/platform/paths*.go` (BC-COMPONENT-MAP: cmd/hylo/config.go (path printing, OD-132) — ARCH-01) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -126,7 +126,7 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-04-cli.md#config` — config subcommands (TBD)
+- `architecture/ARCH-01-binary-cli.md#config` — cmd/hylo/config.go (path printing, OD-132) (config subcommands) (BC-COMPONENT-MAP: ARCH-01 (ARCH-01-binary-cli.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,4 +134,4 @@ S-TBD — config subcommands
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — per-OS path table
+- VP-004, VP-032 — per-OS path table

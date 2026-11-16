@@ -109,8 +109,8 @@ the legacy pass-3 rows).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For integer totals 1..2,000,000 the denominator equals the oracle's | generated table vs oracle |
-| VP-TBD | NaN percentage and non-numeric truthy total degrade | table test |
+| VP-028, VP-001 | For integer totals 1..2,000,000 the denominator equals the oracle's | generated table vs oracle |
+| VP-028, VP-001 | NaN percentage and non-numeric truthy total degrade | table test |
 
 ## Traceability
 
@@ -118,7 +118,7 @@ the legacy pass-3 rows).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; BC-COMPONENT-MAP: internal/statusline/context.go (thermometer quirks) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:fmt_ctx (SL:418-437; crash sites SL:426 CP-S06, SL:435 CP-S07) |
 | Legacy contract | BC-SL-057 (deep pass-3 round 1, new) |
@@ -134,7 +134,7 @@ the legacy pass-3 rows).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/context.go (thermometer quirks) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,7 +142,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — denominator table
+- VP-028, VP-001 — denominator table
 
 ---
 

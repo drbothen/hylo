@@ -121,9 +121,9 @@ oracle case runs, that the shim actually took effect.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | With the shim loaded, `time.time()` == `float(HYLO_TEST_NOW)` for every read within one oracle process | canary + table test over several instants |
-| VP-TBD | The canary fails whenever the shim is not active (`-I`, `-E`, `-S`, missing PYTHONPATH, shim exception) | negative-control table test |
-| VP-TBD | Python `float(s)` and Go `ParseFloat(s, 64)` agree on every harness-formatted instant | table test (shortest round-trip formatting) |
+| VP-034 | With the shim loaded, `time.time()` == `float(HYLO_TEST_NOW)` for every read within one oracle process | canary + table test over several instants |
+| VP-034 | The canary fails whenever the shim is not active (`-I`, `-E`, `-S`, missing PYTHONPATH, shim exception) | negative-control table test |
+| VP-034 | Python `float(s)` and Go `ParseFloat(s, 64)` agree on every harness-formatted instant | table test (shortest round-trip formatting) |
 
 ## Traceability
 
@@ -133,7 +133,7 @@ oracle case runs, that the shim actually took effect.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline/testdata/pyhooks/sitecustomize.py`; `statusline.Env.Now` (filled by architect) |
+| Architecture Module | `internal/statusline/testdata/pyhooks/sitecustomize.py`; `statusline.Env.Now` (BC-COMPONENT-MAP: internal/parity/shim_canary.go + internal/statusline/testdata/pyhooks/sitecustomize.py — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -145,7 +145,7 @@ oracle case runs, that the shim actually took effect.
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — determinism seams (design §3.2)
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/shim_canary.go + internal/statusline/testdata/pyhooks/sitecustomize.py (determinism seams (design §3.2)) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -157,4 +157,4 @@ TBD (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- TBD — clock freeze and canary properties above
+- VP-034 — clock freeze and canary properties above

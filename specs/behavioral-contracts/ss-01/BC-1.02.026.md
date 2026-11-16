@@ -92,8 +92,8 @@ Pinned 2026-11-15 with the legacy `render_lane` / `_fmt_lines` under CPython 3.1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | ±Inf in either lines field degrades; NaN never degrades | table test |
-| VP-TBD | Degraded case keeps earlier cache writes | multi-step harness test (BC-1.01.009) |
+| VP-028, VP-001 | ±Inf in either lines field degrades; NaN never degrades | table test |
+| VP-028, VP-001 | Degraded case keeps earlier cache writes | multi-step harness test (BC-1.01.009) |
 
 ## Traceability
 
@@ -101,7 +101,7 @@ Pinned 2026-11-15 with the legacy `render_lane` / `_fmt_lines` under CPython 3.1
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (CP-S11 degrade) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_fmt_lines (SL:849-860; crash at SL:853) called from legacy/dgx_statusline.py:render_lane (SL:534-537) |
 | Legacy contract | BC-SL-063 (deep pass-3 round 1, new; crash path CP-S11) |
@@ -117,7 +117,7 @@ Pinned 2026-11-15 with the legacy `render_lane` / `_fmt_lines` under CPython 3.1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect (degraded ladder)
+- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (CP-S11 degrade) (degraded ladder) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,7 +125,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — ±Inf degrades, NaN does not
+- VP-028, VP-001 — ±Inf degrades, NaN does not
 
 ---
 

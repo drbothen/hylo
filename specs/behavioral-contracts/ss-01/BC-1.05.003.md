@@ -114,8 +114,8 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `⛏` text present ⇒ cost segment present and lane is local | proptest |
-| VP-TBD | Bytes equal legacy on the five P3r6 §1.1 rows and the P3r7 12-value fixture | manual (table test) |
+| VP-021 | `⛏` text present ⇒ cost segment present and lane is local | proptest |
+| VP-021 | Bytes equal legacy on the five P3r6 §1.1 rows and the P3r7 12-value fixture | manual (table test) |
 
 ## Traceability
 
@@ -123,7 +123,7 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 |-------|-------|
 | L2 Capability | CAP-011 (owned-hardware cost), CAP-010 |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/statusline` cost.go (filled by architect) |
+| Architecture Module | `internal/statusline` cost.go (BC-COMPONENT-MAP: internal/statusline/cost.go (⛏ in $ block) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-602, 626-636); main (SL:1220-1223); MIN_BASIS_MTOK_MONTH (SL:98) |
 | Legacy contract | BC-SL-027 (amended P3r6 §2.1, re-verified P3r7) |
@@ -139,7 +139,7 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[statusline].md#cost-segment` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#cost-segment` — internal/statusline/cost.go (⛏ in $ block) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -147,4 +147,4 @@ S-N.MM — cost segment (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `⛏` gating
+- VP-021 — `⛏` gating

@@ -84,7 +84,7 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For each field × {NaN, +Inf, -Inf}, Go bytes equal legacy bytes and no error is returned | manual (table) |
+| VP-030, VP-001 | For each field × {NaN, +Inf, -Inf}, Go bytes equal legacy bytes and no error is returned | manual (table) |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (NaN/inf, wall mismatch) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -113,7 +113,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — non-finite rendering table
+- VP-030, VP-001 — non-finite rendering table
 
 ---
 

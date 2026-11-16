@@ -147,8 +147,8 @@ directory.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every committed case, the oracle and Go receive identical stdin bytes, clock, TZ and COLUMNS, and semantically equal settings | table test over the corpus loader |
-| VP-TBD | Every setting key round-trips through the legacy/HYLO translation table, or the case is rejected | table test over the translation table |
+| VP-009 | For every committed case, the oracle and Go receive identical stdin bytes, clock, TZ and COLUMNS, and semantically equal settings | table test over the corpus loader |
+| VP-009 | Every setting key round-trips through the legacy/HYLO translation table, or the case is rejected | table test over the translation table |
 
 ## Traceability
 
@@ -158,7 +158,7 @@ directory.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline/testdata/cases/`; harness case loader and fake VictoriaMetrics (filled by architect) |
+| Architecture Module | `internal/statusline/testdata/cases/`; harness case loader and fake VictoriaMetrics (BC-COMPONENT-MAP: internal/parity/case.go (case model) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -171,7 +171,7 @@ directory.
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — parity harness case model
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/case.go (case model) (parity harness case model) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -183,4 +183,4 @@ TBD (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- TBD — case materialization properties above
+- VP-009 — case materialization properties above

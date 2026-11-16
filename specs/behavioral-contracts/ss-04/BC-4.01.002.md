@@ -95,7 +95,7 @@ non-zero status (OD-112, same rule as D4-EX-3).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For any argv containing a flag before `--`: stdout is one line beginning `\e[90mhylo: unknown flag `, exit 0 | fuzz |
+| VP-002 | For any argv containing a flag before `--`: stdout is one line beginning `\e[90mhylo: unknown flag `, exit 0 | fuzz |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ non-zero status (OD-112, same rule as D4-EX-3).
 | Parity / exclusion | n.a.: no parity case passes flags (the harness invokes `hylo statusline` without flags; legacy `--subagent` mode is out of scope, BC-SL-097 OOS). Covered by its own Go table test `TestStatusline_UnknownFlag` |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `cmd/hylo/statusline.go` (filled by architect) |
+| Architecture Module | `cmd/hylo/statusline.go` (BC-COMPONENT-MAP: cmd/hylo/statusline.go (unknown-flag scan) — ARCH-01) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -116,7 +116,7 @@ non-zero status (OD-112, same rule as D4-EX-3).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-04-cli.md#statusline-args` — statusline argument handling (TBD)
+- `architecture/ARCH-01-binary-cli.md#statusline-args` — cmd/hylo/statusline.go (unknown-flag scan) (statusline argument handling) (BC-COMPONENT-MAP: ARCH-01 (ARCH-01-binary-cli.md))
 
 ## Story Anchor (Recommended)
 
@@ -124,4 +124,4 @@ S-TBD — skeleton + dispatch
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — unknown flag never blank
+- VP-002 — unknown flag never blank

@@ -108,7 +108,7 @@ BC-2.02.001:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Every accepted Seconds value v satisfies `!IsNaN(v) && !IsInf(v,0) && v >= 0 && v <= 9223372036.854775` | proptest / fuzz on the parser |
+| VP-016, VP-012 (frontmatter closure) | Every accepted Seconds value v satisfies `!IsNaN(v) && !IsInf(v,0) && v >= 0 && v <= 9223372036.854775` | proptest / fuzz on the parser |
 
 ## Traceability
 
@@ -118,7 +118,7 @@ BC-2.02.001:
 | Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json`, one case per value (`nan`, `inf`, `-inf`, `-1`), each with its expected output file; dedicated table test `TestConfigError_D4EX3_Number` (OD-105, OD-110) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-008, DI-010 |
-| Architecture Module | `internal/config/types.go` (`Seconds`) (filled by architect) |
+| Architecture Module | `internal/config/types.go` (`Seconds`) (BC-COMPONENT-MAP: internal/config/errors.go (number-range class) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -130,7 +130,7 @@ BC-2.02.001:
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#seconds` — Seconds type (TBD)
+- `architecture/ARCH-02-configuration.md#seconds` — internal/config/errors.go (number-range class) (Seconds type) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -138,4 +138,4 @@ S-TBD — D4-EX-3 table tests
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — loaded Seconds always finite and in range
+- VP-016, VP-012 — loaded Seconds always finite and in range

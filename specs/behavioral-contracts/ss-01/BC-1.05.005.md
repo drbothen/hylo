@@ -109,8 +109,8 @@ qualifying sessions exist (cold start).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | p75 ≤ p95 whenever a pair is returned (finite inputs) | proptest |
-| VP-TBD | Go index equals `int(q*(n-1))` computed by CPython for n in 1..10,000 | manual (generated table) |
+| VP-021 | p75 ≤ p95 whenever a pair is returned (finite inputs) | proptest |
+| VP-021 | Go index equals `int(q*(n-1))` computed by CPython for n in 1..10,000 | manual (generated table) |
 
 ## Traceability
 
@@ -118,7 +118,7 @@ qualifying sessions exist (cold start).
 |-------|-------|
 | L2 Capability | CAP-011 (percentile bands) |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/cost` history.go `ForLane` (filled by architect) |
+| Architecture Module | `internal/cost` history.go `ForLane` (BC-COMPONENT-MAP: internal/cost/history.go (p75/p95; NaN usd OD-138) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:cost_thresholds (SL:240-262); constants (SL:217-221) |
 | Legacy contract | BC-SL-029 (P3r1 row 58; index table P3 deep r1; goldens P3r3 §4.1) |
@@ -134,7 +134,7 @@ qualifying sessions exist (cold start).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[cost].md#for-lane` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#for-lane` — internal/cost/history.go (p75/p95; NaN usd OD-138) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,4 +142,4 @@ S-N.MM — cost history (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — percentile index equivalence
+- VP-021 — percentile index equivalence

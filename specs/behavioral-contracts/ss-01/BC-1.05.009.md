@@ -113,8 +113,8 @@ Clock 1794615009.0.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `pyfmt.Dumps` equals CPython `json.dumps` (defaults) on generated ordered values incl. NaN/inf, ints, surrogates | fuzz (differential vs the oracle) |
-| VP-TBD | Python-written file → Go record → bytes equal Python record on the same file (string sids) | manual (cache-swap test) |
+| VP-020, VP-019 | `pyfmt.Dumps` equals CPython `json.dumps` (defaults) on generated ordered values incl. NaN/inf, ints, surrogates | fuzz (differential vs the oracle) |
+| VP-020, VP-019 | Python-written file → Go record → bytes equal Python record on the same file (string sids) | manual (cache-swap test) |
 
 ## Traceability
 
@@ -122,7 +122,7 @@ Clock 1794615009.0.
 |-------|-------|
 | L2 Capability | CAP-011 |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/cost` history.go; `internal/pyfmt` json.go `Dumps` (filled by architect) |
+| Architecture Module | `internal/cost` history.go; `internal/pyfmt` json.go `Dumps` (BC-COMPONENT-MAP: internal/cost/history.go (exact write format) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); cost_thresholds read (SL:245-246); save_cache json.dump (SL:203) |
 | Legacy contract | BC-SL-102 (P3r3 §4.2; re-confirmed P3r4 §1.1); writer-format ruling (b) P3r2 §0 |
@@ -140,7 +140,7 @@ Clock 1794615009.0.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[cost].md#history-format` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#history-format` — internal/cost/history.go (exact write format) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -148,4 +148,4 @@ S-N.MM — cost history (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — Dumps differential equivalence
+- VP-020, VP-019 — Dumps differential equivalence

@@ -85,7 +85,7 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Segment presence and dimming equal legacy for every JSON value shape of `mix[7]` | proptest (generated Values) |
+| VP-030 | Segment presence and dimming equal legacy for every JSON value shape of `mix[7]` | proptest (generated Values) |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (mine) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -115,7 +115,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — mine segment shapes
+- VP-030 — mine segment shapes
 
 ---
 

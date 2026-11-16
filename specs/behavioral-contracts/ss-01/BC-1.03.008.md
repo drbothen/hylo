@@ -85,7 +85,7 @@ One refresh, no cache. Re-pinned 2026-11-15 with the legacy oracle.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | A boundary line changes only `res`, `conv`, `think`, `pp` (plus turn state when timed) | proptest (state diff) |
+| VP-029 | A boundary line changes only `res`, `conv`, `think`, `pp` (plus turn state when timed) | proptest (state diff) |
 
 ## Traceability
 
@@ -108,7 +108,7 @@ One refresh, no cache. Re-pinned 2026-11-15 with the legacy oracle.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-compaction`
+- `architecture/ARCH-03-statusline.md#transcript-compaction` — internal/statusline/transcript.go (compact_boundary reset) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -116,7 +116,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — boundary state diff
+- VP-029 — boundary state diff
 
 ---
 

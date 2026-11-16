@@ -105,8 +105,8 @@ Full-cache goldens for three rows (re-pinned 2026-11-15, legacy oracle, CPython 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | All 20 rows pass as Go table tests | table test (20 rows) |
-| VP-TBD | All rows except T15 match legacy byte-for-byte in the parity harness | parity harness (Tier A) |
+| VP-029 | All 20 rows pass as Go table tests | table test (20 rows) |
+| VP-029 | All rows except T15 match legacy byte-for-byte in the parity harness | parity harness (Tier A) |
 
 ## Traceability
 
@@ -129,7 +129,7 @@ Full-cache goldens for three rows (re-pinned 2026-11-15, legacy oracle, CPython 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#turn-machine`
+- `architecture/ARCH-03-statusline.md#turn-machine` — internal/statusline/transcript_turn.go (20-row table) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -137,7 +137,7 @@ S-TBD — turn machine
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — 20-row table
+- VP-029 — 20-row table
 
 ---
 

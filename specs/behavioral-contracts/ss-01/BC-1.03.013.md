@@ -91,8 +91,8 @@ Re-pinned 2026-11-15 with the legacy oracle (CPython 3.11).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `sid'` equals CPython's for random Unicode strings (incl. astral and lone surrogates) | fuzz (differential) |
-| VP-TBD | `sid'` matches `^[A-Za-z0-9_-]{0,40}$` | proptest |
+| VP-029 | `sid'` equals CPython's for random Unicode strings (incl. astral and lone surrogates) | fuzz (differential) |
+| VP-029 | `sid'` matches `^[A-Za-z0-9_-]{0,40}$` | proptest |
 
 ## Traceability
 
@@ -117,7 +117,7 @@ Re-pinned 2026-11-15 with the legacy oracle (CPython 3.11).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#mix-cache`
+- `architecture/ARCH-03-statusline.md#mix-cache` — internal/statusline/mixcache.go (sid sanitize) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,7 +125,7 @@ S-TBD — mix cache
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — sanitizer differential
+- VP-029 — sanitizer differential
 
 ---
 

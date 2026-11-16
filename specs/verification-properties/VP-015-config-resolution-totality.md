@@ -1,0 +1,105 @@
+---
+document_type: verification-property
+level: L4
+version: "1.0"
+status: draft
+producer: architect
+timestamp: 2026-11-16T00:00:00Z
+phase: 1b
+inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.001.md, behavioral-contracts/ss-02/BC-2.01.004.md, behavioral-contracts/ss-02/BC-2.01.005.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
+input-hash: "349866b"
+traces_to: prd.md
+source_bc: BC-2.01.001
+bcs: [BC-2.01.001, BC-2.01.004, BC-2.01.005, BC-2.01.003]
+module: internal/config
+proof_method: proptest
+feasibility: feasible
+verification_lock: false
+proof_completed_date: null
+proof_file_hash: null
+lifecycle_status: active
+introduced: "1.0"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+withdrawn: null
+withdrawal_reason: null
+removed: null
+removal_reason: null
+---
+
+# VP-015: Config resolution is total over the environment; the registry is closed
+
+## Property Statement
+
+For every possible environment-variable assignment, `config.Load` terminates and
+returns either a `*Config` or a single typed `*Error` (Key, Value, Reason, EnvName) —
+never a crash, never a silent fallback. Every key is declared in the closed registry
+with type, range/operator, default and rationale (D15/OD-114); `EnvName` derivation is
+collision-free at build time; unknown `HYLO_*` variables warn on stderr and never
+change exit status; `DGX_*` is never read; `COLUMNS` is excluded from the registry as a
+protocol input.
+
+## Source Contract
+
+- **Primary BC:** BC-2.01.001 — P1 resolution: HYLO_* env over built-in defaults; no
+  file layer; DGX_* never read.
+- **Partial coverage:** BC-2.01.004 (key registry declarations), BC-2.01.005 (typed
+  grammars; COLUMNS excluded), BC-2.01.003 (theme keys validated as SGR lists).
+- **Invariant verified:** DI-010's P1 surface (typed, validated, no silent fallback;
+  full file→env→default order completes in P4); DI-008 step-0 antecedent.
+
+## Property Class and Verification Method
+
+- **Class:** safety.
+- **Method:** property-based test — random environments (valid, invalid, unknown
+  variables, pathological values) through `Load` asserting termination + typed-result
+  dichotomy; plus a build-time `EnvName` collision test (static analysis over the
+  registry); plus the `legacy_defaults.golden` pin.
+- **Honesty:** totality is established empirically (generator breadth) over a pure
+  function — provable-grade surface, testable-only artifact; the collision check is the
+  closest to an actual proof (finite domain, exhaustively enumerated at build).
+
+## Proof Method
+
+| Method | Tool | Bounded? | Coverage |
+|--------|------|----------|----------|
+| Property test | Go test + env generator | no (random), seeded | random environments |
+| Build-time enumeration | `go test` (registry collision test) | yes — finite key set | EnvName collision-freedom |
+
+## Proof Harness Skeleton
+
+```go
+func TestLoad_TotalOverEnvironment(t *testing.T) {
+    for _, env := range RandomEnvironments(500) { // includes unknown HYLO_*, DGX_*, garbage
+        c, err := config.Load(env.Opts())
+        if c == nil && err == nil { t.Fatal("Load returned neither config nor error") }
+        if c != nil && err != nil { t.Fatal("Load returned both") }
+    }
+}
+```
+
+## Named Tests (OD-145 table where applicable)
+
+Not in the OD-145 harness table; in-tree as `TestLoad_TotalOverEnvironment` plus the
+registry collision test and `internal/config/testdata/legacy_defaults.golden`.
+
+## Feasibility Assessment
+
+| Factor | Assessment | Notes |
+|--------|-----------|-------|
+| Input space size | Infinite | sampled; registry finite |
+| Proof complexity | Low-medium | pure function over env |
+| Tool support | Full | |
+| Estimated proof time | Days | grammar generator reuse from vp-016 |
+
+## Lifecycle
+
+| Event | Date | Actor |
+|-------|------|-------|
+| Created | 2026-11-16 | architect |
+| Proof harness committed | — | formal-verifier |
+| Proof first passed | — | formal-verifier |
+| Locked (VERIFIED) | — | formal-verifier |

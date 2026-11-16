@@ -114,8 +114,8 @@ makes it necessary.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every swap case, outputs after the swap equal the unswapped run's outputs at every later step | multi-step differential test |
-| VP-TBD | All four cache files are exercised in both swap directions | coverage assertion in the harness |
+| VP-019 | For every swap case, outputs after the swap equal the unswapped run's outputs at every later step | multi-step differential test |
+| VP-019 | All four cache files are exercised in both swap directions | coverage assertion in the harness |
 
 ## Traceability
 
@@ -125,7 +125,7 @@ makes it necessary.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009, CAP-011 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness swap runner (filled by architect) |
+| Architecture Module | `internal/statusline` parity harness swap runner (BC-COMPONENT-MAP: internal/parity/swap.go (four-cache swap) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -138,7 +138,7 @@ makes it necessary.
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — cache store and harness swap runner
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/swap.go (four-cache swap) (cache store and harness swap runner) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -146,4 +146,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — swap equivalence properties above
+- VP-019 — swap equivalence properties above

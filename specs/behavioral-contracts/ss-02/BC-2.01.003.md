@@ -114,8 +114,8 @@ during parity.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Default theme bytes equal the legacy literals SL:127-134 (golden table) | table test |
-| VP-TBD | Any accepted SGR value renders without ESC inside the parameter span | proptest |
+| VP-015, VP-016 (theme/SGR class) | Default theme bytes equal the legacy literals SL:127-134 (golden table) | table test |
+| VP-015, VP-016 (theme/SGR class) | Any accepted SGR value renders without ESC inside the parameter span | proptest |
 
 ## Traceability
 
@@ -125,7 +125,7 @@ during parity.
 | Parity / exclusion | n.a. (defaults are byte-identical) |
 | L2 Capability | CAP-015 (supports CAP-009) |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `internal/config/statusline_keys.go`, `internal/statusline/theme.go` (filled by architect) |
+| Architecture Module | `internal/config/statusline_keys.go`, `internal/statusline/theme.go` (BC-COMPONENT-MAP: internal/config/statusline_keys.go (theme keys, SGR class) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -136,7 +136,7 @@ during parity.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#theme` — theme keys (TBD)
+- `architecture/ARCH-02-configuration.md#theme` — internal/config/statusline_keys.go (theme keys, SGR class) (theme keys) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -144,4 +144,4 @@ S-TBD — theme keys
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — default theme bytes equal legacy
+- VP-015, VP-016 — default theme bytes equal legacy

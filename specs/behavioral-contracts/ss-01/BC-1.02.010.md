@@ -99,8 +99,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; prefixes `claude-son
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For numeric reset, window shown ⇒ `reset > now` | property test |
-| VP-TBD | Smoothed window disappears at its reset during a stdin-sequence replay (cache fresh, reset passed) | parity harness sequence (BC-6.02.002) |
+| VP-028 | For numeric reset, window shown ⇒ `reset > now` | property test |
+| VP-028 | Smoothed window disappears at its reset during a stdin-sequence replay (cache fresh, reset passed) | parity harness sequence (BC-6.02.002) |
 
 ## Traceability
 
@@ -126,7 +126,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; prefixes `claude-son
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#limits` — TBD by architect
+- `architecture/ARCH-03-statusline.md#limits` — internal/statusline/limits.go (expired window unreported) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,7 +134,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — no past reset shown
+- VP-028 — no past reset shown
 
 ---
 

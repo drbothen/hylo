@@ -94,8 +94,8 @@ Pass-3 r1 pinned an equivalent 5-call scenario (`rb` 2, tin 501,502); the vector
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `rb` increments iff `pp ≠ null ∧ _w − max(0, prompt − pp) > X` | proptest |
-| VP-TBD | `pp` after a counted call equals that call's prompt | proptest |
+| VP-029 | `rb` increments iff `pp ≠ null ∧ _w − max(0, prompt − pp) > X` | proptest |
+| VP-029 | `pp` after a counted call equals that call's prompt | proptest |
 
 ## Traceability
 
@@ -118,7 +118,7 @@ Pass-3 r1 pinned an equivalent 5-call scenario (`rb` 2, tin 501,502); the vector
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-usage`
+- `architecture/ARCH-03-statusline.md#transcript-usage` — internal/statusline/transcript.go (rebuild 20,000) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -126,7 +126,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — rebuild predicate
+- VP-029 — rebuild predicate
 
 ---
 

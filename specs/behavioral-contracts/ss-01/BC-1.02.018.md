@@ -103,8 +103,8 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Brackets appear iff at least two inner parts are > 0 | proptest vs oracle |
-| VP-TBD | Segment shown iff the visibility predicate of Postcondition 1 holds | table test |
+| VP-028 | Brackets appear iff at least two inner parts are > 0 | proptest vs oracle |
+| VP-028 | Segment shown iff the visibility predicate of Postcondition 1 holds | table test |
 
 ## Traceability
 
@@ -112,7 +112,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-007 (transcript, not ledger), DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/tokens.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/tokens.go`; BC-COMPONENT-MAP: internal/statusline/tokens.go (_fmt_tok_c) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:565-600) and legacy/dgx_statusline.py:_fmt_tok_c (SL:863-873) |
 | Legacy contract | BC-SL-024 (pass-3 r1; refined deep pass-3 round 1) |
@@ -127,7 +127,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/tokens.go (_fmt_tok_c) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -135,7 +135,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — bracket rule
+- VP-028 — bracket rule
 
 ---
 

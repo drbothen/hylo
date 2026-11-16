@@ -92,8 +92,8 @@ All verified 2026-11-15 under CPython 3.11.7 (direct `trim_to_fit` calls and one
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Output = (prefix of segments joined by SEP) + (RESET iff at least one segment dropped) | proptest |
-| VP-TBD | After trim, `visible(out) <= cols` or out has no SEP | proptest |
+| VP-027 | Output = (prefix of segments joined by SEP) + (RESET iff at least one segment dropped) | proptest |
+| VP-027 | After trim, `visible(out) <= cols` or out has no SEP | proptest |
 
 ## Traceability
 
@@ -101,7 +101,7 @@ All verified 2026-11-15 under CPython 3.11.7 (direct `trim_to_fit` calls and one
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | — |
-| Architecture Module | `internal/statusline` width (`width.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` width (`width.go`) (BC-COMPONENT-MAP: internal/statusline/width.go (trim_to_fit double reset) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`trim_to_fit` (SL:1193-1197); applied in `main` SL:1232-1233; ♻ segment shape SL:479 |
 | Legacy contract | BC-SL-054 (new in P3r1 §A1; refined P3r2 §1 single reset at ♻; index P3r4 §7.3) |
@@ -116,7 +116,7 @@ All verified 2026-11-15 under CPython 3.11.7 (direct `trim_to_fit` calls and one
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-width` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-width` — internal/statusline/width.go (trim_to_fit double reset) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -124,7 +124,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — trim structure property
+- VP-027 — trim structure property
 
 ---
 

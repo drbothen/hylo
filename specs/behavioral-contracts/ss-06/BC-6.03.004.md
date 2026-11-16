@@ -137,8 +137,8 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | The validator rejects every entry with a glob, an unknown id, a missing key, a missing file or a missing test | table test on the validator |
-| VP-TBD | A case differs from the oracle without failing only if a valid entry lists it and its expected file matches | table test over synthetic comparator inputs |
+| VP-012 | The validator rejects every entry with a glob, an unknown id, a missing key, a missing file or a missing test | table test on the validator |
+| VP-012 | A case differs from the oracle without failing only if a valid entry lists it and its expected file matches | table test over synthetic comparator inputs |
 
 ## Traceability
 
@@ -148,7 +148,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline/testdata/parity/exclusions.json`; harness exclusion validator (filled by architect) |
+| Architecture Module | `internal/statusline/testdata/parity/exclusions.json`; harness exclusion validator (BC-COMPONENT-MAP: internal/parity/exclusions.go (closed set, no globs) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -162,7 +162,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — parity harness exclusion list
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/exclusions.go (closed set, no globs) (parity harness exclusion list) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -170,4 +170,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — exclusion validator properties above
+- VP-012 — exclusion validator properties above

@@ -113,8 +113,8 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Load returns `{}` for every input the CPython oracle rejects, and the oracle's value otherwise | fuzz (differential) |
-| VP-TBD | Save never panics or returns an error to the caller under injected FS faults | proptest (fault-injecting store) |
+| VP-018, VP-001, VP-022 (primary), VP-019 (frontmatter closure) | Load returns `{}` for every input the CPython oracle rejects, and the oracle's value otherwise | fuzz (differential) |
+| VP-018, VP-001, VP-022 (primary), VP-019 (frontmatter closure) | Save never panics or returns an error to the caller under injected FS faults | proptest (fault-injecting store) |
 
 ## Traceability
 
@@ -122,7 +122,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 |-------|-------|
 | L2 Capability | CAP-009 (status-line caches) |
 | L2 Domain Invariants | DI-007 (the status line's own caches are an allowed input) |
-| Architecture Module | `internal/statusline` cache.go `CacheStore` Load/Save (design IM-17; filled by architect) |
+| Architecture Module | `internal/statusline` cache.go `CacheStore` Load/Save (design IM-17; BC-COMPONENT-MAP: internal/statusline/cache.go (never-raise, raw sid) — ARCH-04) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:load_cache (SL:190-195), save_cache (SL:198-206); main session-cache path (SL:1214-1215) |
 | Legacy contract | BC-SL-052 (P3r1 row 91; refined P3 deep r1 row 157) |
@@ -138,7 +138,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[statusline].md#cache-store` — (filled by architect)
+- `architecture/ARCH-04-data-files.md#cache-store` — internal/statusline/cache.go (never-raise, raw sid) (BC-COMPONENT-MAP: ARCH-04 (ARCH-04-data-files.md))
 
 ## Story Anchor (Recommended)
 
@@ -146,4 +146,4 @@ S-N.MM — cache store (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — never-raise load/save
+- VP-018, VP-001, VP-022, VP-019 — never-raise load/save

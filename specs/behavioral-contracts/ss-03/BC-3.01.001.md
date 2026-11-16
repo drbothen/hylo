@@ -97,8 +97,8 @@ Synthetic environments only (no real home paths).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every env map, the result ends in the component `hylo` and contains no `dgx-llm` component | proptest |
-| VP-TBD | The functions perform no filesystem writes | manual (code review) + unit test on a read-only temp root |
+| VP-032 | For every env map, the result ends in the component `hylo` and contains no `dgx-llm` component | proptest |
+| VP-032 | The functions perform no filesystem writes | manual (code review) + unit test on a read-only temp root |
 
 ## Traceability
 
@@ -106,7 +106,7 @@ Synthetic environments only (no real home paths).
 |-------|-------|
 | L2 Capability | CAP-009 (render-path support), CAP-015 (path keys) |
 | L2 Domain Invariants | DI-008 (an unavailable dir never fails the render) |
-| Architecture Module | `internal/platform` `paths.go`, `paths_unix.go`, `paths_windows.go` (design §2.5) (filled by architect) |
+| Architecture Module | `internal/platform` `paths.go`, `paths_unix.go`, `paths_windows.go` (design §2.5) (BC-COMPONENT-MAP: internal/platform/paths*.go (per-OS dirs, OD-144) — ARCH-05) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. Decisions OD-95 (paths, XDG, APPDATA/LOCALAPPDATA), OD-101 (hylo cache dir from P1, explicit D15 exception), OD-144 (relative/empty `XDG_*` ignored; Windows cache/state as separate `%LOCALAPPDATA%` subdirectories), OD-61 (`~` expansion), OD-107 (P1 config = `HYLO_*` env + defaults), OD-05 (no `DGX_*`); PLAN §6 "Config"; legacy contrast SL:78 (`CACHE_DIR = os.path.expanduser("~/.cache/dgx-llm")`) |
 
@@ -119,7 +119,7 @@ Synthetic environments only (no real home paths).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#platform-paths` — per-OS directory resolution (filled by architect)
+- `architecture/ARCH-05-platform.md#platform-paths` — internal/platform/paths*.go (per-OS dirs, OD-144) (per-OS directory resolution) (BC-COMPONENT-MAP: ARCH-05 (ARCH-05-platform.md))
 
 ## Story Anchor (Recommended)
 
@@ -127,4 +127,4 @@ TBD — platform paths (design step S7)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — no `dgx-llm` path is ever produced
+- VP-032 — no `dgx-llm` path is ever produced

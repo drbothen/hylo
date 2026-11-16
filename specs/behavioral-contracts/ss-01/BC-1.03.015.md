@@ -90,7 +90,7 @@ Re-pinned 2026-11-15 with the legacy oracle (CPython 3.11, macOS arm64, stdout p
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | The type table above holds on Linux, macOS and Windows (Windows: ints → not a regular file) | table test per OS (CI matrix) |
+| VP-029 | The type table above holds on Linux, macOS and Windows (Windows: ints → not a regular file) | table test per OS (CI matrix) |
 
 ## Traceability
 
@@ -113,7 +113,7 @@ Re-pinned 2026-11-15 with the legacy oracle (CPython 3.11, macOS arm64, stdout p
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#platform-fd` — `platform.StatFD` per OS
+- `architecture/ARCH-03-statusline.md` — internal/statusline/transcript.go + internal/platform/fd_*.go (int = fd) (`platform.StatFD` per OS) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md), ARCH-05 (ARCH-05-platform.md))
 
 ## Story Anchor (Recommended)
 
@@ -121,7 +121,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — per-OS type table
+- VP-029 — per-OS type table
 
 ---
 

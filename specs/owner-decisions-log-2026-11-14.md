@@ -110,3 +110,10 @@
 | OD-143 | (a) turn-table row T13 confirmed by the oracle, stays | 20 rows |
 | OD-144 | (a) relative/empty XDG_* ignored | Windows %LOCALAPPDATA%\hylo\cache and \state subdirs |
 | OD-145 | (a) harness names/timing/test names/seed paths delegated to the architect | decided in create-architecture |
+
+<!-- Architecture rulings by the owner, 2026-11-15/16 (create-architecture; next free OD-150) -->
+
+| OD-146 | (a) architecture sections approved: ARCH-00 overview, 01 binary/CLI, 02 configuration, 03 status line, 04 data/files, 05 platform, 06 pyfmt, 07 parity harness, 08 build/CI/release, 09 reserved boundaries P2-P7 | |
+| OD-147 | (a) inert key statusline.window_age.ps_timeout_s removed | |
+| OD-148 | (a) parity fixtures stay with the subject package; runner internal/parity is generic (AD-13) | |
+| OD-149 | (a) Tier C exit = one clean nightly fuzz run on all three OSes, 30 min per OS | owner judgment call |

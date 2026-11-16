@@ -72,8 +72,9 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
 
 ## Invariants
 
-1. No subprocess is spawned (D5: no OS tool without a fallback; design IM-19). `statusline.window_age.ps_timeout_s`
-   is inert with the native probe (design RK-6).
+1. No subprocess is spawned (D5: no OS tool without a fallback; design IM-19). The
+   former inert key `statusline.window_age.ps_timeout_s` was removed by OD-147
+   (owner, 2026-11-16); setting it now raises an ordinary unknown-key config error.
 2. Per-OS probe sources (design §2.5): macOS `sysctl kern.proc.pid` (`P_comm`, `Eproc.Ppid`, `P_starttime`) via
    `golang.org/x/sys/unix`; Linux `/proc/<pid>/stat` parsed after the last `)` (comm, ppid, starttime ticks) plus
    `btime` from `/proc/stat`; Windows `CreateToolhelp32Snapshot` + `GetProcessTimes` with a PID-reuse guard (a parent
@@ -119,9 +120,9 @@ Legacy behavior behind rows 1-6 verified 2026-11-15 against CPython 3.11.7 runni
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | A numeric cached `proc_start` short-circuits: zero probe calls, zero writes | unit test with a counting fake |
-| VP-TBD | A stored `proc_start` is always integral-valued and serialized with a `.0` suffix | proptest over random starts |
-| VP-TBD | At most `max_depth` probe calls per refresh | proptest over random chains |
+| VP-033, VP-014, VP-012 (frontmatter closure) | A numeric cached `proc_start` short-circuits: zero probe calls, zero writes | unit test with a counting fake |
+| VP-033, VP-014, VP-012 (frontmatter closure) | A stored `proc_start` is always integral-valued and serialized with a `.0` suffix | proptest over random starts |
+| VP-033, VP-014, VP-012 (frontmatter closure) | At most `max_depth` probe calls per refresh | proptest over random chains |
 
 ## Traceability
 
@@ -129,7 +130,7 @@ Legacy behavior behind rows 1-6 verified 2026-11-15 against CPython 3.11.7 runni
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008, DI-012 |
-| Architecture Module | `internal/platform` `proc.go`, `proc_{darwin,linux,windows,other}.go` (design §2.5) (filled by architect) |
+| Architecture Module | `internal/platform` `proc.go`, `proc_{darwin,linux,windows,other}.go` (design §2.5) (BC-COMPONENT-MAP: internal/platform/proc.go + proc_*.go (ancestor probe) — ARCH-05) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:claude_window_start (SL:273-275 cache-first; SL:276-294 ps walk; SL:295) and main (SL:1229) |
 | Legacy contract | BC-SL-023 (P3 broad sweep; refined P3r1 §A7; index P3r4 §7.3, tagged D4-EX-1) |
@@ -145,7 +146,7 @@ Legacy behavior behind rows 1-6 verified 2026-11-15 against CPython 3.11.7 runni
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#platform-proc` — native ancestor probe (filled by architect)
+- `architecture/ARCH-05-platform.md#platform-proc` — internal/platform/proc.go + proc_*.go (ancestor probe) (native ancestor probe) (BC-COMPONENT-MAP: ARCH-05 (ARCH-05-platform.md))
 
 ## Story Anchor (Recommended)
 
@@ -157,7 +158,7 @@ TBD — window age (design step S7)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — cache-first short-circuit
+- VP-033, VP-014, VP-012 — cache-first short-circuit
 
 ---
 

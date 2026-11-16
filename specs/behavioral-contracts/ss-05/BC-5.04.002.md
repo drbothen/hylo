@@ -102,9 +102,9 @@ under the named `TZ`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `LocalToUnix` equals the committed CPython goldens (10,893 rows, 0 mismatches) | table test |
-| VP-TBD | Outside transitions, `LocalToUnix(loc, w) == time.Date(w, loc).Unix()` | proptest |
-| VP-TBD | For overlap walls the result is the smaller of the two candidate instants | proptest over the grid |
+| VP-026 | `LocalToUnix` equals the committed CPython goldens (10,893 rows, 0 mismatches) | table test |
+| VP-026 | Outside transitions, `LocalToUnix(loc, w) == time.Date(w, loc).Unix()` | proptest |
+| VP-026 | For overlap walls the result is the smaller of the two candidate instants | proptest over the grid |
 
 ## Traceability
 
@@ -112,7 +112,7 @@ under the named `TZ`).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/time.go` `LocalToUnix` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/time.go` `LocalToUnix` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/time.go (LocalToUnix _mktime port) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-13 and PR-14; P5r2 §A.1 (Go vs Python DST table), P5r3 V2, P5r4 V7 (CONV-ABS-89 rule), P5r5 V1 and §B.6 (10,893 goldens, 0 mismatches). Legacy semantics reproduced: naive `.timestamp()` at SL:983 |
 
@@ -123,7 +123,7 @@ under the named `TZ`).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-time` — local-time conversion (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-time` — internal/pyfmt/time.go (LocalToUnix _mktime port) (local-time conversion) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -131,4 +131,4 @@ TBD — pyfmt time (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `_mktime` port equals CPython goldens
+- VP-026 — `_mktime` port equals CPython goldens

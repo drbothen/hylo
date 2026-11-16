@@ -85,7 +85,7 @@ wall estimate `·<wall>W` carrying the color (red above 95 %, yellow above 80 % 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Review #19 table reproduces legacy bytes | manual (table) |
+| VP-030 | Review #19 table reproduces legacy bytes | manual (table) |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ wall estimate `·<wall>W` carrying the color (red above 95 %, yellow above 80 % 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (power) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -113,7 +113,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — power table
+- VP-030 — power table
 
 ---
 

@@ -92,8 +92,8 @@ committed Windows goldens are generated on the Windows runner).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `PosixNormpath` and `NtNormpath` equal the oracle on fuzzed path strings | fuzz + per-OS oracle tables |
-| VP-TBD | Normpath is idempotent | proptest |
+| VP-025 | `PosixNormpath` and `NtNormpath` equal the oracle on fuzzed path strings | fuzz + per-OS oracle tables |
+| VP-025 | Normpath is idempotent | proptest |
 
 ## Traceability
 
@@ -101,7 +101,7 @@ committed Windows goldens are generated on the Windows runner).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/str.go (Posix/Nt Normpath, Basename) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-11; pitfall PR-20; D5 (cross-platform). Legacy uses served: SL:373, 375, 383, 390, 460 |
 
@@ -113,7 +113,7 @@ committed Windows goldens are generated on the Windows runner).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-str` — path helpers (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-str` — internal/pyfmt/str.go (Posix/Nt Normpath, Basename) (path helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -121,4 +121,4 @@ TBD — pyfmt str (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — normpath equals the oracle per OS
+- VP-025 — normpath equals the oracle per OS

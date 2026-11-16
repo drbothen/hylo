@@ -101,8 +101,8 @@ Exact step-2 row bytes:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Go and legacy session-cache bytes are identical after each of the 11 steps | manual (multi-step parity case, Tier A) |
-| VP-TBD | Cache-swap: a legacy-written file read by Go (and reverse) yields the same next state | manual (BC-6.02.004) |
+| VP-030, VP-019 (frontmatter closure) | Go and legacy session-cache bytes are identical after each of the 11 steps | manual (multi-step parity case, Tier A) |
+| VP-030, VP-019 (frontmatter closure) | Cache-swap: a legacy-written file read by Go (and reverse) yields the same next state | manual (BC-6.02.004) |
 
 ## Traceability
 
@@ -126,7 +126,7 @@ Exact step-2 row bytes:
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#session-cache` — cache format obligation (TBD)
+- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (11-step pinned seq) (cache format obligation) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,7 +134,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — pinned sequence parity
+- VP-030, VP-019 — pinned sequence parity
 
 ---
 

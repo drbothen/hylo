@@ -110,8 +110,8 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Successful `Load` ⇒ exactly one backend entry | proptest over env maps |
-| VP-TBD | `metrics_url` stored value never ends with `/` | proptest |
+| VP-017 | Successful `Load` ⇒ exactly one backend entry | proptest over env maps |
+| VP-017 | `metrics_url` stored value never ends with `/` | proptest |
 
 ## Traceability
 
@@ -121,7 +121,7 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 | Parity / exclusion | n.a.; legacy SL default for the prefixes is `""` (lane unknown) — parity cases for an unset prefix set `HYLO_BACKENDS_0_MODEL_PREFIXES=` explicitly (OD-111) |
 | L2 Capability | CAP-015 (supports CAP-009, CAP-010) |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `internal/config/statusline_keys.go`, `load.go` (filled by architect) |
+| Architecture Module | `internal/config/statusline_keys.go`, `load.go` (BC-COMPONENT-MAP: internal/config/statusline_keys.go (backends[0] validator) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -134,7 +134,7 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#backends` — backend entry schema (TBD)
+- `architecture/ARCH-02-configuration.md#backends` — internal/config/statusline_keys.go (backends[0] validator) (backend entry schema) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,4 +142,4 @@ S-TBD — config subset (design §4 step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — exactly one backend entry
+- VP-017 — exactly one backend entry

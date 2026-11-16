@@ -96,8 +96,8 @@ Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | stdout is always valid UTF-8 | fuzz |
-| VP-TBD | Any invalid-UTF-8 stdin yields the same output as `{}` with the same caches | proptest |
+| VP-005 | stdout is always valid UTF-8 | fuzz |
+| VP-005 | Any invalid-UTF-8 stdin yields the same output as `{}` with the same caches | proptest |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` input + guard (`input.go`, `guard.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` input + guard (`input.go`, `guard.go`) (BC-COMPONENT-MAP: internal/statusline/input.go (strict UTF-8 stdio) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`main` (SL:1201-1206, 1234) |
 | Legacy contract | BC-SL-076 (new P3r1 §A9; strict mode ruled P3r2 §0 (a); index P3r4 §7.3); crash path CP-S17 |
@@ -121,7 +121,7 @@ Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-io-encoding` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-io-encoding` — internal/statusline/input.go (strict UTF-8 stdio) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -129,7 +129,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — stdout always valid UTF-8
+- VP-005 — stdout always valid UTF-8
 
 ---
 

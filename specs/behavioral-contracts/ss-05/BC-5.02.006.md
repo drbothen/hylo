@@ -94,8 +94,8 @@ corpus cases).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Dumps output equals CPython `json.dumps` bytes for every corpus cache shape | CPython oracle table |
-| VP-TBD | Dumps and DumpsLen agree byte-for-byte on shared shapes | proptest |
+| VP-024 | Dumps output equals CPython `json.dumps` bytes for every corpus cache shape | CPython oracle table |
+| VP-024 | Dumps and DumpsLen agree byte-for-byte on shared shapes | proptest |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ corpus cases).
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
 | L2 Domain Invariants | DI-012 (byte parity machinery) |
-| Architecture Module | `internal/pyfmt` json.go (filled by architect) |
+| Architecture Module | `internal/pyfmt` json.go (BC-COMPONENT-MAP: internal/pyfmt/json.go (Dumps) — ARCH-06) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -116,7 +116,7 @@ corpus cases).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-05-pyfmt.md#json` — json.go helpers (TBD)
+- `architecture/ARCH-06-pyfmt.md#json` — internal/pyfmt/json.go (Dumps) (json.go helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -124,4 +124,4 @@ S-TBD — pyfmt json helpers
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — cache-byte equality
+- VP-024 — cache-byte equality

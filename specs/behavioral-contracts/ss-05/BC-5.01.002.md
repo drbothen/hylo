@@ -104,8 +104,8 @@ All values verified 2026-11-15 against CPython 3.11.7 (`int`, `float`, default `
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `ParseFloat` accepts/rejects and values match the CPython oracle on fuzzed strings | fuzz (`go test -fuzz`) + oracle table |
-| VP-TBD | `ParseInt(s)` succeeds iff the oracle `int(s)` succeeds, with equal value | fuzz + oracle table |
+| VP-023 | `ParseFloat` accepts/rejects and values match the CPython oracle on fuzzed strings | fuzz (`go test -fuzz`) + oracle table |
+| VP-023 | `ParseInt(s)` succeeds iff the oracle `int(s)` succeeds, with equal value | fuzz + oracle table |
 
 ## Traceability
 
@@ -113,7 +113,7 @@ All values verified 2026-11-15 against CPython 3.11.7 (`int`, `float`, default `
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/num.go` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/num.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/num.go (ParseInt/ParseFloat) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-12; pitfalls PR-10, PR-18. Legacy call sites served: SL:1188 (`int(COLUMNS)`), SL:178 (`float(s["value"][1])`), SL:853 (`int(n)`), SL:866 (`float(n)`); the import-time env parses SL:74-75 are replaced by `internal/config` (IM-16), not by this helper |
 
@@ -126,7 +126,7 @@ All values verified 2026-11-15 against CPython 3.11.7 (`int`, `float`, default `
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-num` — Python numeric parsing (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-num` — internal/pyfmt/num.go (ParseInt/ParseFloat) (Python numeric parsing) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,4 +134,4 @@ TBD — pyfmt num (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — parse acceptance equals the oracle
+- VP-023 — parse acceptance equals the oracle

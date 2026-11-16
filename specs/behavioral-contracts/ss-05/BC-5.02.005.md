@@ -87,8 +87,8 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `Str` equals CPython `str(value)` for every value shape (nested containers included) | CPython oracle table |
-| VP-TBD | A str input is returned byte-identical (WTF-8) | proptest |
+| VP-024 | `Str` equals CPython `str(value)` for every value shape (nested containers included) | CPython oracle table |
+| VP-024 | A str input is returned byte-identical (WTF-8) | proptest |
 
 ## Traceability
 
@@ -98,7 +98,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
 | L2 Domain Invariants | DI-012 (byte parity machinery) |
-| Architecture Module | `internal/pyfmt` json.go (filled by architect) |
+| Architecture Module | `internal/pyfmt` json.go (BC-COMPONENT-MAP: internal/pyfmt/json.go (Str) — ARCH-06) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -109,7 +109,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-05-pyfmt.md#json` — json.go helpers (TBD)
+- `architecture/ARCH-06-pyfmt.md#json` — internal/pyfmt/json.go (Str) (json.go helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -117,4 +117,4 @@ S-TBD — pyfmt json helpers
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — str() equality table
+- VP-024 — str() equality table

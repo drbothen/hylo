@@ -110,9 +110,9 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Sequence replay (report, silence ×n, report) reproduces oracle stdout and cache bytes at every step | parity harness stdin-sequence (BC-6.02.002) |
-| VP-TBD | Cache written by Python is read identically by Go and vice versa | cache-swap test (BC-6.02.004) |
-| VP-TBD | Used value age < keep_s always | property test |
+| VP-028 | Sequence replay (report, silence ×n, report) reproduces oracle stdout and cache bytes at every step | parity harness stdin-sequence (BC-6.02.002) |
+| VP-028 | Cache written by Python is read identically by Go and vice versa | cache-swap test (BC-6.02.004) |
+| VP-028 | Used value age < keep_s always | property test |
 
 ## Traceability
 
@@ -139,7 +139,7 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#limits` — TBD by architect
+- `architecture/ARCH-03-statusline.md#limits` — internal/statusline/limits.go (smoothing 1800 s + session cache) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -147,7 +147,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — smoothing sequence parity
+- VP-028 — smoothing sequence parity
 
 ---
 

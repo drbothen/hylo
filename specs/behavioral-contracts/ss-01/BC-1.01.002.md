@@ -98,8 +98,8 @@ All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all byte strings, decode returns an object or `{}`, never an error to the caller | fuzz |
-| VP-TBD | Go decode result equals CPython `json.load` (text, strict UTF-8) acceptance on the generated corpus | Tier C differential fuzz |
+| VP-001, VP-005, VP-006 | For all byte strings, decode returns an object or `{}`, never an error to the caller | fuzz |
+| VP-001, VP-005, VP-006 | Go decode result equals CPython `json.load` (text, strict UTF-8) acceptance on the generated corpus | Tier C differential fuzz |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` input decode (`input.go`, design §2.2) (filled by architect) |
+| Architecture Module | `internal/statusline` input decode (`input.go`, design §2.2) (BC-COMPONENT-MAP: internal/statusline/input.go (stdin decode, {} fallback) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`main` (SL:1201-1206) |
 | Legacy contract | BC-SL-002 (broad sweep; refined P3r1 §A9; index P3r4 §7.3) |
@@ -122,7 +122,7 @@ All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-input` — stdin decode (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-input` — internal/statusline/input.go (stdin decode, {} fallback) (stdin decode) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -130,7 +130,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — decode is total (object or `{}`)
+- VP-001, VP-005, VP-006 — decode is total (object or `{}`)
 
 ---
 

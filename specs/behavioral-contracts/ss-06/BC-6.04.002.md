@@ -113,8 +113,8 @@ removes.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Nearest-rank p95 is computed correctly over pooled samples | table test on the percentile helper |
-| VP-TBD | The gate fails iff `HYLO_TIMING_GATE=1` and p95 > 25.0 ms | table test |
+| VP-036 | Nearest-rank p95 is computed correctly over pooled samples | table test on the percentile helper |
+| VP-036 | The gate fails iff `HYLO_TIMING_GATE=1` and p95 > 25.0 ms | table test |
 
 ## Traceability
 
@@ -124,7 +124,7 @@ removes.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | — |
-| Architecture Module | `internal/statusline` timing test (filled by architect) |
+| Architecture Module | `internal/statusline` timing test (BC-COMPONENT-MAP: internal/parity/timing.go (p95 report, HYLO_TIMING_GATE) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -135,7 +135,7 @@ removes.
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — timing harness
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/timing.go (p95 report, HYLO_TIMING_GATE) (timing harness) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -147,4 +147,4 @@ TBD (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- TBD — timing report and gate properties above
+- VP-036 — timing report and gate properties above

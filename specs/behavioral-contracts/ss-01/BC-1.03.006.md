@@ -95,8 +95,8 @@ Expected bytes are the complete cache files, re-pinned 2026-11-15 with the legac
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `pyfmt` Num addition equals CPython for int/big-int/float/bool operand pairs | proptest vs oracle table |
-| VP-TBD | Cache repr of totals equals CPython `json.dumps` | fuzz (differential) |
+| VP-029 | `pyfmt` Num addition equals CPython for int/big-int/float/bool operand pairs | proptest vs oracle table |
+| VP-029 | Cache repr of totals equals CPython `json.dumps` | fuzz (differential) |
 
 ## Traceability
 
@@ -120,7 +120,7 @@ Expected bytes are the complete cache files, re-pinned 2026-11-15 with the legac
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-num`
+- `architecture/ARCH-03-statusline.md#pyfmt-num` — internal/statusline/transcript.go (usage accumulation; py.Num) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -128,7 +128,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — Num addition parity
+- VP-029 — Num addition parity
 
 ---
 

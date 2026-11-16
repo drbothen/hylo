@@ -86,7 +86,7 @@ when `config.Load` returns any error. The error set is identical to the set that
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | validate exit ≠ 0 ⇔ statusline prints the config-error line, over generated env maps | proptest (shared generator with BC-2.02.001) |
+| VP-004, VP-016 | validate exit ≠ 0 ⇔ statusline prints the config-error line, over generated env maps | proptest (shared generator with BC-2.02.001) |
 
 ## Traceability
 
@@ -96,7 +96,7 @@ when `config.Load` returns any error. The error set is identical to the set that
 | Parity / exclusion | n.a. (not a legacy surface); part of the D4-EX-3 test set named in design §5.4 ("+ `config validate`") |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `cmd/hylo/config.go` (filled by architect) |
+| Architecture Module | `cmd/hylo/config.go` (BC-COMPONENT-MAP: cmd/hylo/config.go (validate exit 1) — ARCH-01) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -107,7 +107,7 @@ when `config.Load` returns any error. The error set is identical to the set that
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-04-cli.md#config` — config subcommands (TBD)
+- `architecture/ARCH-01-binary-cli.md#config` — cmd/hylo/config.go (validate exit 1) (config subcommands) (BC-COMPONENT-MAP: ARCH-01 (ARCH-01-binary-cli.md))
 
 ## Story Anchor (Recommended)
 
@@ -115,4 +115,4 @@ S-TBD — config subcommands
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — validate/statusline error-set equivalence
+- VP-004, VP-016 — validate/statusline error-set equivalence

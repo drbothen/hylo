@@ -92,8 +92,8 @@ round 1.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For finite `win_ms` in [300000, 1e12] the Go text equals CPython's | fuzz vs oracle |
-| VP-TBD | Day form iff `wm >= 1440` | table test |
+| VP-028 | For finite `win_ms` in [300000, 1e12] the Go text equals CPython's | fuzz vs oracle |
+| VP-028 | Day form iff `wm >= 1440` | table test |
 
 ## Traceability
 
@@ -101,7 +101,7 @@ round 1.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (window-age duration; big via OD-137) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:560-561, inside SL:554-563; `_hm` SL:545-548) |
 | Legacy contract | BC-SL-081 (deep pass-3 round 1, new) |
@@ -117,7 +117,7 @@ round 1.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (window-age duration; big via OD-137) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,7 +125,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — format equality
+- VP-028 — format equality
 
 ---
 

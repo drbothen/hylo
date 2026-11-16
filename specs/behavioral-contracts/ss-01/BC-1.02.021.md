@@ -105,8 +105,8 @@ the deep pass-3 round 1 finding (crash at print, BC-1.01.008).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `pyfmt.Str(v)` equals CPython `str(v)` for generated JSON values (nested lists/objects, big ints, floats) | fuzz vs oracle |
-| VP-TBD | Falsy values select the next candidate | table test |
+| VP-028 | `pyfmt.Str(v)` equals CPython `str(v)` for generated JSON values (nested lists/objects, big ints, floats) | fuzz vs oracle |
+| VP-028 | Falsy values select the next candidate | table test |
 
 ## Traceability
 
@@ -114,7 +114,7 @@ the deep pass-3 round 1 finding (crash at print, BC-1.01.008).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/lane.go`; `pyfmt.Str` in `internal/pyfmt` json file; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/lane.go`; `pyfmt.Str` in `internal/pyfmt` json file; BC-COMPONENT-MAP: internal/statusline/lane.go (str() of non-str) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:442 selection, SL:453 rendering) |
 | Legacy contract | BC-SL-058 (deep pass-3 round 1, new) |
@@ -130,7 +130,7 @@ the deep pass-3 round 1 finding (crash at print, BC-1.01.008).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/lane.go (str() of non-str) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -138,7 +138,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `Str` equals CPython `str`
+- VP-028 — `Str` equals CPython `str`
 
 ---
 

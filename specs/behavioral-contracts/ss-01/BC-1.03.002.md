@@ -103,9 +103,9 @@ legacy oracle (CPython 3.11).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `need_reset ⇔ off > 0 ∧ ∃k∈{tin,c_wr,mixv6}: k ∉ cache` | proptest over random key subsets and offsets |
-| VP-TBD | `size == off` after the reset step ⇒ zero Save calls | table test with fake `CacheStore` |
-| VP-TBD | Written cache key order is the fixed 16-key sequence | golden byte comparison |
+| VP-029, VP-018, VP-019 | `need_reset ⇔ off > 0 ∧ ∃k∈{tin,c_wr,mixv6}: k ∉ cache` | proptest over random key subsets and offsets |
+| VP-029, VP-018, VP-019 | `size == off` after the reset step ⇒ zero Save calls | table test with fake `CacheStore` |
+| VP-029, VP-018, VP-019 | Written cache key order is the fixed 16-key sequence | golden byte comparison |
 
 ## Traceability
 
@@ -131,7 +131,7 @@ legacy oracle (CPython 3.11).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#mix-cache` — `internal/statusline/mixcache.go` (filled by architect)
+- `architecture/ARCH-03-statusline.md#mix-cache` — internal/statusline/mixcache.go (name, mixv6 reset) (`internal/statusline/mixcache.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -139,7 +139,7 @@ S-TBD — transcript parser and mix cache
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — reset predicate; no write on `size == off`
+- VP-029, VP-018, VP-019 — reset predicate; no write on `size == off`
 
 ---
 

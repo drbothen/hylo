@@ -102,8 +102,8 @@ from the cache-file comparison only.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | After any failed save, no file matching `<base>.*` created by that save remains (Go) | manual (table test with a temp cache dir) |
-| VP-TBD | stdout over an N-refresh sequence with a `/` sid equals legacy | manual (parity harness case) |
+| VP-018, VP-012 (frontmatter closure) | After any failed save, no file matching `<base>.*` created by that save remains (Go) | manual (table test with a temp cache dir) |
+| VP-018, VP-012 (frontmatter closure) | stdout over an N-refresh sequence with a `/` sid equals legacy | manual (parity harness case) |
 
 ## Traceability
 
@@ -111,7 +111,7 @@ from the cache-file comparison only.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/statusline` cache.go `CacheStore.Save` (filled by architect) |
+| Architecture Module | `internal/statusline` cache.go `CacheStore.Save` (BC-COMPONENT-MAP: internal/statusline/cache.go (failed replace, temp handling) — ARCH-04) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:save_cache (SL:198-206), load_cache (SL:190-195); session-cache path in main (SL:1215) |
 | Legacy contract | BC-SL-078 (P3 deep r1 row 157) |
@@ -128,7 +128,7 @@ from the cache-file comparison only.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[statusline].md#cache-store` — (filled by architect)
+- `architecture/ARCH-04-data-files.md#cache-store` — internal/statusline/cache.go (failed replace, temp handling) (BC-COMPONENT-MAP: ARCH-04 (ARCH-04-data-files.md))
 
 ## Story Anchor (Recommended)
 
@@ -140,4 +140,4 @@ S-N.MM — cache store (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- VP-TBD — temp cleanup
+- VP-018, VP-012 — temp cleanup

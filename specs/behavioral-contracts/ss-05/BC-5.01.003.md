@@ -95,9 +95,9 @@ All values verified 2026-11-15 against CPython 3.11.7.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `FloorDiv`/`Mod` equal CPython on 2M random samples plus the boundary rows | proptest + oracle table |
-| VP-TBD | For finite b ≠ 0: `FloorDiv(a,b)*b + Mod(a,b)` ≈ a and `Mod` has b's sign or is a signed zero | proptest |
-| VP-TBD | `Max(a, NaN) == a` and `Max(NaN, a)` is NaN for all a | proptest |
+| VP-023 | `FloorDiv`/`Mod` equal CPython on 2M random samples plus the boundary rows | proptest + oracle table |
+| VP-023 | For finite b ≠ 0: `FloorDiv(a,b)*b + Mod(a,b)` ≈ a and `Mod` has b's sign or is a signed zero | proptest |
+| VP-023 | `Max(a, NaN) == a` and `Max(NaN, a)` is NaN for all a | proptest |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ All values verified 2026-11-15 against CPython 3.11.7.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (typed errors feed the degraded ladder), DI-012 |
-| Architecture Module | `internal/pyfmt/num.go` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/num.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/num.go (divmod/mod, Int/Ceil, Max/Min) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-07, IM-08, IM-09; pitfalls PR-03, PR-04, PR-05. Legacy sites served: float `//`/`%` SL:525-529, 546, 560, 826; int `//`/`%` SL:548, 561, 829-831, 859; `int()` SL:148, 426, 546, 675, 683, 853; `math.ceil` SL:759; `max`/`min` SL:146, 422, 479, 508, 671, 674-675, 758-759, 1117 |
 
@@ -118,7 +118,7 @@ All values verified 2026-11-15 against CPython 3.11.7.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-num` — Python arithmetic helpers (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-num` — internal/pyfmt/num.go (divmod/mod, Int/Ceil, Max/Min) (Python arithmetic helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -126,4 +126,4 @@ TBD — pyfmt num (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — float divmod equals CPython
+- VP-023 — float divmod equals CPython

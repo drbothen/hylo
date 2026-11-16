@@ -109,8 +109,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | fmt equals CPython `_fmt_lines` for ints in [-1e7, 1e8] sampled around thresholds and ties | property test vs CPython goldens |
-| VP-TBD | fmt of strings equals CPython for the BC-5.01.002 grammar corpus | table test |
+| VP-028 | fmt equals CPython `_fmt_lines` for ints in [-1e7, 1e8] sampled around thresholds and ties | property test vs CPython goldens |
+| VP-028 | fmt of strings equals CPython for the BC-5.01.002 grammar corpus | table test |
 
 ## Traceability
 
@@ -135,7 +135,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#session` — TBD by architect
+- `architecture/ARCH-03-statusline.md#session` — internal/statusline/session.go (_fmt_lines) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -143,7 +143,7 @@ TBD — session widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `_fmt_lines` parity property
+- VP-028 — `_fmt_lines` parity property
 
 ---
 

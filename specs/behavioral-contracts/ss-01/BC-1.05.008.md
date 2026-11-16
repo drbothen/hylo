@@ -119,8 +119,8 @@ All twelve numeric rows and EC-001/003/004/005 were re-executed against
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Go cost segment bytes equal the golden table for all rows | manual (golden table test, Tier A) |
-| VP-TBD | Same seed through the parity harness gives identical stdout and cost-history bytes on all three OSes | manual (parity harness case) |
+| VP-021 | Go cost segment bytes equal the golden table for all rows | manual (golden table test, Tier A) |
+| VP-021 | Same seed through the parity harness gives identical stdout and cost-history bytes on all three OSes | manual (parity harness case) |
 
 ## Traceability
 
@@ -128,7 +128,7 @@ All twelve numeric rows and EC-001/003/004/005 were re-executed against
 |-------|-------|
 | L2 Capability | CAP-011 (percentile bands) |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/cost` history.go + `internal/statusline` cost.go (filled by architect) |
+| Architecture Module | `internal/cost` history.go + `internal/statusline` cost.go (BC-COMPONENT-MAP: internal/statusline/cost.go + internal/cost/history.go (goldens) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-625); cost_thresholds (SL:240-262); record_cost throttle (SL:232) |
 | Legacy contract | BC-SL-101 (P3r3 §4.1; mismatches re-confirmed P3r4 §1.1) |
@@ -143,7 +143,7 @@ All twelve numeric rows and EC-001/003/004/005 were re-executed against
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[cost].md#goldens` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#goldens` — internal/statusline/cost.go + internal/cost/history.go (goldens) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -155,4 +155,4 @@ S-N.MM — cost colouring (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- VP-TBD — golden equality
+- VP-021 — golden equality

@@ -148,8 +148,8 @@ the CI runner's shell (DET-43).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For any parent environment, the constructed child env key set equals the per-side allowlist (case-dependent keys aside) | proptest-style table test with randomized parent envs |
-| VP-TBD | No forbidden key (proxy, PYTHON* except PYTHONPATH, GP-1..GP-4, DGX_* on Go side) appears in any child env | table test + probe child |
+| VP-034 | For any parent environment, the constructed child env key set equals the per-side allowlist (case-dependent keys aside) | proptest-style table test with randomized parent envs |
+| VP-034 | No forbidden key (proxy, PYTHON* except PYTHONPATH, GP-1..GP-4, DGX_* on Go side) appears in any child env | table test + probe child |
 
 ## Traceability
 
@@ -159,7 +159,7 @@ the CI runner's shell (DET-43).
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness env builder (filled by architect) |
+| Architecture Module | `internal/statusline` parity harness env builder (BC-COMPONENT-MAP: internal/parity/env.go (child env from scratch) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -171,7 +171,7 @@ the CI runner's shell (DET-43).
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — parity harness child-process construction
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/env.go (child env from scratch) (parity harness child-process construction) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -179,4 +179,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — child-env allowlist properties above
+- VP-034 — child-env allowlist properties above

@@ -83,7 +83,7 @@ byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Six-case table (review #13) reproduces legacy bytes in fresh and stale modes | manual (table) |
+| VP-030 | Six-case table (review #13) reproduces legacy bytes in fresh and stale modes | manual (table) |
 
 ## Traceability
 
@@ -104,7 +104,7 @@ byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (health dot) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -112,7 +112,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — health table
+- VP-030 — health table
 
 ---
 

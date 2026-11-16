@@ -109,8 +109,8 @@ Clock `now = 1794615009.0`, empty history unless noted.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Two refreshes less than record_throttle_s apart with a `cc` entry produce at most one write | proptest (fake clock + fake store) |
-| VP-TBD | All non-target keys survive a write byte-identically | manual (cache-swap test, design §5.2) |
+| VP-020 | Two refreshes less than record_throttle_s apart with a `cc` entry produce at most one write | proptest (fake clock + fake store) |
+| VP-020 | All non-target keys survive a write byte-identically | manual (cache-swap test, design §5.2) |
 
 ## Traceability
 
@@ -118,7 +118,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 |-------|-------|
 | L2 Capability | CAP-011 (cost history; format is status-line-owned, OD-124) |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/cost` history.go `Record` (design §2.3; filled by architect) |
+| Architecture Module | `internal/cost` history.go `Record` (design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (throttled write) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); call site render_lane (SL:603-606) |
 | Legacy contract | BC-SL-028 (P3r1 row 57; refined P3 deep r1) |
@@ -135,7 +135,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[cost].md#record` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#record` — internal/cost/history.go (throttled write) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -143,4 +143,4 @@ S-N.MM — cost history (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — throttle
+- VP-020 — throttle

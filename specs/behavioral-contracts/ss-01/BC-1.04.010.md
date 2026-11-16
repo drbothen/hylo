@@ -83,7 +83,7 @@ otherwise. A NaN value hides the segment. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Eight-case review #18 table reproduces legacy bytes | manual (table) |
+| VP-030 | Eight-case review #18 table reproduces legacy bytes | manual (table) |
 
 ## Traceability
 
@@ -104,7 +104,7 @@ otherwise. A NaN value hides the segment. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (TTFT) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -112,7 +112,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — TTFT table
+- VP-030 — TTFT table
 
 ---
 

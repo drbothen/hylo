@@ -85,8 +85,8 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | TimeFloat equals CPython time.time() value for sampled instants | CPython oracle table |
-| VP-TBD | One read per render (no widget performs its own clock read) | unit test with a counting Env.Now |
+| VP-026, VP-007 (frontmatter closure) | TimeFloat equals CPython time.time() value for sampled instants | CPython oracle table |
+| VP-026, VP-007 (frontmatter closure) | One read per render (no widget performs its own clock read) | unit test with a counting Env.Now |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-05-pyfmt.md#time` — time.go helpers (TBD)
+- `architecture/ARCH-06-pyfmt.md#time` — internal/pyfmt/time.go (TimeFloat) (time.go helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -113,4 +113,4 @@ S-TBD — pyfmt time helpers
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — value-discipline equality
+- VP-026, VP-007 — value-discipline equality

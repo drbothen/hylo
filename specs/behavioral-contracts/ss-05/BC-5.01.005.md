@@ -95,8 +95,8 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline; generator in
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `Repr` equals CPython `repr` for every float64 bit pattern in the generated table (incl. extremes and subnormals) | CPython oracle table |
-| VP-TBD | Round-trip `float(Repr(x)) == x` for every finite pattern | proptest |
+| VP-023 | `Repr` equals CPython `repr` for every float64 bit pattern in the generated table (incl. extremes and subnormals) | CPython oracle table |
+| VP-023 | Round-trip `float(Repr(x)) == x` for every finite pattern | proptest |
 
 ## Traceability
 
@@ -106,7 +106,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline; generator in
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
 | L2 Domain Invariants | DI-012 (byte parity machinery) |
-| Architecture Module | `internal/pyfmt` num.go (filled by architect) |
+| Architecture Module | `internal/pyfmt` num.go (BC-COMPONENT-MAP: internal/pyfmt/num.go (Repr) — ARCH-06) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -118,7 +118,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline; generator in
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-05-pyfmt.md#num` — num.go helpers (TBD)
+- `architecture/ARCH-06-pyfmt.md#num` — internal/pyfmt/num.go (Repr) (num.go helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -126,4 +126,4 @@ S-TBD — pyfmt num helpers
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — oracle-table equality, exact round-trip
+- VP-023 — oracle-table equality, exact round-trip

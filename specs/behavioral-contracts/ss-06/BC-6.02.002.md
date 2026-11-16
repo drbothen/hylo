@@ -118,8 +118,8 @@ are compared after every step (BC-6.03.002).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | The runner executes steps in order and compares after each step before running the next | table test with an instrumented fake side |
-| VP-TBD | Non-monotonic `now` or `transcript_bytes` is always rejected before any side runs that step | table test |
+| VP-009 | The runner executes steps in order and compares after each step before running the next | table test with an instrumented fake side |
+| VP-009 | Non-monotonic `now` or `transcript_bytes` is always rejected before any side runs that step | table test |
 
 ## Traceability
 
@@ -129,7 +129,7 @@ are compared after every step (BC-6.03.002).
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness multi-step runner (filled by architect) |
+| Architecture Module | `internal/statusline` parity harness multi-step runner (BC-COMPONENT-MAP: internal/parity/replay.go (stdin-sequence, stepped clock) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -141,7 +141,7 @@ are compared after every step (BC-6.03.002).
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — parity harness step runner
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/replay.go (stdin-sequence, stepped clock) (parity harness step runner) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -149,4 +149,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — ordered replay properties above
+- VP-009 — ordered replay properties above

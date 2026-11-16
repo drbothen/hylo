@@ -96,7 +96,7 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `pyfmt.F(x, p)` equals CPython `format(x, f".{p}f")` for p ∈ {1, 2} over a generated corpus (boundaries, ties, subnormals, ±0, inf) | fuzz (differential vs the oracle) |
+| VP-021 | `pyfmt.F(x, p)` equals CPython `format(x, f".{p}f")` for p ∈ {1, 2} over a generated corpus (boundaries, ties, subnormals, ±0, inf) | fuzz (differential vs the oracle) |
 
 ## Traceability
 
@@ -104,7 +104,7 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 |-------|-------|
 | L2 Capability | CAP-011, CAP-009 |
 | L2 Domain Invariants | — |
-| Architecture Module | `internal/pyfmt` num.go `F`; `internal/statusline` cost.go (filled by architect) |
+| Architecture Module | `internal/pyfmt` num.go `F`; `internal/statusline` cost.go (BC-COMPONENT-MAP: internal/statusline/cost.go ($, $/h formats) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-636; formats at SL:616, 625, 635) |
 | Legacy contract | BC-SL-082 (P3 deep r1 row 123; `true → $1.00` re-verified P3r7) |
@@ -118,7 +118,7 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[pyfmt].md#num` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#num` — internal/statusline/cost.go ($, $/h formats) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -126,4 +126,4 @@ S-N.MM — cost segment (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `F` differential equivalence
+- VP-021 — `F` differential equivalence

@@ -107,8 +107,8 @@ pass-3 rounds 1 and 5.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all float64 inputs, Go output equals CPython output | fuzz vs oracle |
-| VP-TBD | Never raises / never panics | fuzz |
+| VP-028 | For all float64 inputs, Go output equals CPython output | fuzz vs oracle |
+| VP-028 | Never raises / never panics | fuzz |
 
 ## Traceability
 
@@ -116,7 +116,7 @@ pass-3 rounds 1 and 5.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/tokens.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/tokens.go`; BC-COMPONENT-MAP: internal/statusline/tokens.go (no unit promotion) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_fmt_tok_c (SL:863-873) |
 | Legacy contract | BC-SL-062 (deep pass-3 round 1, new; confirmed round 5) |
@@ -131,7 +131,7 @@ pass-3 rounds 1 and 5.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/tokens.go (no unit promotion) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -139,7 +139,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — float64 fuzz equality
+- VP-028 — float64 fuzz equality
 
 ---
 

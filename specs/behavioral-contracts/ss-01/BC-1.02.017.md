@@ -104,8 +104,8 @@ confirmed by golden A (deep pass-3 round 2).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Suffix present iff `win_start` numeric, timer shown and `(now-win_start)*1000 - dur >= 300000` evaluated without FMA | table test on arm64 + 300k sampled boundary cases vs oracle |
-| VP-TBD | Suffix position is after the API-time suffix | table test |
+| VP-028 | Suffix present iff `win_start` numeric, timer shown and `(now-win_start)*1000 - dur >= 300000` evaluated without FMA | table test on arm64 + 300k sampled boundary cases vs oracle |
+| VP-028 | Suffix position is after the API-time suffix | table test |
 
 ## Traceability
 
@@ -113,7 +113,7 @@ confirmed by golden A (deep pass-3 round 2).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (⌂ gate) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:554-563; gate SL:557-559, append SL:562) |
 | Legacy contract | BC-SL-022 (pass-3 r1; refined deep pass-3 round 1) |
@@ -130,7 +130,7 @@ confirmed by golden A (deep pass-3 round 2).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect (row-1 session widgets; FMA no-fuse convention)
+- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (⌂ gate) (row-1 session widgets; FMA no-fuse convention) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -138,7 +138,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — gate without FMA
+- VP-028 — gate without FMA
 
 ---
 

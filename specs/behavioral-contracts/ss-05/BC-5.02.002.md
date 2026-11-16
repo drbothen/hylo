@@ -161,8 +161,8 @@ length is reproduced except row 53, which becomes the generated 38 (EC-001).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | All 63 rows equal the oracle-generated lengths | table test |
-| VP-TBD | Committed table equals a fresh oracle generation | CI check |
+| VP-024 | All 63 rows equal the oracle-generated lengths | table test |
+| VP-024 | Committed table equals a fresh oracle generation | CI check |
 
 ## Traceability
 
@@ -170,7 +170,7 @@ length is reproduced except row 53, which becomes the generated 38 (EC-001).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/json.go` + `testdata/` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/json.go` + `testdata/` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/json.go (63-case oracle) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1147, `len(json.dumps(blk.get("input") or ""))`) |
 | Legacy contract | BC-SL-096 (P3r2 §A5, 63 cases from `dumpslen.py` and `dl2.py`; index P3r4 §7.3) |
@@ -183,7 +183,7 @@ length is reproduced except row 53, which becomes the generated 38 (EC-001).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-json` — JSON measure (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-json` — internal/pyfmt/json.go (63-case oracle) (JSON measure) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -191,7 +191,7 @@ TBD — pyfmt json (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — 63-row oracle table
+- VP-024 — 63-row oracle table
 
 ---
 

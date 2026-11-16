@@ -93,8 +93,8 @@ Verified 2026-11-15 against CPython 3.11.7 (`str.isspace` enumeration over all c
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `Strip` equals oracle `str.strip()` for strings built from the 29 whitespace code points plus look-alikes | proptest + oracle table |
-| VP-TBD | `bytes.Join(SplitLinesBytes(b), …)` loses only terminators; no element contains `\n` or `\r` | proptest |
+| VP-025 | `Strip` equals oracle `str.strip()` for strings built from the 29 whitespace code points plus look-alikes | proptest + oracle table |
+| VP-025 | `bytes.Join(SplitLinesBytes(b), …)` loses only terminators; no element contains `\n` or `\r` | proptest |
 
 ## Traceability
 
@@ -102,7 +102,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`str.isspace` enumeration over all c
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/str.go (whitespace/splitlines) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-11; pitfall PR-12. Legacy uses served: SL:444-445, 487, 1059, 1196 |
 
@@ -115,7 +115,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`str.isspace` enumeration over all c
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-str` — whitespace and split helpers (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-str` — internal/pyfmt/str.go (whitespace/splitlines) (whitespace and split helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -123,4 +123,4 @@ TBD — pyfmt str (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — strip set equals `str.isspace`
+- VP-025 — strip set equals `str.isspace`

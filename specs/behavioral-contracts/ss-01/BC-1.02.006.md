@@ -114,9 +114,9 @@ prefixes listed in Postcondition 4; `E` = `\e[90m▱`.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `filled == min(floor(pct/10 + 0.5), 10)` for all finite pct in [0,100] | property test |
-| VP-TBD | Visible width of the segment = 10 + 1 + len(number text) + len(denominator text) | property test with `visible()` (BC-1.01.004) |
-| VP-TBD | Bytes equal the oracle across a pct sweep 0..100 step 0.1 × totals {0, 500, 501, 200000, 999999, 1e6, 1048576} | table test against CPython goldens |
+| VP-028 | `filled == min(floor(pct/10 + 0.5), 10)` for all finite pct in [0,100] | property test |
+| VP-028 | Visible width of the segment = 10 + 1 + len(number text) + len(denominator text) | property test with `visible()` (BC-1.01.004) |
+| VP-028 | Bytes equal the oracle across a pct sweep 0..100 step 0.1 × totals {0, 500, 501, 200000, 999999, 1e6, 1048576} | table test against CPython goldens |
 
 ## Traceability
 
@@ -142,7 +142,7 @@ prefixes listed in Postcondition 4; `E` = `\e[90m▱`.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#context` — TBD by architect
+- `architecture/ARCH-03-statusline.md#context` — internal/statusline/context.go (thermometer, denominator) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -150,7 +150,7 @@ TBD — context widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — filled-cell formula
+- VP-028 — filled-cell formula
 
 ---
 

@@ -87,8 +87,8 @@ Verified 2026-11-15 against CPython 3.11.7 (`len`, slicing, strict UTF-8 `print`
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `Len(Truncate(s, n)) == min(n, Len(s))` | proptest |
-| VP-TBD | `Len` equals the oracle `len()` on fuzzed decoded strings | fuzz + oracle |
+| VP-025 | `Len(Truncate(s, n)) == min(n, Len(s))` | proptest |
+| VP-025 | `Len` equals the oracle `len()` on fuzzed decoded strings | fuzz + oracle |
 
 ## Traceability
 
@@ -96,7 +96,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`len`, slicing, strict UTF-8 `print`
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (surrogate → degraded, never a crash), DI-012 |
-| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/str.go (Len/Truncate/HasSurrogate) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-11, IM-22; pitfalls PR-11, PR-17. Legacy uses served: SL:153, 389, 1017, 1122, 1133, 1143, 1145, 1234 |
 
@@ -109,7 +109,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`len`, slicing, strict UTF-8 `print`
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-str` — code-point string helpers (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-str` — internal/pyfmt/str.go (Len/Truncate/HasSurrogate) (code-point string helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -117,4 +117,4 @@ TBD — pyfmt str (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — truncate/length consistency
+- VP-025 — truncate/length consistency

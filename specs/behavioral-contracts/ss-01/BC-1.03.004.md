@@ -102,9 +102,9 @@ expected `conv` and cache `size` were re-pinned 2026-11-15 with the legacy oracl
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `SplitLinesBytes` equals CPython `bytes.splitlines()` on random byte strings | fuzz (differential vs oracle) |
-| VP-TBD | A skipped piece leaves the parser state bit-identical | proptest (state snapshot before/after) |
-| VP-TBD | Go and legacy agree on random transcripts mixing valid, torn and invalid-UTF-8 records | fuzz (Tier C) |
+| VP-029, VP-006 | `SplitLinesBytes` equals CPython `bytes.splitlines()` on random byte strings | fuzz (differential vs oracle) |
+| VP-029, VP-006 | A skipped piece leaves the parser state bit-identical | proptest (state snapshot before/after) |
+| VP-029, VP-006 | Go and legacy agree on random transcripts mixing valid, torn and invalid-UTF-8 records | fuzz (Tier C) |
 
 ## Traceability
 
@@ -128,7 +128,7 @@ expected `conv` and cache `size` were re-pinned 2026-11-15 with the legacy oracl
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-json` — `pyfmt.Decode(ModeBytes)` (design IM-01)
+- `architecture/ARCH-03-statusline.md#pyfmt-json` — internal/statusline/transcript.go (splitlines + per-line decode) (`pyfmt.Decode(ModeBytes)` (design IM-01)) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -136,7 +136,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — splitlines differential
+- VP-029, VP-006 — splitlines differential
 
 ---
 

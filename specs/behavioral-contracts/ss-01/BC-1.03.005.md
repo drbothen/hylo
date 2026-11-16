@@ -98,8 +98,8 @@ serialized with Python `json.dumps` defaults, one per line. `u` = `{"input_token
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Each truthy id contributes usage at most once per stored-window lifetime | proptest |
-| VP-TBD | `len(ids) ≤ N` and `ids` has no duplicates after every write | proptest |
+| VP-029, VP-031 | Each truthy id contributes usage at most once per stored-window lifetime | proptest |
+| VP-029, VP-031 | `len(ids) ≤ N` and `ids` has no duplicates after every write | proptest |
 
 ## Traceability
 
@@ -123,7 +123,7 @@ serialized with Python `json.dumps` defaults, one per line. `u` = `{"input_token
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-usage`
+- `architecture/ARCH-03-statusline.md#transcript-usage` — internal/statusline/transcript.go (dedup 256) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -131,7 +131,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — usage counted once per id
+- VP-029, VP-031 — usage counted once per id
 
 ---
 

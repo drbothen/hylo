@@ -86,8 +86,8 @@ things and are never combined. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Box segment never ends in a space | proptest |
-| VP-TBD | Six-case review #16 table reproduces legacy bytes | manual (table) |
+| VP-030 | Box segment never ends in a space | proptest |
+| VP-030 | Six-case review #16 table reproduces legacy bytes | manual (table) |
 
 ## Traceability
 
@@ -109,7 +109,7 @@ things and are never combined. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (throughput) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -117,7 +117,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — throughput segment shape
+- VP-030 — throughput segment shape
 
 ---
 

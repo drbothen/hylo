@@ -117,8 +117,8 @@ reproduce pass-3 r3 §3.1 exactly.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | All 21 rows pass as Go table tests with exact cache bytes | table test (21 rows) |
-| VP-TBD | Each positive row and row 15 has an `exclusions.json` entry naming this test | harness self-check (BC-6.03.004) |
+| VP-029, VP-013, VP-012 (frontmatter closure) | All 21 rows pass as Go table tests with exact cache bytes | table test (21 rows) |
+| VP-029, VP-013, VP-012 (frontmatter closure) | Each positive row and row 15 has an `exclusions.json` entry naming this test | harness self-check (BC-6.03.004) |
 
 ## Traceability
 
@@ -141,7 +141,7 @@ reproduce pass-3 r3 §3.1 exactly.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#d4-ex-2`
+- `architecture/ARCH-03-statusline.md#d4-ex-2` — internal/statusline/transcript_wshape_test.go (21 rows) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -149,7 +149,7 @@ S-TBD — D4-EX-2 wrong-shape skip
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — 21-row table
+- VP-029, VP-013, VP-012 — 21-row table
 
 ---
 

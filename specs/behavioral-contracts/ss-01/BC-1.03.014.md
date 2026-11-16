@@ -91,8 +91,8 @@ One line `{"type": "assistant", "message": {"content": <list>}}`; result from th
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every JSON type of the block value, the count equals CPython `len(v or "")` where defined | table test |
-| VP-TBD | A truthy-number value never degrades in hylo and leaves no partial mutation | table test (D4-EX-2 rows) |
+| VP-029 | For every JSON type of the block value, the count equals CPython `len(v or "")` where defined | table test |
+| VP-029 | A truthy-number value never degrades in hylo and leaves no partial mutation | table test (D4-EX-2 rows) |
 
 ## Traceability
 
@@ -116,7 +116,7 @@ One line `{"type": "assistant", "message": {"content": <list>}}`; result from th
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-composition`
+- `architecture/ARCH-03-statusline.md#transcript-composition` — internal/statusline/transcript_mix.go (block value types) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -124,7 +124,7 @@ S-TBD — transcript composition
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — value-type table
+- VP-029 — value-type table
 
 ---
 

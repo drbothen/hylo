@@ -116,8 +116,8 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | The comparator reports equality iff stdout bytes, exit codes, named-cache name sets and per-file bytes are all equal (excluded artifacts aside) | table test on the comparator with synthetic side outputs |
-| VP-TBD | stderr content never changes the comparator's verdict | proptest (random stderr) |
+| VP-009 | The comparator reports equality iff stdout bytes, exit codes, named-cache name sets and per-file bytes are all equal (excluded artifacts aside) | table test on the comparator with synthetic side outputs |
+| VP-009 | stderr content never changes the comparator's verdict | proptest (random stderr) |
 
 ## Traceability
 
@@ -127,7 +127,7 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012, DI-008 |
-| Architecture Module | `internal/statusline` parity harness comparator (filled by architect) |
+| Architecture Module | `internal/statusline` parity harness comparator (BC-COMPONENT-MAP: internal/parity/compare.go (bytes+exit+caches) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -139,7 +139,7 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — parity harness comparator
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/compare.go (bytes+exit+caches) (parity harness comparator) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -147,4 +147,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — comparator properties above
+- VP-009 — comparator properties above

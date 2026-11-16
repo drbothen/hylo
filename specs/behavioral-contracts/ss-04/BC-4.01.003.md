@@ -80,7 +80,7 @@ command reads no configuration, so it works even when `HYLO_*` values are invali
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | stdout matches `^hylo [^\n]+\n$` for every build mode | table test |
+| VP-004 | stdout matches `^hylo [^\n]+\n$` for every build mode | table test |
 
 ## Traceability
 
@@ -90,7 +90,7 @@ command reads no configuration, so it works even when `HYLO_*` values are invali
 | Parity / exclusion | n.a. |
 | L2 Capability | CAP-015 (CLI surface; PRD §1 lists S4 under CAP-009, CAP-015) |
 | L2 Domain Invariants | n.a. |
-| Architecture Module | `cmd/hylo/version.go` (filled by architect) |
+| Architecture Module | `cmd/hylo/version.go` (BC-COMPONENT-MAP: cmd/hylo/version.go — ARCH-01) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -99,7 +99,7 @@ command reads no configuration, so it works even when `HYLO_*` values are invali
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-04-cli.md#version` — version command (TBD)
+- `architecture/ARCH-01-binary-cli.md#version` — cmd/hylo/version.go (version command) (BC-COMPONENT-MAP: ARCH-01 (ARCH-01-binary-cli.md))
 
 ## Story Anchor (Recommended)
 
@@ -107,4 +107,4 @@ S-TBD — skeleton + dispatch
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — version line shape
+- VP-004 — version line shape

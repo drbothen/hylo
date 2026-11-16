@@ -94,8 +94,8 @@ at the last 32 points.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | proptest |
-| VP-TBD | Point key order equals legacy for every subset of the four series | manual (table over 16 subsets) |
+| VP-030, VP-031 | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | proptest |
+| VP-030, VP-031 | Point key order equals legacy for every subset of the four series | manual (table over 16 subsets) |
 
 ## Traceability
 
@@ -118,7 +118,7 @@ at the last 32 points.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#session-cache` — history storage (TBD)
+- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (history points) (history storage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -126,7 +126,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — history bound and key order
+- VP-030, VP-031 — history bound and key order
 
 ---
 

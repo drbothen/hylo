@@ -101,8 +101,8 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `$/h` present iff `api_ms` numeric and ≥ burn_min_api_ms | proptest |
-| VP-TBD | `r` bit-identical to Python for the BC-1.05.008 goldens | manual (golden table test) |
+| VP-021 | `$/h` present iff `api_ms` numeric and ≥ burn_min_api_ms | proptest |
+| VP-021 | `r` bit-identical to Python for the BC-1.05.008 goldens | manual (golden table test) |
 
 ## Traceability
 
@@ -110,7 +110,7 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 |-------|-------|
 | L2 Capability | CAP-011, CAP-009 |
 | L2 Domain Invariants | DI-007 |
-| Architecture Module | `internal/statusline` cost.go (filled by architect) |
+| Architecture Module | `internal/statusline` cost.go (BC-COMPONENT-MAP: internal/statusline/cost.go ($/h thresholds) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-603, 617-625) |
 | Legacy contract | BC-SL-026 (P3r1 row 55; refined P3 deep r1 with BC-SL-082) |
@@ -126,7 +126,7 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[statusline].md#cost-segment` — (filled by architect)
+- `architecture/ARCH-03-statusline.md#cost-segment` — internal/statusline/cost.go ($/h thresholds) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,4 +134,4 @@ S-N.MM — cost segment (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `$/h` presence and colour rule
+- VP-021 — `$/h` presence and colour rule

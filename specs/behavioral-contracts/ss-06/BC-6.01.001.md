@@ -116,9 +116,9 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every case/step shape, the oracle argv equals `[abs python, "-s", abs script]` and contains none of `-I`, `-E`, `-S` | table test on the argv builder |
-| VP-TBD | No harness code path calls `exec.LookPath` or a shell to start the oracle | manual review + `go vet`-style grep test |
-| VP-TBD | A non-absolute or non-3.11 interpreter never runs an oracle case | table test |
+| VP-034 | For every case/step shape, the oracle argv equals `[abs python, "-s", abs script]` and contains none of `-I`, `-E`, `-S` | table test on the argv builder |
+| VP-034 | No harness code path calls `exec.LookPath` or a shell to start the oracle | manual review + `go vet`-style grep test |
+| VP-034 | A non-absolute or non-3.11 interpreter never runs an oracle case | table test |
 
 ## Traceability
 
@@ -128,7 +128,7 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness (`*_parity_test.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` parity harness (`*_parity_test.go`) (BC-COMPONENT-MAP: internal/parity/oracle.go (explicit interpreter, -s) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -140,7 +140,7 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — parity harness oracle runner
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/oracle.go (explicit interpreter, -s) (parity harness oracle runner) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -148,4 +148,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — oracle argv and interpreter-resolution properties above
+- VP-034 — oracle argv and interpreter-resolution properties above

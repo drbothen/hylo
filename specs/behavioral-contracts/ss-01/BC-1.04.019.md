@@ -77,7 +77,7 @@ byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | TTFT text equals CPython for random doubles in [0, 10^4] and all tie points k+0.05 | proptest against a CPython-generated table |
+| VP-030 | TTFT text equals CPython for random doubles in [0, 10^4] and all tie points k+0.05 | proptest against a CPython-generated table |
 
 ## Traceability
 
@@ -98,7 +98,7 @@ byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (TTFT boundaries) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -106,7 +106,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — TTFT format boundaries
+- VP-030 — TTFT format boundaries
 
 ---
 

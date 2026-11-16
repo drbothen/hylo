@@ -103,8 +103,8 @@ BC-2.02.001):
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For ASCII-only, underscore-free strings, hylo's parse result equals CPython 3.11 `float()`/`int()` (oracle table) | table test vs CPython goldens + fuzz |
-| VP-TBD | No string containing `_` or a non-ASCII Nd digit is accepted | proptest |
+| VP-016, VP-012 (frontmatter closure) | For ASCII-only, underscore-free strings, hylo's parse result equals CPython 3.11 `float()`/`int()` (oracle table) | table test vs CPython goldens + fuzz |
+| VP-016, VP-012 (frontmatter closure) | No string containing `_` or a non-ASCII Nd digit is accepted | proptest |
 
 ## Traceability
 
@@ -114,7 +114,7 @@ BC-2.02.001):
 | Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3`, one case per value (`4_0`, `٤`, `2_0`, `٢`, and the legacy crash inputs `""`, `four`, `0x4`, `2.0`), each with its expected output file; dedicated table test `TestConfigError_D4EX3_Number` (OD-105, OD-110) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-008, DI-010 |
-| Architecture Module | `internal/config/types.go`; `internal/pyfmt/num.go` (filled by architect) |
+| Architecture Module | `internal/config/types.go`; `internal/pyfmt/num.go` (BC-COMPONENT-MAP: internal/config/errors.go (number-grammar class) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -125,7 +125,7 @@ BC-2.02.001):
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#numbers` — numeric types (TBD)
+- `architecture/ARCH-02-configuration.md#numbers` — internal/config/errors.go (number-grammar class) (numeric types) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -133,4 +133,4 @@ S-TBD — D4-EX-3 table tests
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — in-domain values parse as CPython
+- VP-016, VP-012 — in-domain values parse as CPython

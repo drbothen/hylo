@@ -80,7 +80,7 @@ Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Color = yellow iff `q > 0 or preempt > 0` under Python comparison semantics (NaN false) | proptest |
+| VP-030 | Color = yellow iff `q > 0 or preempt > 0` under Python comparison semantics (NaN false) | proptest |
 
 ## Traceability
 
@@ -101,7 +101,7 @@ Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (queue) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -109,7 +109,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — queue color rule
+- VP-030 — queue color rule
 
 ---
 

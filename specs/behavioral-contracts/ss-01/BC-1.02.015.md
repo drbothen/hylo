@@ -107,8 +107,8 @@ start, so only the base segment appears).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `_hm` equals CPython for ints and floats sampled at every k·60000 ± {0, 1, 0.5, 1 ulp} up to 1e8 | table test vs CPython goldens |
-| VP-TBD | Segment present iff number and `> 60000` | property test |
+| VP-028 | `_hm` equals CPython for ints and floats sampled at every k·60000 ± {0, 1, 0.5, 1 ulp} up to 1e8 | table test vs CPython goldens |
+| VP-028 | Segment present iff number and `> 60000` | property test |
 
 ## Traceability
 
@@ -133,7 +133,7 @@ start, so only the base segment appears).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#session` — TBD by architect
+- `architecture/ARCH-03-statusline.md#session` — internal/statusline/session.go (_hm) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -141,7 +141,7 @@ TBD — session widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `_hm` parity property
+- VP-028 — `_hm` parity property
 
 ---
 

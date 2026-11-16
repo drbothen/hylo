@@ -97,8 +97,8 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Output glyph count = min(12, plottable points) when ≥ 2, else empty | proptest |
-| VP-TBD | Byte equality with legacy over random finite histories | fuzz (Tier C) |
+| VP-030 | Output glyph count = min(12, plottable points) when ≥ 2, else empty | proptest |
+| VP-030 | Byte equality with legacy over random finite histories | fuzz (Tier C) |
 
 ## Traceability
 
@@ -121,7 +121,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#sparkline` — sparkline (TBD)
+- `architecture/ARCH-03-statusline.md#sparkline` — internal/statusline/sparkline.go (glyphs/scale/colors) (sparkline) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -129,7 +129,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — sparkline equivalence
+- VP-030 — sparkline equivalence
 
 ---
 

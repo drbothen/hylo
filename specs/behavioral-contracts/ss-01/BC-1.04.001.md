@@ -114,9 +114,9 @@ is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For any response bytes, the Go fetch returns the same map (keys, order, float bits) or "no sample" as legacy | fuzz (Tier C differential) + table |
-| VP-TBD | The function never panics or returns an error to the caller | fuzz |
-| VP-TBD | Request URL bytes equal legacy's for the default query | manual (golden) |
+| VP-030, VP-022 (partial: network edge), VP-022 (frontmatter closure) | For any response bytes, the Go fetch returns the same map (keys, order, float bits) or "no sample" as legacy | fuzz (Tier C differential) + table |
+| VP-030, VP-022 (partial: network edge), VP-022 (frontmatter closure) | The function never panics or returns an error to the caller | fuzz |
+| VP-030, VP-022 (partial: network edge), VP-022 (frontmatter closure) | Request URL bytes equal legacy's for the default query | manual (golden) |
 
 ## Traceability
 
@@ -141,7 +141,7 @@ is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#metrics-client` — metrics client and fake-metrics seam (TBD by architect)
+- `architecture/ARCH-03-statusline.md#metrics-client` — internal/statusline/telemetry.go (query, total deadline, first-wins) (metrics client and fake-metrics seam) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -149,7 +149,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — fetch differential equivalence
+- VP-030, VP-022 — fetch differential equivalence
 
 ---
 

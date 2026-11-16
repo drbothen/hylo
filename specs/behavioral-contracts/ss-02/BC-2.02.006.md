@@ -97,8 +97,8 @@ byte observability here is the error line, so no CPython run is owed.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Every string outside the seven-token set produces the boolean-class line; every token inside it parses | proptest over random value strings |
-| VP-TBD | `TestConfigError_D4EX3_Boolean` covers one valid token and one invalid value per P1 bool key | table test |
+| VP-016, VP-012 (frontmatter closure) | Every string outside the seven-token set produces the boolean-class line; every token inside it parses | proptest over random value strings |
+| VP-016, VP-012 (frontmatter closure) | `TestConfigError_D4EX3_Boolean` covers one valid token and one invalid value per P1 bool key | table test |
 
 ## Traceability
 
@@ -108,7 +108,7 @@ byte observability here is the error line, so no CPython run is owed.
 | Parity / exclusion | D4-EX-3 (boolean class) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `internal/config` (bool parse + class), `internal/statusline` (render) (filled by architect) |
+| Architecture Module | `internal/config` (bool parse + class), `internal/statusline` (render) (BC-COMPONENT-MAP: internal/config/errors.go (boolean class) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -120,7 +120,7 @@ byte observability here is the error line, so no CPython run is owed.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#classes` — config-error classes (TBD)
+- `architecture/ARCH-02-configuration.md#classes` — internal/config/errors.go (boolean class) (config-error classes) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -128,4 +128,4 @@ S-TBD — config-error classes
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — grammar is exactly the seven-token set
+- VP-016, VP-012 — grammar is exactly the seven-token set

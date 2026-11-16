@@ -125,8 +125,8 @@ It is never a blanket exclusion.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | The temp-name filter removes exactly the names matching the pattern, never a `.json` named cache | table test on the filter |
-| VP-TBD | After any failed Go cache write, no temp file remains in the cache dir | `TestCacheStore_TempFile_CleanupOnFailedReplace` + fuzz over sids |
+| VP-012, VP-018 | The temp-name filter removes exactly the names matching the pattern, never a `.json` named cache | table test on the filter |
+| VP-012, VP-018 | After any failed Go cache write, no temp file remains in the cache dir | `TestCacheStore_TempFile_CleanupOnFailedReplace` + fuzz over sids |
 
 ## Traceability
 
@@ -137,7 +137,7 @@ It is never a blanket exclusion.
 | Parity class | temp-file |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline/cache.go`; parity harness comparator (filled by architect) |
+| Architecture Module | `internal/statusline/cache.go`; parity harness comparator (BC-COMPONENT-MAP: internal/parity/compare.go (temp carve-out) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -148,7 +148,7 @@ It is never a blanket exclusion.
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — cache store write path and harness comparator
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/compare.go (temp carve-out) (cache store write path and harness comparator) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -160,4 +160,4 @@ TBD (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- TBD — temp filter and cleanup properties above
+- VP-012, VP-018 — temp filter and cleanup properties above

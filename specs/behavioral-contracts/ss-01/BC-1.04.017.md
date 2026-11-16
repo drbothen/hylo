@@ -84,7 +84,7 @@ second fields. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Age text equals legacy for every integer delta in [301, 10^7] and random float deltas | proptest |
+| VP-030 | Age text equals legacy for every integer delta in [301, 10^7] and random float deltas | proptest |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ second fields. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#row-2` — row-2 renderer (TBD)
+- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (idle > 300, age format) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -113,7 +113,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — idle age format
+- VP-030 — idle age format
 
 ---
 

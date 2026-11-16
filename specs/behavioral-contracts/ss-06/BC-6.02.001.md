@@ -113,8 +113,8 @@ together form the P1 success criterion (OD-107).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | No file under `internal/statusline/testdata/` matches a forbidden-category pattern | `TestCorpusHygiene` (table of patterns + allowlist) |
-| VP-TBD | No harness write path places captures-derived bytes outside `captures/` | table test on the output-path resolver |
+| VP-035 | No file under `internal/statusline/testdata/` matches a forbidden-category pattern | `TestCorpusHygiene` (table of patterns + allowlist) |
+| VP-035 | No harness write path places captures-derived bytes outside `captures/` | table test on the output-path resolver |
 
 ## Traceability
 
@@ -124,7 +124,7 @@ together form the P1 success criterion (OD-107).
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness corpus loader (filled by architect) |
+| Architecture Module | `internal/statusline` parity harness corpus loader (BC-COMPONENT-MAP: internal/parity/corpus.go (synthetic corpus; captures/) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -135,7 +135,7 @@ together form the P1 success criterion (OD-107).
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — parity harness corpus layout
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/corpus.go (synthetic corpus; captures/) (parity harness corpus layout) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -143,4 +143,4 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- TBD — corpus hygiene properties above
+- VP-035 — corpus hygiene properties above

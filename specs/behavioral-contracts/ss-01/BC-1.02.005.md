@@ -112,9 +112,9 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Multi-step sequence (T, T+5, T+5.001) reproduces oracle stdout and cache bytes | parity harness stdin-sequence replay (BC-6.02.002) |
-| VP-TBD | Cache key equals the oracle for ASCII, non-ASCII and lone-surrogate dirs | table test |
-| VP-TBD | Python-written cache read by Go and vice versa yields identical output | cache-swap test (BC-6.02.004) |
+| VP-028 | Multi-step sequence (T, T+5, T+5.001) reproduces oracle stdout and cache bytes | parity harness stdin-sequence replay (BC-6.02.002) |
+| VP-028 | Cache key equals the oracle for ASCII, non-ASCII and lone-surrogate dirs | table test |
+| VP-028 | Python-written cache read by Go and vice versa yields identical output | cache-swap test (BC-6.02.004) |
 
 ## Traceability
 
@@ -142,7 +142,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#git` — TBD by architect
+- `architecture/ARCH-03-statusline.md#git` — internal/statusline/git.go (5 s TTL git cache) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -150,7 +150,7 @@ TBD — branch segment story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — TTL sequence parity
+- VP-028 — TTL sequence parity
 
 ---
 

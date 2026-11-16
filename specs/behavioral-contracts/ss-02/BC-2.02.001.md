@@ -149,9 +149,9 @@ reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every env map, stdout is either the config-error line (exactly one LF, ending `\e[0m\n`) or not; exit is always 0 | proptest (Go fuzz over env maps) |
-| VP-TBD | A config-error run leaves the cache directory byte-identical (snapshot before/after) | table test |
-| VP-TBD | statusline prints the config-error line iff `config validate` exits non-zero | proptest |
+| VP-016, VP-012 (frontmatter closure) | For every env map, stdout is either the config-error line (exactly one LF, ending `\e[0m\n`) or not; exit is always 0 | proptest (Go fuzz over env maps) |
+| VP-016, VP-012 (frontmatter closure) | A config-error run leaves the cache directory byte-identical (snapshot before/after) | table test |
+| VP-016, VP-012 (frontmatter closure) | statusline prints the config-error line iff `config validate` exits non-zero | proptest |
 
 ## Traceability
 
@@ -162,7 +162,7 @@ reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/
 | Parity / exclusion | **Approved deviation D4-EX-3.** Exclusion-list entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json` (`{id, case, expected_output_file, table_test}`, OD-105); dedicated table tests `TestConfigError_D4EX3_Number`, `TestConfigError_D4EX3_Boolean`, `TestConfigError_D4EX3_URL`, `TestConfigError_D4EX3_Enum` plus the `config validate` test (BC-2.03.001). No blanket exclusion; an excluded case without its test fails the harness (BC-6.03.004) |
 | L2 Capability | CAP-015 (also CAP-009) |
 | L2 Domain Invariants | DI-008, DI-010 |
-| Architecture Module | `internal/config/errors.go` (`Error.StatusLine()`), `cmd/hylo/statusline.go` (filled by architect) |
+| Architecture Module | `internal/config/errors.go` (`Error.StatusLine()`), `cmd/hylo/statusline.go` (BC-COMPONENT-MAP: internal/config/errors.go (D4-EX-3 line) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -177,7 +177,7 @@ reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#errors` — error type and line rendering (TBD)
+- `architecture/ARCH-02-configuration.md#errors` — internal/config/errors.go (D4-EX-3 line) (error type and line rendering) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -185,7 +185,7 @@ S-TBD — config subset + D4-EX-3 (design §4 step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — config-error line iff validate fails
+- VP-016, VP-012 — config-error line iff validate fails
 
 ---
 

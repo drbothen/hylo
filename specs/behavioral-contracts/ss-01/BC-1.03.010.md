@@ -107,8 +107,8 @@ The exhaustive pinned table is BC-1.03.016 (20 rows). Representative rows (TZ=UT
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `finish` is pure and equals the CPython oracle for random `(out, t0, t1)` incl. NaN/inf | proptest vs oracle table |
-| VP-TBD | Go and legacy turn state agree on random timed transcripts | fuzz (Tier C) |
+| VP-029 | `finish` is pure and equals the CPython oracle for random `(out, t0, t1)` incl. NaN/inf | proptest vs oracle table |
+| VP-029 | Go and legacy turn state agree on random timed transcripts | fuzz (Tier C) |
 
 ## Traceability
 
@@ -134,7 +134,7 @@ The exhaustive pinned table is BC-1.03.016 (20 rows). Representative rows (TZ=UT
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#turn-machine`
+- `architecture/ARCH-03-statusline.md#turn-machine` — internal/statusline/transcript_turn.go (rate machine) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,7 +142,7 @@ S-TBD — turn machine
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `finish` oracle parity
+- VP-029 — `finish` oracle parity
 
 ---
 

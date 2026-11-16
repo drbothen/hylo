@@ -93,8 +93,8 @@ from this run (not listed in the legacy pass-3 rows).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For all float64 `hr` (including NaN, ±Inf, ±0) the Go segment equals the oracle's | generated table vs oracle |
-| VP-TBD | No numeric `hr` degrades | proptest |
+| VP-028 | For all float64 `hr` (including NaN, ±Inf, ±0) the Go segment equals the oracle's | generated table vs oracle |
+| VP-028 | No numeric `hr` degrades | proptest |
 
 ## Traceability
 
@@ -102,7 +102,7 @@ from this run (not listed in the legacy pass-3 rows).
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; BC-COMPONENT-MAP: internal/statusline/context.go (cache-hit NaN/inf) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:477-479) |
 | Legacy contract | BC-SL-060 (deep pass-3 round 1, new) |
@@ -117,7 +117,7 @@ from this run (not listed in the legacy pass-3 rows).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/context.go (cache-hit NaN/inf) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,7 +125,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — float64 table equality
+- VP-028 — float64 table equality
 
 ---
 

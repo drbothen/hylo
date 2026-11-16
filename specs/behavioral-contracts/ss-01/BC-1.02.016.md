@@ -98,8 +98,8 @@ All expected values pinned 2026-11-15 by running the legacy `render_lane` under 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every finite numeric `api` and shown timer, the suffix is present iff `api >= 60000` | proptest (table + generated values vs oracle) |
-| VP-TBD | The suffix bytes equal `\e[2m·` + `_hm(api)` + `\e[0m` | table test vs oracle |
+| VP-028 | For every finite numeric `api` and shown timer, the suffix is present iff `api >= 60000` | proptest (table + generated values vs oracle) |
+| VP-028 | The suffix bytes equal `\e[2m·` + `_hm(api)` + `\e[0m` | table test vs oracle |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ All expected values pinned 2026-11-15 by running the legacy `render_lane` under 
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (degraded ladder for `+Infinity`) |
-| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (API-time suffix) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:550-553, inside the timer block SL:539-563) |
 | Legacy contract | BC-SL-021 (pass-3 r1 table; refined in deep pass-3 round 1: `api >= 60000`, `+inf` → CP-S13) |
@@ -123,7 +123,7 @@ All expected values pinned 2026-11-15 by running the legacy `render_lane` under 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect (status line row-1 session widgets)
+- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (API-time suffix) (status line row-1 session widgets) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -131,7 +131,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — presence iff `api >= 60000`
+- VP-028 — presence iff `api >= 60000`
 
 ---
 

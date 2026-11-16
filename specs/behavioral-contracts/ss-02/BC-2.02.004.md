@@ -89,7 +89,7 @@ deviation **D4-EX-3** (enum class).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Trace parse accepts exactly the three strings | table test + fuzz |
+| VP-016, VP-012 (frontmatter closure) | Trace parse accepts exactly the three strings | table test + fuzz |
 
 ## Traceability
 
@@ -99,7 +99,7 @@ deviation **D4-EX-3** (enum class).
 | Parity / exclusion | **Approved deviation D4-EX-3 (enum class).** Named exclusion entry id `D4-EX-3`, cases `mine`, `Rate`, ` kv`, `""`, each with its expected output file; dedicated table test `TestConfigError_D4EX3_Enum` (OD-105, OD-110) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-008, DI-010 |
-| Architecture Module | `internal/config/types.go` (`Enum`) (filled by architect) |
+| Architecture Module | `internal/config/types.go` (`Enum`) (BC-COMPONENT-MAP: internal/config/errors.go (enum class) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -109,7 +109,7 @@ deviation **D4-EX-3** (enum class).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#enum` — enum type (TBD)
+- `architecture/ARCH-02-configuration.md#enum` — internal/config/errors.go (enum class) (enum type) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -117,4 +117,4 @@ S-TBD — D4-EX-3 table tests
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — trace enum exact
+- VP-016, VP-012 — trace enum exact

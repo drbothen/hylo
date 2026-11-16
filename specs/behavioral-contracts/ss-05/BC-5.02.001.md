@@ -113,8 +113,8 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`len(json.dumps(...))`); the fu
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `DumpsLen(v) == len(Dumps(v))` for random Values | proptest |
-| VP-TBD | `DumpsLen(Decode(b))` equals the oracle `len(json.dumps(json.loads(b)))` on fuzzed inputs | fuzz (`DumpsLen` target) + oracle |
+| VP-024 | `DumpsLen(v) == len(Dumps(v))` for random Values | proptest |
+| VP-024 | `DumpsLen(Decode(b))` equals the oracle `len(json.dumps(json.loads(b)))` on fuzzed inputs | fuzz (`DumpsLen` target) + oracle |
 
 ## Traceability
 
@@ -122,7 +122,7 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`len(json.dumps(...))`); the fu
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/json.go` (design §2.6); call sites in `internal/statusline` transcript composition (filled by architect) |
+| Architecture Module | `internal/pyfmt/json.go` (design §2.6); call sites in `internal/statusline` transcript composition (BC-COMPONENT-MAP: internal/pyfmt/json.go (dumps length rules) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1120-1149; measurement at SL:1137-1138, 1140, 1147) |
 | Legacy contract | BC-SL-071 (new in P3r1 with BC-SL-038 refinement; oracle P3r2 §A5; index P3r4 §7.3) |
@@ -137,7 +137,7 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`len(json.dumps(...))`); the fu
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-json` — JSON encode/measure (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-json` — internal/pyfmt/json.go (dumps length rules) (JSON encode/measure) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -145,7 +145,7 @@ TBD — pyfmt json (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — `DumpsLen == len(Dumps)`
+- VP-024 — `DumpsLen == len(Dumps)`
 
 ---
 

@@ -110,8 +110,8 @@ All rows verified 2026-11-15 against CPython 3.11.7 `json.loads(bytes)`.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `Decode(b, ModeBytes)` succeeds iff oracle `json.loads(b)` succeeds, with equal values (type-preserving) | fuzz (`Decode` target) + oracle table |
-| VP-TBD | `Decode` never panics on arbitrary bytes | fuzz |
+| VP-024, VP-006 | `Decode(b, ModeBytes)` succeeds iff oracle `json.loads(b)` succeeds, with equal values (type-preserving) | fuzz (`Decode` target) + oracle table |
+| VP-024, VP-006 | `Decode` never panics on arbitrary bytes | fuzz |
 
 ## Traceability
 
@@ -119,7 +119,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 `json.loads(bytes)`.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (a bad line never degrades), DI-012 |
-| Architecture Module | `internal/pyfmt/json.go` `Decode` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/json.go` `Decode` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/json.go (loads bytes acceptance) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1059-1063: `for line in blob[:cut].splitlines(): try: e = json.loads(line) except Exception: continue`) |
 | Legacy contract | BC-SL-067 (new in P3r1 with BC-SL-033 refinement; index P3r4 §7.3) |
@@ -134,7 +134,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 `json.loads(bytes)`.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-json` — Python-compatible decoder (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-json` — internal/pyfmt/json.go (loads bytes acceptance) (Python-compatible decoder) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,7 +142,7 @@ TBD — pyfmt json (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — acceptance set equals the oracle
+- VP-024, VP-006 — acceptance set equals the oracle
 
 ---
 

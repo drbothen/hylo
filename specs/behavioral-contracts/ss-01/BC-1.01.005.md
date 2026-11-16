@@ -92,7 +92,7 @@ All verified 2026-11-15 by calling legacy `term_cols()` under CPython 3.11.7.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Go `term_cols` equals CPython `int()`-or-0 on generated strings (Unicode digits, underscores, signs, whitespace) | Tier C differential fuzz / table |
+| VP-027 | Go `term_cols` equals CPython `int()`-or-0 on generated strings (Unicode digits, underscores, signs, whitespace) | Tier C differential fuzz / table |
 
 ## Traceability
 
@@ -100,7 +100,7 @@ All verified 2026-11-15 by calling legacy `term_cols()` under CPython 3.11.7.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | — |
-| Architecture Module | `internal/statusline` width (`width.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` width (`width.go`) (BC-COMPONENT-MAP: internal/statusline/width.go (COLUMNS grammar via py.ParseInt) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`term_cols` (SL:1185-1190); read twice in `main` SL:1209, 1211 (same value) |
 | Legacy contract | BC-SL-005 (broad; refined P3r1 §A1; index P3r4 §7.3) |
@@ -115,7 +115,7 @@ All verified 2026-11-15 by calling legacy `term_cols()` under CPython 3.11.7.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-width` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-width` — internal/statusline/width.go (COLUMNS grammar via py.ParseInt) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -123,7 +123,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — COLUMNS grammar parity
+- VP-027 — COLUMNS grammar parity
 
 ---
 

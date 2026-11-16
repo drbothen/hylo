@@ -109,8 +109,8 @@ colour is GREY `\e[90m`; segment = `\e[90m7d10%\e[0m` + countdown.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `cd` equals the oracle for rem sampled densely around every unit boundary (k·60, k·3600, k·86400 ± 1e-6, ± 1 ulp) up to 1.15·7d | table test vs CPython goldens |
-| VP-TBD | Gate `0 < rem <= 1.15·length` matches the oracle at both ends for both windows | table test |
+| VP-028 | `cd` equals the oracle for rem sampled densely around every unit boundary (k·60, k·3600, k·86400 ± 1e-6, ± 1 ulp) up to 1.15·7d | table test vs CPython goldens |
+| VP-028 | Gate `0 < rem <= 1.15·length` matches the oracle at both ends for both windows | table test |
 
 ## Traceability
 
@@ -135,7 +135,7 @@ colour is GREY `\e[90m`; segment = `\e[90m7d10%\e[0m` + countdown.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#limits` — TBD by architect
+- `architecture/ARCH-03-statusline.md#limits` — internal/statusline/limits.go (countdown, 1.15 gate) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -143,7 +143,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — countdown boundary parity
+- VP-028 — countdown boundary parity
 
 ---
 

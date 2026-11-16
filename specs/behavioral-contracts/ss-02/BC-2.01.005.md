@@ -100,8 +100,8 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Bool parse accepts exactly six strings | table test (exhaustive over the six plus a fuzz corpus) |
-| VP-TBD | List parse equals Python `[p.strip() for p in s.split(",") if p.strip()]` on the CPython-generated table | table test against oracle goldens |
+| VP-015 | Bool parse accepts exactly six strings | table test (exhaustive over the six plus a fuzz corpus) |
+| VP-015 | List parse equals Python `[p.strip() for p in s.split(",") if p.strip()]` on the CPython-generated table | table test against oracle goldens |
 
 ## Traceability
 
@@ -111,7 +111,7 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 | Parity / exclusion | boolean values legacy accepted outside the grammar → D4-EX-3 (boolean class), exclusion entry `D4-EX-3`, test `TestConfigError_D4EX3_Boolean` (OD-102, OD-105) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `internal/config/types.go` (filled by architect) |
+| Architecture Module | `internal/config/types.go` (BC-COMPONENT-MAP: internal/config/types.go (value grammars) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -124,7 +124,7 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#types` — typed value grammars (TBD)
+- `architecture/ARCH-02-configuration.md#types` — internal/config/types.go (value grammars) (typed value grammars) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -132,4 +132,4 @@ S-TBD — config subset
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — bool grammar exact
+- VP-015 — bool grammar exact

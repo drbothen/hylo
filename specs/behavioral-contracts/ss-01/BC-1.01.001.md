@@ -95,8 +95,8 @@ Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`,
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every input that makes `Render` return `errDegraded` or panic, `Main` writes exactly the 29 degraded bytes and returns 0 | proptest/fuzz (Tier C differential) |
-| VP-TBD | `Main` never returns non-zero for any stdin/argv routed to it | fuzz |
+| VP-001, VP-003 | For every input that makes `Render` return `errDegraded` or panic, `Main` writes exactly the 29 degraded bytes and returns 0 | proptest/fuzz (Tier C differential) |
+| VP-001, VP-003 | `Main` never returns non-zero for any stdin/argv routed to it | fuzz |
 
 ## Traceability
 
@@ -104,7 +104,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`,
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` guard (`guard.go`, design §2.2) (filled by architect) |
+| Architecture Module | `internal/statusline` guard (`guard.go`, design §2.2) (BC-COMPONENT-MAP: internal/statusline/guard.go (29-byte degraded line, recover backstop) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`__main__` guard (SL:1238-1245); degraded colors RESET SL:127, GREY SL:131-132 |
 | Legacy contract | BC-SL-001 (P3 broad sweep; refined P3r1; index P3r4 §7.3) |
@@ -120,7 +120,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`,
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-guard` — degraded ladder top level (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-guard` — internal/statusline/guard.go (29-byte degraded line, recover backstop) (degraded ladder top level) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -128,7 +128,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — degraded output is exactly 29 bytes, exit 0
+- VP-001, VP-003 — degraded output is exactly 29 bytes, exit 0
 
 ---
 

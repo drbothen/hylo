@@ -115,8 +115,8 @@ incomplete, whose default fails its own validation, or whose env name collides.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `EnvName` is injective over `Registry()` | table test |
-| VP-TBD | Every default validates under its own type and range | table test |
+| VP-015 | `EnvName` is injective over `Registry()` | table test |
+| VP-015 | Every default validates under its own type and range | table test |
 
 ## Traceability
 
@@ -126,7 +126,7 @@ incomplete, whose default fails its own validation, or whose env name collides.
 | Parity / exclusion | n.a. |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
-| Architecture Module | `internal/config/registry.go`, `statusline_keys.go` (filled by architect) |
+| Architecture Module | `internal/config/registry.go`, `statusline_keys.go` (BC-COMPONENT-MAP: internal/config/registry.go (key registry) — ARCH-02) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -137,7 +137,7 @@ incomplete, whose default fails its own validation, or whose env name collides.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-02-configuration.md#registry` — registry schema (TBD)
+- `architecture/ARCH-02-configuration.md#registry` — internal/config/registry.go (key registry) (registry schema) (BC-COMPONENT-MAP: ARCH-02 (ARCH-02-configuration.md))
 
 ## Story Anchor (Recommended)
 
@@ -145,4 +145,4 @@ S-TBD — config registry
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — EnvName injective; defaults self-validate
+- VP-015 — EnvName injective; defaults self-validate

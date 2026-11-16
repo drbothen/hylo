@@ -91,8 +91,8 @@ pitfall PR-04 test grid).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | MaxSeq equals CPython `max(list)` for the PR-04 grid (NaN in every position, int/float/bool mixes) | CPython oracle table |
-| VP-TBD | MaxSeq fold equals chained Max for every permutation | proptest |
+| VP-023 | MaxSeq equals CPython `max(list)` for the PR-04 grid (NaN in every position, int/float/bool mixes) | CPython oracle table |
+| VP-023 | MaxSeq fold equals chained Max for every permutation | proptest |
 
 ## Traceability
 
@@ -102,7 +102,7 @@ pitfall PR-04 test grid).
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
 | L2 Domain Invariants | DI-012 (byte parity machinery) |
-| Architecture Module | `internal/pyfmt` num.go (filled by architect) |
+| Architecture Module | `internal/pyfmt` num.go (BC-COMPONENT-MAP: internal/pyfmt/num.go (MaxSeq) — ARCH-06) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -113,7 +113,7 @@ pitfall PR-04 test grid).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-05-pyfmt.md#num` — num.go helpers (TBD)
+- `architecture/ARCH-06-pyfmt.md#num` — internal/pyfmt/num.go (MaxSeq) (num.go helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -121,4 +121,4 @@ S-TBD — pyfmt num helpers
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — PR-04 grid equality
+- VP-023 — PR-04 grid equality

@@ -118,8 +118,8 @@ consecutive nights.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | The generator is deterministic for a given seed and commit | table test hashing generated cases |
-| VP-TBD | The generator never emits inputs in an owner-ruled difference class | proptest over the generator's domain filter |
+| VP-011 | The generator is deterministic for a given seed and commit | table test hashing generated cases |
+| VP-011 | The generator never emits inputs in an owner-ruled difference class | proptest over the generator's domain filter |
 
 ## Traceability
 
@@ -129,7 +129,7 @@ consecutive nights.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012, DI-008 |
-| Architecture Module | `.github/workflows/tierc.yml`; harness Tier C generator (filled by architect) |
+| Architecture Module | `.github/workflows/tierc.yml`; harness Tier C generator (BC-COMPONENT-MAP: internal/parity/fuzzdiff.go (nightly Tier C) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -141,7 +141,7 @@ consecutive nights.
 
 ## Architecture Anchors (Recommended)
 
-- TBD (filled by architect) — Tier C generator and nightly workflow
+- `architecture/ARCH-07-parity-harness.md` — internal/parity/fuzzdiff.go (nightly Tier C) (Tier C generator and nightly workflow) (BC-COMPONENT-MAP: ARCH-07 (ARCH-07-parity-harness.md))
 
 ## Story Anchor (Recommended)
 
@@ -153,4 +153,4 @@ TBD (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- TBD — generator determinism and domain properties above
+- VP-011 — generator determinism and domain properties above

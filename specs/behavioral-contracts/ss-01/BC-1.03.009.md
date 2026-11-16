@@ -108,8 +108,8 @@ from offset 0; result `res/conv/think`. Re-pinned 2026-11-15 with the legacy ora
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Bucket deltas equal the oracle's for random block lists | fuzz (Tier C differential) |
-| VP-TBD | `DumpsLen` equals CPython on the 63-case table | table test (BC-5.02.002) |
+| VP-029 | Bucket deltas equal the oracle's for random block lists | fuzz (Tier C differential) |
+| VP-029 | `DumpsLen` equals CPython on the 63-case table | table test (BC-5.02.002) |
 
 ## Traceability
 
@@ -134,7 +134,7 @@ from offset 0; result `res/conv/think`. Re-pinned 2026-11-15 with the legacy ora
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-composition`
+- `architecture/ARCH-03-statusline.md#transcript-composition` — internal/statusline/transcript_mix.go (dumps lengths) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,7 +142,7 @@ S-TBD — transcript composition
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — composition differential
+- VP-029 — composition differential
 
 ---
 

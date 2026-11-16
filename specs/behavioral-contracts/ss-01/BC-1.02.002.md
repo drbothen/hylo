@@ -88,8 +88,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; prefixes `claude-son
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For string inputs, label = first non-empty of (display_name, id, "?") | property test + table test |
-| VP-TBD | Label bytes equal the oracle on the Tier A corpus | parity harness (BC-6.03.002) |
+| VP-028 | For string inputs, label = first non-empty of (display_name, id, "?") | property test + table test |
+| VP-028 | Label bytes equal the oracle on the Tier A corpus | parity harness (BC-6.03.002) |
 
 ## Traceability
 
@@ -114,7 +114,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; prefixes `claude-son
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-statusline.md#lane` — TBD by architect
+- `architecture/ARCH-03-statusline.md#lane` — internal/statusline/lane.go (model label chain) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -122,7 +122,7 @@ TBD — row-1 lane segments story
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — label fallback property
+- VP-028 — label fallback property
 
 ---
 

@@ -91,8 +91,8 @@ Re-pinned 2026-11-15 against `legacy/dgx_statusline.py` under CPython 3.11, stdo
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For every falsy JSON value of `transcript_path`, the parser performs zero cache-store calls (fake `CacheStore` records no Load/Save) | proptest (table over all JSON falsy values) |
-| VP-TBD | For a non-regular-file path the parser performs zero cache-store calls and returns no-transcript state | table test with fake `FileSystem` |
+| VP-029 | For every falsy JSON value of `transcript_path`, the parser performs zero cache-store calls (fake `CacheStore` records no Load/Save) | proptest (table over all JSON falsy values) |
+| VP-029 | For a non-regular-file path the parser performs zero cache-store calls and returns no-transcript state | table test with fake `FileSystem` |
 
 ## Traceability
 
@@ -103,7 +103,7 @@ Re-pinned 2026-11-15 against `legacy/dgx_statusline.py` under CPython 3.11, stdo
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1009-1015) |
 | Legacy contract | BC-SL-030 (pass-3 base table; index in pass-3 r4 §7.3) |
 | Parity class | byte-exact (stdout and named cache files compared by the parity harness) |
-| Architecture Module | `internal/statusline/transcript.go` (design §2.2; filled by architect) |
+| Architecture Module | `internal/statusline/transcript.go` (design §2.2; BC-COMPONENT-MAP: internal/statusline/transcript.go (no path -> no state) — ARCH-03) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -115,7 +115,7 @@ Re-pinned 2026-11-15 against `legacy/dgx_statusline.py` under CPython 3.11, stdo
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-parser` — `internal/statusline/transcript.go` per design §2.2 (filled by architect)
+- `architecture/ARCH-03-statusline.md#transcript-parser` — internal/statusline/transcript.go (no path -> no state) (`internal/statusline/transcript.go` per design §2.2) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -123,7 +123,7 @@ S-TBD — transcript parser (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — no cache I/O on no-transcript paths
+- VP-029 — no cache I/O on no-transcript paths
 
 ---
 

@@ -82,8 +82,8 @@ Verified 2026-11-15 against CPython 3.11.7 (`re.sub`, slicing, `str.encode("utf-
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `Len(SubNonWord(s)) == Len(s)` and the output is ASCII | proptest |
-| VP-TBD | `EncodeUTF8Replace` equals the oracle on fuzzed strings with surrogates | fuzz + oracle |
+| VP-025 | `Len(SubNonWord(s)) == Len(s)` and the output is ASCII | proptest |
+| VP-025 | `EncodeUTF8Replace` equals the oracle on fuzzed strings with surrogates | fuzz + oracle |
 
 ## Traceability
 
@@ -91,7 +91,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`re.sub`, slicing, `str.encode("utf-
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (filled by architect) |
+| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/str.go (SubNonWord, EncodeUTF8Replace) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
 | Source | New contract. OD-103; design IM-11 (per-code-point substitution), IM-20 (sha1 key); pitfalls PR-11, PR-13. Legacy uses served: SL:1016-1017 (mix-cache name), SL:405 (git-cache key); OD-03 (raw sid in the session cache, sanitized mix cache) |
 
@@ -103,7 +103,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`re.sub`, slicing, `str.encode("utf-
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#pyfmt-str` — file-name helpers (filled by architect)
+- `architecture/ARCH-06-pyfmt.md#pyfmt-str` — internal/pyfmt/str.go (SubNonWord, EncodeUTF8Replace) (file-name helpers) (BC-COMPONENT-MAP: ARCH-06 (ARCH-06-pyfmt.md))
 
 ## Story Anchor (Recommended)
 
@@ -111,4 +111,4 @@ TBD — pyfmt str (design step S1)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — substitution preserves code-point count
+- VP-025 — substitution preserves code-point count

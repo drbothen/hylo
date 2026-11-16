@@ -84,7 +84,7 @@ last-turn rate stays.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For any sequence of same-id lines, totals equal the first counted line's usage | proptest |
+| VP-029 | For any sequence of same-id lines, totals equal the first counted line's usage | proptest |
 
 ## Traceability
 
@@ -106,7 +106,7 @@ last-turn rate stays.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#transcript-usage`
+- `architecture/ARCH-03-statusline.md#transcript-usage` — internal/statusline/transcript.go (first-line usage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -114,7 +114,7 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — first counted line wins
+- VP-029 — first counted line wins
 
 ---
 

@@ -82,8 +82,8 @@ All verified 2026-11-15 by calling legacy `visible()` under CPython 3.11.7. Gold
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | `visible(a+b) == visible(a)+visible(b)` whenever neither split point falls inside an SGR run | proptest |
-| VP-TBD | Go `visible` equals CPython `len(_ANSI.sub("", s))` on generated strings incl. astral and surrogates | Tier C differential fuzz |
+| VP-027 | `visible(a+b) == visible(a)+visible(b)` whenever neither split point falls inside an SGR run | proptest |
+| VP-027 | Go `visible` equals CPython `len(_ANSI.sub("", s))` on generated strings incl. astral and surrogates | Tier C differential fuzz |
 
 ## Traceability
 
@@ -91,7 +91,7 @@ All verified 2026-11-15 by calling legacy `visible()` under CPython 3.11.7. Gold
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | — |
-| Architecture Module | `internal/statusline` width (`width.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` width (`width.go`) (BC-COMPONENT-MAP: internal/statusline/width.go (visible width, SGR strip) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`visible` (SL:151-153); `_ANSI` regex SL:137 |
 | Legacy contract | BC-SL-004 (broad; refined P3r1 §A1; index P3r4 §7.3) |
@@ -104,7 +104,7 @@ All verified 2026-11-15 by calling legacy `visible()` under CPython 3.11.7. Gold
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-width` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-width` — internal/statusline/width.go (visible width, SGR strip) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -112,7 +112,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — code-point width parity
+- VP-027 — code-point width parity
 
 ---
 

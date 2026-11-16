@@ -94,7 +94,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For REM in a ±5 s grid around `0.10 × length` boundary and P in 0..100, Go colour equals oracle colour | generated table vs oracle |
+| VP-028 | For REM in a ±5 s grid around `0.10 × length` boundary and P in 0..100, Go colour equals oracle colour | generated table vs oracle |
 
 ## Traceability
 
@@ -102,7 +102,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/limits.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/limits.go`; BC-COMPONENT-MAP: internal/statusline/limits.go (0.9 pace boundary) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:515-521, inside limits block SL:487-532) |
 | Legacy contract | BC-SL-061 (deep pass-3 round 1, new; confirmed round 5) |
@@ -117,7 +117,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect
+- `architecture/ARCH-03-statusline.md` — internal/statusline/limits.go (0.9 pace boundary) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -125,7 +125,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — boundary grid equality
+- VP-028 — boundary grid equality
 
 ---
 

@@ -114,8 +114,8 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For any interleaving of good/absent/malformed stdin, Go's shown output and cache bytes equal the oracle's at every step | multi-step (M) sequence harness vs oracle |
-| VP-TBD | A malformed window is cached before the degrade | multi-step table test |
+| VP-028, VP-019 | For any interleaving of good/absent/malformed stdin, Go's shown output and cache bytes equal the oracle's at every step | multi-step (M) sequence harness vs oracle |
+| VP-028, VP-019 | A malformed window is cached before the degrade | multi-step table test |
 
 ## Traceability
 
@@ -123,7 +123,7 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` (design §8 home `sl/limits.go`; filled by architect) |
+| Architecture Module | `internal/statusline` (design §8 home `sl/limits.go`; BC-COMPONENT-MAP: internal/statusline/limits.go (effective_rl, sticky CP-S09) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:effective_rl (SL:298-312); call site legacy/dgx_statusline.py:main (SL:1216); crash site legacy/dgx_statusline.py:render_lane (SL:502-503) |
 | Legacy contract | BC-SL-093 (deep pass-3 round 2 §A3) |
@@ -140,7 +140,7 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/[section-name].md#[anchor]` — filled by architect (session cache, side-effect order)
+- `architecture/ARCH-03-statusline.md` — internal/statusline/limits.go (effective_rl, sticky CP-S09) (session cache, side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -148,7 +148,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — sequence equality
+- VP-028, VP-019 — sequence equality
 
 ---
 

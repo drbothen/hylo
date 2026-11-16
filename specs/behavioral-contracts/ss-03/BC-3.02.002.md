@@ -108,8 +108,8 @@ Legacy column verified 2026-11-15 against CPython 3.11.7 on macOS running `claud
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For seeded `proc_start`, legacy and Go outputs are byte-identical on every corpus case | parity harness (Tier A) |
-| VP-TBD | Every D1-D4 corpus case has exactly one named exclusion entry and a passing dedicated table test | harness self-check (BC-6.03.004) |
+| VP-033, VP-012 (frontmatter closure) | For seeded `proc_start`, legacy and Go outputs are byte-identical on every corpus case | parity harness (Tier A) |
+| VP-033, VP-012 (frontmatter closure) | Every D1-D4 corpus case has exactly one named exclusion entry and a passing dedicated table test | harness self-check (BC-6.03.004) |
 
 ## Traceability
 
@@ -117,7 +117,7 @@ Legacy column verified 2026-11-15 against CPython 3.11.7 on macOS running `claud
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 (named, tested deviations only) |
-| Architecture Module | `internal/platform` `proc_darwin.go`, `proc_linux.go` (design §2.5) (filled by architect) |
+| Architecture Module | `internal/platform` `proc_darwin.go`, `proc_linux.go` (design §2.5) (BC-COMPONENT-MAP: internal/platform/proc_*.go (named per-OS edges) — ARCH-05) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:claude_window_start (SL:276-294; parse at SL:284-286) |
 | Legacy contract | BC-SL-080 (new in P3r1 §A7; index P3r4 §7.3) |
@@ -131,7 +131,7 @@ Legacy column verified 2026-11-15 against CPython 3.11.7 on macOS running `claud
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#platform-proc` — per-OS probe sources (filled by architect)
+- `architecture/ARCH-05-platform.md#platform-proc` — internal/platform/proc_*.go (named per-OS edges) (per-OS probe sources) (BC-COMPONENT-MAP: ARCH-05 (ARCH-05-platform.md))
 
 ## Story Anchor (Recommended)
 
@@ -139,7 +139,7 @@ TBD — window age (design step S7)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — differences limited to D1-D4
+- VP-033, VP-012 — differences limited to D1-D4
 
 > Names provisional — architect (OD-145): the proposed table-test names
 > (`TestWindowStart_OD76_*`) in this contract are delegated to the architect in

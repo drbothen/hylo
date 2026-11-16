@@ -89,7 +89,7 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Fake-metrics request count = 1 iff `rows >= 2` and the TTL has elapsed, independent of `cols` | proptest (ROWS × COLUMNS matrix) |
+| VP-030 | Fake-metrics request count = 1 iff `rows >= 2` and the TTL has elapsed, independent of `cols` | proptest (ROWS × COLUMNS matrix) |
 
 ## Traceability
 
@@ -112,7 +112,7 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#orchestrator` — effect script step 4 (TBD)
+- `architecture/ARCH-03-statusline.md#orchestrator` — internal/statusline/statusline.go (ROWS >= 2 fetch) (effect script step 4) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -120,7 +120,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — fetch independence from width
+- VP-030 — fetch independence from width
 
 ---
 

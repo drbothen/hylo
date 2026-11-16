@@ -99,7 +99,7 @@ COLUMNS=72 -> widths [61, 56], 642 bytes (P3r2 §A1; BC-1.01.010).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | Output has 1 + [row-2 predicate] lines, each LF-terminated, for all (rows, cols) | proptest |
+| VP-027 | Output has 1 + [row-2 predicate] lines, each LF-terminated, for all (rows, cols) | proptest |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ COLUMNS=72 -> widths [61, 56], 642 bytes (P3r2 §A1; BC-1.01.010).
 |-------|-------|
 | L2 Capability | CAP-009, CAP-010 |
 | L2 Domain Invariants | DI-008 |
-| Architecture Module | `internal/statusline` orchestrator (`statusline.go`) (filled by architect) |
+| Architecture Module | `internal/statusline` orchestrator (`statusline.go`) (BC-COMPONENT-MAP: internal/statusline/statusline.go (rows, LF join, width rule) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`main` (SL:1224-1234); `NARROW_COLS` SL:100; `ROWS` SL:75; `SEP` SL:128 |
 | Legacy contract | BC-SL-003 (broad sweep HIGH-R; index P3r4 §7.3) |
@@ -123,7 +123,7 @@ COLUMNS=72 -> widths [61, 56], 642 bytes (P3r2 §A1; BC-1.01.010).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/TBD.md#statusline-output` (filled by architect)
+- `architecture/ARCH-03-statusline.md#statusline-output` — internal/statusline/statusline.go (rows, LF join, width rule) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -131,7 +131,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — row-count predicate
+- VP-027 — row-count predicate
 
 ---
 

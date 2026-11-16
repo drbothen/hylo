@@ -75,8 +75,8 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-TBD | For TTL ≥ 2 and unseeded history, every appended point is ≥ TTL after the previous | proptest |
-| VP-TBD | Seeded gap table matches legacy bytes | manual (table) |
+| VP-030 | For TTL ≥ 2 and unseeded history, every appended point is ≥ TTL after the previous | proptest |
+| VP-030 | Seeded gap table matches legacy bytes | manual (table) |
 
 ## Traceability
 
@@ -97,7 +97,7 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/SS-01-status-line.md#session-cache` — history storage (TBD)
+- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (HIST_MIN_GAP) (history storage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -105,7 +105,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-TBD — gap reachability
+- VP-030 — gap reachability
 
 ---
 
