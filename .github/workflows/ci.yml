@@ -27,9 +27,11 @@ on:
 permissions:
   contents: read
 
+# Per-event groups: pushes to main and the nightly schedule must not cancel
+# each other; superseded PR runs still cancel (pull_request events only).
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint:
@@ -115,7 +117,7 @@ jobs:
           cache-dependency-path: go.mod
       - name: gitleaks detect over full history
         run: |
-          go run github.com/gitleaks/gitleaks/v8@v8.30.1 detect \
+          go run github.com/zricethezav/gitleaks/v8@v8.30.1 detect \
             --source . --log-opts="--all" --no-banner --redact
       - name: Category pattern scan (tracked files)
         # Public-repo hygiene (policy 21 / NFR-006): no private IP literals, home
@@ -132,10 +134,36 @@ jobs:
           # backslash or forward slash in grep -E).
           home_pat='(/Users/[A-Za-z0-9._~-]+|/home/[A-Za-z0-9._~-]+|[Cc]:[\\/]Users)'
           email_pat='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}'
-          # git grep over tracked files avoids filename word-splitting; exit 1
-          # means "no match" (clean).
-          hits="$(git grep -En -e "$ip_pat" -e "$home_pat" -e "$email_pat" -- . 2>/dev/null \
-            | grep -Ev 'users[.]noreply[.]github[.]com|@example' || true)"
+          # git grep over tracked files avoids filename word-splitting. Exit
+          # codes 0 (match) and 1 (no match) are both expected; >= 2 is a real
+          # error (bad pattern, git failure) and must fail the step, not pass
+          # silently. Each rc is captured on its own line before any filtering:
+          # under pipefail, attaching a filter pipe to the capture would blur
+          # "git grep errored" with "the filter dropped every line".
+          #
+          # Pass 1 — IPs and home paths, UNFILTERED. An allowlist filter here
+          # drops whole lines, which could hide a private IP that shares a
+          # line with an allowlisted email.
+          rc=0
+          hits_ip_home="$(git grep -En -e "$ip_pat" -e "$home_pat" -- .)" || rc=$?
+          if [ "$rc" -ge 2 ]; then
+            echo "::error::git grep failed (rc=${rc})"
+            exit 1
+          fi
+          # Pass 2 — emails. GitHub no-reply identities and @example
+          # addresses are allowed, so ONLY this pass's output is filtered,
+          # in a statement separate from the rc capture.
+          rc=0
+          raw_emails="$(git grep -En -e "$email_pat" -- .)" || rc=$?
+          if [ "$rc" -ge 2 ]; then
+            echo "::error::git grep failed (rc=${rc})"
+            exit 1
+          fi
+          hits_email=''
+          if [ -n "$raw_emails" ]; then
+            hits_email="$(printf '%s' "$raw_emails" | grep -Ev 'users[.]noreply[.]github[.]com|@example' || true)"
+          fi
+          hits="${hits_ip_home}${hits_email}"
           if [ -n "$hits" ]; then
             echo '::error::Pattern scan found possible private infrastructure details:'
             printf '%s\n' "$hits"
@@ -255,9 +283,10 @@ jobs:
 
   parity-tier-c-nightly:
     name: parity tier C (nightly differential fuzz)
-    # Nightly only (OD-149): one clean nightly run on all three OSes, 30 min per
-    # OS (HYLO_PARITY_FUZZSECONDS=1800). Non-gating: not in required checks.
-    if: github.event_name == 'schedule' && needs.probe.outputs.parity == 'true'
+    # Nightly cron or manual workflow_dispatch (OD-149): one clean run on all
+    # three OSes, 30 min per OS (HYLO_PARITY_FUZZSECONDS=1800). Non-gating:
+    # not in required checks.
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.probe.outputs.parity == 'true'
     needs: [test, probe]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -298,6 +327,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, macos-15, windows-2025]
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

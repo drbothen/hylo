@@ -1,6 +1,6 @@
 name: release
 
-# Release pipeline: version tags (v*) -> static binaries -> GitHub Release.
+# Release pipeline: version tags (v[0-9]*) -> static binaries -> GitHub Release.
 # AD-11 / D12: distribution is GitHub Releases (binaries + checksums);
 # Homebrew tap / Scoop / `go install` are follow-ups.
 # Build rules from ARCH-08: CGO_ENABLED=0, one static binary per OS/arch,
@@ -10,7 +10,8 @@ name: release
 on:
   push:
     tags:
-      - 'v*'
+      # [0-9] guard: a stray tag like "vendor-fix" must not release.
+      - 'v[0-9]*'
 
 permissions:
   contents: read
@@ -38,8 +39,8 @@ jobs:
       - name: Final verification — go test ./...
         run: |
           if [ -z "$(git ls-files '*.go')" ]; then
-            echo "No Go sources on the tagged commit; skipping tests."
-            exit 0
+            echo '::error::No Go sources on tagged commit; refusing to release.'
+            exit 1
           fi
           go test -count=1 ./...
       - name: Build static binaries (CGO_ENABLED=0, cross-compiled)
@@ -65,11 +66,11 @@ jobs:
           sha256sum hylo_* > SHA256SUMS
           cat SHA256SUMS
       - name: Publish GitHub Release
+        # Draft first: assets are staged while the release is invisible, then
+        # it goes public atomically (no partially populated public release).
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "hylo ${GITHUB_REF_NAME}" \
-            --generate-notes \
-            dist/*
+          gh release create "${GITHUB_REF_NAME}" --draft --title "hylo ${GITHUB_REF_NAME}" --generate-notes dist/*
+          gh release edit "${GITHUB_REF_NAME}" --draft=false
