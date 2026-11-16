@@ -1,0 +1,58 @@
+---
+document_type: prd-supplement-nfr-catalog
+level: L3
+version: "1.0"
+status: draft
+producer: product-owner
+timestamp: 2026-11-15T20:30:00Z
+phase: 1a
+stage: "3 of 3 (integration)"
+inputs: [prd.md]
+input-hash: "5c53471"
+traces_to: prd.md, domain-spec/L2-INDEX.md
+---
+
+# Non-Functional Requirements Catalog: hylo P1
+
+> PRD supplement — extracted from PRD Section 4.
+> Referenced by: architect, performance-engineer, formal-verifier.
+
+## NFR Registry
+
+| ID | Category | Requirement | Target | Validation Method | Priority | Risk Source |
+|----|----------|-------------|--------|------------------|----------|-------------|
+| NFR-001 | Performance | Steady-state render latency on the owner's Mac (darwin/arm64), synthetic fixture corpus, metrics HTTP wait excluded | p95 <= 25 ms (OD-117). Legacy baseline measured 2026-11-15: median 84.5 ms, p90 101 ms; ~25 ms interpreter start removed by the port | per-OS timing report: 1 warm-up + 5 timed runs, nearest-rank p95, fake-VM handling time subtracted; gate fails only with `HYLO_TIMING_GATE=1` | P0 | porting-decision latency tension |
+| NFR-002 | Reliability | Never-blank, exit-0 rendering under every fault: stdin faults, transcript faults, metrics faults, cache faults, config errors, unknown flags | 100% of CP-S01..S17, CP-T01..T07, CP-N01/N02 triggers produce >= 1 stdout byte and exit 0 | fault-injection table tests per owning BC | P0 | DI-008 |
+| NFR-003 | Correctness (parity) | Byte parity vs the CPython 3.11.7 oracle: stdout bytes + exit code per step; named caches byte-for-byte | 0 unexplained diffs; every explained diff on the named exclusion list with its own table test | parity harness (BC-6.03.002) + Tier C differential fuzz (BC-6.04.003) | P0 | D4 exit criterion |
+| NFR-004 | Portability | Three-OS support (D5): macOS, Linux, Windows; OS-specific code confined to `internal/platform` | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean | CI matrix leg per OS | P0 | D5 |
+| NFR-005 | Resource bounds | Bounded per-refresh state: 256-entry usage dedup, 32-point metric histories, 1,000-line turn identity window, 512 KB transcript read steps, memory-256 mix cache | table-verified caps identical to legacy | table tests | P1 | legacy equivalence |
+| NFR-006 | Security/hygiene | Public-repo hygiene: synthetic committed fixtures only; real inputs only from git-ignored captures/; secret scan clean | gitleaks + category pattern scan clean on every push and CI leg | CI leg + `TestCorpusHygiene` | P0 | policy 21 |
+
+## NFR Categories
+
+| Category | Description | Validation Agent |
+|----------|-------------|-----------------|
+| Performance | Render latency, timing gate | performance-engineer |
+| Reliability | Never-blank, degraded ladder | formal-verifier |
+| Correctness | Byte parity, exclusion closure | performance-engineer (harness), formal-verifier |
+| Portability | Cross-platform CI | devops-engineer |
+| Resource bounds | Memory/step caps | formal-verifier |
+| Security/hygiene | Fixture provenance, secret scan | security-reviewer |
+
+## NFR-to-Module Mapping
+
+| NFR ID | Affected Modules | Architectural Impact |
+|--------|-----------------|---------------------|
+| NFR-001 | `internal/statusline`, `internal/pyfmt` | pure render path; no allocation-heavy idioms on the hot path; metrics fetch off the timed path per case model |
+| NFR-002 | `internal/statusline` (guard), `cmd/hylo` | top-level recover + typed CP-* degrades; write ordering preserved (BC-1.01.009) |
+| NFR-003 | `internal/parity`, `internal/pyfmt` | Go `encoding/json` and `strconv` banned on protocol inputs (IM-01, BC-5.01.002 invariant 1) |
+| NFR-004 | `internal/platform` | build tags; per-OS probes with named edge differences (BC-3.02.001/.002) |
+| NFR-005 | `internal/statusline` | caps are named constants where legacy fixed them (T-061/062 class), registry keys where tunable |
+| NFR-006 | `internal/parity` corpus, CI | committed testdata is synthetic; captures/ git-ignored |
+
+## Binding note (OD-117)
+
+The NFR-001 gate binds on the owner's Mac target only; CI legs print the report and pass
+whatever the numbers are (BC-6.04.002 EC-002/003). The p95 figure excludes the metrics
+HTTP wait by case model (BC-6.02.003), matching how the 84.5 ms legacy baseline was
+measured on 2026-11-15.

@@ -1,0 +1,126 @@
+---
+document_type: behavioral-contract
+level: L3
+version: "1.1"
+status: draft
+producer: product-owner
+timestamp: 2026-11-15T17:00:00Z
+phase: 1a
+inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, ../semport/hylo-legacy/statusline-target-design.md, ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
+input-hash: "0000000"
+traces_to: domain-spec/L2-INDEX.md
+origin: greenfield
+extracted_from: "n.a. (greenfield helper; reproduces str.strip/rstrip/rsplit and bytes.splitlines used in legacy/dgx_statusline.py)"
+subsystem: "SS-05"
+capability: "CAP-009"
+legacy_id: "new"
+parity_class: n.a.
+confidence: "—"
+lifecycle_status: active
+introduced: "0.1"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
+---
+
+# Behavioral Contract BC-5.03.002: Strip/RStrip/RSplit1/SplitLinesBytes: Python whitespace; \n \r\n \r only
+
+## Description
+
+Four Python string operations whose boundary sets differ from Go's: `str.strip()` (Unicode whitespace per
+`str.isspace`), `str.rstrip(chars)`, `str.rsplit(sep, 1)` and `bytes.splitlines()` (only `\n`, `\r\n`, `\r`, unlike
+`str.splitlines`). `pyfmt.Strip`, `RStrip`, `RSplit1` and `SplitLinesBytes` reproduce them exactly (design IM-11;
+pitfall PR-12).
+
+## Preconditions
+
+1. `Strip`, `RStrip`, `RSplit1` take Value/Go strings (code points); `SplitLinesBytes` takes raw bytes.
+2. `RSplit1(s, sep)` takes a non-empty `sep` (legacy passes `SEP`, SL:1196).
+
+## Postconditions
+
+1. **Strip(s)** removes leading and trailing code points for which Python `str.isspace()` is true — exactly these 29:
+   U+0009-U+000D, U+001C-U+001F, U+0020, U+0085, U+00A0, U+1680, U+2000-U+200A, U+2028, U+2029, U+202F, U+205F,
+   U+3000. U+200B (zero-width space) and U+FEFF are **not** stripped. (This set differs from the `int()`/`float()`
+   whitespace set, which excludes U+001C-U+001F, BC-5.01.002.)
+2. **RStrip(s, chars)** removes trailing code points that are members of `chars` (a set, not a suffix):
+   `RStrip("claude-sonnet**", "*")` = `claude-sonnet`, `RStrip("***", "*")` = `""`, `RStrip("a*b*", "*")` = `a*b`.
+3. **RSplit1(s, sep)** returns `[head, tail]` split at the **last** occurrence of `sep`, or `[s]` when `sep` does not
+   occur (`RSplit1("", "|")` = `[""]`).
+4. **SplitLinesBytes(b)** splits at `\r\n`, `\n` or `\r` only (a `\r\n` pair is one boundary); a trailing terminator
+   does not produce a final empty element; `b""` → `[]`. Bytes `\v`, `\f`, `\x1c`-`\x1e`, `\xc2\x85` (NEL in UTF-8)
+   and U+2028/U+2029 encodings are **not** boundaries.
+
+## Invariants
+
+1. `strings.TrimSpace` (Go's `unicode.IsSpace` set includes U+0085/U+00A0 but its exact set must not be relied on),
+   `bufio.Scanner` lines and `strings.Split(s, "\n")` are never used in place of these helpers.
+2. Uses served: `p.strip()` on model prefixes (SL:444-445), `p.rstrip("*")` (SL:487), `row.rsplit(SEP, 1)` in
+   `trim_to_fit` (SL:1196), `blob[:cut].splitlines()` (SL:1059).
+
+## Edge Cases
+
+| ID | Description | Expected Behavior |
+|----|-------------|-------------------|
+| EC-001 | `Strip("\u00a0 x \u200b")` | `"x \u200b"` (NBSP stripped; ZWSP kept, so the trailing space before it stays) |
+| EC-002 | `Strip("\x1c\x1fx\x85")` | `"x"` |
+| EC-003 | `Strip(" 　x ")` | `"x"` |
+| EC-004 | `SplitLinesBytes(b"\n")` | `[b""]` |
+| EC-005 | `SplitLinesBytes(b"a\r\rb")` | `[b"a", b"", b"b"]` |
+| EC-006 | `SplitLinesBytes(b"\r\n\r")` | `[b"", b""]` |
+| EC-007 | `RSplit1("abc", " · ")` | `["abc"]` |
+
+In vector cells the escapes `\uXXXX` (e.g. `\u200b` = ZERO WIDTH SPACE, `\u00a0` = NBSP) denote that code point, written visibly so the byte content of the vector is unambiguous; no cell contains a literal invisible character.
+
+## Canonical Test Vectors
+
+| Input | Expected Output | Category |
+|-------|----------------|----------|
+| `SplitLinesBytes(b"ab\rcde\r\n\n\x0bf\x0cg\x1ch\xc2\x85i")` | `[b"ab", b"cde", b"", b"\x0bf\x0cg\x1ch\xc2\x85i"]` | happy-path |
+| `RSplit1("a · b · c", " · ")` | `["a · b", "c"]` | happy-path |
+| `RStrip("claude-sonnet**", "*")` | `"claude-sonnet"` | happy-path |
+| `SplitLinesBytes(b"a\n")`; `SplitLinesBytes(b"")` | `[b"a"]`; `[]` | edge-case |
+| `Strip("\u200b")` | `"\u200b"` (nothing removed) | error (non-whitespace look-alike) |
+
+Verified 2026-11-15 against CPython 3.11.7 (`str.isspace` enumeration over all code points; `strip`, `rstrip`,
+`rsplit`, `bytes.splitlines`).
+
+## Verification Properties
+
+| VP-NNN | Property | Proof Method |
+|--------|----------|-------------|
+| VP-TBD | `Strip` equals oracle `str.strip()` for strings built from the 29 whitespace code points plus look-alikes | proptest + oracle table |
+| VP-TBD | `bytes.Join(SplitLinesBytes(b), …)` loses only terminators; no element contains `\n` or `\r` | proptest |
+
+## Traceability
+
+| Field | Value |
+|-------|-------|
+| L2 Capability | CAP-009 |
+| L2 Domain Invariants | DI-012 |
+| Architecture Module | `internal/pyfmt/str.go` (design §2.6) (filled by architect) |
+| Stories | TBD (filled by story-writer) |
+| Source | New contract. OD-103; design IM-11; pitfall PR-12. Legacy uses served: SL:444-445, 487, 1059, 1196 |
+
+## Related BCs (Recommended)
+
+- BC-1.02.001, BC-1.02.009 — consumed by (prefix strip, reroute-all `rstrip("*")`)
+- BC-1.01.006 — consumed by (`trim_to_fit` `rsplit`)
+- BC-1.03.004 — consumed by (`bytes.splitlines`)
+- BC-5.01.002 — contrasts with (numeric-parse whitespace set)
+
+## Architecture Anchors (Recommended)
+
+- `architecture/TBD.md#pyfmt-str` — whitespace and split helpers (filled by architect)
+
+## Story Anchor (Recommended)
+
+TBD — pyfmt str (design step S1)
+
+## VP Anchors (Recommended)
+
+- VP-TBD — strip set equals `str.isspace`

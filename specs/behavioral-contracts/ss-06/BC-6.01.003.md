@@ -1,0 +1,160 @@
+---
+document_type: behavioral-contract
+level: L3
+version: "1.1"
+status: draft
+producer: product-owner
+timestamp: 2026-11-15T17:00:00Z
+phase: 1a
+inputs:
+  - domain-spec/L2-INDEX.md
+  - domain-spec/invariants.md
+  - behavioral-contracts/BC-ALLOCATION.md
+  - ../semport/hylo-legacy/statusline-target-design.md
+  - ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
+  - research/general-go-port-parity-crossplatform-2026-11-14.md
+  - owner-decisions-log-2026-11-14.md
+input-hash: "0000000"
+traces_to: domain-spec/L2-INDEX.md
+origin: greenfield
+extracted_from: "n.a. (new contract, no legacy source)"
+subsystem: "SS-06"
+capability: "CAP-009"
+legacy_id: "new"
+parity_class: "n.a."
+confidence: "—"
+lifecycle_status: active
+introduced: "0.1"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
+---
+
+# Behavioral Contract BC-6.01.003: Clock shim freezes time functions from HYLO_TEST_NOW, stepped per refresh; canary fails if shim absent
+
+## Description
+
+A `sitecustomize.py` shim on the oracle's `PYTHONPATH` replaces `time.time`, and the
+default-argument forms of `time.strftime`, `time.localtime` and `time.gmtime`, with
+versions that read the frozen instant from `HYLO_TEST_NOW` (OD-58 mode 1). The Go side
+reads the same instant through `Env.Now`; the built binary honors `HYLO_TEST_NOW`. The
+harness sets one instant per refresh step, so all nine `time.time()` reads within a
+refresh see the same value. CPython swallows exceptions raised in `sitecustomize`, and
+`-I`/`-E`/`-S` skip the shim without any error. A canary therefore proves, before any
+oracle case runs, that the shim actually took effect.
+
+## Preconditions
+
+1. The shim file is `internal/statusline/testdata/pyhooks/sitecustomize.py`. It is
+   stdlib-only, about 10 lines, and lives outside `legacy/` (D10).
+2. The oracle runs with `-s` and the env of BC-6.01.002, which sets `PYTHONPATH` to the
+   shim directory and `HYLO_TEST_NOW` to the step instant.
+3. `HYLO_TEST_NOW` is a decimal string produced by the harness with
+   `strconv.FormatFloat(now, 'f', -1, 64)`. Python `float()` and Go
+   `strconv.ParseFloat(s, 64)` both round decimal strings correctly, so both sides get
+   the identical float64 (research P20).
+
+## Postconditions
+
+1. **Frozen functions** (shim, on import). Let `N = float(os.environ["HYLO_TEST_NOW"])`,
+   read when each patched function is called:
+   - `time.time()` returns `N`;
+   - `time.localtime()` with no argument or `None` returns `<real localtime>(N)`;
+   - `time.gmtime()` with no argument or `None` returns `<real gmtime>(N)`;
+   - `time.strftime(fmt)` with no tuple returns `<real strftime>(fmt, <real localtime>(N))`.
+   Calls that pass an explicit argument are forwarded unchanged. `time.mktime` and
+   `time.strptime` are not patched: they run only on the `ps` path (SL:286), which the
+   seeded `proc_start` bypasses (design §3.2).
+2. **Stepped per refresh.** For step `k` of a case the harness sets
+   `HYLO_TEST_NOW = now_k` for both the oracle and Go runs of that step.
+   - Within one oracle process every `time.time()` read returns `now_k`. The read sites
+     are SL:231, 243, 304, 322, 408, 499, 558, 825 and 826.
+   - Between steps the value changes only by the case's step schedule (BC-6.02.002,
+     BC-6.02.003).
+3. **Go side.** The in-process render receives `Env.Now = now_k`. The built binary
+   parses `HYLO_TEST_NOW` once at start and uses it for every clock read of that
+   refresh. `HYLO_TEST_NOW` is a test hook, not a D15 config key; it is documented under
+   "test hooks" in the config reference (design §3.2, risk RK-5).
+4. **Canary (gating).** Before the first oracle case of every Tier A run, the harness
+   runs `<python> -s -c "import time; print(repr(time.time()))"`. It uses the same
+   interpreter and env builder, with `HYLO_TEST_NOW=1794615009.5`.
+   - Stdout must equal exactly `1794615009.5\n`.
+   - On any other output the run fails, not skips, with
+     `parity: clock shim not loaded (OD-109 canary): got "<stdout>"`. No oracle case runs.
+5. **Canary negative control.** A table test runs the same canary probe with `-I`
+   instead of `-s`, and separately with `PYTHONPATH` removed. Each must be reported as
+   "shim not loaded". This proves the canary can discriminate.
+
+## Invariants
+
+1. Every oracle refresh runs with the shim loaded. Any change that could drop it
+   (`-I`, `-E`, `-S`, a lost `PYTHONPATH`, a shim exception) is caught by the canary,
+   not by a later byte diff.
+2. The harness never uses the real wall clock to produce a value a comparison depends
+   on.
+
+## Edge Cases
+
+| ID | Description | Expected Behavior |
+|----|-------------|-------------------|
+| EC-001 | Shim raises at import (e.g. syntax error) | CPython prints `Error in sitecustomize; set PYTHONVERBOSE for traceback:` to stderr and continues on the real clock (observed on a local CPython 3.9.6; same `site.py` logic in 3.11; not re-run on 3.11 in this stage). The canary sees a real-clock value and fails the run |
+| EC-002 | Oracle invoked with `-I` | The shim is silently skipped (observed locally: exit 0, no stderr). Canary fails; the argv test of BC-6.01.001 also fails |
+| EC-003 | `HYLO_TEST_NOW` missing from an oracle step env | `time.time()` raises `KeyError` inside legacy `main()`; the guard prints `statusline degraded` (SL:1238-1245); the byte comparison fails. The env builder's unit test forbids this state |
+| EC-004 | Fractional instant `1794615009.5` | Both sides get float64 `1794615009.5`; `repr` prints `1794615009.5` |
+| EC-005 | Two steps with the same instant | Allowed. Both refreshes see the same `N`; TTL logic sees zero elapsed time |
+| EC-006 | Windows oracle under the shim | The shim loads the same way; the canary runs on all three OSes (BC-6.04.001) |
+
+## Canonical Test Vectors
+
+| Input | Expected Output | Category |
+|-------|----------------|----------|
+| Canary probe, `-s`, `HYLO_TEST_NOW=1794615009.5`, shim present | stdout `1794615009.5\n`; harness proceeds | happy-path |
+| Step `k` with `now_k = 1794615009` and a case whose limits countdown depends on `now` | Oracle and Go both render the countdown computed from `1794615009.0` (e.g. golden A `->2h41m` for `resets_at = NOW+9690`, BC-6.03.001) | edge-case |
+| Canary probe with `-I` (negative control) | Reported "shim not loaded"; the negative-control test passes because it was detected | error |
+| Shim file containing `raise RuntimeError` | Canary FAIL: `parity: clock shim not loaded (OD-109 canary): got "<real time>"` | error |
+
+## Verification Properties
+
+| VP-NNN | Property | Proof Method |
+|--------|----------|-------------|
+| VP-TBD | With the shim loaded, `time.time()` == `float(HYLO_TEST_NOW)` for every read within one oracle process | canary + table test over several instants |
+| VP-TBD | The canary fails whenever the shim is not active (`-I`, `-E`, `-S`, missing PYTHONPATH, shim exception) | negative-control table test |
+| VP-TBD | Python `float(s)` and Go `ParseFloat(s, 64)` agree on every harness-formatted instant | table test (shortest round-trip formatting) |
+
+## Traceability
+
+| Field | Value |
+|-------|-------|
+| Source | OD-58 (extended clock shim, mode 1 frozen P1-P3); OD-109 (`-s` never `-I`; canary fails the harness if the shim did not load); design §3.2 "Clock" row (freezes `time.time`, `time.strftime`, `time.localtime`, `time.gmtime` from `HYLO_TEST_NOW`, stepped between refreshes); P5r3 §B.3 DET-01..08, DET-15..18; research P20 (decimal string parsed by both sides); legacy read sites `legacy/dgx_statusline.py` SL:231, 243, 304, 322, 408, 499, 558, 825-826 |
+| Parity class | n.a. (harness machinery) |
+| L2 Capability | CAP-009 |
+| L2 Domain Invariants | DI-012 |
+| Architecture Module | `internal/statusline/testdata/pyhooks/sitecustomize.py`; `statusline.Env.Now` (filled by architect) |
+| Stories | TBD (filled by story-writer) |
+
+## Related BCs (Recommended)
+
+- BC-6.01.001 — depends on: `-s` invocation keeps the shim on `PYTHONPATH`
+- BC-6.01.002 — depends on: env builder sets `PYTHONPATH` and `HYLO_TEST_NOW`
+- BC-6.02.002 — composes with: per-step clock advance for captured-session replay
+- BC-6.02.003 — composes with: case `now` and step schedule
+
+## Architecture Anchors (Recommended)
+
+- TBD (filled by architect) — determinism seams (design §3.2)
+
+## Story Anchor (Recommended)
+
+TBD (filled by story-writer)
+
+## VP Anchors (Recommended)
+
+> Names provisional — architect (OD-145): harness flag names, the timing method, proposed
+> test names and seed paths in this contract are delegated to the architect in
+> create-architecture, subject to adversarial review. No behavior change.
+
+- TBD — clock freeze and canary properties above

@@ -1,0 +1,152 @@
+---
+document_type: behavioral-contract
+level: L3
+version: "1.1"
+status: draft
+producer: product-owner
+timestamp: 2026-11-15T17:00:00Z
+phase: 1a
+inputs:
+  - domain-spec/L2-INDEX.md
+  - domain-spec/invariants.md
+  - behavioral-contracts/BC-ALLOCATION.md
+  - ../semport/hylo-legacy/statusline-target-design.md
+  - owner-decisions-log-2026-11-14.md
+input-hash: "0000000"
+traces_to: domain-spec/L2-INDEX.md
+origin: greenfield
+extracted_from: "n.a. (new contract, no legacy source)"
+subsystem: "SS-06"
+capability: "CAP-009"
+legacy_id: "new"
+parity_class: "n.a."
+confidence: "—"
+lifecycle_status: active
+introduced: "0.1"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
+---
+
+# Behavioral Contract BC-6.02.002: stdin-sequence replay of captured sessions: ordered snapshots, clock advanced per step
+
+## Description
+
+A captured session is replayed as an ordered sequence of status line refreshes, not as
+single frames (OD-107). Each step supplies that refresh's stdin snapshot, the frozen
+instant at which it was captured, and the transcript as it stood at that moment. The
+oracle and Go run step by step, in order, against their own persistent cache
+directories. Cache state therefore carries across steps exactly as it does in a real
+session: TTLs, rate-limit smoothing, mix-cache offsets and cost history. Both sides
+are compared after every step (BC-6.03.002).
+
+## Preconditions
+
+1. A captured session is a directory under `captures/` (git-ignored, BC-6.02.001)
+   holding `session.json`, an ordered array of steps. Each step has:
+   - `now`: required decimal epoch seconds;
+   - `stdin`: required JSON object, the snapshot as Claude Code sent it;
+   - `transcript_bytes`: optional integer, the transcript length at capture time;
+   - `columns`: optional, the `COLUMNS` value seen at capture time.
+   The directory may also hold `transcript.jsonl` (a copy of the session transcript)
+   and the case settings (BC-6.02.003).
+2. Paths inside each `stdin` snapshot (`transcript_path`, `workspace.project_dir`,
+   `cwd`) are rewritten by the harness to the per-case temp tree before use. The
+   project directory is materialized with the same basename as the captured one.
+
+## Postconditions
+
+1. **Order.** Steps run strictly in array order, `k = 0..n-1`. For each `k` the
+   harness:
+   a. truncates the working transcript copy to `transcript_bytes[k]` when given (the
+      prefix of `transcript.jsonl`), otherwise exposes the full copy;
+   b. sets `HYLO_TEST_NOW = now[k]` for both sides (BC-6.01.003);
+   c. runs the oracle with `stdin[k]` (paths rewritten), then Go with the identical
+      bytes;
+   d. compares stdout bytes, exit code and named caches (BC-6.03.002) before step
+      `k+1`.
+2. **Persistent per-side state.** Each side keeps its own cache directory for the
+   whole sequence. The harness never resets, copies or edits a cache between steps;
+   only the side itself writes it. Cache-swap tests are separate (BC-6.02.004).
+3. **Clock advances per step.** The clock moves only from `now[k]` to `now[k+1]`.
+   - `now` must be non-decreasing. If `now[k+1] < now[k]`, the harness fails with
+     `parity: captured session <name> step <k+1>: now decreases`.
+   - Equal consecutive instants are allowed (two refreshes inside one debounce
+     window).
+4. **First divergence reported.** On the first mismatch the harness reports the
+   session name, step index, which artifact differed (stdout / exit code /
+   `<cache name>`), and a byte-offset diff. Later steps of that session still run and
+   report, because a divergence often heals or cascades and both are informative.
+5. **Transcript growth is monotonic.** `transcript_bytes` must be non-decreasing
+   across steps. A decrease, or a value larger than the file, fails the harness with
+   the step index. A real transcript only grows; a shrink would exercise a reset path
+   the capture never saw.
+
+## Invariants
+
+1. Both sides see byte-identical stdin, transcript prefix, clock and env at every
+   step.
+2. Replay never consults the real wall clock or the developer's real cache directory.
+3. The replay code path is the same multi-step runner used by synthetic `steps` cases
+   (BC-6.02.003).
+
+## Edge Cases
+
+| ID | Description | Expected Behavior |
+|----|-------------|-------------------|
+| EC-001 | Step without `now` | Harness FAIL naming the step. No default instant is guessed |
+| EC-002 | Two consecutive steps with the same `now` | Both run. The git TTL (5 s) and metrics TTL see zero elapsed time, as in a real debounced burst |
+| EC-003 | `transcript_bytes` splits a line mid-way (snapshot taken during an append) | Allowed. Both sides see the same partial last line. Long-line completion behavior is then compared, which is the realistic case |
+| EC-004 | Snapshot has no `transcript_path` | Step runs. Both sides take the no-transcript path |
+| EC-005 | Snapshot `session_id` changes mid-sequence (`/clear`) | Step runs. New session cache names appear on both sides and are compared by file name |
+| EC-006 | Captured `columns` differs per step (terminal resized) | `COLUMNS` set per step for both sides |
+
+## Canonical Test Vectors
+
+| Input | Expected Output | Category |
+|-------|----------------|----------|
+| Synthetic 3-step session (committed analogue): `now` = 1794615009, 1794615011, 1794615020; transcript grows 0 → 1,200 → 2,400 bytes | 3 comparisons. The step-1 metrics fetch is skipped by TTL on both sides; cache files compared after each step | happy-path |
+| Steps with `now` 1794615009, 1794615009 | Both steps run; no error | edge-case |
+| Steps with `now` 1794615020, 1794615009 | FAIL: `parity: captured session <name> step 1: now decreases` | error |
+| `transcript_bytes` 2,400 then 1,200 | FAIL naming step index (transcript shrink) | error |
+
+## Verification Properties
+
+| VP-NNN | Property | Proof Method |
+|--------|----------|-------------|
+| VP-TBD | The runner executes steps in order and compares after each step before running the next | table test with an instrumented fake side |
+| VP-TBD | Non-monotonic `now` or `transcript_bytes` is always rejected before any side runs that step | table test |
+
+## Traceability
+
+| Field | Value |
+|-------|-------|
+| Source | OD-107 ("the harness replays sequences of stdin snapshots from a captured session, not only single frames"; P1 success criterion on the owner's real recorded inputs); design §5.2 (`steps`: each step advances the clock and appends transcript lines) and §5.3 (compare per step); OD-58 (clock stepped between refreshes) |
+| Parity class | n.a. (harness machinery) |
+| L2 Capability | CAP-009 |
+| L2 Domain Invariants | DI-012 |
+| Architecture Module | `internal/statusline` parity harness multi-step runner (filled by architect) |
+| Stories | TBD (filled by story-writer) |
+
+## Related BCs (Recommended)
+
+- BC-6.02.001 — depends on: captured sessions live only in git-ignored `captures/`
+- BC-6.02.003 — composes with: same step runner and settings translation
+- BC-6.01.003 — depends on: per-step `HYLO_TEST_NOW`
+- BC-6.03.002 — composes with: what is compared after each step
+
+## Architecture Anchors (Recommended)
+
+- TBD (filled by architect) — parity harness step runner
+
+## Story Anchor (Recommended)
+
+TBD (filled by story-writer)
+
+## VP Anchors (Recommended)
+
+- TBD — ordered replay properties above

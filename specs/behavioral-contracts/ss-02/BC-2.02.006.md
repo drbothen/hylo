@@ -1,0 +1,131 @@
+---
+document_type: behavioral-contract
+level: L3
+version: "1.1"
+status: draft
+producer: product-owner
+timestamp: 2026-11-15T21:30:00Z
+phase: 1a
+inputs:
+  - behavioral-contracts/BC-ALLOCATION.md
+  - ../owner-decisions-log-2026-11-14.md
+input-hash: "0000000"
+traces_to: domain-spec/L2-INDEX.md
+origin: greenfield
+extracted_from: "n.a. (greenfield; grammar from OD-05 as pinned in BC-2.01.005)"
+subsystem: "SS-02"
+capability: "CAP-015"
+legacy_id: new
+parity_class: "D4-EX-3"
+confidence: "—"
+lifecycle_status: active
+introduced: "0.1"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
+---
+
+# Behavioral Contract BC-2.02.006: Boolean class: a non-typed-boolean value is a config error (true|false|1|0|yes|no)
+
+## Description
+
+The sixth config-error class (OD-140, completing OD-114's register): every `Bool` key
+accepts exactly the typed grammar `true|false|1|0|yes|no` (case-sensitive, OD-05), and any
+other value is a D4-EX-3 config error. Before this contract the boolean grammar lived only
+inside BC-2.01.005 (parsing) with its D4-EX-3 test merely named in BC-2.02.001; this
+contract gives the class its own S2.02 contract, symmetric with number-range, number-
+grammar, enum and URL (BC-2.02.002..005).
+
+## Preconditions
+
+1. Resolution per BC-2.01.001; the value is the raw env string of a `Bool` key (P1 bool
+   keys listed in BC-2.01.005 postcondition 2: `statusline.git.enabled`,
+   `statusline.sparkline.enabled`, and the other registry `Bool` entries).
+2. Rendering context per BC-2.02.001 (D4-EX-3 line, exit 0, stderr detail, no cache writes).
+
+## Postconditions
+
+1. The accepted set is exactly `true`, `false`, `1`, `0`, `yes`, `no` — lower-case, no
+   surrounding whitespace, no quotes. `true`/`1`/`yes` parse as true; `false`/`0`/`no`
+   parse as false.
+2. Any other value — including `""` (empty), `TRUE`, `Yes`, `ON`, `2`, `-1`, ` 1`, `on` —
+   is a boolean-class config error: reason string `not a boolean (true|false|1|0|yes|no)`,
+   rendered as
+   `\e[90mhylo: config error: <key>=<value> (not a boolean (true|false|1|0|yes|no))\e[0m\n`
+   (value control-escaped per BC-2.02.001), exit 0, full list on stderr.
+3. The error participates in registry-order reporting: the first error in registry order is
+   rendered on stdout; boolean errors hold no precedence over other classes.
+4. `config validate` reports the same reason line for the same value, exit 1 (BC-2.03.001).
+5. Legacy values legacy accepted that are outside this grammar (e.g. legacy turned any
+   non-`"0"` string on, SL:76-77) are behavior changes covered by the D4-EX-3 exclusion
+   (BC-2.01.005 traceability), not silent conversions.
+
+## Invariants
+
+1. The grammar is exactly the seven-token set of OD-05; it does not grow with the registry.
+2. The reason string is a fixed vocabulary entry (error-taxonomy Reason Vocabulary); the
+   parenthesized token list is part of the observable bytes.
+
+## Edge Cases
+
+| ID | Description | Expected Behavior |
+|----|-------------|-------------------|
+| EC-001 | `HYLO_STATUSLINE_GIT_ENABLED=yes` | true; segment renders |
+| EC-002 | `HYLO_STATUSLINE_GIT_ENABLED=Yes` | boolean-class error (`not a boolean (...)`) |
+| EC-003 | `HYLO_STATUSLINE_GIT_ENABLED=` (empty) | boolean-class error (empty is not in the set) |
+| EC-004 | `HYLO_STATUSLINE_GIT_ENABLED= 1` (leading space) | boolean-class error |
+| EC-005 | `HYLO_STATUSLINE_GIT_ENABLED=2` | boolean-class error (legacy treated `"2"` as on — D4-EX-3) |
+| EC-006 | `HYLO_STATUSLINE_GIT_ENABLED=-1` | boolean-class error |
+| EC-007 | Two errors, a boolean and a number-range, in registry order | the registry-earlier one renders on stdout; both on stderr |
+
+## Canonical Test Vectors
+
+| Input | Expected Output | Category |
+|-------|----------------|----------|
+| env `{HYLO_STATUSLINE_GIT_ENABLED: "no"}` | git segment omitted; normal render, exit 0 | happy-path |
+| env `{HYLO_STATUSLINE_GIT_ENABLED: "2"}` | stdout `\e[90mhylo: config error: statusline.git.enabled=2 (not a boolean (true\|false\|1\|0\|yes\|no))\e[0m\n`, exit 0 | error |
+| env `{HYLO_STATUSLINE_GIT_ENABLED: "True"}` | same line with `statusline.git.enabled=True`; exit 0 | error |
+
+Pinned against the D4-EX-3 golden format (BC-2.02.001); the grammar itself is OD-05, whose
+byte observability here is the error line, so no CPython run is owed.
+
+## Verification Properties
+
+| VP-NNN | Property | Proof Method |
+|--------|----------|-------------|
+| VP-TBD | Every string outside the seven-token set produces the boolean-class line; every token inside it parses | proptest over random value strings |
+| VP-TBD | `TestConfigError_D4EX3_Boolean` covers one valid token and one invalid value per P1 bool key | table test |
+
+## Traceability
+
+| Field | Value |
+|-------|-------|
+| Source | new — OD-140 (dedicated boolean-class contract), OD-05 (typed booleans), OD-102/OD-114 (D4-EX-3 reporting) |
+| Parity / exclusion | D4-EX-3 (boolean class) |
+| L2 Capability | CAP-015 |
+| L2 Domain Invariants | DI-010 |
+| Architecture Module | `internal/config` (bool parse + class), `internal/statusline` (render) (filled by architect) |
+| Stories | S-TBD (filled by story-writer) |
+
+## Related BCs (Recommended)
+
+- BC-2.01.005 — composes with (the grammar this class validates)
+- BC-2.02.001 — composes with (line format, registry order, stderr detail)
+- BC-2.02.002..005 — related to (sibling classes)
+- BC-2.03.001 — related to (validate exit 1)
+
+## Architecture Anchors (Recommended)
+
+- `architecture/SS-02-configuration.md#classes` — config-error classes (TBD)
+
+## Story Anchor (Recommended)
+
+S-TBD — config-error classes
+
+## VP Anchors (Recommended)
+
+- VP-TBD — grammar is exactly the seven-token set

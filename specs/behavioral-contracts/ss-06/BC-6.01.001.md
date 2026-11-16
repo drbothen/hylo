@@ -1,0 +1,151 @@
+---
+document_type: behavioral-contract
+level: L3
+version: "1.1"
+status: draft
+producer: product-owner
+timestamp: 2026-11-15T17:00:00Z
+phase: 1a
+inputs:
+  - domain-spec/L2-INDEX.md
+  - domain-spec/invariants.md
+  - behavioral-contracts/BC-ALLOCATION.md
+  - ../semport/hylo-legacy/statusline-target-design.md
+  - ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
+  - owner-decisions-log-2026-11-14.md
+input-hash: "0000000"
+traces_to: domain-spec/L2-INDEX.md
+origin: greenfield
+extracted_from: "n.a. (new contract, no legacy source)"
+subsystem: "SS-06"
+capability: "CAP-009"
+legacy_id: "new"
+parity_class: "n.a."
+confidence: "—"
+lifecycle_status: active
+introduced: "0.1"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
+---
+
+# Behavioral Contract BC-6.01.001: Oracle runs via explicit absolute CPython 3.11.x path, never PATH; invoked with -s, never -I/-E
+
+## Description
+
+The parity harness runs the legacy oracle (`legacy/dgx_statusline.py`) only through an
+interpreter path given explicitly as a harness setting. That path must be absolute and
+must resolve to CPython 3.11.x. The harness never looks Python up on `PATH`. The argv is
+fixed to `<python> -s <legacy script>`. The flags `-I`, `-E` and `-S` are never passed,
+because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.003).
+
+## Preconditions
+
+1. The harness setting `HYLO_PARITY_PYTHON` is read from the environment of the
+   `go test` process. It is a test-harness setting, not a D15 config key; the product
+   binary never reads it.
+2. The legacy script is resolved from the repository root as
+   `legacy/dgx_statusline.py` and converted to an absolute path before exec.
+3. CI sets `HYLO_PARITY_PYTHON` to the absolute interpreter path reported by
+   `actions/setup-python` for CPython 3.11 (OD-108). The research Q7 recipe
+   `HYLO_PARITY_PYTHON=python` is superseded and invalid.
+
+## Postconditions
+
+1. **Absolute path only.** If `HYLO_PARITY_PYTHON` is set and
+   `filepath.IsAbs(value)` is false (e.g. `python`, `python3.11`, `./py`), the Tier A
+   package fails (not skips). The message is
+   `parity: HYLO_PARITY_PYTHON must be an absolute path (OD-104/OD-108), got "<value>"`.
+2. **No PATH discovery.** The harness execs the value as given, through
+   `exec.Cmd{Path: <value>}` or `exec.Command` with an absolute first argument. It never
+   calls `exec.LookPath`, never runs a shell, and never falls back to `python3`/`python`
+   when the setting is unset or invalid.
+3. **Version check.** Before the first oracle case of a run, the harness runs
+   `<value> -s -c "import sys,platform; print(platform.python_implementation(), *sys.version_info[:3])"`
+   under the child environment of BC-6.01.002. Stdout must match
+   `^CPython 3 11 [0-9]+\n$`. Anything else, including a non-zero exit, fails the run with
+   the observed string in the message.
+4. **Resolved patch recorded.** The patch number from step 3 (e.g. `3.11.7`) is written
+   into the Tier B golden metadata when goldens are regenerated (BC-6.03.001; design
+   risk RK-4). It is also printed once per Tier A run.
+5. **Exact argv for every oracle refresh:**
+   `[<value>, "-s", <abs>/legacy/dgx_statusline.py]`. Nothing else is passed: no other
+   interpreter flags, no `-X` options, no script arguments. In particular `--subagent`
+   is never passed (OD-14).
+6. **Unset locally means skip; unset in CI means fail.** If the setting is unset and the
+   CI marker `CI=true` is absent, Tier A skips with
+   `parity: HYLO_PARITY_PYTHON unset; Tier A (live differential) skipped`. Tier B still
+   runs without Python. If the setting is unset and `CI=true` is present, Tier A fails.
+
+## Invariants
+
+1. The oracle interpreter is identical for every case and step of one harness run. The
+   harness reads the setting once.
+2. `-I`, `-E` and `-S` never appear in any oracle argv. A unit test of the argv builder
+   asserts this for every case shape.
+3. The harness never edits `legacy/` (D10). The shim lives under
+   `internal/statusline/testdata/pyhooks/`.
+
+## Edge Cases
+
+| ID | Description | Expected Behavior |
+|----|-------------|-------------------|
+| EC-001 | `HYLO_PARITY_PYTHON=python` (the superseded research recipe) | Tier A fails with the absolute-path message; no lookup is attempted |
+| EC-002 | Absolute path to CPython 3.12.x or 3.9.x | The version check fails, naming the observed version; no case runs |
+| EC-003 | Absolute path to a non-CPython implementation (e.g. PyPy 3.11) | The version check fails (`platform.python_implementation()` is not `CPython`) |
+| EC-004 | Absolute path that does not exist or is not executable | The run fails with the exec error; no PATH fallback |
+| EC-005 | Windows absolute path such as `C:\hostedtoolcache\...\python.exe` | Accepted (`filepath.IsAbs` is true on Windows); same argv shape |
+| EC-006 | Unset locally (`CI` not `true`) | Tier A skipped with the documented message; Tier B runs |
+| EC-007 | Unset in CI (`CI=true`) | Tier A fails; CI cannot pass silently without the oracle |
+| EC-008 | A future refactor adds `-I` to "harden" the oracle (pass-8 §8.2 wording) | The argv-builder unit test fails; the shim canary (BC-6.01.003) also fails |
+
+## Canonical Test Vectors
+
+| Input | Expected Output | Category |
+|-------|----------------|----------|
+| `HYLO_PARITY_PYTHON=/opt/py311/bin/python3.11` (CPython 3.11.7) | Version probe prints `CPython 3 11 7`; oracle argv = `[/opt/py311/bin/python3.11, -s, <abs>/legacy/dgx_statusline.py]` | happy-path |
+| Setting unset, `CI` unset | Tier A `t.Skip` with `parity: HYLO_PARITY_PYTHON unset; Tier A (live differential) skipped` | edge-case |
+| `HYLO_PARITY_PYTHON=python3` | FAIL: `parity: HYLO_PARITY_PYTHON must be an absolute path (OD-104/OD-108), got "python3"` | error |
+| Absolute path to CPython 3.12.4 | FAIL: version check, observed `CPython 3 12 4` | error |
+
+## Verification Properties
+
+| VP-NNN | Property | Proof Method |
+|--------|----------|-------------|
+| VP-TBD | For every case/step shape, the oracle argv equals `[abs python, "-s", abs script]` and contains none of `-I`, `-E`, `-S` | table test on the argv builder |
+| VP-TBD | No harness code path calls `exec.LookPath` or a shell to start the oracle | manual review + `go vet`-style grep test |
+| VP-TBD | A non-absolute or non-3.11 interpreter never runs an oracle case | table test |
+
+## Traceability
+
+| Field | Value |
+|-------|-------|
+| Source | OD-104 (CPython 3.11.x oracle, explicit interpreter, never PATH); OD-108 (CI passes setup-python's absolute path; research Q7 recipe superseded); OD-109 (`-s`, never `-I`); design §3.2 "Interpreter" row, §7.1 T4/T5; P5r5 §B.4 P1 pin set ("`-s` ..., never `-E`/`-I`") |
+| Parity class | n.a. (harness machinery) |
+| L2 Capability | CAP-009 |
+| L2 Domain Invariants | DI-012 |
+| Architecture Module | `internal/statusline` parity harness (`*_parity_test.go`) (filled by architect) |
+| Stories | TBD (filled by story-writer) |
+
+## Related BCs (Recommended)
+
+- BC-6.01.002 — composes with: the env builder that the version probe and every oracle run use
+- BC-6.01.003 — depends on: `-s` keeps `PYTHONPATH` active, so the clock shim loads; the canary detects violations
+- BC-6.03.001 — related to: the resolved patch version is recorded in Tier B golden metadata
+- BC-6.04.001 — related to: CI installs CPython 3.11 on all three OSes and passes the absolute path
+
+## Architecture Anchors (Recommended)
+
+- TBD (filled by architect) — parity harness oracle runner
+
+## Story Anchor (Recommended)
+
+TBD (filled by story-writer)
+
+## VP Anchors (Recommended)
+
+- TBD — oracle argv and interpreter-resolution properties above

@@ -4,10 +4,10 @@ level: ops
 version: "2.1"
 status: draft
 producer: state-manager
-timestamp: 2026-11-16T03:49:27Z
-last_amended: "2026-11-15 (v2.1) — state-manager — create-domain-spec DONE (specs/domain-spec/, product-level L2: 18 capabilities, 20 entities, 17 invariants, 15 events, 6 state machines, 10 bounded contexts; 13 owner validations resolved OD-118..130); current_step = create-prd NEXT (P1 scope only, OD-115)"
+timestamp: 2026-11-16T06:42:44Z
+last_amended: "2026-11-16 (v2.3, state-manager backup-create-prd burst: owner rulings OD-132..OD-145 recorded in specs/owner-decisions-log-2026-11-14.md — PRD OQ-1..14 resolved, OQ-3 deferred; OD-135 amends OD-131 labels, S1/S5 CRITICAL; create-prd DONE — 145 BCs behavioral-contracts/ss-01..ss-06: S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped + 44 new; BC-INDEX + five supplements; subsystem breakdown OD-131; input-hashes re-stamped BC-ALLOCATION/BC-INDEX/prd for the OD-log append); current_step = create-architecture NEXT"
 phase: 1
-phase_position: "Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; current_step = create-prd (P1-scoped) NEXT; Phase 0 PASSED 2026-11-14"
+phase_position: "Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; owner rulings OD-132..OD-145 recorded 2026-11-16; current_step = create-architecture NEXT; Phase 0 PASSED 2026-11-14"
 pipeline: ACTIVE
 inputs: []
 input-hash: "[live-state]"
@@ -15,7 +15,7 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "phase-1-spec-crystallization (greenfield-pipeline): create-domain-spec DONE 2026-11-15 (product-level L2, OD-118..130); current_step = create-prd NEXT (P1 scope only, OD-115). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "phase-1-spec-crystallization (greenfield-pipeline): create-prd DONE 2026-11-15 (145 BCs S1-S6: S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; supplements, OD-131); owner rulings OD-132..OD-145 recorded 2026-11-16 resolving OQ-1..14 (OQ-3 deferred); current_step = create-architecture NEXT. D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 market_intel:
   recommendation: GO
@@ -24,7 +24,7 @@ market_intel:
 dtu_required: false
 ---
 
-<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 203 lines (wc-l) at the 2026-11-15 create-domain-spec burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin from soft-target = 500 - 203 = 297; margin from actual = 500 - 203 = 297 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
+<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 204 lines (wc-l) at the 2026-11-16 backup-create-prd burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin from soft-target = 500 - 204 = 296; margin from actual = 500 - 204 = 296 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
 
 # Pipeline State: hylo
 
@@ -38,7 +38,7 @@ dtu_required: false
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-15 — create-domain-spec DONE: `specs/domain-spec/` (product-level L2 per OD-115: 18 capabilities, 20 entities, 17 invariants, 15 events, 6 state machines, 10 bounded contexts; owner validation VALID-01..13 all resolved — rulings OD-118..OD-130; OD-123 supersedes OD-111 key placement; OD-125 REVISIT at P7). Next: create-prd (P1 scope only, OD-115). Prior bursts: create-brief DONE (`specs/product-brief.md`, product-level L1; OD-115..117); semport-translation DONE (design + assessment: 103/103 BCs, 84 H/18 M, S0-S8; validation PASSED; owner ruled T1-T10, OD-107..114); trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-16 — backup-create-prd DONE: owner rulings OD-132..OD-145 recorded in `specs/owner-decisions-log-2026-11-14.md` (PRD OQ-1..14 resolved; OQ-3 deferred; OD-135 amends OD-131 labels — S1/S5 CRITICAL, coverage >= 95%). create-prd COMPLETE: `specs/prd.md` (P1-scoped L3 per OD-115; three-stage writing per OD-131; 145 BCs under `behavioral-contracts/ss-01..ss-06`: S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped + 44 new; BC-INDEX + BC-ALLOCATION; supplements: interface-definitions, error-taxonomy, nfr-catalog, test-vectors, module-criticality). Next: create-architecture. Prior bursts: create-domain-spec DONE (`specs/domain-spec/`, product-level L2 per OD-115: 18 capabilities, 20 entities, 17 invariants, 15 events, 6 state machines, 10 bounded contexts; VALID-01..13 resolved — OD-118..OD-130; OD-123 supersedes OD-111 key placement; OD-125 REVISIT at P7); create-brief DONE (`specs/product-brief.md`, product-level L1; OD-115..117); semport-translation DONE (design + assessment: 103/103 BCs, 84 H/18 M, S0-S8; validation PASSED; owner ruled T1-T10, OD-107..114); trajectory-tail →0→0→0→0 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
@@ -56,7 +56,7 @@ dtu_required: false
 |-------|--------|-------|
 | pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (47e4c37) |
 | Phase 0 brownfield ingestion of `legacy/` | **PASSED 2026-11-14** (owner approval) — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Gate passed: OD list presented and ruled; next Phase 1 spec crystallization |
-| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** — greenfield-pipeline sub-workflow (phase-1-spec-crystallization); create-domain-spec DONE 2026-11-15 | product brief + domain spec product-level (OD-115); PRD/BCs/VPs/architecture detail P1-scoped; later phases via Feature Mode; owner rulings OD-115..130; no design system (OD-100); next create-prd (P1 scope only, OD-115) |
+| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** — greenfield-pipeline sub-workflow (phase-1-spec-crystallization); create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15 | product brief + domain spec product-level (OD-115); PRD/BCs/supplements P1-scoped (OD-131); later phases via Feature Mode; owner rulings OD-115..145; no design system (OD-100); PRD OQ-1..14 resolved (OD-132..145; OQ-3 deferred); next: create-architecture |
 | Adversary passes (Phase 0) | **ALL SIX CONVERGED** — p0: 3 rounds (NITPICK r3); p1: 3 (NITPICK r3); p2: 9 (NITPICK r9); p3: 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22); p4: 7 (NITPICK r7; r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact); p5: 5 (NITPICK r5) | round record in cycles/phase-0-ingestion/convergence-trajectory.md; trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
 | Fix bursts (Phase 0) | **NONE** — no fix burst required yet; extraction-validation fixes were applied in-burst during the sweep | narrative in cycles/phase-0-ingestion/burst-log.md |
 
@@ -64,11 +64,11 @@ dtu_required: false
 
 | # | Step | Outcome |
 |---|------|---------|
+| 16 | create-prd DONE: `specs/prd.md` integrated (three-stage writing per OD-131; subsystem breakdown OD-131 — S1 Status line CRITICAL, S2 Configuration HIGH, S3 Platform MEDIUM, S4 CLI MEDIUM, S5 pyfmt CRITICAL, S6 Parity harness HIGH; reserved S7-S12; S1/S5 CRITICAL per OD-135 amending the OD-131 HIGH labels) + 145 BC files under `behavioral-contracts/ss-01..ss-06` (S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped from BC-SL + 44 new; ids BC-S.SS.NNN with legacy_id) + BC-INDEX + 5 supplements (interface-definitions, error-taxonomy, nfr-catalog, test-vectors, module-criticality); owner rulings OD-132..OD-145 recorded 2026-11-16 resolving OQ-1..OQ-14 (OQ-3 deferred; OD-135 S1/S5 CRITICAL); input-hashes re-stamped (BC-ALLOCATION, BC-INDEX, prd) | COMPLETE — current_step = create-architecture NEXT |
+| 15 | create-prd STAGE 1 (allocation) DONE: `specs/prd.md` skeleton (template-conforming; sections 3-10 marked STAGE 3) + `specs/behavioral-contracts/BC-ALLOCATION.md` — 138 BCs allocated (101 mapped from legacy BC-SL-001..103; BC-SL-097 out of scope per OD-14; BC-SL-068 accounted as replaced by the BC-SL-098 mapping, D4-EX-2; 37 new contracts for S2/S3/S4/S5/S6), writer groups A-H each <= 21 | COMPLETE — stage 2 (parallel BC file creation by writer groups) NEXT |
 | 14 | create-domain-spec DONE: `specs/domain-spec/` committed (product-level L2 per OD-115 — 18 CAP, 20 ENT, 17 DI, 15 EVT, 6 SM, BC1-BC10; owner validation VALID-01..13 resolved, rulings OD-118..OD-130 in the OD log; OD-123 supersedes OD-111 top-level key placement, claude-sonnet default stands; OD-125 adopted for now, REVISIT at P7; shard input-hashes recomputed, 8/8 MATCH) | COMPLETE — current_step = create-prd NEXT (P1 scope only, OD-115) |
 | 13 | create-brief DONE: specs/product-brief.md committed (product-level L1 per OD-115; personas OD-116; success targets OD-117 incl. p95 <= 25 ms vs legacy median 84.5 ms; proxy overhead deferred to P3) + rulings logged in the OD log | COMPLETE — current_step = create-domain-spec NEXT |
-| 10 | Phase 1 routing (feature, P1) + market-intel gate APPROVED + detect-cross-language-porting (needs_semport true) | COMPLETE |
-| 11 | state-manager burst: owner rulings OD-101..OD-106 on the 6 porting tensions (porting-decision.md §9 + OD log; input-hash updated) | COMPLETE — semport-translation unblocked |
-| 12 | semport-translation DONE (design doc + companion assessment; 103/103 BCs: 84 H/18 M; steps S0-S8; ~62 ideal eng-days range 50-80; tensions T1-T10 §7.1) + validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains, 3 citation fixes, 1 Python-semantics fix, tally fix, 0 hallucinations) + owner rulings OD-107..114 on T1-T10 + brownfield-to-greenfield transition performed | COMPLETE — GREENFIELD-PIPELINE NEXT |
+| 12 | semport-translation DONE (design doc + companion assessment; 103/103 BCs: 84 H/18 M; steps S0-S8; ~62 ideal eng-days range 50-80; tensions T1-T10 listed §7.1) + validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains, 3 citation fixes, 1 Python-semantics fix, tally fix, 0 hallucinations) + owner rulings OD-107..114 on T1-T10 + brownfield-to-greenfield transition performed | COMPLETE — GREENFIELD-PIPELINE NEXT |
 
 ## Convergence Status
 
@@ -140,7 +140,8 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 
 ## Open Owner Questions
 
-- OD numbering: OD-01..OD-130 allocated (Phase 0 gate list + 2026-11-15 market-intel review + porting-tension rulings OD-101..106 + semport-tension rulings OD-107..114 + Phase 1 scope rulings OD-115..117 + domain-spec validation rulings OD-118..130); next free OD-131 — log: `specs/owner-decisions-log-2026-11-14.md`.
+- OD numbering: OD-01..OD-145 allocated (Phase 0 gate list + 2026-11-15 market-intel review + porting-tension rulings OD-101..106 + semport-tension rulings OD-107..114 + Phase 1 scope rulings OD-115..117 + domain-spec validation rulings OD-118..130 + PRD subsystem-breakdown ruling OD-131 + PRD open-question rulings OD-132..145); next free OD-146 — log: `specs/owner-decisions-log-2026-11-14.md`.
+- PRD open questions OQ-1..OQ-14 (prd.md §10) RESOLVED 2026-11-15 by owner rulings OD-132..OD-145 (OQ-3 deferred) — create-architecture gate cleared.
 - Optional checks (deferred, non-blocking): Grafana per-session cost panel; offline promtool rule validation.
 - Policy risk (owner awareness): Anthropic Usage Policy 2026-11-12 language on routing through consumer subscriptions.
 
@@ -150,15 +151,15 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 |-------|------|--------|-------|
 | phase-0-ingestion | brownfield-ingestion | **COMPLETE** — Phase 0 PASSED 2026-11-14; analysis converged; artifacts serve as Phase 1 context (pointer table above); transition to the greenfield sub-workflow performed 2026-11-15 | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + 5e83b63 (porting rulings) + this burst (semport design, OD-107..114, transition; create-brief + OD-115..117; domain-spec + OD-118..130) |
 
-## Session Resume Checkpoint (2026-11-15 — Phase 1 in progress: create-domain-spec DONE; current_step = create-prd NEXT)
+## Session Resume Checkpoint (2026-11-16 — Phase 1 in progress: create-prd DONE incl. owner rulings OD-132..145; current_step = create-architecture NEXT)
 
 > **SELF-SUFFICIENT RESUME CONTEXT** — read this section alone to resume after a session CLEAR.
 
 ### Where We Are
 
 - Date 2026-11-15. Position: Phase 1 **IN_PROGRESS** — brownfield-to-greenfield transition performed; the pipeline now runs the greenfield-pipeline sub-workflow scoped to P1 = `hylo statusline`. Phase 0 PASSED 2026-11-14.
-- Done: market-intel GO + approval (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL). Owner ruled the 6 porting tensions 2026-11-15 (OD-101..OD-106; §9). semport-translation DONE (`semport/hylo-legacy/statusline-target-design.md` + `semport-assessment.md`: 103/103 BCs mapped, 84 H/18 M, steps S0-S8, ~62 ideal engineer-days range 50-80; tensions T1-T10 listed §7.1); validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains checked, 3 citation fixes, 1 Python-semantics fix, per-step tally fix, 0 hallucinations; design doc Validation log); owner ruled the 10 semport tensions (OD-107..OD-114; resolutions appended to the design doc). CREATE-BRIEF DONE 2026-11-15: `specs/product-brief.md` (product-level L1; scope ruling OD-115 — brief + domain spec product-level, PRD/BCs/VPs/architecture detail P1-only; personas OD-116; success targets OD-117). Next: create-domain-spec (product-level L2), then the P1-scoped PRD, BCs from the 103 BC-SL contracts, D15 config registry (incl. `statusline.theme.*`, OD-113), parity-harness spec, internal/pyfmt spec. DOMAIN-SPEC DONE 2026-11-15: `specs/domain-spec/` (product-level L2: 18 CAP, 20 ENT, 17 DI, 15 EVT, 6 SM, BC1-BC10; VALID-01..13 all resolved — rulings OD-118..OD-130; OD-123 supersedes OD-111 top-level key placement, claude-sonnet default stands; OD-125 adopted for now, REVISIT at P7). Next: create-prd (P1 scope only, OD-115), then the P1-scoped BCs, D15 config registry (incl. `statusline.theme.*`, OD-113), parity-harness spec, internal/pyfmt spec.
-- Gate inputs (Phase 0 artifacts verified accessible as Phase 1 context, 2026-11-15): `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; `planning/market-intel.md`; `brownfield/porting-decision.md`; `semport/hylo-legacy/statusline-target-design.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-130; next free OD-131, next free CONV-ABS 95).
+- Done: market-intel GO + approval (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL). Owner ruled the 6 porting tensions 2026-11-15 (OD-101..OD-106; §9). semport-translation DONE (`semport/hylo-legacy/statusline-target-design.md` + `semport-assessment.md`: 103/103 BCs mapped, 84 H/18 M, steps S0-S8, ~62 ideal engineer-days range 50-80; tensions T1-T10 listed §7.1); validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains checked, 3 citation fixes, 1 Python-semantics fix, per-step tally fix, 0 hallucinations; design doc Validation log); owner ruled the 10 semport tensions (OD-107..OD-114; resolutions appended to the design doc). CREATE-BRIEF DONE 2026-11-15: `specs/product-brief.md` (product-level L1; scope ruling OD-115 — brief + domain spec product-level, PRD/BCs/VPs/architecture detail P1-only; personas OD-116; success targets OD-117). Next: create-domain-spec (product-level L2), then the P1-scoped PRD, BCs from the 103 BC-SL contracts, D15 config registry (incl. `statusline.theme.*`, OD-113), parity-harness spec, internal/pyfmt spec. DOMAIN-SPEC DONE 2026-11-15: `specs/domain-spec/` (product-level L2: 18 CAP, 20 ENT, 17 DI, 15 EVT, 6 SM, BC1-BC10; VALID-01..13 all resolved — rulings OD-118..OD-130; OD-123 supersedes OD-111 top-level key placement, claude-sonnet default stands; OD-125 adopted for now, REVISIT at P7). CREATE-PRD DONE 2026-11-15: `specs/prd.md` (three-stage writing per OD-131) + `behavioral-contracts/ss-01..ss-06` — 145 BCs (S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped from BC-SL + 44 new) + BC-INDEX + five supplements (interface-definitions, error-taxonomy, nfr-catalog, test-vectors, module-criticality); PRD OQ-1..OQ-14 resolved by owner rulings OD-132..OD-145 (2026-11-16; OQ-3 deferred; OD-135 S1/S5 CRITICAL). Next: create-architecture.
+- Gate inputs (Phase 0 artifacts verified accessible as Phase 1 context, 2026-11-15): `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; `planning/market-intel.md`; `brownfield/porting-decision.md`; `semport/hylo-legacy/statusline-target-design.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-145; next free OD-146, next free CONV-ABS 95).
 
 ### Convergence
 

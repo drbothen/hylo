@@ -1,0 +1,179 @@
+---
+document_type: behavioral-contract
+level: L3
+version: "1.1"
+status: draft
+producer: product-owner
+timestamp: 2026-11-15T17:00:00Z
+phase: 1a
+inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, ../semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, ../semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, ../semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
+input-hash: "0000000"
+traces_to: domain-spec/L2-INDEX.md
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py"
+subsystem: "SS-03"
+capability: "CAP-009"
+legacy_id: "BC-SL-080"
+parity_class: OD-76
+confidence: M
+lifecycle_status: active
+introduced: "0.1"
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
+---
+
+# Behavioral Contract BC-3.02.002: ps-parse replacement: named per-OS edge differences (macOS/Linux)
+
+## Description
+
+Legacy finds the window start by parsing `ps -o ppid=,comm=,lstart=` output with `split(None, 2)`, `strptime` in
+the C locale and libc `mktime` (SL:280-286). Go replaces this parse with a native probe (BC-3.02.001). On macOS and
+Linux most inputs give the same result; this contract names every input class where the bytes differ, and every
+class where they must stay identical. The differences are owner-approved (OD-76 "report the true start", OD-110
+named exclusion entry for "OD-76 + the native process probe on macOS/Linux"); D4-EX-1 (Windows) is BC-3.02.001.
+
+## Preconditions
+
+1. OS is macOS or Linux; stdin `session_id` truthy; the session cache has no numeric `proc_start` (otherwise
+   BC-3.02.001 postcondition 1 applies identically on both sides).
+2. An ancestor within 6 levels is the client process.
+3. For parity tests the legacy side runs with a fake `ps` on its constructed `PATH` (harness env, BC-6.01.002) and the
+   Go side with a fake `ProcStarter` describing the same process (same pid chain, same true start instant).
+
+## Postconditions
+
+Each class below is one row of the named difference table. "Exclusion" rows are cases on the OD-105/OD-110 named
+exclusion list under the entry id `OD-76` (native probe, macOS/Linux): the harness skips the legacy diff for them and
+instead requires the Go output to match the case's own expected-output file, checked by a dedicated table test
+(proposed name `TestWindowStart_OD76_*`; final name fixed by BC-6.03.004). "Identical" rows must pass the ordinary
+byte comparison.
+
+| # | Input class | Legacy result (SL ref) | Go result | Class |
+|---|---|---|---|---|
+| D1 | Start wall time in the repeated DST hour where libc `mktime` picks the other occurrence than the real one (macOS libc: `Sun Nov  1 01:59:59 2026`, `TZ=America/Chicago` → second occurrence) | `1793519999.0` (SL:286, libc `mktime`, `tm_isdst=-1`) | the true start, e.g. `1793516399.0` for a process started in the first occurrence | Exclusion (OD-76) |
+| D2 | Localized `ps` output (non-C `LC_TIME`, e.g. `Do Nov 13 18:10:09 2026`) | `strptime` ValueError → None, not cached, re-walked every refresh; no `⌂` (SL:286, 293) | start found; `proc_start` cached; `⌂` shown | Exclusion (OD-76) |
+| D3 | `comm` contains a space (exec path such as `/opt/App Support/claude`) | `split(None, 2)` gives comm `/opt/App`; `basename` = `App` ≠ `claude`, so this level does not match and the walk continues with the (correct) `ppid`; with no other `claude` ancestor → None (SL:284-292) | native name `claude` matches; `⌂` shown | Exclusion (OD-76) |
+| D4 | No `ps` binary, `ps` fails, or `ps` exceeds its 1 s timeout | exception caught → None, not cached (SL:280-281, 293) | start found | Exclusion (OD-76) |
+| I1 | Ordinary start outside DST transitions, C-locale `ps` | `mktime(strptime(lstart))` (SL:286) | same epoch (truncated true start) | Identical |
+| I2 | Space-padded day (`Thu Nov  6 18:10:09 2026`) | parses (format space matches 1+ whitespace) → `1794010209.0` (Chicago) | `1794010209.0` | Identical |
+| I3 | Sub-second true start | `lstart` has whole seconds | truncated to whole seconds (BC-3.02.001) | Identical |
+| I4 | Ancestor `comm` is not `claude` (e.g. Linux npm install whose comm is `node`) | no match → None | no match → None | Identical |
+| I5 | Process with no start time (`ps` prints no `lstart`, empty `rest`) | no match, walk continues (SL:285) | no start → treated as no match, walk continues | Identical |
+| I6 | A pid in the chain has exited (`ps` empty output) | None immediately (SL:282-283) | probe fails → None immediately | Identical |
+
+## Invariants
+
+1. Differences are limited to rows D1-D4; any other observed difference is a defect or needs a new owner ruling,
+   never a silent exclusion ("no blanket exclusions", OD-105).
+2. Every D-row case in the corpus has an exclusion entry naming one concrete case and an expected-output file; no
+   globs (OD-105).
+3. Linux start = `btime + starttime_ticks / USER_HZ` with integer division (procps computes `lstart` the same way,
+   so I1/I3 hold). `USER_HZ` is a named constant, 100, with the rationale "kernel ABI value for `/proc` tick fields on
+   amd64 and arm64, the CI architectures"; labeled assumption, checked by the per-OS probe test against the runner's
+   `ps -o lstart` for the test's own process.
+4. Linux `comm` from `/proc/<pid>/stat` is parsed after the **last** `)` (comm may contain `)` and spaces); it is
+   truncated by the kernel to 15 bytes, and `claude` fits.
+
+## Edge Cases
+
+| ID | Description | Expected Behavior |
+|----|-------------|-------------------|
+| EC-001 | Repeated-hour wall where libc picks the real occurrence (`Sun Nov  1 01:30:00 2026` Chicago → `1793514600.0`, first occurrence, for a process that started then) | Identical (I1 applies); not an exclusion case |
+| EC-002 | DST gap: `ps` never prints a wall time inside a gap for a real process | No case; the gap side of PR-14 leaves this path |
+| EC-003 | Symlinked install whose executed file name is not `claude` (e.g. a versioned binary behind a `claude` symlink) | **Deferred by owner ruling (OD-139):** the per-OS probe test measures the symlinked-binary case (native `P_comm`/`/proc` comm vs `ps comm`); it becomes an owner ruling only if the measured names differ. Until then no difference class is invented and no exclusion entry exists. Legacy matches `basename` of `ps comm`; macOS `P_comm` and Linux `/proc` comm may name the link target instead |
+| EC-004 | Glibc vs macOS libc `mktime` in the repeated hour | D1's legacy value is libc-dependent (macOS measured, L3-12/DET-20); Linux D1 expectations are generated on the Linux runner |
+
+## Canonical Test Vectors
+
+Legacy side: fake `ps` table (`pid|ppid comm lstart`), `startPID = 500`, `TZ=America/Chicago`, no cache.
+
+| Input | Expected Output | Category |
+|-------|----------------|----------|
+| `500\|400 claude Thu Nov 13 18:10:09 2026`; Go fake 500 = (`claude`, start 1794615009) | both `1794615009.0`; identical cache bytes `{"proc_start": 1794615009.0}` | happy-path (I1) |
+| `500\|400 /x/bin/claude Thu Nov  6 18:10:09 2026`; Go start 1794010209 | both `1794010209.0` | edge-case (I2) |
+| `500\|400 claude Sun Nov  1 01:59:59 2026`; Go true start 1793516399 | legacy `1793519999.0`, Go `1793516399.0` → exclusion `OD-76` case, Go output = its expected file | edge-case (D1) |
+| `500\|400 claude Do Nov 13 18:10:09 2026`; Go start 1794615009 | legacy None (no file); Go `1794615009.0` | edge-case (D2) |
+| `500\|400 /opt/App Support/claude Thu Nov 13 18:10:09 2026`; Go comm `claude` | legacy None; Go `1794615009.0` | edge-case (D3) |
+| no `ps` on `PATH`; Go start 1794615009 | legacy None; Go `1794615009.0` | error (D4) |
+
+Legacy column verified 2026-11-15 against CPython 3.11.7 on macOS running `claude_window_start` from
+`legacy/dgx_statusline.py` with a fake `ps` (all six rows reproduced). Go column is the contract.
+
+## Verification Properties
+
+| VP-NNN | Property | Proof Method |
+|--------|----------|-------------|
+| VP-TBD | For seeded `proc_start`, legacy and Go outputs are byte-identical on every corpus case | parity harness (Tier A) |
+| VP-TBD | Every D1-D4 corpus case has exactly one named exclusion entry and a passing dedicated table test | harness self-check (BC-6.03.004) |
+
+## Traceability
+
+| Field | Value |
+|-------|-------|
+| L2 Capability | CAP-009 |
+| L2 Domain Invariants | DI-012 (named, tested deviations only) |
+| Architecture Module | `internal/platform` `proc_darwin.go`, `proc_linux.go` (design §2.5) (filled by architect) |
+| Stories | TBD (filled by story-writer) |
+| Source | legacy/dgx_statusline.py:claude_window_start (SL:276-294; parse at SL:284-286) |
+| Legacy contract | BC-SL-080 (new in P3r1 §A7; index P3r4 §7.3) |
+| Decisions | OD-76 (DEVIATE: true start, legacy off by 3,600 s in the repeated hour), OD-110 (named exclusion entry "OD-76 + native probe on macOS/Linux" with its own table tests), OD-105 (no blanket exclusions), D4-EX-1 (Windows, BC-3.02.001); design tension T2(b), resolved by OD-110 |
+
+## Related BCs (Recommended)
+
+- BC-3.02.001 — composes with (the native probe this contract constrains)
+- BC-6.03.004 — depends on (exclusion-list machinery)
+- BC-5.04.002 — related to (`LocalToUnix`; the `mktime` path is removed here, PR-14)
+
+## Architecture Anchors (Recommended)
+
+- `architecture/TBD.md#platform-proc` — per-OS probe sources (filled by architect)
+
+## Story Anchor (Recommended)
+
+TBD — window age (design step S7)
+
+## VP Anchors (Recommended)
+
+- VP-TBD — differences limited to D1-D4
+
+> Names provisional — architect (OD-145): the proposed table-test names
+> (`TestWindowStart_OD76_*`) in this contract are delegated to the architect in
+> create-architecture, subject to adversarial review. No behavior change.
+
+---
+
+### Brownfield-Specific Sections
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (SL:276-294) |
+| **Confidence** | medium (legacy side re-run; native correctness on Linux and symlinked installs unverified; design §8 conf M) |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **guard clause**: `if os.path.basename(comm) == "claude" and rest` (SL:285); `except Exception: return None` (SL:293-294)
+- **assertion**: pinned runs (P3r1 §A7, P5r2 §A.1 DST table; re-run 2026-11-15)
+- **inferred**: Linux `lstart` derivation from procps (I1/I3), pending the per-OS probe test
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | reads OS process table |
+| **Global state access** | none beyond the process table |
+| **Deterministic** | no (live processes) unless faked |
+| **Thread safety** | n.a. |
+| **Overall classification** | effectful shell |
+
+#### Refactoring Notes
+
+No parse remains in Go. The process name is the configured `statusline.window_age.process_name`
+(default `claude`, OD-133), passed into `FindAncestor` as a parameter.
