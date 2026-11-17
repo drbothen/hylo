@@ -4,7 +4,7 @@ level: ops
 version: "1.0"
 status: archive
 producer: state-manager
-timestamp: 2026-11-14T08:30:00Z
+timestamp: 2026-11-17T06:18:30Z
 cycle: "phase-0-ingestion"
 inputs: [STATE.md]
 input-hash: "[live-state]"
@@ -113,6 +113,50 @@ Archived verbatim from STATE.md when the SESSION-WRAP-PAUSE checkpoint replaced 
 1. input-hash drift check over `.factory/` artifacts
 2. fresh-context consistency audit
 3. Phase 0 owner approval gate: present `semport/hylo-legacy/hylo-legacy-owner-decisions.md` (answer format: OD-06 a, or A: all recommended)
+
+---
+
+
+## Session Resume Checkpoint (2026-11-16 — Phase 1 in progress: phase-1-cicd-setup DONE (PR #1 merged, branch protection live); current_step = phase-1-consistency-audit NEXT)
+
+Archived verbatim from STATE.md when the SESSION-WRAP-PAUSE-2026-11-17 checkpoint replaced it (2026-11-17, session-wrap pause burst).
+
+
+> **SELF-SUFFICIENT RESUME CONTEXT** — read this section alone to resume after a session CLEAR.
+
+### Where We Are
+
+- Date 2026-11-15. Position: Phase 1 **IN_PROGRESS** — brownfield-to-greenfield transition performed; the pipeline now runs the greenfield-pipeline sub-workflow scoped to P1 = `hylo statusline`. Phase 0 PASSED 2026-11-14.
+- Done: market-intel GO + approval (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL). Owner ruled the 6 porting tensions 2026-11-15 (OD-101..OD-106; §9). semport-translation DONE (`semport/hylo-legacy/statusline-target-design.md` + `semport-assessment.md`: 103/103 BCs mapped, 84 H/18 M, steps S0-S8, ~62 ideal engineer-days range 50-80; tensions T1-T10 listed §7.1); validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains checked, 3 citation fixes, 1 Python-semantics fix, per-step tally fix, 0 hallucinations; design doc Validation log); owner ruled the 10 semport tensions (OD-107..OD-114; resolutions appended to the design doc). CREATE-BRIEF DONE 2026-11-15: `specs/product-brief.md` (product-level L1; scope ruling OD-115 — brief + domain spec product-level, PRD/BCs/VPs/architecture detail P1-only; personas OD-116; success targets OD-117). Next: create-domain-spec (product-level L2), then the P1-scoped PRD, BCs from the 103 BC-SL contracts, D15 config registry (incl. `statusline.theme.*`, OD-113), parity-harness spec, internal/pyfmt spec. DOMAIN-SPEC DONE 2026-11-15: `specs/domain-spec/` (product-level L2: 18 CAP, 20 ENT, 17 DI, 15 EVT, 6 SM, BC1-BC10; VALID-01..13 all resolved — rulings OD-118..OD-130; OD-123 supersedes OD-111 top-level key placement, claude-sonnet default stands; OD-125 adopted for now, REVISIT at P7). CREATE-PRD DONE 2026-11-15: `specs/prd.md` (three-stage writing per OD-131) + `behavioral-contracts/ss-01..ss-06` — 145 BCs (S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped from BC-SL + 44 new) + BC-INDEX + five supplements (interface-definitions, error-taxonomy, nfr-catalog, test-vectors, module-criticality); PRD OQ-1..OQ-14 resolved by owner rulings OD-132..OD-145 (2026-11-16; OQ-3 deferred; OD-135 S1/S5 CRITICAL). CREATE-ARCHITECTURE DONE 2026-11-16: `specs/architecture/` ARCH-00..09 (10 sections, 13 ADRs AD-01..AD-13) + ARCH-INDEX + BC-COMPONENT-MAP; 37 VPs in `specs/verification-properties/` (VP-001..VP-037) covering 145/145 BCs; BC anchor back-fill; rulings OD-146..OD-149 (sections approved; ps_timeout_s removed; fixture placement AD-13; Tier C fuzz exit). PARALLEL PHASE 1 STEPS DONE 2026-11-16: architect-feasibility-review (`specs/architecture-feasibility-report.md`, verdict 'PRD CHANGES REQUIRED: none') with follow-ups — purity classification added to the 55 BCs that lacked it (145/145), ARCH-INDEX VP-022 bucket corrected to ARCH-04/09; phase-1-dtu-assessment (`specs/dtu-assessment.md`, DTU_REQUIRED false — seam fakes, no Docker clones); phase-1-gene-transfusion-assessment (`specs/gene-transfusion-assessment.md` — statusline + cost gene-transfusion, pyfmt/config/platform hybrid, cmd/hylo + parity fresh). PHASE-1-CICD-SETUP IN PROGRESS 2026-11-16: GitHub Actions workflows committed on public branch ci/phase-1-setup at d88e5ea and pushed (owner-approved; OD-150); specs/cicd-setup.md written; remaining: PR (pending owner) + first green run, merge to main, branch protection. Then: phase-1-consistency-audit.
+- Gate inputs (Phase 0 artifacts verified accessible as Phase 1 context, 2026-11-15): `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; `planning/market-intel.md`; `brownfield/porting-decision.md`; `semport/hylo-legacy/statusline-target-design.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-151; next free OD-152, next free CONV-ABS 95).
+
+### Convergence
+
+- None active. Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5.
+
+### In Flight
+
+- None. No sub-agents running, nothing abandoned.
+- Public repo main is clean except pre-existing untracked local config (.claude/, .mcp.json), intentionally uncommitted.
+
+### Pending Owner Decisions
+
+1. DONE 2026-11-15 — Phase 1 start scoped to P1: YES (feature routing recorded); public main pushed to GitHub (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6; full-history gitleaks + pattern scan clean); 6 porting tensions ruled (OD-101..106); 10 semport tensions ruled (OD-107..114; resolutions in the design doc).
+2. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
+3. PUBLIC DOC EDITS PENDING — PLAN D15 exception (OD-101), D4-EX-3 (OD-102), expanded named exclusion list (OD-110); commit to public main only when the owner asks.
+4. REVISIT AT P7 — OD-125 (VALID-08): DI-007 "the status line never reads the ledger" is in force for now (live per-request data reaches the status line only via exporter metrics or the D16 event feed); revisit at P7 during the ledger redesign — allowing ledger-backed widgets then would amend DI-007 and add a BC7←BC4 dependency; flag recorded in `specs/domain-spec/invariants.md` next to DI-007.
+5. DONE 2026-11-16 — CI/CD SETUP (phase-1-cicd-setup): PR #1 merged with admin override (squash) by owner instruction; squash-commit author rewritten to the GitHub no-reply identity; main force-pushed 570a0fc -> fd031da (owner ran the push); branch protection live per OD-150; ruling OD-151.
+6. Owner to enable GitHub 'Keep my email addresses private' and 'Block command line pushes that expose my email' — confirm when done.
+
+No blockers.
+
+### WIP Branches
+
+- None. Public main @ fd031da (PR #1 squash, rewritten with the no-reply identity, force-pushed by the owner 2026-11-16). factory-artifacts: scrubbed history, published on GitHub as an orphan branch (the local bare repo is now an archive holding the local-only pre-scrub tag).
+
+### Resume
+
+Open a new session in $HOME/Dev/hylo, read docs/RESUME.md and .factory/STATE.md, then run /vsdd-factory:rehydrate-wave then /vsdd-factory:next-step.
 
 ---
 

@@ -1,21 +1,21 @@
 ---
 document_type: pipeline-state
 level: ops
-version: "2.1"
+version: "2.2"
 status: draft
 producer: state-manager
-timestamp: 2026-11-16T20:35:34Z
-last_amended: "2026-11-16 (state-manager cicd-done burst: phase-1-cicd-setup DONE — PR #1 merged with admin override (squash) by owner instruction; squash commit rewritten with the GitHub no-reply identity; main force-pushed 570a0fc -> fd031da, same tree and parent (owner ran the push); branch protection live per OD-150 — lint (gofmt + vet), test (ubuntu-24.04), test (macos-15), test (windows-2025), gitleaks (full history); strict; enforce_admins false; force-push/deletion blocked; OD-151 recorded; three [process-gap] lessons queued in Drift Items, target before Phase 3; current_step = phase-1-consistency-audit NEXT)"
+timestamp: 2026-11-17T06:21:40Z
+last_amended: "2026-11-17 (v2.2 — state-manager — session wrap pause after phase-1-cicd-setup)"
 phase: 1
-phase_position: "Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment); owner rulings OD-132..OD-151 recorded; phase-1-cicd-setup DONE 2026-11-16 (PR #1 merged; main @ fd031da; branch protection live); then phase-1-consistency-audit; Phase 0 PASSED 2026-11-14"
-pipeline: ACTIVE
+phase_position: "PAUSED 2026-11-17. Phase 1 (spec crystallization), CI/CD done; next phase-1-consistency-audit — Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment); owner rulings OD-132..OD-151 recorded; phase-1-cicd-setup DONE 2026-11-16 (PR #1 merged; main @ fd031da; branch protection live); then phase-1-consistency-audit; Phase 0 PASSED 2026-11-14"
+pipeline: PAUSED
 inputs: []
 input-hash: "[live-state]"
 traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "phase-1-consistency-audit NEXT. phase-1-cicd-setup DONE 2026-11-16: PR #1 (ci/phase-1-setup, workflows @ d88e5ea) merged with admin override (squash) by owner instruction; GitHub's squash commit carried the owner's personal email as author — rewritten with the GitHub no-reply identity and main force-pushed 570a0fc -> fd031da (same tree and parent; owner ran the push); branch protection live per OD-150: lint (gofmt + vet), test (ubuntu-24.04), test (macos-15), test (windows-2025), gitleaks (full history); strict; enforce_admins false; force-push/deletion blocked. Ruling OD-151; three [process-gap] lessons in Drift Items (target before Phase 3). D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "SESSION-WRAP-PAUSE-2026-11-17: factory paused after phase-1-cicd-setup; next is phase-1-consistency-audit; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-0-ingestion"
 market_intel:
   recommendation: GO
@@ -27,7 +27,7 @@ dtu_clones_built: n/a
 dtu_services: []
 ---
 
-<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; actual 219 lines (wc-l) at the 2026-11-16 cicd-done burst; hard cap: 500 lines (validate-state-md-size hook enforcement); margin = 500 - 219 = 281 (D-446(c) dual-margin form). Historical content belongs in cycle files, NOT here. -->
+<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; hard cap 500 lines (validate-state-md-size hook enforcement); Hard cap (500 lines) margin from soft-target = 500 - 219 = 281; margin from actual = 500 - 221 = 279 (D-446(c) dual-margin form). 221 lines (wc-l) at the 2026-11-17 session-wrap pause burst. Historical content belongs in cycle files, NOT here. -->
 
 # Pipeline State: hylo
 
@@ -71,7 +71,7 @@ dtu_services: []
 | 18 | parallel Phase 1 steps DONE: architect-feasibility-review — `specs/architecture-feasibility-report.md` (verdict 'PRD CHANGES REQUIRED: none'; PRD feasible as written, NFRs coherent, purity boundaries aligned, 37-VP catalog viable); phase-1-dtu-assessment — `specs/dtu-assessment.md` (DTU_REQUIRED false — 4 external deps, 0 Docker clones; fake upstream/backend seam fakes folded into existing harness stories); phase-1-gene-transfusion-assessment — `specs/gene-transfusion-assessment.md` (internal/statusline + internal/cost full gene-transfusion, internal/pyfmt semantic + internal/config + internal/platform hybrid, cmd/hylo + internal/parity fresh; ≈38 SP saved); follow-ups done: purity classification added to the 55 BCs that lacked it (145/145), ARCH-INDEX VP-022 bucket corrected to ARCH-04/09 | COMPLETE — current_step = phase-1-cicd-setup (owner decision pending on how it lands in the public repo), then phase-1-consistency-audit |
 | 19 | phase-1-cicd-setup DONE: PR #1 (branch ci/phase-1-setup, workflows @ d88e5ea) merged with admin override (squash) by owner instruction (OD-151); GitHub's squash commit carried the owner's personal email as author — rewritten with the GitHub no-reply identity, main force-pushed 570a0fc -> fd031da (same tree and parent; owner ran the push); branch protection live per OD-150: lint (gofmt + vet), test (ubuntu-24.04), test (macos-15), test (windows-2025), gitleaks (full history); strict; enforce_admins false; force-push/deletion blocked; CI green on 3 OSes; delivery evidence in `code-delivery/phase-1-cicd-setup/` | COMPLETE — current_step = phase-1-consistency-audit NEXT |
 | 16 | create-prd DONE: `specs/prd.md` integrated (three-stage writing per OD-131; subsystem breakdown OD-131 — S1 Status line CRITICAL, S2 Configuration HIGH, S3 Platform MEDIUM, S4 CLI MEDIUM, S5 pyfmt CRITICAL, S6 Parity harness HIGH; reserved S7-S12; S1/S5 CRITICAL per OD-135 amending the OD-131 HIGH labels) + 145 BC files under `behavioral-contracts/ss-01..ss-06` (S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped from BC-SL + 44 new; ids BC-S.SS.NNN with legacy_id) + BC-INDEX + 5 supplements (interface-definitions, error-taxonomy, nfr-catalog, test-vectors, module-criticality); owner rulings OD-132..OD-145 recorded 2026-11-16 resolving OQ-1..OQ-14 (OQ-3 deferred; OD-135 S1/S5 CRITICAL); input-hashes re-stamped (BC-ALLOCATION, BC-INDEX, prd) | COMPLETE — current_step = create-architecture NEXT |
-| 15 | create-prd STAGE 1 (allocation) DONE: `specs/prd.md` skeleton (template-conforming; sections 3-10 marked STAGE 3) + `specs/behavioral-contracts/BC-ALLOCATION.md` — 138 BCs allocated (101 mapped from legacy BC-SL-001..103; BC-SL-097 out of scope per OD-14; BC-SL-068 accounted as replaced by the BC-SL-098 mapping, D4-EX-2; 37 new contracts for S2/S3/S4/S5/S6), writer groups A-H each <= 21 | COMPLETE — stage 2 (parallel BC file creation by writer groups) NEXT |
+| 20 | SESSION-WRAP-PAUSE-2026-11-17 (state-manager): factory paused after phase-1-cicd-setup; checkpoint archived to `cycles/phase-0-ingestion/session-checkpoints.md` and new SESSION-WRAP-PAUSE checkpoint written | COMPLETE |
 
 ## Convergence Status
 
@@ -154,43 +154,45 @@ Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md`
 |-------|------|--------|-------|
 | phase-0-ingestion | brownfield-ingestion | **COMPLETE** — Phase 0 PASSED 2026-11-14; analysis converged; artifacts serve as Phase 1 context (pointer table above); transition to the greenfield sub-workflow performed 2026-11-15 | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + 5e83b63 (porting rulings) + this burst (semport design, OD-107..114, transition; create-brief + OD-115..117; domain-spec + OD-118..130) |
 
-## Session Resume Checkpoint (2026-11-16 — Phase 1 in progress: phase-1-cicd-setup DONE (PR #1 merged, branch protection live); current_step = phase-1-consistency-audit NEXT)
+## Session Resume Checkpoint (2026-11-17 — SESSION-WRAP-PAUSE)
 
 > **SELF-SUFFICIENT RESUME CONTEXT** — read this section alone to resume after a session CLEAR.
 
 ### Where We Are
 
-- Date 2026-11-15. Position: Phase 1 **IN_PROGRESS** — brownfield-to-greenfield transition performed; the pipeline now runs the greenfield-pipeline sub-workflow scoped to P1 = `hylo statusline`. Phase 0 PASSED 2026-11-14.
-- Done: market-intel GO + approval (OD-96..OD-100); detect-cross-language-porting DONE (`brownfield/porting-decision.md`: needs_semport true; Python 3 + zsh -> Go 1.26; P1 modules only — `legacy/dgx_statusline.py` minus --subagent; 103 BC-SL). Owner ruled the 6 porting tensions 2026-11-15 (OD-101..OD-106; §9). semport-translation DONE (`semport/hylo-legacy/statusline-target-design.md` + `semport-assessment.md`: 103/103 BCs mapped, 84 H/18 M, steps S0-S8, ~62 ideal engineer-days range 50-80; tensions T1-T10 listed §7.1); validation gate PASSED (validate-extraction PASS-WITH-FIXES: 3 iterations, ~80 citations + all MEDIUM chains checked, 3 citation fixes, 1 Python-semantics fix, per-step tally fix, 0 hallucinations; design doc Validation log); owner ruled the 10 semport tensions (OD-107..OD-114; resolutions appended to the design doc). CREATE-BRIEF DONE 2026-11-15: `specs/product-brief.md` (product-level L1; scope ruling OD-115 — brief + domain spec product-level, PRD/BCs/VPs/architecture detail P1-only; personas OD-116; success targets OD-117). Next: create-domain-spec (product-level L2), then the P1-scoped PRD, BCs from the 103 BC-SL contracts, D15 config registry (incl. `statusline.theme.*`, OD-113), parity-harness spec, internal/pyfmt spec. DOMAIN-SPEC DONE 2026-11-15: `specs/domain-spec/` (product-level L2: 18 CAP, 20 ENT, 17 DI, 15 EVT, 6 SM, BC1-BC10; VALID-01..13 all resolved — rulings OD-118..OD-130; OD-123 supersedes OD-111 top-level key placement, claude-sonnet default stands; OD-125 adopted for now, REVISIT at P7). CREATE-PRD DONE 2026-11-15: `specs/prd.md` (three-stage writing per OD-131) + `behavioral-contracts/ss-01..ss-06` — 145 BCs (S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped from BC-SL + 44 new) + BC-INDEX + five supplements (interface-definitions, error-taxonomy, nfr-catalog, test-vectors, module-criticality); PRD OQ-1..OQ-14 resolved by owner rulings OD-132..OD-145 (2026-11-16; OQ-3 deferred; OD-135 S1/S5 CRITICAL). CREATE-ARCHITECTURE DONE 2026-11-16: `specs/architecture/` ARCH-00..09 (10 sections, 13 ADRs AD-01..AD-13) + ARCH-INDEX + BC-COMPONENT-MAP; 37 VPs in `specs/verification-properties/` (VP-001..VP-037) covering 145/145 BCs; BC anchor back-fill; rulings OD-146..OD-149 (sections approved; ps_timeout_s removed; fixture placement AD-13; Tier C fuzz exit). PARALLEL PHASE 1 STEPS DONE 2026-11-16: architect-feasibility-review (`specs/architecture-feasibility-report.md`, verdict 'PRD CHANGES REQUIRED: none') with follow-ups — purity classification added to the 55 BCs that lacked it (145/145), ARCH-INDEX VP-022 bucket corrected to ARCH-04/09; phase-1-dtu-assessment (`specs/dtu-assessment.md`, DTU_REQUIRED false — seam fakes, no Docker clones); phase-1-gene-transfusion-assessment (`specs/gene-transfusion-assessment.md` — statusline + cost gene-transfusion, pyfmt/config/platform hybrid, cmd/hylo + parity fresh). PHASE-1-CICD-SETUP IN PROGRESS 2026-11-16: GitHub Actions workflows committed on public branch ci/phase-1-setup at d88e5ea and pushed (owner-approved; OD-150); specs/cicd-setup.md written; remaining: PR (pending owner) + first green run, merge to main, branch protection. Then: phase-1-consistency-audit.
-- Gate inputs (Phase 0 artifacts verified accessible as Phase 1 context, 2026-11-15): `semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md`; `planning/market-intel.md`; `brownfield/porting-decision.md`; `semport/hylo-legacy/statusline-target-design.md`; decisions in `specs/owner-decisions-log-2026-11-14.md` (through OD-151; next free OD-152, next free CONV-ABS 95).
+- Position: Phase 1 **IN PROGRESS** (greenfield-pipeline sub-workflow after the brownfield-to-greenfield transition), scoped to P1 = `hylo statusline`. Phase 0 PASSED 2026-11-14.
+- DONE this session (2026-11-15..17): market intel GO (P1); porting decision; semport target design + validation; brownfield->greenfield transition; product brief (product-level); L2 domain spec (product-level); P1 PRD (145 BCs S1-S6 + supplements + BC-INDEX); architecture (ARCH-00..09, 13 ADRs, 37 VPs, 145/145 BC<->VP bidirectional); feasibility review (no PRD changes); DTU assessment (DTU_REQUIRED false); gene-transfusion assessment; CI/CD (PR #1 merged; main fd031da; branch protection live).
+- NEXT: phase-1-consistency-audit (fresh context), then phase-1-gate, phase-1d adversarial spec review (>=3 clean passes; inject .factory/policies.yaml incl. policy 21), phase-1d second-model spec review, phase-1-state-backup, check-input-drift, phase-1-human-approval.
 
 ### Convergence
 
-- None active. Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5.
+- None active (adversarial spec review not started). Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5.
 
 ### In Flight
 
-- None. No sub-agents running, nothing abandoned.
-- Public repo main is clean except pre-existing untracked local config (.claude/, .mcp.json), intentionally uncommitted.
+- None. No sub-agents running; nothing abandoned. Public main fd031da (protected; CI green on 3 OSes). factory-artifacts = this commit.
 
 ### Pending Owner Decisions
 
-1. DONE 2026-11-15 — Phase 1 start scoped to P1: YES (feature routing recorded); public main pushed to GitHub (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6; full-history gitleaks + pattern scan clean); 6 porting tensions ruled (OD-101..106); 10 semport tensions ruled (OD-107..114; resolutions in the design doc).
-2. Optional: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=70 advisory from check-state-health.
-3. PUBLIC DOC EDITS PENDING — PLAN D15 exception (OD-101), D4-EX-3 (OD-102), expanded named exclusion list (OD-110); commit to public main only when the owner asks.
-4. REVISIT AT P7 — OD-125 (VALID-08): DI-007 "the status line never reads the ledger" is in force for now (live per-request data reaches the status line only via exporter metrics or the D16 event feed); revisit at P7 during the ledger redesign — allowing ledger-backed widgets then would amend DI-007 and add a BC7←BC4 dependency; flag recorded in `specs/domain-spec/invariants.md` next to DI-007.
-5. DONE 2026-11-16 — CI/CD SETUP (phase-1-cicd-setup): PR #1 merged with admin override (squash) by owner instruction; squash-commit author rewritten to the GitHub no-reply identity; main force-pushed 570a0fc -> fd031da (owner ran the push); branch protection live per OD-150; ruling OD-151.
-6. Owner to enable GitHub 'Keep my email addresses private' and 'Block command line pushes that expose my email' — confirm when done.
+1. Owner to confirm GitHub email settings ('Keep my email addresses private', 'Block command line pushes that expose my email').
+2. PUBLIC DOC EDITS PENDING (PLAN D15 exception OD-101, D4-EX-3 OD-102) — commit to public main only when the owner asks.
+3. REVISIT AT P7 — OD-125 (VALID-08): DI-007 "the status line never reads the ledger" stands for now; revisit during the P7 ledger redesign (flag in `specs/domain-spec/invariants.md`).
+4. Three [process-gap] lessons (merge-commit author check, CI identity check, never quote flagged text) recorded as Drift Items, target before Phase 3 (L-PG-01..03 in `cycles/phase-0-ingestion/lessons.md`).
+5. Six deferred PR #1 findings recorded in `code-delivery/phase-1-cicd-setup/review-findings.md`.
+6. check-state-health warnings: status: draft (should be in_progress); no Phase 1 cycle directory (current_cycle still phase-0-ingestion); STATE.md 200+ lines (compact-state recommended); CLAUDE_AUTOCOMPACT_PCT_OVERRIDE advisory (add 70 to .claude/settings.json).
+7. Next free OD = OD-152 (log: `specs/owner-decisions-log-2026-11-14.md`).
+
+Note: this session saw several subagent breakdowns (looping or early stops); every case was verified on disk and nothing was lost — prefer short, tightly scoped agent briefs.
 
 No blockers.
 
 ### WIP Branches
 
-- None. Public main @ fd031da (PR #1 squash, rewritten with the no-reply identity, force-pushed by the owner 2026-11-16). factory-artifacts: scrubbed history, published on GitHub as an orphan branch (the local bare repo is now an archive holding the local-only pre-scrub tag).
+- None (ci/phase-1-setup merged and deleted).
 
 ### Resume
 
-Open a new session in $HOME/Dev/hylo, read docs/RESUME.md and .factory/STATE.md, then run /vsdd-factory:rehydrate-wave then /vsdd-factory:next-step.
+Open a new session in the hylo repo, read docs/RESUME.md, CLAUDE.local.md and .factory/STATE.md, then run /vsdd-factory:rehydrate-wave and then /vsdd-factory:next-step.
 
 ## Drift Items (deferred; target: before Phase 3)
 
