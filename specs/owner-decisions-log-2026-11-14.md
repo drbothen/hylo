@@ -131,3 +131,10 @@
 | OD-152 | (CA-04) (a) mint an ASM/R register pair instead of waiving the gate criteria — specs/prd-supplements/assumptions-register.md (ASM-001..006) and specs/prd-supplements/risk-register.md (R-001..007) | adopted as proposed |
 | OD-153 | (CA-03) (a) the 14 S6 parity-harness BCs keep capability CAP-009 with a stated rationale (verification machinery proving CAP-009 byte parity; governed by DI-012); no new L2 capability added | adopted as proposed |
 | OD-154 | (a) fix all remaining consistency-audit findings (CA-01..CA-12) in one burst before phase-1-gate | adopted as proposed |
+<!-- Phase-1d pass-2 owner rulings, 2026-11-17 (adversarial spec review pass 2 NOT_CONVERGED, 116 findings; next free OD-160). Open item closed 2026-11-17: owner confirmed both GitHub email settings on ('Keep my email addresses private', 'Block command line pushes that expose my email') -->
+
+| OD-155 | (a) reopen OD-14 (a): port `--subagent` / subagentStatusLine agent-panel rows in P1 now, before Phase 2 stories, with a config off switch | Claude Code 2.1.326 restored the setting; supersedes OD-14 (a) |
+| OD-156 | (a) OverflowError handling split by source: transcript-borne overflow skips the line (extends D4-EX-2, like Q-c); stdin/metrics overflow at render follows catalogued crash paths and reproduces the 29-byte degraded line (like O2); ints beyond int64 in `_fmt_lines` via `math/big` (extends OD-137) | rules the pass-1 held question (C01/B05/B06) |
+| OD-157 | (a) OD-130 (±Inf telemetry treated as unknown) takes effect after cutover (P6); P1 keeps legacy behavior | rules the pass-1 held question (A2-01 + VP-030) |
+| OD-158 | (a) S1/S5 gate is line coverage >= 95% (OD-135 as written); mutation kill rate >= 95% is a Phase 6 target, reported but not gating P1 | rules the pass-1 held question (A08) |
+| OD-159 | (a) Go reads files as UTF-8 on all OSes, as a named deviation | like D4-EX-1; rules the pass-1 held question (B08/C06) |

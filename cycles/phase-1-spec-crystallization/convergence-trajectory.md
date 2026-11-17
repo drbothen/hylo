@@ -18,3 +18,14 @@ Finding progression across adversarial passes in this cycle.
 - Novelty: A HIGH, A2 HIGH, B HIGH, C MEDIUM, C2 HIGH, D HIGH — pass-level HIGH.
 - Tags: 5 [owner-question], 7 [process-gap], 1 (pending verification), 2 (pending intent verification).
 - Verdict: NOT_CONVERGED. Next: consolidate owner questions, run fix burst, then pass 2.
+
+| 2 (phase-1d, 2026-11-17) | 116 (17 HIGH / 58 MEDIUM / 35 LOW / 6 COSMETIC) | −13 | NOT_CONVERGED — novelty MEDIUM; owner rulings OD-155..159 + fix burst next |
+
+### Pass 2 — 2026-11-17 (phase-1d adversarial spec review)
+
+- Scope: full P1 spec package, re-reviewed as the same six fresh-context perimeters as pass 1. Verbatim reports: `adversarial-reviews/pass-2.md`; index: `adversarial-reviews/ADV-P2-INDEX.md`.
+- Perimeter counts: A 26, A2 29, B 17, C 12, C2 14, D 18.
+- Perimeter severities: A 4H/15M/6L/1C; A2 4H/17M/7L/1C; B 3H/6M/7L/1C; C 2H/4M/5L/1C; C2 1H/6M/6L/1C; D 3H/10M/4L/1C.
+- Novelty: A HIGH, A2 HIGH, B MEDIUM, C MEDIUM, C2 MEDIUM, D MEDIUM — pass-level MEDIUM.
+- Tags: 9 [owner-question], 1 [process-gap], 1 (pending intent verification), 1 (pending verification).
+- Verdict: NOT_CONVERGED. Next: fix burst incl. owner rulings OD-155..159, then pass 3.
