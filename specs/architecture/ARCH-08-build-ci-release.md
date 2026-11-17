@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -20,7 +20,11 @@ input-hash: "ea79506"
 
 ## Build
 
-- Go >= 1.26 (go.mod `go 1.26.0` + toolchain line, design doc S0), `CGO_ENABLED=0`,
+- Go >= 1.26: go.mod pins `go 1.26.0` only, **no toolchain directive** (actual repo
+  state, ADV-P2-A14; cicd-setup.md agrees) — with `go-version-file`, CI therefore
+  installs 1.26.0, the oldest 1.26 patch, so the "Go 1.26.x leg" lacks later stdlib
+  security fixes. Approved-in-spec remedy: add a `toolchain go1.26.x` line to go.mod
+  (lands on main with the owner's approval; spec-only here). `CGO_ENABLED=0`,
   one static binary per OS. Version stamping via `-ldflags "-X main.version=..."` from
   the released tag; fallback VCS stamp, then `dev` (BC-4.01.003).
 - **Dependency policy (AD-02):** P1 runtime deps = `golang.org/x/sys` only; stdlib first
@@ -45,8 +49,11 @@ flowchart LR
 
 - Race detector on Linux and macOS; the resolved Python patch version is recorded in
   Tier B golden metadata (RK-4).
-- **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report (1 warm-up +
-  5 timed runs, nearest-rank p95, fake-VM handling time subtracted); the p95 <= 25 ms
+- **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report — per corpus
+  case, 1 discarded warm-up + **20 timed runs**, samples sorted per case, nearest-rank
+  p95 = **19th of the 20 sorted samples** (per nfr-catalog.md; with 5 samples the
+  statistic degenerates to the maximum), p95 computed **per case** and binding per case,
+  no pooling; fake-VM handling time subtracted. The p95 <= 25 ms
   gate fails the build only with `HYLO_TIMING_GATE=1` (binds on the owner's Mac target).
 - **Public-repo hygiene (policy 21, NFR-006):** committed fixtures synthetic-only;
   real inputs replayed from git-ignored `captures/`; gitleaks with
@@ -55,14 +62,19 @@ flowchart LR
   owner approval):** every regression-detector job must print a runtime-computed
   positive-coverage line and must treat "checked nothing" as failure, never as a pass:
   - Tier A: `parity: N cases compared, M exclusions validated, K caches swapped` — job
-    fails if `N == 0`.
+    fails if `N == 0` or if `N` differs from the number of case directories found (same
+    runtime census the exclusions check applies to `M`; a partially lost corpus must not
+    pass — ADV-P2-A15).
   - Tier B: `tier-b: N goldens compared` — fails if `N == 0`.
   - Tier C: `tier-c: N inputs per side, M oracle spawns`; the PR-side budget skip
     (`t.Skip` on unset/0 `HYLO_PARITY_FUZZSECONDS`) is allowed only because the job is
     non-gating — on the nightly schedule a 0/unset budget FAILS, it does not skip.
   - Exclusion machinery / canary: `exclusions: M entries validated against the closed
     set` — `M` must equal the file's entry count; a missing exclusions file fails.
-  - Go jobs (lint/test/vet/govulncheck): `go: K files scanned`; the skeleton-era
+  - Go jobs (lint/test/vet/govulncheck): `go: K files scanned` counts source files, so
+    it is paired with a **test-run line**: `go test: N tests run, S skipped` — fails if
+    `N == 0`; the reported skip count keeps an all-skip suite visible (an all-skip pass
+    standing in for coverage is investigated, not accepted — ADV-P2-A15). The skeleton-era
     empty-module guard prints `go: 0 Go files — guard path, NOT a vet/test pass` and is
     removed once Phase 3 lands sources (after which `K == 0` fails).
   - Pattern scan: `hygiene: K files scanned, H hits`.
@@ -79,7 +91,7 @@ flowchart LR
 - **Rationale:** parity must hold on all OSes before generalization (D4 ordering);
   GitHub Releases keeps the P1 toolchain zero-budget.
 - **Consequences:** windows-2025 leg pins the "not executed" Windows assumptions
-  (PRD §9.5) and the D4-EX-1 fake-probe test; the nightly Tier C exit condition is ONE
+  (ASM-005, prd-supplements/assumptions-register.md) and the D4-EX-1 fake-probe test; the nightly Tier C exit condition is ONE
   clean nightly run on all three OSes, 30 minutes per OS (`HYLO_PARITY_FUZZSECONDS=1800`,
   OD-149).
 - **Verification feasibility:** workflow behavior is testable-only (CI leg observation);

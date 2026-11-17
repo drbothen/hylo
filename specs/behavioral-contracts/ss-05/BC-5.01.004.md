@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "14867e3"
+input-hash: "ef650a3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces the {:d}-family format spec used at legacy/dgx_statusline.py SL:1172, 525, 527, 548, 561, 829, 831)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,7 +54,8 @@ contract per OD-141.
 1. Output is `strconv`-independent: the decimal digits of `|n|`, prefixed by `-` when
    `n < 0`, right-aligned in `width` characters; padding is `0` when `zeroPad`, else a
    space. Zero-padding keeps the sign ahead of the zeros (Python `f"{-5:03d}"` is `-05`).
-2. `|n| >= width` → no truncation: the full number is returned (Python never truncates).
+2. Digit count >= width (not `|n| >= width`; ADV-P2-D18) → no truncation: the full number
+   is returned (Python never truncates).
 3. `width <= len(digits)` → the number, unpadded (includes negative numbers whose digits
    meet the width).
 4. Equal to Python `f"{n:>{width}d}"` / `f"{n:0{width}d}"` for every int64 and every width

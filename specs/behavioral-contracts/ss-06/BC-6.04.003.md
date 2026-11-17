@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "31c4e22"
+input-hash: "92224da"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,8 +52,9 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
 1. The workflow is a scheduled (`schedule`, once nightly) GitHub Actions workflow,
    separate from `ci.yml`, with a three-leg OS matrix matching `ci.yml` (macOS, Linux,
    Windows — ubuntu-24.04 on the Linux leg). It uses the same oracle setup
-   (setup-python CPython 3.11, absolute path, `CI=true`; the Windows leg runs Tier B
-   without Python, BC-6.04.001) and the same canary
+   (setup-python CPython 3.11, absolute path, `CI=true`; the Windows leg installs
+   CPython the same way, so the differential fuzz runs on all three OSes, per OD-149 —
+   ADV-P2-D03 disposition; BC-6.04.001) and the same canary
    (BC-6.01.001, BC-6.01.003).
 2. The generator is committed Go code. It reuses the transcript generator
    (design §5.2), so every generated case is synthetic (BC-6.02.001).
@@ -104,7 +106,7 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | Generated stdin triggers an uncaught Python exception (oracle prints `statusline degraded`) and Go renders a row | Divergence reported with the seed; artifact uploaded (P27 class) |
-| EC-002 | Night with 0 divergences | Summary `clean`; counts toward the N-night exit criterion |
+| EC-002 | Night with 0 divergences | Summary `clean`; satisfies the OD-149 exit gate (ONE clean nightly run on all three OSes — no N-night streak, ADV-P2-D04) |
 | EC-003 | Oracle canary fails on the nightly runner | Run fails before generating cases; the night does not count as clean |
 | EC-004 | Generator emits a numeric `session_id` (bug in the domain filter) | The comparator reports an OD-30-class difference without an entry. That is a generator bug: fixed in the generator, not by adding an exclusion |
 | EC-005 | Time budget reached mid-sequence | The partial sequence is discarded, not counted; the case count reflects completed cases |

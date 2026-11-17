@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "14867e3"
+input-hash: "ef650a3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python max(list) used at legacy/dgx_statusline.py SL:671)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,13 +35,13 @@ removal_reason: null
 
 ## Description
 
-`pyfmt.MaxSeq(vals ...Num) Num` (num.go) reproduces Python `max(list)` for the seed-list
+`pyfmt.MaxSeq(xs []Num) (Num, error)` (num.go) reproduces Python `max(list)` for the seed-list
 sites (SL:671 `max(max(vals), floor)`, feeding the sparkline cell ceiling; pitfall PR-04):
 it keeps the earlier element unless the later one compares greater, which is observable
 exactly when a NaN is present. Helper-level contract per OD-141. The pairwise `Max`/`Min`
 are pinned in BC-5.01.003; this contract covers the sequence form. Signature note (ADV-P1-D06,
-BC side): empty input returns typed `ErrValue` (PC-1); the ARCH-06 signature row without an error
-return is stale and the Architect owns reconciling it; this BC governs the behavior stories build to.
+resolved ADV-P2-D08): empty input returns typed `ErrValue` (PC-1); the ARCH-06 signature row
+(`MaxSeq(xs []Num) (Num, error)`) is reconciled.
 
 ## Preconditions
 

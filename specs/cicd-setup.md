@@ -1,10 +1,10 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.1"
+version: "1.2"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
@@ -14,14 +14,18 @@ input-hash: "ef14751"
 # CI/CD setup — phase-1-cicd-setup (OD-150)
 
 Implements ARCH-08 (build, CI, release) and the CI legs of ARCH-07. Per OD-150
-(owner, 2026-11-16) the work sits in a branch worktree, is **uncommitted** (owner
-reviews the diff first), and nothing has been pushed; branch protection is applied
-later, after the first green CI run, with admin bypass. Worktree:
-`.worktrees/ci-phase-1-setup`, branch `ci/phase-1-setup`, cut from `main`
-(`c023bc6`). One finding from setup: `.worktrees/` is **not** in `main`'s
-`.gitignore` (only `.factory/` is); left to the owner to add.
+(owner, 2026-11-16) the work was prepared in a branch worktree and reviewed by the
+owner before landing. STATUS UPDATE (ADV-P2-A24, 2026-11-17): the change is now
+**committed on main** — PR #1 (squashed, `fd031da` "Add CI, release and security
+workflows (phase-1)") — the `.worktrees/ci-phase-1-setup` worktree no longer exists,
+and `.github/workflows/*.yml`, `go.mod` and `.gitleaksignore` live in the repo root
+(branch protection applied per OD-151 after the first green run). One finding from
+setup stands: `.worktrees/` belongs in `main`'s `.gitignore`; the appended line below
+landed with the change. The ci.yml timing placeholder still just echoes its report
+text and passes once `internal/statusline` exists — activating it (with the
+positive-coverage lines below) is Phase 3 work.
 
-## Files created (all uncommitted)
+## Files created (landed on main via PR #1)
 
 | Path | Purpose |
 |---|---|
@@ -70,11 +74,11 @@ fail when it checked nothing. Per job, the required line is:
 
 | Job | Positive-coverage line | Fail condition |
 |---|---|---|
-| `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0` |
+| `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0` or `N` ≠ case-directory census (partially lost corpus must not pass, ADV-P2-A15) |
 | `parity tier B` | `tier-b: N goldens compared` | `N == 0` |
 | `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); PR-side `t.Skip` is fine only because the job is non-gating |
 | exclusion machinery / canary | `exclusions: M entries validated against the closed set` | `M` ≠ file entry count, or the file is missing |
-| `lint` / `test` / `govulncheck` | `go: K files scanned` | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` fails |
+| `lint` / `test` / `govulncheck` | `go: K files scanned` + `go test: N tests run, S skipped` (test jobs) | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` or `N == 0` fails; an all-skip suite is reported via `S` and investigated, not accepted (ADV-P2-A15) |
 | gitleaks + category pattern scan | `hygiene: K files scanned, H hits` | `K == 0` (scan ran over nothing) |
 
 Additionally: a skipped required check must not count as a pass — the parity/timing
@@ -174,8 +178,9 @@ With: `strict: true` (require branches up to date), 0 approving reviews, `enforc
   `TestParityTierC_DiffFuzz`, canary, exclusion machinery — workflows already
   carry the designed invocations; they activate when `internal/parity` and
   `internal/statusline` exist.
-- The timing-report body (1 warm-up + 5 timed runs, nearest-rank p95,
-  fake-VM handling subtracted; `HYLO_TIMING_GATE=1` remains owner-side only).
+- The timing-report body (1 warm-up + 20 timed runs per case, nearest-rank p95 = 19th
+  sorted sample, per case, no pooling; fake-VM handling subtracted;
+  `HYLO_TIMING_GATE=1` remains owner-side only).
 - `TestCorpusHygiene` wiring beyond the Tier A `-run` selector.
 - Distribution follow-ups (Homebrew tap, Scoop, `go install`), container
   packaging, and Prometheus export configuration — not in P1 scope (ARCH-08).

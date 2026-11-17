@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T21:21:12Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1104-1112)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register), 2026-11-17T21:21:41Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,9 +52,22 @@ totals are cumulative for the session and are **not** reset at compaction.
    `c_wr += _w`; `c_rd += _r`; `tout += u.output_tokens or 0`.
 3. Type rules (Python `Num` arithmetic, design IM-02): int + int = exact int (no overflow, no float64 rounding);
    anything + float = float (IEEE 754 double); `true` = 1, `false` = 0 (falsy → int 0); NaN propagates; negative
-   values are added as-is.
-4. The cache stores each total in Python `json.dump` form: ints as decimal digits of any length, floats as `repr`
+   values are added as-is. **Exception (overflow, CP-O06):** when an int operand whose magnitude exceeds the
+   float64 maximum (DBL_MAX ≈ 1.7976e308; JSON admits ints up to 4,300 digits) meets a float operand, Python
+   raises `OverflowError` ("int too large to convert to float"; oracle-verified 2026-11-17 for `+`, `−`, `×`, `÷`)
+   instead of producing a float — e.g. `input_tokens: 1.5` accumulated onto a 310-digit `cache_creation_input_tokens`
+   (SL:1108), or a float `tin` plus a huge int. Legacy degrades (crash path CP-O06, BC-1.03.018); hylo **skips the
+   line** (owner ruling OD-156, extending D4-EX-2 like ruling Q-c; exclusion id `OD-156`), covered by dedicated Go
+   table tests.
+4. The cache stores each total in Python `json.dump` form: ints as decimal digits of any length **up to the CPython
+   int↔str conversion limit (`sys.get_int_max_str_digits()` = 4,300; oracle-verified 2026-11-17)**, floats as `repr`
    (`1.5`, `2.0`, `1e+16`), `NaN`/`Infinity` as bare tokens.
+5. **Digit-limit save failure (EC-009):** when any serialized accumulator exceeds 4,300 decimal digits (e.g. two
+   counted 4,300-digit `input_tokens` summing to 4,301 digits, oracle-verified), CPython `json.dump` raises
+   `ValueError` mid-write (after partial content has reached the stream); `save_cache` swallows it, so the mix cache
+   is **not written** and keeps its previous bytes, and the failure repeats every refresh while the totals stay
+   above the limit. hylo reproduces the **no-write** observable; the temp-file disposition is ruled by OD-163
+   (BC-1.06.001 EC-010).
 5. A `compact_boundary` line does not change these totals (BC-1.03.008).
 
 ## Invariants
@@ -74,6 +87,8 @@ totals are cumulative for the session and are **not** reset at compaction.
 | EC-006 | `input_tokens: -5` | `tin` -5 |
 | EC-007 | `output_tokens: 2.0` | `tout` 2.0 (float persists in the cache) |
 | EC-008 | `input_tokens: "5"` (truthy string) | CP-T04: line skipped under D4-EX-2 (BC-1.03.018), not accumulated |
+| EC-009 | Accumulator crosses 4,301 decimal digits (two counted 4,300-digit `input_tokens`) | `json.dump` raises `ValueError` mid-write (CPython int↔str limit 4,300, oracle-verified); no cache write, previous cache bytes retained (postcondition 5; temp disposition per OD-163) |
+| EC-010 | Huge int (e.g. 310-digit `cache_creation_input_tokens`) meets a float operand (`input_tokens: 1.5`, or a float `tin`) | Python raises `OverflowError` at SL:1108 (oracle-verified); legacy degrades (CP-O06, sticky); hylo skips the line per OD-156, totals unchanged |
 
 ## Canonical Test Vectors
 

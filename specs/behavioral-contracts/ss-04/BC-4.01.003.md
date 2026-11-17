@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - docs/RESUME.md
-input-hash: "3819837"
+input-hash: "3659c75"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,17 +64,18 @@ command reads no configuration, so it works even when `HYLO_*` values are invali
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | Built with `-X main.version=v0.1.0` | `hylo v0.1.0\n` |
-| EC-002 | `go run ./cmd/hylo version` (no ldflags) | `hylo (devel)\n` |
+| EC-002 | `go run ./cmd/hylo version` (no ldflags) | `hylo (devel)\n` — verified go1.26.5 (ADV-P2-D16): `go run` reports `Main.Version = "(devel)"` inside and outside a VCS checkout |
 | EC-003 | Build info unavailable, no ldflags | `hylo dev\n` |
 | EC-004 | `HYLO_STATUSLINE_ROWS=x` set | version printed normally, exit 0 |
 | EC-005 | `hylo version --short` | usage on stderr, exit 2 |
+| EC-006 | `go build` without ldflags in a VCS checkout (verified go1.26.5, ADV-P2-D16) | the binary prints a module pseudo-version, e.g. `hylo v0.0.0-20261117205840-<sha>\n` — `go build` stamps `Main.Version` from VCS state (readable via `go version -m`), unlike `go run`, which stays `(devel)` |
 
 ## Canonical Test Vectors
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | argv `version`, binary built with `-X main.version=v0.1.0` | stdout `hylo v0.1.0\n`; exit 0 | happy-path |
-| argv `version`, `main.version` empty, build info `(devel)` | stdout `hylo (devel)\n`; exit 0 | edge-case |
+| argv `version`, `main.version` empty, build info `(devel)` (go run) | stdout `hylo (devel)\n`; exit 0 | edge-case |
 | argv `version extra` | stdout empty; stderr = `usage.golden`; exit 2 | error |
 
 ## Verification Properties

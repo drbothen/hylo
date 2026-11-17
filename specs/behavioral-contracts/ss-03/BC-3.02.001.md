@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "8512daa"
+input-hash: "2ce3f54"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: D4-EX-1
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -86,7 +87,9 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
 4. Parity runs never depend on a native value: ordinary render-parity cases seed `proc_start` on both sides (design
    §8 row 023 "T, seeded"); native values have no oracle. The OD-76 difference-table cases (BC-3.02.002) are the
    deliberate exception: they run UNSEEDED precisely to exercise the probe, and their comparison is the named
-   difference table under exclusion `OD-76`, not the seeded byte diff.
+   difference table under exclusion `OD-76`, not the seeded byte diff. Enforced at case-load time (ADV-P2-D12
+   disposition): the harness rejects a case with an unseeded `proc_start` and a truthy `session_id` unless the
+   case declares the fake process table (BC-6.02.003 PC-6).
 
 ## Edge Cases
 

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.04.002.md, behavioral-contracts/ss-01/BC-1.04.004.md, behavioral-contracts/ss-01/BC-1.04.009.md, behavioral-contracts/ss-01/BC-1.04.014.md, behavioral-contracts/ss-01/BC-1.04.020.md, prd-supplements/test-vectors.md]
-input-hash: "4bd1594"
+input-hash: "d3d6afe"
 traces_to: prd.md
 source_bc: BC-1.04.002
 bcs: [BC-1.04.001, BC-1.04.002, BC-1.04.003, BC-1.04.004, BC-1.04.005, BC-1.04.006, BC-1.04.007, BC-1.04.008, BC-1.04.009, BC-1.04.010, BC-1.04.011, BC-1.04.012, BC-1.04.013, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.04.017, BC-1.04.018, BC-1.04.019, BC-1.04.020, BC-1.04.021]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — OD-130 not verified in P1; P1 asserts legacy ±Inf behavior per BC-1.04.014 (OD-157, A2-01)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,8 +47,11 @@ mismatch quirk.
 - **Primary BC:** BC-1.04.002 — get_sample TTL / KEEP_DEAD state machine.
 - **Partial coverage:** BC-1.04.001..021 (all twenty-one S1.04 contracts; NaN crash
   paths also ride VP-001).
-- **Invariant verified:** NFR-005 (32-point metric histories — joint with VP-031);
-  OD-130 (±Inf treated as unknown, defensive parse).
+- **Invariant verified:** NFR-005 (32-point metric histories — joint with VP-031).
+  ±Inf disposition (OD-157): P1 verifies the **legacy** behavior of BC-1.04.014 —
+  +Inf on the `v`/`f` traces degrades (CP-N02), -Inf on any trace clamps to `▁`, and
+  +Inf on the `k` trace is safe — and NOT OD-130 (±Inf treated as unknown), which takes
+  effect only after cutover (P6) and has no verification claim in P1.
 
 
 ## Property Class and Verification Method

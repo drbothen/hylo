@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "f65e846"
+input-hash: "a110b90"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -65,7 +65,9 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
    return a start) is excluded from the parity diff through the OD-105 exclusion-list entry `D4-EX-1` with dedicated
    tests `TestWindowAge_D4EX1_Windows*`; the macOS/Linux native-probe differences (true start in the repeated DST hour,
    `⌂` where legacy's localized `ps` fails) are the OD-76 entry named by OD-110, with their own table tests
-   (BC-3.02.002). No case of this contract is excluded.
+   (BC-3.02.002). No case of this contract is excluded. Foreign-cache shapes (EC-007's hand-edited `proc_start`;
+   ruling Q-b) carry exclusion id **OD-160**: vectors that rely on a hand-edited cache are Go table tests, not
+   byte-parity obligations.
 4. The 300000 default comes from `statusline.window_age.min_margin_ms` (register T-040: owner request, review row 9
    revisit, "otherwise it would repeat the elapsed figure").
 
@@ -82,6 +84,7 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
 | EC-007 | `win_start` = `true` (only reachable through a hand-edited cache `proc_start`) | treated as epoch second 1; at now = 1794600000 renders `⌂20770d19h` |
 | EC-008 | stdin has no `session_id` | acquisition is skipped (SL:1229), `win_start = None` → no suffix |
 | EC-009 | FMA contraction of `(now - win_start)*1000 - dur` | forbidden; tests for this site run on arm64 (macos-15 runner), where fusion is detectable (design IM-10) |
+| EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer beyond float64 range, e.g. 10³⁰⁹ | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int) → guard line (stdin-borne render overflow, OD-156); oracle-verified 2026-11-17 |
 
 ## Canonical Test Vectors
 

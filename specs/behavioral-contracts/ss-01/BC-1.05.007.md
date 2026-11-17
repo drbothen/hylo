@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "abef695"
+input-hash: "a429b91"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-636)"
@@ -23,7 +23,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,8 +57,9 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 2. `$/h` text = `" $" + F(r, 1) + "/h"` with `r = usd / (api_ms / 3.6e6)` (SL:623, 625).
 3. `⛏` text = `" ⛏" + F(eq, 2)` (SL:635).
 4. Non-finite: `+inf` → `inf` (so `$inf`, `$inf/h`, `⛏inf`). NaN never reaches `$`
-   (the `usd > 0` guard is false for NaN); NaN `r` is unreachable because a NaN
-   `api_ms` fails the `>= 300000` gate.
+   (the `usd > 0` guard is false for NaN). A NaN `api_ms` alone fails the
+   `>= 300000` gate, but NaN `r` is reachable: `usd` = +Inf with `api_ms` = +Inf
+   passes the gate and Inf/Inf = NaN → grey ` $nan/h` (SL:622-625).
 5. No thousands separators, no exponent form: `1e16` → `10000000000000000.00`.
 
 ## Invariants
@@ -81,6 +82,7 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 | EC-007 | usd +inf | `$inf`; with api 600000 → ` $inf/h` |
 | EC-008 | usd 1e16, api 600000 | `$10000000000000000.00`, ` $60000000000000000.0/h` |
 | EC-009 | api +inf | `r = 0.0` → ` $0.0/h` |
+| EC-010 | usd +inf, api +inf | ` $nan/h`, grey (NaN rate: Inf/Inf at SL:622-625) |
 
 ## Canonical Test Vectors
 

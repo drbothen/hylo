@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "5f3a24c"
+input-hash: "f95b636"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-08/09/13/14"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,6 +55,12 @@ is byte 0x1B.
    HTTP redirects exactly as urllib's default `HTTPRedirectHandler` (active because
    `build_opener(ProxyHandler({}))` keeps it, SL:168-171) — a 301/302/303/307/308 is
    followed by GET and the **final** body is parsed; other statuses are not redirected.
+   Pinned limits (CPython 3.11.7 `urllib.request.HTTPRedirectHandler`): at most 10
+   redirects (`max_redirections = 10`); at most 4 follower visits to the same URL
+   (`max_repeats = 4`); a redirect target whose scheme is not `http`, `https`, `ftp` or
+   empty (inherit) makes urllib raise `HTTPError`. Go must reproduce all three refusal
+   modes the way urllib does — the fetch fails to "no sample" (outer `except Exception`,
+   SL:186) — and must never parse the refused 3xx body.
 2. Proxy environment variables are ignored for this request (legacy `ProxyHandler({})`,
    SL:168; Go `Transport{Proxy: nil}`).
 3. Result is **no sample** (Go: nil; legacy `None`) when: the status is outside 200-299;
@@ -69,9 +75,16 @@ is byte 0x1B.
      `KeyError`, `ValueError` or `IndexError` that series is skipped. A `TypeError`
      (e.g. `value` is a number, `value[1]` is `null`) is **not** caught per series and
      aborts the whole fetch (no sample).
-   - `name == "up"` is rewritten to `"up:" + s["metric"].get("job", "")`.
+   - `name == "up"` is rewritten to `"up:" + s["metric"].get("job", "")`; a non-string
+     `job` makes the concatenation raise `TypeError` — both sites sit outside the
+     per-series catch (SL:182-185) — and aborts the whole fetch (no sample).
    - The pair is stored only if `name` is truthy and not already present
-     (**first wins**).
+     (**first wins**). Membership is dict hashing, so an unhashable non-empty
+     `__name__` (list, dict) raises `TypeError` at `name not in out` (SL:183-184) and
+     aborts the whole fetch, while an empty list/dict name is falsy and the series is
+     skipped. The hashable non-strings `1`, `1.0` and `true` collide under first-wins
+     (`True == 1`, equal hash; `1.0 == 1`) and round-trip through the JSON cache write
+     as strings.
 5. The function never raises; the render path continues with the result.
 
 ## Invariants
@@ -128,9 +141,9 @@ is byte 0x1B.
 | Source | legacy/dgx_statusline.py:fetch_sample (SL:158-187); QUERY (SL:102-123); VM_URL/HTTP_TIMEOUT (SL:73, 81) |
 | Legacy contract | BC-SL-040 (P3 base + r1 refinement; r5 verified, r8 coverage) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-007, DI-008 |
+| L2 Domain Invariants | DI-007, DI-008, DI-012 (metrics-URL D4-EX-3 deviation, BC-2.02.005) |
 | Decisions | OD-123 (metrics URL under backends[0]), OD-56 (timeout = total deadline), OD-57 E-0 (T-005), D14 (proxy bypass is defense in depth) |
-| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; architect to confirm) |
+| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces, line 114) |
 | Stories | TBD (story-writer) |
 
 ## Related BCs (Recommended)

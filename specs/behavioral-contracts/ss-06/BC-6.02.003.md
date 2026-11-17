@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "31c4e22"
+input-hash: "92224da"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,9 +78,9 @@ directory.
    therefore see identical paths, and path-derived names such as the git cache key
    (`sha1(project_dir)[:16]`, SL:405-406) are equal on both sides.
 2. **Settings translation.** Each case setting is emitted once per side:
-   - Legacy side: the legacy env name, quoted as provenance from SL:73-79, 92 and 444
+   - Legacy side: the legacy env name, quoted as provenance from SL:73-77, 89 and 444
      (`DGX_SL_VM_URL`, `DGX_SL_TTL`, `DGX_SL_ROWS`, `DGX_SL_SPARK`, `DGX_SL_GIT`,
-     `DGX_SL_TRACE`, `LOCAL_MODEL_PREFIXES`).
+     `DGX_SL_TRACE`, `LOCAL_MODEL_PREFIXES`; `DGX_SL_TRACE` is at SL:89).
    - Go side: the key's HYLO_* env form (OD-05; no DGX_* on the Go side).
    - `backends[0].model_prefixes` is always emitted on both sides, even when the case
      does not set it. If the case leaves it unset, the harness emits the legacy
@@ -106,14 +107,23 @@ directory.
      (`<case-home>/.cache/dgx-llm/`) and into the Go cache dir (`<case>/hylo-cache/`)
      under the same file names.
    - A seeded `proc_start` in `statusline-<sid>.json` makes both sides skip the process
-     probe (SL:273-275).
+     probe (SL:273-275). Hermeticity rule (ADV-P2-D12 disposition): the harness REJECTS
+     a case that has an unseeded `proc_start` together with a truthy `session_id` unless
+     the case declares the fake process table (BC-3.02.002) — without a seed, legacy's
+     `ps` subprocess falls back to `os.defpath` (SL:280) and runs the runner's real
+     `ps`, and Go's native probe reads the runner's real process tree, so the case would
+     be machine-dependent.
 7. **Steps.** When `steps` is absent, the case is a single refresh at `now`. Otherwise
    each step may set `dt` (seconds added to the previous instant) or an absolute
    `now`, `append` (generator lines appended to the transcript), `stdin` (a replacement
    template) and `columns`. Steps run through the same runner as captured sessions
    (BC-6.02.002).
 8. **Time zone.** `tz` defaults to `UTC`. Naive-timestamp cases run under the P1 pin
-   set: `UTC`, `America/Chicago` and `Europe/London` (P5r5 §B.4).
+   set: `UTC`, `America/Chicago` and `Europe/London` (P5r5 §B.4). OS restriction
+   (ADV-P2-D02 disposition): non-UTC naive-timestamp cases run on Linux and macOS only;
+   the windows-2025 leg runs only the `UTC` naive-timestamp cases, because CPython on
+   Windows resolves naive timestamps through the MS CRT, which does not accept IANA zone
+   names, so the oracle has no comparable value there (research §476).
 
 ## Invariants
 

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.004.md, behavioral-contracts/ss-01/BC-1.05.006.md, behavioral-contracts/ss-01/BC-1.05.009.md, owner-decisions-log-2026-11-14.md]
-input-hash: "b7f58f5"
+input-hash: "efe51ab"
 traces_to: prd.md
 source_bc: BC-1.05.004
 bcs: [BC-1.05.004, BC-1.05.006, BC-1.05.009]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -30,21 +30,26 @@ removed: null
 removal_reason: null
 ---
 
-# VP-020: Cost-history record integrity — no wipe on parse failure
+# VP-020: Cost-history parse failure — legacy reload; next record regenerates the file
 
 ## Property Statement
 
-An unreadable or malformed `cost-history.json` is handled exactly as legacy handles it
-(SL:224-237): the load yields an empty in-memory history, and the next
-throttle-through `record_cost` saves the whole (now one-session) history, overwriting
-the corrupt file — with the exact legacy JSON format (separators, ensure_ascii,
-int/float distinction, OD-138's oracle-pinned NaN usd bytes) regenerated from the
-loaded state. At most the unreadable bytes are lost, exactly as the oracle loses them.
-The throttle is strict `<`; numeric sids write
-one string-form key (OD-30) and self-exclusion fails with a single string-form key.
-Anti-pattern AP-16 (a cache parse failure wipes all history on the next write) is
-disposed by matching legacy's reload-from-scratch semantics: no loss wider than
-legacy's, and no silent format drift.
+An unreadable or truncated `cost-history.json` is handled exactly as legacy handles it
+(`load_cache`, SL:190-197: any open/parse failure returns `{}`): the load yields an
+empty in-memory history, and the next throttle-through `record_cost` saves the whole
+(now one-session) history, overwriting the corrupt file — with the exact legacy JSON
+format (separators, ensure_ascii, int/float distinction, OD-138's oracle-pinned NaN usd
+bytes) regenerated from the loaded state. The title is deliberately honest: the corrupt
+history **is** wiped by the next successful record, exactly as the oracle wipes it —
+the claim is "no loss wider than legacy's" (at most the unreadable bytes are lost),
+not "no wipe". Anti-pattern AP-16 (a cache parse failure wipes *all* history on the
+next write) is disposed by matching legacy's reload-from-scratch semantics, with no
+silent format drift. Valid-JSON wrong-type shapes are a different class and outside
+this VP's parity scope: legacy raises on them (CP-C09/C10 crash paths, BC-1.05.004
+EC-008 — degraded, no write); they are foreign-cache forms carrying exclusion id
+**OD-160** (ruling Q-b). The throttle is strict `<`; numeric sids write one
+string-form key (OD-30) under which the throttle applies and self-exclusion **holds**
+(BC-1.05.006 PC2/PC3).
 
 ## Source Contract
 
@@ -58,11 +63,12 @@ legacy's, and no silent format drift.
 ## Property Class and Verification Method
 
 - **Class:** invariant.
-- **Method:** unit/table test — poisoned-file fault injection: malformed JSON, wrong
-  types, NaN-bearing history, wrong permissions; assert the load yields an empty
-  history and the next record regenerates the exact legacy-format file from scratch
-  (the corrupt bytes are replaced, as the oracle replaces them); format rows compare
-  exact bytes against oracle-pinned expectations.
+- **Method:** unit/table test — poisoned-file fault injection: malformed/truncated
+  JSON, wrong permissions, plus load-succeeds rows (NaN-bearing history); assert the
+  load yields an empty history and the next record regenerates the exact legacy-format
+  file from scratch (the corrupt bytes are replaced, as the oracle replaces them);
+  format rows compare exact bytes against oracle-pinned expectations. Valid-JSON
+  wrong-type shapes are excluded from the table (OD-160, see above).
 - **Honesty:** testable-only (filesystem seam); byte format is oracle-pinned.
 
 ## Proof Method
@@ -77,15 +83,17 @@ legacy's, and no silent format drift.
 ```go
 func TestCostHistory_ParseFailure_LegacyReloadSemantics(t *testing.T) {
     dir := tempCacheDir(t)
-    writeFile(dir, "cost-history.json", garbage) // unreadable/malformed
+    writeFile(dir, "cost-history.json", garbage) // unreadable/truncated — load => {}
     hist := cost.Load(dir)
     if !hist.Empty() { t.Fatal("poisoned load not empty") }
     cost.Record(hist, session, usd) // throttle-through record
     got := readFile(dir, "cost-history.json")
-    if !parsesAsJSON(got) { t.Fatal("corrupt file not regenerated (legacy reloads from scratch, SL:224-237)") }
+    if !parsesAsJSON(got) { t.Fatal("corrupt file not regenerated (legacy reloads from scratch, SL:190-197)") }
     if got != legacyOneSessionBytes(session, usd) {
         t.Fatal("regenerated bytes drift from the legacy format (AP-16)")
     }
+    // valid-JSON wrong-type shapes are NOT in this table: legacy raises on them
+    // (CP-C09/C10, BC-1.05.004 EC-008) — foreign-cache forms, exclusion id OD-160.
 }
 ```
 

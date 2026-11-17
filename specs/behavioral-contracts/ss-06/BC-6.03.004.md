@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "ca9ed6a"
+input-hash: "14aaea0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -23,7 +23,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,8 +55,9 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    build at zero added dependencies.
 2. Each entry is an object with exactly these keys:
    - `id`, one of the closed set `D4-EX-1`, `D4-EX-2`, `D4-EX-3`, `OD-30`, `OD-76`,
-     `temp-file`, `cp-x03` (the parity-class names of BC-ALLOCATION.md; `cp-x03` added by
-     OD-136);
+     `temp-file`, `cp-x03`, `OD-159`, `OD-160`, `OD-161` (the parity-class names of
+     BC-ALLOCATION.md; `cp-x03` added by OD-136; `OD-159`/`OD-160`/`OD-161` added by the
+     owner rulings of 2026-11-17);
    - `case`, a case directory path relative to the corpus root;
    - `expected_output_file`, a path relative to the corpus root;
    - `package`, the Go test package import path that declares `table_test` (the tests
@@ -82,6 +84,9 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails) | BC-3.02.002 |
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
    | `cp-x03` | OD-136 | degraded-line write itself fails (stdout closed); Go swallows the error and exits 0 where legacy CP-X03 exits 1 | BC-1.01.001 EC-005 (dedicated table test, name provisional — architect (OD-145)) |
+   | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01) |
+   | `OD-160` | OD-160 | foreign-cache shapes in the cache directories | stories owning the cache-store verbs (SS-01) |
+   | `OD-161` | OD-161 | integer `transcript_path` → no transcript | stories owning the stdin path-field verbs (SS-01) |
 
 ## Postconditions
 
@@ -105,11 +110,15 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    - Error message: `parity: exclusion <id>/<case>: table test <name> missing|skipped|failed`.
 3. **Excluded comparison.** For an excluded case, the artifacts named by the entry's
    `scope` are compared to `expected_output_file` instead of the oracle: `temp-file`
-   entries use `go-cache-listing`; D4-EX-3 config-error cases use `stdout` (a
-   config-error run renders the config-error line and stops at step 0 — it writes no
-   cache on the Go side while legacy may still have written caches before its import-time
-   parse, so caches are out of scope and compared to nothing);
-   the other ids use `stdout+caches` over the named caches the case declares.
+   entries use `go-cache-listing`; D4-EX-3 config-error cases use `stdout` — scope
+   `stdout` means ONLY the stdout line and exit code are pinned to the expected file,
+   which exists because for the Boolean, Enum and URL classes legacy renders normally
+   and writes its caches (SL:73-77, 89, 186) — the caches themselves are NOT out of
+   scope; they are still compared to the oracle under the next bullet and
+   BC-6.03.002 PC-6 (ADV-P2-D05 disposition; a config-error run stops at step 0 on the
+   Go side, so the Go cache listing is empty and the comparison is against the legacy
+   caches as the oracle rendered them). The other ids use `stdout+caches` over the named
+   caches the case declares.
    - Every artifact outside the scope is still compared to the oracle (BC-6.03.002).
    - A Go output that differs from the expected file fails with
      `parity: exclusion <id>/<case>: go output differs from <expected_output_file>`.

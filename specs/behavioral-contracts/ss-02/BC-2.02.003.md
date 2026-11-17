@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "de0e402"
+input-hash: "e649c6c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy float()/int() parse at legacy/dgx_statusline.py SL:74-75)"
@@ -23,7 +23,8 @@ parity_class: D4-EX-3
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,8 +71,14 @@ BC-2.02.001):
 ## Invariants
 
 1. Any value legacy parsed successfully and that contains neither `_` nor a non-ASCII digit
-   yields the same number in hylo (parity for in-domain values).
+   yields the same number in hylo (parity for in-domain values) WHEN that number lies
+   within the key's registry range and type width: values above int64 (`Int` keys) or
+   above the Duration ceiling of 9223372036.854775 s (`Seconds` keys) are number-range
+   config errors in hylo even though legacy parsed them (OD-162, OD-164; ADV-P2-D09) —
+   see EC-010.
 2. Grammar errors precede range errors.
+3. Every config key carries a valid range in the registry; an out-of-range value is a
+   number-range config error rendered per BC-2.02.001 (OD-162).
 
 ## Edge Cases
 
@@ -86,7 +93,7 @@ BC-2.02.001):
 | EC-007 | `HYLO_STATUSLINE_TELEMETRY_TTL_S=٤_0` | `underscore in numeral` (check 1 first) |
 | EC-008 | `HYLO_STATUSLINE_ROWS=" +2 "` | valid, 2 |
 | EC-009 | `HYLO_STATUSLINE_ROWS=-1` | valid (one row; legacy-identical) |
-| EC-010 | `HYLO_STATUSLINE_ROWS=99999999999999999999` | `out of range` |
+| EC-010 | `HYLO_STATUSLINE_ROWS=99999999999999999999` | `out of range` (int64 overflow; OD-164 number-range case, ADV-P2-D09) |
 
 ## Canonical Test Vectors
 
@@ -111,7 +118,7 @@ BC-2.02.001):
 | Field | Value |
 |-------|-------|
 | Source | new — OD-114 (T10: `4_0`-style underscores and Unicode digits are config errors), OD-102, OD-103 (pyfmt grammar), PR-18; legacy behavior replaced: legacy/dgx_statusline.py:module tunables (SL:74 `float(DGX_SL_TTL)`, SL:75 `int(DGX_SL_ROWS)`); legacy contract notes BC-SL-087, CP-X01/CP-X02 (pass-3 r1) |
-| Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3`, one case per value (`4_0`, `٤`, `2_0`, `٢`, and the legacy crash inputs `""`, `four`, `0x4`, `2.0`), each with its expected output file; dedicated table test `TestConfigError_D4EX3_Number` (OD-105, OD-110) |
+| Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3`, one case per value (`4_0`, `٤`, `2_0`, `٢`, and the legacy crash inputs `""`, `four`, `0x4`, `2.0`, plus the OD-164 number-RANGE cases: the int64-overflow `99999999999999999999` and the Duration-ceiling `9223372036.854776`), each with its expected output file; dedicated table test `TestConfigError_D4EX3_Number` (OD-105, OD-110, OD-164, ADV-P2-D09) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-008, DI-010 |
 | Architecture Module | `internal/config/types.go`; `internal/pyfmt/num.go` (BC-COMPONENT-MAP: internal/config/errors.go (number-grammar class) — ARCH-02) |

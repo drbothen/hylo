@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T13:05:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "62ad7b0"
+input-hash: "903180b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:load_cache/save_cache (SL:190-206)"
@@ -25,9 +25,10 @@ capability: "CAP-009"
 legacy_id: "BC-SL-052"
 parity_class: "byte-exact"
 confidence: "H"
+priority: P0
 lifecycle_status: active
-introduced: v0.1.0
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added"]
+introduced: "0.1"
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,6 +71,12 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
    directory) named `basename(target) + "." + <random>`, mode 0600; write
    `json.dump(data)` bytes (BC-1.05.009 format rules); rename the temp over the target
    (`os.replace`). Any exception at any step is swallowed; the render continues.
+   **On any failure after the temp was created — a mid-write `json.dump` error (e.g.
+   BC-1.03.006 EC-009's 4,301-digit accumulator) as much as a failed rename — hylo
+   removes its own temp file and swallows the removal error; it never removes another
+   save's in-flight temp** (owner ruling OD-163; legacy leaks its temp in these cases —
+   a cache-directory-listing difference only, covered by the OD-110 temp-file
+   exclusion class, BC-1.06.002).
 3. The target path string is handed to the OS unmodified — Go must not lexically
    clean it (`filepath.Join`/`Clean` would turn `statusline-a/../b.json` into
    `b.json`); it concatenates directory, separator and name.
@@ -99,6 +106,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 | EC-007 | sid contains `/` | BC-1.06.002 |
 | EC-008 | Windows, sid with a character invalid in file names (`:` `*` `?` `"` `<` `>` `\|`) | save fails silently, nothing persists (same class as BC-1.06.002); expected from Win32 file-name rules, **not executed** (pin on the windows-2025 CI leg); kept as-is per OD-03 ("revisit only if Windows complains; real ids are UUIDs") |
 | EC-009 | Windows sharing violation on rename | 2-3 short retries, then swallow (design IM-17) |
+| EC-010 | Mid-write dump failure (accumulator int above the 4,300-digit conversion limit, BC-1.03.006 EC-009) | no write — the target keeps its previous bytes (reproduced from legacy, oracle-verified); legacy leaves a partial temp behind, hylo removes its own temp (OD-163); difference confined to the cache-dir listing (OD-110 class), stdout identical |
 
 ## Canonical Test Vectors
 
@@ -113,8 +121,8 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-018, VP-001, VP-022 (primary) | Load returns `{}` for every input the CPython oracle rejects, and the oracle's value otherwise | fuzz (differential) |
-| VP-018, VP-001, VP-022 (primary) | Save never panics or returns an error to the caller under injected FS faults | Go property test (testing/quick) (fault-injecting store) |
+| — (no VP yet) | Load returns `{}` for every input the CPython oracle rejects, and the oracle's value otherwise | fuzz (differential) — the ledger-read-scope VP was mis-anchored here and re-anchored to BC-1.04.001 (ADV-P2-C05) |
+| VP-018, VP-001 (no dedicated store-fault VP yet) | Save never panics or returns an error to the caller under injected FS faults | Go property test (testing/quick) (fault-injecting store) |
 | VP-019 (positive leg) | Loads of the four oracle-written legacy-compatible caches yield the identical ordered `pyfmt.Value` (the "oracle's value" half of row 1) | golden byte comparison (four-cache swap) |
 
 ## Traceability
@@ -147,7 +155,8 @@ S-N.MM — cache store (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-018, VP-001, VP-022 — never-raise load/save; VP-019 — oracle-writes/Go-reads leg of the differential
+- VP-018, VP-001 — never-raise save legs; VP-019 — oracle-writes/Go-reads leg; no VP yet for the load-differential
+  fuzz (VP-022 was mis-anchored: it verifies ledger read scope, not cache load/save — ADV-P2-C05)
 
 
 #### Source Evidence

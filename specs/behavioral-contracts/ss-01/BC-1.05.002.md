@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "4de1490"
+input-hash: "e5f0d55"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:617-625)"
@@ -25,7 +25,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11a (zero recorded rates)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,7 +82,7 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 | EC-002 | `api_ms` = 300000 exactly | shown (inclusive); usd 1.0 → ` $12.0/h` |
 | EC-003 | `api_ms` = `true` | 1 < 300000 → no `$/h` |
 | EC-004 | `api_ms` = NaN | `NaN >= 300000` false → no `$/h` |
-| EC-005 | `api_ms` = +inf | `r = 0.0` → `\e[90m $0.0/h\e[0m` at cold start (grey with a pair too, since every recorded rate is > 0) |
+| EC-005 | `api_ms` = +inf | `r = 0.0` → `\e[90m $0.0/h\e[0m` at cold start; with a pair, grey (a recorded rate can be 0.0 — a stored `api_ms` of Infinity passes the gate and yields rate 0.0, SL:235, 255 — and 0.0 < any positive p75) |
 | EC-006 | usd = +inf, api 600000 | `$inf/h`; cold start → `\e[90m $inf/h\e[0m` |
 | EC-007 | usd 0.5 (grey `$`), api 600000, `th_rate` (20.0, 26.0) | `\e[90m $3.0/h\e[0m` (3.0 < 20) — rate still shown |
 | EC-008 | `th_usd` present, `th_rate` None (12 dollar entries, no rate entries) | `$` coloured, `$/h` grey |

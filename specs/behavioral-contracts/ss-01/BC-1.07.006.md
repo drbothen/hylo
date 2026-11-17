@@ -1,0 +1,159 @@
+---
+document_type: behavioral-contract
+level: L3
+version: "1.1.2"
+status: draft
+producer: product-owner
+timestamp: 2026-11-18T05:30:00Z
+phase: 1a
+inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
+input-hash: "9e0be15"
+traces_to: domain-spec/L2-INDEX.md
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:render_subagent_rows model branch (SL:898-907)"
+subsystem: "SS-01"
+capability: "CAP-009"
+legacy_id: BC-SL-097
+parity_class: byte-exact
+confidence: H
+lifecycle_status: active
+introduced: v0.2.2
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced"]
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
+---
+
+# Behavioral Contract BC-1.07.006: Model segment carries the model-prefix lane tag
+
+## Description
+
+When a task carries a truthy `model`, the row gains a second bit: the optional lane pill (cyan `◨DGX`
+`\e[36m` when `model` starts with any configured prefix, magenta `◨ANTH` `\e[35m` otherwise — only when
+the configured prefix list yields at least one non-empty entry) followed by the model id in grey `\e[90m`.
+The same prefix rule as the main lane pill (BC-1.02.001) so a Haiku subagent inside a DGX session shows
+it is served by Anthropic (review 2026-11-13 #21.4).
+
+## Preconditions
+
+1. ASSUMPTION (ASSUMP-107-1): the Claude Code 2.1.326 `subagentStatusLine` stdin payload is assumed
+   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 3.
+2. `prefixes` = the configured prefix list `backends[0].model_prefixes` (OD-111, OD-123, BC-2.01.002;
+   legacy provenance: env `LOCAL_MODEL_PREFIXES`, SL:898-907), read through internal/config — hylo never
+   reads the legacy env name (OD-05; the parity harness translates legacy env to `HYLO_*` per case,
+   ASM-003). Comma-separated; entries stripped; empty entries dropped; order kept.
+
+## Postconditions
+
+1. `model` falsy or missing → no segment at all (no pill, no grey model).
+2. Truthy `model` that is a string → `<lane><GREY><model><RESET>`; the pill bytes are
+   `\e[36m◨DGX\e[0m ` (prefix hit) or `\e[35m◨ANTH\e[0m ` (miss), each followed by
+   `\e[90m<model>\e[0m`.
+3. Prefix hit test: case-sensitive `strings.HasPrefix` against any entry (same semantics as
+   BC-1.02.001's startswith rule).
+4. `prefixes` empty (explicit empty value; parity cases set it explicitly, OD-111) → lane pill omitted;
+   grey model bit still appended.
+
+## Invariants
+
+1. The pill is omitted entirely (not neutral-grey) when no prefixes are configured — an unknown lane
+   must not be asserted (mirrors BC-1.02.001's unknown-pill rule from the other direction).
+2. Exactly one of {◨DGX, ◨ANTH} when prefixes exist; case-sensitive startswith; first matching entry
+   wins (outcome identical either way).
+3. The segment appears after the opening glyph bit and before token/clock/status bits.
+
+## Edge Cases
+
+| ID | Description | Expected Behavior |
+|----|-------------|-------------------|
+| EC-001 | `model` missing / `""` / `0` / `False` | No segment |
+| EC-002 | `model = 123` with prefixes configured | AttributeError site in legacy — degraded line (CP-A03, BC-1.07.008); in Go the Num coercion must NOT occur: route non-str truthy models to the degraded predicate |
+| EC-003 | `model = 123`, prefixes empty | Grey segment `123` (f-string coercion), no crash, no pill |
+| EC-004 | Prefixes with spaces (`" claude-sonnet , foo "`) | Entries trimmed; whitespace-only entries dropped |
+| EC-005 | Model `Claude-Sonnet-5-5` vs prefix `claude-sonnet` (case mismatch) | No hit → ◨ANTH (case-sensitive) |
+
+## Canonical Test Vectors
+
+| Input (task dict + config) | Expected Output (content bits) | Category |
+|---|---|---|
+| `{"id":"a1","name":"explore","status":"running","model":"claude-sonnet-5-5","tokenCount":12345,"startTime":<now-125000>}`, `model_prefixes = [claude-sonnet]` | `\e[33m» explore\e[0m · \e[36m◨DGX\e[0m \e[90mclaude-sonnet-5-5\e[0m · \e[36m12.3k tok\e[0m · \e[90m02:05\e[0m` | happy-path |
+| `{"id":"a2","label":"exploré","status":"completed","model":"claude-haiku-5","tokenCount":2500000}`, same config | `\e[32m✔ exploré\e[0m · \e[35m◨ANTH\e[0m \e[90mclaude-haiku-5\e[0m · \e[36m2.50M tok\e[0m · \e[90mcompleted\e[0m` | happy-path |
+| `{"id":"a7","status":"running","model":123}`, `model_prefixes = []` | `\e[33m» ?\e[0m · \e[90m123\e[0m` (no pill, no crash) | edge-case |
+| `{"id":"a7b","status":"running","model":"gpt-9"}`, `model_prefixes = [claude-sonnet]` | `\e[33m» ?\e[0m · \e[35m◨ANTH\e[0m \e[90mgpt-9\e[0m` | edge-case |
+| any truthy str model, `model_prefixes = []` (parity cases set it explicitly) | `\e[90m<model>\e[0m` with no pill | happy-path |
+
+Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`): rows 1, 2, 3, 4 byte-reproduced;
+◨=`◨`; pill bytes `\e[36m◨DGX\e[0m` / `\e[35m◨ANTH\e[0m` confirmed.
+
+## Verification Properties
+
+| VP-NNN | Property | Proof Method |
+|--------|----------|-------------|
+| VP-010 | Python-written goldens pin the lane-pill byte rows on committed cases; the startswith property leg is pinned by VP-028 (rule extended to this contract, VP-028 v1.1) | Tier B golden comparison (Python oracle writes; Go matches) |
+
+## Traceability
+
+| Field | Value |
+|-------|-------|
+| L2 Capability | CAP-009 |
+| L2 Domain Invariants | DI-008 (CP-A03 degrade), DI-012 (byte parity) |
+| Architecture Module | `internal/statusline` (model segment; shares the prefix table with the row-1 lane pill) |
+| Stories | TBD (filled by story-writer) |
+| Source | legacy/dgx_statusline.py: model branch (SL:898-907); pill bytes SL:127-133 |
+| Legacy contract | BC-SL-097 (P3r2 §A7; prefix rule shared with BC-SL-006) |
+| Decisions | OD-155, D4 (byte parity); review 2026-11-13 #21.4 (lane tag rationale) |
+
+## Related BCs (Recommended)
+
+- BC-1.02.001 — related to (same startswith prefix rule, row-1 pill)
+- BC-1.07.004 — composes with (framing)
+- BC-1.07.008 — related to (CP-A03 non-str model + prefixes → degraded line)
+
+## Architecture Anchors (Recommended)
+
+- `architecture/ARCH-03-statusline.md` — segment builder; prefix table read once per render
+
+## Story Anchor (Recommended)
+
+TBD — filled by story-writer
+
+## VP Anchors (Recommended)
+
+- VP-010 (lane-pill byte rows; startswith property leg pinned by VP-028 v1.1)
+
+---
+
+### Brownfield-Specific Sections
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (SL:898-907) |
+| **Confidence** | high (pinned runs 2026-11-18) |
+| **Extraction Date** | 2026-11-18 |
+
+#### Evidence Types Used
+
+- **assertion**: pinned runs for hit/miss/no-prefix/empty cases
+- **guard clause**: `if model:` truthy gate (SL:899); `if prefixes:` pill gate (SL:903-905)
+
+#### Purity Classification
+
+| Property | Assessment |
+|----------|-----------|
+| **I/O operations** | none |
+| **Global state access** | legacy reads `os.environ["LOCAL_MODEL_PREFIXES"]`; hylo receives `backends[0].model_prefixes` from internal/config (OD-05) |
+| **Deterministic** | yes |
+| **Thread safety** | safe for concurrent use |
+| **Overall classification** | pure function of (task, prefixes) |
+
+#### Refactoring Notes
+
+Go: take `backends[0].model_prefixes` from internal/config (OD-123), parse (split on `,`, TrimSpace,
+drop empties) once per render, then
+`slices.ContainsFunc(prefixes, func(p string) bool { return strings.HasPrefix(model, p) })`. Keep the
+pill bytes in the theme/constants file next to PILL_DGX/PILL_ANTH so byte parity is auditable.

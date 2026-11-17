@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "1244d41"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-040 P2/P3"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,8 +82,8 @@ All verified 2026-11-15 by calling legacy `visible()` under CPython 3.11.7. Gold
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-027 | `visible(a+b) == visible(a)+visible(b)` whenever neither split point falls inside an SGR run | Go property test (testing/quick) |
-| VP-027 | Go `visible` equals CPython `len(_ANSI.sub("", s))` on generated strings incl. astral and surrogates | Tier C differential fuzz |
+| VP-040 | P2: `visible(a+b) == visible(a)+visible(b)` whenever neither split point falls inside an SGR run | property-test (testing/quick) |
+| VP-040 | P3: Go `visible` equals CPython `len(_ANSI.sub("", s))` on generated strings incl. astral and WTF-8 lone-surrogate byte forms | differential property legs run under the ARCH-07 oracle harness (VP-034 isolation) |
 
 ## Traceability
 

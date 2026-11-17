@@ -1,13 +1,13 @@
 ---
 document_type: assumption-register
 level: L3
-version: "1.0.1"
+version: "1.1.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T16:30:00Z
 phase: 1a
 inputs: [prd.md]
-input-hash: "669ab0f"
+input-hash: "0d3a902"
 traces_to: prd.md
 ---
 
@@ -26,6 +26,7 @@ traces_to: prd.md
 | ASM-004 | The p95 <= 25 ms render-latency target binds on the owner's Mac (darwin/arm64) only; CI legs report timings without gating (OD-117). | validated | Timing methodology review (BC-6.04.002); OD-117 ruling scope check; VP-036 measurement plan. | MEDIUM | BC-6.04.002, NFR-001, VP-036 |
 | ASM-005 | Windows edge cases (BC-1.06.001 EC-008, BC-1.06.002 EC-003/EC-005) and the sitecustomize shim on CPython 3.11 (observed on 3.9.6) are marked "not executed" and pinned on the windows-2025 CI leg / harness canary. | open (disclosed) | Deferred to the windows-2025 CI leg and harness canary; re-check at first three-OS CI run (VP-037). | HIGH | BC-1.06.001/.002, BC-6.01.003, VP-037 |
 | ASM-006 | OD-56 replaces the per-socket timeout with a total fetch deadline; output-identical on the corpus. | validated | Corpus replay equivalence check against the OD-56 ruling (BC-1.04.001). | MEDIUM | BC-1.04.001 |
+| ASM-007 | The `--subagent` / custom agent-panel surface is portable in P1 behind a config off switch (OD-155, superseding OD-14); the argv surface and agent-panel row behavior match the running client (2.1.322, verified 2026-11-14). | validated | Owner ruling OD-155 (2026-11-17); agent-panel row surface verified on client 2.1.322 per the machine context. | MEDIUM | S1/S4 agent-panel BC rows (inserted by pass-2 remediation), BC-4.01.002 |
 
 ## Gate Notes
 

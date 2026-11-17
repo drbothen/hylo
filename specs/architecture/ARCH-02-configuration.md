@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: "L3"
 section: "configuration"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -22,11 +22,12 @@ input-hash: "f457392"
 
 ## Key registry (D15, OD-114, BC-2.01.004)
 
-Every key declares `Key{Name, Type, Default, Unit, Op, Rationale, RationaleCode, Class}`
+Every key declares `Key{Name, Type, Default, Range, Unit, Op, Rationale, RationaleCode, Class}`
 in `registry.go`; the P1 subset lives in `statusline_keys.go` (families per design doc
 §2.4: telemetry, rows/layout, sparkline, git, limits, context/units/theme, timers/window
 age, cost, row-2 widgets, transcript/turn/composition, glyphs, `paths.cache_dir`,
-`backends[0].*`). Golden pin: `internal/config/testdata/legacy_defaults.golden`.
+`backends[0].*`, and `statusline.subagent.enabled` (Bool, default true = legacy, OD-155,
+BC-1.07.002)). Golden pin: `internal/config/testdata/legacy_defaults.golden`.
 Env name rule (OD-01): `EnvName(key) = HYLO_` + upper snake with every `.`, `[`, `]` run
 collapsed to one `_` (`backends[0].metrics_url` -> `HYLO_BACKENDS_0_METRICS_URL`);
 build-time collision test; unknown `HYLO_*` warns on stderr and never changes exit
@@ -35,8 +36,12 @@ status (BC-2.01.001). Grammar per type in `types.go`: typed bool
 `~user` left as written), `COLUMNS` excluded as protocol input (BC-1.01.005, BC-2.01.005).
 Per-OS env/path behavior (P18, ADV-P1-D21) is build-tag confined in `internal/platform`
 and consumed by `config`: `platform.HomeDir()` backs `~` expansion (on Windows `~` and
-`~\` expand against `USERPROFILE`, BC-2.01.005), `platform.EnvLookup(name)` honors
-NT case-insensitivity when matching `HYLO_*` names, and the `paths.*` **defaults are
+`~\` expand against `USERPROFILE`, BC-2.01.005). Environment access is the injected
+`EnvVars` seam of ARCH-01 (AD-10) — `Lookup(name) (string, bool)` plus `Names()`; the
+Windows NT case-insensitive `HYLO_*` name matching is a `platform`-provided
+**implementation of that same interface**, injected into `config.Load` at the seam —
+never a call around it (ADV-P2-A02), so tests fake env behavior on every OS. The
+`paths.*` **defaults are
 owned by `internal/platform`** (`CacheDir()`/`StateDir()`/`ConfigDir()`, OD-95/OD-101/OD-144;
 ADV-P1-A16) — the registry stores the resolver, not a literal. The cfg→plat edge is
 drawn in ARCH-00's dependency graph; pyfmt and platform remain the two sinks.
@@ -55,7 +60,11 @@ drawn in ARCH-00's dependency graph; pyfmt and platform remain the two sinks.
   owner decision.
 - **Consequences:** every threshold row of P4r7 §B.2.1 becomes a registry entry; two
   documented default exceptions to "defaults equal legacy": `paths.cache_dir` (OD-101)
-  and `backends[0].model_prefixes` = `claude-sonnet` (OD-111/OD-123).
+  and `backends[0].model_prefixes` = `claude-sonnet` (OD-111/OD-123). Per OD-162 every
+  key carries a `Range`; an out-of-range value is a **number-range config error**
+  (BC-2.02.002/.003), and where the owning BC defines no non-default behavior the
+  range is the default value only (e.g. the units/context/heat triples). int64-overflow
+  and Duration-ceiling values are number-range cases riding D4-EX-3 (OD-164).
 - **Verification feasibility:** grammars and ordering are pure — **provable** by
   oracle-pinned class tables (BC-2.02.002..006) plus a registry-order property test
   (first-error selection is order-stable); env reading is testable-only (one thin edge).
@@ -64,10 +73,16 @@ drawn in ARCH-00's dependency graph; pyfmt and platform remain the two sinks.
 
 ```go
 type Config struct{ Statusline Statusline; Cost Cost; Paths Paths; Backends []Backend }
-func Load(opts LoadOptions) (*Config, *Error) // P1: env -> defaults; *Error carries Key, Value, Reason, EnvName
-func EnvName(key string) string               // OD-01, collision-tested
+// Load returns the FULL ordered error list in stable registry order (ADV-P2-A01):
+// the stdout line renders Errors.First(), the full list goes to stderr
+// (BC-2.02.001), and `config validate` prints one plain line per error (E-VAL-001,
+// BC-2.03.001) — a single *Error cannot carry either.
+func Load(opts LoadOptions) (*Config, *ErrorSet) // P1: env -> defaults
+func EnvName(key string) string                  // OD-01, collision-tested
 type Error struct{ Key, Value, Reason, EnvName string }
-func (e *Error) StatusLine() string // "hylo: config error: <key>=<value> (<reason>)"
+type ErrorSet struct{ Errors []Error } // registry-ordered
+func (es *ErrorSet) First() *Error     // highest-precedence error, first in registry order (nil-safe)
+func (e *Error) StatusLine() string    // "hylo: config error: <key>=<value> (<reason>)"
 ```
 
 Backends: exactly one entry validated until P6 — zero or >1 entries are the backends
@@ -75,13 +90,17 @@ config error `exactly one backend entry until P6` (OD-123, BC-2.01.002). Reachab
 P1 (ADV-P1-A21): index 0 is always present through its defaults (PC-1), so the
 **zero-entries half is unreachable** — the environment can amend or add entries but never
 remove the default one; it is exercised at the validator's unit level only. The
-**>1-entries half is reachable and covered**: any `HYLO_BACKENDS_<i>_<FIELD>` with
-`<i>` ≠ `0` (any field name) defines an additional entry and trips the error
-(PC-4, BC-2.03.001 EC-005); a `_FIELD` that is not a P1 key instead warns as an unknown
-setting for every index, `0` included. The status
+**>1-entries half is reachable and covered**: a `HYLO_BACKENDS_<i>_<FIELD>` with
+`<i>` ≠ `0` and a known P1 backend field defines an additional entry and trips the
+cardinality error (PC-4, BC-2.03.001 EC-005); a `_FIELD` that is not a P1 key never
+parses a value but STILL establishes the index's presence for the cardinality count —
+the two effects are independent and both apply (BC-2.01.002 PC-4, ADV-P2-D10
+disposition): for `HYLO_BACKENDS_1_NAME=x` the outcome is the unknown-setting warning
+for `NAME` FOLLOWED BY the fatal load error `backends=2 (exactly one backend entry
+until P6)` with `[from HYLO_BACKENDS_1_NAME]` — warning first, then the load error,
+whose position in the error list follows registry field order. The status
 line's metrics URL and prefixes live at `backends[0].metrics_url` /
 `backends[0].model_prefixes`. `statusline.window_age.process_name` default `claude`
-(OD-133); `statusline.theme.*` SGR keys validated as SGR parameter lists (OD-113/OD-134).
 (OD-133); `statusline.theme.*` SGR keys validated as SGR parameter lists (OD-113/OD-134).
 Skeleton obligations for later phases: `LoadOptions.FileLayer` extension point (P4),
 `backends[]` cardinality check isolates to one validator function (P6 widens it).

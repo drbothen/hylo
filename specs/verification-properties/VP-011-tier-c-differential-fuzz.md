@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-11-18T00:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "a90484b"
+input-hash: "94292a8"
 traces_to: prd.md
 source_bc: BC-6.04.003
 bcs: [BC-6.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — property reclassified from liveness to safety (bounded-budget observation: every observed divergence carries a closed-set exclusion id); BC-6.04.003:65-67 domain filter (seeded proc_start, no numeric sids) enforced in the generator; the generator seed is logged for reproduction (A2-26)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,8 +36,8 @@ removal_reason: null
 
 A nightly, non-gating differential fuzz drives random valid inputs (stdin
 templates, settings, metrics modes, clock steps) to both the oracle and the Go port and
-compares stepwise stdout bytes and exit codes; over the fuzz budget no divergence is
-found that is not covered by the closed exclusion set. Budget 0 skips (PR legs); the
+compares stepwise stdout bytes and exit codes; within the fuzz budget every observed
+divergence carries an id from the closed exclusion set. Budget 0 skips (PR legs); the
 nightly workflow sets `HYLO_PARITY_FUZZSECONDS=1800` (30 minutes per OS, OD-149).
 
 ## Source Contract
@@ -55,8 +55,10 @@ nightly workflow sets `HYLO_PARITY_FUZZSECONDS=1800` (30 minutes per OS, OD-149)
 
 ## Property Class and Verification Method
 
-- **Class:** liveness (a continuous hunt: every night either confirms agreement or
-  surfaces a divergence for triage).
+- **Class:** safety, not liveness (A2-26): the observation is bounded — within a
+  budgeted run, every divergence must carry a closed-set exclusion id, and any
+  unexplained divergence fails the run. The nightly cadence is process discipline
+  (OD-149's exit gate), not a liveness property of the code.
 - **Method:** property-based/fuzz test — `TestParityTierC_DiffFuzz` with random valid
   input generation to both sides; non-gating by ruling.
 - **Honesty:** testable-only; statistical, not exhaustive — budget-bounded.
@@ -72,11 +74,16 @@ nightly workflow sets `HYLO_PARITY_FUZZSECONDS=1800` (30 minutes per OS, OD-149)
 ```go
 func TestParityTierC_DiffFuzz(t *testing.T) {
     if fuzzSeconds() == 0 { t.Skip("budget 0: skip on PR legs") }
-    gen := RandomValidCaseGenerator()
+    seed := time.Now().UnixNano()
+    t.Logf("tier C fuzz seed: %d (log with every divergence report)", seed) // A2-26
+    gen := RandomValidCaseGenerator(seed)
     for run := 0; run < budgetRuns(); run++ {
         cs := gen.Next()
+        if !inTierCDomain(cs) { // BC-6.04.003:65-67: seeded proc_start, no numeric sids
+            continue
+        }
         if diverged(RunOracle(cs), RunGoPort(cs)) && !isClosedExclusion(cs) {
-            t.Fatalf("unexplained divergence in %s", cs.ID)
+            t.Fatalf("unexplained divergence in %s (seed %d)", cs.ID, seed)
         }
     }
 }

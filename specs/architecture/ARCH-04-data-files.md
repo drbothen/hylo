@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "data-files"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
@@ -59,19 +59,33 @@ tests):
   hit sharing violations (RK-3).
 - **Options considered:** (1) replica leaks temps like legacy; (2) Go cleans up temps.
 - **Option 2.** `os.CreateTemp(dir, base+".")`, chmod 0600, write, `os.Rename`; Go
-  removes the temp on failure; 2-3 short retries on Windows sharing violations
-  (design doc §4b).
+  removes the temp on failure; exactly `renameRetryLimit = 2` retries on Windows
+  sharing violations, `renameRetryDelay = 10 ms` fixed sleep between attempts (design
+  doc §4b; rationale under Policy 16 below).
 - **Rationale:** stdout parity is unaffected; the difference is the ruled temp-file
   exclusion (OD-110), excluded only from the cache-file comparison (BC-6.03.003).
+  Retry constants (Policy 16): `renameRetryLimit = 2` is exactly what VP-018 pins
+  (`renameRetryLimit`, derived: two attempts cover the transient sharing violation a
+  live antivirus/indexer hold leaves on the just-written temp — more retries cannot
+  shrink that window further on a sub-second refresh, RK-3); `renameRetryDelay = 10 ms`
+  is a labeled judgment call (J, RK-3 carries no timing data): far below the 25 ms p95
+  render budget, above scheduler noise, outlasting typical transient holds.
 - **Verification feasibility:** fault-injection table tests (failed rename, closed dir,
   sid containing `/` — nothing persists, BC-1.06.002); **testable-only**, deliberately
   so, and covered by a named exclusion with its own table test.
 
-## Temp-file cleanup (OD-110)
+## Temp-file cleanup (OD-110, OD-163)
 
-Failed or interrupted saves remove their temp (difference from legacy, named exclusion
-`temp-file` in the closed set, comparison carve-out per BC-6.03.003). Stale-temp cleanup
-runs opportunistically at Save, never at render time.
+Failed or interrupted saves remove **only their own temp** — the exact path
+`os.CreateTemp` returned, removed on the failure path and nonexistent after a
+successful rename (difference from legacy, named exclusion `temp-file` in the closed
+set, comparison carve-out per BC-6.03.003). **No sweeping** (OD-163): a Save never
+scans for or deletes other temps, regardless of age or name. Several Claude Code
+windows render concurrently and share `cost-history.json` and the caches, so one
+process's Save must never delete another process's in-flight temp — the pass-2 defect
+ADV-P2-A03/A2-15 (a swept ENOENT rename loses the other window's write). A temp left
+behind by a killed process is therefore leaked exactly like legacy's, and rides the
+same `temp-file` exclusion carve-out. Cleanup never runs at render time.
 
 ## Ledger: reserved published language (D7, OD-125)
 

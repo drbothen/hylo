@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "1244d41"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -63,8 +63,10 @@ unknown flags (OD-112) use their own one-line formats and are not this contract.
    `newline="\n"`).
 3. Exactly one write to stdout per refresh: Go builds the output in a buffer and either writes the rendered rows
    or the degraded line, never both (design IM-15/IM-22).
-4. The color code `\e[90m` and reset `\e[0m` are the legacy defaults of `statusline.theme.*` (OD-113); the bytes
-   above are the default-config output.
+4. The color code `\e[90m` and reset `\e[0m` are built-in named constants of the guard,
+   independent of `statusline.theme.*` (OD-162); the theme itself may be the invalid value
+   on a config-error run, so the degraded line must not depend on it (same ruling in
+   interface-definitions.md and ARCH-03).
 
 ## Edge Cases
 
@@ -95,8 +97,8 @@ Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`,
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-001, VP-003 | For every input that makes `Render` return `errDegraded` or panic, `Main` writes exactly the 29 degraded bytes and returns 0 | go test -fuzz (Tier C differential) |
-| VP-001, VP-003 | `Main` never returns non-zero for any stdin/argv routed to it | fuzz |
+| VP-001 | For every input that makes `Render` return `errDegraded` or panic, `Main` writes exactly the 29 degraded bytes and returns 0 | unit/table test (go test; not fuzz — no Tier C fuzz VP exists yet for this property) |
+| VP-001 | `Main` never returns non-zero for any stdin/argv routed to it | unit/table test (go test) |
 
 ## Traceability
 
@@ -160,4 +162,5 @@ TBD — status line frame (design step S2)
 #### Refactoring Notes
 
 Go maps the guard to `errDegraded` (wrapped at each CP site) plus a `recover()` backstop in `statusline.Main`; the
-constant `degradedLine` is assembled from the theme defaults so it stays byte-identical (design IM-15).
+constant `degradedLine` is assembled from built-in named constants, independent of the theme (OD-162), so it stays
+byte-identical (design IM-15).

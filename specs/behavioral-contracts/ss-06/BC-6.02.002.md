@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "ca9ed6a"
+input-hash: "14aaea0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -23,7 +23,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -86,10 +87,12 @@ are compared after every step (BC-6.03.002).
    session name, step index, which artifact differed (stdout / exit code /
    `<cache name>`), and a byte-offset diff. Later steps of that session still run and
    report, because a divergence often heals or cascades and both are informative.
-5. **Transcript growth is monotonic.** `transcript_bytes` must be non-decreasing
-   across steps. A decrease, or a value larger than the file, fails the harness with
-   the step index. A real transcript only grows; a shrink would exercise a reset path
-   the capture never saw.
+5. **Transcript growth is monotonic.** The EFFECTIVE transcript length — the step's
+   `transcript_bytes` when given, otherwise the full `transcript.jsonl` length for a
+   step that omits it (a "full copy" step, ADV-P2-D14) — must be non-decreasing across
+   steps. A decrease of the effective length, or a given value larger than the file,
+   fails the harness with the step index. A real transcript only grows; a shrink would
+   exercise a reset path the capture never saw.
 
 ## Invariants
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "013d953"
+input-hash: "249c67a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces str.strip/rstrip/rsplit and bytes.splitlines used in legacy/dgx_statusline.py)"
@@ -18,7 +18,9 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "VP citation reconciliation: SplitLinesBytes row re-homed from VP-025 to VP-038 (pass-2 mint; VP-038 partial-coverage note), 2026-11-18T03:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,10 +36,9 @@ removal_reason: null
 Four Python string operations whose boundary sets differ from Go's: `str.strip()` (Unicode whitespace per
 `str.isspace`), `str.rstrip(chars)`, `str.rsplit(sep, 1)` and `bytes.splitlines()` (only `\n`, `\r\n`, `\r`, unlike
 `str.splitlines`). `pyfmt.Strip`, `RStrip`, `RSplit1` and `SplitLinesBytes` reproduce them exactly (design IM-11;
-pitfall PR-12). Signature note (ADV-P1-D06, BC side): this contract pins `RSplit1` to Python
-`rsplit(sep, 1)` semantics — it returns the 1- or 2-element list `[head, tail]` / `[s]`; the
-ARCH-06 signature row showing a plain `string` return is stale and the Architect owns
-reconciling it; this BC governs the behavior stories build to.
+pitfall PR-12). Signature note (ADV-P1-D06, resolved ADV-P2-D08): this contract pins `RSplit1` to Python
+`rsplit(sep, 1)` semantics — it returns the 1- or 2-element list `[head, tail]` / `[s]`; the ARCH-06
+signature row (`RSplit1(s, sep string) []string`) is reconciled.
 
 ## Preconditions
 
@@ -97,7 +98,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`str.isspace` enumeration over all c
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-025 | `Strip` equals oracle `str.strip()` for strings built from the 29 whitespace code points plus look-alikes | Go property test (testing/quick) + oracle table |
-| VP-025 | `bytes.Join(SplitLinesBytes(b), …)` loses only terminators; no element contains `\n` or `\r` | Go property test (testing/quick) |
+| VP-038 | `SplitLinesBytes` split points equal CPython 3.11 `bytes.splitlines()` (keepends=False) on `\n`/`\r\n`/`\r`; pieces carry no terminators; pinned by committed oracle corner tables + random self-consistency | oracle corner tables (OD-142) + Go property test (testing/quick) |
 
 ## Traceability
 

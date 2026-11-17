@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "3c7864e"
+input-hash: "24b0715"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "OD-30"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,7 +35,7 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-1.05.006: Numeric sid: throttle and self-exclusion fail (single string-form key)
+# Behavioral Contract BC-1.05.006: Numeric sid keyed by string form — throttle and self-exclusion hold
 
 ## Description
 
@@ -55,7 +55,7 @@ works. Claude Code always sends string session ids, so this shape is non-product
 2. The cost segment exists and the lane is known, so `record_cost` and
    `cost_thresholds` run.
 3. `transcript_path` is absent or not a file, so `_mix_counts` returns before its
-   `re.sub` sid sanitize (SL:1013-1016). With a transcript present, legacy's numeric-sid
+   `re.sub` sid sanitize (early return SL:1010-1011; `re.sub` SL:1017). With a transcript present, legacy's numeric-sid
    refresh raises TypeError in `re.sub` and degrades (CP-S14, BC-1.03.013 EC-007) while
    the string sid renders normally, so the equality claims below are restricted to the
    no-transcript case.
@@ -161,7 +161,7 @@ S-N.MM — cost history (filled by story-writer)
 | Property | Value |
 |----------|-------|
 | **Path** | `legacy/dgx_statusline.py` (record_cost (SL:224-237, lookup SL:230); cost_thresholds (SL:246)) |
-| **Confidence** | medium |
+| **Confidence** | high — frontmatter confidence H; OD-30 pairing re-confirmed P3r4 §1.1 with sid 777 |
 | **Extraction Date** | 2026-11-15 |
 
 #### Evidence Types Used

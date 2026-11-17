@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md, behavioral-contracts/ss-01/BC-1.01.010.md]
-input-hash: "143b3eb"
+input-hash: "ac7479c"
 traces_to: prd.md
 source_bc: BC-1.01.010
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007, BC-1.01.010]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: pass-2 follow-up — the for-all property rows and Tier C differential legs claimed by BC-1.01.003..007 (row/LF structure, visible additivity and CPython differential, term_cols grammar differential, trim structure/boundedness, negative-COLUMNS) spun off to VP-040; this VP remains the fixed breakpoint matrix + Python int grammar for COLUMNS"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,6 +47,9 @@ oracle-pinned matrix exactly.
 - **Partial coverage:** BC-1.01.003 (LF join, width rule), BC-1.01.004 (visible width
   = code points after SGR strip), BC-1.01.005 (COLUMNS grammar, else 0), BC-1.01.006
   (double-reset/recycle), BC-1.01.007 (negative COLUMNS).
+- **Not covered here:** the for-all property rows and Tier C differential legs these
+  BCs also claim (quantified over generators, not a fixed matrix) are delivered by
+  VP-040.
 - **Invariant verified:** NFR-005 joint (caps are legacy-fixed named constants where
   applicable); stage-3 normalization restatement (overflowing-negative behavior
   identical in BC-1.01.005 PC-4 and BC-5.01.002 PC-3).

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "171d068"
+input-hash: "e6c7bec"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_sessions/percentiles ranges, OD-162)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,8 +53,13 @@ qualifying sessions exist (cold start).
    or `{}` when absent/falsy (SL:245).
 3. Config (legacy defaults): `statusline.cost.window_s` = 2,592,000 (30 d, T-018);
    `statusline.cost.min_usd` = 1.0 (T-019); `statusline.cost.min_sessions` = 10
-   (T-020, inclusive); `statusline.cost.rate_min_api_ms` = `{cc: 300000, other:
-   1800000}` (T-023); `statusline.cost.percentiles` = (0.75, 0.95) (T-024).
+   (T-020, inclusive; OD-162 range: Int ≥ 1 — 0 is a number-range config error
+   because with an empty qualifying list Python indexes `v[int(0.75 × −1)]` = `v[0]`
+   of `[]` and raises IndexError, SL:257-261); `statusline.cost.rate_min_api_ms` =
+   `{cc: 300000, other: 1800000}` (T-023); `statusline.cost.percentiles` = (0.75, 0.95)
+   (T-024; OD-162 range: each a finite Float in [0, 1] — q > 1 overflows the index
+   (`int(q × (n−1)) ≥ n` → IndexError) and q < 0 wraps into Python negative indexing,
+   so both are number-range config errors; p75 ≤ p95 ratified by the architect).
 
 ## Postconditions
 

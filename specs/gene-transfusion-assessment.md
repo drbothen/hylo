@@ -1,10 +1,10 @@
 ---
 document_type: gene-transfusion-assessment
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 inputs:
   - architecture/ARCH-INDEX.md
@@ -31,7 +31,7 @@ reproduce legacy's observable output on recorded inputs, so a fresh design would
 legacy byte-for-byte anyway. Detail lives in SA/TD; this file fixes the **per-package strategy**
 that stories will carry as `implementation_strategy` (`gene-transfusion` | `hybrid` | `fresh`),
 the reference ranges, and the risks. Scope: the six P1 code packages plus the parity harness
-(Sub Setsystem Registry SS-01…SS-06); P2–P4 components are out of scope (SA "Modules Without Candidates").
+(Subsystem Registry SS-01…SS-06); P2–P4 components are out of scope (SA "Modules Without Candidates").
 
 ## Summary
 
@@ -46,12 +46,13 @@ Strategy table (headline deliverable; legacy range citations are definitive in S
 
 | Package | SS | Strategy | Reference source (legacy file:function range) | License | Reference test coverage | Key risks |
 |---|---|---|---|---|---|---|
-| `internal/statusline` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F2–F9, F11, F12: telemetry+cache I/O SL:156–206; smoothing SL:298–312; sample machine SL:315–359; git SL:362–413; row 1 SL:416–637, 849–873; row 2 SL:640–835; transcript SL:938–1183; width/main/guard SL:1185–1245 | Apache-2.0, same repo (D8) — compatible by construction | 0 tests in-repo (SA §2); Phase 0 oracle corpus substitutes: 103 BCs incl. 63-row `json.dumps` table (BC-SL-096), 20-row turn table (BC-SL-094), 21-row D4-EX-2 table (BC-SL-099), row goldens A/B/C (BC-SL-089), 11-step sample sequence (BC-SL-091), 43 crash paths; 100 % line citation coverage | R1 (Python JSON/number semantics), R2 (side-effect order), R3 (FMA on arm64), R4 (hidden exception paths), R5 (Windows), R10 (stdin churn) — SA §5 |
+| `internal/statusline` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F2–F9, F11, F12: telemetry+cache I/O SL:156–206; smoothing SL:298–312; sample machine SL:315–359; git SL:362–413; row 1 SL:416–637, 849–873; row 2 SL:640–835; transcript SL:938–1183; width/main/guard SL:1185–1245; subagent panel
+SL:837–847, 876–936 (OD-155) | Apache-2.0, same repo (D8) — compatible by construction | 0 tests in-repo (SA §2); Phase 0 oracle corpus substitutes: 103 BCs incl. 63-row `json.dumps` table (BC-SL-096), 20-row turn table (BC-SL-094), 21-row D4-EX-2 table (BC-SL-099), row goldens A/B/C (BC-SL-089), 11-step sample sequence (BC-SL-091), 43 crash paths; 100 % line citation coverage | R1 (Python JSON/number semantics), R2 (side-effect order), R3 (FMA on arm64), R4 (hidden exception paths), R5 (Windows), R10 (stdin churn) — SA §5 |
 | `internal/cost` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F3: `record_cost` SL:224–237, `cost_thresholds` SL:240–262, constants SL:217–221 | Apache-2.0, same repo | 0 in-repo; fully pinned goldens: 20-session cost goldens (BC-SL-101), throttle boundary (BC-SL-102), OD-30 string-form key (BC-SL-079) | R1 (float repr/int-vs-float in writes); OD-30 ruled difference bookkeeping (R6) |
 | `internal/pyfmt` | SS-05 | **hybrid — semantic transfusion** | Authority is CPython 3.11 stdlib semantics (`round`, `json.dumps`/`loads`, `str`/`repr`, `int`/`float` parse, `//`/`%`, datetime), exercised by legacy call sites SL:72–153, 203, 983, 1061 and pinned by CPython-generated tables (TD §2.6); not a line port of legacy | Apache-2.0 + CPython PSF license (Python stdlib behavior; behavior reproduced, no code copied — no license conflict) | CPython-generated expectation tables per file (gen scripts in `internal/pyfmt/testdata/gen/`), 10,893 naive-time goldens (PR-14), fuzz targets `Decode`/`DumpsLen`/`FromISOFormat`/`ParseFloat` | R1 (decoder breadth: WTF-8, big ints, depth, NaN), R11 (oracle patch drift) |
 | `internal/config` | SS-02 | **hybrid** | Defaults and env-grammar behavior transfused from legacy import-time parsing SL:72–100 and render-time `LOCAL_MODEL_PREFIXES` SL:444 (D4-EX-3 boundary, TD IM-16); registry/types/errors fresh from BCs (D15, OD-01/05/57/102) | Apache-2.0, same repo | Threshold register P4r7 §B.2.1 (79 rows) + OD-57 rationales; D4-EX-3 test classes in TD S2 | R8 (D4-EX-3 boundary unspecified), R9 (P1 config source, tension T7) |
 | `internal/platform` | SS-03 | **hybrid** | Ancestor-walk semantics transfused from `claude_window_start` SL:265–295 (parent-first, ≤ 6 levels, stop at pid ≤ 1, whole-second truncation); native probes fresh (D4-EX-1 driver; TD IM-19) — no oracle for real probe values | Apache-2.0, same repo | No legacy counterpart (no `ps` on Windows); parity via seeded `proc_start` (BC-SL-023/080); per-OS probe unit tests (TD S7) | R5-adjacent: probe correctness LOW-MEDIUM on Linux (`CLK_TCK`, `node` comm) and Windows (PID reuse); tension T2 difference bookkeeping |
-| `cmd/hylo` | SS-04 | **fresh** | None beyond argv tolerance SL:1240 (legacy reads only `--subagent`; Go renders the unknown-flag error line for any argument starting with `-`, except a bare `--`, per OD-112/BC-4.01.002/VP-002 — it does not ignore unknown args) | Apache-2.0, same repo | BCs at CLI level (`hylo config validate`/`path`; `statusline` is flag-error for any `-` argument, golden `cmd/hylo/testdata/usage.golden`) | Minimal; argv tolerance pins BC-4.01.002 EC-003/004 |
+| `cmd/hylo` | SS-04 | **fresh** | None beyond argv tolerance SL:1240 (legacy reads only `--subagent`; Go renders the unknown-flag error line for any `-` argument, EXCEPT a bare `-`, which is positional, and a bare `--`, which terminates flag scanning with trailing arguments ignored, per OD-112/BC-4.01.002 EC-004/005/VP-002 — pass-2 A2-21 correction) | Apache-2.0, same repo | BCs at CLI level (`hylo config validate`/`path`; `statusline` flag-error discipline, golden `cmd/hylo/testdata/usage.golden`) | Minimal; argv tolerance pins BC-4.01.002 EC-003/004/005 |
 | `internal/parity` | SS-06 | **fresh** | None — harness is Go-only infrastructure that *drives* legacy via the sitecustomize shim (OD-58); legacy is exercised, not ported (TD §5) | Apache-2.0, same repo | The harness *is* the coverage mechanism (Tiers A/B/C, SA §3–4; OD-104/105) | R4 (Tier C only surfaces P27-class paths), R6 (exclusion-list discipline), R7 (daily-use parity vs OD-101) |
 
 ## Candidate analysis (condensed factor tables)
@@ -97,7 +98,7 @@ so real-value correctness rests on unit tests, with parity secured through cache
 |---|---|
 | `cmd/hylo` (SS-04) | Thin subcommand dispatch; no legacy logic to transfuse beyond argv tolerance (SL:1240) |
 | `internal/parity` (SS-06) | New infrastructure; its "reference" is the harness recipe (research Q3a–Q3c), not legacy code |
-| `--subagent` rows (SL:837–847, 876–936; BC-SL-097) | Not ported — OD-14 ruling; Claude Code 2.1.323 removed `subagentStatusLine` |
+| `--subagent` rows (SL:837–847, 876–936; BC-SL-097) | PORTED in P1 per OD-155 (owner, 2026-11-17 — supersedes OD-14 (a); Claude Code 2.1.326 restored the setting): `sl/subagent.go`, contracts BC-1.07.001..008, off switch `statusline.subagent.enabled` (default true = legacy). Removed from the fresh/OOS set accordingly |
 | Module docstring (SL:1–58) | No code; contract notes already captured in BCs and `docs/STATUSLINE-WIDGETS.md` |
 | Remaining `legacy/` components (proxy, exporter, hook, launcher, …) | P2–P4 scope (porting-decision §3); their assessments activate with SS-07…SS-12 |
 
@@ -113,7 +114,8 @@ exclusion list (OD-105) stays auditable.
 
 The SA §4 estimate carries over unchanged (62 SP, range 50–80; excludes owner review latency,
 tension rulings T1–T10, CI queue time, release tooling). Assumptions 1–4 in SA §4 apply,
-amended by later rulings (P12, ADV-P1-A2-18): tensions ruled before S2/S7; CPython 3.11 on
-the Linux and macOS CI legs only — the Windows leg runs Tier B from committed goldens with
-no interpreter (VP-010, BC-6.04.001); and owner daily live use starts at the instant P5
+amended by later rulings (P12, ADV-P1-A2-18): tensions ruled before S2/S7; CPython 3.11.x
+is installed on ALL THREE CI legs (OD-104) — the Windows oracle run writes the
+`*.windows.golden` files (update flow with `-update`, BC-6.03.001, ADV-P2-A2-16) and the
+OD-149 Tier C nightly runs the oracle on Windows too; and owner daily live use starts at the instant P5
 cutover (OD-107, which amends OD-96) — not "after S8 is green".

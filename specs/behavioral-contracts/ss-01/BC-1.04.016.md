@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md]
-input-hash: "27b62f9"
+input-hash: "d38840c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:732-820)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-03 (CP-N02 reachability scoping)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,9 +57,14 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 
 ## Invariants
 
-1. None of these inputs raise at render time; a NaN/+Inf box rate or TTFT is admitted
-   into history as the newest point (BC-1.04.003 PC4) and surfaces as CP-N02 in the same
-   render — a typed degrade, not a raise.
+1. None of these inputs raise at render time. A NaN/+Inf box rate or TTFT is admitted
+   into history as the newest point (BC-1.04.003 PC4) only when BC-1.04.003 PC3's 2 s
+   gap is met, and it surfaces as CP-N02 in the same render only when the sparkline
+   actually runs it: ≥ 2 plottable points (BC-1.04.009 PC2) under a trace whose key the
+   point carries — `rate`/`v` for the box rate, `ttft`/`f` for TTFT. A NaN TTFT under
+   the default `rate` trace never reaches the sparkline; on a first fetch the newly
+   appended point plots alone and the sparkline draws "". Otherwise the non-finite
+   renders in row 2 with no degrade.
 2. Output bytes equal legacy's for every non-finite value class.
 
 ## Edge Cases
@@ -96,7 +101,7 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 | Legacy contract | BC-SL-075 (P3 r1 new; r7 flag "latent in production") |
 | L2 Capability | CAP-010 |
 | L2 Domain Invariants | DI-008 |
-| Decisions | owner ruling on catalogued crash paths (P3 r7 §5) |
+| Decisions | owner ruling on catalogued crash paths (P3 r7 §5); OD-156 (render-time overflow follows catalogued crash paths and reproduces the 29-byte degraded line); OD-157 (P1 keeps legacy ±Inf rendering; OD-130 unknown-±Inf only after cutover) |
 | Architecture Module | `internal/statusline/row2.go` |
 | Stories | TBD |
 

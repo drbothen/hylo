@@ -1,10 +1,10 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:45:00Z
+timestamp: 2026-11-17T21:58:00Z
 phase: 1a
 inputs:
   - CLAUDE.md
@@ -12,7 +12,7 @@ inputs:
   - .factory/specs/research/domain-hybrid-routing-claude-code-2026-11-14.md
   - .factory/planning/market-intel.md
   - .factory/specs/owner-decisions-log-2026-11-14.md
-input-hash: "ececa29"
+input-hash: "ab532c5"
 traces_to: docs/PLAN.md
 ---
 
@@ -50,6 +50,8 @@ requirements (this cycle: P1 scope only).
   Claude Code traffic (D13) with no proxy settings leaking to child processes (D14);
   Remote Control keeps working (D6).
 - The lane-aware status line.
+- Custom agent-panel rows in the status line via its `--subagent` mode (ported into P1
+  scope by owner ruling OD-155, 2026-11-17, superseding OD-14; contracts BC-1.07.*).
 - The append-only JSONL ledger and Prometheus exporter; ledger format and metric names frozen
   until P7 (D7).
 - Launcher (`hylo run`), Stop hook, `doctor`, and local-CA management (`hylo ca`).
@@ -64,14 +66,13 @@ requirements (this cycle: P1 scope only).
   benchmarks (they remain in the private home-lab repository as one example backend).
 - Kev (the fake-stop model) — enters only as an optional external URL for the Stop hook (D11).
 - The visible `ANTHROPIC_BASE_URL` router — history only (D6).
-- Claude Code custom agent-panel rows / `--subagent` (OD-14).
 - Reading the Claude.ai OAuth token for usage widgets (market-intel R7).
 
 ## Success Criteria
 
 | Outcome | Metric | Target |
 |---------|--------|--------|
-| Parity (P1–P3, D4) | Unexplained byte/decision diffs vs `legacy/` over the full fixture corpus plus the owner's recorded real inputs, on all 3 OSes | 0; differences only via the closed exclusion set pinned in BC-6.03.004 (rulings OD-105, OD-110) |
+| Parity (P1–P3, D4) | Unexplained byte/decision diffs vs `legacy/` over the full fixture corpus plus the owner's recorded real inputs — the synthetic corpus replayed in CI on all 3 OSes, the owner's recorded inputs replayed locally on the owner's Mac (captures are git-ignored and never leave it) | 0; differences only via the closed exclusion set pinned in BC-6.03.004 (rulings OD-105, OD-110) |
 | Status line speed (P1) | p95 wall time per render on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait | <= 25 ms (measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms on a synthetic input — no transcript, metrics fetch failing fast — of which ~25 ms is interpreter start) |
 | Cutover (P5) | Owner's windows on hylo; rollbacks during the 2-week rollback window | 100% of windows on hylo; 0 rollbacks |
 | Proxy overhead (P3) | Deferred — measure the prototype first, then set the number in Feature Mode | No baseline yet |
@@ -79,9 +80,9 @@ requirements (this cycle: P1 scope only).
 Notes:
 
 - Parity: "unexplained" means anything not on the closed exclusion set of BC-6.03.004
-  (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03); every exclusion
-  carries its own table tests (OD-105, OD-110). Rationale: D4 — parity is the definition of
-  done for P1–P3.
+  (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161);
+  every exclusion carries its own table tests (OD-105, OD-110). Rationale: D4 — parity is
+  the definition of done for P1–P3.
 - Speed: a labeled JUDGMENT CALL (target ≈3× faster; a static binary removes interpreter
   start). CI reports per-OS timing, but the target binds only on the owner's Mac. If the
   >512 KB-line fixture misses the target, the spec states that exception explicitly.

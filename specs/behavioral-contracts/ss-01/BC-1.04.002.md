@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "04f459c"
+input-hash: "bc15a45"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-13"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -110,7 +110,7 @@ TTL 4, frozen clock, fetch outcome injected (full 11-step table with exact JSON:
 | Source | legacy/dgx_statusline.py:get_sample (SL:315-359); TTL/KEEP_DEAD (SL:74, 80) |
 | Legacy contract | BC-SL-041 (P3 base quirk; r1 confirmed NaN tokens; r2 §A2) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-007, DI-008 |
+| L2 Domain Invariants | DI-007, DI-008, DI-012 (TTL D4-EX-3 deviation, BC-2.02.002) |
 | Decisions | OD-55 (keep T-003/T-007/T-008/T-009 as keys), OD-57 E-A (T-004), OD-114 (TTL range), OD-101 (cache dir) |
 | Architecture Module | `internal/statusline/sample.go` (design §2.2) |
 | Stories | TBD |

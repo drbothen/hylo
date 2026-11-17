@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T21:21:12Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "d059ea2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["consolidated pass-2 follow-up: EC-011 overflow condition corrected (int operand converted to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01", "consolidated pass-2 follow-up: EC-011 overflow condition corrected (int operand converted to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,6 +82,7 @@ non-numeric truthy window size crashes the render into the degraded line.
 | EC-008 | `pct = -0.0` (JSON `-0.0`; JSON `-0` is int 0) | `-0%`, 0 cells |
 | EC-009 | `pct` = NaN | degraded (CP-S06) |
 | EC-010 | `total = "x"` or `[1]` | degraded (CP-S07) |
+| EC-011 | `context_window_size` above float max (~1.8e308), e.g. 2·10³⁰⁸ | `total >= 1e6` compares exact; CPython converts the int operand to float first, so `total / 1e6` raises OverflowError at SL:435 (taxonomy CP-O01) → degraded line (stdin-borne render overflow, OD-156); a smaller giant such as 10³⁰⁸ renders a long `/…M` denominator with no error |
 
 ## Canonical Test Vectors
 
@@ -109,7 +110,7 @@ the legacy pass-3 rows).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028, VP-001 | For integer totals 1..2,000,000 the denominator equals the oracle's | generated table vs oracle |
+| VP-028 | For integer totals 1..2,000,000 the denominator equals the oracle's | generated table vs oracle |
 | VP-028, VP-001 | NaN percentage and non-numeric truthy total degrade | table test |
 
 ## Traceability
@@ -142,7 +143,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028, VP-001 — denominator table
+- VP-028 — denominator table
 
 ---
 

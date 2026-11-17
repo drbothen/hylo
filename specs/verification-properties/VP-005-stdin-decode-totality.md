@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.01.002.md, behavioral-contracts/ss-01/BC-1.01.008.md, domain-spec/invariants.md]
-input-hash: "0013234"
+input-hash: "62dbef5"
 traces_to: prd.md
 source_bc: BC-1.01.002
-bcs: [BC-1.01.002, BC-1.01.008]
+bcs: [BC-1.01.002, BC-1.01.008, BC-1.07.002, BC-1.07.003]
 module: internal/statusline (input.go, guard.go), internal/pyfmt
 proof_method: fuzz
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — skeleton asserts utf8.Valid(stdout) (A2-25); added the --subagent stdin-absorb totality leg (BC-1.07.003) and the subagent.enabled=false zero-lines leg (BC-1.07.002)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,7 +37,12 @@ removal_reason: null
 For every possible stdin byte string (valid JSON, non-JSON, non-object, empty, invalid
 UTF-8), the stdin decode step produces a defined `pyfmt.Value` — an empty object on any
 decode failure per the legacy semantics — and the render completes (never blank, exit
-0). No stdin input can crash the decode step or abort the refresh. Symmetrically,
+0). No stdin input can crash the decode step or abort the refresh. The `--subagent`
+entry absorbs stdin faults the same way (BC-1.07.003): for every byte string the
+subagent renderer yields its rows or zero bytes, exit 0 — never the degraded line via
+the parse path; and with `statusline.subagent.enabled=false` (BC-1.07.002, DI-012
+named deviation, default `true` = legacy) the render is zero JSON lines for every
+stdin. Symmetrically,
 whatever the fault, the stdout bytes are always valid UTF-8: the guard emits the
 degraded line with lone surrogates encoded per the BC-1.01.008 rules, so `utf8.Valid`
 holds on every rendered output (BC-1.01.008 stdout property, formerly "no VP yet").
@@ -47,7 +52,10 @@ holds on every rendered output (BC-1.01.008 stdout property, formerly "no VP yet
 - **Primary BC:** BC-1.01.002 — Non-JSON or non-object stdin decodes to an empty
   object.
 - **Partial coverage:** BC-1.01.008 (strict UTF-8 stdio; invalid stdin UTF-8 renders
-  from {}).
+  from {}), BC-1.07.003 (subagent stdin absorb: rows or zero bytes, never the degraded
+  line via the parse path), BC-1.07.002 (`subagent.enabled=false` suppresses the
+  entire subagent render — zero JSON lines, exit 0; the `enabled=true` parity leg rides
+  the Tier A corpus, VP-009, and the Tier B goldens, VP-010).
 - **Invariant verified:** DI-008 (stdin faults are on the degraded ladder's safe side).
 
 ## Property Class and Verification Method
@@ -73,12 +81,17 @@ holds on every rendered output (BC-1.01.008 stdout property, formerly "no VP yet
 ```go
 func FuzzStdinDecodeTotality(f *testing.F) {
     for _, s := range SeedStdinCorpus { f.Add(s) }
-    f.Fuzz(func(t *testing.T, stdin []byte) {
+    f.Fuzz(func(t *testing.T, stdin []byte, subagent bool, enabled bool) {
         v, err := pyfmt.Decode(stdin, pyfmt.ModeText) // must not panic
         _ = v
         _ = err                                       // error allowed, panic is not
-        stdout, _, exit := renderFromStdin(stdin)
-        if exit != 0 || len(stdout) == 0 { t.Fatal("render not total") }
+        stdout, _, exit := renderFromStdin(stdin, subagent, enabled)
+        if exit != 0 { t.Fatal("render not total") }
+        if !subagent && len(stdout) == 0 { t.Fatal("blank render on main entry") }
+        if subagent && !enabled && len(stdout) != 0 { // BC-1.07.002 off switch
+            t.Fatal("subagent render with enabled=false must be zero JSON lines")
+        }
+        if !utf8.Valid(stdout) { t.Fatal("stdout is not valid UTF-8 (BC-1.01.008)") }
     })
 }
 ```

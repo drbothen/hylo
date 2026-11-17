@@ -2,10 +2,10 @@
 document_type: domain-spec-section
 level: L2
 section: "capabilities"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T11:35:43Z
+timestamp: 2026-11-17T20:45:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
 input-hash: "3fb8cb1"
@@ -26,9 +26,9 @@ traces_to: L2-INDEX.md
 | CAP-004 | **Backend credential handling** | Credential resolved before retargeting; failure → local error, never forward; client credentials stripped on the local lane (DI-004) | P3 | P0 |
 | CAP-005 | **Response relaying + SSE usage tap** | Streams responses; taps usage/cache/stop-reason from SSE events without altering them; buffers only where legacy does; non-streamed local replies contribute no usage event — legacy behavior preserved through parity, P6 revisit config-gated (OD-126) | P3 | P0 |
 | CAP-006 | **Observability ledger** | Every lane decision, reply and usage observation lands as an append-only JSONL event (13 legacy-named events, D7-frozen); diagnostic side-logs never affect outcomes (DI-005, DI-006, DI-009) | P3 | P0 |
-| CAP-007 | **Plan-limit capture** | Cloud rate-limit headers captured on change per session, powering plan-window widgets (DI-001) | P3 | P0 |
+| CAP-007 | **Plan-limit capture** | Cloud rate-limit headers captured on change per session for ledger/exporter use; status-line plan-window widgets read stdin `rate_limits` only — never captured headers or the ledger (DI-001, DI-007) | P3 | P0 |
 | CAP-008 | **Metrics exposition** | 28 metric names recomputed from the whole ledger + hook log on `/metrics`; exposition bytes are part of parity | P2 | P1 |
-| CAP-009 | **Lane-aware status line** | Render reads stdin, transcript, metrics store, its own caches and environment seams (git state, process table, clock, env — AD-03), never the ledger (DI-007); always exits 0 and the output is never blank — faults fall down the degraded ladder (DI-008); two rows: session/lane row and backend strip | P1 | P0 |
+| CAP-009 | **Lane-aware status line** | Render reads stdin, transcript, metrics store, its own caches and environment seams (git state, process table, clock, env — AD-03), never the ledger (DI-007); always exits 0 and the output is never blank — faults fall down the degraded ladder (DI-008); rows: session/lane row, backend strip, and agent-panel rows (`--subagent`, ported in P1 with a config off switch — OD-155) | P1 | P0 |
 | CAP-010 | **Backend telemetry strip** | Health, queue, KV, throughput, TTFT, power, idle from the metrics store, with a freshness ladder (fresh/stale/dead/serving-down) | P1 | P1 |
 | CAP-011 | **Cost accounting** | Per-lane cost history with personal p75/p95 percentile coloring; owned-hardware cost; the cost-history format is status-line-owned — backfill honors it as a guest (OD-124); backfill rebuilds history from the ledger (P6) | P1; backfill P6 | P1 |
 | CAP-012 | **Session launch and environment scoping** | Builds the client environment, argv and settings; proxy env and CA scoped to the client only — never leaked to children (DI-014) | P4 | P0 |

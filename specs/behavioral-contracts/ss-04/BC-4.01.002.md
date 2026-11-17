@@ -1,19 +1,19 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "51f00c6"
+input-hash: "37d34b7"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-extracted_from: "n.a. (greenfield; legacy --subagent dispatch at legacy/dgx_statusline.py SL:1240-1241 is not ported, OD-14)"
+extracted_from: "n.a. (greenfield; --subagent is a valid P1 flag dispatched per BC-1.07.*, OD-155; legacy reference: the --subagent dispatch at legacy/dgx_statusline.py SL:1240-1241)"
 subsystem: "SS-04"
 capability: "CAP-009"
 legacy_id: new
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -30,14 +31,15 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-4.01.002: Unknown flag renders one-line error, exit 0, never blank (incl. leftover --subagent)
+# Behavioral Contract BC-4.01.002: Unknown flag renders one-line error, exit 0, never blank
 
 > Notation: `\e` is the byte 0x1B (ESC); `\n` is 0x0A. Byte strings are exact.
 
 ## Description
 
-`hylo statusline` defines no flags in P1. Any flag-shaped argument — including a leftover
-`--subagent` from a legacy `subagentStatusLine` wiring (OD-14: not ported) — makes it print
+`hylo statusline` defines no other flags in P1 (`--subagent` is a VALID flag in P1, OD-155:
+it dispatches the subagent status line mode, BC-1.07.*). Any other flag-shaped argument makes
+it print
 exactly one grey line `hylo: unknown flag <flag>` and exit 0, never a blank line and never a
 non-zero status (OD-112, same rule as D4-EX-3).
 
@@ -67,20 +69,21 @@ non-zero status (OD-112, same rule as D4-EX-3).
 1. Never blank, never non-zero (DI-008).
 2. The grey pair is the built-in literal (`\e[90m`/`\e[0m`), independent of
    `statusline.theme.*`, like the config-error line.
-3. `--subagent` has no special handling: it is an unknown flag like any other (the
-   agent-panel row is out of scope, OD-14; BC-SL-097 not ported).
+3. `--subagent` is a valid flag in P1 (OD-155): it dispatches the subagent status line mode
+   (BC-1.07.*) and never reaches the unknown-flag path of this BC. Every flag other than
+   `--subagent` (and the `--` terminator) is unknown and handled here.
 
 ## Edge Cases
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | `hylo statusline --subagent` | `\e[90mhylo: unknown flag --subagent\e[0m\n`, exit 0 |
+| EC-001 | `hylo statusline --subagent` | NOT this BC: `--subagent` is valid in P1 (OD-155), dispatched per BC-1.07.* |
 | EC-002 | `hylo statusline -h` | `\e[90mhylo: unknown flag -h\e[0m\n`, exit 0 |
 | EC-003 | `hylo statusline --config=x.yaml` | `\e[90mhylo: unknown flag --config=x.yaml\e[0m\n`, exit 0 (no config flag on statusline in P1) |
-| EC-004 | `hylo statusline -- --subagent` | normal render (after `--`), exit 0 |
+| EC-004 | `hylo statusline -- --subagent` | positional `--subagent` after `--` is data for the normal render (BC-1.07.* governs the mode dispatch; an unknown flag after `--` is likewise positional), exit 0 |
 | EC-005 | `hylo statusline -` | normal render (`-` is positional), exit 0 |
 | EC-006 | `hylo statusline foo --a --b` | line names `--a`; stderr lists `--a` and `--b` |
-| EC-007 | `--subagent` plus `HYLO_STATUSLINE_TELEMETRY_TTL_S=nan` | unknown-flag line (precedence), exit 0 |
+| EC-007 | `-h` plus `HYLO_STATUSLINE_TELEMETRY_TTL_S=nan` | unknown-flag line (precedence over the config error), exit 0 |
 | EC-008 | flag containing a newline `$'--a\nb'` | `\e[90mhylo: unknown flag --a\x0ab\e[0m\n` |
 
 ## Canonical Test Vectors
@@ -88,7 +91,7 @@ non-zero status (OD-112, same rule as D4-EX-3).
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | argv `statusline`, stdin `{}` | normal S1 render; exit 0 | happy-path |
-| argv `statusline --subagent`, any stdin/env | stdout `\e[90mhylo: unknown flag --subagent\e[0m\n` (bytes `1b 5b 39 30 6d` + `hylo: unknown flag --subagent` + `1b 5b 30 6d 0a`); exit 0; cache dir unchanged | error |
+| argv `statusline --leftover`, any stdin/env | stdout `\e[90mhylo: unknown flag --leftover\e[0m\n` (bytes `1b 5b 39 30 6d` + `hylo: unknown flag --leftover` + `1b 5b 30 6d 0a`); exit 0; cache dir unchanged | error |
 | argv `statusline -- -x` | normal render; exit 0 | edge-case |
 
 ## Verification Properties
@@ -101,8 +104,8 @@ non-zero status (OD-112, same rule as D4-EX-3).
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-112 (T8: unknown flag incl. leftover `--subagent` → `hylo: unknown flag ...`, exit 0), OD-14 (`--subagent` not ported), DI-008; legacy reference: legacy/dgx_statusline.py:`__main__` (SL:1240-1241 `--subagent` dispatch; SL:1243-1245 never-nonzero guard) |
-| Parity / exclusion | n.a.: no parity case passes flags (the harness invokes `hylo statusline` without flags; legacy `--subagent` mode is out of scope, BC-SL-097 OOS). Covered by its own Go table test `TestStatusline_UnknownFlag` |
+| Source | new — OD-112 (T8: unknown flag → `hylo: unknown flag ...`, exit 0), OD-155 (owner ruling 2026-11-17: `--subagent` IS a valid P1 flag, dispatched per BC-1.07.*), DI-008; legacy reference: legacy/dgx_statusline.py:`__main__` (SL:1240-1241 `--subagent` dispatch; SL:1243-1245 never-nonzero guard) |
+| Parity / exclusion | n.a.: no parity case passes flags (the harness invokes `hylo statusline` without flags; the `--subagent` mode carries its own contracts, BC-1.07.*). Covered by its own Go table test `TestStatusline_UnknownFlag` |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `cmd/hylo/statusline.go` (BC-COMPONENT-MAP: cmd/hylo/statusline.go (unknown-flag scan) — ARCH-01) |

@@ -1,13 +1,13 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.4"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:00:00Z
+timestamp: 2026-11-18T04:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "9e5a4c0"
+input-hash: "81b9fd0"
 traces_to: ../prd.md
 deployment_topology: single-service
 ---
@@ -23,7 +23,7 @@ deployment_topology: single-service
 | Section | File | Tokens | Primary Consumer | Purpose |
 |---------|------|--------|-----------------|---------|
 | Overview | ARCH-00-overview.md | ~900 | orchestrator, all agents | Principles (D4/D15/pure-core-effects/never-blank), package map, acyclic dependency direction |
-| Binary & CLI | ARCH-01-binary-cli.md | ~700 | story-writer, implementer | cmd/hylo dispatch, closed exit-code surface, unknown-flag precedence |
+| Binary & CLI | ARCH-01-binary-cli.md | ~700 | story-writer, implementer | cmd/hylo dispatch incl. `--subagent` routing (OD-155), closed exit-code surface, unknown-flag precedence |
 | Configuration | ARCH-02-configuration.md | ~900 | implementer, test-writer | Key registry (D15/OD-114), HYLO_* grammars, D4-EX-3, resolution skeleton |
 | Status line pipeline | ARCH-03-statusline.md | ~1100 | story-writer, implementer, formal-verifier | Pure widgets + ordered effect script, Env seams, effect-step script |
 | Data files | ARCH-04-data-files.md | ~800 | implementer | Cache dir layout, byte-exact writers, atomic writes, reserved ledger |
@@ -82,6 +82,7 @@ deployment_topology: single-service
 | AD-11 | Closed verb-scoped exit-code table; 3-OS gate; GitHub Releases | ARCH-01/08 | Exhaustive test surface; D5/D12 |
 | AD-12 | Reserved P2-P7 boundaries named; P1 skeleton pre-provisions only FileLayer + backends validator | ARCH-09 | Feature Mode needs unblocked seams, not designs |
 | AD-13 | Fixture co-location under internal/statusline/testdata, runner in internal/parity | ARCH-07 | One fixture home; testdata is opaque to Go, cross-read is deliberate (confirmed by OD-148) |
+| AD-14 | Test-only dependencies, pinned in go.mod at adoption: `github.com/flyingmutant/rapid` (metamorphic property generators, ARCH-06/ARCH-00) and `gremlins` (mutation-testing CLI, P19 tool named in ARCH-00) | ARCH-00/06/08 | Each carries a stated reason per the dependency policy; they never enter the runtime binary; the go.mod test-dep additions land on main with the owner's approval (ADV-P2-A19, spec-only in pass 2) |
 
 ## Owner tensions (all resolved by owner rulings)
 
@@ -102,7 +103,7 @@ deployment_topology: single-service
 
 ## Deferred to Pass 2 / Pass 3
 
-Pass 2 (DONE, 2026-11-16): 37 VP-NNN files + VP-INDEX under
+Pass 2 (DONE, 2026-11-16): 38 VP-NNN files + VP-INDEX under
 `../verification-properties/` (catalog source of truth). Pass 3 (DONE, 2026-11-16):
 VP/architecture anchors inserted into the BC files' Verification Properties / VP Anchors
 body sections (spot-checked 2026-11-17 across ss-01/02/04/05/06). ARCH sections carry the
@@ -110,16 +111,17 @@ verification-feasibility assessments that Pass 2 formalized.
 
 ## Verification Properties (Pass 2 cross-reference)
 
-Catalog: `../verification-properties/VP-INDEX.md` — 38 VPs covering all 145 BCs
-(machine-checked). By class: invariant 30, safety 6, liveness 1, performance 1. By
-primary method: unit/table 19, property/fuzz 11, golden 3, parity 2, static analysis 1,
-measured 1, CI observation 1 (regenerated 2026-11-17 per CA-02 and SC-05, matching the
-VP-INDEX Totals). Zero formal proofs claimed (iron law: Go cycle — the
+Catalog: `../verification-properties/VP-INDEX.md` — 40 VPs covering all 153 BCs
+(machine-checked, rebuilt 2026-11-18 after the pass-2 fixes). By class: invariant 32,
+safety 7, performance 1. By primary method: unit/table 20, property/fuzz 12, golden 3,
+parity 2, static analysis 1, measured 1, CI observation 1 (regenerated 2026-11-18 per
+CA-02 and SC-05, matching the VP-INDEX Totals; VP-011's body class reads "safety, not
+liveness (A2-26)"). Zero formal proofs claimed (iron law: Go cycle — the
 provable-grade pure cores are verified by exhaustive oracle tables + property/fuzz,
 declared per VP). Aggregate VP mapping by primary home (first ARCH home in each
 VP-INDEX catalog row; every VP listed exactly once): ARCH-00 P4 → VP-001; ARCH-01 →
 VP-002/004; ARCH-02 → VP-015/016/017; ARCH-03 →
-VP-003/005/007/008/021/022/027/028/029/030/031/038; ARCH-04 → VP-018/019/020;
+VP-003/005/007/008/021/022/027/028/029/030/031/038/039/040; ARCH-04 → VP-018/019/020;
 ARCH-05 → VP-014/032/033; ARCH-06 → VP-006/023/024/025/026; ARCH-07 →
 VP-009/010/011/012/013/034/035; ARCH-08 → VP-036/037. Eight VPs carry a second ARCH
 home in VP-INDEX (VP-001, VP-005, VP-014, VP-019, VP-020, VP-022, VP-035, VP-038); all

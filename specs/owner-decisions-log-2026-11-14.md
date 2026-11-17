@@ -138,3 +138,12 @@
 | OD-157 | (a) OD-130 (±Inf telemetry treated as unknown) takes effect after cutover (P6); P1 keeps legacy behavior | rules the pass-1 held question (A2-01 + VP-030) |
 | OD-158 | (a) S1/S5 gate is line coverage >= 95% (OD-135 as written); mutation kill rate >= 95% is a Phase 6 target, reported but not gating P1 | rules the pass-1 held question (A08) |
 | OD-159 | (a) Go reads files as UTF-8 on all OSes, as a named deviation | like D4-EX-1; rules the pass-1 held question (B08/C06) |
+
+<!-- Phase-1d pass-2 remediation rulings by the owner, 2026-11-17 (owner chose the recommended option each time; next free OD-166). Closed exclusion set after OD-160/OD-161: 10 ids — D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161 -->
+
+| OD-160 | (a) foreign-cache shapes (ruling Q-b, CP-C01..C10) get the named exclusion id OD-160 in the closed set; vectors relying on hand-edited caches are Go table tests, not byte-parity | adds OD-160 to the closed exclusion set (now 10 ids) |
+| OD-161 | (a) an integer `transcript_path` is treated as no transcript; hylo never reads or closes a descriptor it did not open | adds OD-161 to the closed exclusion set (now 10 ids) |
+| OD-162 | (a) every config key has a valid range derived from legacy semantics; keys whose non-default behavior cannot be defined have range = default only; out-of-range values are config errors (number-range class) | |
+| OD-163 | (a) a save removes only the temp file it created when its write or rename fails (OD-110 as ruled); no sweeping of other temps | |
+| OD-164 | (a) int64 overflow and the Duration ceiling are D4-EX-3 number-range cases (covered by OD-114) | |
+| OD-165 | (a) `hylo config path` prints effective paths (overrides applied) | |

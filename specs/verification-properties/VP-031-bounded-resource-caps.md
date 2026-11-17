@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.04.003.md, prd-supplements/nfr-catalog.md]
-input-hash: "9e17709"
+input-hash: "84b1d96"
 traces_to: prd.md
 source_bc: BC-1.03.005
 bcs: [BC-1.03.003, BC-1.03.005, BC-1.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — legacy has exactly FOUR caps: SPARK_MAX_AGE = 90 s age cap added (A2-14)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,12 +34,15 @@ removal_reason: null
 
 ## Property Statement
 
-Per-refresh state is capped exactly as legacy capped it, and legacy has exactly three
+Per-refresh state is capped exactly as legacy capped it, and legacy has exactly four
 caps (NFR-005, P13 — no cap may be invented): the 256-id usage dedup (registry key
 `statusline.transcript.dedup_memory`, default 256, T-060; legacy `ids[-256:]`,
 mix-cache writer, SL:1153), the 32-point metric histories (legacy `hist[-32:]`,
-SL:350), and the 512 KB transcript read step (module constant `_READ_CAP = 524288`,
-SL:952). The "memory-256 mix cache" is that same 256-id dedup list seen from the
+SL:350), the 512 KB transcript read step (module constant `_READ_CAP = 524288`,
+SL:952), and the 90 s history age cap (config key `statusline.sparkline.max_age_s`, 90,
+T-007; legacy `SPARK_MAX_AGE = 90.0`, SL:83) — the fourth cap is age-based, pruning
+history points older than 90 s (BC-1.04.003). The "memory-256 mix cache" is that same
+256-id dedup list seen from the
 mix-cache writer — one cap, not two. There is no turn-identity-line window in legacy
 and none in hylo. Each cap value is a named constant or registry key with rationale
 (D15), and exceeding a cap evicts per legacy's discipline (FIFO/oldest-first as the
@@ -63,7 +66,7 @@ owning BC rules).
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Cap boundary tables | Go test | yes — cap±1 per cap | all three caps + eviction rows |
+| Cap boundary tables | Go test | yes — cap±1 per cap (age cap: age ± ε) | all four caps + eviction rows |
 | Constant pin | registry golden | yes | cap provenance (D15) |
 
 ## Proof Harness Skeleton
@@ -73,8 +76,9 @@ func TestCaps_LegacyIdentical(t *testing.T) {
     if transcriptDedupMemory() != 256 { t.Fatal("dedup cap drifted (SL:1153 ids[-256:])") }
     if metricHistoryPoints() != 32 { t.Fatal("history cap drifted (SL:350 hist[-32:])") }
     if readCapBytes() != 512*1024 { t.Fatal("read cap drifted (_READ_CAP 524288)") }
+    if sparkMaxAgeS() != 90.0 { t.Fatal("history age cap drifted (SPARK_MAX_AGE 90.0, SL:83)") }
     // no turn-identity window constant exists; a static registry check asserts
-    // the constant/registry set is exactly these three caps (NFR-005).
+    // the constant/registry set is exactly these four caps (NFR-005).
 }
 ```
 
@@ -87,7 +91,7 @@ matrices per cap.
 
 | Factor | Assessment | Notes |
 |--------|-----------|-------|
-| Input space size | Three caps x ±1 | tiny |
+| Input space size | Four caps (point/byte caps ±1; age cap ±ε) | tiny |
 | Proof complexity | N/A | |
 | Tool support | Full | |
 | Estimated proof time | Hours | |

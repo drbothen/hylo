@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "427aa34"
+input-hash: "3879bd0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"
@@ -24,7 +24,8 @@ parity_class: temp-file
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,12 +73,15 @@ It is never a blanket exclusion.
    `^.+\.json\.[a-z0-9_]{8}$` — the anatomy of a leaked legacy temp
    `<target>.json.<8 mkstemp chars>` (Python `tempfile` suffix alphabet
    `[a-z0-9_]{8}`, CPython 3.11 verified with `python3 -I`). A named cache
-   `statusline-<sid>.json` can never match: legacy's sid sanitizer
-   (`re.sub(r"[^A-Za-z0-9_-]", "_", sid)[:40]`, SL:1015-1016) removes dots from the
-   sid, so a named cache contains exactly one `.` and cannot have the `.json.`
-   double-dot anatomy — not even for a fuzzed or synthetic sid (fail-closed for
-   named caches, ADV-P1-D16). Removed names are listed in the step report as
-   `temp (ignored): <name>`.
+   `statusline-<sid>.json` can never match the pattern: every named cache ends in
+   `.json`, so its last eight characters include a `.` and the `.json.` double-dot
+   anatomy requires such a dot EARLIER in the name — which the eight-character suffix
+   cannot supply. The guarantee is purely anatomical (ADV-P2-D07 disposition): the
+   sid itself is used raw for the session cache (SL:1215, OD-03) — dots included, as
+   EC-002's `statusline-a.json.b.json` shows — and the dot-removing sanitizer
+   (`re.sub(...)[:40]`, SL:1017) applies only to the mix cache. A raw sid CAN therefore
+   contain dots; it still cannot make a named cache match. Removed names are listed in
+   the step report as `temp (ignored): <name>`.
 2. **stdout unaffected.** The filter never touches stdout or exit-code comparison.
    For the sid-with-`/` case, stdout and exit code are compared to the oracle exactly
    as for any other case, and must match. Nothing persists on either side, so both
@@ -115,7 +119,7 @@ It is never a blanket exclusion.
 |----|-------------|-------------------|
 | EC-001 | sid `../x`, ROWS 2, stdin carries non-empty `rate_limits`, metrics canned | Legacy leaks two temps (`x.json.<8>` ×2); Go leaks none. stdout equal; named caches equal (the only named caches are git and mix, plus cost history if recorded) |
 | EC-002 | A sid containing `.json.` such as `a.json.b` | Session cache `statusline-a.json.b.json` ends in `.json` and is compared normally |
-| EC-003 | Go's `os.CreateTemp` random part is decimal digits | Also matched by the pattern; it would be ignored if ever present, but the table test requires that none remain |
+| EC-003 | Go's `os.CreateTemp` random part is decimal digits (ADV-P2-D07: the `*` is replaced by a decimal of VARIABLE length, not always 8 chars — so a short Go random part can fail to match the 8-char pattern; the store invariant still forbids leftovers, and the table test requires that none remain) | Go temps are cleaned up before comparison regardless of length; none remain |
 | EC-004 | Windows: rename fails on a sharing violation under concurrent refreshes (RK-3) | Not a corpus case. Go retries, then swallows and cleans up; covered by Go unit tests only |
 | EC-005 | A temp-pattern file appears in a case with no `temp-file` entry | Ignored by the filter for comparison. If the file is on the Go side, the store invariant is violated, and the harness fails the case with `go left temp <name>` |
 

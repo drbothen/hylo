@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "overview"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 inputs: [prd.md, product-brief.md, domain-spec/invariants.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -90,7 +90,9 @@ section as its home; cross-references are by Go interface.
 - **Provable (pure core):** pyfmt arithmetic/JSON/string/time helpers; width/trim math;
   widget segment formatting; transcript state transitions; sample TTL machine; config
   grammars and registry ordering. Strategy: oracle-pinned tables + property/fuzz targets
-  (design doc §2.6); mutation target >= 95% (AD-01 classes S1/S5, OD-135). **Mutation
+  (design doc §2.6). P1 gate for S1/S5: **line coverage >= 95%** per package (OD-135
+  CRITICAL tier as ruled by OD-158); the >= 95% **mutation kill rate is a Phase 6
+  target** — reported by the formal-verifier, not gating P1 (OD-158). **Mutation
   tool (P19): gremlins** (go-gremlins/gremlins) — it drives the standard `go test`
   suite per mutant and reports per-package mutation coverage, so it plugs into the
   3-OS gate unchanged; go-mutesting is an aging research prototype needing custom
@@ -101,9 +103,6 @@ section as its home; cross-references are by Go interface.
   generator deterministically re-draws a fixed sample list and checks those cases
   against the committed CPython tables.
 
-- **Testable-only (effects):** env reads, cache file I/O, HTTP fetch, process probes,
-  interpreter spawning. Strategy: fake-server and fake-seam integration tests plus seeded
-  parity cases; no proof claimed — side effects are confined to thin, table-covered shells.
 - **Testable-only (effects):** env reads, cache file I/O, HTTP fetch, process probes,
   interpreter spawning. Strategy: fake-server and fake-seam integration tests plus seeded
   parity cases; no proof claimed — side effects are confined to thin, table-covered shells.

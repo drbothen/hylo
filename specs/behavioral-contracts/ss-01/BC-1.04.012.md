@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "12ee8f9"
+input-hash: "e457c30"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:822-834)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/12"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,7 +43,8 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
    twice at SL:825-826 — output-neutral under the frozen harness clock, design IM-14).
 3. Config: `statusline.idle.after_s` 300 (T-011, labeled judgment: "longer than a normal
    think/tool gap between turns", review #20.2), `statusline.idle.running_below` 1
-   (T-108, judgment: review #20 threshold choice).
+   (T-108, DOC: review #20 "gating (> 5 min AND running < 1) correct"; OD-162 range:
+   finite Float ≥ 0, out-of-range = number-range config error, NaN rejected).
 
 ## Postconditions
 

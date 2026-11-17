@@ -2,10 +2,10 @@
 document_type: domain-spec-section
 level: L2
 section: "state-machines"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T12:54:51Z
+timestamp: 2026-11-17T20:45:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r8.md, .factory/specs/owner-decisions-log-2026-11-14.md]
 input-hash: "7a8eda6"
@@ -67,11 +67,11 @@ States: **fresh → stale → dead**, plus **serving-down** as an overlay verdic
 (fetched OK, data says the server is down). Driven by fetch attempts + TTL and the
 "5 min of last-known telemetry" rule (OD-57 E-A); NaN samples are kept as floats, as
 in legacy (ADV-P1-A2-02; CP-N01/N02) — those NaN values drive the catalogued crash
-paths, reproduced per BC-1.04.014..016; +Inf/-Inf samples are treated
-as unknown, like a stale sample (defensive parse) — DECIDED OD-130, with the
+paths, reproduced per BC-1.04.014..016. +Inf/-Inf handling: P1 reproduces legacy
+behaviour per BC-1.04.014 (+Inf degrades the sample, -Inf clamps to `▁`);
+OD-130's treat-as-unknown rule takes effect only from P6 (DECIDED OD-157), with the
 confirming owner capture (one real metrics response, read-only) deferred until the
-owner confirms the backend soak has been scored; until then the defensive rule
-stands. [LEGACY-OBSERVED P2r3 §2; sampling config DECIDED
+owner confirms the backend soak has been scored. [LEGACY-OBSERVED P2r3 §2; sampling config DECIDED
 OD-57]
 
 ## SM-06 Turn and composition state (status line)

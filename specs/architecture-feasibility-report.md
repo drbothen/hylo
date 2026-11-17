@@ -1,10 +1,10 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.2"
+version: "1.4"
 status: approved
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T05:30:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
 input-hash: "5c129ba"
@@ -23,14 +23,21 @@ treated as settled and were not reopened.
 
 The PRD is feasible as written. The six active subsystems partition the 145 BCs along
 lines that map one-to-one onto verifiable Go packages, every headline NFR is coherent
-within its owning subsystem, and the 37-VP catalog covers all 145 BCs with viable
-empirical strategies. No PRD changes are required.
+within its owning subsystem, and the 38-VP catalog covers all 145 BCs with viable
+empirical strategies. No PRD changes are required. *(Amended 2026-11-17, pass-2 A2-23
+and OD-155: the catalog is 38 VPs, the oracle pin is CPython 3.11.x per OD-104, and
+OD-155 ports the subagent panel — BC-1.07.001..008, 153 BCs total — into S1/
+`sl/subagent.go` without moving a subsystem boundary; feasibility verdict unchanged.)*
+*(Amended 2026-11-18, adv-p2 sync check SC-05: the review-time counts in this paragraph
+predate the pass-2 VP rebuild — the on-disk PRD totals 153 BCs and the catalog 40 VPs
+(VP-039 subagent elapsed clock, VP-040 frame/width property legs; module-criticality
+tallies regenerated to match). Original figures and verdict retained.)*
 
 ## Constraint Mapping
 
 | PRD Section | BC-S.SS.NNN | Requirement | Architecture Constraint | Feasibility | Resolution |
 |-------------|-------------|-------------|------------------------|-------------|-----------|
-| §1.2, §4 | BC-6.03.002, BC-6.04.001 | Byte parity vs CPython 3.11.7 oracle, 0 unexplained diffs | Three-tier harness (AD-09); referee stronger than refereed | feasible | Tier A/B/C in ARCH-07; exclusion closure VP-012 |
+| §1.2, §4 | BC-6.03.002, BC-6.04.001 | Byte parity vs the CPython 3.11.x oracle (OD-104), 0 unexplained diffs | Three-tier harness (AD-09); referee stronger than refereed | feasible | Tier A/B/C in ARCH-07; exclusion closure VP-012 |
 | §4 NFR-001 | BC-6.04.002 | p95 <= 25 ms render on the owner's Mac, metrics wait excluded | Pure hot path, no allocation-heavy idioms; gate binds only with `HYLO_TIMING_GATE=1` | feasible | Measured VP-036; OD-117 binding note honored |
 | §4 NFR-002 | BC-1.01.001 et al. | Never-blank, exit-0 under all CP-* triggers | Guard backstop + typed degrades; write order preserved | feasible | Fault-injection tables VP-001/VP-003 |
 | §1.2 (OD-107) | BC-2.01.001 | P1 config = `HYLO_*` env over built-in defaults only | Registry closed; six error classes closed (OD-114/134/140) | feasible | Resolution totality VP-015/VP-016/VP-017 |
@@ -43,7 +50,7 @@ empirical strategies. No PRD changes are required.
 
 | L2 Subsystem (CAP-NNN) | PRD Grouping Valid? | NFR Profile Coherent? | Notes |
 |------------------------|--------------------|-----------------------|-------|
-| S1 Status Line (CAP-009/010/011; DI-007/008) | yes | yes | 93 BCs, one mixed core-dominant package. Latency (NFR-001), reliability (NFR-002) and bounds (NFR-005) do not conflict: the metrics HTTP wait is off the timed path by case model, removing the only latent tension |
+| S1 Status Line (CAP-009/010/011; DI-007/008) | yes | yes | 101 BCs incl. the OD-155 subagent panel (BC-1.07.001..008), one mixed core-dominant package. Latency (NFR-001), reliability (NFR-002) and bounds (NFR-005) do not conflict: the metrics HTTP wait is off the timed path by case model, removing the only latent tension |
 | S2 Configuration (CAP-015; DI-010/008) | yes | yes | 13 BCs; typed validation gates every setting; closed class register makes the error surface exhaustively testable |
 | S3 Platform (CAP-009 support; DI-008) | yes | yes | 3 BCs; inherently effectful (syscalls, per-OS divergence) — grouped apart from the pure core, which is the correct call |
 | S4 CLI (CAP-009/015; DI-008) | yes | yes | 3 BCs; thin dispatch, closed verb-scoped exit surface; MEDIUM tier is proportionate |
@@ -68,7 +75,8 @@ does not move a subsystem boundary and stays inside S1's CRITICAL scope.
 | S5 | `internal/pyfmt` | pure core | No I/O of any kind; clock never read |
 | S6 | `internal/parity` | infrastructure | Spawns interpreters; test-only |
 
-Component homes for all 145 BCs: `architecture/BC-COMPONENT-MAP.md`.
+Component homes for all 145 BCs *(amended 2026-11-18, adv-p2 sync check SC-05: 153 BCs
+after OD-155; BC-COMPONENT-MAP is current for all 153)*: `architecture/BC-COMPONENT-MAP.md`.
 
 ## Risks and Mitigations
 
@@ -92,7 +100,7 @@ PRD-carried RK-5/RK-6 dispositions as R-006/R-007, in
 | Endorse AD-03 (pure widgets + ordered effect script, not one pure function) | One pure render + final commit block | Option 2 in ARCH-03 | Referencing AD-03 because legacy read-back semantics (failed replace persists nothing) make a single pure function unable to satisfy BC-1.01.009/BC-1.06.002; order-preserving effects are required for cache-state parity |
 | `internal/cost` inherits S1 CRITICAL rather than getting its own tier | Classify separately | Inherit | Referencing SS-01 because the PO's module-criticality row for `internal/statusline` already enumerates "cost history" in its rationale; the package split is architectural only |
 | Treat VP-INDEX as catalog source of truth for coverage claims | Per-BC anchors only | VP-INDEX | Referencing AD-13/POLICY 9; BC VP-anchor back-fill is Pass 3 (deferred by schedule, not by feasibility). Architect-side nit found and logged: the ARCH-INDEX by-home aggregate buckets VP-022 under ARCH-07/08 while the VP-INDEX catalog row says ARCH-04/09 — to be corrected in ARCH-INDEX at the next architect burst (derived view, no PRD impact). **Resolved 2026-11-17 (CA-08):** the ARCH-INDEX by-home aggregate now reads `ARCH-04/09 → VP-022`, matching the VP-INDEX catalog row; nit closed |
-| Confirm "architect to confirm" module anchors in BC Traceability tables | Defer to story-writer | Confirmed via BC-COMPONENT-MAP | Referencing BC-COMPONENT-MAP (145/145 homes): Pass 3 back-fill can replace the placeholders mechanically |
+| Confirm "architect to confirm" module anchors in BC Traceability tables | Defer to story-writer | Confirmed via BC-COMPONENT-MAP | Referencing BC-COMPONENT-MAP (153/153 homes incl. the OD-155 BC-1.07 rows): Pass 3 back-fill can replace the placeholders mechanically |
 
 ## Approval
 

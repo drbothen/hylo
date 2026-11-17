@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cf59d51"
+input-hash: "315bc06"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -99,7 +100,7 @@ escaping and float-repr code with the cache encoder `Dumps` (IM-03) so the two c
 | `{"command":"ls"}` | 17 (`{"command": "ls"}`) | happy-path |
 | `{"type":"text","text":"hi"}` | 30 | happy-path |
 | `{"a":"é"}` | 15 (`{"a": "é"}`) | edge-case |
-| `"😀"` | 14 (`"😀"`) | edge-case |
+| `"😀"` | 14 (`"😀"`, escaped-surrogate notation per BC-5.01.002) | edge-case |
 | `{"x":1.0}`; `{"x":1e+16}`; `{"x":1e-05}`; `{"x":-0.0}` | 10; 12; 12; 11 | edge-case |
 | `{"x":12345678901234567890}` | 27 (exact big int) | edge-case |
 | `{"x":Infinity}`; `{"x":NaN}` | 15; 10 | edge-case |

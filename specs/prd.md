@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.4"
+version: "0.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-17T21:58:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "4203554"
+input-hash: "8099cac"
 traces_to: domain-spec/L2-INDEX.md
 supplements:
   - prd-supplements/interface-definitions.md
@@ -61,7 +61,7 @@ a base-URL gateway (losing Remote Control since Claude Code 2.1.196) or run a ha
 Python/mitmproxy stack. The prototype's status line is the daily cockpit — lane, session,
 context, limits, cost and backend telemetry — and it is the lowest-risk, highest-value
 first slice of the port: a render over stdin, transcript, metrics, caches and the
-environment seams (git state, process table, clock, env — AD-03), never the ledger (DI-007).
+environment seams (git state, process table, clock, env — AD-10), never the ledger (DI-007).
 
 ### 1.2 Solution Vision (P1)
 
@@ -70,7 +70,8 @@ output against the CPython 3.11.x oracle over the synthetic fixture corpus and t
 owner's recorded real inputs, on all three OSes (D4 parity is the definition of done).
 Rendering never fails: faults produce the degraded ladder — one-line output, exit 0
 (DI-008). Approved deviations ride only the closed exclusion set pinned in BC-6.03.004
-(D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03; DI-012). Configuration in P1 is typed `HYLO_*` env over built-in defaults
+D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161;
+DI-012). Configuration in P1 is typed `HYLO_*` env over built-in defaults
 (file layer arrives P4, OD-107); invalid config renders the D4-EX-3 one-line error and
 exits 0.
 
@@ -93,7 +94,6 @@ exits 0.
 
 > Machine-consumed: no story AC may implement these in the P1 cycle.
 
-- `--subagent` / custom agent-panel rows (OD-14; legacy BC-SL-097 not ported)
 - Exporter (P2), proxy & routing (P3), ledger (P3, D7), launcher/Stop hook/doctor/CA (P4), web/terminal UIs (P4/P6), multi-backend fleet (P6)
 - Config-file layer and its YAML dependency (P4; P1 is `HYLO_*` env + built-in defaults, OD-107)
 - GPU-serving side (vLLM/LMCache launchers, dashboards) — private home-lab repo
@@ -110,7 +110,7 @@ Owner-approved breakdown (2026-11-15; OD-131). BC numbering:
 |-----------|------|----------|------------------------|----------------|
 | S1 | Status Line | CRITICAL | CAP-009, CAP-010, CAP-011; DI-007, DI-008 | 93 |
 | S2 | Configuration | HIGH | CAP-015; DI-010, DI-008 | 13 |
-| S3 | Platform | MEDIUM | CAP-009 (render path support); DI-008 | 3 |
+| S3 | Platform | HIGH | CAP-009 (render path support); DI-008 | 3 |
 | S4 | CLI | MEDIUM | CAP-009, CAP-015; DI-008 | 3 |
 | S5 | Pyfmt | CRITICAL | Enables CAP-009 byte parity (OD-103; `internal/pyfmt`) | 19 |
 | S6 | Parity Harness | HIGH | CAP-009 (parity verification); DI-012 machinery; D4 exit criterion | 14 |
@@ -123,9 +123,17 @@ Owner-approved breakdown (2026-11-15; OD-131). BC numbering:
 
 **Total new BCs: 145** (101 mapped from legacy BC-SL-001..103 + 44 new contracts; see
 `behavioral-contracts/BC-ALLOCATION.md` for the authoritative mapping). Priority labels
-amended by OD-135: S1 and S5 are module-critical (coverage >= 95%, per
-`prd-supplements/module-criticality.md`); the 2026-11-15 owner rulings OD-132..OD-145
-added seven contracts (BC-2.02.006; the six pyfmt helper BCs, OD-140/OD-141).
+amended by OD-135: S1 and S5 are module-critical — the P1 exit gate for both is
+**line coverage >= 95%**; the >= 95% mutation kill rate is the Phase 6 target, not a P1
+gate (OD-158; per `prd-supplements/module-criticality.md`). The 2026-11-15 owner rulings
+OD-132..OD-145 added seven contracts (BC-2.02.006; the six pyfmt helper BCs,
+OD-140/OD-141).
+
+**Scope amendment (OD-155, owner 2026-11-17; supersedes OD-14):** `--subagent` and the
+custom agent-panel rows (legacy BC-SL-097) are **in P1 scope**, ported with a config off
+switch. S1 renders the agent-panel rows and S4 dispatch recognizes `--subagent` (the
+flag-error ladder applies to every other flag); the additional BC rows are inserted into
+Section 2 and BC-INDEX by the pass-2 remediation burst.
 
 ## 2. Behavioral Contracts Index
 
@@ -248,7 +256,7 @@ added seven contracts (BC-2.02.006; the six pyfmt helper BCs, OD-140/OD-141).
 | [BC-1.05.003](behavioral-contracts/ss-01/BC-1.05.003.md) | ⛏ pick inside the $ block (basis threshold) | BC-SL-027 | P0 |
 | [BC-1.05.004](behavioral-contracts/ss-01/BC-1.05.004.md) | record_cost throttled write | BC-SL-028 | P0 |
 | [BC-1.05.005](behavioral-contracts/ss-01/BC-1.05.005.md) | cost_thresholds p75/p95 percentiles | BC-SL-029 | P0 |
-| [BC-1.05.006](behavioral-contracts/ss-01/BC-1.05.006.md) | Numeric sid: throttle and self-exclusion fail (single string-form key) | BC-SL-079 | P0 |
+| [BC-1.05.006](behavioral-contracts/ss-01/BC-1.05.006.md) | Numeric sid keyed by string form — throttle and self-exclusion hold | BC-SL-079 | P0 |
 | [BC-1.05.007](behavioral-contracts/ss-01/BC-1.05.007.md) | $ and $/h number formatting | BC-SL-082 | P0 |
 | [BC-1.05.008](behavioral-contracts/ss-01/BC-1.05.008.md) | Cost colouring goldens (20 seeded sessions) | BC-SL-101 | P0 |
 | [BC-1.05.009](behavioral-contracts/ss-01/BC-1.05.009.md) | record_cost write contract (exact JSON format) | BC-SL-102 | P0 |
@@ -259,6 +267,19 @@ added seven contracts (BC-2.02.006; the six pyfmt helper BCs, OD-140/OD-141).
 |-------|-------|--------|----------|
 | [BC-1.06.001](behavioral-contracts/ss-01/BC-1.06.001.md) | Cache load/save: never-raise, raw sid in file names | BC-SL-052 | P0 |
 | [BC-1.06.002](behavioral-contracts/ss-01/BC-1.06.002.md) | Sid with / : failed replace persists nothing; temp handling | BC-SL-078 | P0 |
+
+#### S1.07 Subagent agent-panel rows (writer group A2, OD-155)
+
+| BC ID | Title | Legacy | Priority |
+|-------|-------|--------|----------|
+| [BC-1.07.001](behavioral-contracts/ss-01/BC-1.07.001.md) | `--subagent` in argv selects the subagent renderer before main | BC-SL-097 | P0 |
+| [BC-1.07.002](behavioral-contracts/ss-01/BC-1.07.002.md) | `statusline.subagent.enabled` off switch (default true = legacy) | new | P0 |
+| [BC-1.07.003](behavioral-contracts/ss-01/BC-1.07.003.md) | Subagent stdin is total — unparseable or non-object input renders zero rows | BC-SL-097 | P0 |
+| [BC-1.07.004](behavioral-contracts/ss-01/BC-1.07.004.md) | One default-JSON line per eligible task; zero bytes for zero rows | BC-SL-097 | P0 |
+| [BC-1.07.005](behavioral-contracts/ss-01/BC-1.07.005.md) | Status glyph, name-fallback chain, and settled-status suffix | BC-SL-097 | P0 |
+| [BC-1.07.006](behavioral-contracts/ss-01/BC-1.07.006.md) | Model segment carries the model-prefix lane tag | BC-SL-097 | P0 |
+| [BC-1.07.007](behavioral-contracts/ss-01/BC-1.07.007.md) | Token segment (_fmt_tokens) and running-only elapsed clock | BC-SL-097 | P0 |
+| [BC-1.07.008](behavioral-contracts/ss-01/BC-1.07.008.md) | CP-A01..A03 degrade to the 29-byte line, exit 0 | BC-SL-097 | P0 |
 
 ### 2.2 S2 — Configuration (CAP-015)
 
@@ -312,7 +333,7 @@ added seven contracts (BC-2.02.006; the six pyfmt helper BCs, OD-140/OD-141).
 | BC ID | Title | Legacy | Priority |
 |-------|-------|--------|----------|
 | [BC-4.01.001](behavioral-contracts/ss-04/BC-4.01.001.md) | Dispatch statusline / version / config; statusline exits 0 for any argv | new | P0 |
-| [BC-4.01.002](behavioral-contracts/ss-04/BC-4.01.002.md) | Unknown flag renders one-line error, exit 0, never blank (incl. leftover --subagent) | new | P0 |
+| [BC-4.01.002](behavioral-contracts/ss-04/BC-4.01.002.md) | Unknown flag renders one-line error, exit 0, never blank | new | P0 |
 | [BC-4.01.003](behavioral-contracts/ss-04/BC-4.01.003.md) | hylo version prints the version string | new | P2 |
 
 ### 2.5 S5 — Python-compatible formatting (`internal/pyfmt`, OD-103)
@@ -414,8 +435,10 @@ S7 exporter (P2), S8 proxy & routing (P3), S9 ledger (P3, D7), S10 launcher/hook
 | `hylo config path` | config, cache and state paths, one per line, fixed labels/order (OD-132) | 0 | BC-2.03.002 |
 
 Usage errors (bad args/flags on non-statusline verbs) print the golden usage text and
-exit 2 (`cmd/hylo/testdata/usage.golden`). `hylo statusline` takes no flags: any flag is
-an unknown-flag one-line error, exit 0 (OD-112), checked before config resolution.
+exit 2 (`cmd/hylo/testdata/usage.golden`). `hylo statusline` recognizes exactly one flag,
+`--subagent` (OD-155; config off switch — flag surface details in the supplement, owned
+by the architect this round): any other flag is an unknown-flag one-line error, exit 0
+(OD-112), checked before config resolution.
 
 ### 3.2 stdin protocol (statusline)
 
@@ -437,7 +460,9 @@ P1 resolution: built-in defaults, overridden by `HYLO_*` env only (no file layer
 (`backends[0].metrics_url` → `HYLO_BACKENDS_0_METRICS_URL`). Every key declares type,
 range, default, rationale and rationale code (D15, OD-57); two documented default
 exceptions: `paths.cache_dir` (OD-101) and `backends[0].model_prefixes` = `claude-sonnet`
-(OD-111/OD-123). `COLUMNS` is a Claude Code protocol input, not a hylo key (BC-1.01.005,
+(OD-111/OD-123). The OD-155 off switch `statusline.subagent.enabled` (typed bool, default
+true = legacy) gates the `--subagent` renderer (BC-1.07.002). `COLUMNS` is a Claude Code protocol
+input, not a hylo key (BC-1.01.005,
 BC-2.01.005). Full P1 subset with ranges and rationale codes: BC-2.01.004 (registry) and
 the supplement.
 
@@ -452,7 +477,7 @@ the supplement.
 | NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02) produce >= 1 output byte and exit 0 | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
-| NFR-005 | Memory/CPU envelope | bounded state, legacy caps only: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952); no other cap exists in legacy and none may be invented (P13) | table tests | BC-1.03.003/.005, BC-1.04.002 |
+| NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
 | NFR-006 | Repo hygiene (public repo) | synthetic-only committed fixtures; gitleaks + pattern scan clean on CI | CI leg + TestCorpusHygiene | BC-6.02.001, BC-6.04.001 |
 
 ## 5. Error Taxonomy
@@ -465,7 +490,7 @@ the supplement.
 | Code | Surface | Observable | Exit | Contract |
 |---|---|---|---|---|
 | E-REN-001 | Panic guard (any crash path) | `\e[90mstatusline degraded\e[0m\n` (29 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`) | 0 | BC-1.01.001 |
-| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015 |
+| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*; incl. the OD-156 overflow family CP-O, below) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015 |
 | E-CFG-001 | D4-EX-3 config error (six classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
@@ -554,13 +579,18 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 - **DI-010 — typed, validated config.** Every key is registry-declared with a rationale
   (D15); invalid values render the D4-EX-3 line and continue (BC-2.01.004, BC-2.02.x).
 - **DI-012 — closed deviation set.** Behavior may differ from the oracle only via named,
-  tested exclusions (D4-EX-1/2/3, OD-30, OD-76, `temp-file`, `cp-x03`). The id set is closed
+  tested exclusions — the closed ten-id set: D4-EX-1/2/3, OD-30, OD-76, `temp-file`,
+  `cp-x03`, OD-159, OD-160, OD-161 (the last three minted by the owner rulings of
+  2026-11-17: OD-159 all files read as UTF-8 on every OS; OD-160 foreign-cache shapes,
+  ruling Q-b; OD-161 integer `transcript_path`). D4-EX-2 is extended by OD-156 to cover
+  transcript-borne numeric-overflow lines (the offending line is skipped — see the
+  OD-156 register in `prd-supplements/error-taxonomy.md`). The id set is closed
   (BC-6.03.004); a new class needs an owner decision.
 - **Cache-format ownership (ruling b).** Go is byte-exact cache writer and reader across
   Python/Go swaps for all four caches (BC-1.02.013, BC-1.03.002, BC-1.05.009,
   BC-1.06.001/.002, BC-6.02.004).
-- **Per-call-site resources.** JSON recursion budget (stdin 993/994; transcript 989/990)
-  and whitespace sets (int/float vs str.isspace) are stated per site, never globally
+- **Per-call-site resources.** JSON recursion budget — per call site, each measured end to end; both current
+  sites (stdin, transcript) measure 993/994) and whitespace sets (int/float vs str.isspace) are stated per site, never globally
   (BC-1.01.002, BC-5.02.003, BC-5.01.002, BC-5.03.002).
 - **Public-repo hygiene (policy 21).** Repo-relative paths only; synthetic fixtures;
   real inputs replayed from git-ignored captures/ (BC-6.02.001); the placeholder IP
@@ -588,6 +618,10 @@ cycle relies on:
   "not executed", pinned on the windows-2025 CI leg / harness canary — open, disclosed.
 - **ASM-006 — Timeout ruling.** OD-56 replaces the per-socket timeout with a total fetch
   deadline (BC-1.04.001); output-identical on the corpus — validated.
+- **ASM-007 — Agent-panel surface (OD-155).** `--subagent` and the custom agent-panel rows
+  are portable in P1 behind a config off switch (OD-155, superseding OD-14); the argv
+  surface and agent-panel row behavior are as tested on the running client (2.1.322) —
+  validated (owner ruling of 2026-11-17).
 
 The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-007).
 
@@ -611,7 +645,7 @@ remain in git history and in the BCs' edge-case registers.
 | OQ-10 | OD-145 | Resolved: proposed test names and seed paths likewise delegated to the architect (marked provisional in BC-1.06.002, BC-3.02.001/.002, BC-6.03.004, BC-1.05.008); no behavior change |
 | OQ-11 | OD-144 | Resolved: relative/empty `XDG_*` values are ignored (XDG spec); on Windows `%LOCALAPPDATA%\hylo\cache` and `%LOCALAPPDATA%\hylo\state` are separate subdirectories (BC-3.01.001; interface-definitions.md) |
 | OQ-12 | OD-133 | Resolved: the process name becomes the config key `statusline.window_age.process_name`, default `claude`, type/range and D15 rationale registered (BC-3.02.001/.002; interface-definitions.md) |
-| OQ-13 | OD-141 | Resolved: one helper-level contract each for the six pyfmt helpers `D` (BC-5.01.004), `Repr` (BC-5.01.005), `MaxSeq` (BC-5.01.006), `Str` (BC-5.02.005), `Dumps` (BC-5.02.006), `TimeFloat` (BC-5.04.003); S5 is module-critical (OD-135); cycle total 145 BCs |
+| OQ-13 | OD-141 | Resolved: one helper-level contract each for the six pyfmt helpers `D` (BC-5.01.004), `Repr` (BC-5.01.005), `MaxSeq` (BC-5.01.006), `Str` (BC-5.02.005), `Dumps` (BC-5.02.006), `TimeFloat` (BC-5.04.003); S5 is module-critical (OD-135); cycle total 145 BCs (then; 153 after OD-155, SC-04) |
 | OQ-14 | OD-142 | Resolved: the whole json.dumps oracle table for BC-5.02.002 regenerated by script from CPython 3.11 (no hand-recorded literals); the generating script is recorded inline in the BC; row 53 = 38 (generated) |
 
 Carried, closed by spec decision (no owner action needed): RK-5 (HYLO_TEST_NOW stderr

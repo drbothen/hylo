@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5245403"
+input-hash: "9aea85e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:523-530)"
@@ -81,6 +81,7 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 | EC-009 | `resets_at` non-numeric | no countdown (rem None) |
 | EC-010 | rem NaN (`resets_at` NaN) | gate false → no countdown, absolute bands (pass-3 r1 BC-SL-061) |
 | EC-011 | float dividends near unit boundaries | must match CPython `float_divmod` exactly (reason for confidence M) |
+| EC-012 | `resets_at` a JSON integer beyond float64 range (e.g. 10³⁰⁹) | `rem = reset - now` raises OverflowError at SL:515 before any gate → guard line (stdin-borne render overflow, OD-156; same site as BC-1.02.011 EC-010) |
 
 ## Canonical Test Vectors
 
@@ -121,7 +122,7 @@ colour is GREY `\e[90m`; segment = `\e[90m7d10%\e[0m` + countdown.
 | Parity class | byte-exact (no exclusion-list entry) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Owner decisions | OD-57 E-A (1.15 rationale), OD-103 (pyfmt FloorDiv/Mod) |
+| Owner decisions | OD-57 E-A (1.15 rationale), OD-103 (pyfmt FloorDiv/Mod), OD-156 (render-time overflow → catalogued crash path) |
 | Config keys | `statusline.limits.countdown_max_factor` (1.15, operator `<=`) |
 | Architecture Module | `internal/statusline/limits.go` |
 | Stories | TBD |

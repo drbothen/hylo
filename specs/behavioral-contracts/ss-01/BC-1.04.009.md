@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "4bc28df"
+input-hash: "e59c0d3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (points/scale ranges, OD-162)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,9 +42,15 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 1. `hist` is the history list (dict points or legacy `[t, v]` lists).
 2. Config: `statusline.sparkline.trace` enum `rate|kv|ttft` → key `v|k|f` (legacy
    `TRACE_KEYS`; unknown values are a config error in Go, BC-2.02.004, D4-EX-3);
-   `statusline.sparkline.points` 12 (T-006, judgment "long flats read as blobs");
+   `statusline.sparkline.points` 12 (T-006, judgment "long flats read as blobs";
+   OD-162 range: Int 1..100 — 0 is a number-range config error because Python
+   `hist[-0:]` returns the whole list (SL:663), and 1 is valid but always draws ""
+   given PC2's `len(pts) < 2` gate);
    `statusline.sparkline.scale` = fixed top `k` 1.0, floors `v` 1.0 and `f` 0.1, other
-   1e-9 (T-045, derived review #17.1); `statusline.sparkline.colors` = trail RGB
+   1e-9 (T-045, derived review #17.1; OD-162 range: each value a finite Float > 0,
+   out-of-range = number-range config error — a fixed top of 0 is falsy in
+   `_SPARK_FIXED.get(key) or …` (SL:671) and silently falls back to the window max,
+   and a floor ≤ 0 breaks zero-anchoring); `statusline.sparkline.colors` = trail RGB
    (70,170,190), fade 0.55..1.0, amber (220,170,60), head (140,235,255), preempt-marked
    head = theme yellow `\e[33m` (T-046, owner judgment, presentation); glyph key = exactly 8 ordered
    glyphs `▁▂▃▄▅▆▇█` (OD-02).

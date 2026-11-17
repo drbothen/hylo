@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "1244d41"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -66,7 +66,9 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
    ruling b): on caches Go authored itself these vectors are unreachable (the Go writer emits legacy's exact
    format), and Go's behavior on foreign cache shapes is a documented known difference, not a byte-parity
    obligation. Within step 7c the within-step order still holds for CP-C10: record_cost writes first, then
-   cost_thresholds faults (SL:606-607).2. A degrade at step k leaves the writes of steps 1..k-1 exactly as written and performs none of steps k..8. (For
+   cost_thresholds faults (SL:606-607).
+
+2. A degrade at step k leaves the writes of steps 1..k-1 exactly as written and performs none of steps k..8. (For
    the out-of-scope foreign-cache classes¹ this holds at step granularity with one within-step exception: a CP-C10
    fault in `cost_thresholds` happens after step 7c's own record_cost write.)
 3. Each write uses legacy's exact file format and in-file key order (BC-1.06.001; key order inherited from earlier

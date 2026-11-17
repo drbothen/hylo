@@ -2,10 +2,10 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.2.1"
+version: "0.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-17T21:58:00Z
 phase: 1a
 stage: "1 of 3 (allocation only — individual BC files are created in stage 2 by the writer groups)"
 origin: greenfield
@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.1"
+modified: "0.2.3"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b870255"
+input-hash: "e493096"
 traces_to: ../prd.md
 ---
 
@@ -54,7 +54,8 @@ traces_to: ../prd.md
 ## Mapping rules applied
 
 1. **Exactly-one mapping.** Every legacy BC-SL-001..103 maps to exactly one new BC id,
-   except BC-SL-097 (out of scope, OD-14) and BC-SL-068 (accounted as replaced by the
+   except BC-SL-097 (restored to scope by OD-155, 2026-11-17 — allocated as group S1.07;
+   originally out of scope, OD-14) and BC-SL-068 (accounted as replaced by the
    BC-SL-098 mapping, D4-EX-2) — see the "Out of scope / replaced" table.
 2. **Helper-home rule.** A legacy contract whose primary Go home is `internal/pyfmt`
    (design §8 "Go home" prefixed `py/`) allocates into S5: BC-SL-067 → S5.02,
@@ -206,7 +207,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-1.05.003 | ⛏ pick inside the $ block (basis threshold) | BC-SL-027 | byte-exact | SL:601-636 | H | E |
 | BC-1.05.004 | record_cost throttled write | BC-SL-028 | byte-exact | SL:224-237 | H | E |
 | BC-1.05.005 | cost_thresholds p75/p95 percentiles | BC-SL-029 | byte-exact | SL:240-262 | H | E |
-| BC-1.05.006 | Numeric sid: throttle and self-exclusion fail (single string-form key) | BC-SL-079 | OD-30 | OD-30; SL:224-262 | H | E |
+| BC-1.05.006 | Numeric sid keyed by string form — throttle and self-exclusion hold | BC-SL-079 | OD-30 | OD-30; SL:224-262 | H | E |
 | BC-1.05.007 | $ and $/h number formatting | BC-SL-082 | byte-exact | SL:601-636 | H | E |
 | BC-1.05.008 | Cost colouring goldens (20 seeded sessions) | BC-SL-101 | byte-exact | SL:601-625; P3r4 §1.1 | H | E |
 | BC-1.05.009 | record_cost write contract (exact JSON format) | BC-SL-102 | OD-30 | OD-30; SL:224-237, 245-246 | H | E |
@@ -217,6 +218,19 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 |---|---|---|---|---|---|---|
 | BC-1.06.001 | Cache load/save: never-raise, raw sid in file names | BC-SL-052 | byte-exact | SL:190-206; OD-03 | H | E |
 | BC-1.06.002 | Sid with / : failed replace persists nothing; temp handling | BC-SL-078 | temp-file | SL:198-206; OD-110 | M | E |
+
+### S1.07 — Subagent panel rows (writer A2, OD-155 revision 2026-11-17)
+
+| New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
+|---|---|---|---|---|---|---|
+| BC-1.07.001 | `--subagent` in argv selects the subagent renderer before main | BC-SL-097 | byte-exact | SL:1240-1241; OD-155 | H | A2 |
+| BC-1.07.002 | `statusline.subagent.enabled` off switch (default true = legacy) | new (OD-155) | OD-155 off switch | OD-155; D15 | H | A2 |
+| BC-1.07.003 | Subagent stdin is total — unparseable or non-object input renders zero rows | BC-SL-097 | byte-exact | SL:928-936 | H | A2 |
+| BC-1.07.004 | One default-JSON line per eligible task; zero bytes for zero rows | BC-SL-097 | byte-exact | SL:888-936 | H | A2 |
+| BC-1.07.005 | Status glyph, name-fallback chain, and settled-status suffix | BC-SL-097 | byte-exact | SL:884-886, 893-896, 922-923 | H | A2 |
+| BC-1.07.006 | Model segment carries the model-prefix lane tag | BC-SL-097 | byte-exact | SL:898-907 | H | A2 |
+| BC-1.07.007 | Token segment (_fmt_tokens) and running-only elapsed clock | BC-SL-097 | byte-exact | SL:909-921, 876-885; PR-15 | H | A2 |
+| BC-1.07.008 | CP-A01..A03 degrade to the 29-byte line, exit 0 | BC-SL-097 | byte-exact | SL:1242-1245; CP-A01..A03; OD-156 "like O2" | H | A2 |
 
 ### S2.01 — Schema + resolution (writer F)
 
@@ -244,7 +258,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
 |---|---|---|---|---|-------------|---|
 | BC-2.03.001 | hylo config validate exits non-zero on the same errors as D4-EX-3 | new | n.a. | OD-102, OD-107 | — | F |
-| BC-2.03.002 | hylo config path prints the per-OS config file path | new | n.a. | OD-95 | — | F |
+| BC-2.03.002 | hylo config path prints the config, cache and state paths (OD-132) | new | n.a. | OD-95 | — | F |
 
 ### S3.01 — Per-OS paths (writer G)
 
@@ -264,7 +278,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
 |---|---|---|---|---|---|---|
 | BC-4.01.001 | Dispatch statusline / version / config; statusline exits 0 for any argv | new | n.a. | design §2.1; RESUME step 1 | — | F |
-| BC-4.01.002 | Unknown flag renders one-line error, exit 0, never blank (incl. leftover --subagent) | new | n.a. | OD-112 | — | F |
+| BC-4.01.002 | Unknown flag renders one-line error, exit 0, never blank | new | n.a. | OD-112 | — | F |
 | BC-4.01.003 | hylo version prints the version string | new | n.a. | RESUME step 1 | — | F |
 
 ### S5.01 — Numbers/rounding (writer G)
@@ -338,13 +352,13 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 |---|---|---|---|---|---|---|
 | BC-6.04.001 | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.x leg; -race; gitleaks | new | n.a. | design §5.5; CLAUDE.md | — | H |
 | BC-6.04.002 | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target | new | n.a. | OD-117 | — | H |
-| BC-6.04.003 | Tier C differential fuzz: nightly Linux, non-gating, random valid inputs to both sides | new | n.a. | design §5.1; O5 | — | H |
+| BC-6.04.003 | Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs | new | n.a. | design §5.1; O5 | — | H |
 
 ## Out of scope / replaced (legacy accounting exceptions)
 
 | Legacy ID | Disposition | Reason |
 |---|---|---|
-| BC-SL-097 | Out of scope — not ported | `--subagent` entry point; OD-14 rules --subagent / agent-panel rows out of hylo (CC 2.1.323 removed subagentStatusLine). The never-blank/exit-0 rule for a leftover `--subagent` argument is covered by BC-4.01.002 (OD-112). |
+| BC-SL-097 | Restored to scope — OD-155 (2026-11-17) | `--subagent` entry point; OD-155 reopens OD-14 (a) and ports the agent-panel rows in P1 (Claude Code 2.1.326 restored `subagentStatusLine`). Allocated as group S1.07 (seven BC-SL-097 rows + one new-contract off-switch row); the never-blank rule for a leftover `--subagent` argv element no longer applies — routing is BC-1.07.001. |
 | BC-SL-068 | Replaced — no new BC of its own | Sticky transcript crash (legacy-only behavior). Superseded by the D4-EX-2 Go contract: the BC-SL-098 mapping (BC-1.03.018) plus BC-1.03.019/020 carry the corrected behavior (Q-c = D4-EX-2; design §8 "068 replaced"). |
 
 ## Summary counts
@@ -359,6 +373,7 @@ Per subsystem / section:
 | S1.04 row-2 telemetry | D | 21 | 21 | 0 |
 | S1.05 cost history + colors | E | 9 | 9 | 0 |
 | S1.06 session caches | E | 2 | 2 | 0 |
+| S1.07 subagent panel rows | A2 | 8 | 7 (BC-SL-097 fan-out) | 1 (off switch, OD-155) |
 | S2.01 schema + resolution | F | 5 | 0 | 5 |
 | S2.02 validation + error line | F | 6 | 1 (BC-SL-087) | 5 |
 | S2.03 config subcommands | F | 2 | 0 | 2 |
@@ -373,9 +388,9 @@ Per subsystem / section:
 | S6.02 fixture corpus | H | 4 | 0 | 4 |
 | S6.03 comparison + exclusions | H | 4 | 1 (089) | 3 |
 | S6.04 CI matrix + timing | H | 3 | 0 | 3 |
-| **Total** | | **145** | **101** | **44** |
+| **Total** | | **153** | **108** | **45** |
 
-Per writer group: A 10 · B1 15 · B2 15 · C 21 · D 21 · E 11 · F 16 · G 22 · H 14 = **145**
+Per writer group: A 10 · B1 15 · B2 15 · C 21 · D 21 · E 11 · F 16 · G 22 · H 14 · A2 8 (OD-155, 2026-11-17) = **153**
 (after the OD-141/OD-140 additions of 2026-11-15; stage-2 baseline was F 15 · G 16 · H 14
 = **138**).
 
@@ -383,9 +398,11 @@ Per writer group: A 10 · B1 15 · B2 15 · C 21 · D 21 · E 11 · F 16 · G 22
 
 - Legacy population: BC-SL-001..103 = **103** contracts.
 - Mapped to exactly one new BC id: **101** (rows marked with a BC-SL-nnn legacy id above).
-- Out of scope: **1** (BC-SL-097, OD-14).
+- Restored to scope (OD-155, 2026-11-17): **1** — BC-SL-097 fans out across the seven BC-SL-097 rows of
+  group S1.07 (an approved exception to the exactly-one rule, one behavior per row).
+- Out of scope: **0** (was 1 under OD-14; superseded by OD-155).
 - Accounted as replaced: **1** (BC-SL-068, superseded by the BC-SL-098 mapping per D4-EX-2).
-- 101 + 1 + 1 = **103 — fully accounted.**
+- 101 + 1 (fan-out) + 1 (replaced) = **103 — fully accounted.**
 - Every new BC id is unique; NNN restarts per subsection; shard = subsystem (ss-01..ss-06).
 
 ## Description
@@ -414,8 +431,9 @@ Section 2) mirrors it and must not drift.
 1. Every row in the allocation table corresponds to exactly one future BC file at
    `behavioral-contracts/ss-NN/BC-S.SS.NNN.md`, created in stage 2.
 2. After stage 2, every legacy contract BC-SL-001..103 is either represented by a new
-   BC file (101), listed out-of-scope (BC-SL-097, OD-14), or listed replaced
-   (BC-SL-068 → the BC-SL-098 mapping).
+   BC file (108 after OD-155 restored BC-SL-097 as group S1.07) or listed replaced
+   (BC-SL-068 → the BC-SL-098 mapping); the out-of-scope list is empty (was BC-SL-097,
+   OD-14, superseded by OD-155).
 3. Writer groups A-H can be dispatched in parallel without id collisions; each group
    has at most 22 contracts — G reached 22 after the OD-141/OD-140 additions of
    2026-11-15 (the stage-2 baseline cap was 21) — and a single subsystem-section scope
@@ -439,9 +457,10 @@ Section 2) mirrors it and must not drift.
 
 ## Edge Cases
 
-1. **BC-SL-097** (`--subagent`, out of scope, OD-14): the never-blank/exit-0 behavior
-   for a leftover `--subagent` argv is contracted by BC-4.01.002 (OD-112), so no
-   parity hole remains despite the OOS disposition.
+1. **BC-SL-097** (`--subagent`): in P1 scope per owner ruling OD-155 (2026-11-17),
+   superseding the original out-of-scope disposition (OD-14) — the subagent status-line
+   mode is contracted by BC-1.07.001..008 and never reaches the unknown-flag path of
+   BC-4.01.002 (amended 2026-11-18, sync-check SC-01 residue).
 2. **BC-SL-068**: legacy sticky-crash behavior is intentionally not ported; its Go
    replacement is the D4-EX-2 W-predicate contract (BC-1.03.018) verified by
    BC-1.03.019/020 — a replacement, not a gap.
@@ -521,9 +540,9 @@ Cross-group normalizations decided at integration (BC files edited):
 - Literal invisible characters in test vectors (U+200B in BC-5.01.002, BC-5.03.002)
   rewritten as visible `\u200B` escapes; all BC files scanned clean of
   U+200B-U+200F, U+202A-U+202E, U+2066-U+2069, U+FEFF.
-- JSON decode recursion budgets restated per call site: stdin text mode 993 accepted /
-  994 rejected (BC-1.01.002), transcript bytes mode 989 accepted / 990 rejected
-  (BC-5.02.003, consumed by BC-1.03.004); `Decode` takes the budget per call site.
+- JSON decode recursion budgets restated per call site, each measured end to end: stdin text mode and
+  transcript bytes mode both 993 accepted / 994 rejected (BC-1.01.002; BC-5.02.003, consumed by
+  BC-1.03.004); `Decode` takes the budget per call site.
 - Negative `COLUMNS` beyond int64 restated identically in BC-1.01.005 PC-4 and
   BC-5.01.002 PC-3: an overflowing negative stays negative (row 2 hidden); only the
   over-4,300-digit error path maps to 0.
@@ -539,7 +558,10 @@ was renumbered, retitled or removed, and the 138 stage-2 rows stand as allocated
 - **Added BC-5.01.004, BC-5.01.005, BC-5.01.006, BC-5.02.005, BC-5.02.006, BC-5.04.003**
   (OD-141): helper-level contracts for the six pyfmt helpers `D`, `Repr`, `Str`, `Dumps`,
   `MaxSeq`, `TimeFloat` in their design §2.6 homes (num / json / time); S5 coverage
-  rises to 19. Cycle total: **145 BCs** (101 mapped from legacy + 44 new).
+  rises to 19. Cycle total: **153 BCs** (108 mapped from legacy + 45 new; amended
+  2026-11-18, sync-check SC-04: rebalanced after the eight OD-155 BC-1.07.* additions —
+  seven restored BC-SL-097 rows plus one new-contract off-switch row; the stage-3 total
+  was 145 = 101 + 44).
 - **OD-135** (no row change): S1 and S5 are module-critical (coverage >= 95%) per
   `prd-supplements/module-criticality.md`; prd.md §1.6 amended accordingly (amends the
   OD-131 priority labels).

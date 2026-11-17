@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "14867e3"
+input-hash: "ef650a3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python time.time() value discipline at the nine legacy clock reads, P3r1 §A0, DET-01..08)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,15 +35,17 @@ removal_reason: null
 
 ## Description
 
-`pyfmt.TimeFloat(t)` reproduces the Python `time.time()` value discipline (design IM-14,
-research P20): `float64(t.UnixNano()) / 1e9` — the Python value, not Go's monotonic-annotated
+`pyfmt.TimeFloat(ns int64)` (ADV-P2-D08: BC side aligned with the reconciled ARCH-06 row
+`TimeFloat(ns int64) float64`) reproduces the Python `time.time()` value discipline (design IM-14,
+research P20): `float64(ns) / 1e9` — the Python value, not Go's monotonic-annotated
 wall-clock methods — read once per render and passed down. Helper-level contract per OD-141
 (the nine legacy clock reads, P3r1 §A0, DET-01..08; motivates the idle-widget
 minute-straddle fix, DET-08).
 
 ## Preconditions
 
-1. `t` is a Go `time.Time` obtained once per render (Env.Now, design §2.1).
+1. `ns` is a nanosecond epoch obtained once per render from `Env.Now.UnixNano()`
+   (design §2.1); the caller owns the single read.
 2. `HYLO_TEST_NOW` (a decimal string) when set is parsed by both sides identically (§3;
    RK-5 documents it as a harness hook, not a setting). A **malformed** value (not a valid
    decimal float, e.g. `abc` or empty) is ignored with exactly one stderr warning and the
@@ -52,7 +55,7 @@ minute-straddle fix, DET-08).
 
 ## Postconditions
 
-1. `TimeFloat(t) = float64(t.UnixNano()) / 1e9` — the Python `time.time()` value, correct
+1. `TimeFloat(ns) = float64(ns) / 1e9` — the Python `time.time()` value, correct
    to the ns-derived float64 (≥ 1 ns granularity below the second is lost to float64, the
    same as Python).
 2. Read once per render and passed down; the idle widget's two legacy reads (SL:825, 826)

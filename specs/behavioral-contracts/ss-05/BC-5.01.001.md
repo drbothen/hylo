@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "013d953"
+input-hash: "249c67a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython round()/format() used at legacy/dgx_statusline.py SL:1171, 234 and the .Nf sites)"
@@ -18,7 +18,8 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,8 +36,7 @@ removal_reason: null
 `round(x)` (ties to even, returns int), `round(x, n)` (correctly rounded decimal, returns float) and the
 `f"{x:.Nf}"` format spec. Go's `math.Round` (ties away from zero) and `strconv` spellings `NaN`/`+Inf` differ, so
 every status-line site uses these helpers (design IM-05, IM-06; pitfalls PR-01, PR-02). Signature note
-(ADV-P1-D06, BC side): `Round` takes `x float64` here; the ARCH-06 row typed `Round(x Num)` is stale and the
-Architect owns reconciling it; this BC governs the behavior stories build to.
+(ADV-P1-D06, resolved ADV-P2-D08): `Round(x float64) (Num, error)` — the ARCH-06 row is reconciled.
 
 ## Preconditions
 

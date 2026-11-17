@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.1"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:45:00Z
+timestamp: 2026-11-17T21:19:34Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "5c53471"
+input-hash: "0d3a902"
 traces_to: prd.md
 ---
 
@@ -37,7 +37,7 @@ traces_to: prd.md
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion) — BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015 |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion; incl. the OD-156 overflow family CP-O, below) — BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015 |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
@@ -55,7 +55,9 @@ writes no caches. `<key>` is the dotted config name (not the env var); `<value>`
 escaped with control bytes and invalid UTF-8 as `\xNN`.
 
 Classes and owner rulings: number-range (BC-2.02.002; OD-114 keeps TTL 0 valid, contra
-IM-16), number-grammar (BC-2.02.003), enum (BC-2.02.004), URL (BC-2.02.005), boolean
+IM-16; every registry key declares a range and an out-of-range value is a number-range
+config error — OD-162; int64-overflow and Duration-ceiling values are number-range cases —
+OD-164), number-grammar (BC-2.02.003), enum (BC-2.02.004), URL (BC-2.02.005), boolean
 (BC-2.02.006; OD-140 — dedicated class contract; grammar pinned in BC-2.01.005), theme/SGR
 (BC-2.01.003 — reason string `not an SGR parameter list`, named class per OD-134, resolving
 PRD OQ-6). The class register is closed at six (OD-114 four + OD-134 + OD-140); a seventh
@@ -95,11 +97,75 @@ closed at six.
 | degraded | Partial result with stated fallback | zero exit |
 | cosmetic | stderr-only detail | zero exit (stderr is never compared by the harness) |
 
+## OD-156 numeric-overflow register (pass-2 remediation, 2026-11-17)
+
+Owner ruling OD-156 splits numeric overflow by source. **Minted trigger ids CP-O01..CP-O09**
+(CP-* style, new oVerflow family) are listed here for the BC agents: each owning BC must
+carry its trigger as an edge case + canonical vector in the pass-2 remediation burst.
+
+**Surface 1 — stdin/metrics-borne overflow at render: catalogued crash paths → E-REN-002,
+the 29-byte degraded line, exit 0, earlier side-effect writes kept.** Legacy analog: an
+exact JSON int above float64 max (~1.8e308; JSON permits 4,300 digits) meets a float and
+CPython raises uncaught `OverflowError: int too large to convert to float`, degrading the
+whole render (ADV-P2-B01/C01 evidence).
+
+| Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
+|-----------|------------------|--------------|---------|
+| CP-O01 | context denominator (SL:435) | BC-1.02.006, BC-1.02.020 | huge exact int (`context_window_size`) enters `total/1e6` |
+| CP-O02 | limits/countdown (SL:515) | BC-1.02.011, BC-1.02.012 | huge `resets_at` enters `reset − now` |
+| CP-O03 | lines segment (SL:857) | BC-1.02.014 | huge int enters `n / 1e6` in `_fmt_lines` |
+| CP-O04 | token segment (SL:866) | BC-1.02.025 | huge int enters `float(n)` in `_fmt_tok_c` |
+| CP-O05 | window-age suffix (SL:558-559) | BC-1.02.017 | huge `total_duration_ms` enters `win_ms − dur` |
+
+**Surface 1 exception (OD-156, extending OD-137):** ints beyond int64 at the `_fmt_lines`
+site are carried exactly via `math/big`, staying byte-exact where CPython itself renders
+(`int(1e300)` is exact, SL:853/857 — no degrade); the int64-typed `pyfmt.Int` sketch in
+BC-1.02.026 PC2 is superseded by this ruling — `Int` is exact beyond int64, matching
+ARCH-06 / BC-5.01.003.
+
+**Surface 2 — transcript-borne overflow: the offending line is skipped (D4-EX-2
+extension).** Hylo's W-predicate family gains a numeric-overflow predicate: a transcript
+line whose numbers overflow float64 or int64 accumulation is skipped whole (no partial
+mutation of parser state), matching the D4-EX-2 skip discipline. Legacy instead degrades
+sticky (nothing saved); the resulting cache-byte divergence rides the extended D4-EX-2
+entry. This resolves ADV-P2-C01 ([owner-question]): the degrade is kept for parity by
+naming it, not by inventing behavior.
+
+| Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
+|-----------|------------------|--------------|---------|
+| CP-O06 | usage accumulation (SL:1108) | BC-1.03.006 | `_i + _w`, or a cached float `tin`, meets a 310+-digit `cache_creation_input_tokens` |
+| CP-O07 | last-turn rate (SL:1117) | BC-1.03.010 | `prompt − pp` with a float `pp` and a huge exact int |
+| CP-O08 | turn machine (SL:994/996) | BC-1.03.010, BC-1.03.016 | `TURN_STALE * out` or `out / span` with a huge exact int `out` |
+
+**Surface 2 consequence (moot in hylo, catalogued for parity):**
+
+| Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
+|-----------|------------------|--------------|---------|
+| CP-O09 | mix-cache save (SL:203-205) | BC-1.03.005, BC-1.06.001 | totals above CPython's 4,300-digit int-to-string limit fail `json.dump`; legacy swallows, writes nothing, leaves a partial temp — prevented in hylo by the CP-O06..O08 skip rule, so the cache-byte divergence rides the extended D4-EX-2 entry |
+
+**Surface 3 — subagent-panel crash paths (argv `--subagent` renderer): catalogued crash paths →
+E-REN-002, the 29-byte degraded line, exit 0 (OD-156 ruling "like O2").** Legacy analog: a wrong-shape
+task field raises uncaught TypeError/AttributeError inside the subagent renderer (BC-SL-097, P3r1 §A7).
+
+| Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
+|-----------|------------------|--------------|---------|
+| CP-A01 | subagent renderer (SL:1242-1245) | BC-1.07.008 | `tasks` truthy and not iterable (number, `true`) — TypeError at the `for task in tasks` step |
+| CP-A02 | subagent renderer (SL:1242-1245) | BC-1.07.008 | a task's `status` unhashable (list/object) — TypeError at `_SUB_GLYPH.get(status, ...)` |
+| CP-A03 | subagent renderer (SL:1242-1245) | BC-1.07.008, BC-1.07.006 | a task's `model` truthy and not a str while the configured prefix list is consulted — AttributeError at `startswith` |
+
+Notes: OD-163 rules that a save removes only its own temp file (owns the CP-O09 partial
+temp); OD-160 (`foreign-cache shapes`, ruling Q-b) is the exclusion id for foreign-form
+cached values, OD-161 for an integer `transcript_path` (no transcript, never touch
+foreign descriptors). The closed ten-id exclusion set (D4-EX-1/2/3, OD-30, OD-76,
+`temp-file`, `cp-x03`, OD-159, OD-160, OD-161) is unchanged by OD-156 — the transcript
+extension rides the existing D4-EX-2 id.
+
 ## Crash-path register coverage
 
 Every CP-S/CP-T/CP-N trigger resolves to E-REN-001 or E-REN-002 or a stated widget
 fallback; the per-trigger disposition lives in the owning BC (CP-S01..S17 in BC-1.02.x /
-BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-N01/N02 in BC-1.04.x). The import/exit-time triggers
+BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-N01/N02 in BC-1.04.x, CP-O01..O09 per the OD-156
+register above, CP-A01..A03 per the Surface 3 register). The import/exit-time triggers
 CP-X01/X02 are replaced by D4-EX-3 (BC-2.02.001) and CP-X03 is the named exclusion
 `cp-x03` (BC-1.01.001 EC-005, OD-136); CP-X04 (signals) is out of scope. A trigger whose
 disposition is neither of those is a spec gap and fails the consistency check.

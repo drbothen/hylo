@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.009.md, prd-supplements/nfr-catalog.md]
-input-hash: "77638f1"
+input-hash: "2d9ae4d"
 traces_to: prd.md
 source_bc: BC-1.01.009
 bcs: [BC-1.01.009]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fix — removed the BC-1.06.002 partial-coverage claim (A2-04); that property is VP-018's, and this VP's fakes do not exercise the slash-sid fault site"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,8 +43,10 @@ therefore observable. No step reordering, buffering, or post-error commit exists
 
 - **Primary BC:** BC-1.01.009 — Side effects run in legacy order; a degrade keeps
   earlier writes.
-- **Partial coverage:** BC-1.06.002 (failed replace persists nothing — the in-memory
-  overlay would get this wrong, motivating AD-03).
+- **Partial coverage:** none beyond the primary BC. (BC-1.06.002's failed-replace
+  property — persists nothing — is verified by VP-018; the ordered script is what
+  makes that property observable per step, motivating AD-03, but this VP's recording
+  fakes do not exercise the slash-sid fault site, so no coverage is claimed here.)
 - **Invariant verified:** NFR-002 consequence (write ordering preserved, BC-1.01.009);
   AD-03 (pure widgets + ordered effect script).
 

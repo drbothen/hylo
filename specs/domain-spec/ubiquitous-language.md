@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "ubiquitous-language"
-version: "1.1"
+version: "1.3"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T11:35:43Z
+timestamp: 2026-11-17T21:57:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md]
-input-hash: "d651b9a"
+input-hash: "8ad23a2"
 traces_to: L2-INDEX.md
 ---
 
@@ -42,8 +42,8 @@ traces_to: L2-INDEX.md
 | **Freshness ladder** | fresh/stale/dead + serving-down (SM-05) | LEGACY-OBSERVED |
 | **Fake stop / Kev / verdict** | Optional Stop-hook oracle mediating turn completion; median-of-3, `p < 0.40`; regex fallback | LEGACY-OBSERVED; optional DECIDED D11 |
 | **Composition** | Byte-share of context since the last compaction boundary (`▤❙◈`) | LEGACY-OBSERVED |
-| **Plan window** | The 5h/7d subscription usage windows from captured rate-limit headers and stdin | LEGACY-OBSERVED |
-| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle; the closed id set is D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03 (BC-6.03.004) | DECIDED OD-105/OD-110/OD-136 |
+| **Plan window** | The 5h/7d subscription usage windows, computed by the status line from stdin `rate_limits` only — captured headers stay in the ledger (ADV-P2-A2-19) | LEGACY-OBSERVED |
+| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle; the closed id set is D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161 (BC-6.03.004) | DECIDED OD-105/OD-110/OD-136 |
 | **Parity** | Byte/decision equality with the frozen prototype on recorded inputs; definition of done P1-P3 (D4) | DECIDED D4 |
 | **Rebuild (exporter)** | Full rescan of ledger + hook log into exporter state | LEGACY-OBSERVED; trigger DECIDED OD-39 |
 | **Exposition** | The 28-name Prometheus text rendering on `/metrics` | LEGACY-OBSERVED |
@@ -63,7 +63,7 @@ traces_to: L2-INDEX.md
 | `dgx_proxy.py` trust CLI | `hylo ca` | CAP-014 |
 | `tools/backfill_cost_history.py` | `hylo cost backfill` | P6 |
 | `~/dgx-llm-obs.jsonl` | `paths.ledger` | D15 key |
-| `--subagent` / `subagentStatusLine` | (dropped) | OD-14 |
+| `--subagent` / `subagentStatusLine` | Agent-panel status-line rows, ported in P1 (config off switch) | OD-155 (supersedes OD-14); CAP-009 |
 
 ## 3. Overloaded-term disambiguation (canonical readings)
 

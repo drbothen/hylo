@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "e782665"
+input-hash: "ed02562"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,8 +38,12 @@ removal_reason: null
 `hylo config path` prints all three per-user paths hylo uses on this OS — the config file,
 the cache directory and the state directory — one per line in that fixed order with fixed
 labels, built explicitly per OD-95 and OD-132 (never `os.UserConfigDir`, which on macOS
-gives `~/Library/Application Support`). An explicit `--config <path>` or `HYLO_CONFIG`
-overrides the config line only. The command neither reads nor creates any file; in P1 the
+gives `~/Library/Application Support`). Every line prints the EFFECTIVE path (OD-165,
+fixing ADV-P2-D11): the `config:` line applies its `--config <path>` / `HYLO_CONFIG`
+override, and the `cache:` line applies the `paths.cache_dir` env override
+(`HYLO_PATHS_CACHE_DIR`, BC-3.01.001 PC-3) — the same directory the status line actually
+uses — not the platform default `CacheDir()`. The command neither reads nor creates any
+file; in P1 the
 file layer does not exist yet (OD-107), so the output is informational. It ships in P1
 (OD-107).
 
@@ -58,12 +63,16 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
      non-empty and absolute (a relative value is ignored, per the XDG spec and OD-144),
      otherwise `$HOME/.config/hylo/config.yaml`; Windows `%APPDATA%\hylo\config.yaml`.
      The per-OS directory comes from `internal/platform.ConfigDir()` (BC-3.01.001).
-   - `cache:` the hylo cache DIRECTORY (`CacheDir()`, BC-3.01.001) — on Windows
-     `%LOCALAPPDATA%\hylo\cache` (OD-144 subdirectory ruling).
+   - `cache:` the EFFECTIVE status-line cache directory (OD-165): `paths.cache_dir` after
+     `~` expansion when the env override `HYLO_PATHS_CACHE_DIR` is set
+     (BC-3.01.001 PC-3), otherwise the platform default (`CacheDir()`, BC-3.01.001) — on
+     Windows `%LOCALAPPDATA%\hylo\cache` (OD-144 subdirectory ruling).
    - `state:` the hylo state DIRECTORY (`StateDir()`, BC-3.01.001) — on Windows
      `%LOCALAPPDATA%\hylo\state` (OD-144).
 3. Override paths (a)/(b) get `~` expansion (OD-61, BC-2.01.005) and are otherwise printed
-   as given (not made absolute, not cleaned). Overrides apply to the `config:` line only.
+   as given (not made absolute, not cleaned). Overrides are applied wherever they exist:
+   `config:` (a)/(b) and `cache:` (`HYLO_PATHS_CACHE_DIR`); the state directory has no
+   override in P1 (OD-165).
 4. If the base needed by a line is unset or empty (`HOME`/`APPDATA`/`LOCALAPPDATA`, or the
    home for a `~` override): that line prints `<label>: (unavailable)`, stderr carries
    `hylo: config path: cannot determine <label> directory (<VAR> unset)\n`, and the exit

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "dc56a43"
+input-hash: "b7953c3"
 traces_to: prd.md
 source_bc: BC-6.04.002
 bcs: [BC-6.04.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — sampling aligned to NFR-001: 20 runs per case, p95 = 19th sorted, binds per case, no pooling (A2-27)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,10 +37,11 @@ removal_reason: null
 Steady-state render latency on the owner's Mac (darwin/arm64) over the synthetic
 fixture corpus, with metrics HTTP wait excluded per the case model, achieves p95 <=
 25 ms (OD-117, labeled judgment call ≈3× over the measured 84.5 ms legacy median).
-Measurement discipline: per fixture, 1 warm-up + 5 timed runs; the 5-per-fixture
-samples are **pooled across the whole corpus** before the nearest-rank p95 is taken
-(sample size 5 × |fixtures| — a per-fixture p95 over 5 runs would degenerate to the
-maximum). One stated exception: the >512 KB-line fixture is timed and reported but its
+Sampling discipline is per **case** (NFR-001): each case gets 1 warm-up + 20 timed
+runs; the case's 20 samples are sorted and the nearest-rank p95 is the 19th sample;
+the gate **binds per case** — every case's p95 must meet the budget, with no pooling
+across the corpus (pooling would hide a slow case behind fast ones). One stated
+exception: the >512 KB-line fixture is timed and reported but its
 miss does not fail the gate (the exception product-brief's speed judgment call
 promises to state). The gate fails the build only with `HYLO_TIMING_GATE=1` — it binds on
 the owner's Mac target; CI legs print the report and pass regardless.
@@ -67,16 +68,16 @@ the owner's Mac target; CI legs print the report and pass regardless.
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Timing report | CI leg + local gate script | 6 runs, nearest-rank p95 | steady-state corpus refreshes |
+| Timing report | CI leg + local gate script | per case: 1 warm-up + 20 timed runs, nearest-rank p95 = 19th sorted sample; binds per case, no pooling | steady-state corpus cases |
 
 ## Proof Harness Skeleton
 
 ```go
 func TestTimingReport_PerOS(t *testing.T) {
-    rep := MeasureCorpus(warmup: 1, timed: 5, subtract: fakeVMHandling)
+    rep := MeasureCorpus(warmup: 1, timed: 20, subtract: fakeVMHandling) // per case
     PrintReport(rep) // every leg prints
-    if gatingEnabled() && rep.p95 > 25*time.Millisecond {
-        t.Fatalf("p95 = %v > 25 ms", rep.p95)
+    if gatingEnabled() && rep.worstCaseP95() > 25*time.Millisecond { // per case, no pooling
+        t.Fatalf("worst-case p95 = %v > 25 ms", rep.worstCaseP95())
     }
 }
 ```

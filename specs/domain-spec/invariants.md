@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "invariants"
-version: "1.1"
+version: "1.3"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T11:35:43Z
+timestamp: 2026-11-17T21:57:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "3fb8cb1"
+input-hash: "475819c"
 traces_to: L2-INDEX.md
 ---
 
@@ -32,12 +32,12 @@ traces_to: L2-INDEX.md
 | DI-009 | Observability never changes outcomes: diagnostic writes (decision log, hook log, flow log) are best-effort and isolated from routing, ledger and hook decisions. | DECIDED OD-45, fixing legacy note()-aborts (pass-8 L0-10). | A log failure would alter a routing result — prohibited. | deferred to P3-P4 (OD-115) |
 | DI-010 | Configuration precedence is file → `HYLO_*` env → default; every key is typed and validated with a stated rationale; invalid config never silently falls back to pass-through. | DECIDED D15, OD-05, OD-59, OD-102, OD-114. | Silent fallback would move billing between lanes unnoticed. | 13 SS-02 BCs: BC-2.01.001..005, BC-2.02.001..006, BC-2.03.001..002 |
 | DI-011 | Startup with invalid config refuses to start; reload failure keeps the last good config and raises a loud error event. | DECIDED OD-26, replacing legacy's plain-pass-through degradation (pass-8 L0-07). | The silent-pass-through state is the domain's most dangerous failure. | deferred to P4 (OD-115) |
-| DI-012 | Behavior may change versus the oracle only via named, tested deviations (D4-EX-1/2/3 + OD-110 entries); every exclusion carries its own table tests; no blanket exclusions. | DECIDED D4, OD-105, OD-110. | Unexplained diffs fail P1-P3 exit criteria. | 42 BCs across SS-01/03/05/06, e.g. BC-6.03.004, BC-1.02.001 |
+| DI-012 | Behavior may change versus the oracle only via named, tested deviations (D4-EX-1/2/3 + OD-110/OD-136/OD-159/OD-160/OD-161 entries); every exclusion carries its own table tests; no blanket exclusions. | DECIDED D4, OD-105, OD-110. | Unexplained diffs fail P1-P3 exit criteria. | 42 BCs across SS-01/03/05/06, e.g. BC-6.03.004, BC-1.02.001 |
 | DI-013 | No timeout shall cut an in-flight stream shorter than the client's API timeout; idle cuts apply only to connections with no flow in progress; pass-through has no total cap. | DECIDED OD-37/OD-42 (HY-TIMEOUT-1, HY-PASS-1), from the observed in-flight cut (P2r8 §1.1). | Mid-stream cuts lose usage and corrupt UX with no ledger trace. | deferred to P3 (OD-115) |
 | DI-014 | Environment scoping: the CA is trusted only via the client-scoped env var (never the OS store); proxy env never reaches child processes. | DECIDED D13, D14; production harm counts in P2r8 §3. | Broken child TLS; intercepted child traffic (observed harms). | deferred to P4 (OD-115) |
 | DI-015 | Every listener binds loopback by default; a non-loopback bind is explicit config with a warning; admission is checked separately from binding. | DECIDED OD-24/OD-27 (HY-BIND-1..6), from observed LAN exposure (P2r4 §2.2). | Silent LAN exposure of backend key or exporter. | deferred to P4 (OD-115) |
 | DI-016 | The UI feed keeps request bodies in memory only and redacts credentials; the ledger's published bytes are not altered by UI needs. | DECIDED D16, OD-53 (metadata-only flow log). | Persisted bodies/credentials violate the credential stance. | deferred to P4 (OD-115) |
-| DI-017 | Local-lane routing keys on a case-sensitive model-prefix match, deterministic per request; server-tool requests stay on the cloud lane. | LEGACY-OBSERVED routing R4/R5 (P2r4 §3.1); generalized to config rules at P6 (DECIDED D15, OD-111) without changing determinism. | Nondeterministic routing breaks cost attribution and parity. | BC-1.02.001 |
+| DI-017 | Local-lane routing keys on a case-sensitive model-prefix match, deterministic per request; server-tool requests stay on the cloud lane. | LEGACY-OBSERVED routing R4/R5 (P2r4 §3.1); generalized to config rules at P6 (DECIDED D15, OD-111) without changing determinism. | Nondeterministic routing breaks cost attribution and parity. | deferred to P3/P6 (OD-115) (ADV-P2-A2-18: BC-1.02.001 explicitly disclaims the server-tools clause — its BCs arrive with CAP-002) |
 
 Enforced by (BC) derives from a grep of `specs/behavioral-contracts/` (2026-11-17;
 counts exclude BC-ALLOCATION.md; "e.g." abbreviates a citing family — full ids are

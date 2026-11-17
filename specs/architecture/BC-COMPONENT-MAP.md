@@ -1,17 +1,17 @@
 ---
 document_type: bc-component-map
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "7bda328"
 traces_to: ../prd.md
 ---
 
-# BC-COMPONENT-MAP: hylo P1 (145/145)
+# BC-COMPONENT-MAP: hylo P1 (153/153)
 
 > One row per behavioral contract: component home (package/file) + governing ARCH
 > section. Homes follow the design doc §8 mapping under the new BC ids; titles here are
@@ -20,7 +20,7 @@ traces_to: ../prd.md
 > `plat/` = `internal/platform`, `cost/` = `internal/cost`, `par/` = `internal/parity`,
 > `cmd/` = `cmd/hylo`.
 
-## S1 — Status Line (93)
+## S1 — Status Line (101)
 
 ### S1.01 Input/output contract
 
@@ -145,6 +145,19 @@ traces_to: ../prd.md
 | BC-1.06.001 | sl/cache.go (never-raise, raw sid) | ARCH-04 |
 | BC-1.06.002 | sl/cache.go (failed replace, temp handling) | ARCH-04 |
 
+### S1.07 Subagent panel (OD-155)
+
+| BC | Component | ARCH |
+|---|---|---|
+| BC-1.07.001 | sl/subagent.go (`--subagent` argv routing) | ARCH-03, ARCH-01 |
+| BC-1.07.002 | sl/subagent.go (enabled off switch, default true) | ARCH-03 |
+| BC-1.07.003 | sl/subagent.go (total stdin: unparseable ⇒ zero rows) | ARCH-03 |
+| BC-1.07.004 | sl/subagent.go (one line per eligible task) | ARCH-03 |
+| BC-1.07.005 | sl/subagent.go (status glyph, name fallback, settled suffix) | ARCH-03 |
+| BC-1.07.006 | sl/subagent.go (model-prefix lane tag) | ARCH-03 |
+| BC-1.07.007 | sl/subagent.go (_fmt_tokens, running-only elapsed) | ARCH-03 |
+| BC-1.07.008 | sl/subagent.go (CP-A01..A03 degrade, 29-byte line) | ARCH-03 |
+
 ## S2 — Configuration (13)
 
 | BC | Component | ARCH |
@@ -224,7 +237,7 @@ traces_to: ../prd.md
 
 ## Coverage
 
-93 + 13 + 3 + 3 + 19 + 14 = **145/145**. Every row names exactly one primary component
+101 + 13 + 3 + 3 + 19 + 14 = **153/153**. Every row names exactly one primary component
 home and at least one ARCH section; two-row exceptions: BC-1.03.015 (sl + plat),
 BC-6.04.001 (par + ARCH-08 workflow). No BC unmapped; no component without a BC set
 except theme.go (serves BC-2.01.003 via cfg) and env.go seams (serve BC-1.01.009).

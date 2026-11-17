@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "12ee8f9"
+input-hash: "e457c30"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:754-763)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/10/12"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,7 +40,10 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 
 1. `kv_raw = m.get("vllm:kv_cache_usage_perc")`, `hs_raw = m.get("dgx_kv:host_hit_share")`.
 2. Config: `statusline.kv.cells` 4 (T-048, derived: ceiling quarters keep 85-96 % steady,
-   review #15), `statusline.kv.host_yellow_pct` 5 (T-049, measured: THRESHOLDS §8b),
+   review #15; OD-162 range: Int 1..100 — the cell formula is defined for C ≥ 1 and
+   C = 0 divides by zero; the 100 cap is a labeled judgment on line width, architect to
+   ratify), `statusline.kv.host_yellow_pct` 5 (T-049, measured: THRESHOLDS §8 (SL:746);
+   §8b is the TTFT rule, SL:790),
    `statusline.kv.host_shown_pct` 0.5 (T-050, derived: at or below 0.5 the `.0f` value
    would print `0%`; OD-57 E-0).
 
@@ -89,7 +92,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | For the default `C = 4`, cell count = `min(ceil(kv/25), 4)`; under any other configured `C` the count is `min(ceil(kv·C/100), C)` and the pad is `C − n` | Go property test (testing/quick) |
+| VP-030 | For the default `C = 4`, cell count = `min(ceil(kv/25), 4)`; under any other configured `C` the count is `min(ceil(kv / (100 / C)), C)` — the PC3 form, normative; `ceil(kv·C/100)` agrees at `C = 4` but can round differently for other `C` — and the pad is `C − n` | Go property test (testing/quick) |
 | VP-030 | 11-case review #15 table reproduces legacy bytes | manual (table) |
 
 ## Traceability

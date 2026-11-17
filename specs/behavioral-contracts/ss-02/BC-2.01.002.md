@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T13:05:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -13,7 +13,7 @@ inputs:
   - domain-spec/ubiquitous-language.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "5ade8f5"
+input-hash: "8ee4968"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445)"
@@ -74,7 +74,13 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
    `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11:8428` →
    `hylo: config error: backends=2 (exactly one backend entry until P6)`. A variable
    `HYLO_BACKENDS_<i>_<FIELD>` whose `<FIELD>` is not a P1 key warns as an unknown setting
-   for every index, `0` included (same discipline as PC-5).
+   for every index, `0` included (same discipline as PC-5). The two effects are
+   independent and BOTH apply (ADV-P2-D10 disposition): a non-P1 field on a non-zero
+   index (e.g. `HYLO_BACKENDS_1_NAME=x`) still establishes the index's presence for the
+   cardinality count, so the outcome is the unknown-setting warning for `NAME` FOLLOWED
+   BY the cardinality error `backends=2 (exactly one backend entry until P6)` with
+   `[from HYLO_BACKENDS_1_NAME]` — warning first, then the fatal load error; the value of
+   a non-P1 field is never parsed.
 5. `HYLO_BACKENDS_0_<FIELD>` for a field that is not a P1 key (e.g. `..._URL`,
    `..._NAME`) is an unknown setting: ignored with a stderr warning (BC-2.01.001 PC-6). The
    other OD-123 entry fields (name, url, protocol flavor, credential, CA, routing rules)

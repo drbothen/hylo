@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "f8e3c46"
+input-hash: "514bbc2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -58,7 +58,12 @@ truncates each channel with `int(c * 255)`. The SGR form is `\e[38;2;R;G;Bm` (`t
 
 1. Blue is always 30 for finite inputs (p = 0.80 × 0.15 = 0.12, 0.12 × 255 truncated).
 2. Monotone hue: higher `pct` never gives a greener colour.
-3. Default values come from `statusline.theme.heat` (T-030, owner group B: aesthetic judgment call).
+3. Default values come from `statusline.theme.heat` (T-030, owner group B: aesthetic judgment call). Valid range
+   (Policy 20, OD-162): legacy bakes the triple — hue span 0.22, saturation 0.85, value 0.80 (SL:145-146) — and
+   defines no config override, so the valid range of `statusline.theme.heat` is the default triple only; any other
+   value is a number-range config error (BC-2.02.003). Assumed range for architect registration:
+   theme.heat = {(0.22, 0.85, 0.80)}. This keeps Postcondition 2's sectors `i` in {0, 1} valid for every admissible
+   input (h ≤ 0.22 < 1/3 for all pct).
 
 ## Edge Cases
 

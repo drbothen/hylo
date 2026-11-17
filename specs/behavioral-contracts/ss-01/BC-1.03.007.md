@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094; REBUILD_EXCESS SL:968-972)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,7 +43,10 @@ is never a rebuild because `pp` is null.
 2. `pp` = cached previous prompt size or null; `rb` = cached rebuild count (0 after reset).
 3. `X = statusline.transcript.rebuild_excess` (default 20000; T-056, rationale: **measured** — validated on 9,650
    calls in 120 transcripts: normal calls max 4,145 excess (99.9 % under 577), smallest rebuild 61,901; 20K sits
-   about 5× above the worst normal call and 3× below the smallest rebuild; SL:968-971).
+   about 5× above the worst normal call and 3× below the smallest rebuild; SL:968-971). **Valid range (OD-162):
+   `>= 0`**, derived from legacy semantics — `X` is a token-excess comparison threshold against
+   `_w − max(0, prompt − pp)` (SL:1117): a negative X marks every call a rebuild; out-of-range values are
+   number-range config errors (S2 schema, OD-114).
 
 ## Postconditions
 

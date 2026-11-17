@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1120-1149)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: image_chars valid range >= 0 (OD-162; ADV-P2-C03)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,7 +43,9 @@ feed the `▤❙◈` composition widget.
 1. A decoded object line that reached the composition step (after the turn machine, the boundary check and the
    usage step); `msg = e.message or {}`; `content = msg.content`.
 2. `IMG = statusline.composition.image_chars` (default 2000; T-059, rationale: judgment/owner-confirmed — review
-   #6.3 records the decision "nested images = 2,000", not a derivation).
+   #6.3 records the decision "nested images = 2,000", not a derivation). **Valid range (OD-162): `>= 0`**, derived
+   from legacy semantics — IMG is a fixed per-image byte estimate summed into `res` (SL:1137, 1149); out-of-range
+   values are number-range config errors (S2 schema, OD-114).
 3. `DumpsLen` = `len(json.dumps(x))` with Python defaults (BC-5.02.001, 63-case oracle BC-5.02.002); `Len` = code
    points, a lone surrogate counts 1 (BC-5.03.001).
 

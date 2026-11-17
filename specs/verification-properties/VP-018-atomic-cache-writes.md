@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-11-17T22:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, behavioral-contracts/ss-01/BC-1.06.001.md, behavioral-contracts/ss-01/BC-1.06.002.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d8caaec"
+input-hash: "6386364"
 traces_to: prd.md
 source_bc: BC-1.06.001
 bcs: [BC-1.06.001, BC-1.06.002, BC-6.03.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: dropped BC-1.03.002 from bcs — VP-018 verifies none of its properties (reset predicate, zero-save, 16-key order)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: dropped BC-1.03.002 from bcs — VP-018 verifies none of its properties (reset predicate, zero-save, 16-key order)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — OD-163: a save removes only its own temp file, no directory-wide sweep (concurrency ruling for ADV-P2-A03/A2-15); load-failure wording aligned with VP-020 (the next save overwrites the file — A2-03); swallow/retry and cleanup-timing wording reconciled with the skeleton (A2-28)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,18 +35,25 @@ removal_reason: null
 ## Property Statement
 
 Every cache save is atomic: write to a `mkstemp`-pattern temp in the cache dir (mode
-0600), then `os.replace`. A failed save removes its temp, and a temp left behind by a
-killed process is removed opportunistically at the next `Save`, never at render time
-(the ruled difference from leaking legacy, named exclusion `temp-file`, carved out only
-from the cache-file comparison per BC-6.03.003 and ARCH-04 temp-file cleanup); a save
+0600), then `os.replace`. A failed save removes its own temp. A save removes **only
+its own temp file** (OD-163): there is no directory-wide sweep, and a temp left behind
+by a killed process is not removed by other processes' saves — legacy leaks those
+temps identically, and the comparison carve-out for leaked temps is the named
+exclusion `temp-file` (cache-file comparison only, per BC-6.03.003 and ARCH-04
+temp-file cleanup; OD-163 resolves the cross-window deletion hazard of ADV-P2-A03 by
+restoring parity: no Go-side sweep at all). Temp cleanup runs inside `Save`, never on
+the load/read path. A save
 whose sid contains `/` performs a failed
 replace that persists nothing while the in-memory overlay still answers the same
 refresh (BC-1.06.002); a failed rename under Windows sharing violations retries
-exactly `renameRetryLimit = 2` times before swallowing (named constant, not config:
+exactly `renameRetryLimit = 2` times, then reports failure to the caller by error
+return — it is the caller (the render effect) that swallows it, per the DI-008 safe
+ladder (named constant, not config:
 internal durability knob of a named fs difference, no parity-visible behavior — legacy
 has no retry at all, IM-17/OD-110); and a load never raises — an unreadable or
-malformed cache file
-loads as an empty object without corrupting or deleting the file on disk.
+malformed cache file loads as an empty object, the load itself leaves the file on disk
+untouched, and the next successful save overwrites it with regenerated content
+(legacy behaviour; the cost-history statement is VP-020's).
 
 ## Source Contract
 
@@ -56,7 +63,8 @@ loads as an empty object without corrupting or deleting the file on disk.
   cleanup difference covered).
 - **Invariant verified:** DI-008 (cache faults stay on the safe ladder); OD-110
   (temp-file exclusion with its own table test); AP-16 corollary for the session
-  caches (parse failure never destroys the file — full cost-history statement in
+  caches (unreadable/malformed loads as empty; the next save overwrites the file with
+  regenerated content — full cost-history statement in
   VP-020).
 
 ## Property Class and Verification Method
@@ -65,8 +73,8 @@ loads as an empty object without corrupting or deleting the file on disk.
 - **Method:** unit/table test with fault injection — failing renames, read-only or
   closed cache dir, sids containing `/`, interrupted saves; asserts no `.tmp` residue,
   no partial files, and unchanged target files.
-- **Honesty:** testable-only (filesystem effects); the AP-16-style "never overwrite
-  unreadable" invariant is asserted at the seam.
+- **Honesty:** testable-only (filesystem effects); the AP-16-style seam assert is
+  "load leaves the file byte-unchanged; only a subsequent successful save rewrites it".
 
 ## Proof Method
 
@@ -92,17 +100,19 @@ func TestCacheStore_OD110_TempCleanup(t *testing.T) {
 
     hopeless := newFailingRenameStore(dir, failFirst(renameRetryLimit+1))
     if err := hopeless.Save("statusline-abc.json", val); err == nil {
-        t.Fatal("save past retry budget should swallow, not succeed")
+        t.Fatal("save past retry budget should report failure, not succeed") // caller swallows (DI-008)
     }
     if tmps(dir) != 0 { t.Fatal("temp leaked on swallowed save") }
 }
 
-func TestCacheStore_StaleTempCleanupAtNextSave(t *testing.T) {
+func TestCacheStore_OwnTempOnly(t *testing.T) { // OD-163: a save removes only its own temp
     dir := tempCacheDir(t)
-    plantStaleTemps(dir, "statusline-old.json.tmp123") // simulates a killed process
+    plantForeignTemps(dir, "statusline-old.json.tmp123") // simulates a killed process
     store := storeAt(t, dir)
-    store.Save("statusline-new.json", val) // one save, any sid
-    if tmps(dir) != 0 { t.Fatal("stale temp survived a Save (ARCH-04 cleanup)") }
+    store.Save("statusline-new.json", val)
+    if tmps(dir) != 1 {
+        t.Fatal("a Save swept a foreign temp — OD-163 forbids a directory-wide sweep")
+    } // the surviving temp is the killed process's; legacy leaks it identically
 }
 
 func TestCacheStore_TempFile_CleanupOnFailedReplace(t *testing.T) {
@@ -116,8 +126,9 @@ func TestCacheStore_TempFile_CleanupOnFailedReplace(t *testing.T) {
 
 ## Named Tests (OD-145 table where applicable)
 
-`TestCacheStore_OD110_TempCleanup` and
-`TestCacheStore_TempFile_CleanupOnFailedReplace` (both settled at stage-3
+`TestCacheStore_OD110_TempCleanup`,
+`TestCacheStore_OwnTempOnly` (OD-163), and
+`TestCacheStore_TempFile_CleanupOnFailedReplace` (settled at stage-3
 integration); the `temp-file` exclusion entry is admissibility-checked by
 `TestParityExclusions_ClosedSet` (VP-012).
 

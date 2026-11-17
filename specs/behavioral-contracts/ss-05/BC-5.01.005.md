@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "14867e3"
+input-hash: "ef650a3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython repr(float) used at legacy/dgx_statusline.py cache and render sites)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,9 +59,15 @@ Helper-level contract per OD-141.
 4. `-0.0` → `-0.0` (CPython 3.11 `repr(-0.0)` is `-0.0`, verified with `python3 -I`);
    the negative-zero case is a distinct spelling from Go's `strconv` 'g' output `-0`, so the
    post-processing must append the `.0` suffix for `-0.0` specifically.
-5. Implementation: `strconv.FormatFloat(x, 'g', -1, 64)` post-processed for the Python
-   spellings — exponent always signed and at least two digits, integral values forced to
-   the `.0` form, and postcondition 3's non-finite spellings.
+5. Implementation (ADV-P2-D01 disposition): take the shortest round-trip digits from
+   `strconv.AppendFloat(dst, x, 'e', -1, 64)` (mantissa plus decimal exponent), then
+   reformat by Python's repr rule — fixed notation when `-4 <= exp10 < 16`, else
+   scientific with a signed, at-least-two-digit exponent; append `.0` to integral values
+   in fixed notation; emit postcondition 3's non-finite spellings. Go's shortest `'g'`
+   mode is not used directly: it switches to an exponent at exponent >= 6
+   (`strconv.FormatFloat(1794615009, 'g', -1, 64)` is `1.794615009e+09`, verified
+   go1.26.5), so the `'g'`-plus-postprocessing recipe would break PC-1/PC-2 and every
+   cache float.
 
 ## Invariants
 

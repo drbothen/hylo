@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -96,6 +96,7 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0 and stdout ends with `\n` and is non-empty | fuzz (`go test -fuzz`) |
+| VP-002 | Partial coverage: the flag-less/positional branch of the same dispatcher fuzz asserts exit 0 with a normal (non-empty, LF-terminated) render for positional-only argv | fuzz (`go test -fuzz`) |
 
 ## Traceability
 

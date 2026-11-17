@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "12ee8f9"
+input-hash: "e457c30"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:329-350)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (history_cap range, OD-162)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,8 +42,11 @@ at the last 32 points.
 2. `c.hist` is the stored history (any mix of dict points and legacy `[t, v]` lists).
 3. Config: `statusline.sparkline.max_age_s` 90 (T-007, derived: gap pruning, F-4),
    `statusline.sparkline.min_gap_s` 2 (T-008, derived: guards a TTL < 2 s), 
-   `statusline.sparkline.history_cap` 32 (T-009, derived: bounds the cache for short TTLs);
-   rationale accepted OD-57 E-0, kept as keys per OD-55.
+   `statusline.sparkline.history_cap` 32 (T-009, derived: bounds the cache for short TTLs;
+   rationale accepted OD-57 E-0, kept as keys per OD-55). OD-162 range for
+   `history_cap`: Int ≥ 1 — the saved slice generalizes as `hist[-cap:]` for cap ≥ 1,
+   but cap 0 is a number-range config error because Python `hist[-0:]` returns the
+   whole list (SL:350), not an empty one.
 
 ## Postconditions
 

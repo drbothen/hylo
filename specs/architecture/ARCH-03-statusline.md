@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
@@ -14,9 +14,11 @@ input-hash: "de05e56"
 
 # ARCH-03 — Status line render pipeline (`internal/statusline`)
 
-> The port target. Carries all 93 S1 BCs. Classification: **mixed, core-dominant** —
+> The port target. Carries all S1 BCs (BC-1.01..1.07, including the OD-155 subagent
+> panel, BC-1.07.001..008). Classification: **mixed, core-dominant** —
 > pure widget/parser/format functions plus one ordered effect script. CRITICAL tier
-> (>= 95% kill rate, OD-135).
+> (line coverage >= 95% for P1; mutation kill rate >= 95% is the Phase 6 target,
+> OD-135/OD-158).
 
 ### Decision: pure widgets plus an ordered effect script (AD-03)
 
@@ -42,9 +44,16 @@ input-hash: "de05e56"
 
 ## Effect-step script (design doc §3.1, normative)
 
+**Ownership of step 0 (ADV-P2-A08):** config resolution is NOT inside `Render`. `Main`
+performs step 0: it calls `config.Load`; on any error it prints the E-CFG-001 line
+(first error in registry order, full list to stderr) and returns 0 having written no
+caches — `Render` is never entered. `Render`'s precondition is `env.Config != nil`
+(non-error `*config.Config`), guaranteed by `Main`; the "no cache writes" guarantee
+follows because every cache write sits inside `Render`'s step script.
+
 | # | Step | Seams | Degrade? |
 |---|---|---|---|
-| 0 | config resolved (D4-EX-3 before any write) | `config.Load` | config-error line |
+| 0 | config resolved by `Main` (precondition; D4-EX-3 before any write) | `config.Load` (in `Main`) | config-error line |
 | 1 | stdin decode (`pyfmt.Decode`, ModeText) | stdin | no — invalid => `{}` (BC-1.01.002/.008) |
 | 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010) |
 | 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no |
@@ -60,6 +69,15 @@ input-hash: "de05e56"
 Import-time crash paths CP-X01/X02 are replaced by D4-EX-3 at step 0; CP-X03 (the
 degraded-line write failing) is the named exclusion `cp-x03` — Go swallows the write
 error and exits 0 (OD-136); CP-X04 (signals) is out of scope.
+
+**Typed crash-path register (normative dispositions live in the owning BCs).** The
+script's Degrade? column names the CP families; the full trigger tables are
+error-taxonomy.md. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 (transcript
+machine), CP-N01/N02 (row-2 telemetry), **CP-O01..O09** (OD-156 numeric-overflow family:
+CP-O01..O05 stdin/metrics-borne at render → E-REN-002, the 29-byte line, exit 0, earlier
+writes kept; CP-O06..O08 transcript-borne → the offending line is skipped whole under the
+extended D4-EX-2 discipline, no sticky state; CP-O09 moot in hylo), and **CP-A01..A03**
+(subagent panel, BC-1.07.008: typed degrades to the 29-byte line, exit 0).
 
 ## Interfaces (design doc §2.2, reused as the contract)
 
@@ -89,8 +107,8 @@ type Env struct {
 }
 
 type CacheStore interface {
-    Load(name string) pyfmt.Value      // never fails: unreadable => empty object
-    Save(name string, v pyfmt.Value)   // never fails: errors swallowed
+    Load(name string) pyfmt.Value    // never fails: unreadable => empty object
+    Save(name string, v pyfmt.Value) error // reports the write outcome to the caller (ADV-P2-A25, VP-018); Render swallows it — DI-008 never-raise at the orchestrator
 }
 type MetricsClient interface {
     Query(ctx context.Context, promql string) ([]byte, error) // total deadline, Proxy: nil
@@ -112,7 +130,9 @@ cannot occur (IM-14). File families: `guard.go`, `input.go`, `statusline.go`,
 `width.go`, `theme.go`,
 `lane.go`, `git.go`, `context.go`, `limits.go`, `session.go`, `tokens.go`, `cost.go`,
 `transcript*.go`, `mixcache.go`, `telemetry.go`, `sample.go`, `row2.go`, `sparkline.go`,
-`cache.go` — one home per S1 subsection (see BC-COMPONENT-MAP.md; `statusline.go` hosts
+`cache.go`, `subagent.go` — one home per S1 subsection (see BC-COMPONENT-MAP.md;
+`subagent.go` hosts the OD-155 agent-panel contracts BC-1.07.001..008, dispatched per
+ARCH-01; `statusline.go` hosts
 the frame-level contracts BC-1.01.003/.009 and BC-1.04.013, ADV-P1-A20).
 
 ## Mapping

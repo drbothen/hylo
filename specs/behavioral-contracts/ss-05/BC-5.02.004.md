@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "013d953"
+input-hash: "249c67a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python dict/str semantics behind every cache and transcript value in legacy/dgx_statusline.py)"
@@ -18,7 +18,8 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,7 +71,7 @@ lone surrogates. Cache bytes depend on this order (IM-03), and length measures d
 |----|-------------|-------------------|
 | EC-001 | Decode `{"a":1,"b":2,"a":3}` | members `a: 3, b: 2` |
 | EC-002 | On that object: `Set("b", 5)`, `Delete("a")`, `Set("a", 9)` | `Dumps` → `{"b": 5, "a": 9}` |
-| EC-003 | Decode raw bytes `"\xed\xa0\xbd\xed\xb8\x80"` | string of 2 code points (U+D83D, U+DE00); `Len` 2; `Dumps` → `"😀"` (escaped surrogate pair, 14 chars) |
+| EC-003 | Decode raw bytes `"\xed\xa0\xbd\xed\xb8\x80"` | string of 2 code points (U+D83D, U+DE00); `Len` 2; `Dumps` → `"😀"` (escaped surrogate pair, 14 chars; escape notation per BC-5.01.002) |
 | EC-004 | Decode the JSON escape text `"😀"` | 1 code point U+1F600; `Len` 1 |
 | EC-005 | Decode `"\ude00\ud83d"` (reversed escapes) | 2 code points, not combined |
 | EC-006 | `Get("missing")` | Null |

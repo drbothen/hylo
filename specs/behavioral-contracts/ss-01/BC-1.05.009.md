@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "377e468"
+input-hash: "752ad87"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -161,7 +161,7 @@ S-N.MM — cost history (filled by story-writer)
 
 #### Evidence Types Used
 
-- **guard clause**: isinstance filters on usd/api_ms (SL:225, 233)
+- **guard clause**: isinstance filters on usd/api_ms (SL:226, 235)
 - **documentation**: key order and entry schema frozen (D7/AP-16)
 
 #### Purity Classification

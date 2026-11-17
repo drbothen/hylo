@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1041-1058)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: read_cap_bytes valid range >= 1 (OD-162; ADV-P2-C03)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,7 +43,10 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 1. BC-1.03.002 chose the incremental or reset path; `off` (bytes) and `size` (bytes, from the earlier size read)
    are known and `size > off`.
 2. `step = statusline.transcript.read_cap_bytes` (default 524,288; T-054, rationale: judgment, the per-refresh
-   parse budget; owner-confirmed as a step, design §2.4). Range is defined in the S2 schema (OD-114).
+   parse budget; owner-confirmed as a step, design §2.4). **Valid range (OD-162):** `>= 1`, derived from legacy
+   semantics — the value feeds `fh.read(min(size − off, step))` and `fh.read(step)` (SL:1044, 1049): `0` hits the
+   no-more-bytes break with `cut < 0`, freezing the parse permanently; a negative value makes `read(−1)` pull the
+   whole remainder. Out-of-range values are number-range config errors (S2 schema, OD-114; BC-2.02.003 class).
 
 ## Postconditions
 

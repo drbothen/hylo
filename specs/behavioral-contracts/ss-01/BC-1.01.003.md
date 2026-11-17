@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7ec71c9"
+input-hash: "b07796d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P1 (catalog lists this BC)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -103,7 +103,7 @@ COLUMNS=72 -> widths [61, 56], 642 bytes (P3r2 §A1; BC-1.01.010).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-027 | Output has 1 + [row-2 predicate] renderer rows, each LF-terminated, for all (rows, cols) and inputs whose rendered strings hold no LF/CR (PC5 carve-out) | Go property test (testing/quick) |
+| VP-040 | P1: output has 1 + [row-2 predicate] renderer rows, each LF-terminated, for all (rows, cols) and inputs whose rendered strings hold no LF/CR (PC5 carve-out) | property-test (testing/quick); VP-027 keeps the fixed breakpoint matrix, VP-040 delivers the quantified leg |
 
 ## Traceability
 

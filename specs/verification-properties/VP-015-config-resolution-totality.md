@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-11-16T00:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.001.md, behavioral-contracts/ss-02/BC-2.01.004.md, behavioral-contracts/ss-02/BC-2.01.005.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "349866b"
+input-hash: "29b3f56"
 traces_to: prd.md
 source_bc: BC-2.01.001
 bcs: [BC-2.01.001, BC-2.01.004, BC-2.01.005, BC-2.01.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P2 pass-2 fixes — the totality oracle now asserts the DI-010 substance: generated-invalid values must return a typed Error identifying the offending key (no silent fallback to the default); unknown HYLO_* must warn on stderr with unchanged exit status; DGX_*-only environments must yield the exact default config (A2-08)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,10 +36,15 @@ removal_reason: null
 
 For every possible environment-variable assignment, `config.Load` terminates and
 returns either a `*Config` or a single typed `*Error` (Key, Value, Reason, EnvName) —
-never a crash, never a silent fallback. Every key is declared in the closed registry
+never a crash, never a silent fallback. "No silent fallback" is asserted, not
+narrated: an environment whose generated value is invalid must produce a typed
+`*Error` whose Key/EnvName identify the offending variable — a returned `*Config`
+carrying the default for that key is a failure. Every key is declared in the closed registry
 with type, range/operator, default and rationale (D15/OD-114); `EnvName` derivation is
-collision-free at build time; unknown `HYLO_*` variables warn on stderr and never
-change exit status; `DGX_*` is never read; `COLUMNS` is excluded from the registry as a
+collision-free at build time; unknown `HYLO_*` variables must warn on stderr and never
+change exit status (asserted); environments carrying only `DGX_*` variables must yield
+the exact built-in-default config, pinning that `DGX_*` is never read (asserted);
+`COLUMNS` is excluded from the registry as a
 protocol input.
 
 ## Source Contract
@@ -81,6 +86,21 @@ func TestLoad_TotalOverEnvironment(t *testing.T) {
         c, err := config.Load(env.Opts())
         if c == nil && err == nil { t.Fatal("Load returned neither config nor error") }
         if c != nil && err != nil { t.Fatal("Load returned both") }
+        if env.HasInvalidValue() { // DI-010 substance: no silent fallback (A2-08)
+            if err == nil {
+                t.Fatalf("invalid %s=%s silently accepted (got default-filled config)",
+                    env.InvalidKey, env.InvalidValue)
+            }
+            if err.Key != env.InvalidKey || err.EnvName != env.InvalidEnvName {
+                t.Fatalf("typed error does not identify the offending variable: %+v", err)
+            }
+        }
+        if env.OnlyUnknownHYLO() && !env.StderrContainsUnknownSettingWarning() {
+            t.Fatal("unknown HYLO_* did not warn on stderr")
+        }
+        if env.OnlyDGXVars() && !c.Equals(DefaultConfig()) {
+            t.Fatal("DGX_* influenced the config — DGX_* must never be read (A2-08)")
+        }
     }
 }
 ```

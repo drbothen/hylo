@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-11-16T00:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, behavioral-contracts/ss-03/BC-3.01.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d4e32e0"
+input-hash: "65c2fc6"
 traces_to: prd.md
 source_bc: BC-3.01.001
 bcs: [BC-3.01.001, BC-2.03.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P2 fix — skeleton applies each row's env/home seam and asserts Config/State dirs (A2-12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,8 +71,18 @@ this resolution.
 ```go
 func TestPaths_XDGAndLocalappdataRules(t *testing.T) {
     for _, tc := range PathEnvMatrices {
-        if got := platform.CacheDir(); got != tc.Want {
-            t.Fatalf("%s: got %q", tc.Name, got)
+        // Each row carries its own env/home seam; the resolver reads ONLY that seam
+        // (no process-global getenv), so rows cannot bleed into each other.
+        env := seamWithHome(tc.Env, tc.Home) // injected env + fake home, per row
+        wantCache, wantConfig, wantState := tc.WantCache, tc.WantConfig, tc.WantState
+        if got := platform.CacheDir(env); got != wantCache {
+            t.Fatalf("%s: cache got %q want %q", tc.Name, got, wantCache)
+        }
+        if got := platform.ConfigDir(env); got != wantConfig {
+            t.Fatalf("%s: config got %q want %q", tc.Name, got, wantConfig)
+        }
+        if got := platform.StateDir(env); got != wantState {
+            t.Fatalf("%s: state got %q want %q", tc.Name, got, wantState)
         }
     }
 }

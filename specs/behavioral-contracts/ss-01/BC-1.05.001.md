@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "7faecc3"
+input-hash: "00b8bf3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-616)"
@@ -25,7 +25,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_usd/cold_yellow_usd ranges, OD-162)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,7 +56,9 @@ itself is BC-1.05.007; the percentile computation is BC-1.05.005.
    `th_usd, th_rate = cost_thresholds(lane, sid)` (BC-1.05.005) when the lane is known,
    else `(None, None)` (SL:606-607).
 4. Config: `statusline.cost.min_usd` = 1.0 (T-019), `statusline.cost.cold_yellow_usd`
-   = 25.0 (T-021); palette from `statusline.theme.*` (OD-113) with legacy defaults
+   = 25.0 (T-021; OD-162 ranges: each a finite Float ≥ 0 — the grey test is strict `<`
+   and the cold test inclusive `>=`; negative or NaN = number-range config error);
+   palette from `statusline.theme.*` (OD-113) with legacy defaults
    grey `\e[90m`, white `\e[97m`, yellow `\e[33m`, red `\e[31m`, reset `\e[0m`
    (SL:127, 131-132). `\e` = byte 0x1B.
 

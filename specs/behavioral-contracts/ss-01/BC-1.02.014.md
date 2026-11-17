@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "aac2048"
+input-hash: "cf1968b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -50,14 +50,14 @@ Notation: `\e` is the byte 0x1B.
 
 1. If neither `la` nor `lr` is truthy → no segment.
 2. Otherwise segment = `\e[32m▲` + fmt(la) + `\e[0m\e[2m/\e[0m\e[31m▼` + fmt(lr) + `\e[0m`.
-3. `fmt(n)` with `k_from` = `statusline.units.lines.k_from` (default 10,000) and `M_from` =
-   `statusline.units.lines.M_from` (default 1,000,000):
+3. `fmt(n)` with the registered semantics of the single Text key `statusline.units.lines`
+   (thresholds 10,000 (`>=` → k) and 1,000,000 (`>=` → M), per interface-definitions):
    1. `n = int(n)` with Python semantics (`pyfmt.ParseInt` for strings — surrounding
       whitespace and `_` digit separators accepted, BC-5.01.002; floats truncate toward
       zero; `true` → 1); a TypeError or ValueError (non-numeric string such as `"1e3"`,
       list, object, NaN) → return `?`.
-   2. `n >= M_from` → F(n / M_from, 1) + `M` (Python `'f'`, half-even on the binary value).
-   3. `n >= k_from` → `n // 1000` + `k` (integer floor division; the k divisor is the SI
+   2. `n >= 1,000,000` → F(n / 1e6, 1) + `M` (Python `'f'`, half-even on the binary value).
+   3. `n >= 10,000` → `n // 1000` + `k` (integer floor division; the k divisor is the SI
       1000, a named constant).
    4. else → decimal `n` (negative values exact, e.g. `-20000`).
 4. Position: after the limits segment, before the timer segment.
@@ -66,10 +66,12 @@ Notation: `\e` is the byte 0x1B.
 
 1. Both counts are always shown together once either is non-zero (`▲0` or `▼0` possible).
 2. Rationale (D15, T-037, documented): keep row 1 narrow on big refactors (review #8.1).
-3. Parameterized keys (Policy 20): non-default `k_from` / `M_from` follow the same formulas
-   above, generalized from legacy's literals (SL:866-867 bakes in 10,000 and 1,000,000); byte
-   parity (vectors) is obligated at the defaults only — other values are unit-tested against
-   the formula, not against Tier A goldens.
+3. Valid ranges (Policy 20, OD-162): legacy bakes both thresholds (10,000 `>=` → k;
+   1,000,000 `>=` → M, SL:866-867) and defines no config override, so the valid range of
+   `statusline.units.lines` is its registered default only; any other value is a
+   number-range config error (BC-2.02.003, OD-162). Assumed range for architect
+   registration: units.lines = {`k`/`M`} (registered default). Byte parity (vectors) is
+   obligated at the defaults.
 
 ## Edge Cases
 
@@ -86,6 +88,8 @@ Notation: `\e` is the byte 0x1B.
 | EC-009 | negative below threshold, e.g. -20000 | `-20000` (thresholds are `>=` on signed value) |
 | EC-010 | `cost` truthy non-object | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
 | EC-011 | ±Infinity | OverflowError not caught → guard line (BC-1.02.026, CP-S11) |
+| EC-012 | `total_lines_added` a JSON integer beyond int64 but within float64, e.g. int(1e300) | `int(n)` is exact (Python arbitrary precision); `n / 1e6` is the correctly rounded quotient (finite) → hylo renders it byte-exact via `math/big` (OD-156, extends OD-137; oracle: `format(int(1e300)/1e6, ".1f")` = the 298-character `……1056.0M` string) |
+| EC-013 | a JSON integer whose `M` quotient exceeds float64 range, e.g. 2·10³¹⁵ | `n / 1e6` raises OverflowError (result too large), uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156) |
 
 ## Canonical Test Vectors
 
@@ -127,7 +131,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 | Parity class | byte-exact (no exclusion-list entry) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Owner decisions | OD-103 (pyfmt ParseInt/Int/F), OD-113 (theme), OD-02 (glyphs) |
+| Owner decisions | OD-103 (pyfmt ParseInt/Int/F), OD-113 (theme), OD-02 (glyphs), OD-156 (beyond-int64 ints via `math/big`; render overflow → crash path), OD-162 (valid range of `statusline.units.lines`) |
 | Config keys | `statusline.units.lines`, `statusline.glyphs.*` (▲ ▼), `statusline.theme.*` |
 | Architecture Module | `internal/statusline/session.go` |
 | Stories | TBD |

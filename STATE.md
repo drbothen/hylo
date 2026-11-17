@@ -4,8 +4,8 @@ level: ops
 version: "2.4"
 status: in_progress
 producer: state-manager
-timestamp: 2026-11-17T20:41:54Z
-last_amended: "2026-11-17 (v2.5 — state-manager — phase-1d ADV pass 2 persisted: 116 findings NOT_CONVERGED, verbatim reports + ADV-P2-INDEX; owner rulings OD-155..159 recorded, next free OD-160)"
+timestamp: 2026-11-17T22:16:30Z
+last_amended: "2026-11-17 (v2.6 — state-manager — phase-1d pass-2 remediation burst closed: rulings OD-160..165 recorded, next free OD-166; contract count 145→153, VPs 38→40; sync-check adv-p2 SC-01..09 fixed; next ADV pass 3)"
 phase: 1
 phase_position: "RESUMED 2026-11-17. Phase 1 (spec crystallization), CI/CD done; phase-1-consistency-audit DONE 2026-11-17 (verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW, all 12 fixed this burst); consistency re-check PASS 2026-11-17 (CR-01..03 fixed; CR-04 = 69 dependent artifacts hash-stale, deferred to check-input-drift pre-gate); phase-1-gate PASSED 2026-11-17 (orchestrator evaluation); phase-1d-adversarial-spec-review IN_PROGRESS 2026-11-17 — pass 1 recorded: 129 findings (21 HIGH / 63 MEDIUM / 40 LOW / 5 COSMETIC), NOT_CONVERGED, novelty HIGH; pass-1 fix burst DONE 2026-11-17 (~115/129 fixed; pass-1 owner questions ruled by OD-156..159); ADV pass 2 recorded 2026-11-17: 116 findings (17H/58M/35L/6C), NOT_CONVERGED, novelty MEDIUM; owner rulings OD-155..159 recorded (incl. OD-155 reopening OD-14: subagent panel rows in P1); next free OD-160; fix burst incl. OD-155..159 next — Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment); owner rulings OD-132..OD-154 recorded; phase-1-cicd-setup DONE 2026-11-16 (PR #1 merged; main @ fd031da; branch protection live); Phase 0 PASSED 2026-11-14"
 pipeline: IN_PROGRESS
@@ -15,7 +15,7 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "ADV pass 2 NOT_CONVERGED (116); fix burst incl. OD-155..159 next; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→129→116"
+current_step: "pass-2 fixes committed; next adversarial pass 3; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→129→116"
 current_cycle: "phase-1-spec-crystallization"
 market_intel:
   recommendation: GO
@@ -27,7 +27,7 @@ dtu_clones_built: n/a
 dtu_services: []
 ---
 
-<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; hard cap 500 lines (validate-state-md-size hook enforcement); Hard cap (500 lines) margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 194 = 306 (D-446(c) dual-margin form). 194 lines (wc-l) at the 2026-11-17 phase-1d pass-1 remediation burst. Historical content belongs in cycle files, NOT here. -->
+<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; hard cap 500 lines (validate-state-md-size hook enforcement); Hard cap (500 lines) margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 196 = 304 (D-446(c) dual-margin form). 196 lines (wc-l) at the 2026-11-17 phase-1d pass-2 remediation burst. Historical content belongs in cycle files, NOT here. -->
 
 # Pipeline State: hylo
 
@@ -41,7 +41,7 @@ dtu_services: []
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-17 — phase-1d ADV pass 2 persisted: same six fresh-context perimeters (A/A2/B/C/C2/D) re-reviewed, 116 findings (17 HIGH / 58 MEDIUM / 35 LOW / 6 COSMETIC, Δ −13 vs pass 1's 129), novelty MEDIUM (A/A2 HIGH; B/C/C2/D MEDIUM), verdict NOT_CONVERGED; reports `cycles/phase-1-spec-crystallization/adversarial-reviews/pass-2.md` + `ADV-P2-INDEX.md` (116 rows cross-checked); owner rulings OD-155..159 recorded 2026-11-17 (OD-155 subagent panel rows in P1, superseding OD-14 a; OD-156 OverflowError by source; OD-157 ±Inf/OD-130 after cutover; OD-158 gate = 95% line coverage; OD-159 UTF-8 named deviation); GitHub-email open item closed (both on); next free OD-160; next: fix burst incl. OD-155..159, then pass 3; trajectory-tail →0→0→0→129→116 |
+| **Last Updated** | 2026-11-17 — phase-1d ADV pass 2 recorded (six fresh-context perimeters A/A2/B/C/C2/D re-reviewed, 116 findings: 17 HIGH / 58 MEDIUM / 35 LOW / 6 COSMETIC, Δ −13 vs pass 1's 129, novelty MEDIUM, verdict NOT_CONVERGED; reports `cycles/phase-1-spec-crystallization/adversarial-reviews/pass-2.md` + `ADV-P2-INDEX.md`); pass-2 fix burst DONE same day (~144 files): rulings OD-155..165 applied, new rulings OD-160..165 recorded (OD-160 foreign-cache exclusion id, OD-161 integer transcript_path = no transcript, OD-162 config-key valid ranges, OD-163 temp-file cleanup scope, OD-164 int64/Duration = D4-EX-3, OD-165 config path prints effective paths; closed exclusion set now 10 ids); contract count 145 → 153 (8 new BC-1.07.001..008 for `--subagent` per OD-155), VP count 38 → 40 (VP-039/040; VP-INDEX rebuilt); JSON depth limits measured end to end by the orchestrator on the real legacy program (isolated HOME): limit = 999 − Python frames to raw_decode — stdin/transcript 993/994, session/mix cache 991/992, git cache/cost history 990/991 (three sites measured, rest derived); sync check `sync-check-adv-p2-2026-11-18.md` initial verdict FAIL (SC-01..09), all nine fixed, orchestrator re-verification clean (VP bcs ↔ BC citations consistent incl. 3 prose-only mentions, no live 989 depth value, no stray characters, no Rust vocabulary); next free OD-166; next: ADV pass 3; trajectory-tail →0→0→129→116 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
@@ -59,7 +59,7 @@ dtu_services: []
 |-------|--------|-------|
 | pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (47e4c37) |
 | Phase 0 brownfield ingestion of `legacy/` | **PASSED 2026-11-14** (owner approval) — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Gate passed: OD list presented and ruled; next Phase 1 spec crystallization |
-| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** — greenfield-pipeline sub-workflow (phase-1-spec-crystallization); create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment) | product brief + domain spec product-level (OD-115); PRD/BCs/supplements P1-scoped (OD-131); later phases via Feature Mode; owner rulings OD-115..149; no design system (OD-100); PRD OQ-1..14 resolved (OD-132..145; OQ-3 deferred); feasibility review verdict 'PRD CHANGES REQUIRED: none'; phase-1-cicd-setup DONE (PR #1 merged; main @ fd031da, CI green on 3 OSes; branch protection live: lint, test ubuntu-24.04, test macos-15, test windows-2025, gitleaks full history; strict; enforce_admins false; force-push/deletion blocked); consistency re-check PASS + phase-1-gate PASSED 2026-11-17; phase-1d ADV pass 1 recorded 2026-11-17 (129 findings: 21H/63M/40L/5C, NOT_CONVERGED, novelty HIGH); pass 2 recorded 2026-11-17 (116 findings: 17H/58M/35L/6C, Δ −13, NOT_CONVERGED, novelty MEDIUM); owner rulings OD-155..159 recorded; next: fix burst incl. OD-155..159, then pass 3 |
+| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** — greenfield-pipeline sub-workflow (phase-1-spec-crystallization); create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment) | product brief + domain spec product-level (OD-115); PRD/BCs/supplements P1-scoped (OD-131); later phases via Feature Mode; owner rulings OD-115..149; no design system (OD-100); PRD OQ-1..14 resolved (OD-132..145; OQ-3 deferred); feasibility review verdict 'PRD CHANGES REQUIRED: none'; phase-1-cicd-setup DONE (PR #1 merged; main @ fd031da, CI green on 3 OSes; branch protection live: lint, test ubuntu-24.04, test macos-15, test windows-2025, gitleaks full history; strict; enforce_admins false; force-push/deletion blocked); consistency re-check PASS + phase-1-gate PASSED 2026-11-17; phase-1d ADV pass 1 recorded 2026-11-17 (129 findings: 21H/63M/40L/5C, NOT_CONVERGED, novelty HIGH); pass 2 recorded 2026-11-17 (116 findings: 17H/58M/35L/6C, Δ −13, NOT_CONVERGED, novelty MEDIUM); owner rulings OD-155..165 recorded; pass-2 remediation DONE 2026-11-17 (sync check clean); next: ADV pass 3 |
 | Adversary passes (Phase 0) | **ALL SIX CONVERGED** | round record + extracted detail in `cycles/phase-0-ingestion/convergence-trajectory.md` (## Extracted from STATE.md on 2026-11-17); trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
 | Fix bursts (Phase 0) | **NONE** | extracted detail in `cycles/phase-0-ingestion/burst-log.md` |
 
@@ -67,7 +67,7 @@ dtu_services: []
 
 | # | Step | Outcome |
 |---|------|---------|
-| 22 | consistency re-check DONE: report `cycles/phase-1-spec-crystallization/consistency-recheck-2026-11-17.md` — verdict PASS: CA-01..12 resolved; CR-01 fixed (`specs/prd.md`), CR-02 fixed (`specs/prd-supplements/assumptions-register.md`), CR-03 fixed (`specs/architecture/ARCH-INDEX.md`); CR-04 = 69 dependent artifacts hash-stale — deferred to the check-input-drift step before the owner gate, dependent-artifact hashes deliberately NOT updated this burst; CA-09 closed: all 145 BC files' frontmatter `inputs:` normalized from '..'-traversal form to repo-relative search-base form with real input-hashes, BC content untouched | COMPLETE — current_step = phase-1-gate |
+| 27 | phase-1d ADV pass-2 remediation DONE (~144 files): business-analyst, product-owner (7 sub-bursts incl. 8 new BC-1.07.001..008 for `--subagent` per OD-155) and architect (6 sub-bursts incl. the VP-INDEX rebuild) fixed the 116 pass-2 findings across domain-spec, product-brief, prd.md, prd-supplements, BCs, architecture, VPs (VP-039/040 minted) and cicd/dtu/gene-transfusion/feasibility docs; rulings OD-155..165 applied, new rulings OD-160..165 recorded (closed exclusion set now 10 ids); JSON depth limits measured end to end on the real legacy program (isolated HOME): 999 − Python frames to raw_decode — stdin/transcript 993/994, session/mix cache 991/992, git cache/cost history 990/991 (three sites measured, rest derived); contract count 145 → 153, VP count 38 → 40; sync check `sync-check-adv-p2-2026-11-18.md` initial verdict FAIL (SC-01..09), all nine fixed; orchestrator re-verification clean (VP bcs ↔ BC citations consistent incl. 3 prose-only mentions, no live 989 depth value, no stray characters, no Rust vocabulary) | COMPLETE — current_step = pass-2 fixes committed; next adversarial pass 3 |
 | 23 | phase-1-gate PASSED 2026-11-17 (orchestrator evaluation): all criteria met — P1-scoped capabilities CAP-009/010/011/015 covered by BCs; remaining 14 capabilities deferred to P2-P6 per OD-115/OD-131; module criticality at `specs/prd-supplements/module-criticality.md` rather than the specs/ path the criterion names (path note, not a failure); design-system and heuristic-evaluation criteria N/A (OD-100; feature_type = cli); ASM-001..006 and R-001..007 registers present; branch protection verified via GitHub API (5 required checks, strict) | COMPLETE — current_step = phase-1d-adversarial-spec-review |
 | 24 | phase-1d adversarial spec review PASS 1 recorded: six fresh-context perimeters (A/A2/B/C/C2/D) because the ~1.4 MB corpus exceeds one context; 129 findings (21 HIGH / 63 MEDIUM / 40 LOW / 5 COSMETIC), novelty HIGH, verdict NOT_CONVERGED; verbatim reports `cycles/phase-1-spec-crystallization/adversarial-reviews/pass-1.md` + index `ADV-P1-INDEX.md`; owner questions and fix burst next, then pass 2 | COMPLETE — current_step = owner questions + fix burst, then ADV pass 2 |
 | 25 | phase-1d ADV pass-1 remediation DONE: ~115 of 129 findings fixed by business-analyst, product-owner (4 parallel sub-bursts + 4 follow-ups) and architect (2 parallel + 3 follow-ups) across domain-spec, prd.md, product-brief.md, prd-supplements, BCs ss-01..ss-06 (+BC-INDEX, BC-ALLOCATION), architecture, VPs incl. new VP-038 (bijective 38 VP x 145 BC re-checked), cicd-setup, dtu/gene-transfusion/feasibility docs; ~45 Python vector cells re-run on CPython 3.11.7 (8 wrong, corrected); transcript depth re-measured 989/990; 4 findings held as owner questions (OverflowError C01/B05/B06; ±Inf/OD-130 A2-01 + VP-030 claim; coverage-vs-mutation 95% A08; Windows encoding B08/C06) — next free OD-155; sync check `sync-check-adv-p1-2026-11-17.md` initial verdict FAIL (SC-01..07), all fixed afterwards | COMPLETE — current_step = pass-1 fixes committed; next adversarial pass 2 |
@@ -75,7 +75,7 @@ dtu_services: []
 
 ## Convergence Status
 
-- **All six passes CONVERGED** (Phase 0: 0:3 1:3 2:9 3:8 4:7 5:5). Round record + extracted detail: `cycles/phase-0-ingestion/convergence-trajectory.md` ("## Extracted from STATE.md on 2026-11-17"). Phase 1d ADV pass 1 recorded 2026-11-17: 129 findings (21H/63M/40L/5C), NOT_CONVERGED, novelty HIGH — `cycles/phase-1-spec-crystallization/adversarial-reviews/`.
+- **All six passes CONVERGED** (Phase 0: 0:3 1:3 2:9 3:8 4:7 5:5). Round record + extracted detail: `cycles/phase-0-ingestion/convergence-trajectory.md` ("## Extracted from STATE.md on 2026-11-17"). Phase 1d ADV pass 1 recorded 2026-11-17: 129 findings (21H/63M/40L/5C), NOT_CONVERGED, novelty HIGH — `cycles/phase-1-spec-crystallization/adversarial-reviews/`. Pass 2 recorded 2026-11-17: 116 findings (17H/58M/35L/6C), NOT_CONVERGED, novelty MEDIUM; pass-2 remediation DONE same day (rulings OD-155..165 applied; contract count 145 → 153, VPs 38 → 40).
 
 ## Canonical Phase 1 Inputs (pointer table)
 
@@ -84,7 +84,7 @@ dtu_services: []
 | Inventory | pass-0 r3 §2 — `semport/hylo-legacy/hylo-legacy-pass-0-deep-inventory-r3.md` |
 | Architecture | pass-1 r3 §B, two Mermaid diagrams — `hylo-legacy-pass-1-deep-architecture-r3.md` |
 | Domain | pass-2 r8 §7, amended by r9 — `hylo-legacy-pass-2-deep-domain-r8.md` |
-| BC index | pass-3 r4, amended by r5-r8 — 232 BCs (legacy pass-3 catalogue, not the 145 P1 BCs) — `hylo-legacy-pass-3-deep-behavioral-contracts-r4.md` |
+| BC index | pass-3 r4, amended by r5-r8 — 232 BCs (legacy pass-3 catalogue, not the 153 P1 BCs) — `hylo-legacy-pass-3-deep-behavioral-contracts-r4.md` |
 | Thresholds / NFR | pass-4 r7 final catalogue — 147 thresholds; 120 rationales resolved; OD-57 (18 bulk-confirm + 27 owner-rationale in 7 groups); OD-94 fact sheet — `hylo-legacy-pass-4-deep-nfr-r7.md` |
 | Conventions / env / determinism / pitfalls | pass-5 r3 consolidated, amended by r4-r5 — 43 explicit + 21 implicit env inputs; 54 determinism rows + 6 Go-side pins; 19 conventions; 22 pitfalls — `hylo-legacy-pass-5-deep-conventions-r3.md` |
 | Synthesis (definitive) | pass-8 deep synthesis — supersedes pass-6; primary reference for create-brief / create-domain-spec / create-prd / semport-analyze — `hylo-legacy-pass-8-deep-synthesis.md` |
@@ -109,7 +109,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 
 ## Open Owner Questions
 
-- OD numbering: OD-01..OD-154 allocated (Phase 0 gate list + 2026-11-15 market-intel review + porting-tension rulings OD-101..106 + semport-tension rulings OD-107..114 + Phase 1 scope rulings OD-115..117 + domain-spec validation rulings OD-118..130 + PRD subsystem-breakdown ruling OD-131 + PRD open-question rulings OD-132..145 + architecture rulings OD-146..149 + CI/CD landing ruling OD-150 + CI/CD merge rulings OD-151 + consistency-audit fix rulings OD-152..154 + phase-1d pass-2 rulings OD-155..159); next free OD-160 — log: `specs/owner-decisions-log-2026-11-14.md`.
+- OD numbering: OD-01..OD-165 allocated (Phase 0 gate list + 2026-11-15 market-intel review + porting-tension rulings OD-101..106 + semport-tension rulings OD-107..114 + Phase 1 scope rulings OD-115..117 + domain-spec validation rulings OD-118..130 + PRD subsystem-breakdown ruling OD-131 + PRD open-question rulings OD-132..145 + architecture rulings OD-146..149 + CI/CD landing ruling OD-150 + CI/CD merge rulings OD-151 + consistency-audit fix rulings OD-152..154 + phase-1d pass-2 rulings OD-155..159 + pass-2 remediation rulings OD-160..165); next free OD-166 — log: `specs/owner-decisions-log-2026-11-14.md`.
 - PRD open questions OQ-1..OQ-14 (prd.md §10) RESOLVED 2026-11-15 by owner rulings OD-132..OD-145 (OQ-3 deferred) — create-architecture gate cleared.
 - Optional checks (deferred, non-blocking): Grafana per-session cost panel; offline promtool rule validation.
 - Policy risk (owner awareness): Anthropic Usage Policy 2026-11-12 language on routing through consumer subscriptions.
@@ -119,7 +119,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 | Cycle | Type | Status | Notes |
 |-------|------|--------|-------|
 | phase-0-ingestion | brownfield-ingestion | **COMPLETE** — Phase 0 PASSED 2026-11-14; analysis converged; artifacts serve as Phase 1 context (pointer table above); transition to the greenfield sub-workflow performed 2026-11-15 | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + 5e83b63 (porting rulings) + this burst (semport design, OD-107..114, transition; create-brief + OD-115..117; domain-spec + OD-118..130) |
-| phase-1-spec-crystallization | spec-crystallization (greenfield-pipeline sub-workflow) | **IN_PROGRESS** — opened 2026-11-15; directory created retroactively 2026-11-17 | scope P1 statusline (OD-131); brief, domain-spec, PRD (145 BCs), architecture (13 ADRs, 37 VPs), parallel steps, CI/CD DONE; phase-1-consistency-audit DONE 2026-11-17 (PASS-WITH-FINDINGS, 0C/0H/4M/8L, all fixed); re-check PASS + phase-1-gate PASSED 2026-11-17; next phase-1d-adversarial-spec-review; manifest: `cycles/phase-1-spec-crystallization/cycle-manifest.md` |
+| phase-1-spec-crystallization | spec-crystallization (greenfield-pipeline sub-workflow) | **IN_PROGRESS** — opened 2026-11-15; directory created retroactively 2026-11-17 | scope P1 statusline (OD-131); brief, domain-spec, PRD (153 BCs ss-01..ss-06 incl. BC-1.07), architecture (13 ADRs, 40 VPs), parallel steps, CI/CD DONE; phase-1-consistency-audit DONE 2026-11-17 (PASS-WITH-FINDINGS, 0C/0H/4M/8L, all fixed); re-check PASS + phase-1-gate PASSED 2026-11-17; phase-1d ADV passes 1-2 recorded (129 then 116 findings, NOT_CONVERGED); pass-2 remediation DONE 2026-11-17 (rulings OD-155..165 applied; sync check clean); next: ADV pass 3; manifest: `cycles/phase-1-spec-crystallization/cycle-manifest.md` |
 
 ## Session Resume Checkpoint (2026-11-17 — SESSION-WRAP-PAUSE)
 
@@ -128,7 +128,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 ### Where We Are
 
 - Position: Phase 1 **IN PROGRESS** (greenfield-pipeline sub-workflow after the brownfield-to-greenfield transition), scoped to P1 = `hylo statusline`. Phase 0 PASSED 2026-11-14.
-- DONE this session (2026-11-15..17): market intel GO (P1); porting decision; semport target design + validation; brownfield->greenfield transition; product brief (product-level); L2 domain spec (product-level); P1 PRD (145 BCs S1-S6 + supplements + BC-INDEX); architecture (ARCH-00..09, 13 ADRs, 37 VPs, 145/145 BC<->VP bidirectional); feasibility review (no PRD changes); DTU assessment (DTU_REQUIRED false); gene-transfusion assessment; CI/CD (PR #1 merged; main fd031da; branch protection live); consistency audit + fix burst CA-01..12 (OD-152..154); consistency re-check PASS; phase-1-gate PASSED 2026-11-17.
+- DONE this session (2026-11-15..17): market intel GO (P1); porting decision; semport target design + validation; brownfield->greenfield transition; product brief (product-level); L2 domain spec (product-level); P1 PRD (153 BCs S1-S6 incl. BC-1.07 + supplements + BC-INDEX); architecture (ARCH-00..09, 13 ADRs, 40 VPs; VP↔BC citations re-verified after the `--subagent` BCs); feasibility review (no PRD changes); DTU assessment (DTU_REQUIRED false); gene-transfusion assessment; CI/CD (PR #1 merged; main fd031da; branch protection live); consistency audit + fix burst CA-01..12 (OD-152..154); consistency re-check PASS; phase-1-gate PASSED 2026-11-17; phase-1d ADV pass-2 remediation DONE (rulings OD-155..165 applied; sync check clean).
 - NEXT: phase-1d adversarial spec review (>=3 clean passes; inject .factory/policies.yaml incl. policy 21), phase-1d second-model spec review, phase-1-state-backup, check-input-drift, phase-1-human-approval.
 
 ### Convergence
@@ -146,7 +146,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 3. Three [process-gap] lessons (merge-commit author check, CI identity check, never quote flagged text) recorded as Drift Items, target before Phase 3 (L-PG-01..03 in `cycles/phase-0-ingestion/lessons.md`).
 4. Six deferred PR #1 findings recorded in `code-delivery/phase-1-cicd-setup/review-findings.md`.
 5. CLAUDE_AUTOCOMPACT_PCT_OVERRIDE advisory (add 70 to .claude/settings.json) — handled separately from the 2026-11-17 housekeeping burst, which resolved the other check-state-health warnings (status: draft, missing Phase 1 cycle directory, STATE.md 200+ lines).
-6. Next free OD = OD-160 (log: `specs/owner-decisions-log-2026-11-14.md`). Former item 'Owner to confirm GitHub email settings' closed 2026-11-17: both settings on.
+6. Next free OD = OD-166 (log: `specs/owner-decisions-log-2026-11-14.md`). Former item 'Owner to confirm GitHub email settings' closed 2026-11-17: both settings on.
 
 Note: this session saw several subagent breakdowns (looping or early stops); every case was verified on disk and nothing was lost — prefer short, tightly scoped agent briefs.
 
@@ -169,6 +169,9 @@ Open a new session in the hylo repo, read docs/RESUME.md, CLAUDE.local.md and .f
 | Documents explaining a scanner false positive must describe, never quote, the flagged text | `cycles/phase-0-ingestion/lessons.md` L-PG-03 [process-gap] | before Phase 3 |
 | BC vectors carrying Python results must be machine-checked against the oracle interpreter when written (ASM-001 claimed oracle-verified; 8 of ~45 cells wrong) | `cycles/phase-1-spec-crystallization/lessons.md` L-PG-04 [process-gap] | before Phase 2 |
 | Plugin-template Rust vocabulary (proptest, Send + Sync) must be adapted to the target language at instantiation (leaked into 60+ Go spec files) | `cycles/phase-1-spec-crystallization/lessons.md` L-PG-05 [process-gap] | before Phase 2 |
+| Legacy-oracle runs from agent briefs must force an isolated HOME and cwd (a synthetic entry landed in the live prototype's cost-history cache; removed, live file verified intact) | `cycles/phase-1-spec-crystallization/lessons.md` L-PG-06 [process-gap] | before Phase 2 |
+| Oracle facts (JSON depth limits et al.) must be measured on the real program end to end, not via wrapper probes (two agents reported 989/990 vs 993/994) | `cycles/phase-1-spec-crystallization/lessons.md` L-PG-07 [process-gap] | before Phase 2 |
+| Finding ids are minted by one owner before parallel dispatch; parallel agents consume an allocation (CP-T08 vs CP-O06..08 collided for one crash class) | `cycles/phase-1-spec-crystallization/lessons.md` L-PG-08 [process-gap] | before Phase 2 |
 
 ## Skip Log
 

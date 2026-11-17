@@ -287,3 +287,23 @@ Burst narratives for this cycle, in chronological order.
 **Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
 
 **Next:** ADV pass 2 (fresh-context perimeters; >=3 clean passes to convergence). Four owner questions above remain open pending rulings.
+
+## Burst: ADV pass-2 remediation — rulings OD-155..165 applied, --subagent BCs, VP-039/040, sync check SC-01..09 fixed (2026-11-17)
+
+**Scope.** Remediation of ADV pass 2 (116 findings: 17 HIGH / 58 MEDIUM / 35 LOW / 6 COSMETIC; reports `adversarial-reviews/pass-2.md` + `ADV-P2-INDEX.md`). Executed by the business-analyst, product-owner (7 sub-bursts, including 8 new behavioral contracts BC-1.07.001..008 for `--subagent` per OD-155) and architect (6 sub-bursts, including the VP-INDEX rebuild). Fixed across domain-spec, product-brief, prd.md, prd-supplements, behavioral contracts, architecture, verification properties (VP-039 and VP-040 minted; VP-INDEX rebuilt), and the cicd / dtu / gene-transfusion / feasibility documents. Rulings OD-155..OD-165 applied throughout; new owner rulings OD-160..OD-165 recorded (owner chose the recommended option each time); the closed exclusion set now holds 10 ids (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161).
+
+**JSON depth limits, measured end to end.** The orchestrator re-measured the limits on the real legacy program with an isolated HOME (three sites measured directly, the rest derived): limit = 999 − Python frames to `raw_decode`; stdin and transcript 993/994, session/mix cache 991/992, git cache and cost history 990/991. This superseded conflicting wrapper-probe figures (989/990) reported during remediation.
+
+**Counts.** Contract count 145 → 153 (8 new `--subagent` BCs); VP count 38 → 40 (VP-039, VP-040).
+
+**Sync check (step 4b).** `sync-check-adv-p2-2026-11-18.md`: initial verdict FAIL with 9 findings SC-01..09; all nine were fixed in the working tree after the check. Orchestrator re-verification: VP `bcs` fields ↔ BC citations consistent (3 prose-only mentions), no live 989 depth value anywhere in the corpus, no stray characters, no Rust vocabulary.
+
+**Dim-2 Attestation:** artifact counts verified on disk this burst: 153 BC files under `specs/behavioral-contracts/ss-01..ss-06`; 40 VP files (+ rebuilt VP-INDEX); 10 ARCH sections (+ ARCH-INDEX); ASM/R registers under `specs/prd-supplements/`.
+
+**Dim-5 Attestation:** N/A — no compiled artifacts in this burst (markdown state/bookkeeping files only).
+
+**Dim-6 Attestation:** N/A — no schema-structured file edited; policies.yaml untouched this burst.
+
+**Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
+
+**Next:** ADV pass 3 (fresh-context perimeters; >=3 clean passes to convergence).

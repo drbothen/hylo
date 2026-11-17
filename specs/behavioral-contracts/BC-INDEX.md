@@ -2,10 +2,10 @@
 artifact_type: bc-index
 document_type: bc-index
 level: L3
-version: "0.2.1"
+version: "0.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T00:10:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 origin: greenfield
@@ -22,12 +22,12 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "7c3d419"
+input-hash: "5d0123c"
 traces_to: ../prd.md
 
 ---
 
-# BC-INDEX: hylo P1 behavioral contracts (all 145, stage 3)
+# BC-INDEX: hylo P1 behavioral contracts (all 153, stage 3)
 
 > **Generated index.** One row per behavioral-contract file, built from each file's
 > frontmatter and H1 heading (bc_h1_is_title_source_of_truth: the title column is the
@@ -35,12 +35,15 @@ traces_to: ../prd.md
 > (including writer groups and primary sources) is `BC-ALLOCATION.md`; per-contract
 > detail is in the linked file. All rows are status draft at stage 3.
 >
-> **Totals.** 145 contracts: 93 in S1, 13 in S2, 3 in S3, 3 in S4, 19 in S5, 14 in S6.
-> 101 mapped from legacy BC-SL-001..103, 44 new; the two accounting exceptions are in
-> the table below.
+> **Totals.** 153 contracts: 101 in S1, 13 in S2, 3 in S3, 3 in S4, 19 in S5, 14 in S6.
+> 108 mapped from legacy BC-SL-001..103 (incl. the BC-SL-097 fan-out), 45 new; the two
+> accounting exceptions are in the table below.
 >
 > Revision note (2026-11-15, OD-132..OD-145): +7 contracts (BC-2.02.006 boolean class;
 +6 pyfmt helper contracts per OD-141); titles are the file H1s verbatim.
+>
+> Revision note (2026-11-17, OD-155): +8 contracts, new group S1.07 (subagent panel
+> rows; BC-SL-097 restored to scope from OD-14 OOS); titles are the file H1s verbatim.
 
 ### S1.01 — Input/output contract
 
@@ -153,7 +156,7 @@ traces_to: ../prd.md
 | BC-1.05.003 | ⛏ pick inside the $ block (basis threshold) | S1.05 | BC-SL-027 | byte-exact | H | draft | [BC-1.05.003](ss-01/BC-1.05.003.md) |
 | BC-1.05.004 | record_cost throttled write | S1.05 | BC-SL-028 | byte-exact | H | draft | [BC-1.05.004](ss-01/BC-1.05.004.md) |
 | BC-1.05.005 | cost_thresholds p75/p95 percentiles | S1.05 | BC-SL-029 | byte-exact | H | draft | [BC-1.05.005](ss-01/BC-1.05.005.md) |
-| BC-1.05.006 | Numeric sid: throttle and self-exclusion fail (single string-form key) | S1.05 | BC-SL-079 | OD-30 | H | draft | [BC-1.05.006](ss-01/BC-1.05.006.md) |
+| BC-1.05.006 | Numeric sid keyed by string form — throttle and self-exclusion hold | S1.05 | BC-SL-079 | OD-30 | H | draft | [BC-1.05.006](ss-01/BC-1.05.006.md) |
 | BC-1.05.007 | $ and $/h number formatting | S1.05 | BC-SL-082 | byte-exact | H | draft | [BC-1.05.007](ss-01/BC-1.05.007.md) |
 | BC-1.05.008 | Cost colouring goldens (20 seeded sessions) | S1.05 | BC-SL-101 | byte-exact | H | draft | [BC-1.05.008](ss-01/BC-1.05.008.md) |
 | BC-1.05.009 | record_cost write contract (exact JSON format) | S1.05 | BC-SL-102 | OD-30 | H | draft | [BC-1.05.009](ss-01/BC-1.05.009.md) |
@@ -164,6 +167,19 @@ traces_to: ../prd.md
 |---|---|---|---|---|---|---|---|
 | BC-1.06.001 | Cache load/save: never-raise, raw sid in file names | S1.06 | BC-SL-052 | byte-exact | H | draft | [BC-1.06.001](ss-01/BC-1.06.001.md) |
 | BC-1.06.002 | Sid with / : failed replace persists nothing; temp handling | S1.06 | BC-SL-078 | temp-file | M | draft | [BC-1.06.002](ss-01/BC-1.06.002.md) |
+
+### S1.07 — Subagent panel rows (OD-155 revision, 2026-11-17)
+
+| BC ID | Title | Subsystem / section | Legacy | Parity class | Conf | Status | File |
+|---|---|---|---|---|---|---|---|
+| BC-1.07.001 | `--subagent` in argv selects the subagent renderer before main | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.001](ss-01/BC-1.07.001.md) |
+| BC-1.07.002 | `statusline.subagent.enabled` off switch (default true = legacy) | S1.07 | new (OD-155) | OD-155 off switch | H | draft | [BC-1.07.002](ss-01/BC-1.07.002.md) |
+| BC-1.07.003 | Subagent stdin is total — unparseable or non-object input renders zero rows | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.003](ss-01/BC-1.07.003.md) |
+| BC-1.07.004 | One default-JSON line per eligible task; zero bytes for zero rows | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.004](ss-01/BC-1.07.004.md) |
+| BC-1.07.005 | Status glyph, name-fallback chain, and settled-status suffix | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.005](ss-01/BC-1.07.005.md) |
+| BC-1.07.006 | Model segment carries the model-prefix lane tag | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.006](ss-01/BC-1.07.006.md) |
+| BC-1.07.007 | Token segment (_fmt_tokens) and running-only elapsed clock | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.007](ss-01/BC-1.07.007.md) |
+| BC-1.07.008 | CP-A01..A03 degrade to the 29-byte line, exit 0 | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.008](ss-01/BC-1.07.008.md) |
 
 ### S2.01 — Schema + resolution
 
@@ -211,7 +227,7 @@ traces_to: ../prd.md
 | BC ID | Title | Subsystem / section | Legacy | Parity class | Conf | Status | File |
 |---|---|---|---|---|---|---|---|
 | BC-4.01.001 | Dispatch statusline / version / config; statusline exits 0 for any argv | S4.01 | new | n.a. | — | draft | [BC-4.01.001](ss-04/BC-4.01.001.md) |
-| BC-4.01.002 | Unknown flag renders one-line error, exit 0, never blank (incl. leftover --subagent) | S4.01 | new | n.a. | — | draft | [BC-4.01.002](ss-04/BC-4.01.002.md) |
+| BC-4.01.002 | Unknown flag renders one-line error, exit 0, never blank | S4.01 | new | n.a. | — | draft | [BC-4.01.002](ss-04/BC-4.01.002.md) |
 | BC-4.01.003 | hylo version prints the version string | S4.01 | new | n.a. | — | draft | [BC-4.01.003](ss-04/BC-4.01.003.md) |
 
 ### S5.01 — Numbers/rounding

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1029-1034, 1096-1103, 1153)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,7 +45,10 @@ refreshes as the last `dedup_memory` (256) ids recorded; within a single refresh
 3. `recent_ids` = cached `ids` list (or `[]` after a reset, BC-1.03.002); `seen` = the set of its elements, kept
    in sync during the refresh.
 4. `N = statusline.transcript.dedup_memory` (default 256; T-060, rationale: derived — ids of one message are
-   adjacent, so any N ≥ 1 covers refresh boundaries; 256 is margin; SL:1029-1032).
+   adjacent, so any N ≥ 1 covers refresh boundaries; 256 is margin; SL:1029-1032). **Valid range (OD-162):**
+   `>= 1`, derived from legacy semantics — the write stores `recent_ids[-N:]` (SL:1153): `N = 0` yields the Python
+   whole-list slice `ids[-0:]` (oracle-verified), defeating the cap; negative N truncates from the wrong end.
+   Out-of-range values are number-range config errors (S2 schema, OD-114).
 
 ## Postconditions
 
@@ -57,13 +60,20 @@ refreshes as the last `dedup_memory` (256) ids recorded; within a single refresh
 4. If `u` is not an object (missing, null, number, string, array): nothing is counted or recorded (an array
    usage on an opening line is the CP-T03 shape, BC-1.03.018).
 5. The cache write stores `"ids": recent_ids[-N:]` (insertion order, oldest first; duplicates cannot occur).
+   Membership is Python set semantics over decoded values: hash first, then equality with an identity
+   short-circuit. Oracle-verified 2026-11-17 (CPython 3.11.7): (a) every JSON-decoded `NaN` is the **same shared
+   object** (`json.loads` returns one constant), so decoded NaN ids dedupe **by identity** despite `NaN != NaN`;
+   two distinct NaN objects would not collide (id-based hashing) but the decoder never produces them; (b) the
+   scalars `1`, `1.0` and `true` collide (equal, equal hash) — first-recorded wins; (c) strings compare normally.
+   Go keys `seen` by the `pyfmt.Value` canonical form reproducing these equivalences.
 6. An id that falls out of the stored window (more than N later distinct ids recorded before the refresh boundary)
    is counted again if it reappears in a later refresh.
 
 ## Invariants
 
 1. Dedup keys on equality of the decoded id value (string ids in practice; any hashable JSON scalar works the same
-   way; an unhashable id is the CP-T07 shape, BC-1.03.018).
+   way; an unhashable id is the CP-T07 shape, BC-1.03.018). Python key semantics per postcondition 5: shared-object
+   NaN dedupes, and `1`/`1.0`/`true` are one key (both oracle-verified 2026-11-17).
 2. Turn tracking does **not** consult `seen` (BC-1.03.017).
 3. Composition is counted for every line regardless of dedup (BC-1.03.009).
 

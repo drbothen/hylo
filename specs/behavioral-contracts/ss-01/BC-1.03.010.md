@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T21:21:12Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_iso_ts, _finish_turn, _mix_counts (SL:954-996, 1064-1087)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register), 2026-11-17T21:21:41Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,7 +49,11 @@ segment (BC-1.04.018).
 3. Config (D15): `statusline.turn.dim_below_out` = 200 tokens (T-055; documented: owner decision 2026-11-13 from a
    replay of 456 local-lane and 193 cloud-lane messages — shorter replies are latency-dominated, shown dimmed);
    `statusline.turn.floor_tps` = 15.0 (T-057; documented: the harness's per-agent decode floor);
-   `statusline.turn.stale_factor` = 4.0 (T-058; judgment: margin for slow prefill). SL:954-974.
+   `statusline.turn.stale_factor` = 4.0 (T-058; judgment: margin for slow prefill). SL:954-974. **Valid ranges
+   (OD-162), derived from legacy semantics; out-of-range = number-range config error (S2 schema, OD-114):**
+   `dim_below_out >= 0` (a token-count threshold, `out < dim_below_out`, SL:996); `floor_tps > 0` (divisor of
+   `stale_factor × out / floor_tps`, SL:994 — 0 divides by zero); `stale_factor > 0` (multiplier forming the stale
+   margin at SL:994; 0 collapses the filter, no legacy-derivable meaning).
 
 ## Postconditions
 
@@ -90,6 +94,7 @@ segment (BC-1.04.018).
 | EC-006 | First line `output_tokens` NaN | `[NaN, false]` (row T16) |
 | EC-007 | Opening line with non-numeric `out` and `lu` set | legacy CP-T05 (crash at close); hylo skips the opening line (D4-EX-2, BC-1.03.018) |
 | EC-008 | Naive timestamp (`2026-11-14T10:00:00`) | interpreted in `Env.Loc` (BC-5.04.001) |
+| EC-009 | Closing a turn whose `out` is a huge int (\|value\| > float64 max) with a float `span`: legacy raises `OverflowError` at SL:994/996 (oracle-verified) | CP-O08: hylo skips the **closer** line (ruling OD-156); previous turn stays open, `lr`/`lu` unchanged (BC-1.03.018) |
 
 ## Canonical Test Vectors
 

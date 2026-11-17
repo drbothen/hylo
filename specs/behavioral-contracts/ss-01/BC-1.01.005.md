@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "1244d41"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P4"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,6 +72,7 @@ protocol input, not a hylo setting: it has no `HYLO_*` key and is not validated 
 | EC-008 | 30 nines | exact big int (no trim, row 2 shown) |
 | EC-009 | `"-"` + 4,301 nines | 0 (digit limit) -> no trim, row 2 **shown** (contrast BC-1.01.007) |
 | EC-010 | absent | 0 |
+| EC-011 | `COLUMNS` containing undecodable bytes (raw 0xFF, invalid UTF-8) | Python decodes the env var with `surrogateescape`, then `int()` raises ValueError → 0. Go pins the same result: `os.Getenv` returns raw bytes; `pyfmt.ParseInt` over invalid UTF-8 is a ValueError equivalent → 0 (no trim, row 2 shown) |
 
 ## Canonical Test Vectors
 
@@ -92,7 +93,7 @@ All verified 2026-11-15 by calling legacy `term_cols()` under CPython 3.11.7.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-027 | Go `term_cols` equals CPython `int()`-or-0 on generated strings (Unicode digits, underscores, signs, whitespace) | Tier C differential fuzz / table |
+| VP-040 | P4: Go `term_cols` equals CPython `int()`-or-0 on generated strings (Unicode digits, underscores, signs, whitespace, invalid-UTF-8 byte sequences) | differential property-test under the ARCH-07 oracle harness; VP-027 keeps the breakpoint matrix |
 
 ## Traceability
 

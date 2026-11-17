@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "6ac5b1e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -42,8 +42,11 @@ line (crash path CP-S11). NaN raises ValueError and is caught, so it prints `?`.
 
 1. `la = cost.total_lines_added or 0`, `lr = cost.total_lines_removed or 0`, and `la or lr` is truthy, so the lines
    segment is being built (BC-1.02.014).
-2. Go implementation uses `pyfmt.Int(x) (int64, error)` with typed errors `ErrValue` (NaN) and `ErrOverflow` (±Inf)
-   (design IM-07).
+2. Go implementation uses `pyfmt.Int(x float64) (Num, error)` (ARCH-06, BC-5.01.003) with
+   typed errors `ErrValue` (NaN) and `ErrOverflow` (±Inf); `Num` is exact beyond int64
+   (oracle: legacy `_fmt_lines(1e300)` renders the long `…M` string, SL:853, 857 — an
+   int64 Int would overflow and degrade instead), so this site degrades only where
+   Postconditions 1/3 say it does (design IM-07).
 
 ## Postconditions
 
@@ -105,7 +108,7 @@ Pinned 2026-11-15 with the legacy `render_lane` / `_fmt_lines` under CPython 3.1
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_fmt_lines (SL:849-860; crash at SL:853) called from legacy/dgx_statusline.py:render_lane (SL:534-537) |
 | Legacy contract | BC-SL-063 (deep pass-3 round 1, new; crash path CP-S11) |
-| Config keys | `statusline.theme.*` (degraded line colours, OD-113) |
+| Config keys | — (none: the degraded line's grey/reset is a built-in named constant, independent of `statusline.theme.*`, OD-162; cf. BC-1.01.001 Inv 4) |
 | Parity | byte-exact (no exclusion entry) |
 
 ## Related BCs (Recommended)

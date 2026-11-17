@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T13:05:00Z
+timestamp: 2026-11-17T21:19:34Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1149; raise sites SL:994, 1069, 1072, 1079, 1097, 1099, 1108, 1112, 1143, 1145)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: eighth crash path CP-T08 numeric overflow (ruling OD-156; ADV-P2-C01)", "1.2.3 2026-11-17: CP-T08 renamed to taxonomy ids CP-O06..O08 (OD-156 register)", "1.2.3 2026-11-17: CP-T08 renamed to taxonomy ids CP-O06..O08 (OD-156 register), 2026-11-17T21:21:41Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -32,13 +32,16 @@ removal_reason: null
 
 ## Description
 
-**Approved deviation D4-EX-2** (owner ruling Q-c, 2026-11-14). Legacy has seven transcript crash paths CP-T01..T07:
+**Approved deviation D4-EX-2** (owner ruling Q-c, 2026-11-14; extended by ruling OD-156, 2026-11-17). Legacy has eight
+transcript crash paths CP-T01..T08:
 a decoded line with a wrong-shaped field raises mid-parse, the refresh degrades, the mix cache is not saved, and the
 crash repeats on every later refresh (sticky; legacy contract BC-SL-068, replaced). hylo instead evaluates a
 wrong-shape predicate `W(state, record)` per line **before** processing it and, when it holds, **skips the line with
 exactly the effect of a JSON decode failure**: no parser state changes, its bytes are consumed, the cache is saved and
 the refresh renders normally. This BC defines the seven predicates precisely so that a skipped line leaves no partial
-mutation.
+mutation. Predicates CP-T01..T07 come from legacy's wrong-shape raise sites; **CP-O06..O08** (ruling OD-156;
+`prd-supplements/error-taxonomy.md`) cover transcript-borne numeric overflow: an int too large for a double meeting a float operand (oracle-verified
+`OverflowError` "int too large to convert to float").
 
 ## Preconditions
 
@@ -65,13 +68,16 @@ mutation.
 | CP-T05 | `ts_ok`, `assistant`, `m.id` truthy, opens a new turn, **`lu` is not null**, the usage is **not counted** (an object whose id is already in `seen_ids`), and `(m.usage or {}).output_tokens` truthy and not a number | SL:994 (lazily, when the turn later closes, possibly next refresh) | previous turn closed, `cur` opened with the bad `out`, composition counted — hylo skips at the opening line; previous turn stays open, composition and `lu` unchanged |
 | CP-T06 | not `cb`; `m.content` is a list; some object block has `type == "text"` with `text` truthy and without a length (number, `true`), or `type == "thinking"` with `thinking` likewise | SL:1143 / SL:1145 | turn step, usage, ids, composition of earlier blocks of the line |
 | CP-T07 | not `cb`; `m.usage` is an object (even `{}`); `m.id` truthy and unhashable (array or object) | SL:1099 | with `ts_ok` and `assistant`: previous turn closed and `cur = {id: [..], …}` opened |
+| CP-O06 | The line's numbers are all JSON numbers, yet the usage-accumulation step raises `OverflowError`: any int operand with \|value\| > float64 max (DBL_MAX ≈ 1.7976e308; JSON admits up to 4,300 digits) participates in an arithmetic step with a float operand — SL:1108/1112 accumulation | SL:1108, 1112 | none (immediate raise during accumulation) |
+| CP-O07 | Same overflow condition at the last-turn-rate step: SL:1117 `prompt − pp` with a float `pp` and a huge exact int | SL:1117 | none (immediate raise) |
+| CP-O08 | Same overflow condition at the turn-machine steps: SL:994 `stale_factor × out / floor_tps` or SL:996 `out / span` with a huge exact int `out` (lazy: the raise surfaces while processing the **closer** line) | SL:994, 996 | for the lazy `_finish_turn` sites: the closer line's own turn/lu bookkeeping (hylo skips the closer; the previous turn stays open) |
 
 4. **Equivalence oracle:** hylo on transcript T yields the same mix cache and render as legacy on T with the skipped
    lines deleted, except `size`, which equals legacy's plus the deleted lines' bytes (each + 1 for its LF).
 5. **Exclusion:** every input that triggers a predicate is listed in the parity harness's named exclusion list
    (OD-105/OD-110), entry id `D4-EX-2`, file `internal/statusline/testdata/parity/exclusions.json`; each entry names
    its expected output file and its dedicated table test (BC-1.03.019). An entry without a test fails the harness; no
-   globs.
+   globs. CP-O06..O08 entries additionally cite ruling `OD-156`.
 
 ## Invariants
 
@@ -120,7 +126,7 @@ The 21-row table with exact expected caches is BC-1.03.019. Representative rows:
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1059-1149), _finish_turn (SL:988-996); raise sites as tabulated |
 | Legacy contract | BC-SL-098 (pass-3 r2 §A6; refined r3); replaces BC-SL-068 (sticky crash) |
 | Parity class | **D4-EX-2** (approved deviation, owner ruling Q-c 2026-11-14) |
-| Exclusion entry | OD-105 / OD-110 named list, id `D4-EX-2`; dedicated tests = BC-1.03.019 (21 rows) + BC-1.03.020 rows |
+| Exclusion entry | OD-105 / OD-110 named list, id `D4-EX-2`; CP-O06..O08 entries cite ruling `OD-156`; dedicated tests = BC-1.03.019 (21 rows) + BC-1.03.020 rows |
 | Confidence note | M — predicates must leave no partial mutation (design §8) |
 | Architecture Module | `internal/statusline/transcript_wshape.go` |
 | Stories | S-TBD |

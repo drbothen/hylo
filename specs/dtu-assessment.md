@@ -1,10 +1,10 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T01:00:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
@@ -107,7 +107,7 @@ staleness markers moved to `null` — grounding the defensive-parse stance.
 | 1 | 200 success envelope, vector result, `[ts, "string"]` tuple | BC-1.04.001 happy path (fetch_sample parse; ADV-P1-A2-21: CP-N02 is the sparkline crash path, not this) |
 | 2 | Empty `result` array (up, no data in window) → stale-ladder path, not an error | SM-05 fresh→stale→dead; OD-57 E-A |
 | 3 | `"NaN"` sample string → **kept as a float**, exactly like legacy `float("NaN")` at SL:178 / BC-1.04.001 — the fake returns it, and the NaN sample then drives the CP-N01/KV and CP-N02/sparkline crash paths downstream (BC-1.04.014/.015/.016, VP-001). It is not dropped | BC-1.04.001 PC-2 (kept as float); CP-N01/N02 consumers |
-| 4 | `"+Inf"` / `"-Inf"` sample strings → treated as unknown, like a stale sample (defensive parse) | **OD-130** (rule stands until the owner capture confirms) |
+| 4 | `"+Inf"` / `"-Inf"` sample strings → **P1 keeps legacy behavior** (+Inf on `v`/`f` degrades via the sparkline crash path, -Inf clamps to `▁`; BC-1.04.014); the OD-130 defensive-unknown rule takes effect after cutover, P6 only (**OD-157**) | **OD-157** (rules pass-2 A2-01: no 8th exclusion id; P1 parity unbroken) |
 | 5 | Error envelope (`status:"error"`) and HTTP 500 | CP register error taxonomy |
 | 6 | Connection refused / unreachable server | harness mode `down` |
 | 7 | Garbage non-JSON body | harness mode `garbage` |
@@ -118,7 +118,7 @@ The fake matches fixtures, not PromQL: it must tolerate any query string legacy 
 authors (queries are legacy-authored; the harness never evaluates MetricsQL). Follow-up
 hook: when the owner confirms the backend soak is scored, record the one real response
 capture (read-only, scrubbed into `captures/`) and pin it as a golden fixture for the
-OD-130 defensive rule.
+OD-130 defensive rule — a P6 activity per OD-157, not needed for P1 parity.
 
 ### #2 statusLine stdin JSON contract
 

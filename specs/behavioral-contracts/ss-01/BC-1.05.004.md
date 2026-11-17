@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T13:05:00Z
+timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "5184321"
+input-hash: "4894c3c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-001 added"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-001 added", "1.2.2 2026-11-17: pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -123,7 +123,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); call site render_lane (SL:603-606) |
 | Legacy contract | BC-SL-028 (P3r1 row 57; refined P3 deep r1) |
-| Thresholds | T-022 (60 s throttle; rationale UNKNOWN in legacy, labelled judgment call pending owner confirmation per P4 catalogue) |
+| Thresholds | T-022 (60 s throttle; derived, accepted in the OD-57 E-0 bulk row — it bounds cache-loss repair to under a minute, R-4 rationale, pass-4-deep-nfr-r7 §C) |
 | Decisions | D4, D7-style format freeze for the cost history (OD-106 copies it at cutover), D15, OD-101 (cache dir), OD-124 |
 
 ## Related BCs (Recommended)

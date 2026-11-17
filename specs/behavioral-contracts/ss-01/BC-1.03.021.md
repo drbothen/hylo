@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_finish_turn, _mix_counts (SL:988-996, 1073-1079, 1150-1153)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: dropped uncited DI-012 (byte-exact, no exclusion entry; ADV-P2-C11)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -91,7 +91,7 @@ legacy oracle (hylo must produce identical bytes).
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-008, DI-012 |
+| L2 Domain Invariants | DI-008 |
 | Source | legacy/dgx_statusline.py:_finish_turn (SL:988-996), _mix_counts (SL:1073-1079, 1150-1153) |
 | Legacy contract | BC-SL-103 (pass-3 r4 §1.2; confirmed r5) |
 | Parity class | byte-exact (design §8: BX, OD-32) |

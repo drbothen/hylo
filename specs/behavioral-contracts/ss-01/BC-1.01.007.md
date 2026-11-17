@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cf59d51"
+input-hash: "315bc06"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P7"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,7 +84,7 @@ verified `COLUMNS` unset/0 behavior; row 5 pinned in P3r2 §A1 (`cols.py`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-027 | For all cols < 0: output rows are untrimmed and row 2 present iff rows > 2 | Go property test (testing/quick) |
+| VP-040 | P7: for all cols < 0: rows untrimmed and row 2 present iff rows > 2 | property-test (testing/quick); VP-027 keeps the breakpoint matrix |
 
 ## Traceability
 

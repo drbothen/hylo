@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b7b49d9"
+input-hash: "a821ab6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:save_cache (SL:198-206)"
@@ -22,9 +22,10 @@ capability: "CAP-009"
 legacy_id: "BC-SL-078"
 parity_class: "temp-file"
 confidence: "M"
+priority: P0
 lifecycle_status: active
-introduced: v0.1.0
-modified: []
+introduced: "0.1"
+modified: ["1.2.1 2026-11-17: own-temp-only write-failure cleanup (OD-163) + EC-006 (ADV-P2-C10/C12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,8 +66,12 @@ from the cache-file comparison only.
    process-age window probe runs every refresh, rate-limit smoothing is lost, and the
    sparkline never accumulates. No crash; stdout is as for a first refresh.
 3. **Legacy:** the temp file is leaked (one per failed save per refresh).
-   **hylo:** the temp file is removed after the failed rename (design IM-17). This is
-   the only difference.
+   **hylo:** the temp file is removed after the failed rename (design IM-17). A failure
+   **during the temp write** (e.g. disk full, or a mid-dump conversion error) is treated
+   the same way: hylo removes its own temp and swallows the error; legacy leaks the
+   partial temp (OD-163 rules the own-temp-only cleanup; the observable no-write
+   behavior is reproduced from legacy). This is the only difference. The save never
+   removes a temp created by a different save (own-temp-only, OD-163).
 4. Path strings go to the OS unmodified (BC-1.06.001 postcondition 3). `a/../b` must
    fail like legacy on macOS/Linux (the OS needs `statusline-a` to exist), not be
    lexically cleaned to `b.json` in the cache dir.
@@ -88,6 +93,7 @@ from the cache-file comparison only.
 | EC-003 | sid `a/../b`, Windows | the OS normalizes `..` lexically, so the target resolves to `b.json` in the cache dir and the save succeeds (Go and legacy both defer to the OS). Expected from Win32 path rules; **not executed** — to be pinned on the windows-2025 CI leg |
 | EC-004 | Go temp removal itself fails | swallowed; a leaked temp remains (still ignored by the comparison) |
 | EC-005 | sid `../x`, Windows | the trailing-dot component `statusline-..` does not exist → fails, nothing persists. **Not executed** — to be pinned on the windows-2025 CI leg |
+| EC-006 | Temp write itself fails mid-dump (disk full / conversion error) | nothing persists; legacy leaks the partial temp, hylo removes its own (OD-163); difference confined to the cache-dir listing (OD-110 class) |
 
 ## Canonical Test Vectors
 

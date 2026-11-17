@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r5.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "c8e8373"
+input-hash: "b17aa1c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -46,20 +46,25 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 
 1. `x = float(n)` with Python's grammar (`pyfmt.ParseFloat` for strings: surrounding whitespace, underscores between
    digits, `nan`/`inf` spellings, exponents; ints and bools convert numerically). TypeError or ValueError → return `?`.
-2. With `k_from` = `statusline.units.tokens.k_from` (default 1000) and `M_from` =
-   `statusline.units.tokens.M_from` (default 1e6): `x >= M_from` → `F(x/M_from, 1)` + `M`;
-   else `x >= k_from` → `F(x/k_from, 0)` + `k`; else `F(x, 0)`; `F` = Python
+2. With the registered semantics of the single Text key `statusline.units.tokens`
+   (thresholds 1,000 (`>=` → k) and 1e6 (`>=` → M), per interface-definitions, T-042):
+   `x >= 1e6` → `F(x/1e6, 1)` + `M`;
+   else `x >= 1000` → `F(x/1000, 0)` + `k`; else `F(x, 0)`; `F` = Python
    `format(x, ".Nf")`, half-even, Python spellings `nan`, `inf`, `-inf` (BC-5.01.001).
 3. No unit promotion after rounding.
 
 ## Invariants
 
-1. The function never raises.
+1. Returns `?` on TypeError/ValueError at `float(n)`; the only raise is OverflowError on
+   a JSON integer beyond float64 range (e.g. 10³⁰⁹), which is uncaught here and runs into the catalogued
+   crash path → guard line (OD-156). Every other failure mode returns `?` or a string.
 2. NaN fails both comparisons and prints `nan`; `+inf` passes `>= 1e6` and prints `infM`; `-inf` prints `-inf`.
-3. Parameterized keys (Policy 20): non-default `k_from` / `M_from` follow the same formula
-   above, generalized from legacy's literals (1000, 1e6; T-042); byte parity (vectors) is
-   obligated at the defaults only — other values are unit-tested against the formula, not
-   against Tier A goldens.
+3. Valid ranges (Policy 20, OD-162): legacy bakes both thresholds (1000 `>=` → k;
+   1e6 `>=` → M; T-042) and defines no config override, so the valid range of
+   `statusline.units.tokens` is its registered default only; any other value is a
+   number-range config error (BC-2.02.003, OD-162). Assumed range for architect
+   registration: units.tokens = {`k`/`M`} (registered default). Byte parity (vectors) is
+   obligated at the defaults.
 
 ## Edge Cases
 
@@ -74,6 +79,7 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 | EC-007 | `None`, `"abc"`, `[1]` | `?` |
 | EC-008 | `True` | `1` |
 | EC-009 | `-5` | `-5` |
+| EC-010 | a JSON integer beyond float64 range, e.g. 10³⁰⁹ | `float(n)` raises OverflowError (uncaught) → guard line (OD-156, stdin-borne render overflow); oracle-verified 2026-11-17 |
 
 ## Canonical Test Vectors
 
@@ -114,7 +120,7 @@ pass-3 rounds 1 and 5.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028 | For all float64 inputs, Go output equals CPython output | fuzz vs oracle |
-| VP-028 | Never raises / never panics | fuzz |
+| VP-028 | Overflow behavior per Inv 1: `?` on TypeError/ValueError; beyond-float64 integers raise OverflowError → guard line | table test + fuzz |
 
 ## Traceability
 

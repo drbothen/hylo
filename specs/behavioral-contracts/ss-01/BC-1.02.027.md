@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "1244d41"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -90,7 +90,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028, VP-001 | `+Infinity` in `dur`, or in `api` with a shown timer, degrades; NaN/`-Infinity` never degrade | table test |
-| VP-028, VP-001 | `_hm` output equals CPython for finite float64 inputs across the full range | fuzz vs oracle |
+| VP-028 | `_hm` output equals CPython for finite float64 inputs across the full range | fuzz vs oracle |
 
 ## Traceability
 

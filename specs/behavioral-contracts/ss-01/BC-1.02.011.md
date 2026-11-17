@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "587df2a"
+input-hash: "0a4ac25"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:510-522, 531-532)"
@@ -82,6 +82,7 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 | EC-007 | pct 120 / -5 | clamped to 100 / 0 before banding and text |
 | EC-008 | pct 44.5 / 45.5 | text `44%` / `46%` (half-even) |
 | EC-009 | pct NaN | `7dnan%` grey, countdown kept (BC-1.02.024 family, pass-3 r1 BC-SL-061) |
+| EC-010 | `resets_at` a JSON integer beyond float64 range (e.g. 10³⁰⁹) | `reset - now` raises OverflowError at SL:515 (mixed int/float arithmetic converts the int) → guard line (stdin-borne render overflow, OD-156) |
 
 ## Canonical Test Vectors
 
@@ -120,7 +121,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; `rate_limits` shown,
 | Parity class | byte-exact (no exclusion-list entry) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Owner decisions | owner redesign 2026-11-14 (SL:490-498), OD-113 (theme) |
+| Owner decisions | owner redesign 2026-11-14 (SL:490-498), OD-113 (theme), OD-156 (render-time overflow → catalogued crash path) |
 | Config keys | `statusline.limits.projection_min_elapsed`, `statusline.limits.projected_bands`, `statusline.limits.absolute_bands`, `statusline.limits.windows`, `statusline.theme.*` |
 | Architecture Module | `internal/statusline/limits.go` |
 | Stories | TBD |

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.02.001.md, behavioral-contracts/ss-02/BC-2.02.002.md, behavioral-contracts/ss-02/BC-2.02.003.md, behavioral-contracts/ss-02/BC-2.02.004.md, behavioral-contracts/ss-02/BC-2.02.005.md, behavioral-contracts/ss-02/BC-2.02.006.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "0863dac"
+input-hash: "dd5c779"
 traces_to: prd.md
 source_bc: BC-2.02.001
 bcs: [BC-2.01.002, BC-2.01.003, BC-2.01.005, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-2.03.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +62,9 @@ for the same errors.
 ## Property Class and Verification Method
 
 - **Class:** invariant.
-- **Method:** unit/table test — one table per class (the five settled names below) with
+- **Method:** unit/table test — one table per class (six tables; the five settled
+  ARCH-07 names are joined by `TestConfigError_D4EX3_NumberGrammar` so number-grammar
+  has its own rows) with
   exact expected bytes; plus a registry-order property test (first-error selection is
   order-stable under permutation of invalid variables); plus a no-cache-writes assert
   (empty temp dir after a config-error run).
@@ -79,7 +81,8 @@ for the same errors.
 ## Proof Harness Skeleton
 
 ```go
-func TestConfigError_D4EX3_Number(t *testing.T)   { runClassTable(t, numberRangeRows) }
+func TestConfigError_D4EX3_Number(t *testing.T)        { runClassTable(t, numberRangeRows) }
+func TestConfigError_D4EX3_NumberGrammar(t *testing.T) { runClassTable(t, numberGrammarRows) } // BC-2.02.003 (A2-07)
 func TestConfigError_D4EX3_Boolean(t *testing.T)  { runClassTable(t, booleanRows) }
 func TestConfigError_D4EX3_URL(t *testing.T)      { runClassTable(t, urlRows) }          // incl. control-character rows
 func TestConfigError_D4EX3_Enum(t *testing.T)     { runClassTable(t, enumRows) }
@@ -88,13 +91,22 @@ func TestConfigError_PathGrammarReasons(t *testing.T)  { runClassTable(t, pathGr
 func TestConfigError_BackendsCardinalityReason(t *testing.T) { runClassTable(t, backendsCardinalityRows) } // taxonomy: BC-2.01.002 reason
 
 func TestConfigError_FirstErrorRegistryOrder(t *testing.T) {
-    if firstErr permuted == firstErr canonical { /* order-stable */ } { t.Fatal("order drifted") }
+    base := InvalidVariablesOnePerClass() // one invalid variable per class + register riders
+    want := FirstErrorLine(base)          // canonical registry selection
+    for _, perm := range Permutations(base) {
+        if got := FirstErrorLine(perm); got != want {
+            t.Fatalf("first-error selection drifted under permutation: got %q, want %q", got, want)
+        }
+    }
 }
 ```
 
 ## Named Tests (OD-145 table where applicable)
 
-`TestConfigError_D4EX3_{Number,Boolean,URL,Enum,Theme}` (settled, ARCH-07); order
+`TestConfigError_D4EX3_{Number,NumberGrammar,Boolean,URL,Enum,Theme}` (the five
+settled ARCH-07 names plus `NumberGrammar`, A2-07 — ARCH-07's five-name set shares
+`Number` between range and grammar rows; renaming there is an ARCH-07 citation
+change, flagged to the architect) ; order
 property named `TestConfigError_FirstErrorRegistryOrder`.
 
 ## Feasibility Assessment

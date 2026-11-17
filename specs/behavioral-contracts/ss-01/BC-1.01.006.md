@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cf59d51"
+input-hash: "315bc06"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-040 P5/P6"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +59,10 @@ single `\e[0m`. A row with no `SEP` is returned unchanged even if it is too wide
 
 ## Invariants
 
-1. The function is pure; the output is always a prefix of the input's segments plus at most one `RESET`.
+1. The function is pure; the output is always a prefix of the input's segments plus at most one `RESET` — provided no
+   segment text contains the exact `SEP` byte string. Stdin text (model display name, project label; BC-1.01.004
+   PC3) can contain `SEP` verbatim, in which case `rsplit` cuts inside that segment and the "prefix of segments"
+   reading no longer holds (legacy SL:1196; the trimming behavior itself is pinned by Postcondition 1 either way).
 2. The `rsplit` is on the exact `SEP` byte string (code-point semantics, `pyfmt.RSplit1`); a `·` that is not part of
    `SEP` is not a split point.
 
@@ -92,8 +95,8 @@ All verified 2026-11-15 under CPython 3.11.7 (direct `trim_to_fit` calls and one
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-027 | Output = (prefix of segments joined by SEP) + (RESET iff at least one segment dropped) | Go property test (testing/quick) |
-| VP-027 | After trim, `visible(out) <= cols` or out has no SEP | Go property test (testing/quick) |
+| VP-040 | P5: output = (max-prefix of segments joined by SEP) + (RESET iff at least one segment dropped), for generated rows whose segment text excludes the exact SEP bytes | property-test (testing/quick; generator excludes SEP-containing segment text) |
+| VP-040 | P6: after trim, `visible(out) <= cols` or out contains no SEP | property-test (testing/quick) |
 
 ## Traceability
 

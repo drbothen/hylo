@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "c2f799c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1009-1015)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: int transcript_path → no-transcript, no foreign-descriptor I/O (ruling OD-161; ADV-P2-C06)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,9 +34,9 @@ removal_reason: null
 
 `transcript_path` is passed to `os.path.isfile` and `os.stat`, which accept strings **and integers** (file
 descriptors). The parser's behavior therefore depends on the JSON type: falsy → no transcript; string → a path;
-truthy int or `true` → a file descriptor; truthy float, array or object → `TypeError`, a degraded refresh (CP-S16).
-The parity corpus captures stdout through pipes, so a descriptor never names a regular file there and both sides
-return no-transcript state.
+truthy int or `true` → **no-transcript state** (ruling OD-161); truthy float, array or object → `TypeError`, a
+degraded refresh (CP-S16). Legacy reads and closes a descriptor naming a regular file; hylo never touches a
+descriptor it did not open.
 
 ## Preconditions
 
@@ -48,10 +48,11 @@ return no-transcript state.
 
 1. Falsy (null, `""`, `0`, `0.0`, `false`, `[]`, `{}`) → no-transcript state (BC-1.03.001).
 2. Non-empty string → path semantics (BC-1.03.001 onward).
-3. Truthy int `n` (or `true` = 1) within the C `int` range [−2³¹, 2³¹−1] → treated as descriptor `n`
-   (`platform.StatFD(n)`: `/dev/fd/n` on Unix; "not a regular file" on Windows). If it is not a regular file, or
-   the stat fails (`-1`, closed fd) → no-transcript state. If it is a regular file, legacy reads it as the
-   transcript and **closes** the descriptor when done (unspecified for the corpus; out of scope).
+3. Truthy int `n` (or `true` = 1) → **no-transcript state** (owner ruling OD-161, 2026-11-17: hylo never reads or
+   closes a descriptor it did not open; exclusion id `OD-161`). Legacy contrast: `os.path.isfile(int)` stats the
+   descriptor (oracle-verified) and a regular-file hit makes legacy read and close the descriptor it did not open —
+   a foreign-descriptor hazard hylo deliberately does not reproduce; the deviation is confined to the transcript
+   feed and covered by the `OD-161` exclusion entry.
 4. Truthy int outside the C `int` range (e.g. `2147483648`, `-2147483649`, `2^70`) → `OverflowError` in legacy →
    degraded line, exit 0. (Pinned 2026-11-15; not in the legacy contract text — see Edge Cases.)
 5. Truthy float (`1.5`), array (`["a"]`) or object (`{"a": 1}`) → `TypeError` → degraded line (29 bytes), exit 0,
@@ -61,6 +62,8 @@ return no-transcript state.
 
 1. No transcript-path value ever produces non-zero exit or blank output (DI-008).
 2. The degraded outcomes happen at step 2 of the effect order (BC-1.01.009): no earlier cache writes exist.
+3. Hylo never reads or closes a file descriptor it did not open (ruling OD-161); the int-valued `transcript_path`
+   branch performs no descriptor I/O at all.
 
 ## Edge Cases
 
@@ -90,7 +93,7 @@ Re-pinned 2026-11-15 with the legacy oracle (CPython 3.11, macOS arm64, stdout p
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029 | The type table above holds on Linux, macOS and Windows (Windows: ints → not a regular file) | table test per OS (CI matrix) |
+| VP-029 | The type table above holds on Linux, macOS and Windows (the int branch is OS-independent no-I/O under OD-161) | table test per OS (CI matrix) |
 
 ## Traceability
 
@@ -152,5 +155,5 @@ S-TBD — transcript parser
 
 #### Refactoring Notes
 
-Classify the value first (pure): falsy / string / int-in-range / int-out-of-range / other; only the string and
-int-in-range branches touch `FileSystem` / `platform.StatFD`.
+Classify the value first (pure): falsy / string / int / int-out-of-range / other; only the string branch touches
+`FileSystem` (the int branch performs no descriptor I/O, OD-161).
