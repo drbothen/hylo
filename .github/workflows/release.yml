@@ -1,0 +1,76 @@
+name: release
+
+# Release pipeline: version tags (v[0-9]*) -> static binaries -> GitHub Release.
+# AD-11 / D12: distribution is GitHub Releases (binaries + checksums);
+# Homebrew tap / Scoop / `go install` are follow-ups.
+# Build rules from ARCH-08: CGO_ENABLED=0, one static binary per OS/arch,
+# version stamped via -ldflags -X main.version=<tag> (binary falls back to
+# VCS stamp, then `dev`; BC-4.01.003).
+
+on:
+  push:
+    tags:
+      # [0-9] guard: a stray tag like "vendor-fix" must not release.
+      - 'v[0-9]*'
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: build + publish release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      # Needed by `gh release create` only.
+      contents: write
+    env:
+      TARGETS: 'linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64'
+    steps:
+      - name: Check out repository (tagged commit)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go (version from go.mod, >= 1.26)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+      - name: Final verification — go test ./...
+        run: |
+          if [ -z "$(git ls-files '*.go')" ]; then
+            echo '::error::No Go sources on tagged commit; refusing to release.'
+            exit 1
+          fi
+          go test -count=1 ./...
+      - name: Build static binaries (CGO_ENABLED=0, cross-compiled)
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for t in ${TARGETS}; do
+            goos="${t%%/*}"
+            goarch="${t##*/}"
+            ext=''
+            if [ "${goos}" = "windows" ]; then ext='.exe'; fi
+            out="dist/hylo_${goos}_${goarch}${ext}"
+            echo "Building ${out}"
+            CGO_ENABLED=0 GOOS="${goos}" GOARCH="${goarch}" \
+              go build -trimpath \
+              -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
+              -o "${out}" ./cmd/hylo
+          done
+      - name: Generate checksums
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum hylo_* > SHA256SUMS
+          cat SHA256SUMS
+      - name: Publish GitHub Release
+        # Draft first: assets are staged while the release is invisible, then
+        # it goes public atomically (no partially populated public release).
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "${GITHUB_REF_NAME}" --draft --title "hylo ${GITHUB_REF_NAME}" --generate-notes dist/*
+          gh release edit "${GITHUB_REF_NAME}" --draft=false

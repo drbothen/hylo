@@ -1,0 +1,2 @@
+# Reviewed false positive (2026-11-15): generic-api-key rule on ordinary prose in a factory research doc, not a credential.
+9692c07481f10d8a636309f8ef941a999d985bff:specs/research/domain-hybrid-routing-claude-code-2026-11-14.md:generic-api-key:6
