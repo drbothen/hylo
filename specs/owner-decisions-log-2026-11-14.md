@@ -121,3 +121,7 @@
 <!-- CI/CD ruling by the owner, 2026-11-16 (next free OD-151) -->
 
 | OD-150 | (a) phase-1-cicd-setup lands via branch ci/phase-1-setup in a worktree; the owner reviews before commit; branch protection on main applied only after the first green CI run, requiring the checks lint (gofmt + vet), test (ubuntu-24.04), test (macos-15), test (windows-2025), gitleaks (full history), with admin bypass (enforce_admins false) | |
+
+<!-- CI/CD merge rulings by the owner, 2026-11-16 (next free OD-152) -->
+
+| OD-151 | (a) PR #1 merged with admin override (squash) by owner instruction; GitHub's squash commit carried the owner's personal email as author; owner approved rewriting that one commit with the no-reply identity and force-pushing main (owner ran the push; 570a0fc -> fd031da, same tree and parent), then applying branch protection per OD-150 | |
