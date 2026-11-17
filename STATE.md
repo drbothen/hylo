@@ -4,10 +4,10 @@ level: ops
 version: "2.4"
 status: in_progress
 producer: state-manager
-timestamp: 2026-11-17T07:54:32Z
-last_amended: "2026-11-17 (v2.4 — state-manager — burst close: 145-BC input-hash normalization CA-09, recheck PASS, CR-01..03 fixed, phase-1-gate PASSED)"
+timestamp: 2026-11-17T11:31:48Z
+last_amended: "2026-11-17 (v2.4 — state-manager — phase-1d ADV pass 1 persisted: 6 perimeters, 129 findings, NOT_CONVERGED, novelty HIGH)"
 phase: 1
-phase_position: "RESUMED 2026-11-17. Phase 1 (spec crystallization), CI/CD done; phase-1-consistency-audit DONE 2026-11-17 (verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW, all 12 fixed this burst); consistency re-check PASS 2026-11-17 (CR-01..03 fixed; CR-04 = 69 dependent artifacts hash-stale, deferred to check-input-drift pre-gate); phase-1-gate PASSED 2026-11-17 (orchestrator evaluation); next phase-1d-adversarial-spec-review — Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment); owner rulings OD-132..OD-154 recorded; phase-1-cicd-setup DONE 2026-11-16 (PR #1 merged; main @ fd031da; branch protection live); Phase 0 PASSED 2026-11-14"
+phase_position: "RESUMED 2026-11-17. Phase 1 (spec crystallization), CI/CD done; phase-1-consistency-audit DONE 2026-11-17 (verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW, all 12 fixed this burst); consistency re-check PASS 2026-11-17 (CR-01..03 fixed; CR-04 = 69 dependent artifacts hash-stale, deferred to check-input-drift pre-gate); phase-1-gate PASSED 2026-11-17 (orchestrator evaluation); phase-1d-adversarial-spec-review IN_PROGRESS 2026-11-17 — pass 1 recorded: 129 findings (21 HIGH / 63 MEDIUM / 40 LOW / 5 COSMETIC), NOT_CONVERGED, novelty HIGH; owner questions + fix burst next — Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment); owner rulings OD-132..OD-154 recorded; phase-1-cicd-setup DONE 2026-11-16 (PR #1 merged; main @ fd031da; branch protection live); Phase 0 PASSED 2026-11-14"
 pipeline: IN_PROGRESS
 inputs: []
 input-hash: "[live-state]"
@@ -15,7 +15,7 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "phase-1-gate PASSED 2026-11-17; next phase-1d-adversarial-spec-review; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "ADV pass 1 NOT_CONVERGED (129 findings); owner questions + fix burst next; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→129"
 current_cycle: "phase-1-spec-crystallization"
 market_intel:
   recommendation: GO
@@ -27,7 +27,7 @@ dtu_clones_built: n/a
 dtu_services: []
 ---
 
-<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; hard cap 500 lines (validate-state-md-size hook enforcement); Hard cap (500 lines) margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 192 = 308 (D-446(c) dual-margin form). 192 lines (wc-l) at the 2026-11-17 burst-close burst. Historical content belongs in cycle files, NOT here. -->
+<!-- STATE.md SIZE BUDGET (per D-421(c) + D-422(c) reconciliation): soft target <=200 lines; hard cap 500 lines (validate-state-md-size hook enforcement); Hard cap (500 lines) margin from soft-target = 500 - 200 = 300; margin from actual = 500 - 192 = 308 (D-446(c) dual-margin form). 192 lines (wc-l) at the 2026-11-17 phase-1d ADV pass-1 burst. Historical content belongs in cycle files, NOT here. -->
 
 # Pipeline State: hylo
 
@@ -41,7 +41,7 @@ dtu_services: []
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-17 — burst close: all 145 BC files normalized to repo-relative inputs with real input-hashes (CA-09 closed); consistency re-check PASS — CA-01..12 resolved, CR-01/02 fixed (prd.md, assumptions-register.md), CR-03 fixed (ARCH-INDEX.md), CR-04 = 69 dependent artifacts hash-stale deferred to check-input-drift before the owner gate; report `cycles/phase-1-spec-crystallization/consistency-recheck-2026-11-17.md`; phase-1-gate PASSED 2026-11-17 (orchestrator evaluation) — next phase-1d-adversarial-spec-review; trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-17 — phase-1d adversarial spec review pass 1 persisted: six fresh-context perimeters (A/A2/B/C/C2/D), 129 findings (21 HIGH / 63 MEDIUM / 40 LOW / 5 COSMETIC), novelty HIGH, verdict NOT_CONVERGED; reports `cycles/phase-1-spec-crystallization/adversarial-reviews/pass-1.md` + `ADV-P1-INDEX.md`; next: owner questions + fix burst, then pass 2; trajectory-tail →0→0→0→129 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
@@ -59,7 +59,7 @@ dtu_services: []
 |-------|--------|-------|
 | pre-0 initialization | **COMPLETE** | policies 12-19 + merge/autonomy config committed (47e4c37) |
 | Phase 0 brownfield ingestion of `legacy/` | **PASSED 2026-11-14** (owner approval) — **analysis COMPLETE**: all six passes converged; coverage-audit PASS; extraction-validation r2 PASS-WITH-FIXES; final-synthesis DONE (pass-8) | Gate passed: OD list presented and ruled; next Phase 1 spec crystallization |
-| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** — greenfield-pipeline sub-workflow (phase-1-spec-crystallization); create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment) | product brief + domain spec product-level (OD-115); PRD/BCs/supplements P1-scoped (OD-131); later phases via Feature Mode; owner rulings OD-115..149; no design system (OD-100); PRD OQ-1..14 resolved (OD-132..145; OQ-3 deferred); feasibility review verdict 'PRD CHANGES REQUIRED: none'; phase-1-cicd-setup DONE (PR #1 merged; main @ fd031da, CI green on 3 OSes; branch protection live: lint, test ubuntu-24.04, test macos-15, test windows-2025, gitleaks full history; strict; enforce_admins false; force-push/deletion blocked); consistency re-check PASS + phase-1-gate PASSED 2026-11-17; next phase-1d adversarial spec review |
+| Phases 1-7 (spec crystallization .. convergence) | Phase 1 **IN_PROGRESS** — greenfield-pipeline sub-workflow (phase-1-spec-crystallization); create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment) | product brief + domain spec product-level (OD-115); PRD/BCs/supplements P1-scoped (OD-131); later phases via Feature Mode; owner rulings OD-115..149; no design system (OD-100); PRD OQ-1..14 resolved (OD-132..145; OQ-3 deferred); feasibility review verdict 'PRD CHANGES REQUIRED: none'; phase-1-cicd-setup DONE (PR #1 merged; main @ fd031da, CI green on 3 OSes; branch protection live: lint, test ubuntu-24.04, test macos-15, test windows-2025, gitleaks full history; strict; enforce_admins false; force-push/deletion blocked); consistency re-check PASS + phase-1-gate PASSED 2026-11-17; phase-1d ADV pass 1 recorded 2026-11-17 (129 findings: 21H/63M/40L/5C, NOT_CONVERGED, novelty HIGH); next: owner questions + fix burst, then pass 2 |
 | Adversary passes (Phase 0) | **ALL SIX CONVERGED** | round record + extracted detail in `cycles/phase-0-ingestion/convergence-trajectory.md` (## Extracted from STATE.md on 2026-11-17); trajectory-tail →0→0→0→0 placeholder retained for the formal finding series |
 | Fix bursts (Phase 0) | **NONE** | extracted detail in `cycles/phase-0-ingestion/burst-log.md` |
 
@@ -67,15 +67,15 @@ dtu_services: []
 
 | # | Step | Outcome |
 |---|------|---------|
-| 19 | phase-1-cicd-setup DONE: PR #1 (branch ci/phase-1-setup, workflows @ d88e5ea) merged with admin override (squash) by owner instruction (OD-151); GitHub's squash commit carried the owner's personal email as author — rewritten with the GitHub no-reply identity, main force-pushed 570a0fc -> fd031da (same tree and parent; owner ran the push); branch protection live per OD-150: lint (gofmt + vet), test (ubuntu-24.04), test (macos-15), test (windows-2025), gitleaks (full history); strict; enforce_admins false; force-push/deletion blocked; CI green on 3 OSes; delivery evidence in `code-delivery/phase-1-cicd-setup/` | COMPLETE — current_step = phase-1-consistency-audit NEXT |
 | 20 | SESSION-WRAP-PAUSE-2026-11-17 (state-manager): factory paused after phase-1-cicd-setup; checkpoint archived to `cycles/phase-0-ingestion/session-checkpoints.md` and new SESSION-WRAP-PAUSE checkpoint written | COMPLETE |
 | 21 | phase-1-consistency-audit DONE: report `cycles/phase-1-spec-crystallization/consistency-audit-2026-11-17.md` — verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW (CA-01..CA-12); all 12 findings fixed this burst per OD-154; ASM/R registers minted per OD-152 — `specs/prd-supplements/assumptions-register.md` (ASM-001..006) + `specs/prd-supplements/risk-register.md` (R-001..007); S6 parity-harness BCs keep CAP-009 with stated rationale per OD-153 (governed by DI-012; no new L2 capability); OD-152..154 recorded in the OD log; placeholder input-hashes recomputed: 2/147 updated (the two registers), 145 BC files report MISSING inputs (frontmatter `../semport/...` traversal-form paths rejected by compute-input-hash, left as-is, listed in burst-log) | COMPLETE — current_step = fresh re-check of changed files, then phase-1-gate |
 | 22 | consistency re-check DONE: report `cycles/phase-1-spec-crystallization/consistency-recheck-2026-11-17.md` — verdict PASS: CA-01..12 resolved; CR-01 fixed (`specs/prd.md`), CR-02 fixed (`specs/prd-supplements/assumptions-register.md`), CR-03 fixed (`specs/architecture/ARCH-INDEX.md`); CR-04 = 69 dependent artifacts hash-stale — deferred to the check-input-drift step before the owner gate, dependent-artifact hashes deliberately NOT updated this burst; CA-09 closed: all 145 BC files' frontmatter `inputs:` normalized from '..'-traversal form to repo-relative search-base form with real input-hashes, BC content untouched | COMPLETE — current_step = phase-1-gate |
 | 23 | phase-1-gate PASSED 2026-11-17 (orchestrator evaluation): all criteria met — P1-scoped capabilities CAP-009/010/011/015 covered by BCs; remaining 14 capabilities deferred to P2-P6 per OD-115/OD-131; module criticality at `specs/prd-supplements/module-criticality.md` rather than the specs/ path the criterion names (path note, not a failure); design-system and heuristic-evaluation criteria N/A (OD-100; feature_type = cli); ASM-001..006 and R-001..007 registers present; branch protection verified via GitHub API (5 required checks, strict) | COMPLETE — current_step = phase-1d-adversarial-spec-review |
+| 24 | phase-1d adversarial spec review PASS 1 recorded: six fresh-context perimeters (A/A2/B/C/C2/D) because the ~1.4 MB corpus exceeds one context; 129 findings (21 HIGH / 63 MEDIUM / 40 LOW / 5 COSMETIC), novelty HIGH, verdict NOT_CONVERGED; verbatim reports `cycles/phase-1-spec-crystallization/adversarial-reviews/pass-1.md` + index `ADV-P1-INDEX.md`; owner questions and fix burst next, then pass 2 | COMPLETE — current_step = owner questions + fix burst, then ADV pass 2 |
 
 ## Convergence Status
 
-- **All six passes CONVERGED** (Phase 0: 0:3 1:3 2:9 3:8 4:7 5:5). Round record + extracted detail: `cycles/phase-0-ingestion/convergence-trajectory.md` ("## Extracted from STATE.md on 2026-11-17"). Adversarial spec review not started (Phase 1).
+- **All six passes CONVERGED** (Phase 0: 0:3 1:3 2:9 3:8 4:7 5:5). Round record + extracted detail: `cycles/phase-0-ingestion/convergence-trajectory.md` ("## Extracted from STATE.md on 2026-11-17"). Phase 1d ADV pass 1 recorded 2026-11-17: 129 findings (21H/63M/40L/5C), NOT_CONVERGED, novelty HIGH — `cycles/phase-1-spec-crystallization/adversarial-reviews/`.
 
 ## Canonical Phase 1 Inputs (pointer table)
 
@@ -133,7 +133,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 
 ### Convergence
 
-- None active (adversarial spec review not started). Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5.
+- None active this minute. Phase 1d ADV pass 1 recorded 2026-11-17: 129 findings (21H/63M/40L/5C), NOT_CONVERGED, novelty HIGH. Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5.
 
 ### In Flight
 
