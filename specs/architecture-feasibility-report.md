@@ -1,10 +1,10 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.0"
+version: "1.1"
 status: approved
 producer: architect
-timestamp: 2026-11-16T12:00:00Z
+timestamp: 2026-11-17T16:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
 input-hash: "0221974"
@@ -78,7 +78,11 @@ Component homes for all 145 BCs: `architecture/BC-COMPONENT-MAP.md`.
 | p95 <= 25 ms miss on the owner's Mac | medium | medium | Legacy baseline measured (median 84.5 ms); hot-path allocation discipline; per-OS timing report; gate binds only where OD-117 says |
 | Windows-only edge cases marked "not executed" (BC-1.06.001 EC-008, BC-1.06.002 EC-003/005; sitecustomize shim) | medium | medium | Pinned on the windows-2025 CI leg and the harness canary (PRD Assumption 5); disclosed, not hidden |
 | Fake-pass parity: harness weaker than refereed | low | high | AD-09 fail-closed machinery, canary (BC-6.01.003), exclusion closure property test (VP-012); HIGH kill-rate tier |
-| Purity-annotation drift: per-BC Purity Classification sections present in 90/145 BC files, uneven in enabler/effectful shards (ss-02 1/13, ss-05 4/19) | low | low | Boundary is carried at module level (ARCH-00 table) and per-VP effectful-shell declarations; recommend annotating the remaining shards during Pass 3 anchor back-fill — documentation consistency, not a feasibility gap |
+| Purity-annotation drift: per-BC Purity Classification sections present in 90/145 BC files, uneven in enabler/effectful shards (ss-02 1/13, ss-05 4/19) — *amended 2026-11-17 (CA-07): on-disk count is now 145/145; the remaining shards were annotated during the 2026-11-16 Pass 3 anchor back-fill. Original verdict retained.* | low | low | Boundary is carried at module level (ARCH-00 table) and per-VP effectful-shell declarations; recommend annotating the remaining shards during Pass 3 anchor back-fill — documentation consistency, not a feasibility gap *(completed 2026-11-16, 145/145)* |
+
+Canonical IDs (OD-152, 2026-11-17): the rows above are minted as R-001..R-005, and the
+PRD-carried RK-5/RK-6 dispositions as R-006/R-007, in
+[prd-supplements/risk-register.md](prd-supplements/risk-register.md).
 
 ## Decision Log
 
@@ -87,7 +91,7 @@ Component homes for all 145 BCs: `architecture/BC-COMPONENT-MAP.md`.
 | Accept subsystem grouping as-is | Merge S2 into S1; split S1 parser into own subsystem | Accept | Referencing AD-01/AD-02: the grouping already equals the acyclic package map; merging would blur the config error surface, splitting would add an import seam without a verification benefit |
 | Endorse AD-03 (pure widgets + ordered effect script, not one pure function) | One pure render + final commit block | Option 2 in ARCH-03 | Referencing AD-03 because legacy read-back semantics (failed replace persists nothing) make a single pure function unable to satisfy BC-1.01.009/BC-1.06.002; order-preserving effects are required for cache-state parity |
 | `internal/cost` inherits S1 CRITICAL rather than getting its own tier | Classify separately | Inherit | Referencing SS-01 because the PO's module-criticality row for `internal/statusline` already enumerates "cost history" in its rationale; the package split is architectural only |
-| Treat VP-INDEX as catalog source of truth for coverage claims | Per-BC anchors only | VP-INDEX | Referencing AD-13/POLICY 9; BC VP-anchor back-fill is Pass 3 (deferred by schedule, not by feasibility). Architect-side nit found and logged: the ARCH-INDEX by-home aggregate buckets VP-022 under ARCH-07/08 while the VP-INDEX catalog row says ARCH-04/09 — to be corrected in ARCH-INDEX at the next architect burst (derived view, no PRD impact) |
+| Treat VP-INDEX as catalog source of truth for coverage claims | Per-BC anchors only | VP-INDEX | Referencing AD-13/POLICY 9; BC VP-anchor back-fill is Pass 3 (deferred by schedule, not by feasibility). Architect-side nit found and logged: the ARCH-INDEX by-home aggregate buckets VP-022 under ARCH-07/08 while the VP-INDEX catalog row says ARCH-04/09 — to be corrected in ARCH-INDEX at the next architect burst (derived view, no PRD impact). **Resolved 2026-11-17 (CA-08):** the ARCH-INDEX by-home aggregate now reads `ARCH-04/09 → VP-022`, matching the VP-INDEX catalog row; nit closed |
 | Confirm "architect to confirm" module anchors in BC Traceability tables | Defer to story-writer | Confirmed via BC-COMPONENT-MAP | Referencing BC-COMPONENT-MAP (145/145 homes): Pass 3 back-fill can replace the placeholders mechanically |
 
 ## Approval

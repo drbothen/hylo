@@ -2,10 +2,10 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T16:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
 input-hash: "3c0bbec"
@@ -31,10 +31,13 @@ modified: []
 - **37 VPs**, all status draft, feasibility feasible.
 - **By property class:** invariant 29, safety 6 (VP-001, 002, 003, 005, 015, 018),
   liveness 1 (VP-011), performance 1 (VP-036).
-- **By primary verification method:** unit/table test 19; golden/parity tier 8
-  (VP-009, 010, 019, 021, 027, 028, 029, 030); property-based/fuzz 7 (VP-005, 007,
-  011, 023, 024, 025, 026); static analysis 1 (VP-022); measured 1 (VP-036); CI
-  process observation 1 (VP-037).
+- **By primary verification method:** unit/table test 20 (VP-001, 002, 003, 004, 008,
+  013, 014, 016, 017, 018, 020, 026, 027, 029, 030, 031, 032, 033, 034, 035); golden/parity
+  tier 5 (VP-009, 010, 019, 021, 028); property-based/fuzz 9 (VP-005, 006, 007, 011, 012,
+  015, 023, 024, 025); static analysis 1 (VP-022); measured 1 (VP-036); CI process
+  observation 1 (VP-037). Regenerated 2026-11-17 from the Catalog Method column (CA-02):
+  VP-026 "tables" and VP-035 "unit/table + gate" bucket as unit/table; VP-006 "fuzz +
+  tables" and VP-015 "property + build-time check" bucket as property/fuzz.
 - **Iron-law honesty:** zero VPs claim a formal proof. The template's Kani/TLA+ path
   is not applicable to this Go cycle; the strongest surfaces (pyfmt, config grammars)
   are marked provable-grade in ARCH-00/06 and are verified by exhaustive
@@ -218,5 +221,6 @@ None. 145/145 covered (machine-checked during Pass 2 self-review).
 
 Per POLICY 9, derived views (architecture/verification-coverage-matrix.md when created)
 propagate from this file. Any VP addition/change lands here and in the VP file in the
-same burst; the BC anchors themselves are back-filled in Pass 3 (BC files are not
-edited in Pass 2).
+same burst; the BC body anchors were back-filled 2026-11-16 (Pass 3 DONE — every BC
+file carries VP links in its Verification Properties / VP Anchors body sections;
+spot-checked 2026-11-17 across ss-01/02/04/05/06).

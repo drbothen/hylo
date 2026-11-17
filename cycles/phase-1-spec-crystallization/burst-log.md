@@ -37,3 +37,50 @@ Burst narratives for this cycle, in chronological order.
 ### Session record 2026-11-15..17 (extracted from STATE.md Project Metadata "Last Updated" on 2026-11-17)
 
 2026-11-16 — phase-1-cicd-setup DONE: PR #1 (ci/phase-1-setup @ d88e5ea) merged with admin override (squash) by owner instruction; squash commit rewritten with the GitHub no-reply identity; main force-pushed 570a0fc -> fd031da (same tree and parent; owner ran the push); branch protection live per OD-150 (lint, test x3, gitleaks full history; strict; enforce_admins false; force-push/deletion blocked); OD-151 recorded. Prior burst — parallel Phase 1 steps DONE: architect-feasibility-review (`specs/architecture-feasibility-report.md`, verdict 'PRD CHANGES REQUIRED: none' — prd-revision closed as a no-op); phase-1-dtu-assessment (`specs/dtu-assessment.md`, DTU_REQUIRED false — seam fakes, no Docker clones); phase-1-gene-transfusion-assessment (`specs/gene-transfusion-assessment.md` — statusline + cost gene-transfusion, pyfmt/config/platform hybrid, cmd/hylo + parity fresh). Follow-ups done: purity classification added to the 55 BCs that lacked it (145/145); ARCH-INDEX VP-022 bucket corrected to ARCH-04/09. PHASE-1-CICD-SETUP DONE 2026-11-16: PR #1 (ci/phase-1-setup, workflows @ d88e5ea) merged with admin override (squash) by owner instruction (OD-151); GitHub's squash commit carried the owner's personal email as author — rewritten with the GitHub no-reply identity, main force-pushed 570a0fc -> fd031da (same tree and parent; owner ran the push); branch protection live per OD-150 (lint, test ubuntu-24.04, test macos-15, test windows-2025, gitleaks full history; strict; enforce_admins false; force-push/deletion blocked); CI green on 3 OSes. Three [process-gap] lessons recorded (Drift Items, target before Phase 3). Then: phase-1-consistency-audit. Prior burst — backup-create-architecture DONE: `specs/architecture/` ARCH-00..09 (10 sections, 13 ADRs) + ARCH-INDEX + BC-COMPONENT-MAP; 37 VPs in `specs/verification-properties/` covering 145/145 BCs; BC anchor back-fill; owner rulings OD-146..OD-149. Earlier bursts: backup-create-prd DONE (145 BCs under `behavioral-contracts/ss-01..ss-06`: S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped + 44 new; BC-INDEX + 5 supplements; rulings OD-132..OD-145); create-domain-spec DONE (`specs/domain-spec/`, product-level L2 per OD-115); create-brief DONE (`specs/product-brief.md`, OD-115..117); semport-translation DONE (design + assessment PASSED; OD-107..114); trajectory-tail →0→0→0→0
+
+---
+
+## Burst: consistency-audit fix burst — CA-01..CA-12 fixed, ASM/R registers minted, OD-152..154 recorded (2026-11-17)
+
+**Parent-commit:** 4004444 (factory(state): resume housekeeping — status in_progress, phase-1 cycle dir, compact STATE.md)
+
+**Adversary verdict:** no adversary pass dispatched this burst (remediation of the consistency-audit findings CA-01..CA-12; the phase-1d adversarial spec review has not started — Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5, round record in `cycles/phase-0-ingestion/convergence-trajectory.md`).
+
+**Audit outcome:** phase-1-consistency-audit DONE — report `cycles/phase-1-spec-crystallization/consistency-audit-2026-11-17.md`; verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW (CA-01..CA-12); all 12 findings fixed this burst per OD-154.
+
+**Codifications:** owner rulings OD-152..OD-154 recorded 2026-11-17, ruled "adopt" — OD-152 (CA-04): mint an ASM/R register pair instead of waiving the gate criteria (`specs/prd-supplements/assumptions-register.md` ASM-001..006; `specs/prd-supplements/risk-register.md` R-001..007); OD-153 (CA-03): the 14 S6 parity-harness BCs keep capability CAP-009 with a stated rationale (verification machinery proving CAP-009 byte parity; governed by DI-012); no new L2 capability added; OD-154: fix all remaining consistency-audit findings in one burst before phase-1-gate. Next free OD-155.
+
+**Input-hash recomputation (placeholder "0000000" files only; no blanket --scan --update):** 147 placeholder files identified (145 BC files + the two new registers). Updated 2/147: `specs/prd-supplements/assumptions-register.md` (669ab0f) and `specs/prd-supplements/risk-register.md` (a18a43b), both --check clean. The 145 BC files report MISSING inputs — left as-is. Cause (uniform): their frontmatter `inputs:` reference siblings in traversal form (`../semport/hylo-legacy/...`, `../../semport/...`, `../domain-spec/...`, `../owner-decisions-log-2026-11-14.md`, `../../docs/PLAN.md`, `../../../docs/RESUME.md`, `../../CLAUDE.md`), and compute-input-hash deliberately rejects '..' path components (CWE-22 guard; "legitimate factory inputs never use '..' components") before any resolution attempt, so no hash can be computed for any of them. Affected: all 145 BC files under `specs/behavioral-contracts/ss-01..ss-06` (ss-01: 93, ss-02: 13, ss-03: 3, ss-04: 3, ss-05: 19, ss-06: 14). A future spec-steward burst may normalize those inputs to search-base form (e.g. `semport/hylo-legacy/...`, `owner-decisions-log-2026-11-14.md`) to make them resolvable; content untouched this burst (state-manager mandate).
+
+**Eviction note (keep-last-5):** step row 16 (create-prd DONE, rulings OD-132..145, input-hash re-stamp note) evicted from STATE.md Current Phase Steps on appending row 21; content preserved below in the extracted session record ("backup-create-prd DONE ...") per the move-never-delete rule.
+
+**Files touched (Dim-1): 27 unique files**
+
+- .factory/STATE.md
+- .factory/sidecar-learning.md
+- .factory/specs/owner-decisions-log-2026-11-14.md
+- .factory/specs/prd-supplements/assumptions-register.md (new, OD-152)
+- .factory/specs/prd-supplements/risk-register.md (new, OD-152)
+- .factory/cycles/phase-1-spec-crystallization/consistency-audit-2026-11-17.md (new, audit report)
+- .factory/cycles/phase-1-spec-crystallization/burst-log.md
+- .factory/specs/architecture-feasibility-report.md
+- .factory/specs/architecture/ARCH-INDEX.md
+- .factory/specs/behavioral-contracts/BC-ALLOCATION.md
+- .factory/specs/behavioral-contracts/ss-04/BC-4.01.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.01.001.md .. BC-6.01.003.md (3)
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.001.md .. BC-6.02.004.md (4)
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.001.md .. BC-6.03.004.md (4)
+- .factory/specs/behavioral-contracts/ss-06/BC-6.04.001.md .. BC-6.04.003.md (3)
+- .factory/specs/prd-supplements/module-criticality.md
+- .factory/specs/prd.md
+- .factory/specs/verification-properties/VP-INDEX.md
+
+**Dim-2 Attestation:** artifact counts verified on disk this burst: 145 BC files under `specs/behavioral-contracts/ss-01..ss-06` (placeholder-hash census 147 = 145 BC + 2 registers); 37 VP files (+ VP-INDEX); 10 ARCH sections (+ ARCH-INDEX); 2 new registers under `specs/prd-supplements/`. Owner-ruling ranges cited from the log (`specs/owner-decisions-log-2026-11-14.md`), next free OD-155.
+
+**Dim-5 Attestation:** N/A — no compiled artifacts in this burst (markdown state/bookkeeping files only).
+
+**Dim-6 Attestation:** N/A — no schema-structured file edited; policies.yaml untouched this burst.
+
+**Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
+
+**Closes:** all 12 consistency-audit findings CA-01..CA-12 (OD-154). Still open: fresh re-check of changed files, then phase-1-gate; the 145-BC input-hash normalization (spec-steward, optional follow-up); CLAUDE_AUTOCOMPACT_PCT_OVERRIDE advisory.

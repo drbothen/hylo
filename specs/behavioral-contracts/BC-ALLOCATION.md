@@ -2,10 +2,10 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.1"
+version: "0.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T16:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 stage: "1 of 3 (allocation only — individual BC files are created in stage 2 by the writer groups)"
 origin: greenfield
@@ -417,7 +417,9 @@ Section 2) mirrors it and must not drift.
    BC file (101), listed out-of-scope (BC-SL-097, OD-14), or listed replaced
    (BC-SL-068 → the BC-SL-098 mapping).
 3. Writer groups A-H can be dispatched in parallel without id collisions; each group
-   has at most 21 contracts and a single subsystem-section scope (B split B1/B2).
+   has at most 22 contracts — G reached 22 after the OD-141/OD-140 additions of
+   2026-11-15 (the stage-2 baseline cap was 21) — and a single subsystem-section scope
+   (B split B1/B2).
 4. prd.md frontmatter `supplements:` remain STAGE 3 placeholders until stage 3
    populates `prd-supplements/`.
 

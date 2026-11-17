@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -88,7 +88,7 @@ command reads no configuration, so it works even when `HYLO_*` values are invali
 |-------|-------|
 | Source | new — RESUME P1 step 1 (`hylo version` in the skeleton dispatch), design §2.1 (`version.go`) |
 | Parity / exclusion | n.a. |
-| L2 Capability | CAP-015 (CLI surface; PRD §1 lists S4 under CAP-009, CAP-015) |
+| L2 Capability | CAP-015 (configuration management: emits the build-injected product version — product metadata owned by the CAP-015 verb family in this breakdown, alongside the S2.03 config subcommands; the command reads no runtime config; PRD §1 lists S4 under CAP-009, CAP-015) |
 | L2 Domain Invariants | n.a. |
 | Architecture Module | `cmd/hylo/version.go` (BC-COMPONENT-MAP: cmd/hylo/version.go — ARCH-01) |
 | Stories | S-TBD (filled by story-writer) |

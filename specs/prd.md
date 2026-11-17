@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.1"
+version: "0.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T20:30:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -24,6 +24,7 @@ supplements:
   - prd-supplements/test-vectors.md
   - prd-supplements/nfr-catalog.md
   - prd-supplements/module-criticality.md
+  - prd-supplements/assumptions-register.md
 ---
 
 # Product Requirements Document: hylo P1 — Status Line
@@ -109,7 +110,7 @@ Owner-approved breakdown (2026-11-15, to be recorded as OD-131). BC numbering:
 | S3 | Platform | MEDIUM | CAP-009 (render path support); DI-008 | 3 |
 | S4 | CLI | MEDIUM | CAP-009, CAP-015; DI-008 | 3 |
 | S5 | Python-compatible formatting (`internal/pyfmt`) | CRITICAL | Enables CAP-009 byte parity (OD-103) | 19 |
-| S6 | Parity harness | HIGH | DI-012 machinery; D4 exit criterion | 14 |
+| S6 | Parity harness | HIGH | CAP-009 (parity verification); DI-012 machinery; D4 exit criterion | 14 |
 | S7 | Exporter | — | CAP-008 | **Reserved — no BCs this cycle (P2)** |
 | S8 | Proxy & routing | — | CAP-001..005 | **Reserved — no BCs this cycle (P3)** |
 | S9 | Ledger | — | CAP-006, CAP-007; DI-005, DI-006 | **Reserved — no BCs this cycle (P3, D7)** |
@@ -284,7 +285,7 @@ added seven contracts (BC-2.02.006; the six pyfmt helper BCs, OD-140/OD-141).
 | BC ID | Title | Legacy | Priority |
 |-------|-------|--------|----------|
 | [BC-2.03.001](behavioral-contracts/ss-02/BC-2.03.001.md) | hylo config validate exits non-zero on the same errors as D4-EX-3 | new | P1 |
-| [BC-2.03.002](behavioral-contracts/ss-02/BC-2.03.002.md) | hylo config path prints the per-OS config file path | new | P2 |
+| [BC-2.03.002](behavioral-contracts/ss-02/BC-2.03.002.md) | hylo config path prints the config, cache and state paths (OD-132) | new | P2 |
 
 ### 2.3 S3 — Platform
 
@@ -521,7 +522,7 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 | BC-1.02.001..030 | CAP-009 | `internal/statusline` (widgets) + `internal/pyfmt` | P0 | oracle-pinned table tests |
 | BC-1.03.001..021 | CAP-009 | `internal/statusline` (transcript parser) | P0 | oracle-pinned table tests, D4-EX-2 table |
 | BC-1.04.001..021 | CAP-009, CAP-010 | `internal/statusline` (row 2, metrics client) | P0 | table tests + fake-server integration |
-| BC-1.05.001..009 | CAP-011, CAP-009 | `internal/statusline` (cost history, colors) | P0 | seeded goldens, table tests |
+| BC-1.05.001..009 | CAP-011, CAP-009 | `internal/statusline` + `internal/cost` (cost history, colors) | P0 | seeded goldens, table tests |
 | BC-1.06.001..002 | CAP-009 | `internal/statusline` (cache store) | P0 | table tests, temp-file exclusion test |
 | BC-2.01.001..005 | CAP-015 | `internal/config` | P0/P1 | build-time table tests |
 | BC-2.02.001..006 | CAP-015 | `internal/config` | P0 | D4-EX-3 class tests |
@@ -563,26 +564,28 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 
 ## 9. Assumptions
 
-Itemized from the Phase 0 semport registers and resolved by the owner rulings
+The canonical register is
+[prd-supplements/assumptions-register.md](prd-supplements/assumptions-register.md)
+(minted 2026-11-17 per OD-152), which carries Status, Validation Method and Impact per
+ASM-NNN. Itemized from the Phase 0 semport registers and resolved by the owner rulings
 OD-118..OD-130 (owner-validation-list.md); none reopened here. Operating assumptions this
 cycle relies on:
 
-1. **Oracle pin.** CPython 3.11.7 with a strict UTF-8 locale is the parity oracle
-   (OD-104); all nine stage-2 writer groups re-ran their expected outputs against it on
-   2026-11-15. Edge cases reasoned out rather than run are not in vector tables.
-2. **Client surface stability.** Claude Code 2.1.325 is the tested statusLine surface;
-   the stdin field list is unchanged since 2026-11-14 and the newer optional fields are
-   tolerated absent (market-intel §5/§6.1; BC-1.01.002).
-3. **Settings translation.** The harness translates legacy `DGX_SL_*`/`LOCAL_MODEL_PREFIXES`
-   to typed `HYLO_*` per case (OD-05); stdout parity is unaffected by the typed-bool
-   grammar difference (BC-1.02.005 EC-011).
-4. **Binding latency target.** The p95 <= 25 ms target binds on the owner's Mac
-   (darwin/arm64) only; CI legs report timings without gating (OD-117, BC-6.04.002).
-5. **Pending CI-leg verification.** Windows edge cases (BC-1.06.001 EC-008, BC-1.06.002
-   EC-003/EC-005) and the sitecustomize shim on CPython 3.11 (observed on 3.9.6) are
-   marked "not executed" and pinned on the windows-2025 CI leg / harness canary.
-6. **Timeout ruling.** OD-56 replaces the per-socket timeout with a total fetch deadline
-   (BC-1.04.001); output-identical on the corpus.
+- **ASM-001 — Oracle pin.** CPython 3.11.7 with a strict UTF-8 locale is the parity
+  oracle (OD-104) — validated.
+- **ASM-002 — Client surface stability.** Claude Code 2.1.325 is the tested statusLine
+  surface; the stdin field list is unchanged since 2026-11-14 (BC-1.01.002) — validated.
+- **ASM-003 — Settings translation.** Legacy `DGX_SL_*`/`LOCAL_MODEL_PREFIXES` translate
+  to typed `HYLO_*` per case (OD-05, BC-1.02.005 EC-011) — validated.
+- **ASM-004 — Binding latency target.** The p95 <= 25 ms target binds on the owner's Mac
+  (darwin/arm64) only; CI legs report without gating (OD-117, BC-6.04.002) — validated.
+- **ASM-005 — Pending CI-leg verification.** Windows edge cases (BC-1.06.001 EC-008,
+  BC-1.06.002 EC-003/EC-005) and the CPython 3.11 sitecustomize shim are marked
+  "not executed", pinned on the windows-2025 CI leg / harness canary — open, disclosed.
+- **ASM-006 — Timeout ruling.** OD-56 replaces the per-socket timeout with a total fetch
+  deadline (BC-1.04.001); output-identical on the corpus — validated.
+
+The companion R-NNN risk register is minted by the architect in a follow-up burst.
 
 ## 10. Open Questions
 

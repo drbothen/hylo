@@ -125,3 +125,9 @@
 <!-- CI/CD merge rulings by the owner, 2026-11-16 (next free OD-152) -->
 
 | OD-151 | (a) PR #1 merged with admin override (squash) by owner instruction; GitHub's squash commit carried the owner's personal email as author; owner approved rewriting that one commit with the no-reply identity and force-pushing main (owner ran the push; 570a0fc -> fd031da, same tree and parent), then applying branch protection per OD-150 | |
+
+<!-- Consistency-audit fix rulings by the owner, 2026-11-17 (consistency audit report cycles/phase-1-spec-crystallization/consistency-audit-2026-11-17.md; next free OD-155) -->
+
+| OD-152 | (CA-04) (a) mint an ASM/R register pair instead of waiving the gate criteria — specs/prd-supplements/assumptions-register.md (ASM-001..006) and specs/prd-supplements/risk-register.md (R-001..007) | adopted as proposed |
+| OD-153 | (CA-03) (a) the 14 S6 parity-harness BCs keep capability CAP-009 with a stated rationale (verification machinery proving CAP-009 byte parity; governed by DI-012); no new L2 capability added | adopted as proposed |
+| OD-154 | (a) fix all remaining consistency-audit findings (CA-01..CA-12) in one burst before phase-1-gate | adopted as proposed |

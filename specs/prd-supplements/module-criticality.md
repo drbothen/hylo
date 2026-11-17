@@ -1,10 +1,10 @@
 ---
 document_type: module-criticality
 level: ops
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T20:30:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
@@ -39,12 +39,18 @@ traces_to: prd.md
 
 | Module | Path | Tier | Rationale | Kill Rate Target | VP Count |
 |--------|------|------|-----------|-----------------|----------|
-| Status line (S1) | `internal/statusline` | CRITICAL | carries all 93 render/parser/widget/store contracts; byte-exact parity is the D4 definition of done; every CP-* crash path lives here | >= 95% | VP-TBD |
-| Configuration (S2) | `internal/config` | HIGH | typed domain and D4-EX-3 classes gate every settings interpretation; mutants shift error bytes/exit paths | >= 90% | VP-TBD |
-| Platform (S3) | `internal/platform` | HIGH | wrong dirs/probes corrupt caches and window age; per-OS divergence is subtle | >= 90% | VP-TBD |
-| CLI (S4) | `cmd/hylo` | MEDIUM | thin dispatch over statusline/config; usage goldens pin it | >= 80% | VP-TBD |
-| Python-compatible formatting (S5) | `internal/pyfmt` | CRITICAL | parity foundation under every widget and both JSON modes; Python-semantics surface (half-even, WTF-8, divmod) is where mutants hide | >= 95% | VP-TBD |
-| Parity harness (S6) | `internal/parity` | HIGH | referees D4: weak machinery fake-passes parity; strong mutants survive behind it | >= 90% | VP-TBD |
+| Status line (S1) | `internal/statusline` | CRITICAL | carries all 93 render/parser/widget/store contracts; byte-exact parity is the D4 definition of done; every CP-* crash path lives here | >= 95% | 17 (VP-001, -003, -005, -007, -008, -013, -014, -018, -020, -021, -022, -027, -028, -029, -030, -031, -036) |
+| Configuration (S2) | `internal/config` | HIGH | typed domain and D4-EX-3 classes gate every settings interpretation; mutants shift error bytes/exit paths | >= 90% | 3 (VP-015, -016, -017) |
+| Platform (S3) | `internal/platform` | HIGH | wrong dirs/probes corrupt caches and window age; per-OS divergence is subtle | >= 90% | 3 (VP-014, -032, -033) |
+| CLI (S4) | `cmd/hylo` | MEDIUM | thin dispatch over statusline/config; usage goldens pin it | >= 80% | 2 (VP-002, -004) |
+| Python-compatible formatting (S5) | `internal/pyfmt` | CRITICAL | parity foundation under every widget and both JSON modes; Python-semantics surface (half-even, WTF-8, divmod) is where mutants hide | >= 95% | 6 (VP-005, -006, -023, -024, -025, -026) |
+| Parity harness (S6) | `internal/parity` | HIGH | referees D4: weak machinery fake-passes parity; strong mutants survive behind it | >= 90% | 8 (VP-009, -010, -011, -012, -019, -034, -035, -037) |
+
+> VP counts from `verification-properties/VP-INDEX.md` (Catalog Module column,
+> 2026-11-16). VPs listing several modules count in each: VP-005 (statusline, pyfmt),
+> VP-014 (platform, statusline), VP-021 (statusline, cost); VP-020 (internal/cost) is
+> attributed to S1; VP-035 spans internal/parity and CI; VP-037 (module "CI workflow")
+> is attributed to S6 via source_bc BC-6.04.001. Union across the six modules = 37/37.
 | Exporter (S7) | — | Reserved (P2) | — | — | — |
 | Proxy & routing (S8) | — | Reserved (P3) | — | — | — |
 | Ledger (S9) | — | Reserved (P3) | — | — | — |

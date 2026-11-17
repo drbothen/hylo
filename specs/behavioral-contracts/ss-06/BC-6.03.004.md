@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -150,6 +150,8 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 | L2 Domain Invariants | DI-012 |
 | Architecture Module | `internal/statusline/testdata/parity/exclusions.json`; harness exclusion validator (BC-COMPONENT-MAP: internal/parity/exclusions.go (closed set, no globs) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
+
+> Capability anchor rationale (OD-153): the parity harness is verification machinery whose sole purpose is proving CAP-009 byte parity (the D4 exit criterion), governed by DI-012.
 
 ## Related BCs (Recommended)
 

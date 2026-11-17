@@ -1,10 +1,10 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T16:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "c243f11"
@@ -40,6 +40,7 @@ deployment_topology: single-service
 | Story decomposition inputs | ARCH-03 + ARCH-02 + BC-COMPONENT-MAP.md |
 | Verification plan for a module | ARCH-00 purity table + owning section + prd-supplements/test-vectors.md |
 | Harness implementation | ARCH-07 + prd-supplements/nfr-catalog.md (timing) |
+| Risk register / mitigations | ../prd-supplements/risk-register.md (R-001..R-007, OD-152) |
 | P1-exit vs later phases | ARCH-09 + docs/PLAN.md phases |
 
 ## Subsystem Registry (canonical; Policy 6)
@@ -99,18 +100,23 @@ deployment_topology: single-service
 ## Deferred to Pass 2 / Pass 3
 
 Pass 2 (DONE, 2026-11-16): 37 VP-NNN files + VP-INDEX under
-`../verification-properties/` (catalog source of truth). Pass 3 (back-fill, later
-burst): VP/architecture anchors inserted into BC files. ARCH sections carry the
+`../verification-properties/` (catalog source of truth). Pass 3 (DONE, 2026-11-16):
+VP/architecture anchors inserted into the BC files' Verification Properties / VP Anchors
+body sections (spot-checked 2026-11-17 across ss-01/02/04/05/06). ARCH sections carry the
 verification-feasibility assessments that Pass 2 formalized.
 
 ## Verification Properties (Pass 2 cross-reference)
 
 Catalog: `../verification-properties/VP-INDEX.md` — 37 VPs covering all 145 BCs
 (machine-checked). By class: invariant 29, safety 6, liveness 1, performance 1. By
-primary method: unit/table 19, golden/parity 8, property/fuzz 7, static analysis 1,
-measured 1, CI observation 1. Zero formal proofs claimed (iron law: Go cycle — the
+primary method: unit/table 20, golden/parity 5, property/fuzz 9, static analysis 1,
+measured 1, CI observation 1 (regenerated 2026-11-17 per CA-02, matching the VP-INDEX
+Totals). Zero formal proofs claimed (iron law: Go cycle — the
 provable-grade pure cores are verified by exhaustive oracle tables + property/fuzz,
-declared per VP). Aggregate VP mapping by home: ARCH-01 → VP-002/004; ARCH-02 →
-VP-015/016/017; ARCH-03 (+ARCH-04 stores) → VP-001/003/005/006/007/008/018/020/021/
-027/028/029/030/031/036; ARCH-05 → VP-014/032/033; ARCH-06 → VP-006/023/024/025/026;
-ARCH-04/09 → VP-022; ARCH-07/08 → VP-009/010/011/012/013/019/034/035/037.
+declared per VP). Aggregate VP mapping by home: ARCH-00 P4 → VP-001; ARCH-01 →
+VP-002/004; ARCH-02 → VP-015/016/017; ARCH-03 (+ARCH-04 stores) →
+VP-003/005/006/007/008/018/020/021/027/028/029/030/031; ARCH-05 → VP-014/032/033;
+ARCH-06 → VP-006/023/024/025/026; ARCH-04/09 → VP-022; ARCH-07/08 →
+VP-009/010/011/012/013/019/034/035/037; ARCH-08 (timing gate) → VP-036. VP-001 and
+VP-036 homes aligned to the VP-INDEX catalog rows and the VP files themselves
+(2026-11-17, CA-08).

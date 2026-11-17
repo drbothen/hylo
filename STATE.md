@@ -1,13 +1,13 @@
 ---
 document_type: pipeline-state
 level: ops
-version: "2.3"
+version: "2.4"
 status: in_progress
 producer: state-manager
-timestamp: 2026-11-17T06:48:37Z
-last_amended: "2026-11-17 (v2.3 — state-manager — resume housekeeping: status in_progress, phase-1 cycle dir, compact STATE.md)"
+timestamp: 2026-11-17T07:22:11Z
+last_amended: "2026-11-17 (v2.4 — state-manager — consistency-audit fix burst: CA-01..CA-12 fixed, ASM/R registers minted, OD-152..154 recorded)"
 phase: 1
-phase_position: "RESUMED 2026-11-17. Phase 1 (spec crystallization), CI/CD done; next phase-1-consistency-audit — Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment); owner rulings OD-132..OD-151 recorded; phase-1-cicd-setup DONE 2026-11-16 (PR #1 merged; main @ fd031da; branch protection live); then phase-1-consistency-audit; Phase 0 PASSED 2026-11-14"
+phase_position: "RESUMED 2026-11-17. Phase 1 (spec crystallization), CI/CD done; phase-1-consistency-audit DONE 2026-11-17 (verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW, all 12 fixed this burst); next fresh re-check of changed files, then phase-1-gate — Phase 1 IN_PROGRESS via the greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 statusline; create-domain-spec DONE 2026-11-15; create-prd DONE 2026-11-15; create-architecture DONE 2026-11-16; parallel Phase 1 steps DONE 2026-11-16 (feasibility review, DTU assessment, gene-transfusion assessment); owner rulings OD-132..OD-154 recorded; phase-1-cicd-setup DONE 2026-11-16 (PR #1 merged; main @ fd031da; branch protection live); Phase 0 PASSED 2026-11-14"
 pipeline: IN_PROGRESS
 inputs: []
 input-hash: "[live-state]"
@@ -15,7 +15,7 @@ traces_to: ""
 project: hylo
 product: hylo
 mode: brownfield
-current_step: "RESUMED 2026-11-17: housekeeping done; next phase-1-consistency-audit; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
+current_step: "phase-1-consistency-audit DONE; next fresh re-check of changed files, then phase-1-gate; D-chain cite D-446 latest brownfield; trajectory-tail →0→0→0→0"
 current_cycle: "phase-1-spec-crystallization"
 market_intel:
   recommendation: GO
@@ -41,7 +41,7 @@ dtu_services: []
 | **Port** | Python -> Go (`semport-analyze legacy go`) |
 | **Phase 1 inputs** | `docs/PLAN.md` (decisions D1-D16, phases P0-P7), `docs/STATUSLINE-WIDGETS.md`, `docs/STATUSLINE-REVIEW-2026-11-13.md`, `CLAUDE.md` |
 | **Default branch** | main (no develop) |
-| **Last Updated** | 2026-11-17 — resume-housekeeping burst: status in_progress, `cycles/phase-1-spec-crystallization/` created, STATE.md compacted; the phase-1 session narrative 2026-11-15..17 is in `cycles/phase-1-spec-crystallization/burst-log.md`; trajectory-tail →0→0→0→0 |
+| **Last Updated** | 2026-11-17 — consistency-audit fix burst: report at `cycles/phase-1-spec-crystallization/consistency-audit-2026-11-17.md` (verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW); all 12 findings fixed (OD-154); ASM/R registers minted (OD-152); S6 BCs keep CAP-009 with rationale (OD-153); OD-152..154 recorded; placeholder input-hashes recomputed where resolvable (2 updated, 145 BC files report MISSING inputs); trajectory-tail →0→0→0→0 |
 
 ## Owner Guardrails (standing; see policies.yaml 12-21)
 
@@ -67,11 +67,11 @@ dtu_services: []
 
 | # | Step | Outcome |
 |---|------|---------|
-| 16 | create-prd DONE: `specs/prd.md` integrated (three-stage writing per OD-131; subsystem breakdown OD-131 — S1 Status line CRITICAL, S2 Configuration HIGH, S3 Platform MEDIUM, S4 CLI MEDIUM, S5 pyfmt CRITICAL, S6 Parity harness HIGH; reserved S7-S12; S1/S5 CRITICAL per OD-135 amending the OD-131 HIGH labels) + 145 BC files under `behavioral-contracts/ss-01..ss-06` (S1 93, S2 13, S3 3, S4 3, S5 19, S6 14; 101 legacy-mapped from BC-SL + 44 new; ids BC-S.SS.NNN with legacy_id) + BC-INDEX + 5 supplements (interface-definitions, error-taxonomy, nfr-catalog, test-vectors, module-criticality); owner rulings OD-132..OD-145 recorded 2026-11-16 resolving OQ-1..OQ-14 (OQ-3 deferred; OD-135 S1/S5 CRITICAL); input-hashes re-stamped (BC-ALLOCATION, BC-INDEX, prd) | COMPLETE — current_step = create-architecture NEXT |
 | 17 | create-architecture DONE: `specs/architecture/` — 10 sections ARCH-00 (overview) .. ARCH-09 (reserved boundaries P2-P7) + ARCH-INDEX + BC-COMPONENT-MAP, 13 ADRs (AD-01..AD-13); 37 VPs in `specs/verification-properties/` (VP-001..VP-037 + VP-INDEX) covering 145/145 BCs; BC anchor back-fill across `behavioral-contracts/ss-01..ss-06` + `prd.md` + `prd-supplements/`; owner rulings OD-146..OD-149 recorded in the OD log (sections approved; ps_timeout_s removed; fixture placement AD-13; Tier C fuzz exit) | COMPLETE — current_step = parallel Phase 1 steps (feasibility review, DTU assessment, gene-transfusion assessment, CI/CD setup pending owner decision, then consistency audit) |
 | 18 | parallel Phase 1 steps DONE: architect-feasibility-review — `specs/architecture-feasibility-report.md` (verdict 'PRD CHANGES REQUIRED: none'; PRD feasible as written, NFRs coherent, purity boundaries aligned, 37-VP catalog viable); phase-1-dtu-assessment — `specs/dtu-assessment.md` (DTU_REQUIRED false — 4 external deps, 0 Docker clones; fake upstream/backend seam fakes folded into existing harness stories); phase-1-gene-transfusion-assessment — `specs/gene-transfusion-assessment.md` (internal/statusline + internal/cost full gene-transfusion, internal/pyfmt semantic + internal/config + internal/platform hybrid, cmd/hylo + internal/parity fresh; ≈38 SP saved); follow-ups done: purity classification added to the 55 BCs that lacked it (145/145), ARCH-INDEX VP-022 bucket corrected to ARCH-04/09 | COMPLETE — current_step = phase-1-cicd-setup (owner decision pending on how it lands in the public repo), then phase-1-consistency-audit |
 | 19 | phase-1-cicd-setup DONE: PR #1 (branch ci/phase-1-setup, workflows @ d88e5ea) merged with admin override (squash) by owner instruction (OD-151); GitHub's squash commit carried the owner's personal email as author — rewritten with the GitHub no-reply identity, main force-pushed 570a0fc -> fd031da (same tree and parent; owner ran the push); branch protection live per OD-150: lint (gofmt + vet), test (ubuntu-24.04), test (macos-15), test (windows-2025), gitleaks (full history); strict; enforce_admins false; force-push/deletion blocked; CI green on 3 OSes; delivery evidence in `code-delivery/phase-1-cicd-setup/` | COMPLETE — current_step = phase-1-consistency-audit NEXT |
 | 20 | SESSION-WRAP-PAUSE-2026-11-17 (state-manager): factory paused after phase-1-cicd-setup; checkpoint archived to `cycles/phase-0-ingestion/session-checkpoints.md` and new SESSION-WRAP-PAUSE checkpoint written | COMPLETE |
+| 21 | phase-1-consistency-audit DONE: report `cycles/phase-1-spec-crystallization/consistency-audit-2026-11-17.md` — verdict PASS-WITH-FINDINGS, 0 CRITICAL / 0 HIGH / 4 MEDIUM / 8 LOW (CA-01..CA-12); all 12 findings fixed this burst per OD-154; ASM/R registers minted per OD-152 — `specs/prd-supplements/assumptions-register.md` (ASM-001..006) + `specs/prd-supplements/risk-register.md` (R-001..007); S6 parity-harness BCs keep CAP-009 with stated rationale per OD-153 (governed by DI-012; no new L2 capability); OD-152..154 recorded in the OD log; placeholder input-hashes recomputed: 2/147 updated (the two registers), 145 BC files report MISSING inputs (frontmatter `../semport/...` traversal-form paths rejected by compute-input-hash, left as-is, listed in burst-log) | COMPLETE — current_step = fresh re-check of changed files, then phase-1-gate |
 
 ## Convergence Status
 
@@ -109,7 +109,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 
 ## Open Owner Questions
 
-- OD numbering: OD-01..OD-150 allocated (Phase 0 gate list + 2026-11-15 market-intel review + porting-tension rulings OD-101..106 + semport-tension rulings OD-107..114 + Phase 1 scope rulings OD-115..117 + domain-spec validation rulings OD-118..130 + PRD subsystem-breakdown ruling OD-131 + PRD open-question rulings OD-132..145 + architecture rulings OD-146..149 + CI/CD landing ruling OD-150 + CI/CD merge rulings OD-151); next free OD-152 — log: `specs/owner-decisions-log-2026-11-14.md`.
+- OD numbering: OD-01..OD-154 allocated (Phase 0 gate list + 2026-11-15 market-intel review + porting-tension rulings OD-101..106 + semport-tension rulings OD-107..114 + Phase 1 scope rulings OD-115..117 + domain-spec validation rulings OD-118..130 + PRD subsystem-breakdown ruling OD-131 + PRD open-question rulings OD-132..145 + architecture rulings OD-146..149 + CI/CD landing ruling OD-150 + CI/CD merge rulings OD-151 + consistency-audit fix rulings OD-152..154); next free OD-155 — log: `specs/owner-decisions-log-2026-11-14.md`.
 - PRD open questions OQ-1..OQ-14 (prd.md §10) RESOLVED 2026-11-15 by owner rulings OD-132..OD-145 (OQ-3 deferred) — create-architecture gate cleared.
 - Optional checks (deferred, non-blocking): Grafana per-session cost panel; offline promtool rule validation.
 - Policy risk (owner awareness): Anthropic Usage Policy 2026-11-12 language on routing through consumer subscriptions.
@@ -119,7 +119,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 | Cycle | Type | Status | Notes |
 |-------|------|--------|-------|
 | phase-0-ingestion | brownfield-ingestion | **COMPLETE** — Phase 0 PASSED 2026-11-14; analysis converged; artifacts serve as Phase 1 context (pointer table above); transition to the greenfield sub-workflow performed 2026-11-15 | Commits: dff1f56 (passes 2-3) + be38c50 (passes 0/1/4/5) + 5e83b63 (porting rulings) + this burst (semport design, OD-107..114, transition; create-brief + OD-115..117; domain-spec + OD-118..130) |
-| phase-1-spec-crystallization | spec-crystallization (greenfield-pipeline sub-workflow) | **IN_PROGRESS** — opened 2026-11-15; directory created retroactively 2026-11-17 | scope P1 statusline (OD-131); brief, domain-spec, PRD (145 BCs), architecture (13 ADRs, 37 VPs), parallel steps, CI/CD DONE; next phase-1-consistency-audit; manifest: `cycles/phase-1-spec-crystallization/cycle-manifest.md` |
+| phase-1-spec-crystallization | spec-crystallization (greenfield-pipeline sub-workflow) | **IN_PROGRESS** — opened 2026-11-15; directory created retroactively 2026-11-17 | scope P1 statusline (OD-131); brief, domain-spec, PRD (145 BCs), architecture (13 ADRs, 37 VPs), parallel steps, CI/CD DONE; phase-1-consistency-audit DONE 2026-11-17 (PASS-WITH-FINDINGS, 0C/0H/4M/8L, all fixed); next fresh re-check of changed files, then phase-1-gate; manifest: `cycles/phase-1-spec-crystallization/cycle-manifest.md` |
 
 ## Session Resume Checkpoint (2026-11-17 — SESSION-WRAP-PAUSE)
 
@@ -147,7 +147,7 @@ Engine-level decisions live in `docs/PLAN.md` (owner decisions) and the plugin d
 4. Three [process-gap] lessons (merge-commit author check, CI identity check, never quote flagged text) recorded as Drift Items, target before Phase 3 (L-PG-01..03 in `cycles/phase-0-ingestion/lessons.md`).
 5. Six deferred PR #1 findings recorded in `code-delivery/phase-1-cicd-setup/review-findings.md`.
 6. CLAUDE_AUTOCOMPACT_PCT_OVERRIDE advisory (add 70 to .claude/settings.json) — handled separately from the 2026-11-17 housekeeping burst, which resolved the other check-state-health warnings (status: draft, missing Phase 1 cycle directory, STATE.md 200+ lines).
-7. Next free OD = OD-152 (log: `specs/owner-decisions-log-2026-11-14.md`).
+7. Next free OD = OD-155 (log: `specs/owner-decisions-log-2026-11-14.md`).
 
 Note: this session saw several subagent breakdowns (looping or early stops); every case was verified on disk and nothing was lost — prefer short, tightly scoped agent briefs.
 
