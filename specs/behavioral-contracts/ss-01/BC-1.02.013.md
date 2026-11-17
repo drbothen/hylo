@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "af5956f"
@@ -83,7 +83,7 @@ Notation: `T = 1800000000.0` is the injected clock.
 | EC-005 | cache has `rl` but no `rl_ts` | ts 0 → stale → None |
 | EC-006 | cached `rl` is `{}` | returned (object); renders nothing |
 | EC-007 | cached `rl_ts` in the future | negative age → used |
-| EC-008 | cached `rl_ts` a string | legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n` (`\e` = 0x1B), exit 0 |
+| EC-008 | cached `rl_ts` a string **while cached `rl` is an object** (the `isinstance(rl, dict) and` short-circuit at SL:312: with a non-object `rl` and a string `rl_ts` the result is None and there is no crash) | foreign-cache vector (CP-C02, BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n` (`\e` = 0x1B), exit 0; Go's foreign-cache behavior is a documented known difference (ruling Q-b, P3r2 ruling b) |
 | EC-009 | no `session_id` | shared `statusline-nosession.json` |
 | EC-010 | cached window that later crashes rendering (CP-S09) | sticky for up to 1800 s — BC-1.02.030 |
 | EC-011 | temp-file names during save | covered by the temp-file exclusion, cache comparison only (BC-6.03.003, OD-110) |
@@ -104,14 +104,14 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 | cache `{"rl": {"a": 1}}` (no ts) | None | edge-case |
 | cache `{"rl": {}, "rl_ts": T}` | `{}` | edge-case |
 | cache `{"proc_start": 1.5, "rl": {"old": 1}, "rl_ts": 1.0, "zz": 2}`, stdin `{"seven_day": {"used_percentage": 44}}`, `T` | cache bytes `{"proc_start": 1.5, "rl": {"seven_day": {"used_percentage": 44}}, "rl_ts": 1800000000.0, "zz": 2}` | edge-case |
-| cache `{"rl": {"a": 1}, "rl_ts": "x"}`, stdin absent | TypeError → full run prints the guard line, exit 0 | error |
+| cache `{"rl": {"a": 1}, "rl_ts": "x"}`, stdin absent | TypeError → full run prints the guard line, exit 0 (foreign-cache vector, CP-C02 — EC-008; ruling Q-b) | error |
 
 ## Verification Properties
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028 | Sequence replay (report, silence ×n, report) reproduces oracle stdout and cache bytes at every step | parity harness stdin-sequence (BC-6.02.002) |
-| VP-028 | Cache written by Python is read identically by Go and vice versa | cache-swap test (BC-6.02.004) |
+| VP-019 | Cache written by Python is read identically by Go and vice versa | cache-swap test (BC-6.02.004) |
 | VP-028 | Used value age < keep_s always | property test |
 
 ## Traceability
@@ -147,7 +147,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — smoothing sequence parity
+- VP-028 — smoothing sequence parity; VP-019 — four-cache swap (moved from VP-028, pass-1 finding ADV-P1-B11)
 
 ---
 

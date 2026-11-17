@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,10 +15,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "4df61cf"
+input-hash: "3c7864e"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-079"
@@ -54,12 +54,19 @@ works. Claude Code always sends string session ids, so this shape is non-product
    degrade, CP-S15.)
 2. The cost segment exists and the lane is known, so `record_cost` and
    `cost_thresholds` run.
+3. `transcript_path` is absent or not a file, so `_mix_counts` returns before its
+   `re.sub` sid sanitize (SL:1013-1016). With a transcript present, legacy's numeric-sid
+   refresh raises TypeError in `re.sub` and degrades (CP-S14, BC-1.03.013 EC-007) while
+   the string sid renders normally, so the equality claims below are restricted to the
+   no-transcript case.
 
 ## Postconditions
 
 1. **String-form key (Go).** The sid key is the string JSON would emit for that value
    as an object key: a string unchanged; an int as decimal digits (`777` → `"777"`); a
-   float as Python `repr` (`1.5` → `"1.5"`, `1e16` → `"1e+16"`); `true` → `"true"`.
+   float as Python `repr` (`1.5` → `"1.5"`, `1e16` → `"1e+16"`; non-finite floats are
+   pinned to `repr` spelling `nan`/`inf`/`-inf`, although JSON key emission would spell
+   them `NaN`/`Infinity` — the `repr` rule wins); `true` → `"true"`.
    It is computed with `internal/pyfmt` (OD-103).
 2. **Record (Go).** `record_cost` looks up, throttles and writes under that one string
    key, so the file never holds two equal keys and the throttle applies as for a
@@ -71,8 +78,10 @@ works. Claude Code always sends string session ids, so this shape is non-product
    own entry counts. Refresh 2 loads `"777"`; `s.get(777)` misses (SL:230), the
    throttle never applies, and `json.dump` writes **two** `"777"` keys; `json.load` keeps
    the last, so the file stays at two duplicates on every later refresh.
-5. Hence Go output equals legacy's output for the **string** sid `"777"` on the same
-   inputs (stdout and `cost-history.json`).
+5. Hence — when no transcript exists (Precondition 3) — Go output equals legacy's
+   output for the **string** sid `"777"` on the same inputs (stdout and
+   `cost-history.json`). With a transcript present legacy degrades on the numeric sid
+   (CP-S14), so no equality is claimed there.
 
 ## Invariants
 
@@ -108,15 +117,15 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-020 | For any non-string hashable sid, Go output equals legacy output for `str_form(sid)` as a string sid | manual (paired oracle runs) |
-| VP-020 | No Go-written cost history contains a duplicate key | proptest |
+| VP-020 | For any non-string hashable sid with no transcript present, Go output equals legacy output for `str_form(sid)` as a string sid (with a transcript legacy degrades on the numeric sid, CP-S14) | manual (paired oracle runs) |
+| VP-020 | No Go-written cost history contains a duplicate key | Go property test (testing/quick) |
 
 ## Traceability
 
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007, DI-012 (OD-30 named deviation) |
 | Architecture Module | `internal/cost` history.go (`Record`/`ForLane` take the sid as a raw `pyfmt.Value`, design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (numeric sid, OD-30) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237, lookup SL:230); cost_thresholds (SL:240-262, compare SL:246) |
@@ -136,7 +145,7 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#sid-key` — internal/cost/history.go (numeric sid, OD-30) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/cost/history.go (numeric sid, OD-30) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -146,6 +155,19 @@ S-N.MM — cost history (filled by story-writer)
 
 - VP-020 — string-form equivalence
 
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (record_cost (SL:224-237, lookup SL:230); cost_thresholds (SL:246)) |
+| **Confidence** | medium |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **inferred**: OD-30 pairing runs (numeric sid vs string form) executed on CPython 3.11.7 (2026-11-15); dict-key identity semantics are the subtle surface
+
 #### Purity Classification
 
 | Property | Assessment |
@@ -153,7 +175,7 @@ S-N.MM — cost history (filled by story-writer)
 | **I/O operations** | writes via the injected `Store` seam |
 | **Global state access** | none |
 | **Deterministic** | yes (given samples and a store fake) |
-| **Thread safety** | Send + Sync (store injected) |
+| **Thread safety** | Safe for concurrent use (store injected) |
 | **Overall classification** | boundary |
 
 Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (numeric sid, OD-30) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.

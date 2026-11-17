@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.01.002.md, behavioral-contracts/ss-05/BC-5.02.003.md, behavioral-contracts/ss-01/BC-1.03.004.md, prd-supplements/nfr-catalog.md]
 input-hash: "ad5ccd8"
@@ -18,7 +18,7 @@ verification_lock: false
 proof_completed_date: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -33,10 +33,15 @@ removal_reason: null
 
 ## Property Statement
 
-`pyfmt.Decode` honours the per-call-site depth budgets exactly: stdin text mode accepts
-depth 993 and rejects at 994; transcript bytes mode accepts 995 and rejects at 1,000;
-`Decode` takes its budget as a per-call-site parameter (no package-global constant).
-Boundary values behave identically to CPython 3.11 `json.load`/`json.loads(bytes)`.
+`pyfmt.Decode` honours the per-call-site recursion budget exactly: the budget is an
+explicit per-call-site argument (BC-5.02.003:71-72), not baked into the decode mode —
+`ModeText` serves both the stdin and cache-load sites, which sit at different
+CPython frame depths. Measured boundaries: the transcript `_mix_counts` call site
+pins L = 989 accepted / 990 rejected (BC-5.02.003:67, reproduced four consecutive
+runs); the stdin text-mode site pins 993 accepted / 994 rejected (BC-1.01.002
+EC-005/EC-006, re-probed 2026-11-17). Each site is tested at exactly L accepted /
+L+1 rejected — a single limit, no gap (BC-5.02.003:65-66). Boundary values behave
+identically to CPython 3.11 `json.load`/`json.loads(bytes)`.
 
 ## Source Contract
 
@@ -66,15 +71,16 @@ Boundary values behave identically to CPython 3.11 `json.load`/`json.loads(bytes
 
 ```go
 func TestDecode_DepthBudgetsPerCallSite(t *testing.T) {
-    cases := []struct{ mode pyfmt.DecodeMode; ok, reject int }{
-        {pyfmt.ModeText, 993, 994}, {pyfmt.ModeBytes, 995, 1000},
+    cases := []struct{ name string; mode pyfmt.DecodeMode; budget, ok, reject int }{
+        {"mix_counts site", pyfmt.ModeBytes, budgetOf("_mix_counts"), 989, 990},
+        {"stdin site", pyfmt.ModeText, budgetOf("stdin"), 993, 994},
     }
     for _, c := range cases {
-        if _, err := pyfmt.Decode(nested(c.ok), c.mode); err != nil {
-            t.Fatalf("depth %d rejected", c.ok)
+        if _, err := pyfmt.Decode(nested(c.ok), c.mode, c.budget); err != nil {
+            t.Fatalf("%s: depth %d rejected", c.name, c.ok)
         }
-        if _, err := pyfmt.Decode(nested(c.reject), c.mode); err == nil {
-            t.Fatalf("depth %d accepted", c.reject)
+        if _, err := pyfmt.Decode(nested(c.reject), c.mode, c.budget); err == nil {
+            t.Fatalf("%s: depth %d accepted", c.name, c.reject)
         }
     }
 }

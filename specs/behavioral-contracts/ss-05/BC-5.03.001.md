@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
 input-hash: "013d953"
@@ -65,7 +65,7 @@ counts 1; a combining mark counts 1; a CJK or emoji character counts 1), never t
 |----|-------------|-------------------|
 | EC-001 | `Len("😀")` | 1 |
 | EC-002 | `Len(lone U+D800)` | 1 |
-| EC-003 | `Len("é")` (e + combining acute) | 2 |
+| EC-003 | `Len("e\u0301")` (e + combining acute U+0301, escape notation; the precomposed é would be 1) | 2 |
 | EC-004 | `Len("中")` | 1 (not 2 cells) |
 | EC-005 | Raw-byte surrogate pair (two code points, BC-5.02.004 EC-003) | `Len` 2; `HasSurrogate` true |
 | EC-006 | `Truncate("😀x", 1)` | `"😀"` |
@@ -87,7 +87,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`len`, slicing, strict UTF-8 `print`
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-025 | `Len(Truncate(s, n)) == min(n, Len(s))` | proptest |
+| VP-025 | `Len(Truncate(s, n)) == min(n, Len(s))` | Go property test (testing/quick) |
 | VP-025 | `Len` equals the oracle `len()` on fuzzed decoded strings | fuzz + oracle |
 
 ## Traceability
@@ -126,7 +126,7 @@ TBD — pyfmt str (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/str.go (Len/Truncate/HasSurrogate)` (BC-COMPONENT-MAP: py/str.go (Len/Truncate/HasSurrogate) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

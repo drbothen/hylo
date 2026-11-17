@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md, owner-decisions-log-2026-11-14.md]
 input-hash: "689b66e"
@@ -103,8 +103,8 @@ under the named `TZ`).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-026 | `LocalToUnix` equals the committed CPython goldens (10,893 rows, 0 mismatches) | table test |
-| VP-026 | Outside transitions, `LocalToUnix(loc, w) == time.Date(w, loc).Unix()` | proptest |
-| VP-026 | For overlap walls the result is the smaller of the two candidate instants | proptest over the grid |
+| VP-026 | Outside transitions, `LocalToUnix(loc, w) == time.Date(w, loc).Unix()` | Go property test (testing/quick) |
+| VP-026 | For overlap walls the result is the smaller of the two candidate instants | Go property test (testing/quick) over the grid |
 
 ## Traceability
 
@@ -140,7 +140,7 @@ TBD — pyfmt time (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/time.go (LocalToUnix _mktime port)` (BC-COMPONENT-MAP: py/time.go (LocalToUnix _mktime port) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

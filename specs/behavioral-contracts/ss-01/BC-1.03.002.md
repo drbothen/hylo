@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1016-1040)"
@@ -103,9 +103,9 @@ legacy oracle (CPython 3.11).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-018, VP-019 | `need_reset ⇔ off > 0 ∧ ∃k∈{tin,c_wr,mixv6}: k ∉ cache` | proptest over random key subsets and offsets |
-| VP-029, VP-018, VP-019 | `size == off` after the reset step ⇒ zero Save calls | table test with fake `CacheStore` |
-| VP-029, VP-018, VP-019 | Written cache key order is the fixed 16-key sequence | golden byte comparison |
+| VP-029 | `need_reset ⇔ off > 0 ∧ ∃k∈{tin,c_wr,mixv6}: k ∉ cache` | Go property test (testing/quick) over random key subsets and offsets |
+| VP-029 (no dedicated write-scope VP yet) | `size == off` after the reset step ⇒ zero Save calls | table test with fake `CacheStore` |
+| VP-029, VP-019 | Written cache key order is the fixed 16-key sequence (byte equality of the swapped caches) | golden byte comparison |
 
 ## Traceability
 
@@ -131,7 +131,7 @@ legacy oracle (CPython 3.11).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#mix-cache` — internal/statusline/mixcache.go (name, mixv6 reset) (`internal/statusline/mixcache.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/mixcache.go (name, mixv6 reset) (`internal/statusline/mixcache.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -139,7 +139,7 @@ S-TBD — transcript parser and mix cache
 
 ## VP Anchors (Recommended)
 
-- VP-029, VP-018, VP-019 — reset predicate; no write on `size == off`
+- VP-029, VP-019 — reset predicate (family table); key order → VP-019 swap parity
 
 ---
 

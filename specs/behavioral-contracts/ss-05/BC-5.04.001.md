@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "cd1eea3"
@@ -102,7 +102,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 running the `_iso_ts` expres
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-026 | `FromISOFormat` equals the oracle `_iso_ts` on fuzzed strings under the committed TZ grid | fuzz (`FromISOFormat` target) + oracle |
-| VP-026 | Aware inputs are independent of `loc` | proptest |
+| VP-026 | Aware inputs are independent of `loc` | Go property test (testing/quick) |
 
 ## Traceability
 

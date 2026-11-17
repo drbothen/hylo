@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1029-1034, 1096-1103, 1153)"
@@ -98,8 +98,8 @@ serialized with Python `json.dumps` defaults, one per line. `u` = `{"input_token
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-031 | Each truthy id contributes usage at most once per stored-window lifetime | proptest |
-| VP-029, VP-031 | `len(ids) ≤ N` and `ids` has no duplicates after every write | proptest |
+| VP-029, VP-031 | Each truthy id contributes usage at most once per stored-window lifetime | Go property test (testing/quick) |
+| VP-029, VP-031 | `len(ids) ≤ N` and `ids` has no duplicates after every write | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -123,7 +123,7 @@ serialized with Python `json.dumps` defaults, one per line. `u` = `{"input_token
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#transcript-usage` — internal/statusline/transcript.go (dedup 256) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript.go (dedup 256) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

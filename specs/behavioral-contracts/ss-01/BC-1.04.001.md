@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "d7b0b4e"
+input-hash: "5f3a24c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-040"
@@ -51,7 +51,10 @@ is byte 0x1B.
 1. Exactly one HTTP GET is issued to
    `<url>/api/v1/query?query=<QUERY percent-encoded as Python quote(QUERY, safe='')>`
    (space as `%20`, never `+`; the encoded prefix is
-   `%7B__name__%3D~%22vllm%3Anum_requests_running%7C...`).
+   `%7B__name__%3D~%22vllm%3Anum_requests_running%7C...`). Redirects: the Go client follows
+   HTTP redirects exactly as urllib's default `HTTPRedirectHandler` (active because
+   `build_opener(ProxyHandler({}))` keeps it, SL:168-171) — a 301/302/303/307/308 is
+   followed by GET and the **final** body is parsed; other statuses are not redirected.
 2. Proxy environment variables are ignored for this request (legacy `ProxyHandler({})`,
    SL:168; Go `Transport{Proxy: nil}`).
 3. Result is **no sample** (Go: nil; legacy `None`) when: the status is outside 200-299;
@@ -73,7 +76,7 @@ is byte 0x1B.
 
 ## Invariants
 
-1. At most one metrics request per fetch decision (BC-1.04.002 decides whether to fetch).
+1. One fetch decision per refresh (BC-1.04.002 decides whether to fetch); the decision issues the initial GET plus any redirect hops urllib's default handler would also take — a bare single-request `Transport` is not parity-compatible.
 2. Non-finite strings (`"NaN"`, `"+Inf"`, `"-Inf"`, `"1e400"`) are accepted as floats and
    flow to the renderers and history unchanged (handled by BC-1.04.014/015/016).
 3. Ordering of the sample map is insertion order (it is written to the session cache in
@@ -95,7 +98,7 @@ is byte 0x1B.
 | EC-010 | `metric` = `{}` | name `""` → series skipped, others kept |
 | EC-011 | `metric` key missing on any element | no sample |
 | EC-012 | `up` without `job` label | key `"up:"` |
-| EC-013 | `__name__` is a number (`5`) | stored under int key 5; later `serving_state` calls `startswith` on it → degraded line (BC-1.01.001) after the session-cache write (JSON key `"5"`) |
+| EC-013 | `__name__` is a number (`5`) | stored under int key 5; `serving_state`'s `any(k.startswith("vllm:") for k in m)` short-circuits at the first `vllm:` key (SL:717), so the numeric key degrades the line (BC-1.01.001) only when it precedes every `vllm:`-prefixed key (`{5: 1}` alone → degraded; `{"vllm:x": 1, 5: 1}` → renders normally). After the session-cache write the key round-trips through JSON as the string `"5"`, so later cached-path refreshes never degrade |
 | EC-014 | HTTP 500 / 404 | no sample |
 | EC-015 | body `not json`; `[1,2]`; `{"status":"error"}`; `result` = `{}` or `"ab"` | no sample |
 | EC-016 | body with UTF-8 BOM | accepted (bytes-mode decode) |
@@ -114,9 +117,9 @@ is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030, VP-022 (partial: network edge), VP-022 (frontmatter closure) | For any response bytes, the Go fetch returns the same map (keys, order, float bits) or "no sample" as legacy | fuzz (Tier C differential) + table |
-| VP-030, VP-022 (partial: network edge), VP-022 (frontmatter closure) | The function never panics or returns an error to the caller | fuzz |
-| VP-030, VP-022 (partial: network edge), VP-022 (frontmatter closure) | Request URL bytes equal legacy's for the default query | manual (golden) |
+| VP-030, VP-022 (partial: network edge only) | For any response bytes, the Go fetch returns the same map (keys, order, float bits) or "no sample" as legacy | fuzz (Tier C differential) + table |
+| VP-030 | The function never panics or returns an error to the caller | fuzz |
+| VP-030 | Request URL bytes equal legacy's for the default query | manual (golden) |
 
 ## Traceability
 
@@ -141,7 +144,7 @@ is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#metrics-client` — internal/statusline/telemetry.go (query, total deadline, first-wins) (metrics client and fake-metrics seam) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/telemetry.go (query, total deadline, first-wins) (metrics client and fake-metrics seam) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -149,7 +152,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 ## VP Anchors (Recommended)
 
-- VP-030, VP-022 — fetch differential equivalence
+- VP-030 — fetch differential equivalence; VP-022 (partial) — network-edge read scope only
 
 ---
 

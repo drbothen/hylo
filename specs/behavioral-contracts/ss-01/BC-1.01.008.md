@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cf59d51"
+input-hash: "c9aab29"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,9 +50,10 @@ JSON `\uXXXX` escape) cannot be encoded at output and degrades the refresh (CP-S
    `{}` -> `?` defaults; exit 0. The bytes are never echoed back.
 2. A JSON escape decoding to a lone surrogate (U+D800..U+DFFF, any sub-range incl. U+DC80..U+DCFF) is accepted by
    the decoder and kept (WTF-8 in Go, design IM-01).
-3. If such a string reaches stdout as a **str** (model display name or id, project label), the refresh degrades:
-   stdout is the 29-byte line (BC-1.01.001), exit 0, and every cache write of the refresh has already happened
-   (the fault is at the final print, step 8 of BC-1.01.009).
+3. If such a string reaches stdout as a **str** (model display name or id, project label, or a cached git `branch` —
+   a JSON `\udXXX` escape in `statusline-git-<key>.json` is returned as a str by the loader and rendered verbatim,
+   SL:412-413), the refresh degrades: stdout is the 29-byte line (BC-1.01.001), exit 0, and every cache write of the
+   refresh has already happened (the fault is at the final print, step 8 of BC-1.01.009).
 4. A lone surrogate that is rendered through Python `repr` of a container (e.g. a list display name) is escaped as
    text (`'\ud800'`) and does not degrade (BC-1.02 model-label contract).
 5. Valid output is encoded UTF-8 with LF line ends; Go checks `pyfmt.HasSurrogate` over the output strings before
@@ -84,7 +85,7 @@ Config: defaults, `HYLO_STATUSLINE_ROWS=1`, git disabled, COLUMNS unset, empty c
 | `{"model":{"display_name":"Opus 5.5"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mOpus 5.5\e[0m\n` | happy-path |
 | `{"model":{"id":"A` `FF` `B"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m\n` (45 bytes) | error |
 | `{"model":{"display_name":"\ud800"}}` | `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 | edge-case |
-| `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` | degraded 29 bytes; `statusline-s1.json` written with `rl`, `rl_ts` before the fault | edge-case |
+| `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` | degraded 29 bytes; `statusline-s1.json` written with exactly `rl`, `rl_ts` before the fault (window-start probe pinned: harness fake `ps` with no `claude` ancestor, BC-3.02.002 case I4 — no `proc_start` key) | edge-case |
 
 | `{"model":{"display_name":["\ud800"]}}` (list -> `repr`) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m['\ud800']\e[0m\n` (the six ASCII characters `\ud800` inside quotes; no degrade) | edge-case |
 | `{"x\ud800":1,"model":{"display_name":"Z"}}` (surrogate in an unrendered key) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mZ\e[0m\n` | edge-case |
@@ -96,8 +97,8 @@ Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-005 | stdout is always valid UTF-8 | fuzz |
-| VP-005 | Any invalid-UTF-8 stdin yields the same output as `{}` with the same caches | proptest |
+| VP-005 (stdout codec leg) | stdout is always valid UTF-8 — VP-005's symmetric stdout half ("stdout is valid UTF-8" for every render state) | fuzz |
+| VP-005 | Any invalid-UTF-8 stdin yields the same output as `{}` with the same caches | go test -fuzz |
 
 ## Traceability
 
@@ -129,7 +130,8 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-005 — stdout always valid UTF-8
+- VP-005 — decode-failure equivalence and the stdout-always-valid-UTF-8 property (VP-005 1.1 spans both
+  stdio halves; resolves pass-1 finding ADV-P1-B11)
 
 ---
 

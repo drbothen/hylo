@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.001.md, behavioral-contracts/ss-02/BC-2.03.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, prd-supplements/error-taxonomy.md]
 input-hash: "c1ecf7f"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,17 +35,22 @@ removal_reason: null
 ## Property Statement
 
 The exit code of `hylo` is a total function over the closed verb-scoped table: 0 for
-every `statusline` run (happy, degraded, config-error, unknown-flag), `version`, and
-`config path`; 0 for `config validate` on valid config and 1 on invalid; 2 for usage
-errors on non-statusline verbs with the golden usage text on stderr. No verb/state pair
-exists outside the table, and `runStatusline` cannot propagate a non-zero code.
+every `statusline` run (happy, degraded, config-error, unknown-flag) and `version`;
+`config path` exits 0 with the three path lines, or 1 when a requested directory is
+unavailable (stderr detail per unavailable line, BC-2.03.002 EC-008/EC-010);
+`config validate` exits 0 on valid config and 1 on invalid; `help`/`-h`/`--help` print
+the usage text on stdout, exit 0 (BC-4.01.001 PC-5); 2 for usage errors on
+non-statusline verbs with the golden usage text on stderr. No verb/state pair exists
+outside the table, and `runStatusline` cannot propagate a non-zero code.
 
 ## Source Contract
 
 - **Primary BC:** BC-4.01.001 — Dispatch statusline / version / config; statusline
   exits 0 for any argv.
-- **Partial coverage:** BC-4.01.003 (version string chain), BC-2.03.001 (validate
-  exits non-zero on D4-EX-3 errors), BC-2.03.002 (config path prints three paths).
+- **Partial coverage:** BC-4.01.003 (version string chain), BC-4.01.001 PC-5
+  (`help`/`-h`/`--help` usage on stdout, exit 0), BC-2.03.001 (validate exits non-zero
+  on D4-EX-3 errors), BC-2.03.002 (config path prints three paths; exit 1 when a
+  directory is unavailable, EC-008/EC-010).
 - **Invariant verified:** DI-008 antecedent (non-zero exits only in validate/usage/
   harness contexts, per ARCH-00 Principle 4); AD-11 closed-table consequence.
 
@@ -67,9 +72,10 @@ exists outside the table, and `runStatusline` cannot propagate a non-zero code.
 
 ```go
 func TestExitSurface_ClosedTable(t *testing.T) {
-    for _, tc := range ExitTable { // {verb, args, env, validConfig} -> {exit, golden}
+    for _, tc := range ExitTable { // {verb, args, env, validConfig} -> {exit, stdout golden, stderr golden}
         stdout, stderr, exit := runHylo(tc.Verb, tc.Args, tc.Env, tc.Stdin, tc.Valid)
         if exit != tc.WantExit { t.Fatalf("%s: exit=%d", tc.Name, exit) }
+        if tc.Stdout != "" { assertGoldenBytes(t, tc.Stdout, stdout) } // help/-h/--help usage rows
         if tc.Golden != "" { assertGoldenBytes(t, tc.Golden, stderr) }
     }
 }

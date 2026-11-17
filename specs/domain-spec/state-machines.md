@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "state-machines"
-version: "1.0"
+version: "1.2"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T12:54:51Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r8.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "600cb42"
+input-hash: "7a8eda6"
 traces_to: L2-INDEX.md
 ---
 
@@ -53,18 +53,21 @@ Pass-through destinations acquire connections on demand under the same per-lane 
 
 ## SM-04 Status line render ladder
 
-States: **clean render → degraded one-line (exception) → config-error line
-(D4-EX-3, OD-102) → unknown-flag line (OD-112)**. Terminal for that refresh: every
+Evaluation order per refresh mirrors the PRD error taxonomy (E-CLI-001 outranks
+E-CFG-001): **(1) unknown-flag line (OD-112)** — checked first; **(2) config-error
+line (D4-EX-3, OD-102)** — checked at step 0, before any render; **(3) render
+success, else the degraded one-line fallback**. Terminal for that refresh: every
 refresh starts fresh; the ladder always ends exit 0 with at least one line (DI-008).
-Legacy lacks the middle/hydration distinction between config-error and unknown-flag
-lines (both existed as crash/import paths) — hylo splits them (DECIDED).
+Legacy conflated the config-error and unknown-flag conditions — both surfaced as
+crash/import paths; hylo splits them into distinct rungs (DECIDED).
 
 ## SM-05 Backend health freshness ladder
 
 States: **fresh → stale → dead**, plus **serving-down** as an overlay verdict
 (fetched OK, data says the server is down). Driven by fetch attempts + TTL and the
-"5 min of last-known telemetry" rule (OD-57 E-A); NaN semantics per VictoriaMetrics
-documentation (CP-N01/N02) — NaN samples are dropped; +Inf/-Inf samples are treated
+"5 min of last-known telemetry" rule (OD-57 E-A); NaN samples are kept as floats, as
+in legacy (ADV-P1-A2-02; CP-N01/N02) — those NaN values drive the catalogued crash
+paths, reproduced per BC-1.04.014..016; +Inf/-Inf samples are treated
 as unknown, like a stale sample (defensive parse) — DECIDED OD-130, with the
 confirming owner capture (one real metrics response, read-only) deferred until the
 owner confirms the backend soak has been scored; until then the defensive rule

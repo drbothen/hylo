@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1149; raise sites SL:994, 1069, 1072, 1079, 1097, 1099, 1108, 1112, 1143, 1145)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -107,8 +107,9 @@ The 21-row table with exact expected caches is BC-1.03.019. Representative rows:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-013, VP-012 (frontmatter closure) | For every W-line, parser state after = state before (bit-identical) | proptest with generated W-lines per CP |
-| VP-029, VP-013, VP-012 (frontmatter closure) | Delete-the-line equivalence holds on random transcripts with injected W-lines | fuzz (oracle on the transcript with W deleted) |
+| VP-029, VP-013 | For every W-line, parser state after = state before (bit-identical) | Go property test (testing/quick) with generated W-lines per CP |
+| VP-029, VP-013 | Delete-the-line equivalence holds on random transcripts with injected W-lines | fuzz (oracle on the transcript with W deleted) |
+| VP-012 | Postcondition 5 closure: every predicate-triggering input is a named D4-EX-2 exclusion entry carrying its own expected-output file and dedicated table test; no globs | repository test over `exclusions.json` |
 
 ## Traceability
 
@@ -134,7 +135,7 @@ The 21-row table with exact expected caches is BC-1.03.019. Representative rows:
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#d4-ex-2` — internal/statusline/transcript_wshape.go (W-predicates) (`transcript_wshape.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript_wshape.go (W-predicates) (`transcript_wshape.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -142,7 +143,7 @@ S-TBD — D4-EX-2 wrong-shape skip
 
 ## VP Anchors (Recommended)
 
-- VP-029, VP-013, VP-012 — no partial mutation
+- VP-029, VP-013 — no partial mutation; VP-012 — D4-EX-2 register closure (PC-5)
 
 ---
 

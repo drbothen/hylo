@@ -1,10 +1,10 @@
 ---
 document_type: test-vectors
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T20:30:00Z
+timestamp: 2026-11-17T23:45:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
@@ -37,8 +37,8 @@ traces_to: prd.md
 | Row goldens A/B/C (committed Tier B strings, per-OS variants) | 3 goldens | BC-6.03.001 | P3r2 strings; totals recomputed |
 | CPython-generated pyfmt expectation tables (Round/RoundN/F, ParseInt/ParseFloat, divmod/mod, Strip sets, FromISOFormat) | generated per helper | BC-5.01.001..003, BC-5.03.001..004, BC-5.04.001 | committed generator output (design §2.6) |
 | `-0.0` spellings (cache-hit segment, thermometer) | 2 vectors | BC-1.02.023, BC-1.02.020 | oracle run (writer-added pins) |
-| D4-EX-3 class vectors (one per key class + reason strings) | 1+ per class | BC-2.02.001..005, BC-2.01.003/.005 | spec-pinned (OD-114) |
+| D4-EX-3 class vectors (one per key class + reason strings) | 1+ per class | BC-2.02.001..006, BC-2.01.003/.005 | spec-pinned (OD-114) |
 
-Escape convention: in vector cells, `\uXXXX` escapes (e.g. `\u200B`, ` `) denote that
+Escape convention: in vector cells, `\uXXXX` escapes (e.g. `\u200B`, `\u00A0`) denote that
 code point visibly; `\xNN` denotes a byte; `\e` is 0x1B. No table contains a literal
 invisible character (scanned at stage 3).

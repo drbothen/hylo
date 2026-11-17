@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.02.002.md, behavioral-contracts/ss-06/BC-6.02.003.md, behavioral-contracts/ss-06/BC-6.03.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
 input-hash: "3fbb08d"
 traces_to: prd.md
 source_bc: BC-6.03.002
-bcs: [BC-6.03.002, BC-6.02.002, BC-6.02.003]
+bcs: [BC-6.03.002, BC-6.02.002, BC-6.02.003, BC-1.01.009]
 module: internal/parity
 proof_method: manual
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null

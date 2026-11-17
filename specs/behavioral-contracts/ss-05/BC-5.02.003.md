@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
 input-hash: "f2c1725"
@@ -62,13 +62,21 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
    → error.
 6. **Objects:** duplicate keys keep the **last** value at the **first** key's position (BC-5.02.004).
 7. **Depth:** nesting beyond the CPython recursion budget at the legacy call site → error (RecursionError) → skipped.
-   The limit is call-context dependent (measured 994 or 995 for arrays in a fresh interpreter depending on stack
-   depth); Go uses a named constant equal to the value measured by running the oracle **through
-   `legacy/dgx_statusline.py` end to end** on transcript lines of depth d, recorded in the committed table. Go's own
-   10,000-level limit must not apply. At this call site the committed end-to-end oracle run pins **995 accepted /
-   1,000 rejected** (BC-1.03.004); the stdin text-mode call site pins its own budget (993 accepted / 994 rejected,
-   BC-1.01.002). `Decode` therefore takes the recursion budget as a per-call-site parameter — it is never a
-   package global.
+   The boundary is a single limit `L`: depth `L` is accepted and depth `L + 1` is rejected — there is no gap. Go uses
+   a named constant equal to `L`, with a "why not config" comment; Go's own 10,000-level limit must not apply. At
+   this call site (`_mix_counts`, SL:1061) the pinned boundary is **L = 989 accepted / 990 rejected** for wrapped
+   array nesting, measured 2026-11-17 with the recorded recipe (below) under the pinned oracle CPython 3.11.7,
+   `python3 -I`, default recursion limit 1000, one line per fresh process. The stdin text-mode call site pins its
+   own budget (993 accepted / 994 rejected, BC-1.01.002); the two differ because the recursion budget depends on
+   the Python-frame depth of the call site. `Decode` therefore takes the recursion budget as a per-call-site
+   parameter — it is never a package global.
+   **Measurement recipe (how L was pinned):** run `python3 -I` with the legacy module imported
+   (`importlib`, `legacy/dgx_statusline.py`), `mod.CACHE_DIR` redirected to an empty temp dir, and call
+   `mod._mix_counts(d)` through one module-level runner frame so the frame depth at `json.loads` equals
+   production (`module → main → _mix_counts → json.loads`). The transcript file holds the single line
+   `{"type":"assistant","message":{"id":"m1","content":[{"type":"tool_use","input":` + `"["·d + "]"·d` + `}]}}`
+   with a trailing `\n`; acceptance is observable as `conv = 2·d` (a rejected line leaves `conv = 0`). Bisect d;
+   the largest accepted d is `L` (reproduced: 989 accepted, 990 rejected, four consecutive runs).
 
 ## Invariants
 
@@ -91,7 +99,7 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
 | EC-007 | `"a\x01b"` (raw control char) | error |
 | EC-008 | 4,301-digit integer literal | error (ValueError) → skipped |
 | EC-009 | `{"a":1} x` | error (extra data) |
-| EC-010 | Array nesting at the measured limit / limit + 1 | accepted / error (values from the committed oracle table) |
+| EC-010 | Wrapped array nesting at depth 989 / 990 (`L` / `L + 1`) | accepted / error (RecursionError → skipped) |
 
 ## Canonical Test Vectors
 
@@ -123,7 +131,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 `json.loads(bytes)`.
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1059-1063: `for line in blob[:cut].splitlines(): try: e = json.loads(line) except Exception: continue`) |
 | Legacy contract | BC-SL-067 (new in P3r1 with BC-SL-033 refinement; index P3r4 §7.3) |
-| Decisions | OD-103; design IM-01; pitfalls PR-09, PR-10, PR-11, PR-19; validation-log note (depth 995 vs 994 is call-context dependent, design "Validation log") |
+| Decisions | OD-103; design IM-01; pitfalls PR-09, PR-10, PR-11, PR-19; validation-log note (depth boundary is call-context dependent: 989/990 at this site vs 993/994 at the stdin site, design "Validation log") |
 
 ## Related BCs (Recommended)
 

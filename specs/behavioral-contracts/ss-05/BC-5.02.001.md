@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "cf59d51"
@@ -84,7 +84,7 @@ escaping and float-repr code with the cache encoder `Dumps` (IM-03) so the two c
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | tool_use input `-0.0` vs `{"x":-0.0}` | 2 (falsy → `""`) vs 11 (truthy container) |
-| EC-002 | String with JSON-escaped `  ` | each 6 characters (escaped as ≥ U+007F) |
+| EC-002 | String containing U+2028 / U+2029 (LINE SEPARATOR / PARAGRAPH SEPARATOR, in escapes `\u2028` / `\u2029`) | each escape is 6 characters (escaped as ≥ U+007F) |
 | EC-003 | `{"t":"\\\/\""}` source (`\\`, `\/`, `\"` escapes) | 14: `\/` decodes to `/` (written as 1 char); `\\` and `\"` re-escape to 2 each |
 | EC-004 | Raw U+1F600 vs JSON surrogate-pair escape for it | both 21 in `{"t":…}` (one astral char → 12) |
 | EC-005 | Two raw CESU-encoded surrogate bytes (kept as two lone surrogates by `Decode`) | 12 (two `\udXXX` escapes) — same count as the combined character |
@@ -113,7 +113,7 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`len(json.dumps(...))`); the fu
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-024 | `DumpsLen(v) == len(Dumps(v))` for random Values | proptest |
+| VP-024 | `DumpsLen(v) == len(Dumps(v))` for random Values | Go property test (testing/quick) |
 | VP-024 | `DumpsLen(Decode(b))` equals the oracle `len(json.dumps(json.loads(b)))` on fuzzed inputs | fuzz (`DumpsLen` target) + oracle |
 
 ## Traceability

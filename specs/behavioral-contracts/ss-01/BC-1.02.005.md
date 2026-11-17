@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "5245403"
@@ -47,8 +47,8 @@ Notation: `\e` is the byte 0x1B; `T` = the injected clock (`HYLO_TEST_NOW` /
 2. `statusline.git.enabled` (bool, default `true`) and `statusline.git.ttl_s` (seconds,
    default `5.0`) are resolved (BC-2.01.001).
 3. The cache directory is hylo's per-OS cache dir `paths.cache_dir` (OD-101,
-   BC-3.01.001) — not the legacy `~/.cache/dgx-llm`; the parity harness compares cache
-   files by file name (BC-6.03.002).
+   BC-3.01.001) — not the legacy cache dir (CACHE_DIR, SL:78); the parity harness compares
+   cache files by file name (BC-6.03.002).
 4. `now` is the render's single clock read (design IM-14).
 
 ## Postconditions
@@ -87,8 +87,8 @@ Notation: `\e` is the byte 0x1B; `T` = the injected clock (`HYLO_TEST_NOW` /
 | EC-006 | cached `branch` `5` (non-string) | segment `\e[90m⎇ 5\e[0m` |
 | EC-007 | cached `ts` in the future (clock moved back) | negative age → fresh; cached branch kept until `now > ts + ttl_s` |
 | EC-008 | cached `ts` `true` | counts as 1 → stale → recompute |
-| EC-009 | cached `ts` a string (`"x"`) | legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
-| EC-010 | cache file holds a JSON array (`[1,2]`) | legacy AttributeError → guard line, exit 0 |
+| EC-009 | cached `ts` a string (`"x"`) | foreign-cache vector (CP-C08, BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0; Go's foreign-cache behavior is a documented known difference (ruling Q-b, P3r2 ruling b) — not byte-compared |
+| EC-010 | cache file holds a JSON array (`[1,2]`) | foreign-cache vector (CP-C08): unreachable on Go-authored caches; legacy AttributeError → guard line, exit 0; Go's foreign-cache behavior is a documented known difference (ruling Q-b, P3r2 ruling b) — not byte-compared |
 | EC-011 | `HYLO_STATUSLINE_GIT_ENABLED=no` | disabled under hylo's typed bool (OD-05); legacy `DGX_SL_GIT` disabled only on `"0"`. Config-layer difference only; harness cases translate settings (BC-6.02.003); invalid values are D4-EX-3 Boolean class (BC-2.02.001) |
 | EC-012 | mkstemp temp names / Go temp cleanup | outside this BC's output; covered by the temp-file exclusion (BC-6.03.003, OD-110) |
 
@@ -106,7 +106,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 | key for `/x/p/` | `09d4733efe0f2c7f` | edge-case |
 | key for `/x/\udcff` (lone surrogate) | `a77db2f8cb13007e` | edge-case |
 | git disabled | no segment, no cache file | edge-case |
-| cache `{"ts": "x", "branch": "m"}` | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 | error |
+| cache `{"ts": "x", "branch": "m"}` | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (foreign-cache vector, CP-C08 — see EC-009; ruling Q-b) | error |
 
 ## Verification Properties
 
@@ -114,7 +114,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 |--------|----------|-------------|
 | VP-028 | Multi-step sequence (T, T+5, T+5.001) reproduces oracle stdout and cache bytes | parity harness stdin-sequence replay (BC-6.02.002) |
 | VP-028 | Cache key equals the oracle for ASCII, non-ASCII and lone-surrogate dirs | table test |
-| VP-028 | Python-written cache read by Go and vice versa yields identical output | cache-swap test (BC-6.02.004) |
+| VP-019 | Python-written cache read by Go and vice versa yields identical output | cache-swap test (BC-6.02.004) |
 
 ## Traceability
 
@@ -126,7 +126,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-101 (cache dir), OD-05 (typed bool, no `DGX_*`), OD-110 (temp-file exclusion is cache-only) |
-| Config keys | `statusline.git.enabled` (default true), `statusline.git.ttl_s` (default 5.0 s, operator `>`; rationale: convention — "docs' example pattern", T-013), `paths.cache_dir` |
+| Config keys | `statusline.git.enabled` (default true), `statusline.git.ttl_s` (default 5.0 s, operator `>`; rationale: convention — "docs' example pattern" (GIT_TTL SL:99); catalogue T-013 has no measured basis), `paths.cache_dir` |
 | Architecture Module | `internal/statusline/git.go` |
 | Stories | TBD |
 
@@ -150,7 +150,7 @@ TBD — branch segment story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — TTL sequence parity
+- VP-028 — TTL sequence parity; VP-019 — four-cache swap (moved from VP-028, pass-1 finding ADV-P1-B11)
 
 ---
 

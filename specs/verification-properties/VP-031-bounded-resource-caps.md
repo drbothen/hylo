@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.04.003.md, prd-supplements/nfr-catalog.md]
 input-hash: "9e17709"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,12 +34,16 @@ removal_reason: null
 
 ## Property Statement
 
-Per-refresh state is capped exactly as legacy capped it: 256-entry usage dedup,
-32-point metric histories, 1,000-line turn identity window, 512 KB transcript read
-steps, memory-256 mix cache. Each cap value is a named constant or registry key with
-rationale (D15) — the caps legacy fixed are named constants (T-061/062 class), the
-tunable ones are registry keys — and exceeding a cap evicts per legacy's discipline
-(FIFO/oldest-first as the owning BC rules).
+Per-refresh state is capped exactly as legacy capped it, and legacy has exactly three
+caps (NFR-005, P13 — no cap may be invented): the 256-id usage dedup (registry key
+`statusline.transcript.dedup_memory`, default 256, T-060; legacy `ids[-256:]`,
+mix-cache writer, SL:1153), the 32-point metric histories (legacy `hist[-32:]`,
+SL:350), and the 512 KB transcript read step (module constant `_READ_CAP = 524288`,
+SL:952). The "memory-256 mix cache" is that same 256-id dedup list seen from the
+mix-cache writer — one cap, not two. There is no turn-identity-line window in legacy
+and none in hylo. Each cap value is a named constant or registry key with rationale
+(D15), and exceeding a cap evicts per legacy's discipline (FIFO/oldest-first as the
+owning BC rules).
 
 ## Source Contract
 
@@ -59,18 +63,18 @@ tunable ones are registry keys — and exceeding a cap evicts per legacy's disci
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Cap boundary tables | Go test | yes — cap±1 per cap | all five caps + eviction rows |
+| Cap boundary tables | Go test | yes — cap±1 per cap | all three caps + eviction rows |
 | Constant pin | registry golden | yes | cap provenance (D15) |
 
 ## Proof Harness Skeleton
 
 ```go
 func TestCaps_LegacyIdentical(t *testing.T) {
-    if usageDedupCap() != 256 { t.Fatal("dedup cap drifted") }
-    if metricHistoryCap() != 32 { t.Fatal("history cap drifted") }
-    if turnIdentityWindow() != 1000 { t.Fatal("identity window drifted") }
-    if transcriptStepBytes() != 512*1024 { t.Fatal("step bytes drifted") }
-    if mixCacheMemory() != 256 { t.Fatal("mix cache memory drifted") }
+    if transcriptDedupMemory() != 256 { t.Fatal("dedup cap drifted (SL:1153 ids[-256:])") }
+    if metricHistoryPoints() != 32 { t.Fatal("history cap drifted (SL:350 hist[-32:])") }
+    if readCapBytes() != 512*1024 { t.Fatal("read cap drifted (_READ_CAP 524288)") }
+    // no turn-identity window constant exists; a static registry check asserts
+    // the constant/registry set is exactly these three caps (NFR-005).
 }
 ```
 
@@ -83,7 +87,7 @@ matrices per cap.
 
 | Factor | Assessment | Notes |
 |--------|-----------|-------|
-| Input space size | Five caps x ±1 | tiny |
+| Input space size | Three caps x ±1 | tiny |
 | Proof complexity | N/A | |
 | Tool support | Full | |
 | Estimated proof time | Hours | |

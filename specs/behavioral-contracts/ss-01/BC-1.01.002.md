@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-18T00:10:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "0a39af3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -74,9 +74,13 @@ the guard (BC-1.01.001).
 | EC-007 | `{"model":{"display_name":"X","display_name":"Y"},"v":NaN}` | parses; model label `Y` |
 | EC-008 | `{"model":"x"}` (valid object, wrong inner type) | not this BC: degrades via BC-1.01.001 (CP-S01) |
 
-Note on EC-005/006: the stdin depth limit pinned here (993 accepted / 994 rejected, measured on CPython 3.11.7 through
-the real `main()` call stack) differs from the transcript `json.loads` limit (995/1000, BC-5.02.003). The Go decoder
-must take the depth limit per call site.
+Note on EC-005/006: the stdin depth limit pinned here (993 accepted / 994 rejected) differs from the transcript
+`json.loads` limit (989 accepted / 990 rejected, call-context dependent, BC-5.02.003). The Go decoder must take the depth limit per call site.
+Measured invocation (OD-104/OD-109 oracle, CPython 3.11.7, default recursion limit 1000): a fresh `python3 -I`
+process running a module-level `main()` that calls `json.load(sys.stdin)`, stdin piped from a file; depth = top-level
+`[` nesting. Re-probed 2026-11-17: 993 accepted, 994 RecursionError. The Tier C harness must invoke the oracle in
+this same shape — feed stdin to a fresh process, do not import the module — or the budget can shift by a Python
+frame.
 
 ## Canonical Test Vectors
 

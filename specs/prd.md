@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.1"
+version: "0.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T16:30:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "d23a0b0"
+input-hash: "4203554"
 traces_to: domain-spec/L2-INDEX.md
 supplements:
   - prd-supplements/interface-definitions.md
@@ -37,7 +37,8 @@ supplements:
 >
 > **Integration stage (3 of 3).** Stage 1 produced the subsystem breakdown and the
 > authoritative allocation (`behavioral-contracts/BC-ALLOCATION.md`); stage 2 wrote all
-> 138 BC files (verified: 138/138 match the register; frontmatter carries legacy_id,
+> BC files (verified against the register: 138 at stage 2; seven contracts added by
+> OD-132..OD-145 bring the total to 145; frontmatter carries legacy_id,
 > parity_class, confidence); stage 3 built `behavioral-contracts/BC-INDEX.md`,
 > reconciled cross-group differences, and fills the sections below. The BC files and
 > `BC-INDEX.md` are the contract detail; this document indexes them. Revised 2026-11-15
@@ -45,8 +46,8 @@ supplements:
 >
 > **Scope ruling (OD-115).** The brief and L2 spec are product-level; this PRD specifies
 > **P1 (`hylo statusline`) only**. Later phases enter via Feature Mode.
-> **Subsystem breakdown** approved by the owner 2026-11-15; to be recorded as OD-131
-> (pending recording in the owner decision log).
+> **Subsystem breakdown** approved by the owner 2026-11-15 and recorded as OD-131
+> (owner decision log).
 
 ## 1. Product Overview
 
@@ -59,7 +60,8 @@ A Claude Code subscriber with local inference hardware must either repoint the c
 a base-URL gateway (losing Remote Control since Claude Code 2.1.196) or run a hand-built
 Python/mitmproxy stack. The prototype's status line is the daily cockpit — lane, session,
 context, limits, cost and backend telemetry — and it is the lowest-risk, highest-value
-first slice of the port: a pure function of stdin + transcript + metrics + caches (DI-007).
+first slice of the port: a render over stdin, transcript, metrics, caches and the
+environment seams (git state, process table, clock, env — AD-03), never the ledger (DI-007).
 
 ### 1.2 Solution Vision (P1)
 
@@ -67,8 +69,8 @@ first slice of the port: a pure function of stdin + transcript + metrics + cache
 output against the CPython 3.11.x oracle over the synthetic fixture corpus and the
 owner's recorded real inputs, on all three OSes (D4 parity is the definition of done).
 Rendering never fails: faults produce the degraded ladder — one-line output, exit 0
-(DI-008). Approved deviations ride only the named exclusion list (D4-EX-1/2/3 + OD-110
-entries; DI-012). Configuration in P1 is typed `HYLO_*` env over built-in defaults
+(DI-008). Approved deviations ride only the closed exclusion set pinned in BC-6.03.004
+(D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03; DI-012). Configuration in P1 is typed `HYLO_*` env over built-in defaults
 (file layer arrives P4, OD-107); invalid config renders the D4-EX-3 one-line error and
 exits 0.
 
@@ -100,24 +102,24 @@ exits 0.
 
 ### 1.6 Subsystems
 
-Owner-approved breakdown (2026-11-15, to be recorded as OD-131). BC numbering:
+Owner-approved breakdown (2026-11-15; OD-131). BC numbering:
 `BC-S.SS.NNN` = subsystem S, subsection SS, sequential within subsection. Shards:
 `behavioral-contracts/ss-NN/` keyed by subsystem.
 
 | Subsystem | Name | Priority | Governing L2 (CAP / DI) | BCs this cycle |
 |-----------|------|----------|------------------------|----------------|
-| S1 | Status line | CRITICAL | CAP-009, CAP-010, CAP-011; DI-007, DI-008 | 93 |
+| S1 | Status Line | CRITICAL | CAP-009, CAP-010, CAP-011; DI-007, DI-008 | 93 |
 | S2 | Configuration | HIGH | CAP-015; DI-010, DI-008 | 13 |
 | S3 | Platform | MEDIUM | CAP-009 (render path support); DI-008 | 3 |
 | S4 | CLI | MEDIUM | CAP-009, CAP-015; DI-008 | 3 |
-| S5 | Python-compatible formatting (`internal/pyfmt`) | CRITICAL | Enables CAP-009 byte parity (OD-103) | 19 |
-| S6 | Parity harness | HIGH | CAP-009 (parity verification); DI-012 machinery; D4 exit criterion | 14 |
+| S5 | Pyfmt | CRITICAL | Enables CAP-009 byte parity (OD-103; `internal/pyfmt`) | 19 |
+| S6 | Parity Harness | HIGH | CAP-009 (parity verification); DI-012 machinery; D4 exit criterion | 14 |
 | S7 | Exporter | — | CAP-008 | **Reserved — no BCs this cycle (P2)** |
-| S8 | Proxy & routing | — | CAP-001..005 | **Reserved — no BCs this cycle (P3)** |
+| S8 | Proxy And Routing | — | CAP-001..005 | **Reserved — no BCs this cycle (P3)** |
 | S9 | Ledger | — | CAP-006, CAP-007; DI-005, DI-006 | **Reserved — no BCs this cycle (P3, D7)** |
-| S10 | Launcher / hook / doctor / CA | — | CAP-012, CAP-014, CAP-017 | **Reserved — no BCs this cycle (P4)** |
-| S11 | UIs (web + TUI) | — | CAP-016; DI-016 | **Reserved — no BCs this cycle (P4/P6)** |
-| S12 | Multi-backend | — | CAP-018 | **Reserved — no BCs this cycle (P6)** |
+| S10 | Launcher Hook Doctor CA | — | CAP-012, CAP-014, CAP-017 | **Reserved — no BCs this cycle (P4)** |
+| S11 | UIs | — | CAP-016; DI-016 (web + TUI) | **Reserved — no BCs this cycle (P4/P6)** |
+| S12 | Multi-Backend | — | CAP-018 | **Reserved — no BCs this cycle (P6)** |
 
 **Total new BCs: 145** (101 mapped from legacy BC-SL-001..103 + 44 new contracts; see
 `behavioral-contracts/BC-ALLOCATION.md` for the authoritative mapping). Priority labels
@@ -388,7 +390,7 @@ added seven contracts (BC-2.02.006; the six pyfmt helper BCs, OD-140/OD-141).
 |-------|-------|--------|----------|
 | [BC-6.04.001](behavioral-contracts/ss-06/BC-6.04.001.md) | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.x leg; -race; gitleaks | new | P0 |
 | [BC-6.04.002](behavioral-contracts/ss-06/BC-6.04.002.md) | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target | new | P1 |
-| [BC-6.04.003](behavioral-contracts/ss-06/BC-6.04.003.md) | Tier C differential fuzz: nightly Linux, non-gating, random valid inputs to both sides | new | P1 |
+| [BC-6.04.003](behavioral-contracts/ss-06/BC-6.04.003.md) | Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs | new | P1 |
 
 ### 2.7 Reserved subsystems (no BCs this cycle)
 
@@ -449,8 +451,8 @@ the supplement.
 | NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
 | NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02) produce >= 1 output byte and exit 0 | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
-| NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean | CI matrix | BC-6.04.001 |
-| NFR-005 | Memory/CPU envelope | bounded state: 256-entry dedup memory, 32-point histories, 1000-line identity window, 512 KB read steps | table tests | BC-1.03.003/.005, BC-1.04.002 |
+| NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
+| NFR-005 | Memory/CPU envelope | bounded state, legacy caps only: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952); no other cap exists in legacy and none may be invented (P13) | table tests | BC-1.03.003/.005, BC-1.04.002 |
 | NFR-006 | Repo hygiene (public repo) | synthetic-only committed fixtures; gitleaks + pattern scan clean on CI | CI leg + TestCorpusHygiene | BC-6.02.001, BC-6.04.001 |
 
 ## 5. Error Taxonomy
@@ -475,7 +477,8 @@ the supplement.
 Severity model: `broken` = cannot render (E-REN-001/002 — observable is the degraded
 line); `degraded` = partial widget output with stated fallback (E-CFG-001, E-CLI-001,
 E-NET-001, E-FS-001); `cosmetic` = stderr-only detail (stderr is never compared by the
-harness). Non-zero exits: E-CLI-002 and E-VAL-001 by ruler TOM side (OD-102); E-HAR-001
+harness). Non-zero exits: E-CLI-002 (usage) and E-VAL-001 — `hylo config validate` exits 1
+for the same errors that render the D4-EX-3 line on the status line (OD-102); E-HAR-001
 in the harness process only.
 
 ## 5b. Test Vectors
@@ -507,9 +510,9 @@ lane-split peer).
 
 | Differentiator | Implementing BCs | Claim basis |
 |---|---|---|
-| KD-001 Backend telemetry strip (health/queue/KV/throughput/TTFT/power/idle + freshness ladder) | BC-1.04.001 (client), BC-1.04.002/.003/.020/.021 (store, history, TTL), BC-1.04.004 (freshness ladder), BC-1.04.005..012, .017, .018, .019 (segments), BC-1.04.013 (ROWS >= 2 fetch), BC-1.02.009 (limits segment) | CAP-010; market-intel §4: no surveyed peer renders local-backend telemetry in the status line |
-| KD-002 Owned-hardware `⛏` cost with percentile colors | BC-1.05.003 (⛏ pick inside the $ block), BC-1.05.001/.002 (percentile thresholds), BC-1.05.005 (p75/p95 from history), BC-1.05.004/.006/.009 (record throttle, numeric sid, write format), BC-1.05.007 (number formats), BC-1.05.008 (goldens), BC-1.02.029 (basis threshold) | CAP-011, CAP-009; lane-split cost coloring absent from peers (§4) |
-| KD-003 Composition and window-age widgets | composition: BC-1.02.007 (half-even percentage), BC-1.03.008/.009 (state from transcript), BC-1.02.019 (heat cells); window age: BC-1.02.017 (gate), BC-1.02.028 (duration format), BC-3.02.001/.002 (native per-OS probe, D4-EX-1/OD-76) | CAP-009; `▤❙◈` and ancestor-probe age unique among surveyed peers (§4) |
+| KD-001 Backend telemetry strip (health/queue/KV/throughput/TTFT/power/idle + freshness ladder) | BC-1.04.001 (client), BC-1.04.002/.003/.020/.021 (store, history, TTL), BC-1.04.004 (freshness ladder), BC-1.04.005..012, .017, .018, .019 (segments), BC-1.04.013 (ROWS >= 2 fetch) | CAP-010; market-intel §4: no surveyed peer renders local-backend telemetry in the status line |
+| KD-002 Owned-hardware `⛏` cost with percentile colors | BC-1.05.003 (⛏ pick inside the $ block — the basis threshold), BC-1.05.001/.002 (percentile thresholds), BC-1.05.005 (p75/p95 from history), BC-1.05.004/.006/.009 (record throttle, numeric sid, write format), BC-1.05.007 (number formats), BC-1.05.008 (goldens) | CAP-011, CAP-009; lane-split cost coloring absent from peers (§4) |
+| KD-003 Composition and window-age widgets | composition: BC-1.02.007 (half-even percentage), BC-1.03.008/.009 (state from transcript), BC-1.02.006 (thermometer heat cells); window age: BC-1.02.017 (gate), BC-1.02.028 (duration format), BC-3.02.001/.002 (native per-OS probe, D4-EX-1/OD-76) | CAP-009; `▤❙◈` and ancestor-probe age unique among surveyed peers (§4) |
 
 ## 7. Requirements Traceability Matrix
 
@@ -533,7 +536,7 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 | BC-4.01.001..003 | CAP-009, CAP-015 | `cmd/hylo` | P0/P2 | CLI integration, usage golden |
 | BC-5.01.001..006 | CAP-009 (enabler, OD-103) | `internal/pyfmt` (num) | P0 | CPython oracle tables + fuzz |
 | BC-5.02.001..006 | CAP-009 (enabler) | `internal/pyfmt` (json) | P0 | oracle tables (63-case dump oracle) + fuzz |
-| BC-5.03.001..004 | CAP-009 (enabler) | `internal/pyfmt` (str) | P0 | proptest + oracle tables |
+| BC-5.03.001..004 | CAP-009 (enabler) | `internal/pyfmt` (str) | P0 | Go property test (testing/quick) + oracle tables |
 | BC-5.04.001..003 | CAP-009 (enabler) | `internal/pyfmt` (time) | P0 | oracle tables, TZ-matrix tests |
 | BC-6.01.001..003 | DI-012 machinery | `internal/parity` (oracle exec) | P0 | harness integration tests |
 | BC-6.02.001..004 | DI-012 machinery | `internal/parity` (corpus) | P0/P1 | harness integration tests |
@@ -551,12 +554,12 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 - **DI-010 — typed, validated config.** Every key is registry-declared with a rationale
   (D15); invalid values render the D4-EX-3 line and continue (BC-2.01.004, BC-2.02.x).
 - **DI-012 — closed deviation set.** Behavior may differ from the oracle only via named,
-  tested exclusions (D4-EX-1/2/3, OD-30, OD-76, temp-file). The id set is closed
+  tested exclusions (D4-EX-1/2/3, OD-30, OD-76, `temp-file`, `cp-x03`). The id set is closed
   (BC-6.03.004); a new class needs an owner decision.
 - **Cache-format ownership (ruling b).** Go is byte-exact cache writer and reader across
   Python/Go swaps for all four caches (BC-1.02.013, BC-1.03.002, BC-1.05.009,
   BC-1.06.001/.002, BC-6.02.004).
-- **Per-call-site resources.** JSON recursion budget (stdin 993/994; transcript 995/1000)
+- **Per-call-site resources.** JSON recursion budget (stdin 993/994; transcript 989/990)
   and whitespace sets (int/float vs str.isspace) are stated per site, never globally
   (BC-1.01.002, BC-5.02.003, BC-5.01.002, BC-5.03.002).
 - **Public-repo hygiene (policy 21).** Repo-relative paths only; synthetic fixtures;
@@ -613,6 +616,7 @@ remain in git history and in the BCs' edge-case registers.
 
 Carried, closed by spec decision (no owner action needed): RK-5 (HYLO_TEST_NOW stderr
 warning outside the harness), RK-6 (`statusline.window_age.ps_timeout_s` — removed by
-OD-147 (owner, 2026-11-16); setting it is now an ordinary unknown-key config error),
+OD-147 (owner, 2026-11-16); setting it is an unknown `HYLO_*` setting: stderr warning,
+ignored, exit status unchanged (BC-2.01.001 PC-6)),
 T9 follow-through (theme key registry rows — delivered in BC-2.01.003), and the recording
 of OD-131 (subsystem breakdown approved 2026-11-15).

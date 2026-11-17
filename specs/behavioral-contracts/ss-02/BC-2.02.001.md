@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -48,7 +48,7 @@ import-time crash (empty stdout, traceback, exit 1, blank status line) and is th
 deviation **D4-EX-3** (OD-102), excluded from the parity diff by name (OD-105).
 
 This file is the canonical home of the line format, the `<value>` escaping rule and the
-reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/005 use.
+reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/005 use.
 
 ## Preconditions
 
@@ -97,7 +97,7 @@ reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/
 | `negative` | number-range | BC-2.02.002 |
 | `must be > 0` | number-range | BC-2.02.002 (keys whose registry range excludes 0) |
 | `out of range` | number-range | BC-2.02.002, BC-2.02.003 (int64 overflow) |
-| `not a boolean (true\|false\|1\|0\|yes\|no)` | boolean | BC-2.01.005 |
+| `not a boolean (true\|false\|1\|0\|yes\|no)` | boolean | BC-2.02.006 (dedicated class contract, OD-140), BC-2.01.005 (grammar) |
 | `unknown value (<v1>\|<v2>\|...)` | enum | BC-2.02.004 (`unknown value (rate\|kv\|ttft)` for the trace key) |
 | `scheme must be http or https` | URL | BC-2.02.005 |
 | `not a URL` | URL | BC-2.02.005 |
@@ -107,6 +107,14 @@ reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/
 | `empty path` | path | BC-2.01.005 |
 | `home directory unknown` | path | BC-2.01.005 |
 | `exactly one backend entry until P6` | backends | BC-2.01.002 |
+
+Class-count reconciliation (ADV-P1-D33, mirrored from error-taxonomy.md): the class register
+is closed at exactly six classes with dedicated class contracts and D4-EX-3 table tests —
+number-range, number-grammar, enum, URL (OD-114), theme (OD-134), boolean (OD-140). The
+`path` and `backends` columns above are reason categories without dedicated class contracts;
+their reasons map to the raising contracts (BC-2.01.005, BC-2.01.002), and `control
+character` maps to the URL class when raised by BC-2.02.005 and to the theme class when
+raised by BC-2.01.003. A seventh class needs an owner decision.
 
 (In the table `\|` is a literal `|`.)
 
@@ -149,9 +157,9 @@ reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-016, VP-012 (frontmatter closure) | For every env map, stdout is either the config-error line (exactly one LF, ending `\e[0m\n`) or not; exit is always 0 | proptest (Go fuzz over env maps) |
+| VP-016, VP-012 (frontmatter closure) | For every env map, stdout is either the config-error line (exactly one LF, ending `\e[0m\n`) or not; exit is always 0 | Go property test (testing/quick) (Go fuzz over env maps) |
 | VP-016, VP-012 (frontmatter closure) | A config-error run leaves the cache directory byte-identical (snapshot before/after) | table test |
-| VP-016, VP-012 (frontmatter closure) | statusline prints the config-error line iff `config validate` exits non-zero | proptest |
+| VP-016, VP-012 (frontmatter closure) | statusline prints the config-error line iff `config validate` exits non-zero | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -168,7 +176,8 @@ reason vocabulary that the class contracts BC-2.02.002..005 and BC-2.01.002/003/
 ## Related BCs (Recommended)
 
 - BC-2.01.001 — depends on (resolution produces the errors)
-- BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005 — composes with (one error class each)
+- BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006 — composes with (one error class each: number-range, number-grammar, enum, URL, boolean)
+- BC-2.01.003 — composes with (theme class, OD-134)
 - BC-2.01.005 — composes with (boolean / list / path grammar errors)
 - BC-2.03.001 — related to (same error set, non-zero exit)
 - BC-4.01.002 — related to (same one-line/exit-0 rule for unknown flags; takes precedence)

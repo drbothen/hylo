@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -14,7 +14,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "1334386"
+input-hash: "c6df6ee"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -57,7 +57,7 @@ together form the P1 success criterion (OD-107).
 ## Postconditions
 
 1. **Two corpus roots.** The harness loads cases from
-   `internal/statusline/testdata/cases/` (committed, synthetic) and, when the directory
+   `internal/parity/testdata/cases/` (committed, synthetic) and, when the directory
    exists, from `captures/` at the repository root (git-ignored, local only).
 2. **Captures never leave `captures/`.**
    - When a captures case is run with `-update`, its expected outputs are written under
@@ -68,12 +68,17 @@ together form the P1 success criterion (OD-107).
    real-input suite skips with `parity: captures/ absent; real-input replay skipped
    (OD-107, local only)`. The synthetic suite is unaffected.
 4. **Hygiene gate on committed fixtures.** A test (`TestCorpusHygiene`) scans every
-   file under `internal/statusline/testdata/` and fails on any match of:
+   file under every committed `testdata/` directory — `internal/statusline/testdata/`,
+   `internal/pyfmt/testdata/`, `internal/config/testdata/`, `cmd/hylo/testdata/` and
+   `internal/parity/testdata/` — and fails on any match of:
    - IPv4 addresses outside the RFC 5737 documentation ranges (`192.0.2.0/24`,
      `198.51.100.0/24`, `203.0.113.0/24`) and outside loopback `127.0.0.0/8`;
      RFC 1918 addresses always fail;
    - absolute home paths (`/Users/<name>`, `/home/<name>`, `C:\Users\<name>`) other than
      templated placeholders;
+   - username and hostname patterns (macOS/Linux user or host names in paths or
+     `username@host` shapes, e.g. `/Users/<name>`, ` boxes.local`) other than templated
+     placeholders;
    - e-mail addresses;
    - Claude-Session trailer lines or private session links.
    The legacy placeholder `192.0.2.10` passes. CI also runs gitleaks with
@@ -124,7 +129,7 @@ together form the P1 success criterion (OD-107).
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness corpus loader (BC-COMPONENT-MAP: internal/parity/corpus.go (synthetic corpus; captures/) — ARCH-07) |
+| Architecture Module | `internal/parity` parity harness corpus loader (BC-COMPONENT-MAP: internal/parity/corpus.go (synthetic corpus; captures/) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 > Capability anchor rationale (OD-153): the parity harness is verification machinery whose sole purpose is proving CAP-009 byte parity (the D4 exit criterion), governed by DI-012.

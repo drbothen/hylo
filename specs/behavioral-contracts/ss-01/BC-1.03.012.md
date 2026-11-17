@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1041-1058)"
@@ -84,7 +84,7 @@ Pass-3 r1 pinned the same mechanism with a 600,089 B file (refresh 1 → offset 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029 | For `len(S) < step < len(S)+len(G)`, refresh 1 size = `len(S)`, refresh 2 size = `len(S)+len(G)` | proptest over `len(S)`, `len(G)` |
+| VP-029 | For `len(S) < step < len(S)+len(G)`, refresh 1 size = `len(S)`, refresh 2 size = `len(S)+len(G)` | Go property test (testing/quick) over `len(S)`, `len(G)` |
 | VP-029 | Multi-step harness case matches legacy per step | M (multi-step parity case) |
 
 ## Traceability
@@ -106,7 +106,7 @@ Pass-3 r1 pinned the same mechanism with a 600,089 B file (refresh 1 → offset 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#transcript-read-window` — internal/statusline/transcript.go (two-refresh completion) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript.go (two-refresh completion) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

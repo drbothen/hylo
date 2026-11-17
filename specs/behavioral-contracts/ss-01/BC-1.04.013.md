@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "334d138"
+input-hash: "12ee8f9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:main (SL:1217-1227)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-053"
@@ -89,7 +89,7 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Fake-metrics request count = 1 iff `rows >= 2` and the TTL has elapsed, independent of `cols` | proptest (ROWS × COLUMNS matrix) |
+| VP-030 | Fake-metrics request count = 1 iff `rows >= 2` and the TTL has elapsed, independent of `cols` | Go property test (testing/quick) (ROWS × COLUMNS matrix) |
 
 ## Traceability
 
@@ -98,7 +98,7 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 | Source | legacy/dgx_statusline.py:main (SL:1217-1227); ROWS/SPARK_ON (SL:75-76); NARROW_COLS (SL:100) |
 | Legacy contract | BC-SL-053 (P3 base) |
 | L2 Capability | CAP-010, CAP-009 |
-| L2 Domain Invariants | DI-007, DI-008 |
+| L2 Domain Invariants | DI-007, DI-008, DI-012 (rows D4-EX-3 deviation) |
 | Decisions | OD-114 (rows range), OD-107 (P1 config = HYLO_* env + defaults) |
 | Architecture Module | `internal/statusline/statusline.go` |
 | Stories | TBD |
@@ -112,7 +112,7 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#orchestrator` — internal/statusline/statusline.go (ROWS >= 2 fetch) (effect script step 4) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/statusline/statusline.go (ROWS >= 2 fetch) (effect script step 4) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

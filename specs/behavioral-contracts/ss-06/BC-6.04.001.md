@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - CLAUDE.md
-input-hash: "9a13cf9"
+input-hash: "ea5a0e4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-010 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -113,6 +113,7 @@ gitleaks scans the full history. The workflow is gating: any red leg blocks the 
 |--------|----------|-------------|
 | VP-037, VP-035 | The workflow file pins exactly the three OS labels, includes the Go 1.26.x leg, `-race` on Linux/macOS, and the gitleaks full-history step | manual review + a repository test that parses `ci.yml` |
 | VP-037, VP-035 | Every CI parity run uses an absolute interpreter path with `CI=true` | CI log check + BC-6.01.001 tests |
+| VP-010 | Go output matches the committed Tier B goldens byte-for-byte on every CI OS — the property the three-OS matrix (windows-2025 golden leg) exists to enforce | `TestParityTierB_Goldens` on all CI legs |
 
 ## Traceability
 
@@ -144,7 +145,7 @@ TBD (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-037, VP-035 — CI matrix properties above
+- VP-037, VP-035 — CI matrix properties above; VP-010 — Tier B golden parity on every leg
 
 #### Purity Classification
 

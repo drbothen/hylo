@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.03.001.md, behavioral-contracts/ss-05/BC-5.03.002.md, behavioral-contracts/ss-05/BC-5.03.003.md, behavioral-contracts/ss-05/BC-5.03.004.md, owner-decisions-log-2026-11-14.md]
 input-hash: "904a6b4"
@@ -12,14 +12,14 @@ traces_to: prd.md
 source_bc: BC-5.03.001
 bcs: [BC-5.03.001, BC-5.03.002, BC-5.03.003, BC-5.03.004]
 module: internal/pyfmt (str.go)
-proof_method: proptest
+proof_method: property-test (testing/quick)
 feasibility: feasible
 verification_lock: false
 proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +62,7 @@ not terminal cells), `Truncate`, `HasSurrogate`, `EncodeUTF8Replace` (lone surro
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
 | Oracle tables | Go test | yes | whitespace corners, normpath cases |
-| Property generators | Go test | no (random), seeded | Unicode string space |
+| Property generators | Go test | no (random), seeded | Unicode string space; oracle = self-consistency invariants (e.g. `Len(EncodeUTF8Replace(s)) == Len(s)`, idempotence of `Strip`), never a live interpreter call — Python-semantics equivalence is pinned only by the committed tables |
 
 ## Proof Harness Skeleton
 

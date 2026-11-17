@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "7d75fbc"
@@ -73,7 +73,7 @@ unknown flags (OD-112) use their own one-line formats and are not this contract.
 | EC-001 | Fault inside the row-1 widgets after the git-cache write (e.g. thermometer, CP-S06) | Degraded line; git cache and earlier writes kept (BC-1.01.009) |
 | EC-002 | Fault at the final print: a rendered str holds a lone surrogate (CP-S17) | Degraded line after every cache write of the refresh (BC-1.01.008) |
 | EC-003 | Go panic not mapped to any CP site (programming error) | `recover()` backstop prints the same 29 bytes, exit 0; the parity diff still flags it because legacy would not degrade on that input |
-| EC-004 | Legacy import-time env crash (CP-X01/X02: unparseable TTL/ROWS -> empty stdout, exit 1) | Not reachable in Go: invalid settings are config errors, approved deviation **D4-EX-3** (OD-102, OD-114) rendered by BC-2.02.001; excluded from the parity diff via the OD-105 exclusion entry `D4-EX-3` with dedicated tests `TestConfigError_D4EX3_{Number,Boolean,URL,Enum}` |
+| EC-004 | Legacy import-time env crash (CP-X01/X02: unparseable TTL/ROWS -> empty stdout, exit 1) | Not reachable in Go: invalid settings are config errors, approved deviation **D4-EX-3** (OD-102, OD-114) rendered by BC-2.02.001; excluded from the parity diff via the OD-105 exclusion entry `D4-EX-3` with dedicated tests `TestConfigError_D4EX3_{Number,Boolean,URL,Enum}` — one per class with its own dedicated grammar (number-range, boolean, URL, enum); the number-grammar (BC-2.02.003) and theme/SGR (BC-2.01.003) classes are pinned by their class contracts, and the register is closed at six (OD-114 + OD-134 + OD-140) |
 | EC-005 | Writing the degraded line itself fails (stdout closed / EPIPE; legacy CP-X03 exits 1 with no stdout) | Ruled OD-136: Go swallows the write error and still returns exit 0 (DI-008). This is the named exclusion `cp-x03` in the OD-105/OD-110 closed set, with its own dedicated table test (name provisional — architect (OD-145)). Not observable by Claude Code (the consumer is gone); out of parity comparison (P3r1 §B marks CP-X03 not parity-relevant) |
 | EC-006 | SIGINT/SIGTERM (legacy CP-X04) | Out of scope; no output contract |
 | EC-007 | argv contains `--subagent` | Not this contract: OD-14 drops the subagent path; OD-112 renders `hylo: unknown flag ...`, exit 0 (BC-4.01.002) |
@@ -86,7 +86,7 @@ Config: defaults with `HYLO_STATUSLINE_ROWS=1`, `HYLO_STATUSLINE_GIT_ENABLED=0`,
 |-------|----------------|----------|
 | stdin `{"model":{"display_name":"Opus 5.5"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mOpus 5.5\e[0m\n`, exit 0 (no degrade) | happy-path |
 | stdin `{"model":"x"}` (CP-S01: `.get` on a str) | exactly `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 | error |
-| stdin `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` (JSON escape, CP-S17) | degraded 29 bytes, exit 0; `statusline-s1.json` exists holding `rl`/`rl_ts` (written before the fault) | edge-case |
+| stdin `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` (JSON escape, CP-S17) | degraded 29 bytes, exit 0; `statusline-s1.json` exists holding exactly `rl`/`rl_ts` (written before the fault). Window-start probe pinned: the harness fake `ps` describes no `claude` ancestor (BC-3.02.002 case I4), so the probe returns None and writes no `proc_start` key; without that fake the vector additionally admits a trailing `proc_start` key and is not byte-pinned | edge-case |
 | injected panic in a widget (Go unit test) | degraded 29 bytes, exit 0 | error |
 
 Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`, `DGX_SL_GIT=0`): rows 1-3 above.
@@ -95,7 +95,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`,
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-001, VP-003 | For every input that makes `Render` return `errDegraded` or panic, `Main` writes exactly the 29 degraded bytes and returns 0 | proptest/fuzz (Tier C differential) |
+| VP-001, VP-003 | For every input that makes `Render` return `errDegraded` or panic, `Main` writes exactly the 29 degraded bytes and returns 0 | go test -fuzz (Tier C differential) |
 | VP-001, VP-003 | `Main` never returns non-zero for any stdin/argv routed to it | fuzz |
 
 ## Traceability

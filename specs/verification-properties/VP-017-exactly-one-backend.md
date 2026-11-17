@@ -1,15 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
 input-hash: "97d0de8"
 traces_to: prd.md
 source_bc: BC-2.01.002
+bcs: [BC-2.01.002]
 module: internal/config (backends validator)
 proof_method: manual
 feasibility: feasible
@@ -18,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -33,9 +34,13 @@ removal_reason: null
 
 ## Property Statement
 
-The `backends[]` config validator accepts exactly one entry in P1-P5: zero entries and
-more than one entry are config errors carrying the reason `exactly one backend entry
-until P6`, riding the D4-EX-3 output path. The status line's metrics URL and model
+The `backends[]` config validator enforces exactly one entry in P1-P5: more than one
+entry is a config error carrying the value `backends=<count>` and the reason `exactly
+one backend entry until P6` (rendered `hylo: config error: backends=2 (…)`, riding the
+D4-EX-3 output path). Zero entries are unreachable in P1 — the built-in defaults always
+create index 0 (BC-2.01.002 Invariant 2) — so no P1 test exercises the `backends=0`
+guard through `Load`; the guard is validated directly when the P4 file layer makes the
+case reachable. The status line's metrics URL and model
 prefixes are read exclusively at `backends[0].metrics_url` / `backends[0].model_prefixes`
 (default `claude-sonnet`), and the cardinality check is isolated in one validator
 function that P6 widens — no other code learns the cardinality rule.
@@ -59,18 +64,20 @@ function that P6 widens — no other code learns the cardinality rule.
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Cardinality table | Go test, `internal/config` | yes — 0/1/2/N | error rows + defaults plumb-through |
+| Cardinality table | Go test, `internal/config` | yes — 1/2/N (0 at P4) | error rows + defaults plumb-through |
 
 ## Proof Harness Skeleton
 
 ```go
 func TestBackends_ExactlyOneUntilP6(t *testing.T) {
-    if _, err := config.Load(optsWithBackends()); err == nil ||
-        err.Reason != "exactly one backend entry until P6" {
-        t.Fatalf("zero backends: got %v", err)
-    }
     if _, err := config.Load(oneBackendOpts()); err != nil { t.Fatalf("one backend rejected: %v", err) }
-    if _, err := config.Load(twoBackendsOpts()); err == nil { t.Fatal("two backends accepted") }
+    if _, err := config.Load(twoBackendsOpts()); err == nil ||
+        err.Reason != "exactly one backend entry until P6" || err.Value != "backends=2" {
+        t.Fatalf("two backends: got %v", err)
+    }
+    // backends=0 is unreachable through Load in P1 (defaults create index 0,
+    // BC-2.01.002 Inv-2); the guard is exercised at the validator when the P4
+    // file layer makes zero-entry configs representable.
 }
 ```
 

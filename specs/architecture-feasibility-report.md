@@ -1,13 +1,13 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.1"
+version: "1.2"
 status: approved
 producer: architect
-timestamp: 2026-11-17T16:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "0221974"
+input-hash: "5c129ba"
 traces_to: prd.md
 prd_version: "0.1"
 ---
@@ -43,12 +43,12 @@ empirical strategies. No PRD changes are required.
 
 | L2 Subsystem (CAP-NNN) | PRD Grouping Valid? | NFR Profile Coherent? | Notes |
 |------------------------|--------------------|-----------------------|-------|
-| S1 Status line (CAP-009/010/011; DI-007/008) | yes | yes | 93 BCs, one mixed core-dominant package. Latency (NFR-001), reliability (NFR-002) and bounds (NFR-005) do not conflict: the metrics HTTP wait is off the timed path by case model, removing the only latent tension |
+| S1 Status Line (CAP-009/010/011; DI-007/008) | yes | yes | 93 BCs, one mixed core-dominant package. Latency (NFR-001), reliability (NFR-002) and bounds (NFR-005) do not conflict: the metrics HTTP wait is off the timed path by case model, removing the only latent tension |
 | S2 Configuration (CAP-015; DI-010/008) | yes | yes | 13 BCs; typed validation gates every setting; closed class register makes the error surface exhaustively testable |
 | S3 Platform (CAP-009 support; DI-008) | yes | yes | 3 BCs; inherently effectful (syscalls, per-OS divergence) — grouped apart from the pure core, which is the correct call |
 | S4 CLI (CAP-009/015; DI-008) | yes | yes | 3 BCs; thin dispatch, closed verb-scoped exit surface; MEDIUM tier is proportionate |
 | S5 Pyfmt (enabler, OD-103) | yes | yes | 19 BCs; pure-core island whose NFR profile is purely parity; isolating it from I/O is what makes the equivalence targets reachable |
-| S6 Parity harness (DI-012 machinery) | yes | yes | 14 BCs; test-only infrastructure, never in the render path; hygiene NFR-006 anchored here |
+| S6 Parity Harness (DI-012 machinery) | yes | yes | 14 BCs; test-only infrastructure, never in the render path; hygiene NFR-006 anchored here |
 | S7-S12 reserved | yes (out of cycle) | n/a | No BCs; ARCH-09 preserves their seams (FileLayer, backends validator) without designs |
 
 ### Proposed Restructuring (if any)

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
 input-hash: "013d953"
@@ -35,6 +35,10 @@ Three CPython number behaviors that Go's builtins get wrong for the status line:
 `float_divmod`, not `math.Floor(a/b)`), `int()`/`math.ceil()` truncation that raises on non-finite input, and
 `max`/`min` whose NaN result depends on argument order. `pyfmt` provides `FloorDiv`, `Mod`, `FloorDivInt`, `ModInt`,
 `Int`, `Ceil`, `Max`, `Min` with exact CPython semantics (design IM-07, IM-08, IM-09; pitfalls PR-03, PR-04, PR-05).
+Signature note (ADV-P1-D06, BC side): this contract requires `FloorDiv`/`Mod` to return `ErrZeroDivision`,
+`Int`/`Ceil` to return `(Num, error)` with the exact big integer beyond int64, and `MaxSeq` (BC-5.01.006) to return
+`ErrValue` on empty input; the ARCH-06 signature rows without those error returns are stale and the Architect owns
+reconciling them; this BC governs the behavior stories build to.
 
 ## Preconditions
 
@@ -95,9 +99,9 @@ All values verified 2026-11-15 against CPython 3.11.7.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-023 | `FloorDiv`/`Mod` equal CPython on 2M random samples plus the boundary rows | proptest + oracle table |
-| VP-023 | For finite b ≠ 0: `FloorDiv(a,b)*b + Mod(a,b)` ≈ a and `Mod` has b's sign or is a signed zero | proptest |
-| VP-023 | `Max(a, NaN) == a` and `Max(NaN, a)` is NaN for all a | proptest |
+| VP-023 | `FloorDiv`/`Mod` equal CPython on 2M random samples plus the boundary rows | Go property test (testing/quick) + oracle table |
+| VP-023 | For finite b ≠ 0: `FloorDiv(a,b)*b + Mod(a,b)` ≈ a and `Mod` has b's sign or is a signed zero | Go property test (testing/quick) |
+| VP-023 | `Max(a, NaN) == a` and `Max(NaN, a)` is NaN for all a | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -135,7 +139,7 @@ TBD — pyfmt num (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/num.go (divmod/mod, Int/Ceil, Max/Min)` (BC-COMPONENT-MAP: py/num.go (divmod/mod, Int/Ceil, Max/Min) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

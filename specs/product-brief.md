@@ -1,10 +1,10 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-16T02:48:14Z
+timestamp: 2026-11-17T23:45:00Z
 phase: 1a
 inputs:
   - CLAUDE.md
@@ -71,14 +71,15 @@ requirements (this cycle: P1 scope only).
 
 | Outcome | Metric | Target |
 |---------|--------|--------|
-| Parity (P1–P3, D4) | Unexplained byte/decision diffs vs `legacy/` over the full fixture corpus plus the owner's recorded real inputs, on all 3 OSes | 0; differences only via the named exclusion list (OD-105, OD-110) |
+| Parity (P1–P3, D4) | Unexplained byte/decision diffs vs `legacy/` over the full fixture corpus plus the owner's recorded real inputs, on all 3 OSes | 0; differences only via the closed exclusion set pinned in BC-6.03.004 (rulings OD-105, OD-110) |
 | Status line speed (P1) | p95 wall time per render on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait | <= 25 ms (measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms on a synthetic input — no transcript, metrics fetch failing fast — of which ~25 ms is interpreter start) |
 | Cutover (P5) | Owner's windows on hylo; rollbacks during the 2-week rollback window | 100% of windows on hylo; 0 rollbacks |
 | Proxy overhead (P3) | Deferred — measure the prototype first, then set the number in Feature Mode | No baseline yet |
 
 Notes:
 
-- Parity: "unexplained" means anything not on the OD-105 exclusion list; every exclusion
+- Parity: "unexplained" means anything not on the closed exclusion set of BC-6.03.004
+  (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03); every exclusion
   carries its own table tests (OD-105, OD-110). Rationale: D4 — parity is the definition of
   done for P1–P3.
 - Speed: a labeled JUDGMENT CALL (target ≈3× faster; a static binary removes interpreter
@@ -119,7 +120,7 @@ Notes:
 | Phase | Work | Exit criterion |
 |---|---|---|
 | P0 | Repo + scrubbed history, license, README, CI matrix (macOS/Linux/Windows), release tooling | Owner approves scrub report; CI green on all 3 OSes |
-| P1 | `hylo statusline` — lowest risk, pure function of stdin + transcript + metrics | Golden tests: Python and Go render byte-identical output for recorded stdin fixtures and real transcripts (incl. compaction, >512 KB lines, rebuilds) |
+| P1 | `hylo statusline` — lowest risk: the render reads stdin, transcript, metrics, its own caches and the environment seams (AD-03), never the ledger | Golden tests: Python and Go render byte-identical output for recorded stdin fixtures and real transcripts (incl. compaction, >512 KB lines, rebuilds) |
 | P2 | `hylo exporter` | Same metric names, labels, values as the Python exporter on the same ledger file |
 | P3 | `hylo proxy` — the hard part; internal event stream (feeds ledger now, UIs later) | Recorded-request replay: identical routing decisions (as data), rewritten bodies, ledger lines vs the Python addon |
 | P4 | `hylo run`, `hook stop`, `doctor`, `ca`, `ui` (web UI, D16) | A full working session on each OS; Remote Control works |

@@ -2,10 +2,10 @@
 document_type: domain-spec-section
 level: L2
 section: "bounded-contexts"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:35:43Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
 input-hash: "3fb8cb1"
@@ -39,8 +39,8 @@ traces_to: L2-INDEX.md
 - **BC4 is the published language** (D7-frozen ledger): every downstream conforms —
   BC5 (exposition), dashboards, P7 readers. BC3 is the sole legitimate writer
   (post-cutover). [LEGACY-OBSERVED + DECIDED D7]
-- **BC7 is a separate-ways context**: it never reads BC4 (DI-007; permanent per
-  OD-125, REVISIT at P7) — it consumes
+- **BC7 is a separate-ways context**: it never reads BC4 (DI-007; adopted for now per
+  OD-125, which flags REVISIT at P7) — it consumes
   stdin, transcripts, BC10-adjacent platform facts, and the metrics store fed by BC5
   through the export tunnel. The cockpit tolerates BC5/telemetry breakage as
   freshness degradation, never failure (SM-05, DI-008).
@@ -58,4 +58,4 @@ traces_to: L2-INDEX.md
 | T2 | Client-view lane vs proxy-authoritative lane | The status line infers the lane from the client-reported `model.id`; the ledger records the proxy's actual decision. Both are true simultaneously; widgets must not conflate them | LEGACY-OBSERVED (P2r4 §3.1); client-view lane a distinct derived value — DECIDED OD-121 |
 | T3 | Correlation translation | Ledger near-key (weak) vs internal `flow_id` (exact, ephemeral); UIs must use the latter for live views and the former for history | DECIDED OD-25 + OD-122 (BC6 history is live + ring buffer only until P7's schema) |
 | T4 | Config-surface translation | `HYLO_*` env / config file / defaults encode the same typed keys; legacy `DGX_*` surface ends at cutover | DECIDED OD-05, OD-101, OD-95 |
-| T5 | Parity translation | Recorded legacy inputs → identical outputs modulo the OD-105/OD-110 exclusion list; harness-level, not runtime | DECIDED D4, OD-105/OD-110 |
+| T5 | Parity translation | Recorded legacy inputs → identical outputs modulo the closed exclusion set (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03; BC-6.03.004); harness-level, not runtime | DECIDED D4, OD-105/OD-110/OD-136 |

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,10 +15,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "3f0deba"
+input-hash: "171d068"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-029"
@@ -109,7 +109,7 @@ qualifying sessions exist (cold start).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-021 | p75 ≤ p95 whenever a pair is returned (finite inputs) | proptest |
+| VP-021 | p75 ≤ p95 whenever a pair is returned (finite inputs) | Go property test (testing/quick) |
 | VP-021 | Go index equals `int(q*(n-1))` computed by CPython for n in 1..10,000 | manual (generated table) |
 
 ## Traceability
@@ -134,7 +134,7 @@ qualifying sessions exist (cold start).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#for-lane` — internal/cost/history.go (p75/p95; NaN usd OD-138) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/cost/history.go (p75/p95; NaN usd OD-138) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -144,14 +144,28 @@ S-N.MM — cost history (filled by story-writer)
 
 - VP-021 — percentile index equivalence
 
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (cost_thresholds (SL:240-262)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **guard clause**: lane/window/min-usd filters and the `len(v) < COST_MIN_N` cold-start return (SL:245-256)
+- **inferred**: percentile index rule re-executed against CPython 3.11.7 (2026-11-15)
+
 #### Purity Classification
 
 | Property | Assessment |
 |----------|-----------|
-| **I/O operations** | writes via the injected `Store` seam |
+| **I/O operations** | reads via the injected `Store` seam (cost_thresholds only reads, SL:240-262) |
 | **Global state access** | none |
 | **Deterministic** | yes (given samples and a store fake) |
-| **Thread safety** | Send + Sync (store injected) |
+| **Thread safety** | Safe for concurrent use (store injected) |
 | **Overall classification** | boundary |
 
 Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (p75/p95; NaN usd OD-138) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.

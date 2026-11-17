@@ -12,7 +12,7 @@ traces_to: prd.md
 source_bc: BC-2.01.001
 bcs: [BC-2.01.001, BC-2.01.004, BC-2.01.005, BC-2.01.003]
 module: internal/config
-proof_method: proptest
+proof_method: property-test (testing/quick)
 feasibility: feasible
 verification_lock: false
 proof_completed_date: null
@@ -58,7 +58,11 @@ protocol input.
   variables, pathological values) through `Load` asserting termination + typed-result
   dichotomy; plus a build-time `EnvName` collision test (static analysis over the
   registry); plus the `legacy_defaults.golden` pin.
-- **Honesty:** totality is established empirically (generator breadth) over a pure
+- **Honesty:** the random-sample property asserts the typed-result dichotomy as its
+  own oracle — every generated environment terminates in exactly one of {*Config,
+  single typed *Error}, never a crash or silent fallback; no live CPython call exists
+  on this surface (equivalence corners are the `legacy_defaults.golden` pin). Totality
+  is established empirically (generator breadth) over a pure
   function — provable-grade surface, testable-only artifact; the collision check is the
   closest to an actual proof (finite domain, exhaustively enumerated at build).
 

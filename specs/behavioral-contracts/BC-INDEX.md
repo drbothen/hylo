@@ -2,14 +2,13 @@
 artifact_type: bc-index
 document_type: bc-index
 level: L3
-version: "0.1"
+version: "0.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T22:30:00Z
+timestamp: 2026-11-18T00:10:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 origin: greenfield
-subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
@@ -286,7 +285,7 @@ traces_to: ../prd.md
 |---|---|---|---|---|---|---|---|
 | BC-6.04.001 | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.x leg; -race; gitleaks | S6.04 | new | n.a. | — | draft | [BC-6.04.001](ss-06/BC-6.04.001.md) |
 | BC-6.04.002 | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target | S6.04 | new | n.a. | — | draft | [BC-6.04.002](ss-06/BC-6.04.002.md) |
-| BC-6.04.003 | Tier C differential fuzz: nightly Linux, non-gating, random valid inputs to both sides | S6.04 | new | n.a. | — | draft | [BC-6.04.003](ss-06/BC-6.04.003.md) |
+| BC-6.04.003 | Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs | S6.04 | new | n.a. | — | draft | [BC-6.04.003](ss-06/BC-6.04.003.md) |
 
 ## Accounting exceptions
 

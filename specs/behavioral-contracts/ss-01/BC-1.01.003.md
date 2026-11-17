@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "7ec71c9"
@@ -51,17 +51,21 @@ separator `SEP`.
 2. stdout = row 1, then (if present) `\n` + row 2, then exactly one trailing `\n`. Row 1 is always first.
 3. Each row is `SEP.join(segments)` with `SEP` = `\e[2m · \e[0m` (default `statusline.theme` separator, OD-113).
 4. Rows are trimmed (BC-1.01.006) only after the row-2 decision and only when `cols > 0`.
-5. No `\r` is ever emitted (LF only on every OS).
+5. No `\r` is emitted by the renderer itself (LF only on every OS). Carve-out: input-derived text is emitted
+   verbatim, so it can carry CR or LF bytes to stdout — a stdin `display_name`/`id`/project label containing
+   `"a\rb"` or `"a\nb"` adds those bytes to the row (SL:442, 453, 1234), and a git branch whose HEAD file held a CR
+   is read in text mode with universal newlines and comes back with an LF inside (SL:385-386).
 
 ## Invariants
 
-1. At most two rows; never an empty stdout.
+1. At most two rows; never an empty stdout. (Verbatim input-derived text may embed LF bytes that display as extra
+   lines — PC5 carve-out; the renderer still emits at most two of its own rows.)
 2. The row-2 decision does not affect whether the metrics fetch runs: the fetch happens whenever `rows >= 2`, even if
    row 2 is then hidden for width (BC-1.04.013).
 
 Threshold rationale (D15): `rows` default 2 — convention: the two-row design (P4r7 T-002). `narrow_cols` 72 with
-operator `>=` keeps row 2 — labeled judgment call (presentation), accepted under OD-57 E-B (P4r7 T-014).
-`cols == 0` means "width unknown, treat as wide" (P4r7 T-116).
+operator `>=` keeps row 2 — owner judgment (presentation), catalogue resolution T-014 = OWNER group B
+(layout/aesthetics), accepted under OD-57 E-B. `cols == 0` means "width unknown, treat as wide" (P4r7 T-116).
 
 ## Edge Cases
 
@@ -99,7 +103,7 @@ COLUMNS=72 -> widths [61, 56], 642 bytes (P3r2 §A1; BC-1.01.010).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-027 | Output has 1 + [row-2 predicate] lines, each LF-terminated, for all (rows, cols) | proptest |
+| VP-027 | Output has 1 + [row-2 predicate] renderer rows, each LF-terminated, for all (rows, cols) and inputs whose rendered strings hold no LF/CR (PC5 carve-out) | Go property test (testing/quick) |
 
 ## Traceability
 

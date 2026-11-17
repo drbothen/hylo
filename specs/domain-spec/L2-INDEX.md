@@ -1,10 +1,10 @@
 ---
 document_type: domain-spec-index
 level: L2
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:35:43Z
 phase: 1a
 inputs:
   - .factory/specs/product-brief.md
@@ -108,4 +108,5 @@ itemized with resolutions in `owner-validation-list.md`.
 
 Priority expresses product necessity; the delivery phase for each capability is in
 `capabilities.md` (P1-P7 per docs/PLAN.md §7). Under OD-115, this Phase 1 cycle
-elaborates only the P1-phase slice (status line = CAP-009/010/011 render path).
+elaborates only the P1-phase slice (status line = CAP-009/010/011 render path;
+configuration env + defaults = CAP-015).

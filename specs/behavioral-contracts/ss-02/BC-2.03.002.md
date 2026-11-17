@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -67,7 +67,11 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 4. If the base needed by a line is unset or empty (`HOME`/`APPDATA`/`LOCALAPPDATA`, or the
    home for a `~` override): that line prints `<label>: (unavailable)`, stderr carries
    `hylo: config path: cannot determine <label> directory (<VAR> unset)\n`, and the exit
-   code is 1; the other lines still print their resolved paths.
+   code is 1; the other lines still print their resolved paths. One stderr line prints
+   PER unavailable line — if all three lines are unavailable, stderr carries three detail
+   lines in label order (config, cache, state) (ADV-P1-D13). `<VAR>` is the unset base of
+   that line: `HOME` (macOS/Linux), `APPDATA`/`LOCALAPPDATA` (Windows), and for a `~`
+   override on Windows `USERPROFILE` (OD-61).
 5. The files are not opened, stat'ed or created; `HYLO_*` settings are not validated (a
    config error does not affect this command).
 6. Any other argument or flag: usage on stderr (BC-4.01.001 golden), exit 2.
@@ -89,7 +93,7 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 | EC-005 | `HYLO_CONFIG=~/alt.yaml`, `HOME=/home/user` | `config: /home/user/alt.yaml` |
 | EC-006 | `--config ./c.yaml` and `HYLO_CONFIG=/y.yaml` | `config: ./c.yaml` (flag wins) |
 | EC-007 | `HYLO_CONFIG=` (empty) | ignored; per-OS default |
-| EC-008 | Unix, `HOME` and `XDG_CONFIG_HOME` unset | three lines all `(unavailable)`; stderr `hylo: config path: cannot determine config directory (HOME unset)`, exit 1 |
+| EC-008 | Unix, `HOME` and `XDG_CONFIG_HOME` unset | three lines all `(unavailable)`; three stderr lines — `...config directory (HOME unset)`, `...cache directory (HOME unset)`, `...state directory (HOME unset)` in label order; exit 1 |
 | EC-009 | `HYLO_STATUSLINE_ROWS=x` set | paths printed normally, exit 0 |
 | EC-010 | Windows, `LOCALAPPDATA` unset, `APPDATA` set | `config:` resolves; `cache: (unavailable)` and `state: (unavailable)`; stderr detail twice; exit 1 |
 

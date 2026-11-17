@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "7d75fbc"
@@ -94,7 +94,7 @@ from this run (not listed in the legacy pass-3 rows).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028 | For all float64 `hr` (including NaN, ±Inf, ±0) the Go segment equals the oracle's | generated table vs oracle |
-| VP-028 | No numeric `hr` degrades | proptest |
+| VP-028 | No numeric `hr` degrades | Go property test (testing/quick) |
 
 ## Traceability
 

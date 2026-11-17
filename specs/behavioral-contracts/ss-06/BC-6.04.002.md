@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -59,8 +59,11 @@ removes.
 ## Postconditions
 
 1. **Measurement.**
-   - For each corpus step the harness runs 1 warm-up and then `R = 5` timed
-     executions.
+   - For each corpus step the harness runs 1 warm-up (rationale, convention: absorbs
+     the first-execution page-cache and oracle-start cost so it does not skew the timed
+     runs) and then `R = 5` timed executions (rationale, labeled judgment call: five
+     samples per step keep the three-OS nightly matrix affordable while nearest-rank
+     p95 stays computable; not a measured optimum).
    - Render time per execution = process wall time (exec start to exit) minus the fake
      VM's server-side handling time for requests made during that execution.
    - Loopback connect and transfer time stays counted against hylo, which is the
@@ -99,7 +102,7 @@ removes.
 | EC-002 | Owner Mac with `HYLO_TIMING_GATE=1`, p95 = 25.0 ms | Pass (the gate is `> 25.0`) |
 | EC-003 | Owner Mac with `HYLO_TIMING_GATE=1`, p95 = 25.1 ms | FAIL with the OD-117 message |
 | EC-004 | Case with metrics mode `down` (closed listener) | No server-side time to subtract. The connect-refused time (sub-millisecond on loopback) is counted against hylo |
-| EC-005 | Fewer than 20 total samples (tiny corpus subset) | Report printed with `n` and a `low sample count` note; gate still applies if enabled |
+| EC-005 | Fewer than 20 total samples (tiny corpus subset; threshold rationale, convention: below ~20 samples a nearest-rank p95 is dominated by outlier ordering, so the report says so) | Report printed with `n` and a `low sample count` note; gate still applies if enabled |
 
 ## Canonical Test Vectors
 
@@ -123,8 +126,8 @@ removes.
 | Source | OD-117 target (2): status line p95 render ≤ 25 ms on the owner's Mac excluding the metrics HTTP wait, vs the measured legacy baseline (median 84.5 ms), labeled JUDGMENT CALL; product-brief Success Criteria (baseline 2026-11-15: median 84.5 ms, p90 101 ms, ~25 ms interpreter start); CLAUDE.md (explain every threshold); D15/OD-57 rationale rule |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | — |
-| Architecture Module | `internal/statusline` timing test (BC-COMPONENT-MAP: internal/parity/timing.go (p95 report, HYLO_TIMING_GATE) — ARCH-07) |
+| L2 Domain Invariants | DI-012 (behavior changes only through named, tested deviations — the timing gate reports, it never changes bytes) |
+| Architecture Module | `internal/parity` timing test (BC-COMPONENT-MAP: internal/parity/timing.go (p95 report, HYLO_TIMING_GATE) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 > Capability anchor rationale (OD-153): the parity harness is verification machinery whose sole purpose is proving CAP-009 byte parity (the D4 exit criterion), governed by DI-012.

@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -64,7 +64,9 @@ directory.
    - optionally a transcript generator spec, consumed by the committed Go generator.
 2. `settings` is a JSON object keyed by hylo config key name (S2 key registry), e.g.
    `backends[0].metrics_url`, `backends[0].model_prefixes`. Values are strings exactly
-   as an operator would export them.
+   as an operator would export them. Every captured-session step declares its metrics
+   source per step (BC-6.02.002 `metrics` key, ADV-P1-D18); the case-level `metrics`
+   here is the default for generated cases.
 3. `metrics` is `"canned"` (serve `metrics.json`) or one of `"down"` (closed listener),
    `"500"` (HTTP 500) or `"garbage"` (non-JSON body). Timeout-based "slow" modes are not
    allowed (research Q3b: the legacy 1.5 s timeout makes them flaky).
@@ -133,7 +135,7 @@ directory.
 | EC-004 | Case sets TTL `nan` and is a listed D4-EX-3 case | Runs. The Go output is checked against the case's expected file (config-error line), not against the oracle |
 | EC-005 | `metrics: "slow"` | Harness FAIL: unknown metrics mode |
 | EC-006 | Seed contains a legacy-written poisoned mix cache (BC-SL-100) | Copied to both sides; the reader behavior is compared (D4-EX-2 entries apply where listed) |
-| EC-007 | Case sets a non-default `statusline.theme.sgr.*` value | Harness FAIL: no legacy equivalent. Theme overrides are tested by Go table tests only |
+| EC-007 | Case sets a non-default `statusline.theme.<role>` value | Harness FAIL: no legacy equivalent. Theme overrides are tested by Go table tests only |
 
 ## Canonical Test Vectors
 
@@ -158,7 +160,7 @@ directory.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline/testdata/cases/`; harness case loader and fake VictoriaMetrics (BC-COMPONENT-MAP: internal/parity/case.go (case model) — ARCH-07) |
+| Architecture Module | `internal/parity/testdata/cases/`; harness case loader and fake VictoriaMetrics (BC-COMPONENT-MAP: internal/parity/case.go (case model) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 > Capability anchor rationale (OD-153): the parity harness is verification machinery whose sole purpose is proving CAP-009 byte parity (the D4 exit criterion), governed by DI-012.

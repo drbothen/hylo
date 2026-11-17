@@ -1,14 +1,14 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.0"
+version: "1.1"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
-input-hash: "fbd7ace"
+input-hash: "ef14751"
 ---
 
 # CI/CD setup — phase-1-cicd-setup (OD-150)
@@ -53,11 +53,35 @@ Triggers: `pull_request`, `push` to `main`, `workflow_dispatch`, and `schedule`
 
 Harness-placeholder semantics: job-level `if` reads `needs.probe.outputs.*`
 (hashFiles() is not allowed in job-level `if` — actionlint-enforced); a skipped
-required check counts as success, so protection holds before Phase 3. Proposed
+required check counts as success on GitHub, so the placeholders must NOT be added to
+branch protection's required set until Phase 3 makes them execute (the section below
+tightens this: from activation on, every required detector must print a
+positive-coverage line and fail on zero coverage — a skip is never accepted as a pass;
+ADV-P1-A09). Proposed
 invocations (test names per ARCH-07 OD-145) are baked into the step bodies so
 Phase 3 activates them by adding code, not by editing workflows. Tier A sets
 `HYLO_PARITY_PYTHON` from `actions/setup-python`'s `python-path` output (OD-108:
 absolute interpreter path, never PATH discovery).
+
+## Positive-coverage requirement (spec-side; ADV-P1-A09 — implementation lands later on main with owner approval)
+
+Every regression-detector job must log a runtime-computed positive-coverage line and
+fail when it checked nothing. Per job, the required line is:
+
+| Job | Positive-coverage line | Fail condition |
+|---|---|---|
+| `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0` |
+| `parity tier B` | `tier-b: N goldens compared` | `N == 0` |
+| `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); PR-side `t.Skip` is fine only because the job is non-gating |
+| exclusion machinery / canary | `exclusions: M entries validated against the closed set` | `M` ≠ file entry count, or the file is missing |
+| `lint` / `test` / `govulncheck` | `go: K files scanned` | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` fails |
+| gitleaks + category pattern scan | `hygiene: K files scanned, H hits` | `K == 0` (scan ran over nothing) |
+
+Additionally: a skipped required check must not count as a pass — the parity/timing
+placeholders stay out of `required_status_checks` until they can execute (Phase 3), and
+once required, an activation that reports `skipped` is investigated rather than
+accepted. The lines are printed by the in-tree test binaries/workflow steps, so they
+surface in the runner logs the owner audits.
 
 Category pattern scan (policy 21 / NFR-006): after gitleaks, a `git grep -E` pass
 flags private-IP literals (10/8, 192.168/16, 172.16–31/12, with a

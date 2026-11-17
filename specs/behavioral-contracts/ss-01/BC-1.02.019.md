@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
 input-hash: "f8e3c46"
@@ -67,7 +67,7 @@ truncates each channel with `int(c * 255)`. The SGR form is `\e[38;2;R;G;Bm` (`t
 | EC-001 | `pct > 100`, `+Infinity` | clamped: `(204,30,30)` |
 | EC-002 | `pct < 0`, `-Infinity` | clamped: `(148,204,30)` |
 | EC-003 | `pct = true` | treated as 1: `(150,204,30)` |
-| EC-004 | `pct` = NaN | `Max(nan, 0.0)` keeps NaN; `int(nan*255)` raises ValueError. Unreachable from `fmt_ctx`, because SL:426 raises first (CP-S06, BC-1.02.020) |
+| EC-004 | `pct` = NaN | `Max(nan, 0.0)` keeps NaN; the ValueError ("cannot convert float NaN to integer") is raised inside `colorsys.hsv_to_rgb` at `i = int(h*6.0)` — before any channel multiplication, same outcome. Verified 2026-11-17 on CPython 3.11.7. Unreachable from `fmt_ctx`, because SL:426 raises first (CP-S06, BC-1.02.020) |
 | EC-005 | FMA-capable target (arm64) | results identical to CPython; the table runs on the macos-15 arm64 runner, the only CI leg where fusion is detectable |
 
 ## Canonical Test Vectors
@@ -92,7 +92,7 @@ Pinned 2026-11-15 by calling the legacy `heat` under CPython 3.11 (oracle, OD-10
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028 | For all float64 `pct` in a dense grid over [-10, 110] the Go triple equals the CPython triple | generated table vs oracle (arm64) |
-| VP-028 | Blue channel is 30 for all finite inputs | proptest |
+| VP-028 | Blue channel is 30 for all finite inputs | Go property test (testing/quick) |
 
 ## Traceability
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094; REBUILD_EXCESS SL:968-972)"
@@ -41,7 +41,7 @@ is never a rebuild because `pp` is null.
 
 1. A counted usage object (BC-1.03.005) with `_i`, `_w`, `_r` as in BC-1.03.006.
 2. `pp` = cached previous prompt size or null; `rb` = cached rebuild count (0 after reset).
-3. `X = statusline.tokens.rebuild_excess` (default 20000; T-056, rationale: **measured** — validated on 9,650
+3. `X = statusline.transcript.rebuild_excess` (default 20000; T-056, rationale: **measured** — validated on 9,650
    calls in 120 transcripts: normal calls max 4,145 excess (99.9 % under 577), smallest rebuild 61,901; 20K sits
    about 5× above the worst normal call and 3× below the smallest rebuild; SL:968-971).
 
@@ -94,8 +94,8 @@ Pass-3 r1 pinned an equivalent 5-call scenario (`rb` 2, tin 501,502); the vector
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029 | `rb` increments iff `pp ≠ null ∧ _w − max(0, prompt − pp) > X` | proptest |
-| VP-029 | `pp` after a counted call equals that call's prompt | proptest |
+| VP-029 | `rb` increments iff `pp ≠ null ∧ _w − max(0, prompt − pp) > X` | Go property test (testing/quick) |
+| VP-029 | `pp` after a counted call equals that call's prompt | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -105,7 +105,7 @@ Pass-3 r1 pinned an equivalent 5-call scenario (`rb` 2, tin 501,502); the vector
 | L2 Domain Invariants | DI-007 |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094); constant SL:968-972 |
 | Legacy contract | BC-SL-036 (base; pinned pass-3 r1) |
-| Threshold | T-056 → `statusline.tokens.rebuild_excess` = 20000 (measured) |
+| Threshold | T-056 → `statusline.transcript.rebuild_excess` = 20000 (measured) |
 | Parity class | byte-exact |
 | Architecture Module | `internal/statusline/transcript.go` |
 | Stories | S-TBD |
@@ -118,7 +118,7 @@ Pass-3 r1 pinned an equivalent 5-call scenario (`rb` 2, tin 501,502); the vector
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#transcript-usage` — internal/statusline/transcript.go (rebuild 20,000) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript.go (rebuild 20,000) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

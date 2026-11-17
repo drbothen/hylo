@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "8512daa"
@@ -62,8 +62,10 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
       set `proc_start = start` in the loaded cache object (keeping key order: an existing non-numeric `proc_start`
       keeps its position, a new key is appended last; IM-03), save the whole object with the atomic never-raise
       writer, and return `start` (SL:285-289).
-   c. Else `pid = PPID`; if `pid <= 1` → return None (SL:290-292). The parent is examined first; pid 1 is never
-      examined.
+   c. Else `pid = PPID`; if `pid <= 1` → return None (SL:290-292). The start PID is probed
+      first, so pid 1 IS examined when it is itself the start PID (`Getppid() == 1`); what
+      never happens is descending below it — the walk stops when the next ancestor pid is
+      ≤ 1 (SL:290-292).
 3. After `maxDepth` non-matching levels → None (SL:295). Any error anywhere in the walk → None (SL:293-294).
 4. A None result writes nothing; the walk re-runs on the next refresh (failures are not cached).
 5. The stored value is a JSON float with Python repr: `1794615009.0` (never an int, never a fraction), so
@@ -74,14 +76,17 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
 
 1. No subprocess is spawned (D5: no OS tool without a fallback; design IM-19). The
    former inert key `statusline.window_age.ps_timeout_s` was removed by OD-147
-   (owner, 2026-11-16); setting it now raises an ordinary unknown-key config error.
+   (owner, 2026-11-16); setting it is an unknown setting: ignored with one stderr
+   warning, never changing output or exit status (OD-01, BC-2.01.001 PC-6; ADV-P1-D04).
 2. Per-OS probe sources (design §2.5): macOS `sysctl kern.proc.pid` (`P_comm`, `Eproc.Ppid`, `P_starttime`) via
    `golang.org/x/sys/unix`; Linux `/proc/<pid>/stat` parsed after the last `)` (comm, ppid, starttime ticks) plus
    `btime` from `/proc/stat`; Windows `CreateToolhelp32Snapshot` + `GetProcessTimes` with a PID-reuse guard (a parent
    created after its child is rejected); other OSes return not found.
 3. The probe never degrades the status line (never-raise helper, design IM-15).
-4. Parity runs never depend on a native value: parity cases seed `proc_start` on both sides (design §8 row 023 "T,
-   seeded"); native values have no oracle.
+4. Parity runs never depend on a native value: ordinary render-parity cases seed `proc_start` on both sides (design
+   §8 row 023 "T, seeded"); native values have no oracle. The OD-76 difference-table cases (BC-3.02.002) are the
+   deliberate exception: they run UNSEEDED precisely to exercise the probe, and their comparison is the named
+   difference table under exclusion `OD-76`, not the seeded byte diff.
 
 ## Edge Cases
 
@@ -121,8 +126,8 @@ Legacy behavior behind rows 1-6 verified 2026-11-15 against CPython 3.11.7 runni
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-033, VP-014, VP-012 (frontmatter closure) | A numeric cached `proc_start` short-circuits: zero probe calls, zero writes | unit test with a counting fake |
-| VP-033, VP-014, VP-012 (frontmatter closure) | A stored `proc_start` is always integral-valued and serialized with a `.0` suffix | proptest over random starts |
-| VP-033, VP-014, VP-012 (frontmatter closure) | At most `max_depth` probe calls per refresh | proptest over random chains |
+| VP-033, VP-014, VP-012 (frontmatter closure) | A stored `proc_start` is always integral-valued and serialized with a `.0` suffix | Go property test (testing/quick) over random starts |
+| VP-033, VP-014, VP-012 (frontmatter closure) | At most `max_depth` probe calls per refresh | Go property test (testing/quick) over random chains |
 
 ## Traceability
 

@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "5c176a5"
+input-hash: "4bc28df"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-048"
@@ -32,7 +32,8 @@ removal_reason: null
 ## Description
 
 The sparkline plots the configured trace (box rate, KV fraction or TTFT) from the last 12
-history points that carry it, zero-anchored, with a fading cyan trail, an amber cell for
+history points — sliced first (`hist[-12:]`), then filtered to those carrying the key —
+zero-anchored, with a fading cyan trail, an amber cell for
 points marked with preemptions, and a bright head cell. Fewer than two plottable points
 yield an empty string. Notation: `\e` is byte 0x1B.
 
@@ -77,7 +78,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | EC-002 | Idle box `v` [0.2, 0.6] (floor 1.0) | `▂▅` |
 | EC-003 | Flat `v` [3,3,3] | `███` (top = max) |
 | EC-004 | Negative value `v` [-5, 2] | `▁█` (clamped to 0) |
-| EC-005 | Both points `p=1` | `\e[38;2;220;170;60m▅\e[33m█\e[0m` |
+| EC-005 | `kv` trace, `k` [0.5, 1.0], both points `p=1` | `\e[38;2;220;170;60m▅\e[33m█\e[0m` |
 | EC-006 | Legacy list points `[[900,50],[990,60]]` | `\e[38;2;38;93;104m▇\e[38;2;140;235;255m█\e[0m` |
 | EC-007 | `kv` trace, `k` [0.5, 1.0] | `▅█` (fixed top 1.0) |
 | EC-008 | `ttft` trace, `f` [0.02, 0.05] (floor 0.1) | `▂▅` |
@@ -97,7 +98,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Output glyph count = min(12, plottable points) when ≥ 2, else empty | proptest |
+| VP-030 | Glyph count = the number of the last 12 history points carrying the key (slice first, then filter), when ≥ 2, else empty | Go property test (testing/quick) |
 | VP-030 | Byte equality with legacy over random finite histories | fuzz (Tier C) |
 
 ## Traceability
@@ -107,7 +108,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | Source | legacy/dgx_statusline.py:sparkline (SL:659-690); TRACE_KEYS/_SPARK_FIXED/_SPARK_FLOOR (SL:644-649); SPARK (SL:136); SPARK_PTS (SL:82); TRACE (SL:89) |
 | Legacy contract | BC-SL-048 (P3 base; r1 color table via BC-SL-073) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 (unknown-trace D4-EX-3 deviation) |
 | Decisions | OD-02 (glyph keys), OD-113 (theme), OD-114 (enum range), OD-57 E-B (T-046 presentation judgment) |
 | Architecture Module | `internal/statusline/sparkline.go` |
 | Stories | TBD |
@@ -121,7 +122,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#sparkline` — internal/statusline/sparkline.go (glyphs/scale/colors) (sparkline) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/sparkline.go (glyphs/scale/colors) (sparkline) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -155,7 +156,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none |
 | **Global state access** | reads config |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync |
+| **Thread safety** | Safe for concurrent use |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

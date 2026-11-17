@@ -1,15 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T00:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5e684b4"
+input-hash: "a90484b"
 traces_to: prd.md
 source_bc: BC-6.04.003
+bcs: [BC-6.04.003]
 module: internal/parity
 proof_method: fuzz
 feasibility: feasible
@@ -18,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,8 +42,8 @@ nightly workflow sets `HYLO_PARITY_FUZZSECONDS=1800` (30 minutes per OS, OD-149)
 
 ## Source Contract
 
-- **Primary BC:** BC-6.04.003 — Tier C differential fuzz: nightly Linux, non-gating,
-  random valid inputs to both sides.
+- **Primary BC:** BC-6.04.003 — Tier C differential fuzz: nightly all three OSes, one
+  clean run, non-gating, random valid inputs.
 - **Disposition (OD-149, owner 2026-11-16):** the nightly run extends to all three OSes
   with a 30-minute budget per OS (`HYLO_PARITY_FUZZSECONDS=1800`); the P1 Tier C exit
   condition is ONE clean nightly run on all three OSes (owner judgment call).

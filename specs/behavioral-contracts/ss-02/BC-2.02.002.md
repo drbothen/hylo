@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -108,7 +108,7 @@ BC-2.02.001:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-016, VP-012 (frontmatter closure) | Every accepted Seconds value v satisfies `!IsNaN(v) && !IsInf(v,0) && v >= 0 && v <= 9223372036.854775` | proptest / fuzz on the parser |
+| VP-016, VP-012 (frontmatter closure) | Every accepted Seconds value v satisfies `!IsNaN(v) && !IsInf(v,0) && v >= 0 && v <= 9223372036.854775` | Go property test (testing/quick) / fuzz on the parser |
 
 ## Traceability
 
@@ -147,7 +147,7 @@ S-TBD — D4-EX-3 table tests
 | **I/O operations** | reads the environment once at startup (`Load`) |
 | **Global state access** | none (resolved config immutable) |
 | **Deterministic** | yes (given the environment) |
-| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Thread safety** | safe for concurrent use (immutable after `Load`) |
 | **Overall classification** | boundary |
 
 Owning component `internal/config` (BC-COMPONENT-MAP: cfg/errors.go (number-range class) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "af4fbde"
+input-hash: "390fdb8"
 ---
 
 # ARCH-07 — Parity harness (`internal/parity`)
@@ -39,7 +39,8 @@ input-hash: "af4fbde"
   excluded case `{id, case, expected_output_file, table_test}`; harness FAILs with a
   named reason on: an excluded case without a matching table test, an excluded case whose
   Go output differs from its own expected file, a glob ("no blanket exclusions"), or an
-  id outside the closed set {D4-EX-1, D4-EX-2, D4-EX-3, od30, od76, temp-file, cp-x03}.
+  id outside the closed set {D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03}
+  (spelling exactly per BC-6.03.004; ADV-P1-A05).
   stderr is never compared (Python tracebacks invisible to Claude Code).
 - **Verification feasibility:** comparison and exclusion machinery are
   **provably-closable**: a closure property test proves every exclusion id ∈ closed set,
@@ -55,7 +56,12 @@ input-hash: "af4fbde"
 - Clock shim `internal/statusline/testdata/pyhooks/sitecustomize.py` on `PYTHONPATH`
   freezes `time.time`/`strftime`/`localtime`/`gmtime` from `HYLO_TEST_NOW` (decimal
   string parsed by both sides), stepped between refreshes; canary test fails the harness
-  if the shim did not load (BC-6.01.003).
+  if the shim did not load (BC-6.01.003). Depth boundaries are call-context dependent
+  (ADV-P1-B17): the stdio shim and runner frames change the Python-frame depth at
+  `json.load`, so the oracle is always invoked with the exact recorded recipe for the
+  site being measured (stdin: module-level `main()` over piped stdin, BC-1.01.002;
+  transcript: the `_mix_counts` runner frame recipe, BC-5.02.003) — a boundary measured
+  under a different invocation does not transfer.
 - Metrics directed to an httptest fake via the typed settings translation (legacy gets
   `DGX_SL_*` + `LOCAL_MODEL_PREFIXES`; Go gets the `HYLO_*` equivalents per OD-05;
   outside-domain values legal only in D4-EX-3 cases).

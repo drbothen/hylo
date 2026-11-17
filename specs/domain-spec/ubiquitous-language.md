@@ -2,10 +2,10 @@
 document_type: domain-spec-section
 level: L2
 section: "ubiquitous-language"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:35:43Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md]
 input-hash: "d651b9a"
@@ -36,14 +36,14 @@ traces_to: L2-INDEX.md
 | **Near-key** | Composite correlation key `(session, path, model_req, req_bytes)` ±1 s — ambiguous on client retries | LEGACY-OBSERVED (P2r4 §3.3) |
 | **Flow / flow_id** | One request + outcomes; exact correlation via the internal event stream only | DECIDED OD-25 |
 | **Ledger** | The append-only JSONL of 13 legacy-named events (D7-frozen) | DECIDED D7 |
-| **Degraded line / ladder** | One-line output at ≤ 29 bytes, exit 0, for any fault (DI-008) | LEGACY-OBSERVED + DECIDED OD-102 |
+| **Degraded line / ladder** | One-line output, exit 0, for any fault (DI-008); the degraded line itself is exactly 29 bytes (BC-1.01.001) — the config-error and unknown-flag rungs render longer lines | LEGACY-OBSERVED + DECIDED OD-102 |
 | **Config-error line** | `hylo: config error: <key>=<value> (<reason>)`, exit 0 (D4-EX-3) | DECIDED OD-102 |
 | **Widget** | One status line visual element with rule-level tests | LEGACY-OBSERVED (STATUSLINE-WIDGETS) |
 | **Freshness ladder** | fresh/stale/dead + serving-down (SM-05) | LEGACY-OBSERVED |
 | **Fake stop / Kev / verdict** | Optional Stop-hook oracle mediating turn completion; median-of-3, `p < 0.40`; regex fallback | LEGACY-OBSERVED; optional DECIDED D11 |
 | **Composition** | Byte-share of context since the last compaction boundary (`▤❙◈`) | LEGACY-OBSERVED |
 | **Plan window** | The 5h/7d subscription usage windows from captured rate-limit headers and stdin | LEGACY-OBSERVED |
-| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle (D4-EX-1/2/3 + OD-110) | DECIDED OD-105/OD-110 |
+| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle; the closed id set is D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03 (BC-6.03.004) | DECIDED OD-105/OD-110/OD-136 |
 | **Parity** | Byte/decision equality with the frozen prototype on recorded inputs; definition of done P1-P3 (D4) | DECIDED D4 |
 | **Rebuild (exporter)** | Full rescan of ledger + hook log into exporter state | LEGACY-OBSERVED; trigger DECIDED OD-39 |
 | **Exposition** | The 28-name Prometheus text rendering on `/metrics` | LEGACY-OBSERVED |

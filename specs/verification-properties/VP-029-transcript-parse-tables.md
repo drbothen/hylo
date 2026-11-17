@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.001.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.03.007.md, behavioral-contracts/ss-01/BC-1.03.016.md, prd-supplements/test-vectors.md, prd-supplements/nfr-catalog.md]
 input-hash: "64e00bc"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,16 +42,18 @@ compact_boundary resets, composition per block from json.dumps lengths, the last
 rate machine, first-line usage, sanitized mix-cache sid, text/thinking block types,
 int-`transcript_path` fd semantics, the exhaustive 20-row turn machine (T13
 oracle-confirmed, OD-143), turn identity ignoring seen_ids, cur with t0-null/non-numeric
-out verbatim; plus the D4-EX-2 wrong-shape rows (VP-013).
+out verbatim; the reset write-scope property (after the reset step `size == off`, the
+step performs zero `Save` calls — fake-`CacheStore` table, BC-1.03.002 row 2); plus the
+D4-EX-2 wrong-shape rows (VP-013).
 
 ## Source Contract
 
 - **Primary BC:** BC-1.03.016 — Turn-machine exhaustive table (20 rows).
 - **Partial coverage:** BC-1.03.001..021 (all twenty-one S1.03 contracts; the D4-EX-2
   trio primarily in VP-013).
-- **Invariant verified:** NFR-005 caps (256 dedup, 512 KB steps, 1,000-line window —
-  joint with VP-031); OD-143 (T13 confirmed by oracle, row kept); OD-32 (poisoned
-  cur.out reader rule).
+- **Invariant verified:** NFR-005 caps (256 dedup [SL:1153 `ids[-256:]`], 512 KB steps
+  [`_READ_CAP`], 32-point histories [SL:350 `hist[-32:]`] — joint with VP-031);
+  OD-143 (T13 confirmed by oracle, row kept); OD-32 (poisoned cur.out reader rule).
 
 ## Property Class and Verification Method
 
@@ -77,6 +79,13 @@ func TestTurnMachine_ExhaustiveTable(t *testing.T) {
         st := advance(newState(r.Seed), r.Events)
         if st != r.Want { t.Fatalf("row %s: %+v", r.ID, st) }
     }
+}
+
+func TestReset_WriteScope(t *testing.T) {
+    st := newStore(t, seedMixCache(off)) // off > 0 forces the reset step
+    st.Refresh(transcriptL1)
+    if st.Size() != st.Offset() { t.Fatal("size != off after reset") }
+    if st.SaveCalls() != 0 { t.Fatal("reset step performed a Save (write scope exceeded)") }
 }
 ```
 

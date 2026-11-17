@@ -1,15 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
 input-hash: "dc56a43"
 traces_to: prd.md
 source_bc: BC-6.04.002
+bcs: [BC-6.04.002]
 module: internal/statusline (hot path), CI timing report
 proof_method: manual
 feasibility: feasible
@@ -18,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,8 +37,12 @@ removal_reason: null
 Steady-state render latency on the owner's Mac (darwin/arm64) over the synthetic
 fixture corpus, with metrics HTTP wait excluded per the case model, achieves p95 <=
 25 ms (OD-117, labeled judgment call ≈3× over the measured 84.5 ms legacy median).
-Measurement discipline: 1 warm-up + 5 timed runs, nearest-rank p95, fake-VM handling
-time subtracted. The gate fails the build only with `HYLO_TIMING_GATE=1` — it binds on
+Measurement discipline: per fixture, 1 warm-up + 5 timed runs; the 5-per-fixture
+samples are **pooled across the whole corpus** before the nearest-rank p95 is taken
+(sample size 5 × |fixtures| — a per-fixture p95 over 5 runs would degenerate to the
+maximum). One stated exception: the >512 KB-line fixture is timed and reported but its
+miss does not fail the gate (the exception product-brief's speed judgment call
+promises to state). The gate fails the build only with `HYLO_TIMING_GATE=1` — it binds on
 the owner's Mac target; CI legs print the report and pass regardless.
 
 ## Source Contract

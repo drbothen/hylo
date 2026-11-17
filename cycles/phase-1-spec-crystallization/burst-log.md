@@ -267,3 +267,23 @@ Burst narratives for this cycle, in chronological order.
 **Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
 
 **Closes:** CA-09 (input-hash placeholders), CR-01..CR-03, the re-check step, and phase-1-gate (PASSED 2026-11-17). Still open: phase-1d-adversarial-spec-review NEXT; CR-04 dependent-artifact hash staleness (check-input-drift, pre-owner-gate); CLAUDE_AUTOCOMPACT_PCT_OVERRIDE advisory.
+
+## Burst: ADV pass-1 remediation — ~115/129 findings fixed, VP-038 minted, sync check SC-01..07 fixed (2026-11-17)
+
+**Scope.** Remediation of ADV pass 1 (129 findings: 21 HIGH / 63 MEDIUM / 40 LOW / 5 COSMETIC; reports `adversarial-reviews/pass-1.md` + `ADV-P1-INDEX.md`). Executed by business-analyst and product-owner (4 parallel sub-bursts + 4 follow-ups) and architect (2 parallel sub-bursts + 3 follow-ups). ~115 of 129 findings fixed across domain-spec, prd.md, product-brief.md, prd-supplements, behavioral contracts ss-01..ss-06 (+ BC-INDEX, BC-ALLOCATION), architecture, verification properties, and the cicd-setup / dtu / gene-transfusion / feasibility documents. Four findings held as owner questions (below); verdict remains NOT_CONVERGED until pass 2.
+
+**Oracle re-run.** ~45 Python-result vector cells re-run on CPython 3.11.7; 8 were wrong and were corrected. Transcript JSON depth limits re-measured: 989/990.
+
+**Held as owner questions (not yet ruled; next free OD remains OD-155).** (1) OverflowError exception-class treatment — C01, B05, B06. (2) ±Inf handling vs OD-130 — A2-01 and the OD-130 claim in VP-030. (3) Coverage-vs-mutation 95% gate — A08. (4) Windows file encoding — B08, C06.
+
+**Sync check (step 4b).** `sync-check-adv-p1-2026-11-17.md` ran against baseline 6fa2b38 (~180 changed files): initial verdict FAIL with 7 findings SC-01..07; all seven were fixed in the working tree after the check. Orchestrator re-verification: no stale depth wording anywhere in the corpus; VP<->BC citations bijective, 38 VPs x 145 BCs (VP-038 minted this burst).
+
+**Dim-2 Attestation:** artifact counts per the orchestrator re-verification this burst: 145 BC files under `specs/behavioral-contracts/ss-01..ss-06`; 38 VP files (+ VP-INDEX); 10 ARCH sections (+ ARCH-INDEX); ASM/R registers under `specs/prd-supplements/`.
+
+**Dim-5 Attestation:** N/A — no compiled artifacts in this burst (markdown state/bookkeeping files only).
+
+**Dim-6 Attestation:** N/A — no schema-structured file edited; policies.yaml untouched this burst.
+
+**Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
+
+**Next:** ADV pass 2 (fresh-context perimeters; >=3 clean passes to convergence). Four owner questions above remain open pending rulings.

@@ -2,10 +2,10 @@
 document_type: domain-spec-section
 level: L2
 section: "entities"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:35:43Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md]
 input-hash: "d651b9a"
@@ -32,7 +32,7 @@ traces_to: L2-INDEX.md
 | ENT-08 | **Rate-limit Snapshot** | `{suffix: value}` set of `anthropic-ratelimit-unified-*` headers, wire first-occurrence order, logged on change per session | LEGACY-OBSERVED (P2r3 §1.3) |
 | ENT-09 | **Backend** | The local inference server (legacy: the DGX). Config entry: `name`, `url`, protocol flavor (Anthropic-/OpenAI-compatible from P6), credential, CA, routing rules; the status line's `metrics_url` and `model_prefixes` keys live under the entry (P1: `backends[0].metrics_url`, `backends[0].model_prefixes` — not top-level singletons) | LEGACY-OBSERVED single instance; N-backends-in-config model DECIDED (OD-123; brief In Scope, P6; OD-20) |
 | ENT-10 | **Backend Credential** | Bearer key from a key file (legacy) / config-resolved secret (hylo). Must resolve **before** retargeting; failure → fail closed | legacy path LEGACY-OBSERVED; fail-closed DECIDED (OD-06/OD-07) |
-| ENT-11 | **Health Sample / History Point** | One telemetry observation `{name or up:<job>: value}`; point `{t, v, k, f[, v], p}` from the metrics store recording-rule series (18 series) | LEGACY-OBSERVED (P2r1 §4; P2r3 §2; OD-20 series list) |
+| ENT-11 | **Health Sample / History Point** | One telemetry observation `{name or up:<job>: value}`; point `{t, v, k, f, p}` — only `t` is guaranteed; a missing series omits its key, `p` appears only while preemptions are active — from the metrics store recording-rule series (18 series) | LEGACY-OBSERVED (P2r1 §4; P2r3 §2; OD-20 series list) |
 | ENT-12 | **Session** | A Claude Code session: id (raw for the session cache name, sanitized for the mix cache — OD-03), owning status-line caches and rate-limit state | LEGACY-OBSERVED; raw/sanitized split DECIDED (OD-03) |
 | ENT-13 | **Transcript Record** | JSONL `{type, subtype, timestamp, message{id, usage, content[]}}`; blocks text/thinking/tool_use/tool_result/image; 512 KB window, 256-id dedup | LEGACY-OBSERVED (P2r1 §2) |
 | ENT-14 | **Status-Line Caches** | Session cache (`rl, rl_ts, fetch_ts, up, ts, sample, hist, proc_start`), mix cache (16 keys, `mixv6`), git cache (`{ts, branch}`), cost history (`sessions[sid] = {lane, usd, api_ms, ts, src}`) | LEGACY-OBSERVED (P2r1 §3); cache dir relocated DECIDED (OD-101, OD-95) |

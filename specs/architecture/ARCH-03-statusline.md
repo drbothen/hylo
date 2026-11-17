@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "bcf984d"
+input-hash: "de05e56"
 ---
 
 # ARCH-03 — Status line render pipeline (`internal/statusline`)
@@ -46,7 +46,7 @@ input-hash: "bcf984d"
 |---|---|---|---|
 | 0 | config resolved (D4-EX-3 before any write) | `config.Load` | config-error line |
 | 1 | stdin decode (`pyfmt.Decode`, ModeText) | stdin | no — invalid => `{}` (BC-1.01.002/.008) |
-| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip, no degrade |
+| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010) |
 | 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no |
 | 4 | get_sample when ROWS >= 2: fetch, then session-cache write | `Metrics`, `Cache`, `Now` | no |
 | 5 | row-2 render (width rule) | pure | CP-N01/N02 |
@@ -108,10 +108,12 @@ type FileSystem interface {
 A `recover()` backstop in `Main` maps any panic to `degradedLine` (mirrors
 `except Exception`); typed CP-* sites return `errDegraded` wrappers with per-site catch
 lists reproduced exactly (IM-15). One clock read per render; a live-clock minute-straddle
-cannot occur (IM-14). File families: `guard.go`, `input.go`, `width.go`, `theme.go`,
+cannot occur (IM-14). File families: `guard.go`, `input.go`, `statusline.go`,
+`width.go`, `theme.go`,
 `lane.go`, `git.go`, `context.go`, `limits.go`, `session.go`, `tokens.go`, `cost.go`,
 `transcript*.go`, `mixcache.go`, `telemetry.go`, `sample.go`, `row2.go`, `sparkline.go`,
-`cache.go` — one home per S1 subsection (see BC-COMPONENT-MAP.md).
+`cache.go` — one home per S1 subsection (see BC-COMPONENT-MAP.md; `statusline.go` hosts
+the frame-level contracts BC-1.01.003/.009 and BC-1.04.013, ADV-P1-A20).
 
 ## Mapping
 

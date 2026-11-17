@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
@@ -38,13 +38,16 @@ accepts exactly the typed grammar `true|false|1|0|yes|no` (case-sensitive, OD-05
 other value is a D4-EX-3 config error. Before this contract the boolean grammar lived only
 inside BC-2.01.005 (parsing) with its D4-EX-3 test merely named in BC-2.02.001; this
 contract gives the class its own S2.02 contract, symmetric with number-range, number-
-grammar, enum and URL (BC-2.02.002..005).
+grammar, enum and URL (BC-2.02.002..005). Register count discipline (ADV-P1-D33): the
+register stays closed at six; the `path` and `backends` reason strings of the Reason
+Vocabulary map to their raising contracts (BC-2.01.005, BC-2.01.002) and are not
+additional classes.
 
 ## Preconditions
 
 1. Resolution per BC-2.01.001; the value is the raw env string of a `Bool` key (P1 bool
-   keys listed in BC-2.01.005 postcondition 2: `statusline.git.enabled`,
-   `statusline.sparkline.enabled`, and the other registry `Bool` entries).
+   keys enumerated in BC-2.01.005 postcondition 1: `statusline.sparkline.enabled` and
+   `statusline.git.enabled` — the complete P1 set; `statusline.queue.yellow` joins in P4).
 2. Rendering context per BC-2.02.001 (D4-EX-3 line, exit 0, stderr detail, no cache writes).
 
 ## Postconditions
@@ -66,7 +69,8 @@ grammar, enum and URL (BC-2.02.002..005).
 
 ## Invariants
 
-1. The grammar is exactly the seven-token set of OD-05; it does not grow with the registry.
+1. The grammar is exactly the six-token set `true|false|1|0|yes|no` of OD-05; it does not
+   grow with the registry.
 2. The reason string is a fixed vocabulary entry (error-taxonomy Reason Vocabulary); the
    parenthesized token list is part of the observable bytes.
 
@@ -97,7 +101,7 @@ byte observability here is the error line, so no CPython run is owed.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-016, VP-012 (frontmatter closure) | Every string outside the seven-token set produces the boolean-class line; every token inside it parses | proptest over random value strings |
+| VP-016, VP-012 (frontmatter closure) | Every string outside the six-token set produces the boolean-class line; every token inside it parses | Go property test (testing/quick) over random value strings |
 | VP-016, VP-012 (frontmatter closure) | `TestConfigError_D4EX3_Boolean` covers one valid token and one invalid value per P1 bool key | table test |
 
 ## Traceability
@@ -128,7 +132,7 @@ S-TBD — config-error classes
 
 ## VP Anchors (Recommended)
 
-- VP-016, VP-012 — grammar is exactly the seven-token set
+- VP-016, VP-012 — grammar is exactly the six-token set
 
 #### Purity Classification
 
@@ -137,7 +141,7 @@ S-TBD — config-error classes
 | **I/O operations** | reads the environment once at startup (`Load`) |
 | **Global state access** | none (resolved config immutable) |
 | **Deterministic** | yes (given the environment) |
-| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Thread safety** | safe for concurrent use (immutable after `Load`) |
 | **Overall classification** | boundary |
 
 Owning component `internal/config` (BC-COMPONENT-MAP: cfg/errors.go (boolean class) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

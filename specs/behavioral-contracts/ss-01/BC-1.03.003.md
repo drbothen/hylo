@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1041-1058)"
@@ -63,7 +63,13 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 
 1. `off` only moves to just past an LF; it never points inside a line.
 2. If the first step contains an LF, no extension read happens, even if the step ends mid-line (BC-1.03.012).
-3. Size is the value read before the parse; bytes appended after it are not read in this refresh.
+3. Size is the value read before the parse. Only the **first** read is clamped to
+   `min(size - off, step)`; extension reads are bounded solely by the loop condition
+   `off + len(blob) < size` (legacy never re-checks the size read). If the file grows
+   between the size read and an extension read, the last chunk can pull in bytes past
+   `size`, the final LF can land past `size`, and the written `"size"` can exceed the
+   stat value. Bytes appended after the read with no LF in them are not parsed in this
+   refresh (no LF → no cut) but are pulled into the blob.
 
 ## Edge Cases
 
@@ -72,7 +78,7 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 | EC-001 | First line is 600,029 bytes (one LF at its end), off 0 | extension reads until the LF; whole line parsed in one refresh; `size` 600,029 |
 | EC-002 | Three 199,999-byte lines (599,997 B) | refresh 1: first step (524,288 B) holds 2 LFs → `size` 399,998; refresh 2 → 599,997 |
 | EC-003 | Trailing partial line without LF | no write; `off` unchanged; completed on the refresh after its LF lands |
-| EC-004 | File grows during the extension loop | extension stops at the earlier `size`; the rest is read next refresh |
+| EC-004 | File grows during the extension loop | extension chunks read from the file as it now is: if the grown region supplies the first LF the loop stops there and everything up to that LF — possibly past the earlier `size` — is parsed and written as `"size"`; only whole lines beyond the final LF wait for the next refresh |
 | EC-005 | Read error (permission revoked after the stat) | cached values returned, no write |
 | EC-006 | A line containing `\r` but no `\n` | treated as "no LF": not cut; `\r` splitting happens only inside `blob[:cut]` (BC-1.03.004) |
 
@@ -93,8 +99,8 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-031 | After a write, `size` = offset just past an LF, and `size ≤` the stat size | proptest over random line lengths around the step boundary |
-| VP-029, VP-031 | Extension reads occur iff the first step contains no LF | proptest with an instrumented `FileSystem` |
+| VP-029, VP-031 | After a write, `size` = offset just past an LF; `size ≤` the stat value whenever the file does not grow between the size read and the last extension read (growth can push the written `"size"` past the stat value) | Go property test (testing/quick) over random line lengths around the step boundary |
+| VP-029, VP-031 | Extension reads occur iff the first step contains no LF | Go property test (testing/quick) with an instrumented `FileSystem` |
 | VP-029, VP-031 | Go and legacy offsets agree for random line-length sequences | fuzz (Tier C differential) |
 
 ## Traceability
@@ -118,7 +124,7 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#transcript-read-window` — internal/statusline/transcript.go (512 KB step) (`FileSystem.ReadFrom` seam (design §2.2)) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript.go (512 KB step) (`FileSystem.ReadFrom` seam (design §2.2)) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

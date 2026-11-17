@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr.md]
-input-hash: "fa2d167"
+input-hash: "c1cbee0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:get_sample (SL:337)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-092"
@@ -75,7 +75,7 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | For TTL ≥ 2 and unseeded history, every appended point is ≥ TTL after the previous | proptest |
+| VP-030 | For TTL ≥ 2 and unseeded history, every appended point is ≥ TTL after the previous | Go property test (testing/quick) |
 | VP-030 | Seeded gap table matches legacy bytes | manual (table) |
 
 ## Traceability
@@ -85,7 +85,7 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
 | Source | legacy/dgx_statusline.py:get_sample (SL:337); HIST_MIN_GAP (SL:84) |
 | Legacy contract | BC-SL-092 (P3 r2 §A2); P4 F-2 |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-012 (TTL nan D4-EX-3 deviation, EC-005) |
 | Decisions | OD-55, OD-57 E-0 (T-008), OD-114 |
 | Architecture Module | `internal/statusline/sample.go` |
 | Stories | TBD |
@@ -97,7 +97,7 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (HIST_MIN_GAP) (history storage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/statusline/sample.go (HIST_MIN_GAP) (history storage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -130,7 +130,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none (within the history step) |
 | **Global state access** | reads config |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync |
+| **Thread safety** | Safe for concurrent use |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

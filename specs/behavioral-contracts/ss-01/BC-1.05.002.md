@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -14,10 +14,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "04f3121"
+input-hash: "4de1490"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:render_lane (SL:617-625)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-026"
@@ -101,7 +101,7 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-021 | `$/h` present iff `api_ms` numeric and ≥ burn_min_api_ms | proptest |
+| VP-021 | `$/h` present iff `api_ms` numeric and ≥ burn_min_api_ms | Go property test (testing/quick) |
 | VP-021 | `r` bit-identical to Python for the BC-1.05.008 goldens | manual (golden table test) |
 
 ## Traceability
@@ -126,7 +126,7 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#cost-segment` — internal/statusline/cost.go ($/h thresholds) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/cost.go ($/h thresholds) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -135,6 +135,20 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `$/h` presence and colour rule
+
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (render_lane (SL:617-625)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **guard clause**: `burn_min_api_ms` gate on the $/h leg (SL:618-625)
+- **inferred**: burn-rate division and rounding re-executed against CPython 3.11.7 (2026-11-15)
 
 #### Purity Classification
 

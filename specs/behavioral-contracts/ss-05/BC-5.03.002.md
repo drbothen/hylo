@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
 input-hash: "013d953"
@@ -34,7 +34,10 @@ removal_reason: null
 Four Python string operations whose boundary sets differ from Go's: `str.strip()` (Unicode whitespace per
 `str.isspace`), `str.rstrip(chars)`, `str.rsplit(sep, 1)` and `bytes.splitlines()` (only `\n`, `\r\n`, `\r`, unlike
 `str.splitlines`). `pyfmt.Strip`, `RStrip`, `RSplit1` and `SplitLinesBytes` reproduce them exactly (design IM-11;
-pitfall PR-12).
+pitfall PR-12). Signature note (ADV-P1-D06, BC side): this contract pins `RSplit1` to Python
+`rsplit(sep, 1)` semantics — it returns the 1- or 2-element list `[head, tail]` / `[s]`; the
+ARCH-06 signature row showing a plain `string` return is stale and the Architect owns
+reconciling it; this BC governs the behavior stories build to.
 
 ## Preconditions
 
@@ -68,7 +71,7 @@ pitfall PR-12).
 |----|-------------|-------------------|
 | EC-001 | `Strip("\u00a0 x \u200b")` | `"x \u200b"` (NBSP stripped; ZWSP kept, so the trailing space before it stays) |
 | EC-002 | `Strip("\x1c\x1fx\x85")` | `"x"` |
-| EC-003 | `Strip(" 　x ")` | `"x"` |
+| EC-003 | `Strip(" \u3000x\u2028")` (leading plain space + U+3000 IDEOGRAPHIC SPACE; trailing U+2028 LINE SEPARATOR, escape notation) | `"x"` (U+3000 and U+2028 are in Python str.strip()'s space set) |
 | EC-004 | `SplitLinesBytes(b"\n")` | `[b""]` |
 | EC-005 | `SplitLinesBytes(b"a\r\rb")` | `[b"a", b"", b"b"]` |
 | EC-006 | `SplitLinesBytes(b"\r\n\r")` | `[b"", b""]` |
@@ -93,8 +96,8 @@ Verified 2026-11-15 against CPython 3.11.7 (`str.isspace` enumeration over all c
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-025 | `Strip` equals oracle `str.strip()` for strings built from the 29 whitespace code points plus look-alikes | proptest + oracle table |
-| VP-025 | `bytes.Join(SplitLinesBytes(b), …)` loses only terminators; no element contains `\n` or `\r` | proptest |
+| VP-025 | `Strip` equals oracle `str.strip()` for strings built from the 29 whitespace code points plus look-alikes | Go property test (testing/quick) + oracle table |
+| VP-025 | `bytes.Join(SplitLinesBytes(b), …)` loses only terminators; no element contains `\n` or `\r` | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -132,7 +135,7 @@ TBD — pyfmt str (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/str.go (whitespace/splitlines)` (BC-COMPONENT-MAP: py/str.go (whitespace/splitlines) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

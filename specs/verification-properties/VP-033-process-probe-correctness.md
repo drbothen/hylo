@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, behavioral-contracts/ss-03/BC-3.02.001.md, behavioral-contracts/ss-03/BC-3.02.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
 input-hash: "2ed5662"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,7 +37,9 @@ removal_reason: null
 `FindAncestor` obeys the register of named rules identically in unit on every OS leg:
 walk from `os.Getppid()` checking the parent first; at most 6 levels; stop at pid <= 1;
 `basename(comm)` match with case-insensitive `.exe` stripping on Windows; start time
-truncated to whole seconds returned as float under the legacy `proc_start` key; PID-reuse
+truncated to whole seconds returned as float under the legacy `proc_start` key (raw
+probe values such as 100.7 truncate to 100.0 — the fake chains carry untruncated raw
+values so the truncation rule itself can fail); PID-reuse
 guard (parent created before child) on Windows. Probe-result differences between
 macOS/Linux are the ruled OD-76 exclusion entries; the symlinked-binary name case is
 measured in the probe test (OD-139 deferral).
@@ -71,10 +73,12 @@ measured in the probe test (OD-139 deferral).
 
 ```go
 func TestFindAncestor_RuleRegister(t *testing.T) {
-    for _, tc := range FakePIDChains {
+    for _, tc := range FakePIDChains { // WantStart is the pre-truncated expectation;
+        // chains include raw values like 100.7 whose expectation is 100.0, so an
+        // implementation that skips truncation fails here.
         start, ok := FindAncestor(tc.PID, tc.Name, 6)
-        if ok != tc.WantOK || (ok && int(start) != int(tc.WantStart)) {
-            t.Fatalf("%s: ok=%v start=%v", tc.Name, ok, start)
+        if ok != tc.WantOK || (ok && start != tc.WantStart) {
+            t.Fatalf("%s: ok=%v start=%v want=%v", tc.Name, ok, start, tc.WantStart)
         }
     }
 }

@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "2cad41e"
+input-hash: "04f459c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-091"
@@ -101,8 +101,8 @@ Exact step-2 row bytes:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030, VP-019 (frontmatter closure) | Go and legacy session-cache bytes are identical after each of the 11 steps | manual (multi-step parity case, Tier A) |
-| VP-030, VP-019 (frontmatter closure) | Cache-swap: a legacy-written file read by Go (and reverse) yields the same next state | manual (BC-6.02.004) |
+| VP-030, VP-019 (swap byte equality) | Go and legacy session-cache bytes are identical after each of the 11 steps | manual (multi-step parity case, Tier A) |
+| VP-030, VP-019 (swap byte equality) | Cache-swap: a legacy-written file read by Go (and reverse) yields the same next state | manual (BC-6.02.004) |
 
 ## Traceability
 
@@ -111,7 +111,7 @@ Exact step-2 row bytes:
 | Source | legacy/dgx_statusline.py:get_sample (SL:315-359); save_cache (SL:198-206); _norm_pt (SL:652-656) |
 | Legacy contract | BC-SL-091 (P3 r2 §A2; ruling (b) Go-writer format obligation) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-012 (TTL nan/inf D4-EX-3 deviation, EC-004) |
 | Decisions | P3 r2 ruling (b); OD-105/OD-110 (exclusions named in EC-004/EC-005); OD-114 |
 | Architecture Module | `internal/statusline/sample.go`, `internal/pyfmt` (json) |
 | Stories | TBD |
@@ -126,7 +126,7 @@ Exact step-2 row bytes:
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (11-step pinned seq) (cache format obligation) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/statusline/sample.go (11-step pinned seq) (cache format obligation) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

@@ -1,15 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T22:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.001.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2ac3fc3"
+input-hash: "9bd924e"
 traces_to: prd.md
 source_bc: BC-6.03.001
+bcs: [BC-1.06.002, BC-6.03.001, BC-6.04.001]
 module: internal/parity
 proof_method: manual
 feasibility: feasible
@@ -18,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: added BC-1.06.002 to bcs — the Tier B golden statement verifies its slash-sid stdout-parity row"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,8 +35,10 @@ removal_reason: null
 ## Property Statement
 
 Every committed Tier B golden under `internal/statusline/testdata/goldens/` is written
-by the Python oracle (never Go) — recorded on Linux with `*.windows.golden` variants
-for OS-dependent cases — and the Go port's output matches the applicable golden
+by the Python oracle (never Go): the POSIX goldens are recorded on Linux oracle runs,
+and the `*.windows.golden` variants for OS-dependent cases are Python-written on a
+**Windows oracle run** — a Linux run cannot produce ntpath output (BC-6.03.001 match
+rule 7). The Go port's output matches the applicable golden
 byte-for-byte on every CI OS without Python installed. Golden metadata records the
 resolved Python patch version (RK-4).
 
@@ -43,7 +46,9 @@ resolved Python patch version (RK-4).
 
 - **Primary BC:** BC-6.03.001 — Row goldens A/B/C (Tier B, Python-written, OS-specific
   variants).
-- **Partial coverage:** BC-6.04.001 (Windows leg runs Tier B without Python).
+- **Partial coverage:** BC-1.06.002 (sid with `/`: stdout over an N-refresh sequence
+  equals legacy — the Tier B golden row), BC-6.04.001 (Windows leg runs Tier B without
+  Python).
 - **Invariant verified:** DI-012 (the referee writes the expected bytes, keeping the
   refereed side from self-certifying); AD-13 (fixture co-location).
 

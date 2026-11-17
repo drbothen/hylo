@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1153)"
@@ -117,8 +117,8 @@ reproduce pass-3 r3 §3.1 exactly.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-013, VP-012 (frontmatter closure) | All 21 rows pass as Go table tests with exact cache bytes | table test (21 rows) |
-| VP-029, VP-013, VP-012 (frontmatter closure) | Each positive row and row 15 has an `exclusions.json` entry naming this test | harness self-check (BC-6.03.004) |
+| VP-029, VP-013 | All 21 rows pass as Go table tests with exact cache bytes | table test (21 rows) |
+| VP-029, VP-013, VP-012 (exclusion-machinery self-check) | Each positive row and row 15 has an `exclusions.json` entry naming this test | harness self-check (BC-6.03.004) |
 
 ## Traceability
 
@@ -141,7 +141,7 @@ reproduce pass-3 r3 §3.1 exactly.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#d4-ex-2` — internal/statusline/transcript_wshape_test.go (21 rows) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript_wshape_test.go (21 rows) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -149,7 +149,7 @@ S-TBD — D4-EX-2 wrong-shape skip
 
 ## VP Anchors (Recommended)
 
-- VP-029, VP-013, VP-012 — 21-row table
+- VP-029, VP-013 — 21-row table; VP-012 — exclusions.json self-check row only
 
 ---
 

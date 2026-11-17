@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -13,10 +13,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "bb4f9c8"
+input-hash: "a53ab2d"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-625)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-101"
@@ -143,7 +143,7 @@ All twelve numeric rows and EC-001/003/004/005 were re-executed against
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#goldens` — internal/statusline/cost.go + internal/cost/history.go (goldens) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/cost.go + internal/cost/history.go (goldens) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -156,6 +156,19 @@ S-N.MM — cost colouring (filled by story-writer)
 > create-architecture, subject to adversarial review. No behavior change.
 
 - VP-021 — golden equality
+
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (render_lane (SL:601-625); cost_thresholds (SL:240-262)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **inferred**: seeded 20-session goldens regenerated from CPython 3.11.7 (2026-11-15)
 
 #### Purity Classification
 

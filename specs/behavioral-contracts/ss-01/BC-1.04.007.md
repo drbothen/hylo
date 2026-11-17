@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "334d138"
+input-hash: "12ee8f9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:754-763)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-046"
@@ -49,9 +49,10 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 1. `host_share = hs_raw * 100` if `hs_raw` is a number (bool, int or float), else none.
 2. Segment exists only if `kv_raw` is a number (`isinstance(int, float)`, bool included).
 3. `kv = Min(Max(kv_raw * 100, 0.0), 100.0)` with Python argument-order NaN semantics
-   (BC-5.01.003); `n = Min(Ceil(kv / 25), 4)`.
+   (BC-5.01.003); with `C = statusline.kv.cells` (default 4), `n = Min(Ceil(kv / (100 / C)), C)` —
+   the default `C = 4` is the legacy `/25`, `4` cell math.
 4. `warn = host_share is not none and host_share > 5`.
-5. Segment = `("\e[33m" if warn else "\e[36m") + "KV" + "▰"*n + "▱"*(4-n) + " " + F(kv,0) + "%\e[0m"`,
+5. Segment = `("\e[33m" if warn else "\e[36m") + "KV" + "▰"*n + "▱"*(C-n) + " " + F(kv,0) + "%\e[0m"`,
    then, if `host_share is not none and host_share > 0.5`, append
    `" \e[2m↺host " + F(host_share,0) + "%\e[0m"`.
 6. Stale mode does not change this segment.
@@ -88,7 +89,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Cell count = `min(ceil(clamp(kv*100)/25), 4)` for finite and ±inf inputs | proptest |
+| VP-030 | For the default `C = 4`, cell count = `min(ceil(kv/25), 4)`; under any other configured `C` the count is `min(ceil(kv·C/100), C)` and the pad is `C − n` | Go property test (testing/quick) |
 | VP-030 | 11-case review #15 table reproduces legacy bytes | manual (table) |
 
 ## Traceability
@@ -110,7 +111,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (KV) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/row2.go (KV) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -144,7 +145,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none |
 | **Global state access** | reads config |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync |
+| **Thread safety** | Safe for concurrent use |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

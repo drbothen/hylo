@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "2cad41e"
+input-hash: "04f459c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-041"
@@ -42,7 +42,7 @@ it is younger than KEEP_DEAD.
 1. `now` is the single per-render clock read (`Env.Now`, Python `time.time()` value).
 2. `c` = session cache `statusline-<sid>.json` loaded via the never-raise loader
    (BC-1.06.001); an unreadable file is `{}`.
-3. `ttl` = `statusline.telemetry.ttl_s` (default 4, T-001 "match refreshInterval");
+3. `ttl` = `statusline.telemetry.ttl_s` (default 4, T-001, convention: "match refreshInterval");
    `keep_dead` = `statusline.telemetry.keep_dead_s` (default 300, T-004, judgment
    "5 min of last-known telemetry before giving up", OD-57 E-A). Non-finite or negative
    TTL is a config error — approved deviation D4-EX-3 (BC-2.02.002; OD-105 exclusion
@@ -66,7 +66,7 @@ it is younger than KEEP_DEAD.
 
 ## Invariants
 
-1. The function never raises; cache write errors are swallowed.
+1. Total except the typed history-point site (a malformed point raises IndexError → errDegraded, BC-1.04.003 EC-009); cache write errors are swallowed.
 2. KEEP_DEAD is applied **only** on the fetch path (pinned quirk: inside a TTL window
    after a failed fetch an over-300 s sample renders stale instead of `◌ DGX ?`).
 3. A failed fetch never deletes the stored sample.
@@ -101,7 +101,7 @@ TTL 4, frozen clock, fetch outcome injected (full 11-step table with exact JSON:
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Same `(sample, age, up, hist)` and same cache bytes as legacy for every step of the pinned sequence | manual (multi-step table, BC-1.04.020) |
-| VP-030 | Cached path performs zero fetches and zero writes | proptest (fake metrics counter) |
+| VP-030 | Cached path performs zero fetches and zero writes | Go property test (testing/quick) (fake metrics counter) |
 
 ## Traceability
 
@@ -126,7 +126,7 @@ TTL 4, frozen clock, fetch outcome injected (full 11-step table with exact JSON:
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (TTL/KEEP_DEAD) (session cache state machine) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/statusline/sample.go (TTL/KEEP_DEAD) (session cache state machine) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "64c1eaa"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1063)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-038", "1.2.2 2026-11-17: depth-limit correction 989/990 (SC-01..02) + VP-006 citation (SC-06)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +52,8 @@ transcript parser uses it.
    UTF-16/32 detection; invalid UTF-8 fails; leading/trailing JSON whitespace (space, tab, CR, LF) allowed;
    `NaN`, `Infinity`, `-Infinity` and overflowing literals (`1e400` → inf) accepted; duplicate keys last-wins in
    first position; lone surrogate escapes kept; integers exact; nesting at CPython 3.11's recursion limit fails
-   (depth 995 accepted, 1,000 rejected, BC-5.02.003).
+   (depth 989 accepted, 990 rejected at the `_mix_counts` site, measured on the legacy oracle; call-context
+   dependent — stdin sits at 993/994; BC-5.02.003, VP-006).
 4. A failed decode skips the piece: no change to `res/conv/think`, `tin/tout/c_wr/c_rd/c_in`, `rb`, `pp`, `cur`,
    `lr`, `lu`, ids. Its bytes are still consumed (the offset is already set past `cut`, BC-1.03.003).
 5. A successfully decoded piece is processed by the downstream steps in this order: turn machine (BC-1.03.010),
@@ -77,7 +78,7 @@ transcript parser uses it.
 | EC-006 | A record containing byte `0xFF` | skipped; neighbors unaffected |
 | EC-007 | `NaN` literal anywhere in a record | accepted |
 | EC-008 | Torn record (truncated JSON) followed by LF | skipped; offset moves past it permanently |
-| EC-009 | Nesting depth 1,000 | skipped (Go's `encoding/json` limit of 10,000 must not be used) |
+| EC-009 | Nesting depth limit/limit+1: 989 accepted, 990 skipped | 990 skipped (Go's `encoding/json` limit of 10,000 must not be used) |
 
 ## Canonical Test Vectors
 
@@ -102,9 +103,10 @@ expected `conv` and cache `size` were re-pinned 2026-11-15 with the legacy oracl
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-006 | `SplitLinesBytes` equals CPython `bytes.splitlines()` on random byte strings | fuzz (differential vs oracle) |
-| VP-029, VP-006 | A skipped piece leaves the parser state bit-identical | proptest (state snapshot before/after) |
-| VP-029, VP-006 | Go and legacy agree on random transcripts mixing valid, torn and invalid-UTF-8 records | fuzz (Tier C) |
+| VP-038 | `SplitLinesBytes` equals CPython `bytes.splitlines()` on random byte strings (split points, ends-retained pieces, losslessness) | fuzz (differential vs oracle) |
+| VP-006 | Per-call-site JSON depth budget holds at this site's edge: depth 989 accepted, 990 rejected (justified: EC-009's depth edge case is the transcript-site instance of VP-006's per-call-site budget obligation) | fuzz (boundary L/L+1 vs oracle) |
+| VP-029 | A skipped piece leaves the parser state bit-identical | Go property test (testing/quick) (state snapshot before/after) |
+| VP-029 | Go and legacy agree on random transcripts mixing valid, torn and invalid-UTF-8 records | fuzz (Tier C) |
 
 ## Traceability
 
@@ -128,7 +130,7 @@ expected `conv` and cache `size` were re-pinned 2026-11-15 with the legacy oracl
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#pyfmt-json` — internal/statusline/transcript.go (splitlines + per-line decode) (`pyfmt.Decode(ModeBytes)` (design IM-01)) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript.go (splitlines + per-line decode) (`pyfmt.Decode(ModeBytes)` (design IM-01)) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -136,7 +138,8 @@ S-TBD — transcript parser
 
 ## VP Anchors (Recommended)
 
-- VP-029, VP-006 — splitlines differential
+- VP-038 — splitlines differential (dedicated differential VP; family table still VP-029)
+- VP-006 — per-call-site JSON depth budget (transcript site edge: 989 accepted / 990 rejected)
 
 ---
 

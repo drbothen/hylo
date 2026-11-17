@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -86,7 +86,7 @@ when `config.Load` returns any error. The error set is identical to the set that
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-004, VP-016 | validate exit ≠ 0 ⇔ statusline prints the config-error line, over generated env maps | proptest (shared generator with BC-2.02.001) |
+| VP-004, VP-016 | validate exit ≠ 0 ⇔ statusline prints the config-error line, over generated env maps | Go property test (testing/quick) (shared generator with BC-2.02.001) |
 
 ## Traceability
 

@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.01.001.md, behavioral-contracts/ss-05/BC-5.01.002.md, behavioral-contracts/ss-05/BC-5.01.003.md, behavioral-contracts/ss-05/BC-5.01.004.md, behavioral-contracts/ss-05/BC-5.01.005.md, behavioral-contracts/ss-05/BC-5.01.006.md, owner-decisions-log-2026-11-14.md]
 input-hash: "afa8d5e"
@@ -12,14 +12,14 @@ traces_to: prd.md
 source_bc: BC-5.01.001
 bcs: [BC-5.01.001, BC-5.01.002, BC-5.01.003, BC-5.01.004, BC-5.01.005, BC-5.01.006]
 module: internal/pyfmt (num.go)
-proof_method: proptest
+proof_method: property-test (testing/quick)
 feasibility: feasible
 verification_lock: false
 proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,7 +72,7 @@ duration-format sites (OD-137).
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
 | Oracle tables | Go test, `internal/pyfmt/testdata/*.golden` | yes — committed tables | every helper, corner-pinned |
-| Property generators | Go test | no (random), seeded | value-space sampling |
+| Property generators | Go test | no (random), seeded | value-space sampling; oracle = self-consistency invariants (e.g. `Repr(ParseFloat(r))` spelling stability, divmod identity `a*b ≡ FloorDiv*a + Mod*a` for finite a), never a live interpreter call — CPython equivalence is pinned only by the committed tables |
 | Fuzz | `go test -fuzz` (ParseFloat et al.) | budget-bounded | grammar acceptance |
 
 ## Proof Harness Skeleton

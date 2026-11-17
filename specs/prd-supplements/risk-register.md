@@ -1,13 +1,13 @@
 ---
 document_type: risk-register
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-17T16:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1b
 inputs: [architecture-feasibility-report.md, prd.md, prd-supplements/nfr-catalog.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "a18a43b"
+input-hash: "d76cd4a"
 traces_to: prd.md
 ---
 
@@ -28,7 +28,7 @@ traces_to: prd.md
 | R-004 | Fake-pass parity: harness weaker than refereed | Verification integrity | open | HIGH | AD-09 fail-closed machinery, canary (BC-6.01.003), exclusion-closure property test (VP-012); HIGH kill-rate tier | n.a. | ARCH-07 / AD-09 |
 | R-005 | Purity-annotation drift across BC files | Documentation consistency | closed (remediated) | LOW | Per-BC Purity Classification sections annotated during Pass 3 — 145/145 on disk (re-verified 2026-11-17, CA-07); module-level boundary carried in the ARCH-00 purity table | n.a. | ARCH-00 purity table |
 | R-006 | RK-5: HYLO_TEST_NOW stderr warning leaking outside the harness | Operational (determinism) | closed (spec decision) | LOW | Env seam set: HYLO_TEST_NOW is a harness hook, not a setting (AD-10); reserved names are never warned as unknown keys (BC-2.01.001 invariant 6) | n.a. | ARCH-03 / AD-10 |
-| R-007 | RK-6: inert key `statusline.window_age.ps_timeout_s` confusing the config surface | Operational (config surface) | closed (owner ruling) | LOW | Key removed from the registry by OD-147 (owner, 2026-11-16); setting it is now an ordinary unknown-key config error | n.a. | ARCH-02 key registry (OD-147) |
+| R-007 | RK-6: inert key `statusline.window_age.ps_timeout_s` confusing the config surface | Operational (config surface) | closed (owner ruling) | LOW | Key removed from the registry by OD-147 (owner, 2026-11-16); setting it now draws only the unknown-setting stderr warning, is ignored, and never changes the output or exit status (BC-2.01.001 PC-6, VP-015) — there is no unknown-key config-error class | n.a. | ARCH-02 key registry (OD-147) |
 
 ## Gate Notes
 

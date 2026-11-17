@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -71,8 +71,9 @@ happens once per process, before any side effect.
 6. A present `HYLO_*` variable that names no registry key and is not a reserved name is
    ignored, with one stderr warning line `hylo: warning: unknown setting <NAME> (ignored)\n`
    (OD-01). Reserved names, never warned and never config keys: `HYLO_CONFIG` (config path
-   override, BC-2.03.002), `HYLO_TEST_NOW` (harness clock hook, design §3.2),
-   `HYLO_PARITY_PYTHON` (harness interpreter setting, OD-104).
+   override, BC-2.03.002), `HYLO_TEST_NOW` (harness clock hook, design §3.2; a malformed
+   value is ignored with one stderr warning and the real clock is used — BC-6.01.003,
+   ADV-P1-D22 spec choice), `HYLO_PARITY_PYTHON` (harness interpreter setting, OD-104).
 7. If any key fails validation, `Load` returns every failing key (registry order) and the
    caller renders per BC-2.02.001 (statusline) or BC-2.03.001 (validate).
 
@@ -110,7 +111,7 @@ happens once per process, before any side effect.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-015 | Adding or changing any non-`HYLO_*` variable (except OS-level ones read by `internal/platform` for paths) never changes the resolved config | proptest |
+| VP-015 | Adding or changing any non-`HYLO_*` variable (except OS-level ones read by `internal/platform` for paths) never changes the resolved config | Go property test (testing/quick) |
 | VP-015 | Unset `EnvName(k)` ⇒ effective value == registry default for every k | table test over `Registry()` |
 
 ## Traceability
@@ -152,7 +153,7 @@ S-TBD — config subset (design §4 step S2)
 | **I/O operations** | reads the environment once at startup (`Load`) |
 | **Global state access** | none (resolved config immutable) |
 | **Deterministic** | yes (given the environment) |
-| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Thread safety** | safe for concurrent use (immutable after `Load`) |
 | **Overall classification** | boundary |
 
 Owning component `internal/config` (BC-COMPONENT-MAP: cfg/load.go (env -> defaults) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

@@ -12,7 +12,7 @@ traces_to: prd.md
 source_bc: BC-1.01.009
 bcs: [BC-1.01.009, BC-5.04.003]
 module: internal/statusline (Render, Env)
-proof_method: proptest
+proof_method: property-test (testing/quick)
 feasibility: feasible
 verification_lock: false
 proof_completed_date: null
@@ -54,7 +54,10 @@ sources are `Env` members; none is read behind `Render`'s back.
 - **Method:** property-based test — a generator produces random `Env` recordings;
   each `Env` is replayed twice (and shuffled-order read-checked) asserting identical
   output bytes; a counting `Now` asserts exactly-one clock read.
-- **Honesty:** testable-only. Seam-closedness (no hidden global reads) is asserted by
+- **Honesty:** testable-only. The random-sample property asserts replay determinism
+  as its own oracle: a randomly recorded `Env` replayed twice (reads shuffle-safe)
+  must yield byte-identical output — no live oracle exists or is needed. Seam-
+  closedness (no hidden global reads) is asserted by
   the recording fakes noticing reads, not proven; a static lint on `Env` scope is a
   code-review obligation, mirroring VP-022.
 

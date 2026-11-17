@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,10 +15,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r6.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "e56ce12"
+input-hash: "5452a6a"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:render_lane (SL:626-636)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-027"
@@ -59,7 +59,7 @@ equivalent, unless that is below half a cent.
    fetched (rows < 2, or no sample).
 5. Config: `statusline.cost.basis_min_mtok_month` = 30.4 (T-012, derived: 1M backend
    tokens per 24 h ≈ 30.4 MTok/month, review #11.1); `statusline.cost.basis_min_shown_usd`
-   = 0.005 (T-044, "skip sub-half-cent noise", SL:634; boundary detail in BC-1.02.029).
+   = 0.005 (T-044, derived: "skip sub-half-cent noise", SL:634; boundary detail in BC-1.02.029).
    Grey `\e[90m`, reset `\e[0m` (OD-113 theme keys).
 
 ## Postconditions
@@ -114,7 +114,7 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-021 | `⛏` text present ⇒ cost segment present and lane is local | proptest |
+| VP-021 | `⛏` text present ⇒ cost segment present and lane is local | Go property test (testing/quick) |
 | VP-021 | Bytes equal legacy on the five P3r6 §1.1 rows and the P3r7 12-value fixture | manual (table test) |
 
 ## Traceability
@@ -127,7 +127,7 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-602, 626-636); main (SL:1220-1223); MIN_BASIS_MTOK_MONTH (SL:98) |
 | Legacy contract | BC-SL-027 (amended P3r6 §2.1, re-verified P3r7) |
-| Thresholds | T-012 (30.4 MTok/month, derived), T-044 (0.005, judgment: sub-half-cent noise) |
+| Thresholds | T-012 (30.4 MTok/month, derived), T-044 (0.005, derived: sub-half-cent noise; aligned with the catalog) |
 | Decisions | D4, D15, OD-113 |
 
 ## Related BCs (Recommended)
@@ -139,7 +139,7 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#cost-segment` — internal/statusline/cost.go (⛏ in $ block) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/cost.go (⛏ in $ block) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -148,6 +148,20 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `⛏` gating
+
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (render_lane (SL:626-636); main (SL:1220-1223)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **guard clause**: `not isinstance(dgx_mtok, (int, float)) or dgx_mtok <= 0` keeps NaN (SL:1221)
+- **inferred**: pit-badge gate and basis guards re-executed against CPython 3.11.7 (2026-11-15)
 
 #### Purity Classification
 

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "7d75fbc"
@@ -82,7 +82,7 @@ All verified 2026-11-15 by calling legacy `visible()` under CPython 3.11.7. Gold
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-027 | `visible(a+b) == visible(a)+visible(b)` whenever neither split point falls inside an SGR run | proptest |
+| VP-027 | `visible(a+b) == visible(a)+visible(b)` whenever neither split point falls inside an SGR run | Go property test (testing/quick) |
 | VP-027 | Go `visible` equals CPython `len(_ANSI.sub("", s))` on generated strings incl. astral and surrogates | Tier C differential fuzz |
 
 ## Traceability
@@ -138,7 +138,7 @@ TBD — status line frame (design step S2)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync equivalent (pure) |
+| **Thread safety** | safe for concurrent use (pure, no shared state) |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

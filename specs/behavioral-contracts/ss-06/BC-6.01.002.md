@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -71,12 +71,16 @@ the CI runner's shell (DET-43).
    - `HYLO_TEST_NOW=<step instant>` (BC-6.01.003).
    - `COLUMNS=<value>`, only when the case or step declares it.
    - The legacy-side spelling of the case settings. These are legacy's own env names,
-     quoted as provenance from SL:73-79, 92 and 444: `DGX_SL_VM_URL`, `DGX_SL_TTL`,
+     quoted as provenance from SL:73-77, 89 and 444 (`DGX_SL_TRACE` is at SL:89;
+     ADV-P1-D23): `DGX_SL_VM_URL`, `DGX_SL_TTL`,
      `DGX_SL_ROWS`, `DGX_SL_SPARK`, `DGX_SL_GIT`, `DGX_SL_TRACE`, `LOCAL_MODEL_PREFIXES`.
      Only keys the case sets are included, except `LOCAL_MODEL_PREFIXES`, which is always
      set explicitly (OD-111; BC-6.02.003).
    - On Windows only, `SYSTEMROOT` with the runner's value. CPython cannot start without
      it, and Go's `os/exec` adds it on Windows when it is missing.
+   - `PATH=<case>/bin`, ONLY when the case declares a subprocess-fake table (the fake
+     `ps` of BC-3.02.002). The value is the harness constant, never the runner's
+     `PATH`; cases without a fake table get no `PATH` key (ADV-P1-D05 resolution).
 2. **Go child env** (built binary). It contains exactly these keys:
    - `HOME` and `USERPROFILE` as above.
    - `TMPDIR`, plus `TMP`/`TEMP` on Windows (GP-5).
@@ -148,7 +152,7 @@ the CI runner's shell (DET-43).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-034 | For any parent environment, the constructed child env key set equals the per-side allowlist (case-dependent keys aside) | proptest-style table test with randomized parent envs |
+| VP-034 | For any parent environment, the constructed child env key set equals the per-side allowlist (case-dependent keys aside) | Go property test (testing/quick)-style table test with randomized parent envs |
 | VP-034 | No forbidden key (proxy, PYTHON* except PYTHONPATH, GP-1..GP-4, DGX_* on Go side) appears in any child env | table test + probe child |
 
 ## Traceability
@@ -159,7 +163,7 @@ the CI runner's shell (DET-43).
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness env builder (BC-COMPONENT-MAP: internal/parity/env.go (child env from scratch) — ARCH-07) |
+| Architecture Module | `internal/parity` parity harness env builder (BC-COMPONENT-MAP: internal/parity/env.go (child env from scratch) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 > Capability anchor rationale (OD-153): the parity harness is verification machinery whose sole purpose is proving CAP-009 byte parity (the D4 exit criterion), governed by DI-012.

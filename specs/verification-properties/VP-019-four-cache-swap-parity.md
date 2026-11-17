@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.02.004.md, behavioral-contracts/ss-01/BC-1.06.001.md, behavioral-contracts/ss-01/BC-1.05.009.md, behavioral-contracts/ss-01/BC-1.04.020.md, behavioral-contracts/ss-01/BC-1.03.002.md, owner-decisions-log-2026-11-14.md]
 input-hash: "fc30fec"
 traces_to: prd.md
 source_bc: BC-6.02.004
-bcs: [BC-6.02.004, BC-1.06.001, BC-1.05.009, BC-1.04.020, BC-1.03.002, BC-1.02.030]
+bcs: [BC-6.02.004, BC-1.06.001, BC-1.05.009, BC-1.04.020, BC-1.03.002, BC-1.02.005, BC-1.02.013, BC-1.02.030]
 module: internal/parity (swap), internal/statusline (cache.go)
 proof_method: manual
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null

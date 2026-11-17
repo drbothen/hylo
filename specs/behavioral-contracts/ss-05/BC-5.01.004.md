@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
@@ -43,8 +43,9 @@ contract per OD-141.
 ## Preconditions
 
 1. `n` any int64.
-2. `width` in 0..67 (legacy uses 2 and 3); values above 67 are out of consumer range but
-   behave by the same rule.
+2. `width` in 0..67 (rationale, derived: 67 exceeds the widest consumer cell in
+   `render_telemetry_fields`/`render_lane` with margin over legacy's 2 and 3 — an envelope,
+   not a legacy value; values above 67 are out of consumer range but behave by the same rule).
 3. `zeroPad` selects the `02d` form; `!zeroPad` the `>2d` form.
 
 ## Postconditions
@@ -90,7 +91,7 @@ Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle di
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-023 | D equals CPython for every (n, width, zeroPad) in the generated table | CPython oracle table |
-| VP-023 | Sign placement holds for every negative int64 minimum | proptest |
+| VP-023 | Sign placement holds for every negative int64 minimum | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -128,7 +129,7 @@ S-TBD — pyfmt num helpers
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/num.go (D)` (BC-COMPONENT-MAP: py/num.go (D) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

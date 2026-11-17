@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -77,7 +77,11 @@ oracle case runs, that the shim actually took effect.
      BC-6.02.003).
 3. **Go side.** The in-process render receives `Env.Now = now_k`. The built binary
    parses `HYLO_TEST_NOW` once at start and uses it for every clock read of that
-   refresh. `HYLO_TEST_NOW` is a test hook, not a D15 config key; it is documented under
+   refresh. A malformed value (not a valid decimal float) is ignored with exactly one
+   stderr warning and the real clock is used — never a config error, never a degraded
+   line (spec choice, ADV-P1-D22; mirrors the unknown-`HYLO_*` warning discipline of
+   BC-2.01.001 PC-6; echoed in BC-5.04.003 and BC-2.01.001). `HYLO_TEST_NOW` is a test
+   hook, not a D15 config key; it is documented under
    "test hooks" in the config reference (design §3.2, risk RK-5).
 4. **Canary (gating).** Before the first oracle case of every Tier A run, the harness
    runs `<python> -s -c "import time; print(repr(time.time()))"`. It uses the same

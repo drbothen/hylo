@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "aac2048"
@@ -50,13 +50,15 @@ Notation: `\e` is the byte 0x1B.
 
 1. If neither `la` nor `lr` is truthy → no segment.
 2. Otherwise segment = `\e[32m▲` + fmt(la) + `\e[0m\e[2m/\e[0m\e[31m▼` + fmt(lr) + `\e[0m`.
-3. `fmt(n)`:
+3. `fmt(n)` with `k_from` = `statusline.units.lines.k_from` (default 10,000) and `M_from` =
+   `statusline.units.lines.M_from` (default 1,000,000):
    1. `n = int(n)` with Python semantics (`pyfmt.ParseInt` for strings — surrounding
       whitespace and `_` digit separators accepted, BC-5.01.002; floats truncate toward
       zero; `true` → 1); a TypeError or ValueError (non-numeric string such as `"1e3"`,
       list, object, NaN) → return `?`.
-   2. `n >= 1000000` → F(n / 1e6, 1) + `M` (Python `'f'`, half-even on the binary value).
-   3. `n >= 10000` → `n // 1000` + `k` (integer floor division).
+   2. `n >= M_from` → F(n / M_from, 1) + `M` (Python `'f'`, half-even on the binary value).
+   3. `n >= k_from` → `n // 1000` + `k` (integer floor division; the k divisor is the SI
+      1000, a named constant).
    4. else → decimal `n` (negative values exact, e.g. `-20000`).
 4. Position: after the limits segment, before the timer segment.
 
@@ -64,6 +66,10 @@ Notation: `\e` is the byte 0x1B.
 
 1. Both counts are always shown together once either is non-zero (`▲0` or `▼0` possible).
 2. Rationale (D15, T-037, documented): keep row 1 narrow on big refactors (review #8.1).
+3. Parameterized keys (Policy 20): non-default `k_from` / `M_from` follow the same formulas
+   above, generalized from legacy's literals (SL:866-867 bakes in 10,000 and 1,000,000); byte
+   parity (vectors) is obligated at the defaults only — other values are unit-tested against
+   the formula, not against Tier A goldens.
 
 ## Edge Cases
 

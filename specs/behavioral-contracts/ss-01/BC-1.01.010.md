@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "2c519fb"
@@ -70,7 +70,9 @@ on realistic rows.
 1. The staircase widths are the cumulative sums of per-segment visible widths plus 3 per SEP. Segment widths (P3r2
    §A1): A row 1 = 8·8·6·8·19·14·5·28·6·20·29·14; B = 7·10·6·8·19·14·5·6·20·29·19; C = B with cost 20;
    row 2 fresh = 1·5·10·5·15·5·22; row 2 stale = 1·5·10·5·7·5·22·10.
-2. Row 2 is trimmed only when `narrow_cols <= COLUMNS < its width`.
+2. Row 2, once rendered, is trimmed (like row 1) whenever `0 < COLUMNS < its width`;
+   `narrow_cols` gates only whether row 2 is rendered at all, and the `rows > 2` branch renders
+   it at any width (BC-1.01.003 PC1, EC-005).
 
 ## Edge Cases
 

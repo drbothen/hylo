@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,10 +15,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "3d1015c"
+input-hash: "5184321"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-028"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-001 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -109,8 +109,9 @@ Clock `now = 1794615009.0`, empty history unless noted.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-020 | Two refreshes less than record_throttle_s apart with a `cc` entry produce at most one write | proptest (fake clock + fake store) |
+| VP-020 | Two refreshes less than record_throttle_s apart with a `cc` entry produce at most one write | Go property test (testing/quick) (fake clock + fake store) |
 | VP-020 | All non-target keys survive a write byte-identically | manual (cache-swap test, design §5.2) |
+| VP-001 | Corrupt cost history (CP-C09/C10, EC-008) still yields ≥1 stdout byte and exit 0 — out of parity scope, never-blank per DI-008 | fault-injection table (exhaustive CP-*) |
 
 ## Traceability
 
@@ -135,7 +136,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#record` — internal/cost/history.go (throttled write) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/cost/history.go (throttled write) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -143,7 +144,21 @@ S-N.MM — cost history (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-020 — throttle
+- VP-020 — throttle; VP-001 — never-blank/exit-0 under CP-C09/C10 corrupt history
+
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (record_cost (SL:224-237)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **guard clause**: one-write-per-minute throttle `now - e.get("ts", 0) < 60` (SL:232)
+- **documentation**: throttle rationale comment (review #11, SL:224)
 
 #### Purity Classification
 
@@ -152,7 +167,7 @@ S-N.MM — cost history (filled by story-writer)
 | **I/O operations** | writes via the injected `Store` seam |
 | **Global state access** | none |
 | **Deterministic** | yes (given samples and a store fake) |
-| **Thread safety** | Send + Sync (store injected) |
+| **Thread safety** | Safe for concurrent use (store injected) |
 | **Overall classification** | boundary |
 
 Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (throttled write) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.

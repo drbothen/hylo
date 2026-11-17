@@ -1,10 +1,10 @@
 ---
 document_type: prd-supplement-nfr-catalog
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T20:30:00Z
+timestamp: 2026-11-17T23:45:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
@@ -24,8 +24,8 @@ traces_to: prd.md, domain-spec/L2-INDEX.md
 | NFR-001 | Performance | Steady-state render latency on the owner's Mac (darwin/arm64), synthetic fixture corpus, metrics HTTP wait excluded | p95 <= 25 ms (OD-117). Legacy baseline measured 2026-11-15: median 84.5 ms, p90 101 ms; ~25 ms interpreter start removed by the port | per-OS timing report: 1 warm-up + 5 timed runs, nearest-rank p95, fake-VM handling time subtracted; gate fails only with `HYLO_TIMING_GATE=1` | P0 | porting-decision latency tension |
 | NFR-002 | Reliability | Never-blank, exit-0 rendering under every fault: stdin faults, transcript faults, metrics faults, cache faults, config errors, unknown flags | 100% of CP-S01..S17, CP-T01..T07, CP-N01/N02 triggers produce >= 1 stdout byte and exit 0 | fault-injection table tests per owning BC | P0 | DI-008 |
 | NFR-003 | Correctness (parity) | Byte parity vs the CPython 3.11.7 oracle: stdout bytes + exit code per step; named caches byte-for-byte | 0 unexplained diffs; every explained diff on the named exclusion list with its own table test | parity harness (BC-6.03.002) + Tier C differential fuzz (BC-6.04.003) | P0 | D4 exit criterion |
-| NFR-004 | Portability | Three-OS support (D5): macOS, Linux, Windows; OS-specific code confined to `internal/platform` | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean | CI matrix leg per OS | P0 | D5 |
-| NFR-005 | Resource bounds | Bounded per-refresh state: 256-entry usage dedup, 32-point metric histories, 1,000-line turn identity window, 512 KB transcript read steps, memory-256 mix cache | table-verified caps identical to legacy | table tests | P1 | legacy equivalence |
+| NFR-004 | Portability | Three-OS support (D5): macOS, Linux, Windows; OS-specific code confined to `internal/platform` | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix leg per OS | P0 | D5 |
+| NFR-005 | Resource bounds | Bounded per-refresh state, legacy caps only: 256-id usage dedup (legacy `ids[-256:]`, SL:1153), 32-point metric histories (legacy `hist[-32:]`, SL:350), 512 KB transcript read step (legacy `_READ_CAP = 524288`, SL:952). No other cap exists in legacy; none may be invented (P13) | table-verified caps identical to legacy | table tests | P1 | legacy equivalence |
 | NFR-006 | Security/hygiene | Public-repo hygiene: synthetic committed fixtures only; real inputs only from git-ignored captures/; secret scan clean | gitleaks + category pattern scan clean on every push and CI leg | CI leg + `TestCorpusHygiene` | P0 | policy 21 |
 
 ## NFR Categories

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -13,10 +13,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "6b1dee1"
+input-hash: "b7b49d9"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:save_cache (SL:198-206)"
 subsystem: "SS-01"
 capability: "CAP-009"
 legacy_id: "BC-SL-078"
@@ -102,15 +102,15 @@ from the cache-file comparison only.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-018, VP-012 (frontmatter closure) | After any failed save, no file matching `<base>.*` created by that save remains (Go) | manual (table test with a temp cache dir) |
-| VP-018, VP-012 (frontmatter closure) | stdout over an N-refresh sequence with a `/` sid equals legacy | manual (parity harness case) |
+| VP-018 (temp-cleanup leg) | After any failed save, no file matching `<base>.*` created by that save remains (Go) | manual (table test with a temp cache dir) |
+| VP-010 (Tier B golden) | stdout over an N-refresh sequence with a `/` sid equals legacy | manual (parity harness case) |
 
 ## Traceability
 
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007, DI-012 (OD-110 temp-file cleanup deviation) |
 | Architecture Module | `internal/statusline` cache.go `CacheStore.Save` (BC-COMPONENT-MAP: internal/statusline/cache.go (failed replace, temp handling) — ARCH-04) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:save_cache (SL:198-206), load_cache (SL:190-195); session-cache path in main (SL:1215) |
@@ -128,7 +128,7 @@ from the cache-file comparison only.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-04-data-files.md#cache-store` — internal/statusline/cache.go (failed replace, temp handling) (BC-COMPONENT-MAP: ARCH-04 (ARCH-04-data-files.md))
+- `architecture/ARCH-04-data-files.md#decision-atomic-write-with-temp-file-cleanup-and-windows-sharing-violation-retry` — internal/statusline/cache.go (failed replace, temp handling) (BC-COMPONENT-MAP: ARCH-04 (ARCH-04-data-files.md))
 
 ## Story Anchor (Recommended)
 
@@ -141,6 +141,20 @@ S-N.MM — cache store (filled by story-writer)
 > create-architecture, subject to adversarial review. No behavior change.
 
 - VP-018, VP-012 — temp cleanup
+
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (save_cache (SL:198-206)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **documentation**: atomic-replace comment "readers never see a torn file" (SL:205)
+- **inferred**: failed-replace persists nothing, re-executed on CPython 3.11.7 (2026-11-15)
 
 #### Purity Classification
 

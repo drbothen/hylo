@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -16,10 +16,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "79177eb"
+input-hash: "62ad7b0"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:load_cache/save_cache (SL:190-206)"
 subsystem: "SS-01"
 capability: "CAP-009"
 legacy_id: "BC-SL-052"
@@ -27,7 +27,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -113,8 +113,9 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-018, VP-001, VP-022 (primary), VP-019 (frontmatter closure) | Load returns `{}` for every input the CPython oracle rejects, and the oracle's value otherwise | fuzz (differential) |
-| VP-018, VP-001, VP-022 (primary), VP-019 (frontmatter closure) | Save never panics or returns an error to the caller under injected FS faults | proptest (fault-injecting store) |
+| VP-018, VP-001, VP-022 (primary) | Load returns `{}` for every input the CPython oracle rejects, and the oracle's value otherwise | fuzz (differential) |
+| VP-018, VP-001, VP-022 (primary) | Save never panics or returns an error to the caller under injected FS faults | Go property test (testing/quick) (fault-injecting store) |
+| VP-019 (positive leg) | Loads of the four oracle-written legacy-compatible caches yield the identical ordered `pyfmt.Value` (the "oracle's value" half of row 1) | golden byte comparison (four-cache swap) |
 
 ## Traceability
 
@@ -138,7 +139,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-04-data-files.md#cache-store` — internal/statusline/cache.go (never-raise, raw sid) (BC-COMPONENT-MAP: ARCH-04 (ARCH-04-data-files.md))
+- `architecture/ARCH-04-data-files.md#decision-go-is-byte-exact-cache-writer-and-reader-across-pythongo-swaps-ad-08` — internal/statusline/cache.go (never-raise, raw sid) (BC-COMPONENT-MAP: ARCH-04 (ARCH-04-data-files.md))
 
 ## Story Anchor (Recommended)
 
@@ -146,7 +147,21 @@ S-N.MM — cache store (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-018, VP-001, VP-022, VP-019 — never-raise load/save
+- VP-018, VP-001, VP-022 — never-raise load/save; VP-019 — oracle-writes/Go-reads leg of the differential
+
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (load_cache (SL:190-195), save_cache (SL:198-206)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **guard clause**: bare `except Exception` gives `{}` on load and `pass` on save (SL:190-206)
+- **inferred**: fault-injection semantics (unreadable, unwritable) re-executed on CPython 3.11.7 (2026-11-15)
 
 #### Purity Classification
 

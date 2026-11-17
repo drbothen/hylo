@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "aac2048"
@@ -46,15 +46,15 @@ Notation: `\e` is the byte 0x1B.
 3. `total = cw.context_window_size` if truthy else `0`.
 4. Config resolved: `statusline.context.cells` (10), `statusline.context.plain_max`
    (50, operator `>`), `statusline.context.red_from` (85, operator `>=`),
-   `statusline.units.context` (`1e6` → M, else K), `statusline.theme.heat`.
+   `statusline.units.context.M_from` (1e6, operator `>=`; else SI K), `statusline.theme.heat`.
 
 ## Postconditions
 
 1. If `pct` is not a number → no segment.
 2. `pct = Min(Max(pct, 0.0), 100.0)` (NaN-order-preserving `pyfmt.Max/Min`, IM-09).
-3. `filled = min(Int(pct/10 + 0.5), 10)` — explicit half-up, never `math.Round`
-   (IM-06).
-4. Bar = for `i` in 0..9: `truecolor(heat((i+0.5)*10)) + "▰"` if `i < filled`, else
+3. With `n = cells` and `d = 100.0/n` (exactly 10.0 at the default): `filled =
+   min(Int(pct/d + 0.5), n)` — explicit half-up, never `math.Round` (IM-06).
+4. Bar = for `i` in `0..n-1`: `truecolor(heat((i+0.5)*d)) + "▰"` if `i < filled`, else
    `\e[90m▱`; then `\e[0m`. With the default heat theme the 10 cell colours are, in order,
    `\e[38;2;159;204;30m`, `\e[38;2;182;204;30m`, `\e[38;2;204;202;30m`,
    `\e[38;2;204;179;30m`, `\e[38;2;204;156;30m`, `\e[38;2;204;133;30m`,
@@ -62,8 +62,10 @@ Notation: `\e` is the byte 0x1B.
    `\e[38;2;204;42;30m` (heat itself: BC-1.02.019).
 5. Number colour `col`: `\e[1;91m` if `pct >= 85`; else `truecolor(heat(pct))` if
    `pct > 50`; else `""`.
-6. Denominator: `\e[2m/` + F(total/1e6, 1) + `M\e[0m` if `total >= 1e6`; else
-   `\e[2m/` + F(total/1000, 0) + `K\e[0m` if `total > 0`; else `""` (F = Python `'f'`
+6. Denominator: `\e[2m/` + F(total/M_from, 1) + `M\e[0m` if `total >= M_from`; else
+   `\e[2m/` + F(total/1000, 0) + `K\e[0m` if `total > 0`; else `""`, where `M_from` is
+   `statusline.units.context.M_from` (default 1e6; the K divisor is the SI 1000, a named
+   constant) (F = Python `'f'`
    formatting, half-even on the binary value, BC-5.01.001).
 7. Segment = bar + `" "` + col + F(pct, 0) + `"%"` + `\e[0m` + denominator. The reset after
    the number is present even when `col` is empty.
@@ -73,6 +75,10 @@ Notation: `\e` is the byte 0x1B.
 
 1. Exactly 10 cells (with the default `cells`); filled count is in 0..10.
 2. The cell colours depend only on cell index, never on `pct`.
+3. Parameterized keys (Policy 20): non-default `cells` / `M_from` follow the same formulas
+   above, generalized from legacy's literals (`n = 10`, `d = 10.0`, `M_from = 1e6`); byte
+   parity (vectors, VP sweeps) is obligated at the defaults only — other values are
+   unit-tested against the formula, not against Tier A goldens.
 3. Rationale (D15, design T-027..T-029): 10 cells half-up (review #5.2: half-even gave
    45 % → 4 cells but 55 % → 6); 50 / 85 thresholds (85 % leaves ~117K tokens before the
    ~967K auto-compact of a 1M window, review #5.1; documented); M/K are SI units

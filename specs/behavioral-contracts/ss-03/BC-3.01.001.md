@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
 input-hash: "af02e6d"
@@ -97,7 +97,7 @@ Synthetic environments only (no real home paths).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-032 | For every env map, the result ends in the component `hylo` and contains no `dgx-llm` component | proptest |
+| VP-032 | For every env map, the result ends in the component `hylo` and contains no `dgx-llm` component | Go property test (testing/quick) |
 | VP-032 | The functions perform no filesystem writes | manual (code review) + unit test on a read-only temp root |
 
 ## Traceability

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1009-1015)"
@@ -91,7 +91,7 @@ Re-pinned 2026-11-15 against `legacy/dgx_statusline.py` under CPython 3.11, stdo
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029 | For every falsy JSON value of `transcript_path`, the parser performs zero cache-store calls (fake `CacheStore` records no Load/Save) | proptest (table over all JSON falsy values) |
+| VP-029 | For every falsy JSON value of `transcript_path`, the parser performs zero cache-store calls (fake `CacheStore` records no Load/Save) | Go property test (testing/quick) (table over all JSON falsy values) |
 | VP-029 | For a non-regular-file path the parser performs zero cache-store calls and returns no-transcript state | table test with fake `FileSystem` |
 
 ## Traceability
@@ -115,7 +115,7 @@ Re-pinned 2026-11-15 against `legacy/dgx_statusline.py` under CPython 3.11, stdo
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#transcript-parser` — internal/statusline/transcript.go (no path -> no state) (`internal/statusline/transcript.go` per design §2.2) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/transcript.go (no path -> no state) (`internal/statusline/transcript.go` per design §2.2) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

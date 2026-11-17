@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -13,7 +13,7 @@ inputs:
   - domain-spec/ubiquitous-language.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "21f6128"
+input-hash: "5ade8f5"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445)"
@@ -24,7 +24,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-016 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,8 +67,14 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
    an additional entry. If the entry count is not exactly 1, `Load` returns the error
    `backends=<count> (exactly one backend entry until P6)`, rendered per BC-2.02.001, where
    `<count>` is the number of distinct indices present plus index 0 (always present through
-   its defaults). Example: `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11:8428` →
-   `hylo: config error: backends=2 (exactly one backend entry until P6)`.
+   its defaults); the `[from <ENVNAME>]` detail (BC-2.02.001) names the variable with the
+   lowest extra index present, tie-broken by registry field order — for a single extra
+   entry that is that entry's own variable (e.g. `HYLO_BACKENDS_1_METRICS_URL`) (spec
+   choice pinning BC-2.03.001 EC-005, ADV-P1-D12). Example:
+   `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11:8428` →
+   `hylo: config error: backends=2 (exactly one backend entry until P6)`. A variable
+   `HYLO_BACKENDS_<i>_<FIELD>` whose `<FIELD>` is not a P1 key warns as an unknown setting
+   for every index, `0` included (same discipline as PC-5).
 5. `HYLO_BACKENDS_0_<FIELD>` for a field that is not a P1 key (e.g. `..._URL`,
    `..._NAME`) is an unknown setting: ignored with a stderr warning (BC-2.01.001 PC-6). The
    other OD-123 entry fields (name, url, protocol flavor, credential, CA, routing rules)
@@ -110,8 +116,9 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-017 | Successful `Load` ⇒ exactly one backend entry | proptest over env maps |
-| VP-017 | `metrics_url` stored value never ends with `/` | proptest |
+| VP-017 | Successful `Load` ⇒ exactly one backend entry | Go property test (testing/quick) over env maps |
+| VP-017 | `metrics_url` stored value never ends with `/` | Go property test (testing/quick) |
+| VP-016 | The backends-cardinality reason rides the closed six-class register (no seventh class): exact one-line E-CFG-001 stdout, exit 0, no cache writes (vector 3) | table test (class register) |
 
 ## Traceability
 
@@ -142,7 +149,7 @@ S-TBD — config subset (design §4 step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-017 — exactly one backend entry
+- VP-017 — exactly one backend entry; VP-016 — cardinality-reason error surface
 
 #### Purity Classification
 
@@ -151,7 +158,7 @@ S-TBD — config subset (design §4 step S2)
 | **I/O operations** | reads the environment once at startup (`Load`) |
 | **Global state access** | none (resolved config immutable) |
 | **Deterministic** | yes (given the environment) |
-| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Thread safety** | safe for concurrent use (immutable after `Load`) |
 | **Overall classification** | boundary |
 
 Owning component `internal/config` (BC-COMPONENT-MAP: cfg/statusline_keys.go (backends[0] validator) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

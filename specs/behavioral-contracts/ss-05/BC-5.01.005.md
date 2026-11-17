@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
@@ -55,7 +55,9 @@ Helper-level contract per OD-141.
    form applies (`Repr(1e16)` = `1e+16`).
 3. Non-finite spellings: `Repr(NaN)` = `nan`; `Repr(+Inf)` = `inf`; `Repr(-Inf)` = `-inf`
    (never Go's `NaN`/`+Inf`).
-4. `-0.0` → `-0` (Python repr; Go `strconv` 'g' gives `-0` too, but strconv is not used here).
+4. `-0.0` → `-0.0` (CPython 3.11 `repr(-0.0)` is `-0.0`, verified with `python3 -I`);
+   the negative-zero case is a distinct spelling from Go's `strconv` 'g' output `-0`, so the
+   post-processing must append the `.0` suffix for `-0.0` specifically.
 5. Implementation: `strconv.FormatFloat(x, 'g', -1, 64)` post-processed for the Python
    spellings — exponent always signed and at least two digits, integral values forced to
    the `.0` form, and postcondition 3's non-finite spellings.
@@ -74,10 +76,10 @@ Helper-level contract per OD-141.
 | EC-002 | `Repr(1e15)` | `1000000000000000.0` |
 | EC-003 | `Repr(1e-5)` | `1e-05` |
 | EC-004 | `Repr(1.5e-7)` | `1.5e-07` |
-| EC-005 | `Repr(5e-324)` | `5e-324` (three-digit exponent, four-digit mantissa) |
+| EC-005 | `Repr(5e-324)` | `5e-324` (three-digit exponent, one-digit mantissa) |
 | EC-006 | `Repr(NaN)` | `nan` |
 | EC-007 | `Repr(+Inf)` / `Repr(-Inf)` | `inf` / `-inf` |
-| EC-008 | `Repr(-0.0)` | `-0` |
+| EC-008 | `Repr(-0.0)` | `-0.0` |
 
 ## Canonical Test Vectors
 
@@ -96,7 +98,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline; generator in
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-023 | `Repr` equals CPython `repr` for every float64 bit pattern in the generated table (incl. extremes and subnormals) | CPython oracle table |
-| VP-023 | Round-trip `float(Repr(x)) == x` for every finite pattern | proptest |
+| VP-023 | Round-trip `float(Repr(x)) == x` for every finite pattern | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -135,7 +137,7 @@ S-TBD — pyfmt num helpers
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/num.go (Repr)` (BC-COMPONENT-MAP: py/num.go (Repr) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

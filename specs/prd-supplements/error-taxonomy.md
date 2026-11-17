@@ -1,10 +1,10 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T20:30:00Z
+timestamp: 2026-11-17T23:45:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
@@ -73,10 +73,19 @@ E-CFG-001.
 | `not a boolean (true\|false\|1\|0\|yes\|no)` | boolean | BC-2.01.005 |
 | `unknown value (<v1>\|<v2>\|...)` | enum | BC-2.02.004 |
 | `scheme must be http or https` / `not a URL` / `missing host` | URL | BC-2.02.005 |
-| `control character` | URL/text | BC-2.02.005, BC-2.01.003 |
+| `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) | BC-2.02.005, BC-2.01.003 |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
-| `empty path` / `home directory unknown` | path | BC-2.01.005 |
-| `exactly one backend entry until P6` | backends | BC-2.01.002 |
+| `empty path` / `home directory unknown` | path (BC-2.01.005 grammar; no dedicated class contract) | BC-2.01.005 |
+| `exactly one backend entry until P6` | backends (BC-2.01.002 cardinality rule; no dedicated class contract) | BC-2.01.002 |
+
+Reconciliation with the closed register: the six closed classes (OD-114 four + OD-134 +
+OD-140) are the classes with dedicated class contracts and D4-EX-3 table tests. The
+vocabulary above also contains reasons raised under the same E-CFG-001 surface by other
+contracts: the path-grammar reasons (`empty path`, `home directory unknown`) come from
+BC-2.01.005 and the backends-cardinality reason from BC-2.01.002 — each maps to its raising
+contract, not to a seventh class; `control character` maps to the URL class when raised by
+BC-2.02.005 and to the theme class when raised by BC-2.01.003. The class register stays
+closed at six.
 
 ## Severity Definitions
 

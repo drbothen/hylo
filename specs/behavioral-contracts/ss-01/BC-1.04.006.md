@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "334d138"
+input-hash: "12ee8f9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:732-741)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-045"
@@ -40,7 +40,8 @@ Notation: `\e` is byte 0x1B.
 1. `m` is a dict sample; the segment is considered only if
    `m.get("vllm:num_requests_running")` is not None.
 2. Yellow rule = `statusline.queue.yellow` (T-047, derived from review #14:
-   "q > 0 or preempt > 0").
+   "q > 0 or preempt > 0") — a boolean toggle, default `true`; when `true` the fixed
+   rule `q > 0 or preempt > 0` decides yellow, when `false` the segment never yellows.
 
 ## Postconditions
 
@@ -80,7 +81,7 @@ Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Color = yellow iff `q > 0 or preempt > 0` under Python comparison semantics (NaN false) | proptest |
+| VP-030 | Color = yellow iff `q > 0 or preempt > 0` under Python comparison semantics (NaN false) | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -101,7 +102,7 @@ Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (queue) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/row2.go (queue) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -134,7 +135,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none |
 | **Global state access** | reads config |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync |
+| **Thread safety** | Safe for concurrent use |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

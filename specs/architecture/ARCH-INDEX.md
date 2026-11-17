@@ -1,13 +1,13 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.2"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-17T07:45:00Z
+timestamp: 2026-11-18T00:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c243f11"
+input-hash: "9e5a4c0"
 traces_to: ../prd.md
 deployment_topology: single-service
 ---
@@ -86,8 +86,11 @@ deployment_topology: single-service
 ## Owner tensions (all resolved by owner rulings)
 
 1. **Inert key `statusline.window_age.ps_timeout_s`** — resolved by OD-147 (owner,
-   2026-11-16): the key is removed from the registry; setting it is an ordinary
-   unknown-key config error.
+   2026-11-16): the key is removed from the registry. `HYLO_STATUSLINE_WINDOW_AGE_PS_TIMEOUT_S`
+   is thereafter an unknown `HYLO_*` setting: one stderr warning (`hylo: warning: unknown
+   setting <NAME> (ignored)`), then it is ignored — it never changes the output or the
+   exit status. There is no unknown-key config-error class to build a story against
+   (BC-2.01.001 PC-6, BC-2.01.002 PC-5, VP-015; ADV-P1-A03).
 2. **Fixture co-location** (AD-13) — resolved by OD-148 (owner, 2026-11-16): fixtures
    stay with the subject package under `internal/statusline/testdata/parity/...`; the
    runner `internal/parity` stays generic; AD-13 confirmed.
@@ -107,16 +110,17 @@ verification-feasibility assessments that Pass 2 formalized.
 
 ## Verification Properties (Pass 2 cross-reference)
 
-Catalog: `../verification-properties/VP-INDEX.md` — 37 VPs covering all 145 BCs
-(machine-checked). By class: invariant 29, safety 6, liveness 1, performance 1. By
-primary method: unit/table 20, golden/parity 5, property/fuzz 9, static analysis 1,
-measured 1, CI observation 1 (regenerated 2026-11-17 per CA-02, matching the VP-INDEX
-Totals). Zero formal proofs claimed (iron law: Go cycle — the
+Catalog: `../verification-properties/VP-INDEX.md` — 38 VPs covering all 145 BCs
+(machine-checked). By class: invariant 30, safety 6, liveness 1, performance 1. By
+primary method: unit/table 19, property/fuzz 11, golden 3, parity 2, static analysis 1,
+measured 1, CI observation 1 (regenerated 2026-11-17 per CA-02 and SC-05, matching the
+VP-INDEX Totals). Zero formal proofs claimed (iron law: Go cycle — the
 provable-grade pure cores are verified by exhaustive oracle tables + property/fuzz,
-declared per VP). Aggregate VP mapping by home: ARCH-00 P4 → VP-001; ARCH-01 →
-VP-002/004; ARCH-02 → VP-015/016/017; ARCH-03 (+ARCH-04 stores) →
-VP-003/005/007/008/018/020/021/027/028/029/030/031; ARCH-05 → VP-014/032/033;
-ARCH-06 → VP-006/023/024/025/026; ARCH-04/09 → VP-022; ARCH-07/08 →
-VP-009/010/011/012/013/019/034/035/037; ARCH-08 (timing gate) → VP-036. VP-001 and
-VP-036 homes aligned to the VP-INDEX catalog rows and the VP files themselves
-(2026-11-17, CA-08).
+declared per VP). Aggregate VP mapping by primary home (first ARCH home in each
+VP-INDEX catalog row; every VP listed exactly once): ARCH-00 P4 → VP-001; ARCH-01 →
+VP-002/004; ARCH-02 → VP-015/016/017; ARCH-03 →
+VP-003/005/007/008/021/022/027/028/029/030/031/038; ARCH-04 → VP-018/019/020;
+ARCH-05 → VP-014/032/033; ARCH-06 → VP-006/023/024/025/026; ARCH-07 →
+VP-009/010/011/012/013/034/035; ARCH-08 → VP-036/037. Eight VPs carry a second ARCH
+home in VP-INDEX (VP-001, VP-005, VP-014, VP-019, VP-020, VP-022, VP-035, VP-038); all
+homes follow the catalog rows (CA-08 alignment generalized 2026-11-17, SC-05).

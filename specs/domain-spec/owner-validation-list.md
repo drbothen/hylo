@@ -2,10 +2,10 @@
 document_type: spec-open-questions
 level: L2
 section: "owner-validation-list"
-version: "1.0"
+version: "1.1"
 status: resolved
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:35:43Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/specs/owner-decisions-log-2026-11-14.md]
 input-hash: "8090c61"
@@ -226,10 +226,9 @@ rule stands.
 | Class | Count | HIGH items |
 |---|---|---|
 | Terms | 3 | — |
-| Entities & relationships | 3 | VALID-06 |
+| Entities & relationships | 4 | VALID-05, VALID-06 |
 | Invariants | 3 | VALID-08 |
 | State machines | 3 | — |
-| Context boundaries | 1 | VALID-05 |
 | **Total** | **13** | **3** |
 
 **HIGH items (verbatim proposals):**

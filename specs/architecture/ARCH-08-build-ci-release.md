@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "55a24b8"
+input-hash: "ea79506"
 ---
 
 # ARCH-08 — Build, CI, release
@@ -51,6 +51,25 @@ flowchart LR
 - **Public-repo hygiene (policy 21, NFR-006):** committed fixtures synthetic-only;
   real inputs replayed from git-ignored `captures/`; gitleaks with
   `--log-opts="--all"` plus the category pattern scan; `TestCorpusHygiene` in-tree.
+- **Positive coverage (ADV-P1-A09, process gap — implementation lands on main later with
+  owner approval):** every regression-detector job must print a runtime-computed
+  positive-coverage line and must treat "checked nothing" as failure, never as a pass:
+  - Tier A: `parity: N cases compared, M exclusions validated, K caches swapped` — job
+    fails if `N == 0`.
+  - Tier B: `tier-b: N goldens compared` — fails if `N == 0`.
+  - Tier C: `tier-c: N inputs per side, M oracle spawns`; the PR-side budget skip
+    (`t.Skip` on unset/0 `HYLO_PARITY_FUZZSECONDS`) is allowed only because the job is
+    non-gating — on the nightly schedule a 0/unset budget FAILS, it does not skip.
+  - Exclusion machinery / canary: `exclusions: M entries validated against the closed
+    set` — `M` must equal the file's entry count; a missing exclusions file fails.
+  - Go jobs (lint/test/vet/govulncheck): `go: K files scanned`; the skeleton-era
+    empty-module guard prints `go: 0 Go files — guard path, NOT a vet/test pass` and is
+    removed once Phase 3 lands sources (after which `K == 0` fails).
+  - Pattern scan: `hygiene: K files scanned, H hits`.
+  A skipped required check must never stand in for a pass: probe-gated placeholder jobs
+  are added to branch protection's required set only when they can execute (Phase 3),
+  and from then on every activation of the job must satisfy its coverage line —
+  `skip` on a required detector is investigated, not accepted.
 
 ### Decision: gate on three OSes per change; release via GitHub Releases (AD-11)
 

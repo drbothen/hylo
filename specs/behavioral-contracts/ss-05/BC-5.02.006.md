@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
@@ -95,7 +95,7 @@ corpus cases).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-024 | Dumps output equals CPython `json.dumps` bytes for every corpus cache shape | CPython oracle table |
-| VP-024 | Dumps and DumpsLen agree byte-for-byte on shared shapes | proptest |
+| VP-024 | Dumps and DumpsLen agree byte-for-byte on shared shapes | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -133,7 +133,7 @@ S-TBD — pyfmt json helpers
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/json.go (Dumps)` (BC-COMPONENT-MAP: py/json.go (Dumps) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

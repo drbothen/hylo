@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "5c176a5"
+input-hash: "4bc28df"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:773-781)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-085"
@@ -85,7 +85,7 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Segment presence and dimming equal legacy for every JSON value shape of `mix[7]` | proptest (generated Values) |
+| VP-030 | Segment presence and dimming equal legacy for every JSON value shape of `mix[7]` | Go property test (testing/quick) (generated Values) |
 
 ## Traceability
 
@@ -107,7 +107,7 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (mine) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/row2.go (mine) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -140,7 +140,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none |
 | **Global state access** | reads config |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync |
+| **Thread safety** | Safe for concurrent use |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
 input-hash: "194b59d"
@@ -12,13 +12,13 @@ traces_to: prd.md
 source_bc: BC-6.03.004
 bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006]
 module: internal/parity
-proof_method: proptest
+proof_method: property-test (testing/quick)
 feasibility: feasible
 verification_lock: false
 
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -39,8 +39,9 @@ The parity exclusion list admits only entries whose id is in the closed set
 specific case and its own table test plus an expected-output file; the Go output of an
 excluded case must match its own expected file; no glob or wildcard entry exists; and
 the harness FAILs with a named reason on any violation (missing table test, mismatched
-expected file, glob entry, or foreign id). Corpus case-ids are unique. A seventh
-exclusion class requires an owner decision — the machinery cannot admit one silently.
+expected file, glob entry, empty or duplicate case-id, or foreign id). Corpus case-ids
+are non-empty and unique. Any id outside the seven-element closed set requires an
+owner decision — the machinery cannot admit one silently.
 
 ## Source Contract
 
@@ -61,7 +62,10 @@ exclusion class requires an owner decision — the machinery cannot admit one si
   correspondence: id membership, uniqueness, expected-file existence and match,
   one-test-per-entry, no globs.
 - **Honesty:** the strongest close-to-proof property in the harness, but still
-  empirical (parsed-structure assertions), not a theorem-prover artifact.
+  empirical (parsed-structure assertions), not a theorem-prover artifact. The
+  random-sample oracle is the finite parsed structure itself: membership in the
+  closed seven-id set, case-id non-emptiness and uniqueness, and one-table-test
+  correspondence per entry — no live oracle call exists or is needed.
 
 ## Proof Method
 
@@ -78,8 +82,9 @@ func TestParityExclusions_ClosedSet(t *testing.T) {
     seen := map[string]bool{}
     for _, e := range LoadExclusions("internal/statusline/testdata/parity/exclusions.json") {
         if !ids[e.ID] { t.Fatalf("foreign exclusion id %q", e.ID) }
-        if seen[e.ID] && e.Case == "" { t.Fatalf("duplicate non-specific id %q", e.ID) }
-        seen[e.ID] = true
+        if e.Case == "" { t.Fatalf("entry %s: empty case-id", e.ID) }
+        if seen[e.Case] { t.Fatalf("duplicate case-id %q", e.Case) }
+        seen[e.Case] = true
         if strings.ContainsAny(e.Case, "*?[") { t.Fatal("glob entry — blanket exclusions banned") }
         if !TableTestExists(e.TableTest) { t.Fatalf("entry %s: missing table test", e.ID) }
         if !GoOutputMatchesExpected(e) { t.Fatalf("entry %s: Go output ≠ own expected file", e.ID) }

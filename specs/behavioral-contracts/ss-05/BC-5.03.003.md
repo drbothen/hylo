@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "7f728f2"
@@ -82,7 +82,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`re.sub`, slicing, `str.encode("utf-
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-025 | `Len(SubNonWord(s)) == Len(s)` and the output is ASCII | proptest |
+| VP-025 | `Len(SubNonWord(s)) == Len(s)` and the output is ASCII | Go property test (testing/quick) |
 | VP-025 | `EncodeUTF8Replace` equals the oracle on fuzzed strings with surrogates | fuzz + oracle |
 
 ## Traceability
@@ -120,7 +120,7 @@ TBD — pyfmt str (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/str.go (SubNonWord, EncodeUTF8Replace)` (BC-COMPONENT-MAP: py/str.go (SubNonWord, EncodeUTF8Replace) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "334d138"
+input-hash: "12ee8f9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:get_sample (SL:329-350)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-042"
@@ -94,7 +94,7 @@ at the last 32 points.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030, VP-031 | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | proptest |
+| VP-030, VP-031 | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | Go property test (testing/quick) |
 | VP-030, VP-031 | Point key order equals legacy for every subset of the four series | manual (table over 16 subsets) |
 
 ## Traceability
@@ -118,7 +118,7 @@ at the last 32 points.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#session-cache` — internal/statusline/sample.go (history points) (history storage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/statusline/sample.go (history points) (history storage) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -152,7 +152,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none |
 | **Global state access** | reads config |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (pure) |
+| **Thread safety** | Safe for concurrent use (pure) |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

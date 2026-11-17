@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -33,23 +33,26 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-6.04.003: Tier C differential fuzz: nightly Linux, non-gating, random valid inputs to both sides
+# Behavioral Contract BC-6.04.003: Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs
 
 ## Description
 
-Tier C runs once a night on Linux. A seeded generator produces random but valid inputs:
+Tier C runs once a night on all three OSes (macOS, Linux, Windows — OD-149). A seeded
+generator produces random but valid inputs:
 stdin, transcripts, metrics replies and cache seeds. Each generated case runs through
 both the oracle and Go, and the outputs are compared with the Tier A comparator
 (BC-6.03.002). Tier C exists to find hidden Python exception paths and other
 divergences the hand-built corpus missed (research P27; risk RK-2). It never blocks a
-change. It is part of the P1 exit gate: it must run clean for an owner-picked number of
-consecutive nights.
+change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes, with a
+30-minute budget per OS (OD-149).
 
 ## Preconditions
 
 1. The workflow is a scheduled (`schedule`, once nightly) GitHub Actions workflow,
-   separate from `ci.yml`, on `ubuntu-24.04`. It uses the same oracle setup
-   (setup-python CPython 3.11, absolute path, `CI=true`) and the same canary
+   separate from `ci.yml`, with a three-leg OS matrix matching `ci.yml` (macOS, Linux,
+   Windows — ubuntu-24.04 on the Linux leg). It uses the same oracle setup
+   (setup-python CPython 3.11, absolute path, `CI=true`; the Windows leg runs Tier B
+   without Python, BC-6.04.001) and the same canary
    (BC-6.01.001, BC-6.01.003).
 2. The generator is committed Go code. It reuses the transcript generator
    (design §5.2), so every generated case is synthetic (BC-6.02.001).
@@ -69,24 +72,24 @@ consecutive nights.
    - Each nightly run derives a 64-bit seed (default: from the UTC date) and prints it.
    - Given the same seed and commit, the generator emits the identical case sequence.
    - Running locally with `-tierc.seed=<seed>` reproduces any night.
-2. **Volume.** Each night runs as many cases as fit in a fixed time budget, a harness
-   setting with default 30 minutes. At about 30-60 ms Python start per run, that is
+2. **Volume.** Each night each OS leg runs as many cases as fit in a fixed time budget, a harness
+   setting with default 30 minutes per OS (OD-149). At about 30-60 ms Python start per run, that is
    thousands of cases (research Q3c). The count is reported.
 3. **Comparison.** Every generated case, including multi-step generated sequences, is
    compared per step by the BC-6.03.002 comparator, with temp names filtered
    (BC-6.03.003).
 4. **Divergence artifact.** For each divergent case the run uploads a materialized
    case directory as a workflow artifact, in the BC-6.02.003 case model with seed and
-   index. A maintainer can promote it into `internal/statusline/testdata/cases/` as a
+   index. A maintainer can promote it into `internal/parity/testdata/cases/` as a
    regression case. It is synthetic by construction.
 5. **Non-gating.**
    - A divergence marks the nightly run failed and visible.
    - It never blocks pushes or pull requests: it is not a required status check and
      not part of `ci.yml`.
-6. **Exit criterion input.** The run summary records `clean` (0 divergences) or
-   `divergent: <count>`. P1 is declared done only after Tier C has been `clean` for N
-   consecutive nights. N is picked by the owner; the research proposes 3 (open
-   question O5, not decided here).
+6. **Exit criterion input.** The run summary records, per OS leg, `clean` (0 divergences) or
+   `divergent: <count>`. Per OD-149 the P1 exit gate is satisfied by ONE clean nightly
+   run on all three OSes with the 30-minute per-OS budget; no multi-night streak is
+   required (this discharges the earlier "N consecutive nights" open question).
 
 ## Invariants
 
@@ -119,7 +122,7 @@ consecutive nights.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-011 | The generator is deterministic for a given seed and commit | table test hashing generated cases |
-| VP-011 | The generator never emits inputs in an owner-ruled difference class | proptest over the generator's domain filter |
+| VP-011 | The generator never emits inputs in an owner-ruled difference class | Go property test (testing/quick) over the generator's domain filter |
 
 ## Traceability
 

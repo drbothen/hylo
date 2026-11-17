@@ -2,10 +2,10 @@
 document_type: domain-spec-section
 level: L2
 section: "capabilities"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:35:43Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
 input-hash: "3fb8cb1"
@@ -28,7 +28,7 @@ traces_to: L2-INDEX.md
 | CAP-006 | **Observability ledger** | Every lane decision, reply and usage observation lands as an append-only JSONL event (13 legacy-named events, D7-frozen); diagnostic side-logs never affect outcomes (DI-005, DI-006, DI-009) | P3 | P0 |
 | CAP-007 | **Plan-limit capture** | Cloud rate-limit headers captured on change per session, powering plan-window widgets (DI-001) | P3 | P0 |
 | CAP-008 | **Metrics exposition** | 28 metric names recomputed from the whole ledger + hook log on `/metrics`; exposition bytes are part of parity | P2 | P1 |
-| CAP-009 | **Lane-aware status line** | Pure function of stdin + transcript + metrics + caches; always exits 0, degraded ladder instead of failure (DI-007, DI-008); two rows: session/lane row and backend strip | P1 | P0 |
+| CAP-009 | **Lane-aware status line** | Render reads stdin, transcript, metrics store, its own caches and environment seams (git state, process table, clock, env — AD-03), never the ledger (DI-007); always exits 0 and the output is never blank — faults fall down the degraded ladder (DI-008); two rows: session/lane row and backend strip | P1 | P0 |
 | CAP-010 | **Backend telemetry strip** | Health, queue, KV, throughput, TTFT, power, idle from the metrics store, with a freshness ladder (fresh/stale/dead/serving-down) | P1 | P1 |
 | CAP-011 | **Cost accounting** | Per-lane cost history with personal p75/p95 percentile coloring; owned-hardware cost; the cost-history format is status-line-owned — backfill honors it as a guest (OD-124); backfill rebuilds history from the ledger (P6) | P1; backfill P6 | P1 |
 | CAP-012 | **Session launch and environment scoping** | Builds the client environment, argv and settings; proxy env and CA scoped to the client only — never leaked to children (DI-014) | P4 | P0 |

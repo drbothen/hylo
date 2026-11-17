@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -12,10 +12,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "ecda6d1"
+input-hash: "abef695"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-636)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-082"
@@ -118,7 +118,7 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#num` — internal/statusline/cost.go ($, $/h formats) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/cost.go ($, $/h formats) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -127,6 +127,19 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `F` differential equivalence
+
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (render_lane (SL:601-636; formats at SL:616, 625, 635)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **inferred**: format-specifier bytes re-executed against CPython 3.11.7 (2026-11-15)
 
 #### Purity Classification
 

@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -69,9 +69,15 @@ It is never a blanket exclusion.
 
 1. **Temp-name filter.** Before the named-cache comparison of BC-6.03.002, the
    harness removes from each side's file list every regular file whose name matches
-   `^.+\.json\.[A-Za-z0-9_]+$`. Named caches always end in `.json`, so no named cache
-   matches. Removed names are listed in the step report as `temp (ignored):
-   <name>`.
+   `^.+\.json\.[a-z0-9_]{8}$` — the anatomy of a leaked legacy temp
+   `<target>.json.<8 mkstemp chars>` (Python `tempfile` suffix alphabet
+   `[a-z0-9_]{8}`, CPython 3.11 verified with `python3 -I`). A named cache
+   `statusline-<sid>.json` can never match: legacy's sid sanitizer
+   (`re.sub(r"[^A-Za-z0-9_-]", "_", sid)[:40]`, SL:1015-1016) removes dots from the
+   sid, so a named cache contains exactly one `.` and cannot have the `.json.`
+   double-dot anatomy — not even for a fuzzed or synthetic sid (fail-closed for
+   named caches, ADV-P1-D16). Removed names are listed in the step report as
+   `temp (ignored): <name>`.
 2. **stdout unaffected.** The filter never touches stdout or exit-code comparison.
    For the sid-with-`/` case, stdout and exit code are compared to the oracle exactly
    as for any other case, and must match. Nothing persists on either side, so both

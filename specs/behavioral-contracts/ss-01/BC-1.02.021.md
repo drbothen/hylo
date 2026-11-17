@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "7d75fbc"
@@ -76,7 +76,7 @@ through `pyfmt.Str`.
 | EC-007 | `display_name` = 0, `""`, `false`, `[]`, `-0.0`, `null` | falls through to `id` |
 | EC-008 | `display_name = ["\ud800"]` (lone surrogate in a list) | `['\ud800']` (escaped, no crash) |
 | EC-009 | `display_name` = `"\ud800"` (top-level lone surrogate) | degraded at output (CP-S17, BC-1.01.008) |
-| EC-010 | `display_name` absent, `id = 42` | label `42` |
+| EC-010 | `display_name` absent, `id = 42` | label `42` **only when the model-prefix list resolves empty** (legacy `LOCAL_MODEL_PREFIXES` unset / hylo `statusline.routing.prefixes` empty, OD-123). Under the default prefix `claude-sonnet` (OD-123), `model_id.startswith(p)` at SL:446 raises AttributeError (`'int' object has no attribute 'startswith'`, verified 2026-11-17) and the refresh degrades (BC-1.01.001) |
 
 ## Canonical Test Vectors
 

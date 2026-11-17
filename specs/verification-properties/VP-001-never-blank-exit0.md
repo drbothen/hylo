@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-00-overview.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.001.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, prd-supplements/error-taxonomy.md, owner-decisions-log-2026-11-14.md]
 input-hash: "5a738fb"
 traces_to: prd.md
 source_bc: BC-1.01.001
-bcs: [BC-1.01.001, BC-1.01.002, BC-1.02.020, BC-1.02.026, BC-1.02.027, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.06.001]
+bcs: [BC-1.01.001, BC-1.01.002, BC-1.02.020, BC-1.02.026, BC-1.02.027, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.05.004, BC-1.06.001]
 module: internal/statusline (guard), cmd/hylo
 proof_method: manual
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,7 +46,9 @@ non-zero statusline exit.
 - **Partial coverage:** BC-1.01.002 (invalid stdin renders from {}), BC-1.02.020
   (thermometer NaN crash path), BC-1.02.026 (_fmt_lines OverflowError), BC-1.02.027
   (_hm ValueError), BC-1.04.014 (sparkline NaN/+Inf), BC-1.04.015 (KV NaN), BC-1.04.016
-  (row-2 NaN rendering), BC-1.06.001 (never-raise cache load/save).
+  (row-2 NaN rendering), BC-1.06.001 (never-raise cache load/save), BC-1.05.004
+  (CP-C09/C10 corrupt-cost-history fault injection — out of parity scope, still
+  never-blank/exit-0 per DI-008).
 - **Invariant verified:** DI-008 (rendering never fails; degraded ladder ends in
   one-line output, exit 0). NFR-002 (100% of CP-* triggers, fault-injection table).
 
@@ -54,7 +56,9 @@ non-zero statusline exit.
 
 - **Class:** safety.
 - **Method:** unit/table test — exhaustive fault-injection table over the closed
-  trigger catalogue, one row per CP-* id, asserting `len(stdout) >= 1 && exit == 0`.
+  trigger catalogue, one row per CP-* id plus the CP-C09/C10 corrupt-history shapes
+  (BC-1.05.004 EC-008; in coverage for never-blank/exit-0 even though out of parity
+  scope), asserting `len(stdout) >= 1 && exit == 0`.
 - **Honesty (iron law):** testable-only. This is an empirical property over an
   enumerated trigger list, not a formal proof; completeness rests on the taxonomy being
   closed (error-taxonomy.md) and Tier C fuzz hunting for unenumerated paths (VP-011).
@@ -69,7 +73,7 @@ non-zero statusline exit.
 
 ```go
 func TestDegradedLadder_AllTriggers(t *testing.T) {
-    for _, tc := range FaultInjectionTable { // one row per CP-S01..S17, T01..T07, N01, N02 + panic rows
+    for _, tc := range FaultInjectionTable { // one row per CP-S01..S17, T01..T07, N01, N02, CP-C09/C10 + panic rows
         stdout, _, exit := runStatusline(tc.Env, tc.Stdin, tc.Files)
         if exit != 0 { t.Fatalf("%s: exit = %d, want 0", tc.ID, exit) }
         if len(stdout) == 0 { t.Fatalf("%s: blank stdout", tc.ID) }

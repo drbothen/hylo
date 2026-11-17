@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "e81117b"
@@ -42,8 +42,13 @@ named exclusion entry for "OD-76 + the native process probe on macOS/Linux"); D4
 1. OS is macOS or Linux; stdin `session_id` truthy; the session cache has no numeric `proc_start` (otherwise
    BC-3.02.001 postcondition 1 applies identically on both sides).
 2. An ancestor within 6 levels is the client process.
-3. For parity tests the legacy side runs with a fake `ps` on its constructed `PATH` (harness env, BC-6.01.002) and the
-   Go side with a fake `ProcStarter` describing the same process (same pid chain, same true start instant).
+3. For parity tests the legacy side runs with a fake `ps` on the harness-constructed
+   `PATH` — the constant `<case>/bin`, admitted by BC-6.01.002's conditional `PATH` bullet
+   when the case declares a subprocess-fake table — and the Go side with a fake
+   `ProcStarter` describing the same process (same pid chain, same true start instant).
+   These cases run UNSEEDED (no cached `proc_start`) by design; BC-3.02.001 Invariant 4
+   applies to ordinary render-parity cases, not to this difference table
+   (ADV-P1-D05 resolution).
 
 ## Postconditions
 

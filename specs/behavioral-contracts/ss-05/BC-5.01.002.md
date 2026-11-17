@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
 input-hash: "013d953"
@@ -81,7 +81,6 @@ Unicode-digit numerals there are config errors (D4-EX-3, BC-2.02.003).
 | EC-005 | `ParseInt` of 4,300 `1`s; of `"1_"` + 4,299 `1`s; of `"+"` + 4,300 `1`s | accepted (4,300 digits each) |
 | EC-006 | `ParseInt` of 4,301 `1`s; of `"0"` × 4,301; of `"-"` + 4,301 `1`s | `ErrValue`. Consequence at SL:1188: a 4,301-digit negative `COLUMNS` → 0 → row 2 shown, whereas a shorter negative value hides row 2 (BC-1.01.005/007) |
 
-In vector cells the escapes `\uXXXX` (e.g. `\u200b` = ZERO WIDTH SPACE, `\u00a0` = NBSP) denote that code point, written visibly so the byte content of the vector is unambiguous; no cell contains a literal invisible character.
 | EC-007 | `ParseInt("")`, `"  "` | err |
 | EC-008 | `ParseFloat("4.9e-325")` | `0.0` |
 
@@ -143,7 +142,7 @@ TBD — pyfmt num (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/num.go (ParseInt/ParseFloat)` (BC-COMPONENT-MAP: py/num.go (ParseInt/ParseFloat) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

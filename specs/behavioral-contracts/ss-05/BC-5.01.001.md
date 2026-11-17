@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
 input-hash: "013d953"
@@ -34,13 +34,20 @@ removal_reason: null
 `internal/pyfmt` (`num.go`) reproduces three CPython 3.11 number operations the status line formats with:
 `round(x)` (ties to even, returns int), `round(x, n)` (correctly rounded decimal, returns float) and the
 `f"{x:.Nf}"` format spec. Go's `math.Round` (ties away from zero) and `strconv` spellings `NaN`/`+Inf` differ, so
-every status-line site uses these helpers (design IM-05, IM-06; pitfalls PR-01, PR-02).
+every status-line site uses these helpers (design IM-05, IM-06; pitfalls PR-01, PR-02). Signature note
+(ADV-P1-D06, BC side): `Round` takes `x float64` here; the ARCH-06 row typed `Round(x Num)` is stale and the
+Architect owns reconciling it; this BC governs the behavior stories build to.
 
 ## Preconditions
 
 1. `Round(x float64) (Num, error)`: any float64.
-2. `RoundN(x float64, n int) float64`: `0 <= n <= 17` (legacy uses `n = 4`, SL:234).
-3. `F(x float64, prec int) string`: `0 <= prec <= 20` (legacy uses 0, 1, 2).
+2. `RoundN(x float64, n int) float64`: `0 <= n <= 17` (rationale, derived: 17 significant
+   decimal digits uniquely determine any IEEE-754 binary64, so no shorter-round-trip site can
+   need more; legacy's largest is `n = 4`, SL:234 — the envelope is a judgment-call margin,
+   not a legacy value).
+3. `F(x float64, prec int) string`: `0 <= prec <= 20` (rationale, labeled judgment call: legacy
+   uses 0, 1, 2 and CPython's `f` format imposes no upper bound; 20 bounds pathological widths
+   while covering every conceivable site).
 
 ## Postconditions
 
@@ -96,9 +103,9 @@ All values verified 2026-11-15 against CPython 3.11.7 (`round`, `format`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-023 | `F(x, p)` equals the CPython oracle for every finite x in a 2M-sample random set and all boundary rows | proptest + oracle table |
-| VP-023 | `Round(x)` equals `math.RoundToEven(x)` for finite x with magnitude below 2^53 and is exact beyond | proptest |
-| VP-023 | `RoundN(RoundN(x, n), n) == RoundN(x, n)` | proptest |
+| VP-023 | `F(x, p)` equals the CPython oracle for every finite x in a 2M-sample random set and all boundary rows | Go property test (testing/quick) + oracle table |
+| VP-023 | `Round(x)` equals `math.RoundToEven(x)` for finite x with magnitude below 2^53 and is exact beyond | Go property test (testing/quick) |
+| VP-023 | `RoundN(RoundN(x, n), n) == RoundN(x, n)` | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -136,7 +143,7 @@ TBD — pyfmt num (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/num.go (Round/RoundN/F)` (BC-COMPONENT-MAP: py/num.go (Round/RoundN/F) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

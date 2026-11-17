@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
@@ -38,7 +38,9 @@ removal_reason: null
 sites (SL:671 `max(max(vals), floor)`, feeding the sparkline cell ceiling; pitfall PR-04):
 it keeps the earlier element unless the later one compares greater, which is observable
 exactly when a NaN is present. Helper-level contract per OD-141. The pairwise `Max`/`Min`
-are pinned in BC-5.01.003; this contract covers the sequence form.
+are pinned in BC-5.01.003; this contract covers the sequence form. Signature note (ADV-P1-D06,
+BC side): empty input returns typed `ErrValue` (PC-1); the ARCH-06 signature row without an error
+return is stale and the Architect owns reconciling it; this BC governs the behavior stories build to.
 
 ## Preconditions
 
@@ -50,10 +52,12 @@ are pinned in BC-5.01.003; this contract covers the sequence form.
 1. Empty sequence → typed `ErrValue` (Python `ValueError: max() arg is an empty sequence`),
    mapped to `errDegraded` at the consuming site (design IM-15).
 2. Otherwise the result is `vals[0]`, replaced by `vals[i]` only when `vals[i] > current`
-   (Python's first-maximal-wins order). Consequence for NaN: an earlier NaN can only be
-   displaced by a later element that compares greater — a NaN never compares greater, so a
-   NaN at position 0 wins over any later NaN and over later finites until a finite
-   `b > a` displacement occurs exactly as Python decides it (pinned table).
+   (Python's first-maximal-wins order). Consequence for NaN: a NaN never compares greater
+   (`nan > x` is false for every `x`, including NaN), so a NaN never displaces the current
+   value — it is kept only when it is `vals[0]` or when every later element also fails to
+   displace. A trailing or middle NaN therefore leaves an earlier finite winner in place
+   (`max([1, nan, 2]) == 2`, `max([1, 2, nan]) == 2`, CPython 3.11 verified with
+   `python3 -I`), exactly as Python decides it (pinned table).
 3. Same comparison semantics as `pyfmt.Max` applied left-fold, but always in Python's
    argument order (never the builtin `max`/`math.Max`, design IM-09).
 
@@ -69,10 +73,10 @@ are pinned in BC-5.01.003; this contract covers the sequence form.
 |----|-------------|-------------------|
 | EC-001 | `MaxSeq()` empty | `ErrValue` → `errDegraded` at the site |
 | EC-002 | `MaxSeq(nan, 1, 2)` | `nan` (position 0; `1 > nan` false forever) |
-| EC-003 | `MaxSeq(1, nan, 2)` | `nan` (displaced 1; `2 > nan` false) |
-| EC-004 | `MaxSeq(1, 2, nan)` | `nan` (NaN last compares-not-greater, stays; result is NaN) |
+| EC-003 | `MaxSeq(1, nan, 2)` | `2` (NaN does not displace 1 — `nan > 1` is false; the later finite `2 > 1` does) |
+| EC-004 | `MaxSeq(1, 2, nan)` | `2` (trailing NaN compares-not-greater — `nan > 2` is false — so the current value stays) |
 | EC-005 | `MaxSeq(2, 1, 3)` | `3` |
-| EC-006 | `MaxSeq(true, 1)` | `1` (bool counts as int; tie keeps the first) |
+| EC-006 | `MaxSeq(true, 1)` | `true` (bool counts as int; `1 > true` is a tie, and a tie keeps the first) |
 | EC-007 | `MaxSeq(nan, nan)` | first `nan` (identity of the winner is positional) |
 
 ## Canonical Test Vectors
@@ -81,7 +85,8 @@ are pinned in BC-5.01.003; this contract covers the sequence form.
 |-------|----------------|----------|
 | `MaxSeq(1, 2, 3)` | `3` | happy-path |
 | `MaxSeq(nan, 1, 2)` | `nan` | edge-case |
-| `MaxSeq(1, nan, 2)` | `nan` | edge-case |
+| `MaxSeq(1, nan, 2)` | `2` | edge-case |
+| `MaxSeq(1, 2, nan)` | `2` | edge-case |
 | `MaxSeq()` | typed `ErrValue` | error |
 
 Expectations generated from CPython 3.11 `max()` semantics (OD-104 oracle discipline;
@@ -92,7 +97,7 @@ pitfall PR-04 test grid).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-023 | MaxSeq equals CPython `max(list)` for the PR-04 grid (NaN in every position, int/float/bool mixes) | CPython oracle table |
-| VP-023 | MaxSeq fold equals chained Max for every permutation | proptest |
+| VP-023 | MaxSeq fold equals chained Max for every permutation | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -130,7 +135,7 @@ S-TBD — pyfmt num helpers
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/num.go (MaxSeq)` (BC-COMPONENT-MAP: py/num.go (MaxSeq) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

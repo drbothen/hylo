@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.02.001.md, behavioral-contracts/ss-05/BC-5.02.002.md, behavioral-contracts/ss-05/BC-5.02.004.md, behavioral-contracts/ss-05/BC-5.02.005.md, behavioral-contracts/ss-05/BC-5.02.006.md, owner-decisions-log-2026-11-14.md]
 input-hash: "588ae19"
@@ -12,14 +12,14 @@ traces_to: prd.md
 source_bc: BC-5.02.001
 bcs: [BC-5.02.001, BC-5.02.002, BC-5.02.003, BC-5.02.004, BC-5.02.005, BC-5.02.006]
 module: internal/pyfmt (json.go)
-proof_method: proptest
+proof_method: fuzz
 feasibility: feasible
 verification_lock: false
 proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,9 +57,13 @@ strings surviving lone surrogates); `Str` reproduces Python str() of values
 
 - **Class:** invariant.
 - **Method:** property-based + oracle tables — 63-case script-regenerated table;
-  round-trip property `Decode(Dumps(v)) == v` over generated ordered Values; fuzz
+  round-trip property `spelling(Decode(Dumps(v))) == spelling(v)` over generated
+  ordered Values, compared as byte spellings (NaN-aware: NaN never equals itself, so
+  equality is on `Dumps` output bytes, not on `Value` identity); fuzz
   targets `DumpsLen`/`Decode` (length == bytes invariant is fuzzed directly:
-  `DumpsLen(v) == len(Dumps(v))`).
+  `DumpsLen(v) == len(Dumps(v))`). Random-sample oracle: the committed CPython
+  3.11-generated tables pin equivalence; generated samples assert self-consistency
+  (round-trip spelling stability, length==bytes), never a live interpreter call.
 - **Honesty:** testable-only; the shared-code-path argument is a structural argument
   (one implementation), strengthened but not replaced by fuzzing.
 
@@ -75,9 +79,23 @@ strings surviving lone surrogates); `Str` reproduces Python str() of values
 
 ```go
 func FuzzDumpsLenAgreesWithDumps(f *testing.F) {
-    f.Fuzz(func(t *testing.T, v Value) {
+    f.Fuzz(func(t *testing.T, b []byte) { // primitives only: fuzz bytes, decode
+        v, err := pyfmt.Decode(b, pyfmt.ModeBytes, pyfmtDefaultBudget)
+        if err != nil { return } // undecodable bytes: length invariant vacuous
         if pyfmt.DumpsLen(v) != len(pyfmt.Dumps(v)) {
             t.Fatal("DumpsLen/Dumps drift")
+        }
+    })
+}
+
+func FuzzJSONRoundTrip(f *testing.F) {
+    f.Fuzz(func(t *testing.T, b []byte) {
+        v, err := pyfmt.Decode(b, pyfmt.ModeBytes, pyfmtDefaultBudget)
+        if err != nil { return }
+        again := pyfmt.Decode(pyfmt.Dumps(v), pyfmt.ModeBytes, pyfmtDefaultBudget)
+        // NaN-aware equality: compare byte spellings, never v == v on NaN
+        if !bytes.Equal(pyfmt.Dumps(again.MustValue()), pyfmt.Dumps(v)) {
+            t.Fatal("round-trip drift")
         }
     })
 }

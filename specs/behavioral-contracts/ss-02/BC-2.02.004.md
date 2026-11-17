@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -126,7 +126,7 @@ S-TBD — D4-EX-3 table tests
 | **I/O operations** | reads the environment once at startup (`Load`) |
 | **Global state access** | none (resolved config immutable) |
 | **Deterministic** | yes (given the environment) |
-| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Thread safety** | safe for concurrent use (immutable after `Load`) |
 | **Overall classification** | boundary |
 
 Owning component `internal/config` (BC-COMPONENT-MAP: cfg/errors.go (enum class) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

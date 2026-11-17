@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
 input-hash: "013d953"
@@ -83,7 +83,7 @@ into `/`, BC-SL-059), so it is not used (design IM-11; pitfall PR-20).
 | nt label of `C:\work\proj\` | `proj` | happy-path |
 | posix label of `//` | `//` | edge-case |
 | nt `NtNormpath("\\server\share\x")`, label | unchanged, `x` | edge-case |
-| posix label of `""` | `.` | error (empty cwd still renders a label) |
+| posix label of `""` | `.` | helper-level edge case (at the legacy call site an empty cwd renders NO label: `if proj_dir:` skips it, SL:454; a fact of the call site, not the helper) |
 
 Verified 2026-11-15 against CPython 3.11.7 `posixpath`/`ntpath` (ntpath rows from the module run on macOS; the
 committed Windows goldens are generated on the Windows runner).
@@ -93,7 +93,7 @@ committed Windows goldens are generated on the Windows runner).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-025 | `PosixNormpath` and `NtNormpath` equal the oracle on fuzzed path strings | fuzz + per-OS oracle tables |
-| VP-025 | Normpath is idempotent | proptest |
+| VP-025 | Normpath is idempotent | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -130,7 +130,7 @@ TBD — pyfmt str (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/str.go (Posix/Nt Normpath, Basename)` (BC-COMPONENT-MAP: py/str.go (Posix/Nt Normpath, Basename) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

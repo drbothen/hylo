@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "334d138"
+input-hash: "12ee8f9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:serving_state (SL:705-722)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-044"
@@ -68,7 +68,7 @@ byte 0x1B.
 | EC-004 | `up:vllm`=1, `up:lmcache`=0, no lookup counter | dot |
 | EC-005 | `up:vllm`=1, lookup counter present, `up:lmcache`=0 | `LMCache down` |
 | EC-006 | `up:vllm`=NaN, no vllm keys | dot (`nan == 0` false; not None) |
-| EC-007 | non-string key in sample (BC-1.04.001 EC-013) | degraded line |
+| EC-007 | non-string key in sample (BC-1.04.001 EC-013) | degraded line only when the key precedes every `vllm:` key (`any()` stops at the first match, SL:717); `{"vllm:x": 1, 5: 1}` renders normally; on later cached-path refreshes the key is the string `"5"` and nothing degrades |
 
 ## Canonical Test Vectors
 
@@ -104,7 +104,7 @@ byte 0x1B.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (health dot) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/row2.go (health dot) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -138,7 +138,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none |
 | **Global state access** | reads config (theme) |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync |
+| **Thread safety** | Safe for concurrent use |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

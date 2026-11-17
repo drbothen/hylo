@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.01.001.md, behavioral-contracts/ss-06/BC-6.01.002.md, behavioral-contracts/ss-06/BC-6.01.003.md, owner-decisions-log-2026-11-14.md]
 input-hash: "1f18aa1"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,10 +72,19 @@ disabled clock shim cannot produce false-pass parity.
 ```go
 func TestOracleEnv_FromScratch(t *testing.T) {
     env := oracleChildEnv(nowSetting)
-    if v, ok := env["*_proxy"]; ok { t.Fatalf("proxy var leaked: %v", v) }
+    for k := range env { // real proxy-var sweep: HTTP_PROXY, HTTPS_PROXY, ALL_PROXY,
+        if strings.HasSuffix(strings.ToLower(k), "_proxy") { // NO_PROXY, lower-case forms
+            t.Fatalf("proxy variable leaked into child env: %s", k)
+        }
+    }
+    fixed := "/tmp/parity-home" // fixed HOME/USERPROFILE and TMPDIR, never inherited
+    if env["HOME"] != fixed || env["USERPROFILE"] != fixed {
+        t.Fatal("HOME/USERPROFILE not the fixed parity value")
+    }
+    if env["TMPDIR"] != "/tmp/parity-tmp" { t.Fatal("TMPDIR not the fixed parity value") }
     if env["LANG"] != "en_US.UTF-8" { t.Fatal("locale not pinned") }
-    if !argsInclude(runnerArgs, "-s") || argsInclude(runnerArgs, "-I") {
-        t.Fatal("wrong interpreter flags")
+    if !argsInclude(runnerArgs, "-s") || argsInclude(runnerArgs, "-I") || argsInclude(runnerArgs, "-E") {
+        t.Fatal("wrong interpreter flags (-s required; -I and -E banned, OD-109)")
     }
 }
 ```

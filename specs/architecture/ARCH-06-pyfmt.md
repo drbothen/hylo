@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "pyfmt"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "fea48f5"
+input-hash: "390fdb8"
 ---
 
 # ARCH-06 — Python-compatible formatting (`internal/pyfmt`)
@@ -24,8 +24,8 @@ input-hash: "fea48f5"
 
 | File | Reproduces (BCs) |
 |---|---|
-| `num.go` | CPython 3.11 arithmetic on `Num` (int64 / *big.Int / float64 / bool-as-int); `Round` (ties-to-even + decimal re-round), `RoundN`, `F` ('f' format incl. -0, nan/inf spellings), `D`, `Int`, `Ceil`, `FloorDiv`/`Mod` (CPython `float_divmod` port — NOT `math.Floor(a/b)`), `FloorDivInt/ModInt`, `Max`/`Min` (first-maximal-wins NaN argument order), `MaxSeq`, `Repr` (shortest round-trip + .0 suffix + inf/nan spellings), `ParseInt`/`ParseFloat` (Python grammar: underscores, Unicode digits, 4,300-digit limit, `1e400`, nan/inf) — BC-5.01.001..006, BC-5.01.003 |
-| `json.go` | Hand-written decoder/encoder over ordered `Value`/`Member`/`Kind`: `Decode(b, mode)` (ModeText = `json.load` text semantics: BOM invalid, invalid-UTF-8 error, depth 993/994 at stdin; ModeBytes = `json.loads(bytes)`: BOM/UTF-16/32 detection, depth 995/1,000, NaN/Infinity tokens, duplicates last-wins keeping position, WTF-8 strings surviving lone surrogates); `Dumps`/`DumpsLen` (json.dump byte defaults, shared escape/float-repr code with DumpsLen so lengths and bytes cannot drift); `Str` (Python str()/repr of values) — BC-5.02.001..006 |
+| `num.go` | CPython 3.11 arithmetic on `Num` (int64 / *big.Int / float64 / bool-as-int); `Round` (ties-to-even + decimal re-round, big-int result beyond int64), `RoundN`, `F` ('f' format incl. -0, nan/inf spellings), `D`, `Int`/`Ceil` (exact `Num` results beyond int64, typed NaN/Overflow errors), `FloorDiv`/`Mod` (CPython `float_divmod` port — NOT `math.Floor(a/b)`; `ErrZeroDivision` on zero divisor), `FloorDivInt/ModInt` (integer `//`/`%`, exact for big ints), `Max`/`Min` (first-maximal-wins NaN argument order), `MaxSeq` (typed `ErrValue` on empty), `Repr` (shortest round-trip + .0 suffix + inf/nan spellings), `ParseInt`/`ParseFloat` (Python grammar: underscores, Unicode digits, 4,300-digit limit, `1e400`, nan/inf) — BC-5.01.001..006, BC-5.01.003 |
+| `json.go` | Hand-written decoder/encoder over ordered `Value`/`Member`/`Kind`: `Decode(b, mode, depthBudget)` — the recursion budget is a **per-call-site parameter**, never a mode property and never a package global (ModeText serves both stdin and cache/transcript loads, which sit at different CPython call depths; BC-5.02.003 invariant 3): named constants `depthTranscriptMixCounts = 989` (989 accepted / 990 rejected at `_mix_counts` SL:1061, BC-5.02.003) and `depthStdinLoad = 993` (993 accepted / 994 rejected, BC-1.01.002, re-probed 2026-11-17); the boundaries are **call-context dependent** (Python-frame depth at the call site), and the pyfmt gen scripts pin them by re-running the recorded measurement recipes under the pinned oracle — a moved boundary fails regeneration, and the committed tables then pin Go's constants. ModeText = `json.load` text semantics (BOM invalid, invalid-UTF-8 error); ModeBytes = `json.loads(bytes)` (BOM/UTF-16/32 detection, NaN/Infinity tokens, duplicates last-wins keeping position, WTF-8 strings surviving lone surrogates); `Dumps`/`DumpsLen` (json.dump byte defaults, shared escape/float-repr code with DumpsLen so lengths and bytes cannot drift); `Str` (Python str()/repr of values) — BC-5.02.001..006 |
 | `str.go` | WTF-8-aware `Len` (surrogate = 1 code point), `Truncate`, `HasSurrogate`, `EncodeUTF8Replace` (lone surrogate -> `?`), `Strip`/`RStrip` (Python whitespace incl. NBSP), `RSplit1`, `SplitLinesBytes` (\n \r\n \r only), `SubNonWord` (per code point before truncation), `PosixNormpath`/`NtNormpath`/`Basename` (per-OS selection, ntpath on Windows) — BC-5.03.001..004 |
 | `time.go` | `TimeFloat` (ns -> s float, once per render, BC-5.04.003); `FromISOFormat` (3.11 grammar, naive = local, fraction truncation beyond µs, BC-5.04.001); `LocalToUnix` (CPython `_mktime` port: gap/overlap semantics; 0 mismatches over 10,893 CPython goldens across four zone grids; Go `time.Date` differs) with embedded `time/tzdata` — BC-5.04.001..002 |
 
@@ -50,8 +50,17 @@ input-hash: "fea48f5"
   values; tests run the FMA-sensitive sites on arm64 (IM-10/PR-15) with a
   `// pyfmt: no-fuse` convention at each site.
 - **Verification feasibility: the strongest provable-grade surface in the repo** — closed
-  functions over values; oracle tables + `go test -fuzz` targets + proptest-style
-  generators; mutation kill rate >= 95% binds here first.
+  functions over values; oracle tables + `go test -fuzz` targets + property generators
+  (`github.com/flyingmutant/rapid`, test-only; `testing/quick` suffices for trivial
+  chains) asserting metamorphic oracles plus spot-pins against the committed CPython
+  tables (ARCH-00, ADV-P1-A07); mutation kill rate >= 95% binds here first (tool:
+  gremlins, named in ARCH-00).
+- **Per-OS behavior (P18, ADV-P1-D21, explicitly justified):** the only GOOS-dependent
+  logic in `pyfmt` is `Basename` choosing ntpath on Windows. It is deliberately NOT
+  routed through `internal/platform`: `pyfmt` is the repo's lowest sink and importing
+  infrastructure from it would invert AD-02's dependency direction. The selection is a
+  pure function of the build target; both flavors are always compiled and always
+  table-pinned on every OS, so no build tag or platform call is needed.
 
 ## Interfaces (signatures per design doc §2.6)
 
@@ -59,17 +68,20 @@ input-hash: "fea48f5"
 package pyfmt
 
 type Num struct{ /* int64 | *big.Int | float64 | bool */ }
-func Round(x Num) (Num, error)          // ErrValue / ErrOverflow typed errors
+
+func Round(x float64) (Num, error)      // BC-5.01.001: ties-to-even; ErrValue / ErrOverflow; result is a Num int (int64 or exact big int)
 func RoundN(x float64, n int) float64
 func F(x float64, prec int) string
 func D(n int64, width int, zeroPad bool) string
-func Int(x float64) (int64, error)
-func Ceil(x float64) (int64, error)
-func FloorDiv(a, b float64) float64
-func Mod(a, b float64) float64
-func Max(a, b Num) Num
+func Int(x float64) (Num, error)        // BC-5.01.003 EC-006: exact beyond int64 (Int(1e300)); ErrValue / ErrOverflow
+func Ceil(x float64) (Num, error)       // exact beyond int64; ErrValue / ErrOverflow
+func FloorDiv(a, b float64) (float64, error) // CPython float_divmod port; ErrZeroDivision when b == 0
+func Mod(a, b float64) (float64, error)      // float_divmod remainder;       ErrZeroDivision when b == 0
+func FloorDivInt(a, b Num) (Num, error) // integer //: quotient toward −∞, exact for big ints; ErrZeroDivision on zero divisor
+func ModInt(a, b Num) (Num, error)      // integer %: remainder takes the divisor's sign; ErrZeroDivision on zero divisor
+func Max(a, b Num) Num                  // first-maximal-wins NaN argument order
 func Min(a, b Num) Num
-func MaxSeq(xs []Num) Num
+func MaxSeq(xs []Num) (Num, error)      // BC-5.01.006 PC-1: typed ErrValue on empty input
 func Repr(x float64) string
 func ParseInt(s string) (Num, error)
 func ParseFloat(s string) (float64, error)
@@ -77,7 +89,11 @@ func ParseFloat(s string) (float64, error)
 type Value struct{ /* Kind + ordered members / WTF-8 string / Num / bool */ }
 type DecodeMode uint8
 const (ModeText DecodeMode = iota; ModeBytes)
-func Decode(b []byte, mode DecodeMode) (Value, error)
+
+// depthBudget is per CALL SITE, not per mode: stdin pins 993 (BC-1.01.002), the
+// transcript _mix_counts site pins 989 (BC-5.02.003); boundaries are call-context
+// dependent and pinned via the recorded measurement recipes (gen scripts).
+func Decode(b []byte, mode DecodeMode, depthBudget int) (Value, error)
 func Dumps(v Value) []byte
 func DumpsLen(v Value) int
 func Str(v Value) string
@@ -88,12 +104,12 @@ func HasSurrogate(s string) bool
 func EncodeUTF8Replace(s string) string
 func Strip(s string) string
 func RStrip(s, chars string) string
-func RSplit1(s, sep string) string
+func RSplit1(s, sep string) []string // Python rsplit(sep, 1): 1- or 2-element list [head, tail] / [s] (BC-5.03.002)
 func SplitLinesBytes(b []byte) [][]byte
 func SubNonWord(s, repl string) string
 func PosixNormpath(p string) string
 func NtNormpath(p string) string
-func Basename(p string) string
+func Basename(p string) string        // runtime.GOOS selects ntpath on Windows; both flavors always compiled and table-pinned (see P18 note)
 
 func TimeFloat(ns int64) float64
 func FromISOFormat(s string, loc *time.Location) (float64, bool)

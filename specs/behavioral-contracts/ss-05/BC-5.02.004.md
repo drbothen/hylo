@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T17:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
 input-hash: "013d953"
@@ -70,8 +70,8 @@ lone surrogates. Cache bytes depend on this order (IM-03), and length measures d
 |----|-------------|-------------------|
 | EC-001 | Decode `{"a":1,"b":2,"a":3}` | members `a: 3, b: 2` |
 | EC-002 | On that object: `Set("b", 5)`, `Delete("a")`, `Set("a", 9)` | `Dumps` → `{"b": 5, "a": 9}` |
-| EC-003 | Decode raw bytes `"\xed\xa0\xbd\xed\xb8\x80"` | string of 2 code points (U+D83D, U+DE00); `Len` 2; `Dumps` → `"😀"` (14 chars) |
-| EC-004 | Decode JSON escapes `"😀"` | 1 code point U+1F600; `Len` 1 |
+| EC-003 | Decode raw bytes `"\xed\xa0\xbd\xed\xb8\x80"` | string of 2 code points (U+D83D, U+DE00); `Len` 2; `Dumps` → `"😀"` (escaped surrogate pair, 14 chars) |
+| EC-004 | Decode the JSON escape text `"😀"` | 1 code point U+1F600; `Len` 1 |
 | EC-005 | Decode `"\ude00\ud83d"` (reversed escapes) | 2 code points, not combined |
 | EC-006 | `Get("missing")` | Null |
 | EC-007 | Cache `{"proc_start": "x", "a": 1}` then `Set("proc_start", 1794615009.0)` | `{"proc_start": 1794615009.0, "a": 1}` (BC-3.02.001) |
@@ -92,7 +92,7 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`json.loads`, dict assignment/d
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-024 | For random op sequences (Set/Delete), member order equals a Python dict driven by the same ops | proptest vs oracle replay |
+| VP-024 | For random op sequences (Set/Delete), member order equals a Python dict driven by the same ops | Go property test (testing/quick) vs oracle replay |
 | VP-024 | `Dumps(Decode(b))` equals `json.dumps(json.loads(b))` byte for byte | fuzz + oracle |
 
 ## Traceability
@@ -131,7 +131,7 @@ TBD — pyfmt json (design step S1)
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/json.go (ordered Value)` (BC-COMPONENT-MAP: py/json.go (ordered Value) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

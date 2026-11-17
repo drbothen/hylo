@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.04.002.md, behavioral-contracts/ss-01/BC-1.04.004.md, behavioral-contracts/ss-01/BC-1.04.009.md, behavioral-contracts/ss-01/BC-1.04.014.md, behavioral-contracts/ss-01/BC-1.04.020.md, prd-supplements/test-vectors.md]
 input-hash: "4bd1594"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,8 +81,9 @@ func TestGetSample_Pinned11StepSequence(t *testing.T) {
 
 ## Named Tests (OD-145 table where applicable)
 
-`cache`/`row1` parity families + the metrics-mode rows (down/500/garbage) of the
-ARCH-07 case model; in-tree `TestGetSample_Pinned11StepSequence`.
+`row2` parity family (ARCH-07 case-id grammar) + the metrics-mode rows
+(down/500/garbage) of the ARCH-07 case model; in-tree
+`TestGetSample_Pinned11StepSequence`.
 
 ## Feasibility Assessment
 

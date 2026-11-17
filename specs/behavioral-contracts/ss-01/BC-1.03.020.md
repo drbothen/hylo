@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "372936a"
+input-hash: "d937286"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_finish_turn, _mix_counts (SL:988-996, 1023, 1073-1079, 1150-1153)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,7 +42,7 @@ hylo at the next turn event, with a known composition residual.
 
 ## Preconditions
 
-1. A mix cache loaded by BC-1.03.002 contains `cur` as an object with `t0` a number (int or float) and `out` a JSON
+1. A mix cache loaded by BC-1.03.002 contains `cur` as an object with `t0` a number — "number" as defined in BC-1.03.018: int, float or bool, so a bool `t0` counts as a number and fires the rule (pinned; arises only with foreign caches) — and `out` a JSON
    value that is not int/float/bool (string, array, object; see EC-004 for falsy non-numbers).
 2. Only a legacy-written cache can contain this form: hylo's own parser never writes it (it skips the opening line,
    BC-1.03.018 CP-T05).
@@ -101,8 +101,9 @@ expectation = legacy run on the seed with `cur` replaced by null).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-013, VP-012 (frontmatter closure) | Rule fires iff `cur` is an object, `t0` is a number, `out` is not a number | table test |
-| VP-029, VP-013, VP-012 (frontmatter closure) | After the rule and one turn event, turn state equals native hylo's | table test (C1/C2 vs BC-1.03.019 row 13) |
+| VP-029, VP-013 | Rule fires iff `cur` is an object, `t0` is a number (int, float or bool), `out` is not a number | table test |
+| VP-029, VP-013 | After the rule and one turn event, turn state equals native hylo's | table test (C1/C2 vs BC-1.03.019 row 13) |
+| VP-012 | Postcondition 5 closure: the OD-32 cache-swap cases are admitted under the closed D4-EX-2 register, each with an expected output file and a dedicated `TestMixCache_OD32_*` test; no globs | repository test over `exclusions.json` |
 
 ## Traceability
 
@@ -128,7 +129,7 @@ expectation = legacy run on the seed with `cur` replaced by null).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#mix-cache` — internal/statusline/mixcache.go (OD-32 reader rule) (reader rule in `mixcache.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/mixcache.go (OD-32 reader rule) (reader rule in `mixcache.go`) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -136,7 +137,7 @@ S-TBD — mix cache
 
 ## VP Anchors (Recommended)
 
-- VP-029, VP-013, VP-012 — reader-rule predicate
+- VP-029, VP-013 — reader-rule predicate; VP-012 — D4-EX-2 register closure (PC-5)
 
 ---
 

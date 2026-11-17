@@ -2,10 +2,10 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.2"
+version: "0.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1a
 stage: "1 of 3 (allocation only — individual BC files are created in stage 2 by the writer groups)"
 origin: greenfield
@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.1"
+modified: "0.2.1"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "fc86b6b"
+input-hash: "b870255"
 traces_to: ../prd.md
 ---
 
@@ -522,7 +522,7 @@ Cross-group normalizations decided at integration (BC files edited):
   rewritten as visible `\u200B` escapes; all BC files scanned clean of
   U+200B-U+200F, U+202A-U+202E, U+2066-U+2069, U+FEFF.
 - JSON decode recursion budgets restated per call site: stdin text mode 993 accepted /
-  994 rejected (BC-1.01.002), transcript bytes mode 995 accepted / 1,000 rejected
+  994 rejected (BC-1.01.002), transcript bytes mode 989 accepted / 990 rejected
   (BC-5.02.003, consumed by BC-1.03.004); `Decode` takes the budget per call site.
 - Negative `COLUMNS` beyond int64 restated identically in BC-1.01.005 PC-4 and
   BC-5.01.002 PC-3: an overflowing negative stays negative (row 2 hidden); only the

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
@@ -44,7 +44,11 @@ minute-straddle fix, DET-08).
 
 1. `t` is a Go `time.Time` obtained once per render (Env.Now, design §2.1).
 2. `HYLO_TEST_NOW` (a decimal string) when set is parsed by both sides identically (§3;
-   RK-5 documents it as a harness hook, not a setting).
+   RK-5 documents it as a harness hook, not a setting). A **malformed** value (not a valid
+   decimal float, e.g. `abc` or empty) is ignored with exactly one stderr warning and the
+   real clock is used — it never config-errors and never degrades the line (spec choice,
+   ADV-P1-D22; mirrors the unknown-`HYLO_*` warning discipline of BC-2.01.001; not an
+   owner-recorded decision).
 
 ## Postconditions
 
@@ -95,6 +99,8 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 | Source | new — OD-141 (helper-level contract), OD-103; design IM-14, research P20; consumers: the nine clock reads (BC-1.05.004, BC-1.04.002/.004, BC-1.02.028, idle widget) |
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
+| L2 Domain Invariants | DI-012 (byte parity machinery) |
+| Architecture Module | `internal/pyfmt` time.go (BC-COMPONENT-MAP: internal/pyfmt/time.go (TimeFloat) — ARCH-06) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs (Recommended)
@@ -122,7 +128,7 @@ S-TBD — pyfmt time helpers
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/time.go (TimeFloat)` (BC-COMPONENT-MAP: py/time.go (TimeFloat) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

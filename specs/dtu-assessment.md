@@ -1,15 +1,15 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-17T23:59:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "b3fdbc7"
+input-hash: "fa75fe8"
 ---
 
 # DTU Assessment: hylo P1 (status line)
@@ -104,9 +104,9 @@ staleness markers moved to `null` — grounding the defensive-parse stance.
 
 | # | Behavior the fake must reproduce | Contract |
 |---|----------------------------------|----------|
-| 1 | 200 success envelope, vector result, `[ts, "string"]` tuple | CP-N02 happy path |
+| 1 | 200 success envelope, vector result, `[ts, "string"]` tuple | BC-1.04.001 happy path (fetch_sample parse; ADV-P1-A2-21: CP-N02 is the sparkline crash path, not this) |
 | 2 | Empty `result` array (up, no data in window) → stale-ladder path, not an error | SM-05 fresh→stale→dead; OD-57 E-A |
-| 3 | `"NaN"` sample string → sample dropped | CP-N01 |
+| 3 | `"NaN"` sample string → **kept as a float**, exactly like legacy `float("NaN")` at SL:178 / BC-1.04.001 — the fake returns it, and the NaN sample then drives the CP-N01/KV and CP-N02/sparkline crash paths downstream (BC-1.04.014/.015/.016, VP-001). It is not dropped | BC-1.04.001 PC-2 (kept as float); CP-N01/N02 consumers |
 | 4 | `"+Inf"` / `"-Inf"` sample strings → treated as unknown, like a stale sample (defensive parse) | **OD-130** (rule stands until the owner capture confirms) |
 | 5 | Error envelope (`status:"error"`) and HTTP 500 | CP register error taxonomy |
 | 6 | Connection refused / unreachable server | harness mode `down` |

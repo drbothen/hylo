@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
 input-hash: "d909e2a"
@@ -103,7 +103,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | Brackets appear iff at least two inner parts are > 0 | proptest vs oracle |
+| VP-028 | Brackets appear iff at least two inner parts are > 0 | Go property test (testing/quick) vs oracle |
 | VP-028 | Segment shown iff the visibility predicate of Postcondition 1 holds | table test |
 
 ## Traceability

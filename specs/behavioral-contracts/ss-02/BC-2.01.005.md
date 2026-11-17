@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-016 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,7 +65,9 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    `<key>= (empty path)`; a needed but unknown home yields
    `<key>=<value> (home directory unknown)`. P1 path key: `paths.cache_dir` (OD-101 default
    from `internal/platform`, BC-3.01.001). The same rule applies to every path value
-   (OD-61), including `HYLO_CONFIG` (BC-2.03.002).
+   (OD-61), including `HYLO_CONFIG` (BC-2.03.002) — except that an empty `HYLO_CONFIG` is
+   treated as unset and falls through to the per-OS default rather than raising the
+   empty-path error (resolution semantics of BC-2.03.002 PC-2b/EC-007, ADV-P1-D25).
 4. **COLUMNS:** no registry key reads or shadows `COLUMNS`; `HYLO_COLUMNS` is not a key
    (an unknown-setting warning if set). The renderer reads `COLUMNS` per BC-1.01.005.
 
@@ -102,6 +104,7 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 |--------|----------|-------------|
 | VP-015 | Bool parse accepts exactly six strings | table test (exhaustive over the six plus a fuzz corpus) |
 | VP-015 | List parse equals Python `[p.strip() for p in s.split(",") if p.strip()]` on the CPython-generated table | table test against oracle goldens |
+| VP-016 | Bool and path-grammar error reasons ride the closed six-class register on the E-CFG-001 surface (PC-1 error strings; invariant 2) | table test (class register) |
 
 ## Traceability
 
@@ -132,7 +135,7 @@ S-TBD — config subset
 
 ## VP Anchors (Recommended)
 
-- VP-015 — bool grammar exact
+- VP-015 — bool grammar exact; VP-016 — error reasons on the six-class register
 
 #### Purity Classification
 
@@ -141,7 +144,7 @@ S-TBD — config subset
 | **I/O operations** | reads the environment once at startup (`Load`) |
 | **Global state access** | none (resolved config immutable) |
 | **Deterministic** | yes (given the environment) |
-| **Thread safety** | Send + Sync (immutable after `Load`) |
+| **Thread safety** | safe for concurrent use (immutable after `Load`) |
 | **Overall classification** | boundary |
 
 Owning component `internal/config` (BC-COMPONENT-MAP: cfg/types.go (value grammars) - ARCH-02); the ARCH-00 package table classifies the package boundary - pure registry and grammars, with `Load` reading the environment once at startup.

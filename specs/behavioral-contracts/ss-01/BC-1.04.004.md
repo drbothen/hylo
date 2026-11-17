@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "5c176a5"
+input-hash: "4bc28df"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
-extracted_from: "legacy/dgx_statusline.py"
+extracted_from: "legacy/dgx_statusline.py:render_telemetry (SL:693-702)"
 subsystem: "SS-01"
 capability: "CAP-010"
 legacy_id: "BC-SL-043"
@@ -60,7 +60,9 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
    applies only while `up` is true).
 2. The dead rung never shows stale fields or a suffix.
 3. Rendering never fails for a dict sample except via the named crash paths
-   (BC-1.04.014, BC-1.04.015).
+   (BC-1.04.014, BC-1.04.015) plus the non-string-key site of BC-1.04.001 EC-013: a
+   numeric sample key ahead of every `vllm:` key degrades in `serving_state` (SL:717);
+   after the session-cache write it returns as string `"5"` and no longer degrades.
 
 ## Edge Cases
 
@@ -90,7 +92,7 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Rung selection is a total function of `(truthy(sample), up, age > fresh_s, age > 0)` matching legacy | proptest |
+| VP-030 | Rung selection is a total function of `(truthy(sample), up, age > fresh_s, age > 0)` matching legacy | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -112,7 +114,7 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#row-2` — internal/statusline/row2.go (freshness ladder) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/row2.go (freshness ladder) (row-2 renderer) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -145,7 +147,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 | **I/O operations** | none |
 | **Global state access** | reads config |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync |
+| **Thread safety** | Safe for concurrent use |
 | **Overall classification** | pure |
 
 #### Refactoring Notes

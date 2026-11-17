@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
@@ -50,7 +50,16 @@ floats, so every `str()` site routes through this helper. Helper-level contract 
 3. int/float → Python repr spelling (BC-5.01.005): `str(1794615009.0)` = `1794615009.0`;
    `str(1e16)` = `1e+16`; non-finite: `nan`/`inf`/`-inf`.
 4. list/dict → Python repr of the container: `str([1, "a"])` is `[1, 'a']` — single quotes,
-   comma+space separators, repr of each element. Containers nest.
+   comma+space separators, repr of each element. Containers nest. **Element string quoting
+   (CPython `repr(str)` rules, CPython 3.11 verified with `python3 -I`):** the element is
+   wrapped in single quotes unless it contains `'` and not `"`, in which case it is wrapped
+   in double quotes (`Str(["it's"])` is `["it's"]`); if it contains both quote characters it
+   is wrapped in single quotes with every `'` escaped as `\'`. Inside the quotes: `\` is
+   escaped as `\\`; `\n`, `\r`, `\t` use the two-character shorthands; every other
+   non-printable code point (anything false under Python `str.isprintable`, including
+   U+0000-U+001F, U+007F-U+009F and lone surrogates) is escaped as `\xhh` (U+00XX),
+   `\uhhhh` (U+XXXX) or `\Uhhhhhhhh` (astral) with lowercase hex digits. Printable
+   non-ASCII code points (e.g. é, 言) are written as themselves, not escaped.
 5. All cases pure and deterministic; equal to CPython `str(value)` for every decoded value
    shape in the generated table (OD-104 oracle discipline).
 
@@ -71,6 +80,9 @@ floats, so every `str()` site routes through this helper. Helper-level contract 
 | EC-005 | `Str(NaN)` | `nan` |
 | EC-006 | `Str({})` | `{}` (empty dict repr) |
 | EC-007 | `Str(None)` | `None` |
+| EC-008 | `Str(["it's"])` | `["it's"]` (contains `'`, not `"` → double-quoted element) |
+| EC-009 | `Str(["both ' and \""])` | `['both \' and "']` (both quotes → single-quoted, `'` escaped) |
+| EC-010 | `Str([chr(0)])`, `Str([chr(0x7F)])` | `['\x00']`, `['\x7f']` (non-printables escaped, lowercase hex) |
 
 ## Canonical Test Vectors
 
@@ -88,7 +100,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-024 | `Str` equals CPython `str(value)` for every value shape (nested containers included) | CPython oracle table |
-| VP-024 | A str input is returned byte-identical (WTF-8) | proptest |
+| VP-024 | A str input is returned byte-identical (WTF-8) | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -126,7 +138,7 @@ S-TBD — pyfmt json helpers
 | **I/O operations** | none |
 | **Global state access** | none |
 | **Deterministic** | yes |
-| **Thread safety** | Send + Sync (stateless functions) |
+| **Thread safety** | safe for concurrent use (stateless functions) |
 | **Overall classification** | pure core |
 
 Owning component `py/json.go (Str)` (BC-COMPONENT-MAP: py/json.go (Str) - ARCH-06); the ARCH-00 package table classifies `internal/pyfmt` pure core - bytes/values in, values out, no I/O, clock never read.

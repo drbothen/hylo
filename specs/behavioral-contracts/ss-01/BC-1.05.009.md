@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,10 +15,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b21e2a3"
+input-hash: "377e468"
 traces_to: domain-spec/L2-INDEX.md
-origin: greenfield
-extracted_from: "legacy/dgx_statusline.py"
+origin: brownfield
+extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-102"
@@ -89,7 +89,7 @@ string-form key instead of legacy's duplicates), specified in BC-1.05.006.
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | existing file `{"keep": 1}` | `{"keep": 1, "sessions": {…}}` |
-| EC-002 | sid `café` | key `"café"` |
+| EC-002 | sid `café` | key `"caf\u00e9"` — `ensure_ascii` escapes the non-ASCII key on disk (legacy `json.dump` default, SL:203) |
 | EC-003 | sid holding a lone surrogate (from a JSON `\udce9` escape) | key `"x\udce9"` (escaped, no error) |
 | EC-004 | usd `true`, api `1e-05` | `"usd": 1, "api_ms": 1e-05` |
 | EC-005 | usd 3 (int), api `true` | `"usd": 3, "api_ms": true` |
@@ -105,7 +105,7 @@ Clock 1794615009.0.
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | empty history; sid `fmt`, lane anth, usd 12.345678, api 654321.5 | `{"sessions": {"fmt": {"lane": "anth", "usd": 12.3457, "api_ms": 654321.5, "ts": 1794615009.0, "src": "cc"}}}` (no trailing newline) | happy-path |
-| `{"keep": 1}`; sid `café` lane dgx usd 3 api `true`; then sid `x\udce9` lane anth usd 1.00001 api NaN | `{"keep": 1, "sessions": {"café": {"lane": "dgx", "usd": 3, "api_ms": true, "ts": 1794615009.0, "src": "cc"}, "x\udce9": {"lane": "anth", "usd": 1.0, "api_ms": NaN, "ts": 1794615009.0, "src": "cc"}}}` | edge-case |
+| `{"keep": 1}`; sid `café` lane dgx usd 3 api `true`; then sid `x\udce9` lane anth usd 1.00001 api NaN | `{"keep": 1, "sessions": {"caf\u00e9": {"lane": "dgx", "usd": 3, "api_ms": true, "ts": 1794615009.0, "src": "cc"}, "x\udce9": {"lane": "anth", "usd": 1.0, "api_ms": NaN, "ts": 1794615009.0, "src": "cc"}}}` | edge-case |
 | `{"sessions": {"b": {…backfill…}, "a": {"x": 1}}, "keep": 1}`; sid `b` usd `true` api 1e-05 | `{"sessions": {"b": {"lane": "anth", "usd": 1, "api_ms": 1e-05, "ts": 1794615009.0, "src": "cc"}, "a": {"x": 1}}, "keep": 1}` | edge-case |
 | sid `777` (int), two refreshes | Go: one `"777"` key (OD-30, BC-1.05.006) | error (deviation) |
 
@@ -121,7 +121,7 @@ Clock 1794615009.0.
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007, DI-012 (OD-30 sub-case deviation) |
 | Architecture Module | `internal/cost` history.go; `internal/pyfmt` json.go `Dumps` (BC-COMPONENT-MAP: internal/cost/history.go (exact write format) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); cost_thresholds read (SL:245-246); save_cache json.dump (SL:203) |
@@ -140,7 +140,7 @@ Clock 1794615009.0.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#history-format` — internal/cost/history.go (exact write format) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#effect-step-script-design-doc-31-normative` — internal/cost/history.go (exact write format) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -150,6 +150,20 @@ S-N.MM — cost history (filled by story-writer)
 
 - VP-020, VP-019 — Dumps differential equivalence
 
+
+#### Source Evidence
+
+| Property | Value |
+|----------|-------|
+| **Path** | `legacy/dgx_statusline.py` (record_cost (SL:224-237); save_cache json.dump (SL:203)) |
+| **Confidence** | high |
+| **Extraction Date** | 2026-11-15 |
+
+#### Evidence Types Used
+
+- **guard clause**: isinstance filters on usd/api_ms (SL:225, 233)
+- **documentation**: key order and entry schema frozen (D7/AP-16)
+
 #### Purity Classification
 
 | Property | Assessment |
@@ -157,7 +171,7 @@ S-N.MM — cost history (filled by story-writer)
 | **I/O operations** | writes via the injected `Store` seam |
 | **Global state access** | none |
 | **Deterministic** | yes (given samples and a store fake) |
-| **Thread safety** | Send + Sync (store injected) |
+| **Thread safety** | Safe for concurrent use (store injected) |
 | **Overall classification** | boundary |
 
 Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (exact write format) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.

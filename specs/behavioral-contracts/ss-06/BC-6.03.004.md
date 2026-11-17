@@ -4,7 +4,7 @@ level: L3
 version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -58,14 +58,26 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
      OD-136);
    - `case`, a case directory path relative to the corpus root;
    - `expected_output_file`, a path relative to the corpus root;
+   - `package`, the Go test package import path that declares `table_test` (the tests
+     live in more than one package — `internal/config`, `internal/platform`,
+     `internal/statusline`, `internal/parity` — so `go test -list` needs it;
+     ADV-P1-D17);
+   - `scope`, one of `stdout` (compares captured stdout and exit code only),
+     `stdout+caches` (stdout, exit code and the named-cache listings of both sides),
+     `go-cache-listing` (the Go cache listing only); default `stdout`;
    - `table_test`, the name of a Go test function.
+   `expected_output_file` format (one file per entry, defined): a UTF-8 JSON object
+   `{"exit": <int>, "stdout": "<literal captured stdout>", "caches": {"<side>":
+   {"<filename>": "<literal file bytes>"}}}` where `<side>` is `oracle` or `go` and
+   `caches` may be omitted when the entry's `scope` does not claim caches
+   (ADV-P1-D17).
 3. The approved deviations and their owners:
 
    | `id` | Approved by | Scope of the exclusion | Contract that defines the expected behavior |
    |---|---|---|---|
    | `D4-EX-1` | D4-EX-1 | ⌂ on Windows (fake probe returns a start) | BC-3.02.001 (`TestWindowAge_D4EX1_Windows*`) |
    | `D4-EX-2` | D4-EX-2, OD-21/OD-32 | wrong-shape transcript lines skipped | BC-1.03.018/019/020 (21 BC-SL-099 rows + BC-SL-100/103 rows) |
-   | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..005 (`TestConfigError_D4EX3_{Number,Boolean,URL,Enum}` + `config validate`) |
+   | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..006 + theme class BC-2.01.003 (`TestConfigError_D4EX3_{Number,Boolean,URL,Enum,Theme}` + `config validate`) |
    | `OD-30` | OD-30, OD-110 | numeric sid: one string-form cost-history key | BC-1.05.006, BC-1.05.009 |
    | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails) | BC-3.02.002 |
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
@@ -82,16 +94,22 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    - `case` does not name an existing case directory, or `expected_output_file` does
      not exist;
    - two entries share the same `(id, case)`;
-   - `table_test` does not match `^Test[A-Za-z0-9_]+$`.
+   - `table_test` does not match `^Test[A-Za-z0-9_]+$`;
+   - `package` is not one of the harness's declared test-package import paths, or
+     `scope` is not one of the three values above.
 2. **Table test must exist and run.**
-   - Each `table_test` must appear in `go test -list '.*'` output for its package.
+   - Each `table_test` must appear in `go test -list '.*'` output for its entry's
+     `package`.
    - In a full `go test` run, the harness checks the test-event stream (`-json`) and
      fails if a named test did not run or did not pass.
    - Error message: `parity: exclusion <id>/<case>: table test <name> missing|skipped|failed`.
 3. **Excluded comparison.** For an excluded case, the artifacts named by the entry's
-   scope are compared to `expected_output_file` instead of the oracle. For `temp-file`
-   the scope is the Go cache listing; for the others it is stdout plus the named
-   caches the case declares.
+   `scope` are compared to `expected_output_file` instead of the oracle: `temp-file`
+   entries use `go-cache-listing`; D4-EX-3 config-error cases use `stdout` (a
+   config-error run renders the config-error line and stops at step 0 — it writes no
+   cache on the Go side while legacy may still have written caches before its import-time
+   parse, so caches are out of scope and compared to nothing);
+   the other ids use `stdout+caches` over the named caches the case declares.
    - Every artifact outside the scope is still compared to the oracle (BC-6.03.002).
    - A Go output that differs from the expected file fails with
      `parity: exclusion <id>/<case>: go output differs from <expected_output_file>`.
@@ -122,7 +140,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 | EC-003 | Entry whose `table_test` names a deleted test | Run FAIL: table test missing |
 | EC-004 | Excluded case where Go output now equals the oracle | Passes against its expected file only if the expected file also equals that output. Otherwise FAIL; the entry must be revisited, never silently ignored |
 | EC-005 | `-update` (Tier B) run | Does not touch any `expected_output_file` of an exclusion entry |
-| EC-006 | Same case listed under two different ids (e.g. a D4-EX-3 config case on Windows that also hits D4-EX-1) | Allowed. Each entry checked independently; scopes must not both claim stdout |
+| EC-006 | Same case listed under two different ids (e.g. a macOS numeric-sid case that hits both OD-30 and OD-76's repeated-DST class) | Allowed. Each entry checked independently; scopes must not both claim stdout |
 
 ## Canonical Test Vectors
 

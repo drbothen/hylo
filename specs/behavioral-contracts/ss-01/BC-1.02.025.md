@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r5.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
 input-hash: "c8e8373"
@@ -46,7 +46,9 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 
 1. `x = float(n)` with Python's grammar (`pyfmt.ParseFloat` for strings: surrounding whitespace, underscores between
    digits, `nan`/`inf` spellings, exponents; ints and bools convert numerically). TypeError or ValueError → return `?`.
-2. `x >= 1e6` → `F(x/1e6, 1)` + `M`; else `x >= 1000` → `F(x/1000, 0)` + `k`; else `F(x, 0)`; `F` = Python
+2. With `k_from` = `statusline.units.tokens.k_from` (default 1000) and `M_from` =
+   `statusline.units.tokens.M_from` (default 1e6): `x >= M_from` → `F(x/M_from, 1)` + `M`;
+   else `x >= k_from` → `F(x/k_from, 0)` + `k`; else `F(x, 0)`; `F` = Python
    `format(x, ".Nf")`, half-even, Python spellings `nan`, `inf`, `-inf` (BC-5.01.001).
 3. No unit promotion after rounding.
 
@@ -54,6 +56,10 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 
 1. The function never raises.
 2. NaN fails both comparisons and prints `nan`; `+inf` passes `>= 1e6` and prints `infM`; `-inf` prints `-inf`.
+3. Parameterized keys (Policy 20): non-default `k_from` / `M_from` follow the same formula
+   above, generalized from legacy's literals (1000, 1e6; T-042); byte parity (vectors) is
+   obligated at the defaults only — other values are unit-tested against the formula, not
+   against Tier A goldens.
 
 ## Edge Cases
 
