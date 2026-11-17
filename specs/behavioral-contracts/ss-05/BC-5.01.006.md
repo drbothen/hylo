@@ -8,9 +8,9 @@ timestamp: 2026-11-15T21:30:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-  - ../semport/hylo-legacy/statusline-target-design.md
-  - ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "0000000"
+  - semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
+input-hash: "14867e3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python max(list) used at legacy/dgx_statusline.py SL:671)"

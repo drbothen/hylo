@@ -8,12 +8,12 @@ timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
-  - ../owner-decisions-log-2026-11-14.md
-  - ../../semport/hylo-legacy/statusline-target-design.md
-  - ../../semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
-  - ../../semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
-  - ../domain-spec/invariants.md
-input-hash: "0000000"
+  - owner-decisions-log-2026-11-14.md
+  - semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
+  - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
+  - domain-spec/invariants.md
+input-hash: "8b13223"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"

@@ -8,9 +8,9 @@ timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
-  - ../../semport/hylo-legacy/statusline-target-design.md
-  - ../../../docs/RESUME.md
-input-hash: "0000000"
+  - semport/hylo-legacy/statusline-target-design.md
+  - docs/RESUME.md
+input-hash: "3819837"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"

@@ -10,11 +10,11 @@ inputs:
   - domain-spec/L2-INDEX.md
   - domain-spec/invariants.md
   - behavioral-contracts/BC-ALLOCATION.md
-  - ../semport/hylo-legacy/statusline-target-design.md
-  - ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
+  - semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "0000000"
+input-hash: "d5e09c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"

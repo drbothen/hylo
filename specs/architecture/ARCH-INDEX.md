@@ -1,10 +1,10 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T16:00:00Z
+timestamp: 2026-11-17T07:45:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "c243f11"
@@ -115,7 +115,7 @@ Totals). Zero formal proofs claimed (iron law: Go cycle — the
 provable-grade pure cores are verified by exhaustive oracle tables + property/fuzz,
 declared per VP). Aggregate VP mapping by home: ARCH-00 P4 → VP-001; ARCH-01 →
 VP-002/004; ARCH-02 → VP-015/016/017; ARCH-03 (+ARCH-04 stores) →
-VP-003/005/006/007/008/018/020/021/027/028/029/030/031; ARCH-05 → VP-014/032/033;
+VP-003/005/007/008/018/020/021/027/028/029/030/031; ARCH-05 → VP-014/032/033;
 ARCH-06 → VP-006/023/024/025/026; ARCH-04/09 → VP-022; ARCH-07/08 →
 VP-009/010/011/012/013/019/034/035/037; ARCH-08 (timing gate) → VP-036. VP-001 and
 VP-036 homes aligned to the VP-INDEX catalog rows and the VP files themselves

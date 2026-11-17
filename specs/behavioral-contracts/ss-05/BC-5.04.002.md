@@ -6,8 +6,8 @@ status: draft
 producer: product-owner
 timestamp: 2026-11-15T17:00:00Z
 phase: 1a
-inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, ../semport/hylo-legacy/statusline-target-design.md, ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md, ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md, ../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md, owner-decisions-log-2026-11-14.md]
-input-hash: "0000000"
+inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md, owner-decisions-log-2026-11-14.md]
+input-hash: "689b66e"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; ports CPython datetime._mktime behind naive .timestamp() at legacy/dgx_statusline.py SL:983)"

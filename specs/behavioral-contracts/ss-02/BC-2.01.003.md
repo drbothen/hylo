@@ -8,9 +8,9 @@ timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
-  - ../owner-decisions-log-2026-11-14.md
-  - ../../semport/hylo-legacy/statusline-target-design.md
-input-hash: "0000000"
+  - owner-decisions-log-2026-11-14.md
+  - semport/hylo-legacy/statusline-target-design.md
+input-hash: "51f00c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; defaults taken from legacy/dgx_statusline.py SL:127-134)"

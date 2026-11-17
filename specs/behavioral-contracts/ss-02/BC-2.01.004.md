@@ -8,11 +8,11 @@ timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
-  - ../owner-decisions-log-2026-11-14.md
-  - ../../semport/hylo-legacy/statusline-target-design.md
-  - ../../semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
-  - ../../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "0000000"
+  - owner-decisions-log-2026-11-14.md
+  - semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
+  - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
+input-hash: "d4063b6"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"

@@ -11,8 +11,8 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
-  - ../semport/hylo-legacy/statusline-target-design.md
-input-hash: "0000000"
+  - semport/hylo-legacy/statusline-target-design.md
+input-hash: "f1e293b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"

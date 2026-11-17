@@ -10,10 +10,10 @@ inputs:
   - domain-spec/L2-INDEX.md
   - domain-spec/invariants.md
   - behavioral-contracts/BC-ALLOCATION.md
-  - ../semport/hylo-legacy/statusline-target-design.md
-  - ../semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
+  - semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "0000000"
+input-hash: "427aa34"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"

@@ -84,3 +84,186 @@ Burst narratives for this cycle, in chronological order.
 **Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
 
 **Closes:** all 12 consistency-audit findings CA-01..CA-12 (OD-154). Still open: fresh re-check of changed files, then phase-1-gate; the 145-BC input-hash normalization (spec-steward, optional follow-up); CLAUDE_AUTOCOMPACT_PCT_OVERRIDE advisory.
+
+---
+
+## Burst: BC input-hash normalization (CA-09 closed), re-check PASS, CR-01..03 fixed, phase-1-gate PASSED (2026-11-17)
+
+**Parent-commit:** 6b67d35 (factory(phase-1): consistency audit + fixes CA-01..12, ASM/R registers, OD-152..154)
+
+**Adversary verdict:** no adversary pass dispatched this burst (consistency re-check + gate bookkeeping; the phase-1d adversarial spec review is NEXT — Phase 0 passes converged 0:3 1:3 2:9 3:8 4:7 5:5, round record in `cycles/phase-0-ingestion/convergence-trajectory.md`).
+
+**Codifications:** no new owner rulings this burst (OD-152..154 remain the latest; next free OD-155 — log: `specs/owner-decisions-log-2026-11-14.md`).
+
+**Re-check outcome:** fresh re-check of the changed files PASS — report `cycles/phase-1-spec-crystallization/consistency-recheck-2026-11-17.md`. CA-01..CA-12 resolved; CR-01 fixed (`specs/prd.md`), CR-02 fixed (`specs/prd-supplements/assumptions-register.md`), CR-03 fixed (`specs/architecture/ARCH-INDEX.md`); CR-04 = 69 dependent artifacts hash-stale — deferred to the check-input-drift step before the owner gate; dependent-artifact hashes deliberately NOT updated this burst (do-not-update directive).
+
+**Gate outcome:** phase-1-gate PASSED 2026-11-17 (orchestrator evaluation): all criteria met. P1-scoped capabilities CAP-009/010/011/015 covered by BCs; the other 14 capabilities deferred to P2-P6 per OD-115/OD-131; module criticality at `specs/prd-supplements/module-criticality.md` (path note, not a failure); design-system and heuristic-evaluation criteria N/A (OD-100, feature_type = cli); ASM-001..006 + R-001..007 registers present; branch protection verified via GitHub API (5 required checks, strict). Next step: phase-1d-adversarial-spec-review.
+
+**Input-hash normalization (CA-09 closed):** all 145 BC files under `specs/behavioral-contracts/ss-01..ss-06` (ss-01: 93, ss-02: 13, ss-03: 3, ss-04: 3, ss-05: 19, ss-06: 14): frontmatter `inputs:` normalized from '..'-traversal form to repo-relative search-base form (resolvable by compute-input-hash; no '..' components per its CWE-22 guard) and the MISSING placeholders replaced with real input-hashes. BC content untouched (state-manager mandate: input-path frontmatter only).
+
+**Eviction note (keep-last-5):** step rows 17 (create-architecture DONE) and 18 (parallel Phase 1 steps DONE) evicted from STATE.md Current Phase Steps on appending rows 22-23; both preserved in the extracted session record above ("backup-create-architecture DONE ...", "parallel Phase 1 steps DONE ...") per the move-never-delete rule.
+
+**Files touched (Dim-1): 152 unique files**
+
+- .factory/STATE.md
+- .factory/sidecar-learning.md
+- .factory/specs/prd.md (CR-01 fix)
+- .factory/specs/prd-supplements/assumptions-register.md (CR-02 fix)
+- .factory/specs/architecture/ARCH-INDEX.md (CR-03 fix)
+- .factory/cycles/phase-1-spec-crystallization/consistency-recheck-2026-11-17.md (new, re-check report)
+- .factory/cycles/phase-1-spec-crystallization/burst-log.md (this entry)
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.007.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.008.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.010.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.007.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.008.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.010.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.011.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.012.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.013.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.014.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.015.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.016.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.017.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.018.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.019.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.020.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.021.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.022.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.023.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.024.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.025.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.026.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.027.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.028.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.029.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.030.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.007.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.008.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.010.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.011.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.012.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.013.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.014.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.015.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.016.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.017.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.018.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.019.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.020.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.021.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.007.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.008.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.010.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.011.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.012.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.013.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.014.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.015.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.016.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.017.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.018.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.019.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.020.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.021.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.007.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.008.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.06.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.06.002.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.001.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.002.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.003.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.004.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.005.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.001.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.002.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.003.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.004.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.005.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.006.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.03.001.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.03.002.md
+- .factory/specs/behavioral-contracts/ss-03/BC-3.01.001.md
+- .factory/specs/behavioral-contracts/ss-03/BC-3.02.001.md
+- .factory/specs/behavioral-contracts/ss-03/BC-3.02.002.md
+- .factory/specs/behavioral-contracts/ss-04/BC-4.01.001.md
+- .factory/specs/behavioral-contracts/ss-04/BC-4.01.002.md
+- .factory/specs/behavioral-contracts/ss-04/BC-4.01.003.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.001.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.002.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.003.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.004.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.005.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.006.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.001.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.002.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.003.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.004.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.005.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.006.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.03.001.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.03.002.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.03.003.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.03.004.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.04.001.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.04.002.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.04.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.01.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.01.002.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.01.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.002.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.004.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.002.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.004.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.04.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.04.002.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.04.003.md
+
+**Dim-2 Attestation:** artifact counts verified on disk this burst: 145 BC files under `specs/behavioral-contracts/ss-01..ss-06`; 37 VP files (+ VP-INDEX); 10 ARCH sections (+ ARCH-INDEX); registers ASM-001..006 + R-001..007 present under `specs/prd-supplements/`.
+
+**Dim-5 Attestation:** N/A — no compiled artifacts in this burst (markdown state/bookkeeping files only).
+
+**Dim-6 Attestation:** N/A — no schema-structured file edited; policies.yaml untouched this burst.
+
+**Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
+
+**Closes:** CA-09 (input-hash placeholders), CR-01..CR-03, the re-check step, and phase-1-gate (PASSED 2026-11-17). Still open: phase-1d-adversarial-spec-review NEXT; CR-04 dependent-artifact hash staleness (check-input-drift, pre-owner-gate); CLAUDE_AUTOCOMPACT_PCT_OVERRIDE advisory.

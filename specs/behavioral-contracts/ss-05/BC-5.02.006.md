@@ -8,9 +8,9 @@ timestamp: 2026-11-15T21:30:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-  - ../semport/hylo-legacy/statusline-target-design.md
-  - ../semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
-input-hash: "0000000"
+  - semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
+input-hash: "9d55c35"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces json.dump cache-file bytes; ruling (b) P3r2 §0)"

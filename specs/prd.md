@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2"
+version: "0.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T16:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -25,6 +25,7 @@ supplements:
   - prd-supplements/nfr-catalog.md
   - prd-supplements/module-criticality.md
   - prd-supplements/assumptions-register.md
+  - prd-supplements/risk-register.md
 ---
 
 # Product Requirements Document: hylo P1 — Status Line
@@ -585,7 +586,7 @@ cycle relies on:
 - **ASM-006 — Timeout ruling.** OD-56 replaces the per-socket timeout with a total fetch
   deadline (BC-1.04.001); output-identical on the corpus — validated.
 
-The companion R-NNN risk register is minted by the architect in a follow-up burst.
+The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-007).
 
 ## 10. Open Questions
 

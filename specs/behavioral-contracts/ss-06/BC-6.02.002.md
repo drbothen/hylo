@@ -10,9 +10,9 @@ inputs:
   - domain-spec/L2-INDEX.md
   - domain-spec/invariants.md
   - behavioral-contracts/BC-ALLOCATION.md
-  - ../semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "0000000"
+input-hash: "ca9ed6a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"

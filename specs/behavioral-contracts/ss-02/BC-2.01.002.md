@@ -8,12 +8,12 @@ timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
-  - ../owner-decisions-log-2026-11-14.md
-  - ../domain-spec/entities.md
-  - ../domain-spec/ubiquitous-language.md
-  - ../../semport/hylo-legacy/statusline-target-design.md
-  - ../../semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "0000000"
+  - owner-decisions-log-2026-11-14.md
+  - domain-spec/entities.md
+  - domain-spec/ubiquitous-language.md
+  - semport/hylo-legacy/statusline-target-design.md
+  - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
+input-hash: "21f6128"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445)"

@@ -8,8 +8,8 @@ timestamp: 2026-11-15T21:30:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-  - ../owner-decisions-log-2026-11-14.md
-input-hash: "0000000"
+  - owner-decisions-log-2026-11-14.md
+input-hash: "5e6f522"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; grammar from OD-05 as pinned in BC-2.01.005)"

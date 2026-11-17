@@ -1,10 +1,10 @@
 ---
 document_type: assumption-register
 level: L3
-version: "1.0"
+version: "1.0.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-17T16:30:00Z
 phase: 1a
 inputs: [prd.md]
 input-hash: "669ab0f"
@@ -16,7 +16,7 @@ traces_to: prd.md
 > Minted 2026-11-17 per owner ruling OD-152 (consistency audit CA-04). One ASM-NNN row
 > per operating assumption formerly held in prd.md §9 prose; Status, Validation Method
 > and Impact populated per the de facto mapping in consistency-audit-2026-11-17.md §10.1.
-> The companion R-NNN risk register is minted by the architect in a follow-up burst.
+> The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-007).
 
 | ASM ID | Assumption | Status | Validation Method | Impact | Traced To |
 |--------|-----------|--------|-------------------|--------|-----------|
