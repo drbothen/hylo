@@ -216,3 +216,42 @@ Passes 2 (9 rounds) and 3 (8 rounds) converged in the prior burst; see the entry
 ---
 
 <!-- Repeat for each burst. Maintain chronological order. -->
+
+## Extracted from STATE.md on 2026-11-17
+
+### Owner Decisions — rulings recorded 2026-11-14 (as recorded at the 2026-11-17 session-wrap pause)
+
+- **D16 committed on main (3e05cfe):** web UI (React + TypeScript + Vite, go:embed, Node build-time only) plus terminal UI on one local event API; design system in Storybook; guardrails. **D15 committed (a7b5e04).** Policy 12 now reads D1-D16.
+- **O1:** CI pins Python 3.11 for the statusline and Stop hook (confirmed 3.11.7 by the env probe); 3.12 for the proxy (venv 3.12.10).
+- **O2:** degraded output reproduced byte-for-byte for catalogued crash paths.
+- **O3 = D4-EX-1:** Go may show ⌂ on Windows.
+- **O5:** the nightly differential fuzz job runs but does not gate P1.
+- **Q-a:** harness stdio STRICT, confirmed by the env probe (LANG=en_US.UTF-8, no LC_ALL/PYTHONUTF8, utf8_mode 0, strict stdin/stdout, COLUMNS supplied by Claude Code).
+- **Q-b:** foreign-cache crash paths CP-C01..C10 are out of parity scope; the Go writer must produce legacy's exact cache format.
+- **Q-c = D4-EX-2:** fix the sticky transcript crash. Skip wrong-shape JSON lines as legacy skips invalid JSON (dgx_statusline.py:1060-1063); excluded from the parity diff; covered by Go table tests (BC-SL-098/099).
+- **LAN exposure** of the live legacy proxies/exporter: accepted by the owner until cutover (ruled via OD-24/OD-27). hylo proxy, UI and exporter bind to loopback by default (HY-BIND).
+- **OD-01..OD-94 decision list gate-ready** — `semport/hylo-legacy/hylo-legacy-owner-decisions.md`. Groups A-F: A 12 (incl. 2 ruled: OD-24/OD-27), B 19, C 13, D 10, E 2, F 8 = 64 issued; unused or reserved (30): OD-44, OD-49, OD-62-65, OD-67-73, OD-77-93; next free OD-95. Recommendations: 23 KEEP / 30 DEVIATE / 11 NEW. **Owner flag: OD-14** now recommends (a) do not port --subagent, reversing the earlier Phase-0 toggle recommendation (PLAN §3 non-goal; CC 2.1.323 removed subagentStatusLine) — confirm at the gate. D13/D14 remain recorded in the Decisions Log below.
+- **DECIDED 2026-11-14 (gate rulings; full log in `specs/owner-decisions-log-2026-11-14.md`):**
+  - No DGX_* aliases / no backwards compatibility (OD-05)
+  - No shadow week, full cutover (OD-52 moot)
+  - --subagent not ported (OD-14)
+  - Credential hygiene OD-06/07
+  - Upstream TLS OD-41
+  - HTTP/1.1 only OD-94
+  - Proxy lifecycle OD-66/50/38
+  - Config paths OD-95
+  - Public doc edits drafted in the main working tree (PLAN, STATUSLINE-WIDGETS, RESUME) → committed on main as c023bc6 (ruling below).
+- **Public doc edits committed on main as c023bc6** (PLAN D13/D15/P3/P5/P6/§6/§9, STATUSLINE-WIDGETS health dot, RESUME). Public main is 5 commits ahead of GitHub (f562477, b99082e, a7b5e04, 3e05cfe, c023bc6), not pushed.
+- **DECIDED 2026-11-15 (market-intel human gate; rows in `specs/owner-decisions-log-2026-11-14.md`):** rulings OD-96..OD-100, summarized in the market_intel frontmatter block above.
+
+### Phase Progress row detail — "Fix bursts (Phase 0)"
+
+**NONE** — no fix burst required yet; extraction-validation fixes were applied in-burst during the sweep.
+
+### Research (2026-11-14)
+
+Four reports in `specs/research/`, indexed in `specs/research/RESEARCH-INDEX.md` (verified: exactly one row per report):
+
+- `domain-hybrid-routing-claude-code-2026-11-14.md` (domain landscape, config surfaces, Messages API facts, policy risks, OpenAI translation); `general-go-port-parity-crossplatform-2026-11-14.md` (Python->Go byte-parity pitfalls, parity harness, cross-platform, deps, hardening, CI/release).
+- `general-go-tls-intercepting-proxy-2026-11-14.md` (stdlib vs goproxy/martian/go-mitmproxy, selective interception + Remote Control, ALPN/SSE/WebSocket, CA semantics, mitmproxy parity behaviors, testing); `peer-tool-lessons-2026-11-14.md` (peer lessons L1-L7; owner decisions OD-1 = D13, OD-2 = D14).
+- `domain-statusline-landscape-2026-11-15.md` (2026-11-15, domain): status line peer landscape + freshness delta since 11-14 + P1 risk signals — the market-intel input; row in `specs/research/RESEARCH-INDEX.md`.

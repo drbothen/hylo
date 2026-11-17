@@ -103,3 +103,18 @@ Index totals at convergence: 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 
      converted to rows in the Finding Progression table above.
      Original field format: adversary_pass_N_findings: "description"
      Original field format: adversary_pass_N_date: "YYYY-MM-DD" -->
+
+## Extracted from STATE.md on 2026-11-17
+
+### Convergence Status (as recorded at the 2026-11-17 session-wrap pause)
+
+- **All six passes CONVERGED.** Rounds: pass 0 — 3 (SUBSTANTIVE r1-r2, NITPICK r3); pass 1 — 3 (SUBSTANTIVE r1-r2, NITPICK r3); pass 2 — 9 (SUBSTANTIVE r1-r8, NITPICK r9); pass 3 — 8 (SUBSTANTIVE r1-r7, NITPICK r8; r7 self-declared NITPICK overridden by the orchestrator — new crash path H-09, retraction CONV-ABS-22); pass 4 — 7 (SUBSTANTIVE r1-r6, NITPICK r7; r4 self-declared NITPICK overridden — retractions and reliance on a retracted HTTP/2 fact); pass 5 — 5 (SUBSTANTIVE r1-r4, NITPICK r5).
+- Round-disposition declarations verified on disk in the final-round files (pass-0/1 r3 declarations; pass-4 r7 / pass-5 r5 "findings are nitpicks, not gaps").
+
+### Phase Progress row detail — "Adversary passes (Phase 0)" (as recorded 2026-11-17)
+
+**ALL SIX CONVERGED** — p0: 3 rounds (NITPICK r3); p1: 3 (NITPICK r3); p2: 9 (NITPICK r9); p3: 8 (r7 self-declared NITPICK overridden — crash path H-09, CONV-ABS-22); p4: 7 (NITPICK r7; r4 self-declared NITPICK overridden — retractions + reliance on a retracted HTTP/2 fact); p5: 5 (NITPICK r5). Trajectory-tail →0→0→0→0 placeholder retained for the formal finding series.
+
+### Registers paragraph (was under the Canonical Phase 1 Inputs table)
+
+Registers: BC index totals 232 BCs = 137 byte-exact + 44 JSON-equivalent + 10 out of scope + 6 approved deviation + 35 pending owner decision. Statement partition (1,809 Python statements): 903 re-read + 422 covered by pinned tables + 133 out of scope + 351 read in pass-2 r8; 0 uncovered. Retractions: RET crosswalk (pass-3 r4) plus CONV-ABS through 94; next free CONV-ABS 95; IDs 101-104 unused. Extraction validation (validate-extraction, not a deepening round): PASS-WITH-FIXES; exhaustive; 0 hallucinations. Final analysis (this burst): coverage audit PASS (step B.5, 0 gaps); extraction validation r2 PASS-WITH-FIXES (step B.6: 78/232 BCs sampled, 100% confirmed; 26/27 metric groups exact; 1 fix applied in-burst); definitive synthesis pass-8 (supersedes pass-6); lessons 53 — 13 P0 (L0-01..L0-13), 13 P1, 9 P2, 18 P3 — recorded in pass-8 §10. Evidence captured this burst: proxy venv `pyvenv.cfg` include-system-site-packages=false (proxy and preflight not affected by the user site; parity harness runs shimmed Python cases under -s); mitmproxy 12.3.1 with no config.yaml; Go 1.26.5 h2 facts recorded for OD-94. Trajectory-tail (D-433(e) LENGTH=4): →0→0→0→0 placeholder retained until the formal finding series begins.
