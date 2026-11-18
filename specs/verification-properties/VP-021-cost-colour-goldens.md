@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.001.md, behavioral-contracts/ss-01/BC-1.05.002.md, behavioral-contracts/ss-01/BC-1.05.003.md, behavioral-contracts/ss-01/BC-1.05.005.md, behavioral-contracts/ss-01/BC-1.05.007.md, behavioral-contracts/ss-01/BC-1.05.008.md]
-input-hash: "0ead974"
+input-hash: "0ae0d90"
 traces_to: prd.md
 source_bc: BC-1.05.008
 bcs: [BC-1.05.001, BC-1.05.002, BC-1.05.003, BC-1.05.005, BC-1.05.007, BC-1.05.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))", "1.4 2026-11-19T18:00:00Z: pass-7 fix (A2-14) — the quick leg's quantifier is the filtered population (SL:240-262): recorded sid/lane, 30-day window, rates length >= COST_MIN_N (= 10), $1 gate on the goldens side; the COST_MIN_N cold-start case (no threshold, no colour) is pinned as a table leg, so a correct implementation no longer false-fails on arbitrary-length rates"]
+modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))", "1.4 2026-11-19T18:00:00Z: pass-7 fix (A2-14) — the quick leg's quantifier is the filtered population (SL:240-262): recorded sid/lane, 30-day window, rates length >= COST_MIN_N (= 10), $1 gate on the goldens side; the COST_MIN_N cold-start case (no threshold, no colour) is pinned as a table leg, so a correct implementation no longer false-fails on arbitrary-length rates", "1.5 2026-11-20T18:00:00Z: pass-11 fix (A2-03, orchestrator call 10) — the percentile property derived from BC-1.05.005 exactly: the quantifier runs over qualified HISTORY ENTRIES building TWO lists (dollar list per PC1/PC2 — the $ colour thresholds come from THIS list, not the rate list; rate list further gated by PC3's per-src api_ms need, cc 300000 vs other 1800000); PC1's self-exclusion (k == sid skipped) replaces the 'single recorded sid' misstatement; the NaN finite restriction (EC-009, Python sorted with a NaN is non-monotone) carried normatively in the Method, not only a sketch comment; skeleton generator rewritten to entries → two lists", "1.6 2026-11-21T09:00:00Z: pass-11 residual — the Method paragraph's corrupted glyph line (a stray wrench emoji) repaired to its clause text '⛏ basis and $/h'; no other change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -39,11 +39,26 @@ per BC-1.05.008): the $ colour derives from the lane percentile
 thresholds exactly (p75/p95 percentiles per the cost_thresholds math), $/h threshold
 colouring, the ⛏ pick inside the $ block, and the $ / $/h number formatting match the
 oracle-pinned goldens byte-for-byte, including colour-band boundary rows. The
-for-all percentile leg is quantified over the population cost_thresholds actually
-filters (SL:240-262, A2-14): a single recorded sid and lane, the 30-day window,
-rates of length >= COST_MIN_N (= 10; shorter histories are the cold-start case
-returning no threshold — no colour — pinned as a table leg, not a quick leg), and
-the $1 session-minimum gate honoured on the goldens side.
+for-all percentile leg is derived from BC-1.05.005 exactly (PC1-PC4, SL:240-262;
+A2-14, A2-03). The quantifier runs over HISTORY ENTRIES, not bare rate lists, and
+cost_thresholds builds TWO lists qualified independently (A2-03): the DOLLAR list —
+the $ colour thresholds come from this list, not from the rate list — and the RATE
+list, a further subset of it. An entry `(k, e)` qualifies for the dollar list iff
+(PC1) it is not self-excluded — a stored key `k == sid` is SKIPPED (self-exclusion
+of the current sid, not "a single recorded sid") — and `e.lane == lane`, and it is
+within the strict 30-day window (`now - ts > window_s` excludes; exactly 30 d
+counts, EC-004), and (PC2) `e.usd` is a number (bool counts) with `usd >= min_usd`
+($1). It additionally qualifies for the rate list iff (PC3) `e.api_ms` is a number
+and `api_ms >= need`, the PER-SRC gate: `need = rate_min_api_ms.cc` = 300000 when
+`e.src == "cc"`, `rate_min_api_ms.other` = 1800000 for every other src (absent
+included); the rate value is `usd / (api_ms / 3.6e6)`. Each list independently
+returns None below COST_MIN_N (= 10; the cold-start case — no threshold, no colour
+— pinned as a table leg, not a quick leg); else sort ascending and floor-index
+(PC4). NaN-bearing histories are LEGAL inputs (EC-009, OD-138: pinned
+byte-for-byte per exact file order); a NaN can land on a picked index (Python
+`sorted` with a NaN is non-monotone), so the ordering corollary is stated only
+over NaN-free populations — the finite restriction is carried in the Method, not
+just a sketch comment.
 
 ## Source Contract
 
@@ -63,7 +78,10 @@ the $1 session-minimum gate honoured on the goldens side.
   (band edges, basis crossings), plus percentile math tables; PLUS the legs the BC
   VP-tables route here (C2-08): testing/quick for-all legs for the invariants marked
   "property proof" in BC-1.05.001/002/003/005 (colour is a pure function of the lane
-  percentile thresholds; p75 ≤ p95 whenever a pair is returned; ⛏ basis and $/h
+  percentile thresholds; p75 ≤ p95 only for NAN-FREE populations — the finite restriction is normative
+  here, because EC-009's legal NaN histories can put a NaN on a picked index and
+  return an unordered pair (Python `sorted` with a NaN is non-monotone, A2-03);
+  ⛏ basis and $/h
   banding are pure threshold functions — the quick-leg oracle INDEPENDENTLY RE-DERIVES
   the BC-1.05.005 rule in the harness; a canonical table cannot oracle randomly
   generated inputs, the VP-041 A2-08 lesson), and a Tier C differential formatting-fuzz
@@ -96,26 +114,34 @@ func TestCostProps_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
     cfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
         // A2-05: a Values filler must ASSIGN each arg (args[i] = reflect.ValueOf(x));
         // args arrives filled with zero reflect.Values — Elem().Set panics.
-        // A2-12: the thresholds ARE the percentiles of the rates (BC-1.05.005), so
-        // the generator produces rates and derives th from them — an independent th
-        // would be unconstrained by the percentile assertions.
-        // A2-14: the for-all quantifier is the FILTERED population — recorded sid
-        // and lane, 30-day window, rates length >= COST_MIN_N (= 10); the
-        // cold-start case (len < COST_MIN_N → no threshold, no colour) is a
-        // pinned table leg, not a quick leg, so a correct implementation no
-        // longer false-fails on arbitrary-length rates.
-        rates := genFiniteRatesMinN(r, costMinN) // FINITE only and len >= 10 (BC-1.05.005 qualifier; OD-138 NaN usd rows are pinned table legs)
-        args[0] = reflect.ValueOf(derivePercentile(rates, 0.75))
-        args[1] = reflect.ValueOf(rates)
+        // A2-12: the thresholds ARE the percentiles (BC-1.05.005), derived in the
+        // harness — an independent th would be unconstrained.
+        // A2-14/A2-03: the quantifier is the QUALIFIED-HISTORY population of
+        // BC-1.05.005 PC1-PC4 — entries, not bare rate lists. The harness
+        // re-derives BOTH lists: usdList (PC1: k == sid SELF-EXCLUDED, lane
+        // match, strict 30-d window; PC2: numeric usd, usd >= min_usd) and
+        // rateList (further subset by PC3: numeric api_ms >= PER-SRC need —
+        // cc 300000, other 1800000 — value usd/(api_ms/3.6e6)). The $ colour
+        // thresholds derive from usdList, the ⛏/$/h bands from rateList; each
+        // list independently returns None below COST_MIN_N (= 10). FINITE
+        // (NaN-free) populations only for the ordering corollary; EC-009
+        // NaN-bearing histories are pinned table legs ordered per exact file
+        // order (OD-138).
+        h := genQualifiedHistories(r, costMinN)
+        args[0] = reflect.ValueOf(derivePercentile(h.Usd, 0.75))  // usd pair
+        args[1] = reflect.ValueOf(derivePercentile(h.Usd, 0.95))
+        args[2] = reflect.ValueOf(derivePercentile(h.Rate, 0.75)) // rate pair
+        args[3] = reflect.ValueOf(derivePercentile(h.Rate, 0.95))
+        args[4] = reflect.ValueOf(h)
     }}
-    if err := quick.Check(func(th thresholds, rates []float64) bool {
-        c := costColor(th, rates)
+    if err := quick.Check(func(usTh thresholds, usd []float64, rateTh thresholds, rate []float64, h histories) bool {
+        c := costColor(usTh, rateTh, h)
         // A2-08: the oracle RE-DERIVES the percentiles from the BC-1.05.005 rule
         // (sort the finite inputs, pinned indices) — the check CAN fail; the bare
-        // p75 ≤ p95 tautology is kept only as a corollary.
-        return c.p75 == derivePercentile(rates, 0.75) &&
-            c.p95 == derivePercentile(rates, 0.95) &&
-            c.p75 <= c.p95 && coloringIsPure(th, rates)
+        // p75 ≤ p95 tautology is kept only as a corollary over NaN-free lists.
+        return c.usdPair == usTh && c.ratePair == rateTh &&
+            usTh.p75 <= usTh.p95 && rateTh.p75 <= rateTh.p95 &&
+            coloringIsPure(usTh, rateTh, h)
     }, cfg); err != nil {
         t.Fatalf("cost invariant violated: %v", err)
     }

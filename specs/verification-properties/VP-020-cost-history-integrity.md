@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-20T08:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.004.md, behavioral-contracts/ss-01/BC-1.05.006.md, behavioral-contracts/ss-01/BC-1.05.009.md, owner-decisions-log-2026-11-14.md]
-input-hash: "1a4e92b"
+input-hash: "232daeb"
 traces_to: prd.md
 source_bc: BC-1.05.004
 bcs: [BC-1.05.004, BC-1.05.006, BC-1.05.009]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)", "1.3 2026-11-18T14:50:00Z: ADV-P4 fix (A2-03/OD-169) — OD-166 record-guard leg added: record_cost SKIPS a cost value whose usd or api_ms cannot convert to float (legacy persisted the raw int); the current refresh still degrades; the resulting cache-byte divergence cites exclusion id OD-166 with its own table test TestCostHistory_OD166_RecordGuard and its own VP-012 closure row — no 'rides D4-EX-2' wording", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-26) — the OD-166 leg is exercised through the RENDERED refresh over both guard fields (usd and api_ms): the P1 cost.Record signature takes no api_ms and a library call renders nothing, so file-unchanged and the E-REN-002 degrade are observed in the rendered bytes", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (C2-04, A2-02: the OD-166 guard legs put the unconvertible exact int on STDIN (BC-1.05.004 EC-010/011) over a valid history; outcomes are field-specific (usd degrades per EC-010, api_ms renders normally per EC-011); a seeded-history huge value is the OD-160/CP-O10/O11 class)", "1.6 2026-11-20T08:00:00Z: pass-8 fixes (C2-06, C2-07) — the record-guard refresh outcome stated field- AND sign-specific per BC-1.05.004 PC1: usd degrades (CP-O10 at the .2f site SL:616, before the $/h math SL:622), POSITIVE huge api_ms passes the gate and degrades via CP-O11, NEGATIVE huge api_ms fails the gate and renders normally (EC-011); sketch gains the positive-api_ms row; the BC-1.05.004/006 testing/quick rows gained a matching property leg (TestCostRecord_QuickProperties: at-most-one-write under a fake clock; no duplicate keys), Method/Proof Method/Named Tests updated"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)", "1.3 2026-11-18T14:50:00Z: ADV-P4 fix (A2-03/OD-169) — OD-166 record-guard leg added: record_cost SKIPS a cost value whose usd or api_ms cannot convert to float (legacy persisted the raw int); the current refresh still degrades; the resulting cache-byte divergence cites exclusion id OD-166 with its own table test TestCostHistory_OD166_RecordGuard and its own VP-012 closure row — no 'rides D4-EX-2' wording", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-26) — the OD-166 leg is exercised through the RENDERED refresh over both guard fields (usd and api_ms): the P1 cost.Record signature takes no api_ms and a library call renders nothing, so file-unchanged and the E-REN-002 degrade are observed in the rendered bytes", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (C2-04, A2-02: the OD-166 guard legs put the unconvertible exact int on STDIN (BC-1.05.004 EC-010/011) over a valid history; outcomes are field-specific (usd degrades per EC-010, api_ms renders normally per EC-011); a seeded-history huge value is the OD-160/CP-O10/O11 class)", "1.6 2026-11-20T08:00:00Z: pass-8 fixes (C2-06, C2-07) — the record-guard refresh outcome stated field- AND sign-specific per BC-1.05.004 PC1: usd degrades (CP-O10 at the .2f site SL:616, before the $/h math SL:622), POSITIVE huge api_ms passes the gate and degrades via CP-O11, NEGATIVE huge api_ms fails the gate and renders normally (EC-011); sketch gains the positive-api_ms row; the BC-1.05.004/006 testing/quick rows gained a matching property leg (TestCostRecord_QuickProperties: at-most-one-write under a fake clock; no duplicate keys), Method/Proof Method/Named Tests updated", "1.7 2026-11-18T21:00:00Z: pass-11 fix (C2-07) — the field-/sign-specific refresh-outcome citations moved from BC-1.05.004 PC1 to PC4 in the statement and the sketch comment: pass-9 (ADV-P9-C2-03) relocated the OD-166 convertibility skip out of the PC1 guard to the write step (PC4), and PC1 now explicitly says the skip is not part of the guard; the 1.6 history entry keeps its as-of-pass-8 figures"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,7 +53,7 @@ string-form key (OD-30) under which the throttle applies and self-exclusion **ho
 usage block — field `usd` or `api_ms` (BC-1.05.004 EC-010/EC-011) — that cannot
 convert to float (magnitude >= 2**1024 - 2**970 as an exact int) is **not recorded** —
 the file is unchanged, where legacy persisted the raw int. The refresh outcome is
-field- AND sign-specific (BC-1.05.004 PC1): an unconvertible `usd` degrades the
+field- AND sign-specific (BC-1.05.004 PC4): an unconvertible `usd` degrades the
 current refresh (EC-010 — the `.2f` format site SL:616 raises CP-O10/BC-1.05.007,
 E-REN-002, before the $/h math at SL:622); a huge `api_ms` passes or fails the
 `>= burn_min_api_ms` gate BY SIGN — a POSITIVE huge `api_ms` passes the gate and
@@ -133,7 +133,7 @@ func TestCostHistory_OD166_RecordGuard(t *testing.T) { // OD-166/OD-169 record g
         wantOut string // EC-010: degraded line; EC-011: renders normally
     }{
         {"huge stdin usd", usageBlockUSD(exactIntAboveFloat64Max), degradedLine}, // EC-010: degrades (CP-O10 at the .2f site SL:616, before the $/h math SL:622)
-        {"huge positive stdin api_ms", usageBlockAPIMS(exactPosIntAboveFloat64Max), degradedLine}, // BC-1.05.004 PC1 (C2-06): passes the gate, degrades via CP-O11
+        {"huge positive stdin api_ms", usageBlockAPIMS(exactPosIntAboveFloat64Max), degradedLine}, // BC-1.05.004 PC4 (C2-06): passes the gate, degrades via CP-O11
         {"huge negative stdin api_ms", usageBlockAPIMS(exactNegIntAboveFloat64Max), normalRender}, // EC-011: fails the gate, renders normally, no $/h segment
     } {
         dir := tempCacheDir(t)

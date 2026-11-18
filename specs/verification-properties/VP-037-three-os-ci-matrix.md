@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
 timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.001.md, prd-supplements/nfr-catalog.md]
-input-hash: "8025997"
+input-hash: "549dc61"
 traces_to: prd.md
 source_bc: BC-6.04.001
 bcs: [BC-6.04.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:11:00Z: ADV-P3 fixes — “Windows runs Tier B without Python” corrected: setup-python installs the oracle on all three legs and Tier A runs on all three (BC-6.04.001, A2-10); POL-11 positive-coverage gate added to the sketch: every harness step asserts a computed “N … validated” count > 0 (A2-06)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-20, P19) — the -race legs (Linux, macOS) set CGO_ENABLED=1: the race detector requires cgo on Linux, so a CGO_ENABLED=0 race build is not a truthful toolchain claim; the CGO_ENABLED=0 build legs stand", "1.4 2026-11-20T15:00:00Z: pass-9 cosmetic fix (ADV-P9-A2-20) — missing space in 'report.The' repaired"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:11:00Z: ADV-P3 fixes — “Windows runs Tier B without Python” corrected: setup-python installs the oracle on all three legs and Tier A runs on all three (BC-6.04.001, A2-10); POL-11 positive-coverage gate added to the sketch: every harness step asserts a computed “N … validated” count > 0 (A2-06)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-20, P19) — the -race legs (Linux, macOS) set CGO_ENABLED=1: the race detector requires cgo on Linux, so a CGO_ENABLED=0 race build is not a truthful toolchain claim; the CGO_ENABLED=0 build legs stand", "1.4 2026-11-20T15:00:00Z: pass-9 cosmetic fix (ADV-P9-A2-20) — missing space in 'report.The' repaired", "1.5 2026-11-21T09:00:00Z: pass-11 residual — the Go floor term respelled to the BC-6.04.001 H1 verbatim 'Go 1.26.0 floor leg' in the Property Statement and the Primary BC quotation; no other change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,7 +35,7 @@ removal_reason: null
 ## Property Statement
 
 Every change runs the full matrix — ubuntu-24.04, macos-15 (arm64), windows-2025 — on
-Go 1.26.x with `CGO_ENABLED=0` builds, and the `-race` legs (Linux and macOS) set
+the Go 1.26.0 floor leg with `CGO_ENABLED=0` builds, and the `-race` legs (Linux and macOS) set
 `CGO_ENABLED=1` because the race detector requires cgo (A2-20) — Tier A corpus
 (interpreter path from setup-python, OD-108) on all three legs, Tier B goldens, gitleaks + category scan, and the printed timing report. The resolved
 Python patch version is recorded in Tier B golden metadata (RK-4). Non-zero harness
@@ -46,7 +46,7 @@ validated” count > 0 before passing.
 ## Source Contract
 
 - **Primary BC:** BC-6.04.001 — CI matrix: ubuntu-24.04 / macos-15 arm64 /
-  windows-2025; Go 1.26.x leg; -race; gitleaks.
+  windows-2025; Go 1.26.0 floor leg; -race; gitleaks.
 - **Partial coverage:** NFR-004 (three-OS CI green for every change); RK-4 (golden
   metadata); OD-108 (absolute interpreter path from setup-python).
 - **Invariant verified:** D5 ordering (cross-platform before generalization); the

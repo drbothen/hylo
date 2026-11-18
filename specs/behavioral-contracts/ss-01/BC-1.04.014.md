@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md]
-input-hash: "27b62f9"
+input-hash: "78dfe5a"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "1.3 2026-11-18: pass-11 remediation ADV-P11-C2-04 (cached-path sparkline crash sites EC-008..EC-010 added — dict/number/null hist TypeError at the SL:664 slice, short-list-point IndexError at SL:655 via SL:664, plotted giant exact int OverflowError at SL:674, non-numeric plotted value TypeError at SL:671/674, OD-160 class; DI-012 lifted into the L2 row; timestamp raised above the new modified entry)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,6 +71,9 @@ paths. Notation: `\e` is byte 0x1B.
 | EC-005 | Same NaN history but row stale | no sparkline call → no crash |
 | EC-006 | NaN point older than the last 12 | not plotted → no crash |
 | EC-007 | Sparkline disabled | main passes `[]` → no crash |
+| EC-008 | Cached path, stored `hist` a JSON dict, number or null (foreign cache, exclusion id **OD-160**) | `hist[-12:]` raises TypeError (a dict slice is unhashable in CPython 3.11; SL:664) → errDegraded, same top-level-guard disposition as PC1 (not the CP-N02 `int()` site itself) |
+| EC-009 | Cached path, a stored point a list shorter than 2 elements | IndexError inside `_norm_pt` (SL:655 via SL:664) → errDegraded (same class; on the cached path the sparkline's own normalization at SL:664 is the first — BC-1.04.002 PC1 returns `hist` raw) |
+| EC-010 | A plotted point's value a giant exact int (magnitude >= 2**1024 - 2**970) or a non-numeric scalar (foreign cache, **OD-160**) | OverflowError (SL:674) / TypeError (SL:671/SL:674) → errDegraded (same class) |
 
 ## Canonical Test Vectors
 
@@ -93,7 +97,7 @@ paths. Notation: `\e` is byte 0x1B.
 | Source | legacy/dgx_statusline.py:sparkline (SL:659-690; raise at SL:673-675); guard (SL:1238-1245) |
 | Legacy contract | BC-SL-073 (P3 r1 new; r7 flag "latent in production") |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 (cached-path foreign-hist crash shapes EC-008..EC-010 under the OD-160 named-deviation rule) |
 | Decisions | owner ruling on catalogued crash paths (handled defensively, byte for byte; P3 r7 §5) |
 | Architecture Module | `internal/statusline/sparkline.go` |
 | Stories | TBD |

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.6"
+version: "1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
@@ -23,6 +23,7 @@ modified:
   - "1.4 pass-5 remediation (ADV-P5-B04): glyphs named per key with the orchestrator-call-2 renames — statusline.glyphs.reroute → cache_read (U+27F3, SL:594), statusline.glyphs.stale → cache_rebuild (U+21BB, SL:598-599); not shipped, no alias; 2026-11-18T05:42:56Z"
   - "1.5 pass-6 remediation (OD-184 wording + B16): Inv 2 glyph length respelled to the OD-184 canon (exactly 1 code point, measured in legacy's render width); history labels version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
   - "1.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
+  - "1.7 pass-11 remediation (ADV-P11-B06): PC2.3's dim token brackets pinned as named format constants, not config (D15; the theme separator governs inter-segment separators, not intra-segment markup); no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +60,10 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
       `\e[97m` + `statusline.labels.input` (default `in`) + `_fmt_tok_c(c_in)` + `\e[0m`, `\e[33m✍` + `_fmt_tok_c(c_wr)` + `\e[0m`,
       `\e[36m⟳` + `_fmt_tok_c(c_rd)` + `\e[0m`;
    3. if there are **two or more** inner parts: `\e[2m[\e[0m` + parts joined by one space + `\e[2m]\e[0m`
-      (a single part equals `↑` and is omitted entirely);
+      (a single part equals `↑` and is omitted entirely). The dim brackets (SL:596) are **named format
+      constants** of this widget, not config (D15 rationale: display-format markup of the output, parity-bound
+      at four bytes each; why not config = the theme's `statusline.theme.separator` governs inter-segment
+      separators, not intra-segment markup — no ruling mints a key for this site);
    4. `\e[90m ↓\e[0m\e[97m` + `_fmt_tok_c(tout or 0)` + `\e[0m`;
    5. if `rb` is numeric and `> 0`: ` \e[2m\e[33m↻` + `format(rb, ".0f")` (half-even) + `\e[0m`.
 3. When not shown, no segment is appended.

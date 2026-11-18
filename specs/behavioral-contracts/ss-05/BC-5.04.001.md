@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "db51b69"
+input-hash: "42be7fc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -25,6 +25,7 @@ modified:
   - "2026-11-19T04:00:00Z (1.2.4) ADV-P6 remediation D06 + D10 / orchestrator call 2 — signatures carry the third outcome in pure pyfmt: FromISOFormat(s, loc, msvcDomain bool) (float64, error) with sentinels ErrValue (None) and ErrLocaltimeDomain (caller degrades); LocalToUnix(fields, loc, msvcDomain bool) (int64, error); statusline injects msvcDomain = platform.IsWindows(), no platform import (AD-02); Pre-2 TZ reading aligned to OD-177 (empty or unparseable TZ → UTC; unset → OS-zone fallback)"
   - "2026-11-19T17:00:00Z (1.2.5): ADV-P7 remediation D06+D07 (orchestrator call 8) — Description states the every-probe domain rule: all MSVC calls (t, u1, u1-86400, u2) are domain-checked, so the working domain is left-open (1970-01-01T00:00:00, year 3001) — a naive wall time on or before 1970-01-01 degrades via the fold-0 u1-86400 dip (PC-6 already correct; Description's [1970-01-01, ...) interval fixed); Pre-1 non-str ownership stated (caller's Value resolution; canon (float64, error) with ErrValue), superseding (0, false). Crash id CP-T09 names the degrade"
   - "2026-11-20T18:30:00Z (1.2.6): ADV-P9 remediation D09 — the working domain's lower bound corrected to 1970-01-02T00:00 local wall (the fold-0 u1 − 86400 probe is negative for every wall time before it, instant before 1970-01-02T00:00:00Z, shifted by the zone offset; 1970-01-01T12:00 degrades); supersedes the 1.2.5 interval left end (verified by probe arithmetic, CPython 3.11.7)"
+  - "2026-11-21T07:00:00Z (1.2.7): ADV-P11 remediation D06 (orchestrator call 13) — the working domain is LEFT-CLOSED [1970-01-02T00:00:00 local wall, year 3001): under the parity pin TZ=UTC the boundary wall gives t = 86400 and probe u1 − 86400 = 0, inside MSVC's domain (re-measured 2026-11-18, CPython 3.11.7), so the boundary instant itself renders; the contradictory zone-offset wording dropped (not measured); same statement in BC-5.04.002 and BC-6.04.003"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,13 +52,14 @@ leaves MSVC's domain. Every MSVC call in the conversion — the probes `t`, `u1`
 and `u2` — is checked against MSVC `localtime_s`'s domain (pass-7 D06, orchestrator
 call 8), so a NAIVE wall time ON OR BEFORE 1970-01-01 (the fold-0 `u1 - 86400` probe
 already dips below MSVC's 1970-01-01 floor) or AT OR AFTER YEAR 3001 degrades; the
-working domain of the whole conversion is therefore left-open
-`(1970-01-02T00:00:00 local wall, year 3001)`, not the MSVC range itself — the lower
-bound is set by the probe, not by MSVC's own floor: `u1 − 86400` is negative for every
-naive wall time before 1970-01-02T00:00 (instant before 1970-01-02T00:00:00Z; shifted
-by the zone offset), so e.g. 1970-01-01T12:00 degrades even though it is inside the
-former `(1970-01-01T00:00:00, ...)` interval (ADV-P9-D09, verified by probe arithmetic
-under CPython 3.11.7). The flag is injected — statusline passes
+working domain of the whole conversion is therefore LEFT-CLOSED
+`[1970-01-02T00:00:00 local wall, year 3001)`, not the MSVC range itself — the lower
+bound is set by the probe, not by MSVC's own floor: under the parity pin `TZ=UTC` the
+boundary wall 1970-01-02T00:00:00 gives `t = 86400` and the fold-0 probe
+`u1 − 86400 = 0`, INSIDE MSVC's domain (probe arithmetic re-measured 2026-11-18 on
+CPython 3.11.7), so the boundary instant itself renders, while every naive wall time
+BEFORE it gives a negative probe and degrades — e.g. 1970-01-01T12:00 degrades
+(ADV-P9-D09; interval sidedness corrected pass-11 D06). The flag is injected — statusline passes
 `msvcDomain = platform.IsWindows()` — so the rule stays in pure pyfmt with no platform
 import (AD-02).
 

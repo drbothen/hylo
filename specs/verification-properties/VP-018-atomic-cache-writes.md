@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, behavioral-contracts/ss-01/BC-1.06.001.md, behavioral-contracts/ss-01/BC-1.06.002.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "984e49c"
+input-hash: "f03476d"
 traces_to: prd.md
 source_bc: BC-1.06.001
 bcs: [BC-1.06.001, BC-1.06.002, BC-6.03.003, BC-2.01.004]
@@ -20,7 +20,8 @@ proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
 modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: dropped BC-1.03.002 from bcs — VP-018 verifies none of its properties (reset predicate, zero-save, 16-key order)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — OD-163: a save removes only its own temp file, no directory-wide sweep (concurrency ruling for ADV-P2-A03/A2-15); load-failure wording aligned with VP-020 (the next save overwrites the file — A2-03); swallow/retry and cleanup-timing wording reconciled with the skeleton (A2-28)", "1.4 2026-11-18T09:23:00Z: ADV-P3 fix (A2-25) — retry scope pinned: the rename-retry arm is Windows-only (sharing violations are the named Windows fs difference); on POSIX a failed rename reports failure immediately, matching legacy", "1.5 2026-11-18T14:28:00Z: ADV-P4 fix (A2-07) — TestCacheStore_OD110_TempCleanup skeleton OS-gated: the success-after-retry leg runs only on windows (runtime.GOOS gate); POSIX legs assert immediate failure reporting, so a correct implementation no longer goes red on the ubuntu/macos CI legs", "1.6 2026-11-19T12:00:00Z: pass-6 fixes (OD-186: single attempt count — one initial attempt + two retries = three attempts (aligned with ARCH-04 and BC-6.03.003); the retry delay is config statusline.cache.rename_retry_delay_ms; the widened temp-file scope (Windows rename-retry persistence) cited)", "1.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-21) — bcs: gains BC-2.01.004, whose PC-11 registry row cross-references this VP for the rename_retry_delay_ms key semantics; Source Contract names the row; no property change",
-  "1.8 2026-11-19T18:00:00Z: pass-7 fixes (A2-07/OD-188, A2-08) — the Windows rename retry count is CONFIG, not a constant: statusline.cache.rename_retry_limit (Int, default 2, range 0..10, labeled judgment call, OD-188), beside rename_retry_delay_ms; total attempts = 1 + limit; the 'no parity-visible behavior' constant justification is withdrawn (the widened temp-file scope makes the retry outcome parity-visible — that is WHY it is config now); the leaked-temp oracle is keyed on the mkstemp pattern <basename>.XXXXXXXX (mkstemp prefix, SL:201), not a .tmp suffix a correct temp name can never carry"]
+  "1.8 2026-11-19T18:00:00Z: pass-7 fixes (A2-07/OD-188, A2-08) — the Windows rename retry count is CONFIG, not a constant: statusline.cache.rename_retry_limit (Int, default 2, range 0..10, labeled judgment call, OD-188), beside rename_retry_delay_ms; total attempts = 1 + limit; the 'no parity-visible behavior' constant justification is withdrawn (the widened temp-file scope makes the retry outcome parity-visible — that is WHY it is config now); the leaked-temp oracle is keyed on the mkstemp pattern <basename>.XXXXXXXX (mkstemp prefix, SL:201), not a .tmp suffix a correct temp name can never carry",
+  "1.9 2026-11-18T21:00:00Z: pass-11 fix (A2-01) — the slash-sid passage respelled per ARCH-03 AD-03 / BC-1.06.001 Inv 3 / BC-1.06.002 PC2: NO in-memory overlay answers later reads (AD-03 rejected the overlay option because it gets failed-replace semantics wrong); every load of that path returns {} within and across refreshes — the former 'while the in-memory overlay still answers the same refresh' wording contradicted the rejected-option ruling"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,8 +46,11 @@ temp-file cleanup; OD-163 resolves the cross-window deletion hazard of ADV-P2-A0
 restoring parity: no Go-side sweep at all). Temp cleanup runs inside `Save`, never on
 the load/read path. A save
 whose sid contains `/` performs a failed
-replace that persists nothing while the in-memory overlay still answers the same
-refresh (BC-1.06.002); a failed rename under Windows sharing violations retries
+replace that persists nothing, and NO in-memory
+overlay answers later reads (AD-03 rejected the overlay option precisely because it
+gets failed-replace persistence semantics wrong; BC-1.06.001 Inv 3): within and
+across refreshes every load of that path returns `{}` (BC-1.06.002 PC2), which is
+what the same refresh's subsequent reads see; a failed rename under Windows sharing violations retries
 exactly `statusline.cache.rename_retry_limit` times — CONFIG (OD-188: Int, default 2,
 range 0..10, labeled judgment call, registered beside
 `statusline.cache.rename_retry_delay_ms`), total attempts = 1 + limit, the single

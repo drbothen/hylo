@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -24,6 +24,7 @@ modified:
   - "1.3.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-3 stamp re-dated ascending; no behavioral change"
   - "1.3.4 pass-6 remediation (ADV-P6-B16): history labels reconciled \u2014 the sync-check entry no longer cites a nonexistent preceding 1.3.1; no behavioral change; 2026-11-19T04:00:00Z"
   - "1.3.5 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B04): PC4's clamp claim withdrawn \u2014 clamping a negative overflow to math.MinInt64 is not output-equivalent when narrow_cols is itself MinInt64 (Python -10**30 >= -2**63 is False, clamped Go MinInt64 >= MinInt64 is True); the row-2 comparison must be made on the exact sign-preserving big-int value"
+  - "1.3.6 pass-11 remediation (ADV-P11-B03): the pass-10 counter-case gained EC-012 and its canonical vector (COLUMNS = \u221210^30 with narrow_cols = MinInt64 and ROWS 2: exact big-int comparison keeps row 2 hidden where a MinInt64 clamp would show it; interpreter-verified CPython 3.11.7); no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -83,6 +84,7 @@ protocol input, not a hylo setting: it has no `HYLO_*` key and is not validated 
 | EC-009 | `"-"` + 4,301 nines | 0 (digit limit) -> no trim, row 2 **shown** (contrast BC-1.01.007) |
 | EC-010 | absent | 0 |
 | EC-011 | `COLUMNS` containing undecodable bytes (raw 0xFF, invalid UTF-8) | Python decodes the env var with `surrogateescape`, then `int()` raises ValueError → 0. Go pins the same result: `os.Getenv` returns raw bytes; `pyfmt.ParseInt` over invalid UTF-8 is a ValueError equivalent → 0 (no trim, row 2 shown) |
+| EC-012 | `-` + `1` + 30 x `0` (−10^30) with `statusline.narrow_cols` = −9223372036854775808 (MinInt64; the int grammar admits it) and ROWS = 2 | cols = −10^30 exact; the row-2 comparison −10^30 ≥ −2^63 evaluates **False** → row 2 **hidden** (BC-1.01.003 PC1); clamping the parse to MinInt64 compares MinInt64 ≥ MinInt64 = True and wrongly shows row 2 (the ADV-P10-B04 counter-case, now pinned) |
 
 ## Canonical Test Vectors
 
@@ -96,6 +98,7 @@ protocol input, not a hylo setting: it has no `HYLO_*` key and is not validated 
 | `"80.0"` | 0 | error |
 | `"0x50"` | 0 | error |
 | `"-"` + 4,301 x `9` | 0 | error |
+| `-` + `1` + 30 x `0` (−10^30), with `statusline.narrow_cols` = −9223372036854775808 (MinInt64), ROWS 2 | cols = −10^30 exact (sign-preserving big int); row 2 **hidden** (−10^30 ≥ −2^63 is False; a MinInt64 clamp would compare True and show row 2 — ADV-P10-B04) | edge-case |
 
 All verified 2026-11-15 by calling legacy `term_cols()` under CPython 3.11.7.
 

@@ -2,10 +2,10 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.22"
+version: "1.23"
 status: draft
 producer: architect
-timestamp: 2026-11-21T14:00:00Z
+timestamp: 2026-11-21T15:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
 input-hash: "e954932"
@@ -34,6 +34,7 @@ modified:
   - "1.20 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A2 sync) — the BC-1.05.009 coverage-map row gains VP-012 (VP-012 bcs: gained it in agent 3's pass-8 delta; the row had lagged); union re-machine-check scripted over all 41 VP files x 154 BC bodies: 270 directed bcs: edges, 0 forward-only, reverse-only residue exactly the standing 3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions (two additional raw hits — VP-001 in BC-1.01.002, VP-003 in BC-6.03.004 — are modified:-history mentions, not live citations)"
   - "1.21 2026-11-21T12:00:00Z: pass-10 sync (agent 4) — ADV-P10-A2-04: the VP-008 catalog Name cell gains the qualifier 'with the ruled PC2 exceptions' (VP-008 v1.5, pass-8 A2-03, added it to the file title; the index had lagged). Agent 3's pass-10 VP-001 bcs: delta landed on disk mid-burst and is synced: VP-001 gains eleven co-owner BCs (BC-1.02.006/.011/.012/.014/.017/.029, BC-1.04.001/.004/.005, BC-1.05.002/.003; ADV-P10-C2-11/B03), the eleven coverage-map rows gain VP-001, and the scripted recount reads 281 directed bcs: edges, 0 forward-only. Agent 4's own pass-10 edits (VP-028 statement, VP-022 statement, VP-030 generator) change no bcs: frontmatter. The count-propagation hook's stale-count citations are historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative), not live counts — live counts agree at 41 VPs / 154 BCs (STATE.md last_amended line; SC-32 precedent: history entries are provenance, not rewritten)"
   - "1.22 2026-11-21T14:00:00Z: pass-10 residual sweep (product-owner) — VP-001 bcs: gains the two C2-11 reciprocity co-owners BC-1.02.025 (the CP-O04 owner, EC-010) and BC-1.05.005 (the history-borne CP-O10/O11 raise in cost_thresholds, EC-011), both BC-body VP-001 rows + VP Anchors verified on disk in the same burst; the two coverage-map rows gain VP-001; the scripted recount over all 41 VP files reads 283 directed bcs: edges, 0 forward-only, reverse-only residue exactly the standing 3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions; the count-propagation hook's VP/BC count citations remain historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative — SC-32 precedent), live counts agree at 41 VPs / 154 BCs"
+  - "1.23 2026-11-21T15:00:00Z: pass-11 residual sweep (product-owner) — VP-001 bcs: and VP-012 bcs: gain BC-1.04.018 (that contract's VP-table rows route its OD-160 legs to both: the never-blank OverflowError degrade leg to VP-001's fault-injection ladder and the OD-160 closure citation to VP-012; ADV-P11-C2-02 reciprocity), the two Source Contract sections name the rows, and the BC-1.04.018 coverage-map row gains VP-001, VP-012; scripted recount over all 41 VP files reads 285 directed bcs: edges, 0 forward-only, standing residue unchanged. (Stamp 15:00Z, not the sweep's 09:00Z default, solely to keep this file's modified[] ascending after the 1.22 14:00Z entry — SC-27 precedent.)"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -214,7 +215,7 @@ modified:
 | BC-1.04.015 | VP-001, VP-030 |
 | BC-1.04.016 | VP-001, VP-030 |
 | BC-1.04.017 | VP-030 |
-| BC-1.04.018 | VP-030 |
+| BC-1.04.018 | VP-030, VP-001, VP-012 |
 | BC-1.04.019 | VP-030 |
 | BC-1.04.020 | VP-019, VP-030 |
 | BC-1.04.021 | VP-030 |
@@ -348,7 +349,11 @@ the two reciprocity co-owners BC-1.02.025 (the CP-O04 owner, EC-010) and BC-1.05
 (the history-borne CP-O10/O11 raise in `cost_thresholds`, EC-011; ADV-P10-C2-11
 residual), the two map rows gain VP-001, and the recount reads 283 directed VP→BC
 `bcs:` edges, 0 forward-only — residue exactly the standing 3 design references +
-3 removal-note citations + 2 VP-041 scope-split contrast mentions; Pass-8 second sync (residual sweep): agent 3's `bcs:` deltas
+3 removal-note citations + 2 VP-041 scope-split contrast mentions. Pass-11 residual
+sweep 2026-11-21T15:00:00Z, scripted over all 41 VP files × 154 BC bodies: VP-001 and
+VP-012 gain BC-1.04.018 (its VP-table rows route to both; ADV-P11-C2-02), the map row
+gains both ids, and the recount reads 285 directed VP→BC `bcs:` edges, 0 forward-only
+— residue unchanged; Pass-8 second sync (residual sweep): agent 3's `bcs:` deltas
 reported and synced — VP-004 gains BC-1.07.001 (subagent NDJSON exit-surface leg of
 the for-all fuzz; the reciprocal BC-body VP-table row delivered in BC-1.07.001
 v1.0.7), VP-012 gains BC-1.03.002/.005/.014/.016 and VP-013 gains

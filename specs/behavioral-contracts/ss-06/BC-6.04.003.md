@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "8d8509c"
+input-hash: "1162cba"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-19T00:25:00Z (1.2.4) ADV-P5 remediation D10+D30 — Windows skip removed per OD-171/OD-177 (naive-timestamp cases run on all three legs; BC-5.04.001 OSError rule cited); HYLO_PARITY_FUZZSECONDS named as this contract's harness budget with the 0/unset-fails-on-schedule semantics (D30)"
   - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
   - "1.2.6 2026-11-19T17:00:00Z: ADV-P7 remediation D06 + D16 (orchestrator call 8) - the MSVC OSError rule applies at EVERY MSVC call in the local-to-UTC conversion (probes t, u1, u1-86400, u2), not only range-end extremes; new crash id CP-T09 named (Windows MSVC localtime domain OSError on a naive transcript timestamp; append-only, CP-T08 retired); Tier C out-of-domain list gains the OD-166 huge-int usd/api_ms divergence and the D4-EX-2 transcript-overflow extension; Inv 3 restated: entries are path-keyed, generated cases are covered by the PC-3 domain exclusion plus the rider register"
+  - "1.2.7 2026-11-21T07:00:00Z: ADV-P11 remediation D06 (orchestrator call 13) - the CP-T09 note states the working domain once and consistently with BC-5.04.001/BC-5.04.002: LEFT-CLOSED [1970-01-02T00:00:00 local wall, year 3001) - under the parity pin TZ=UTC the boundary wall gives probe u1 - 86400 = 0, inside MSVC's domain (re-measured 2026-11-18, CPython 3.11.7), so the boundary instant itself renders"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,7 +83,10 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
    BC-5.04.001 PC-6 is checked at EVERY MSVC call in the local-to-UTC conversion — the
    probes `t`, `u1`, `u1 - 86400` and `u2` (call 8, pass 7; crash id CP-T09: a naive
    transcript timestamp on or before 1970-01-01, or from year 3001, degrades wherever
-   its probe leaves the domain) — so the hole is not limited to extreme range-end
+   its probe leaves the domain; the working domain is LEFT-CLOSED
+   `[1970-01-02T00:00:00 local wall, year 3001)` — under the parity pin `TZ=UTC` the
+   boundary wall gives probe `u1 − 86400 = 0`, inside MSVC's domain, so the boundary
+   instant itself renders; pass-11 D06, identical to BC-5.04.001/BC-5.04.002) — so the hole is not limited to extreme range-end
    probes; generated present-day values never enter it, and CP-T09's directional leg
    is the committed rider test, not a generated case. The OD-159/160/161
    foreign-shape classes are out of the generator's domain (their

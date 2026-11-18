@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T06:25:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "73c010e"
+input-hash: "11dfbf1"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces os.path normpath/basename used at legacy/dgx_statusline.py SL:373-390, 460)"
@@ -18,7 +18,7 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["2026-11-18T00:00:00Z (1.2.1): ADV-P4 remediation D18 - abspath/join/dirname de-scoped from pyfmt (ARCH-06 agreement); flavor selection pinned to runtime.GOOS incl. Basename", "2026-11-18T00:00:00Z (1.2.2): pass-4 residual sweep — BC-1.02.003 cross-reference updated to the enriched project-label title (ADV-P4-B17)", "2026-11-18T00:00:00Z (1.2.3): pass-5 residual sweep (ADV-P5-B14) — 1.2.2 entry re-dated ascending (its stamp predated 1.2.1); no behavioral change", "2026-11-19T03:55:00Z (1.2.4): ADV-P6 remediation D22 — stale anchoring-gap wording replaced with the resolved anchor: BC-1.02.004 PC-1/EC-012 own the per-flavor abspath/join/dirname rules (Inv 3 and Source row updated)"]
+modified: ["2026-11-18T00:00:00Z (1.2.1): ADV-P4 remediation D18 - abspath/join/dirname de-scoped from pyfmt (ARCH-06 agreement); flavor selection pinned to runtime.GOOS incl. Basename", "2026-11-18T00:00:00Z (1.2.2): pass-4 residual sweep — BC-1.02.003 cross-reference updated to the enriched project-label title (ADV-P4-B17)", "2026-11-18T00:00:00Z (1.2.3): pass-5 residual sweep (ADV-P5-B14) — 1.2.2 entry re-dated ascending (its stamp predated 1.2.1); no behavioral change", "2026-11-19T03:55:00Z (1.2.4): ADV-P6 remediation D22 — stale anchoring-gap wording replaced with the resolved anchor: BC-1.02.004 PC-1/EC-012 own the per-flavor abspath/join/dirname rules (Inv 3 and Source row updated)", "2026-11-21T07:00:00Z (1.2.5): ADV-P11 remediation D05 (orchestrator call 16) — PC-3 states the CPython ntpath.root rule: split runs splitdrive first, so a UNC root \\\\server\\share (and a \\\\\\?\\\\ device root) has NO basename (''), and the SL:460 label falls back to the normpath; PC-4 example and EC-008 added"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,9 +50,17 @@ into `/`, BC-SL-059), so it is not used (design IM-11; pitfall PR-20).
 2. **NtNormpath(p):** treats `/` and `\` as separators and outputs `\`; preserves drive (`C:`) and UNC
    (`\\server\share`) prefixes and the `\\?\` prefix; `C:` stays `C:`, `C:\` stays `C:\`; `//` → `\\`; `""` → `.`.
 3. **Basename(p)** returns the text after the last separator of the active flavor (`/` for posix; `/`, `\` and the
-   drive colon for nt); `""` when `p` ends with a separator.
+   drive colon for nt); `""` when `p` ends with a separator. NT flavor (pass-11 D05: CPython
+   `ntpath.basename` is `split(p)[1]`, and `split` runs `splitdrive` FIRST, so the root of
+   a UNC path or a `\\?\` device path is consumed by `splitdrive`): a UNC root
+   `\\server\share` has NO basename — `basename` is `""` and the SL:460 label falls back
+   to the normpath `\\server\share` (PC-4); likewise for a `\\?\`-prefixed device root
+   and for a bare drive root (`EC-006`). PC-3 as formerly written ("text after the last
+   separator") would wrongly give `share` for the UNC root.
 4. The project label call site `basename(normpath(p)) or normpath(p)` (SL:460) yields `//` for `//`, `/` for `/..`,
-   `proj` for `/work/proj/`, and on Windows `C:\` for `C:\`.
+   `proj` for `/work/proj/`, and on Windows `C:\` for `C:\`; on Windows a UNC root
+   `\\server\share` (and a `\\?\` device root) has basename `""`, so the label is the
+   normpath itself: `\\server\share` (pass-11 D05).
 
 ## Invariants
 
@@ -78,6 +86,7 @@ into `/`, BC-SL-059), so it is not used (design IM-11; pitfall PR-20).
 | EC-005 | `NtNormpath("\\?\C:\x")` | unchanged |
 | EC-006 | `NtNormpath("C:")`; basename → `""`; label falls back to `"C:"` | `"C:"` |
 | EC-007 | `NtNormpath("a/b\c")` | `"a\b\c"` |
+| EC-008 | nt `basename("\\server\share")` (UNC root) | `""` — `splitdrive` consumes the root; the SL:460 label is the normpath `\server\share` (fallback of the call site, pass-11 D05) |
 
 ## Canonical Test Vectors
 

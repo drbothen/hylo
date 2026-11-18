@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "ef650a3"
+input-hash: "4f8af84"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython repr(float) used at legacy/dgx_statusline.py cache and render sites)"
@@ -23,6 +23,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-21T07:00:00Z (1.2.2): ADV-P11 remediation D11 (orchestrator call 16) — Inv 1 scoped to finite floats and composed with json.dumps' non-finite tokens: Repr spells nan/inf, the cache writers must emit NaN/Infinity (-Infinity), so the non-finite spelling is json.dumps' own float token rule (BC-5.02.006 PC-1), not Repr's"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,8 +72,13 @@ Helper-level contract per OD-141.
 
 ## Invariants
 
-1. Pure; the only float→string conversion used by the cache writers (IM-03) and by
-   `Str` (BC-5.02.005).
+1. Pure; for FINITE floats, the only float→string conversion used by the cache writers
+   (IM-03) and by
+   `Str` (BC-5.02.005). Non-finite values never reach Repr in a cache write: CPython
+   `json.dumps` emits its own tokens `NaN`/`Infinity`/`-Infinity` for those
+   (BC-5.02.006 PC-1), so the composition the cache writers use is `json.dumps`'s
+   non-finite token rule around Repr's finite mantissas — Repr's own `nan`/`inf`
+   spellings never appear in a cache (pass-11 D11).
 2. `float(Repr(x)) == x` exactly for every finite `x`; `-0.0` round-trips to `-0.0`.
 
 ## Edge Cases

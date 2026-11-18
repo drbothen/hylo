@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "data-files"
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-11-19T21:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "32c0741"
+input-hash: "3cc0087"
 ---
 
 # ARCH-04 — Data files: cache dir, atomic writes, reserved ledger
@@ -23,6 +23,9 @@ input-hash: "32c0741"
 Cache dir resolution is `internal/platform.CacheDir(env EnvVars) (string, error)` (ARCH-05; env-injected signature with error return per pass-8 D01, orchestrator call 7): macOS/Linux
 `$XDG_CACHE_HOME/hylo` else `~/.cache/hylo` (relative/empty `XDG_*` ignored, OD-144);
 Windows `%LOCALAPPDATA%\hylo\cache` (OD-144, separate `...\hylo\state` subdir for state).
+At status-line startup a `CacheDir` error is not a config error: `Main` wires the
+load-empty / save-no-op store and the render proceeds (ARCH-03 step 0, BC-3.01.001
+EC-004, ADV-P11-A08); only `hylo config path` reports it.
 Four legacy-compatible cache files, file-name formats are legacy-shared named constants
 (T-061/T-062 class, "why not config": legacy must read the same names during cache-swap
 tests):

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.2"
+version: "1.4.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "1c6f92f"
+input-hash: "3ccf4f1"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.4.0): ADV-P8 remediation D04+D05+D07+D15 — H1/Description/Pre-1 broadened to cover PC-5/PC-6/PC-7 (P7); PC-2 item wording corrected: List items get the PC-6 control-free check (a control byte in an item is the Text-class `control character` error, OD-178/pass-6 A14) with key-specific entry ranges superseding; PC-5 type enumeration completed with FloatQuad (the 1.3.1 changelog's 'NumberList' wording for scale is superseded — the registry type is FloatQuad, fixed length 4) and an overflowing JSON member classified: a literal such as `1e400` parses to ±Inf, passes the strict-JSON shape check and fails the member-wise range check with `not finite` (BC-2.02.001 precedence check 1); PC-6 gains the control-character rule and now mints five reason strings"
   - "2026-11-20T18:30:00Z (1.4.1): ADV-P9 remediation A11+D18+D08+D07 (orchestrator calls 13+15+14+14) — PC-3: paths.cache_dir MUST resolve absolute (relative value = config error `not an absolute path`, path-grammar family, OD-144 rationale) and a set-but-empty HOME/USERPROFILE is home-unknown (BC-2.03.002 PC-4 consistent); PC-6 mints the Text-class `invalid UTF-8` pre-check (six reason strings); PC-7 states the Text-class-checks-first order for default-only Text/List keys with exact bytes"
   - "2026-11-21T06:00:00Z (1.4.2): ADV-P10 remediation D08 — three legacy citations corrected against legacy/dgx_statusline.py: fade formula SL:683 → SL:682 (SL:683 is the RGB scaling), _fmt_lines whole-thousands `184k` SL:860 → SL:859 (SL:860 is `return str(n)`), token millions `88.0M` SL:871 → SL:870 (the .1f}M spelling; SL:871 is the k branch)"
+  - "2026-11-21T07:00:00Z (1.4.3): ADV-P11 remediation D12 (orchestrator call 16) — PC-6's control-byte rule states the ANY-TEXT verdict: a control byte in an any-text key value (e.g. statusline.telemetry.query) yields the same Text-class reason 'control character' (its only bounds are the control-byte bound and valid UTF-8; the empty string stays in range); sibling A09/D08 respell — PC-5 band defaults to strict-JSON env spellings [80,100] and [70,90]"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -112,9 +113,10 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    - `array of 2 numbers` (FloatPair). Elements are named per key:
      `statusline.cost.percentiles` = `[p75, p95]`, ASCENDING (`p75 <= p95` ratified,
      pass-3 C2-07); `statusline.limits.projected_bands` = `[yellow, red]` (yellow when
-     `proj >= yellow`, red when `proj > red`; legacy default `[80, 100]`, SL:519);
+     `proj >= yellow`, red when `proj > red`; legacy default `[80,100]` in the strict-JSON
+     env spelling, SL:519);
      `statusline.limits.absolute_bands` = `[yellow, red]` (yellow when `pct > yellow`,
-     red when `pct > red`; legacy default `[70, 90]`, SL:521). No ordering constraint is
+     red when `pct > red`; legacy default `[70,90]`, SL:521). No ordering constraint is
      ratified for the bands pairs — legacy's chained red-first comparison is
      comparison-total for any finite pair.
    - `array of 3 numbers` (FloatTriple; `statusline.theme.heat`, default-only).
@@ -165,9 +167,13 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      `statusline.labels.input`, ...): a violating value yields
      `<key>=<value> (expected non-empty control-free text)`.
    - **Control bytes (OD-178; pass-6 A14, normative here per pass-8 D04):** a control
-     byte (0x00-0x1F, 0x7F) anywhere in a non-theme free-text key value or in a `List`
+     byte (0x00-0x1F, 0x7F) anywhere in a non-theme free-text key value, in an
+     ANY-TEXT key value (e.g. `statusline.telemetry.query` — its only registered bounds
+     are the control-byte bound and valid UTF-8, so the empty string is in range
+     (BC-2.01.001 PC-2) and a control byte is the violation), or in a `List`
      item — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item —
-     yields the Text-class reason `control character`. Precedence: where the registry
+     yields the Text-class reason `control character` (pass-11 D12: the any-text verdict
+     is stated; previously only the free-text case was). Precedence: where the registry
      declares a key-specific entry range (`statusline.lane.reroute_all_prefixes`,
      BC-2.01.004 PC-9), that range's own reason
      (`expected non-empty control-free text in every entry`) supersedes for the key's

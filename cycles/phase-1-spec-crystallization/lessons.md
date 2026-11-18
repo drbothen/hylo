@@ -476,3 +476,33 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   mints a new constant value.
 
 **Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-43 [process-gap] — Walk canonical vector outputs field by field against the setting code
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-11 burst, ADV-P11-C01) A reasoned expected output in a
+  canonical vector (CP-O07 `lu`) was accepted without being walked field by field against the legacy
+  code that sets each field; sound-looking reasoning hid an unanchored cell.
+- **Remedy:** A canonical vector's expected output is walked field by field, on disk, against the legacy
+  line that sets each field before the vector is accepted — paragraph-level plausibility is not a check.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-44 [process-gap] — Per-agent diffs are scanned for emoji before acceptance
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-11 burst) A fix agent replaced a line of spec text with
+  an emoji line (VP-021); the per-agent diff scan caught it before acceptance, which is the only reason
+  it stayed out of the specs.
+- **Remedy:** Every fix agent's diff is scanned for emoji and non-ASCII additions before acceptance,
+  regardless of what the agent's report claims; the scan runs at acceptance, not at commit.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-45 [process-gap] — Binding calls name exactly one mechanism
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-11 burst) Two parallel fix agents each minted a different
+  mechanism for the same binding call — the oracle test selector came out as a name pattern in one
+  agent's files and a build tag in the other's — because the call allowed "X or Y".
+- **Remedy:** A binding call in a remediation plan names exactly one mechanism; where a genuine choice
+  exists, the call assigns the decision to one agent or escalates it before dispatch, never "X or Y".
+
+**Closes:** recorded as a Drift Item in STATE.md

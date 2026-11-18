@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T06:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "5d9a826"
+input-hash: "c9f1dd6"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -35,6 +35,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation D08 — PC-3(f) names the PC-11 Windows rename-retry keys (statusline.cache.rename_retry_delay_ms, _limit) as golden-default exceptions beside the two PC-4 exceptions: they have no legacy analog (legacy save_cache SL:198-206 never retries); PC-4 lists them"
   - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D05+D08 (orchestrator calls 9+14) — PC-8's pair checks respelled: the cost.percentiles ascending-pair check is INTRA-key (fires at that key's validation, error names the whole key with its full JSON value, following error-taxonomy) beside the cross-KEY subagent.tokens pair; the display-width bullet states the Text-class `invalid UTF-8` pre-check (width and code-point counts only ever consulted on valid UTF-8; minted in BC-2.02.001 pass-9 D08)"
   - "2026-11-21T06:00:00Z (1.3.4): ADV-P10 remediation D06 (orchestrator call 6) — the cross-KEY subagent.tokens pair rule states the default-layer value spelling: when the named value comes from the default layer, <value> is the default's env spelling per the interface-definitions Default column (e.g. m_from's 1000000) and [from <ENVNAME>] is omitted (BC-2.02.001 PC-3/PC-6)"
+  - "2026-11-21T07:00:00Z (1.3.5): ADV-P11 remediation OD-194 + A09/D08 (orchestrator calls 4, 16) — new PC-13 registers the nine statusline.labels.* word keys (old, rate, queue, kv, host, tps, max, idle, na; Text; default = the exact legacy WORD; range = the label rule: non-empty, no control bytes, valid UTF-8, display width 1..16 per OD-173) with env names via PC-2; punctuation and unit marks (->, ·, /, [, ], ?, the dead-rung ?, <1%) stay named format constants with why-not-config notes; PC-9's reroute_all_prefixes default respelled to the env spelling claude,claude- (List grammar, call 4)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -206,8 +207,9 @@ incomplete, whose default fails its own validation, or whose env name collides.
 
 9. **Pass-5 additions (ADV-P5-B03/C03/A18/D14/D15, orchestrator calls 1-2, OD-179):**
    - **Reroute-all key (OD-179):** the reroute-all markers become the List key
-     `statusline.lane.reroute_all_prefixes` (default `["claude", "claude-"]`, markers
-     tuple legacy SL:487-488; SL:489 is the `rl = {}` reset the markers feed,
+     `statusline.lane.reroute_all_prefixes` (default `claude,claude-` — the env spelling
+     the List grammar parses into the two entries `claude` and `claude-`, pass-11 call 4;
+     markers tuple legacy SL:487-488; SL:489 is the `rl = {}` reset the markers feed,
      ADV-P6-D23), range: every entry non-empty and control-free; it is never a hard-coded
      literal in logic. Consumer: BC-1.02.009 (PC1 — reroute-all hiding; pass-7 ADV-P7-B05:
      BC-1.02.011 is the pace/absolute-bands contract, not this key's consumer).
@@ -283,6 +285,38 @@ incomplete, whose default fails its own validation, or whose env name collides.
    `statusline.subagent.name_fallback` (default `?`, env
    `HYLO_STATUSLINE_SUBAGENT_NAME_FALLBACK`). The dead-backend marker WORD reuses
    `statusline.pill.label_local` (OD-173) — no fourth key is minted for it.
+
+13. **Displayed-word label keys (OD-194, pass-11):** every word a person reads as a
+   label in the rendered line is a `Text` config key under `statusline.labels.*`. The
+   registry carries exactly these nine members, each with the legacy WORD as its
+   default — the exact word only; surrounding spaces, digits and punctuation stay in
+   the format string (sites in `legacy/dgx_statusline.py`):
+
+   | Key | Default | Legacy site | Inline-literal owner (ADV-P11-C2-03) |
+   |-----|---------|-------------|--------------------------------------|
+   | `statusline.labels.old` | `old` | SL:700, `(~{age:.0f}s old)` | BC-1.04.004 |
+   | `statusline.labels.rate` | `r` | SL:741, `r{r:.0f}·q{q:.0f}` | BC-1.04.006 |
+   | `statusline.labels.queue` | `q` | SL:741, `r{r:.0f}·q{q:.0f}` | BC-1.04.006 |
+   | `statusline.labels.kv` | `KV` | SL:761 | BC-1.04.007 |
+   | `statusline.labels.host` | `host` | SL:762, `↺host` | BC-1.04.007 |
+   | `statusline.labels.tps` | `t/s` | SL:781 and SL:783 | BC-1.04.008 |
+   | `statusline.labels.max` | `max` | SL:797, `◔max {val}` | BC-1.04.010 |
+   | `statusline.labels.idle` | `idle` | SL:834, `☾ idle {age}` | BC-1.04.012 |
+   | `statusline.labels.na` | `n/a` | SL:631, `⛏n/a` | BC-1.05.003 |
+
+   Range (the OD-194 label rule, mirroring the OD-173 pill-label bound): non-empty,
+   no control bytes, valid UTF-8, display width 1..16 (BC-2.01.005 PC-6 Text class; the
+   `invalid UTF-8` pre-check of pass-9 D08 applies before width is consulted). Env
+   names via PC-2's `EnvName`: `HYLO_STATUSLINE_LABELS_OLD`, `HYLO_STATUSLINE_LABELS_RATE`,
+   `HYLO_STATUSLINE_LABELS_QUEUE`, `HYLO_STATUSLINE_LABELS_KV`, `HYLO_STATUSLINE_LABELS_HOST`,
+   `HYLO_STATUSLINE_LABELS_TPS`, `HYLO_STATUSLINE_LABELS_MAX`, `HYLO_STATUSLINE_LABELS_IDLE`,
+   `HYLO_STATUSLINE_LABELS_NA`. Punctuation and unit marks are NOT keys — `->`, `·`,
+   `/` as a lone separator, `[`, `]`, `?`, the dead-rung ` ?` and the ` <1%` mark stay
+   named format constants with a "why not config" comment at each call site (they are
+   glyph-adjacent punctuation or unit syntax, not readable words). The consuming BCs
+   name these keys in their postconditions (pass-11 routing: the inline-literal owners
+   above derive the words and name the keys; interface-definitions registers the same
+   rows).
 
 ## Invariants
 

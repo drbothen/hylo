@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "76b3a2d"
+input-hash: "8e821c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:732-741)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-17 (PC3 states the statusline.queue.yellow=false never-yellow branch as an output)"]
+modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-17 (PC3 states the statusline.queue.yellow=false never-yellow branch as an output)", "2026-11-18 (v1.2.2) pass-11 OD-194 consumer (PC3 names statusline.labels.rate and statusline.labels.queue beside their defaults; the · separator carries the named-format-constant note)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,7 +47,11 @@ Notation: `\e` is byte 0x1B.
 
 1. `r` = running; `q = m.get("vllm:num_requests_waiting", 0)`.
 2. `busy = q > 0 or m.get("dgx_preempt:rate5m", 0) > 0`.
-3. Segment = `<colour> + "r" + F(r,0) + "·q" + F(q,0) + "\e[0m"` where `F(x,0)` = Python
+3. Segment = `<colour> + labels.rate + F(r,0) + "·" + labels.queue + F(q,0) + "\e[0m"`
+   where `labels.rate` = `statusline.labels.rate` (Text, default `r`, SL:741, OD-194)
+   and `labels.queue` = `statusline.labels.queue` (Text, default `q`, SL:741, OD-194;
+   the `·` between them stays literal — a named format constant, not config: template
+   scaffolding, only the readable words vary); `F(x,0)` = Python
    `f"{x:.0f}"` (half-even on the binary value; `nan`/`inf` spellings, BC-5.01.001) and
    `<colour>` = `"\e[33m"` if `busy` else `"\e[32m"` when `statusline.queue.yellow` is
    `true` (default), and always `"\e[32m"` when it is `false` (never yellow; OD-175 —

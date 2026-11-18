@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md]
-input-hash: "b6a58aa"
+input-hash: "78dfe5a"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:732-820)"
@@ -22,6 +22,7 @@ modified:
   - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-03 (CP-N02 reachability scoping)"
   - "1.3.1 2026-11-18: pass-5 remediation ADV-P5-C2-12 (idle-gate running and last operands pinned as EC-006/EC-007; host-share surface cross-linked to BC-1.04.007 EC-010/EC-011; VP row field set scoped)"
   - "1.3.2 2026-11-18: pass-9 remediation ADV-P9-C2-08 (VP row cites Precondition 1 instead of PC1 — PC1 is the queue postcondition only)"
+  - "1.3.3 2026-11-18: pass-11 OD-194 sibling sweep (PC6 added — the label bytes in PC1-PC5 are the default spellings of the statusline.labels.* keys named in the forming contracts BC-1.04.006/008/010)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,6 +61,11 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 4. Wall color mismatch: the color tests `wall > 1520` on the raw value, the text uses
    `.0f`, so 1520.4 → red `1520W` while 1520.0 → yellow `1520W`.
 5. Box rate NaN → `▣nant/s` (sparkline behavior per BC-1.04.014).
+6. The label bytes PC1–PC5 render (`r`/`q` with the `·` between them, `max` after the
+   `◔` glyph, `t/s` after the box rate) are the default spellings of the
+   `statusline.labels.*` keys named in the forming contracts — `labels.rate`/`labels.queue`
+   (defaults `r`/`q`, BC-1.04.006 PC3), `labels.max` (default `max`, BC-1.04.010 PC3)
+   and `labels.tps` (default `t/s`, BC-1.04.008 PC2); OD-194.
 
 ## Invariants
 

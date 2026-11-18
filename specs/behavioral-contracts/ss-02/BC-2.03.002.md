@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T06:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "3e229e8"
+input-hash: "f60a5ff"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - the --config=<path> equals spelling parses as the separated form; a bare --config is a flag error on the golden usage surface, exit 2 (BC-4.01.001 PC-3 cross-referenced)"
   - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D01 — the three directory resolvers carry the env seam everywhere in this file: ConfigDir(env EnvVars), CacheDir(env EnvVars), StateDir(env EnvVars), matching BC-3.01.001 and ARCH-05"
   - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D03 (orchestrator call 3) — the pass-9 A11 absoluteness rule propagated to its sibling: a RELATIVE HYLO_PATHS_CACHE_DIR reports the same config error as the status line's grammar (not an absolute path; cache: (unavailable), stderr detail, exit 1 — new EC-012); absoluteness is filepath.IsAbs semantics computed in internal/platform per OS (Windows: drive + root or UNC); HYLO_CONFIG is reserved for P4 and printed as given, no absoluteness check (PC-3/PC-5 scope note)"
+  - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation D07 — PC-3's absoluteness scope note names the registry key as paths.cache_dir (the statusline. prefix spelled at :84 was a mis-anchor; the env name HYLO_PATHS_CACHE_DIR only fits paths.cache_dir)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,7 +82,7 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
      `%LOCALAPPDATA%\hylo\state` (OD-144).
 3. Override paths (a)/(b) get `~` expansion (OD-61, BC-2.01.005) and are otherwise printed
    as given (not made absolute, not cleaned). Absoluteness scope (ADV-P10-D03,
-   orchestrator call 3): only `statusline.paths.cache_dir` (`HYLO_PATHS_CACHE_DIR`) must
+   orchestrator call 3): only `paths.cache_dir` (`HYLO_PATHS_CACHE_DIR`) must
    be ABSOLUTE — a relative value is a config error, reported exactly as the status
    line's grammar reports it (`not an absolute path`, BC-2.01.005 PC-3; the pass-4
    call-16 empty-path disposition in the same shape): `cache: (unavailable)`, stderr

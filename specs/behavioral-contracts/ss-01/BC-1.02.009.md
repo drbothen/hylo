@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5ca0c29"
+input-hash: "1fb936c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:444-445, 487-489)"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "1.2 pass-5 remediation (ADV-P5-B09 disposition, OD-179): the reroute-all markers become the List key statusline.lane.reroute_all_prefixes (default [\"claude\", \"claude-\"], legacy; entries non-empty, no control bytes); PC1, Config keys, Owner decisions and Refactoring Notes aligned; 2026-11-18T05:42:56Z"
+  - "1.3.1 pass-11 residual: the default re-spelled to the env spelling `claude,claude-` in PC1, the Config-keys row and the Refactoring Notes line (legacy display form kept as the citation), matching the interface-definitions.md Default cell (pass-11 A09/call 4); no behavioral change; 2026-11-21T09:00:00Z"
   - "1.3 pass-6 remediation (ADV-P6-B01, call 10): the for-any-stdin no-limits-segment row re-anchored from VP-028 to VP-041 (VP-028 keeps the exhaustive oracle leg); 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
@@ -48,7 +49,8 @@ whatever `rate_limits` stdin or the smoothing cache carries.
 
 1. `reroute_all = any(RStrip(p, "*") in reroute_all_prefixes for p in prefixes)` where
    `reroute_all_prefixes` is the configured List key `statusline.lane.reroute_all_prefixes` (OD-179; default
-   `["claude", "claude-"]`, equal to the legacy literals; range: every entry non-empty, no control bytes)
+   `claude,claude-` (env spelling; equal to the legacy display literals `["claude", "claude-"]`);
+   range: every entry non-empty, no control bytes)
    (only `*` is stripped, only from the right; comparison is exact and case-sensitive).
 2. If `reroute_all` → the limits input is the empty mapping: no limits segment is
    emitted (BC-1.02.010/011/012 never produce output).
@@ -112,7 +114,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15, `T = 1800000000.0`, 
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-111 / OD-123 (prefix key under `backends[0]`, default `claude-sonnet`), OD-179 (reroute-all markers are the List key `statusline.lane.reroute_all_prefixes`) |
-| Config keys | `backends[0].model_prefixes`, `statusline.lane.reroute_all_prefixes` (OD-179; List of Text, default `["claude", "claude-"]`, legacy; every entry non-empty, no control bytes) |
+| Config keys | `backends[0].model_prefixes`, `statusline.lane.reroute_all_prefixes` (OD-179; List of Text, default `claude,claude-` (env spelling; legacy display form `["claude", "claude-"]`); every entry non-empty, no control bytes) |
 | Architecture Module | `internal/statusline/limits.go` |
 | Stories | TBD |
 
@@ -165,5 +167,6 @@ TBD — plan-window widget story
 #### Refactoring Notes
 
 No refactoring needed. The reroute-all markers are resolved config: the List key
-`statusline.lane.reroute_all_prefixes` (OD-179, default `["claude", "claude-"]`, legacy); the render takes the
+`statusline.lane.reroute_all_prefixes` (OD-179, default `claude,claude-` (env spelling; legacy
+display form `["claude", "claude-"]`)); the render takes the
 parsed list from `internal/config` (D15), falling back to nothing hard-coded.

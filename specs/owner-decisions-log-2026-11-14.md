@@ -193,3 +193,7 @@
 <!-- Phase-1d pass-8 remediation rulings by the owner, 2026-11-18 (owner chose the recommended option each time; next free OD-194) -->
 
 | OD-193 | OD-158 stands unchanged: the P1 >=95% line-coverage gate covers S1 (`internal/statusline`, `internal/cost`) and S5 (`internal/pyfmt`) only. `internal/parity` (S6) coverage is reported, not gated. Pass-7 call 12's addition of `internal/parity` to the gate is withdrawn. | ADV-P8-A04 |
+
+<!-- Phase-1d pass-11 owner ruling, 2026-11-18 (minted centrally with the pass-11 remediation plan; next free OD-195) -->
+
+| OD-194 | Every word a person reads as a label becomes a Text config key under `statusline.labels.*`, default = the legacy bytes; punctuation and unit marks (`->`, `·`, `/`, `[`, `]`, `?`, the dead-rung ` ?`, ` <1%`) stay named format constants with a "why not config" note. Range for the new keys = the label rule: non-empty, no control bytes, valid UTF-8, display width 1..16 (OD-173 judgment call). | ADV-P11-C2-03. Nine keys minted centrally (defaults = the exact legacy word; sites in legacy/dgx_statusline.py): `statusline.labels.old` = `old` (SL:700), `rate` = `r` (SL:741), `queue` = `q` (SL:741), `kv` = `KV` (SL:761), `host` = `host` (SL:762, `↺host`), `tps` = `t/s` (SL:781/783), `max` = `max` (SL:797), `idle` = `idle` (SL:834), `na` = `n/a` (SL:631). Agent 2 registers them in interface-definitions with env names per the `EnvName` rule; agent 8 adds them to BC-2.01.004's registry; agent 7 names them in the consuming BCs' postconditions. |

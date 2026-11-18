@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T06:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "520a653"
+input-hash: "fc9529b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -31,6 +31,7 @@ modified:
   - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
   - "1.2.6 2026-11-20T18:30:00Z: ADV-P9 remediation D12 (orchestrator call 8) — new Pre-3 cache-seeding rule: a replay starts fresh and the harness seeds a fixed synthetic proc_start exactly as corpus cases do under BC-6.02.003 PC-6; a replay never consults the machine's real process tree (real captures have a truthy session_id and no proc_start, so the OD-107 real-input criterion is met by stdin/clock/transcript bytes)"
   - "1.2.7 2026-11-21T06:00:00Z: ADV-P10 remediation D04 (orchestrator call 4) — Pre-3 seeding generalized to the EVERY-SID rule: the harness seeds a fixed synthetic proc_start for every session_id that any step's stdin of the capture uses (a step may change the sid mid-sequence, e.g. /clear), and the case-load validator rejects a capture whose step introduces a sid it cannot seed; EC-005 aligned; no replay ever consults the real process tree"
+  - "1.2.8 2026-11-21T07:00:00Z: ADV-P11 remediation D16 + D01 (orchestrator calls 2, 16) — Pre-2's capture path rewrite gains workspace.current_dir (legacy's fallback chain ws.get(project_dir) or ws.get(current_dir) or cwd, SL:452), closing the real-.git hermeticity hole; the splice is pinned to the JSON-ESCAPED form so uniformly backslash-escaped Windows paths are the normal contiguous case, and the build-error branch is reserved for a genuinely non-contiguous occurrence; Pre-3 cites the declared-fake-table admission branch (BC-6.02.003 PC-6) for a capture sid whose target stays unseeded"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,7 +81,11 @@ are compared after every step (BC-6.03.002).
    The directory may also hold `transcript.jsonl` (a copy of the session transcript)
    and the case settings (BC-6.02.003).
 2. Paths inside each `stdin.bin` snapshot (`transcript_path`, `workspace.project_dir`,
-   `cwd`) are rewritten by the harness to the per-case temp tree before use. The
+   `workspace.current_dir`, `cwd`) are rewritten by the harness to the per-case temp
+   tree before use — `workspace.current_dir` included because legacy's fallback chain
+   reads it (`ws.get("project_dir") or ws.get("current_dir") or d.get("cwd")`,
+   SL:452), so an unre-written replay could read the developer's real `.git`
+   (pass-11 D16). The
    rewrite (ADV-P5-D03, owner call 9): the splice locates the path ONLY as a JSON
    string value of the snapshot document and inserts the replacement JSON-escaped
    (backslashes and control bytes escaped) — never raw — so Windows paths containing
@@ -92,9 +97,13 @@ are compared after every step (BC-6.03.002).
    bytes are replaced (lengths adjusted); `stdin.bin` is NOT parsed and
    re-serialized. Big-int literals, `NaN`/`Infinity` tokens, duplicate keys, key order
    and the original escaping are thereby preserved verbatim, satisfying the OD-107
-   byte-parity-on-real-inputs criterion. If a capture ever requires more than a
-   substring splice (paths split by JSON escapes), the case is a harness build error,
-   not a silent rewrite.
+   byte-parity-on-real-inputs criterion. The splice operates on the JSON-ESCAPED form
+   of each path: a Windows path, backslash-escaped uniformly by any consistent JSON
+   encoder, is ONE contiguous escaped occurrence — the normal case, spliced
+   successfully (pass-11 D16). Only a genuinely non-contiguous occurrence (the same
+   logical path present partly literal and partly escaped) requires more than a
+   substring splice, and THAT is the harness build error — a plain backslash-escaped
+   Windows capture is never one.
 3. **Cache seeding (ADV-P9-D12, orchestrator call 8; every-sid rule ADV-P10-D04,
    orchestrator call 4).** A replay's cache directories
    start FRESH, and the harness seeds a fixed synthetic `proc_start` (in
@@ -105,7 +114,11 @@ are compared after every step (BC-6.03.002).
    seeding covers EVERY session id the capture uses: the harness seeds a fixed
    synthetic `proc_start` for every `session_id` that any step's stdin of the capture
    uses (a step's stdin may change the sid mid-sequence, e.g. `/clear`), and the
-   case-load validator rejects a capture whose step introduces a sid it cannot seed.
+   case-load validator rejects a capture whose step introduces a sid it cannot seed —
+   unless the capture declares the fake process table, the admission branch of
+   BC-6.02.003 PC-6's hermeticity rule, in which case the target stays intentionally
+   unseeded and the fake `ps` serves both sides (the canonical `temp-file` case;
+   pass-11 call 2).
    The OD-107 real-input criterion is met by the stdin, clock and transcript bytes; the
    process tree is synthetic by construction, identically on both sides.
 

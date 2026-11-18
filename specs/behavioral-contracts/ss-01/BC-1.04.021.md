@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr.md]
-input-hash: "10b1018"
+input-hash: "e6b9d0e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:337)"
@@ -23,6 +23,7 @@ modified:
   - "1.3.1 2026-11-18: pass-6 metadata alignment (ADV-P6-C2-15) — D22 sweep entry redated to the pass-4 burst date (2026-11-18) and timestamp raised above the last modified entry; no behavioral change"
   - "1.3.2 2026-11-18: pass-7 remediation ADV-P7-C2-11 (VP-030 property leg gains the monotonic non-decreasing clock precondition — a backward step voids the appended-gap property per EC-003)"
   - "1.3.3 2026-11-18: pass-9 remediation ADV-P9-C2-09 sibling sweep (PC1/PC2 name the registered key statusline.sparkline.min_gap_s beside its default literal)"
+  - "1.3.4 2026-11-18: pass-11 remediation ADV-P11-C2-06 (Description, Pre 1 and PC3 respelled against statusline.sparkline.min_gap_s instead of the literal 2 s — the key's finite > 0 range means the gap decides appends whenever TTL < min_gap_s, e.g. min_gap 5 with TTL 4)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,16 +36,18 @@ removal_reason: null
 
 ## Description
 
-With TTL ≥ 2 s, fetches (and therefore history appends) are at least TTL apart, so the
-2 s minimum gap never decides anything in steady state. It is reachable only with a TTL
-below 2 s, a seeded or foreign history point newer than `now - 2`, or a backward clock
+With TTL ≥ the minimum gap (`statusline.sparkline.min_gap_s`, default 2), fetches (and
+therefore history appends) are at least TTL apart, so the minimum gap never decides
+anything in steady state. It is reachable whenever TTL < min_gap_s (the key's range is
+finite > 0 — for example min_gap 5 with TTL 4), with a seeded or foreign history point
+newer than `now - min_gap_s`, or a backward clock
 step. The Go code must keep the gap rule anyway, and a seeded table test must exercise it.
 
 ## Preconditions
 
 1. A successful fetch at `now` (BC-1.04.002), history rules per BC-1.04.003,
-   `min_gap_s` = 2 (T-008; OD-55 keeps it as a key "only takes effect when TTL < 2 s or
-   history is seeded").
+   `min_gap_s` = `statusline.sparkline.min_gap_s` = 2 (T-008; OD-55 keeps it as a key
+   "only takes effect when TTL < min_gap_s or history is seeded").
 
 ## Postconditions
 
@@ -52,7 +55,9 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
    `now - t < statusline.sparkline.min_gap_s` (default 2), no point is appended for this
    fetch; the sample is still stored and the row still renders from it.
 2. If `now - t >= statusline.sparkline.min_gap_s` (default 2), a point is appended.
-3. In steady state with TTL 4, consecutive points are ≥ 4 s apart (gap never bites).
+3. In steady state with TTL ≥ min_gap_s (e.g. TTL 4 at the default min_gap 2),
+   consecutive points are ≥ TTL apart (gap never bites); with an allowed
+   TTL < min_gap_s the gap decides appends in steady state (e.g. min_gap 5, TTL 4).
 
 ## Invariants
 

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.15"
+version: "1.17"
 status: draft
 producer: architect
-timestamp: 2026-11-20T22:00:00Z
+timestamp: 2026-11-21T09:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "16bc583"
+input-hash: "a83ec9b"
 
 ---
 
@@ -62,7 +62,11 @@ input-hash: "16bc583"
 - Explicit absolute CPython 3.11.x interpreter path, never PATH discovery (OD-104);
   oracle SELF-CHECK at harness start (OD-185, pass-6 A02: CI resolves the latest 3.11
   patch while the measured constants were taken on 3.11.7): the harness measures the
-  JSON depth boundaries and `unicodedata.unidata_version` against the RESOLVED oracle
+  JSON depth boundaries, `unicodedata.unidata_version`, and a NUL-keeps probe —
+  `posixpath.normpath('a\0b')` and `ntpath.normpath('a\0b')` must BOTH keep the NUL
+  and return `'a\x00b'` (orchestrator-measured on 3.11.7; the gh-106242-era behavior
+  BC-1.02.022 PC-3 pins — a pre-fix oracle would silently truncate to `'ab'`;
+  ADV-P11-B08) — against the RESOLVED oracle
   and FAILS CLOSED on any mismatch, printing the resolved version; Tier B golden
   metadata records the resolved patch (RK-4). Pinned constants, copied verbatim from
   BC-6.01.001 PC-4 (pass-7 D04, the ONE end-to-end definition; CPython 3.11.7, default
@@ -100,7 +104,11 @@ input-hash: "16bc583"
   for the oracle, `HYLO_BACKENDS_0_METRICS_URL=<fake>` — the env key of
   `backends[0].metrics_url` — for hylo; the same raw-listener fake serves both sides,
   BC-6.02.003) UNLESS the case itself sets the metrics URL, in which case the case
-  value wins. BC-6.01.002's exact key sets and its CTVs copy that (a settings-`{}`
+  value is used on BOTH sides — `DGX_SL_VM_URL=<case value>` for the oracle and
+  `HYLO_BACKENDS_0_METRICS_URL=<case value>` for hylo — one value per key (pass-11
+  orchestrator call 3, ADV-P11-D02), and the corpus validator admits a case metrics
+  URL only as a PLACEHOLDER that resolves to the fake server (optionally with a path
+  suffix). BC-6.01.002's exact key sets and its CTVs copy that (a settings-`{}`
   CTV still expects the metrics keys present).
   `HOMEDRIVE`/`HOMEPATH` are NOT constructed keys on any OS (home is
   `HOME`+`USERPROFILE`); no key set on any OS includes `PATH` unless the fake-table
@@ -122,8 +130,10 @@ input-hash: "16bc583"
   forbidden). By OD-190 this LF behavior is hylo-wide and named beside the builder
   variable, never hidden in the shim: hylo writes UTF-8 + LF line endings on every
   OS, and the Windows oracle's LF normalization is produced by the two named
-  mechanisms — the builder's `PYTHONIOENCODING=utf-8` (encoding) and the shim's
-  `newline="\n"` reconfigure (LF-only newlines). Conditional `PATH`: `PATH=<case>/bin`,
+  mechanisms — the builder's `PYTHONIOENCODING=utf-8` (encoding) and the comparator's
+  open CRLF→LF conversion of the ORACLE's stdout on the Windows legs, BEFORE the byte
+  comparison (hylo's bytes are NEVER converted — hylo writes LF itself — and the shim
+  does NO newline reconfigure). Conditional `PATH`: `PATH=<case>/bin`,
   ONLY when the case declares a subprocess-fake table (the fake `ps` of BC-3.02.002);
   the value is the harness constant, never the runner's `PATH`; cases without a fake
   table get no `PATH` key (ADV-P1-D05 resolution) — with no `PATH` key, CPython's
@@ -185,6 +195,7 @@ input-hash: "16bc583"
 | Canary | `TestParityCanary_ShimLoaded` |
 | Exclusion machinery | `TestParityExclusions_ClosedSet` |
 | Cache swap | `TestParityCacheSwap_FourCaches` |
+| Oracle-dependent test selector | `ORACLE_TESTS` — the ONE named mechanism (ADV-P11-A07, pass-11 orchestrator call 8): pattern constant `^(TestParityTierA_Corpus\|TestParityCanary_ShimLoaded\|TestParityCacheSwap_FourCaches)$`; every test needing the resolved Python oracle is a member (a new oracle-dependent test extends the pattern, never a second mechanism); the plain test step, the coverage job and the release job pass `-skip $ORACLE_TESTS`, the dedicated Tier A job runs `-run $ORACLE_TESTS` |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
 | Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` (corpus root; OD-148, matching BC-6.02.001/.003, BC-6.04.003) |
 | case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpt09 (the Windows-only CP-T09 MSVC localtime-domain family, pass-8 orchestrator call 2 — cpt08 is retired and not reused), cpn01..cpn03, cpo01..cpo12, cpa01..cpa05. SUBAGENT FAMILY RULE (restated pass-10 orchestrator call 2, superseding the pass-7 `-sub` suffix spelling): a subagent case is a case of the `subagent` FAMILY — id `subagent-<nnn>[-<variant>]` — and the corpus validator gives argv `["--subagent"]` to exactly that family; there is NO `-sub` suffix rule (BC-6.01.001/BC-6.02.003/BC-6.03.001 state this one family rule) |

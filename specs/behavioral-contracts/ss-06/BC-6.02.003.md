@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.13"
+version: "1.2.14"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T06:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "42fd3b9"
+input-hash: "1162cba"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -38,6 +38,7 @@ modified:
   - "2026-11-20T12:30:00Z (1.2.11): pass-8 residual (C2-05 seam) - the metrics fake respelled: one fake VictoriaMetrics server per case is a raw net.Listener fake (DTU-3), not httptest, whose server canonicalises headers into a map and trims values; serving both sides unchanged"
   - "2026-11-20T18:30:00Z (1.2.12): ADV-P9 remediation D01+D12 (orchestrator calls 7+8) — PC-8 tail: exclusions.json carries NO OD-76 entry at all (rider-test closure); PC-6/PC-8 binding to the capture-replay seeding rule of BC-6.02.002 stated"
   - "2026-11-21T06:00:00Z (1.2.13): ADV-P10 remediation D01+D02+D04 (orchestrator calls 1, 2, 4) — PC-5 gains the run-time injection rule (DGX_SL_VM_URL / HYLO_BACKENDS_0_METRICS_URL always injected, case value wins on the Go side); PC-4 states the one subagent-family rule (id of the form subagent-<nnn>[-<variant>], argv [\"--subagent\"] for exactly that family; the erroneous '-sub shorthand' notation removed here and from the 1.2.9 entry); PC-6/PC-7 gain the every-sid seeding rule (fixed synthetic proc_start for EVERY session id any step's stdin uses; validator rejects a case whose step introduces an unseedable sid; no replay ever consults the real process tree)"
+  - "2026-11-21T07:00:00Z (1.2.14): ADV-P11 remediation D02 (orchestrator call 3) + D01 (call 2) — PC-5: a case metrics URL wins on BOTH sides (oracle DGX_SL_VM_URL and hylo HYLO_BACKENDS_0_METRICS_URL get the same value), and the validator admits it only as a placeholder resolving to the fake server, optionally with a path suffix — one value per key, no non-fake URL (the 1.5 s timeout ban holds); PC-6: the canonical temp-file case cache-003 is named as the fake-table branch's first P1 consumer, its session-cache target intentionally unseeded"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -146,12 +147,18 @@ directory.
    serves both sides:
    - legacy reaches it through `DGX_SL_VM_URL`;
    - Go reaches it through `backends[0].metrics_url`;
-   - **Run-time injection (ADV-P10-D01, orchestrator call 1).** The fake's port is only
+   - **Run-time injection (ADV-P10-D01, orchestrator call 1; both-sides rule pass-11
+     call 3).** The fake's port is only
      known at run time, so a case cannot declare it: the harness ALWAYS injects the fake
      server's URL into BOTH children — `DGX_SL_VM_URL=<fake>` for the oracle and
      `HYLO_BACKENDS_0_METRICS_URL=<same fake>` for Go (unconditional members of
      BC-6.01.002's exact key sets) — unless the case itself sets the metrics URL, in
-     which case the case value wins on the Go side;
+     which case the case value is used on BOTH sides: the oracle's `DGX_SL_VM_URL` AND
+     hylo's `HYLO_BACKENDS_0_METRICS_URL` get the same case value, so the two sides
+     never query different servers. The validator admits a case metrics URL only as a
+     PLACEHOLDER that resolves to the fake server (optionally with a path suffix) —
+     never a routable non-fake URL, which would bring back the 1.5 s timeout flakiness
+     Pre-3 bans — and one value per key;
    - the handler checks that the request path is `/api/v1/query`.
 6. **Seeds.**
    - `seed/` files are copied byte for byte into the legacy cache dir
@@ -168,7 +175,12 @@ directory.
      synthetic `proc_start` for every `session_id` that any step's stdin of the case or
      capture uses (a step's replacement stdin template may change the sid mid-sequence,
      e.g. `/clear`), and the case-load validator rejects a case whose step introduces a
-     sid it cannot seed. NO replay ever consults the real process tree.
+     sid it cannot seed. NO replay ever consults the real process tree. The fake-table
+     branch's first P1 consumer is the canonical `temp-file` case `cache-003` (sid
+     `../x`): its session-cache target stays INTENTIONALLY unseeded — seeding
+     `statusline-../x.json` would create the directory `statusline-..`, legacy's
+     `os.replace` would then succeed and no temp file would leak, defeating the case
+     (pass-11 call 2) — and the declared fake table satisfies the rule without a seed.
 7. **Steps.** When `steps` is absent, the case is a single refresh at `now`. Otherwise
    each step may set `dt` (seconds added to the previous instant) or an absolute
    `now`, `append` (generator lines appended to the transcript), `stdin` (a replacement

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "389f30f"
+input-hash: "75de44d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1104-1112)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C04) — PC3 and EC-010 name the OD-167 in-flight-turn drop; timestamped CP-O06 turn-drop vector added: the drop is observable in `lr` (hylo null) against the plain-deletion oracle (lr [50.0, true], oracle-run 2026-11-18)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O06 D4-EX-2 legs (VP-013 register, VP-012 closure)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C08) — the CP-O06 turn-drop leg now cites where the A-template is defined (BC-1.03.016 PC2; self-contained copy in BC-1.03.010 CP-O08) instead of relying on an out-of-file template", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C03; orchestrator call 4) — PC5 gains the BC-1.03.018 Inv-3 cross-reference: counted exact-int totals degrade the later render (CP-O04, CP-O09, CP-O12); parse-time skips never fire for int+int sums"]
+modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C04) — PC3 and EC-010 name the OD-167 in-flight-turn drop; timestamped CP-O06 turn-drop vector added: the drop is observable in `lr` (hylo null) against the plain-deletion oracle (lr [50.0, true], oracle-run 2026-11-18)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O06 D4-EX-2 legs (VP-013 register, VP-012 closure)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C08) — the CP-O06 turn-drop leg now cites where the A-template is defined (BC-1.03.016 PC2; self-contained copy in BC-1.03.010 CP-O08) instead of relying on an out-of-file template", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C03; orchestrator call 4) — PC5 gains the BC-1.03.018 Inv-3 cross-reference: counted exact-int totals degrade the later render (CP-O04, CP-O09, CP-O12); parse-time skips never fire for int+int sums", "1.3.1 2026-11-22T12:00:00Z: pass-11 remediation (ADV-P11-C02) — DI-012 traceability row: the CP-O09 no-write is reproduced legacy behavior (PC5; error-taxonomy CP-O09 row), not a named deviation; the only CP-O09 divergence, the leaked partial temp file, rides the temp-file exclusion/OD-163 (BC-1.06.001 EC-010), not D4-EX-2"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -132,7 +132,7 @@ Expected bytes are the complete cache files, re-pinned 2026-11-15 with the legac
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009, CAP-011 (token totals feed cost/tokens widgets) |
-| L2 Domain Invariants | DI-007; DI-012 (the OD-156/D4-EX-2 skip and the CP-O09 no-write are named, tested deviations) |
+| L2 Domain Invariants | DI-007; DI-012 (the OD-156/D4-EX-2 skip is a named, tested deviation; the CP-O09 no-write is **reproduced** legacy behavior — PC5 and the error-taxonomy CP-O09 row — and the only CP-O09 divergence, the leaked partial temp file, rides the temp-file exclusion/OD-163 (BC-1.06.001 EC-010), not D4-EX-2) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1104-1112) |
 | Legacy contract | BC-SL-035 (base; pinned pass-3 r1: float usage accepted) |
 | Parity class | byte-exact |

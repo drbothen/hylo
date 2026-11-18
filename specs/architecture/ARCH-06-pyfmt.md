@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "pyfmt"
-version: "1.16"
+version: "1.18"
 status: draft
 producer: architect
-timestamp: 2026-11-20T22:00:00Z
+timestamp: 2026-11-21T09:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "16bc583"
+input-hash: "a83ec9b"
 
 ---
 
@@ -18,7 +18,8 @@ input-hash: "16bc583"
 > The parity foundation under every widget (OD-103: ONE package, four files).
 > Classification: **pure core** — the only package with no effect edge at all; stdlib
 > imports only; `math/big` for beyond-int64 durations (OD-137). CRITICAL tier
-> (line coverage >= 95% P1; mutation kill rate >= 95% is the Phase 6 target, OD-135/OD-158).
+> (statement coverage (the OD-158 gate's 'line coverage') >= 95% P1; mutation kill
+> rate >= 95% is the Phase 6 target, OD-135/OD-158).
 > encoding/json and strconv are banned on protocol inputs; inside `F`/`Repr`, strconv is
 > trusted only for finite values (BC-5.01.002 invariant 1, NFR-003).
 
@@ -73,6 +74,7 @@ alike. Per-site encoder constants:
 | `save_cache` cost-history — `record_cost` SL:237 (via `render_lane`) | same 5-frame depth | 5 | `json.dump` | **990** — payload flat; unreachable from input |
 | `_mix_counts` serializers, inner-value and tool_use input (SL:1140/1147) | `<module>→main→_mix_counts` | 3 | `json.dumps` | **991** — value nesting; input capped at 989 by the line decode → unreachable |
 | `_mix_counts` serializer, tool_result list genexp (SL:1138) | `<module>→main→_mix_counts→genexp` | 4 | `json.dumps` | **990** — item capped at 988 → unreachable |
+| subagent wire — `--subagent` renderer (SL:924) | `<module>→main→<subagent renderer>` | 3 | `json.dumps` | **991** — pinned end to end by BC-6.01.001 PC-4 ("subagent wire 991 renders"); Go constant `depthSubagentWire`, served by `Dumps(v, depthSubagentWire)` in `sl/subagent.go` (ARCH-03 file family; named here so the "do not invent a value" rule has a home, ADV-P11-A10) |
 
 Superseded by this table: the pass-5 D08-era budgets (session/mix 989, record_cost/git
 988, composition 990/989 — the `993 − W` convention under-modeled the invoke-frame

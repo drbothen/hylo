@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.11"
+version: "1.12"
 status: draft
 producer: architect
 timestamp: 2026-11-20T22:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "604b20b"
+input-hash: "380f3f1"
 
 ---
 
@@ -22,10 +22,16 @@ input-hash: "604b20b"
 ## Build
 
 - Go >= 1.26: go.mod pins `go 1.26.0` only, **no toolchain directive** (actual repo
-  state, ADV-P2-A14; cicd-setup.md agrees) — with `go-version-file`, CI therefore
+  state, ADV-P2-A14; cicd-setup.md agrees; verified on disk this burst — the landed
+  go.mod is `module github.com/drbothen/hylo` + `go 1.26.0` only) — with
+  `go-version-file`, CI therefore
   installs 1.26.0, the oldest 1.26 patch, so the "Go 1.26.x leg" lacks later stdlib
   security fixes. Approved-in-spec remedy: add a `toolchain go1.26.x` line to go.mod
-  (lands on main with the owner's approval; spec-only here). ORDERING (ADV-P9-A06):
+  (lands on main with the owner's approval; spec-only here). BC-6.04.001 Pre-2's
+  "`toolchain` line" is THIS remedy — the approved-in-spec posture, not a statement
+  that the landed go.mod already carries it (ADV-P11-D03 reconciliation); the floor
+  leg's exact `go-version: 1.26.0` pin (ADV-P10-D09) tests the oldest patch with or
+  without the line. ORDERING (ADV-P9-A06):
   the `toolchain` line MUST land BEFORE govulncheck becomes a required PR check
   (Hardening posture below) — govulncheck reports stdlib advisories against the Go
   version actually used (crypto/tls and net are reachable through the metrics client),
@@ -50,9 +56,9 @@ flowchart LR
     GEN --> T["go test -race (Linux/macOS) -count=1 ./... — Tier A EXCLUDED (pass-6 A12); setup-python BEFORE go test/generate (pass-3 D22, pass-4 D08)"]
     M -->|"macos-15 / windows-2025 legs"| T
     T --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
-    TB --> HL["gitleaks --log-opts=--all + category pattern scan"]
+    TB --> HL["gitleaks --log-opts=main factory-artifacts (two-ref set, ADV-P11-A04) + category pattern scan"]
     HL --> J["report timing per leg, non-gating (OD-117)"]
-    COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07; runs on EVERY PR — never probe-gated<br/>on internal/parity, ADV-P9-A04):<br/>go test -coverpkg=./internal/... over IN-PROCESS tests; Tier A excluded because it<br/>needs the Python oracle, which the coverage job does not install (ADV-P9-A07);<br/>checks each gated package that EXISTS — prints `coverage: G of 3 gated packages present`;<br/>>= 95 percent line coverage, S1/S5 packages (OD-158)"] --> REQ["required check-run `coverage`"]
+    COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07; runs on EVERY PR — never probe-gated<br/>on internal/parity, ADV-P9-A04):<br/>go test -coverpkg=./internal/... over IN-PROCESS tests; oracle-dependent tests excluded<br/>via the ORACLE_TESTS pattern (ARCH-07, ADV-P11-A07);<br/>checks each gated package that EXISTS — prints `coverage: G of 3 gated packages present`;<br/>>= 95 percent statement coverage (Go's figure; the OD-158 gate name "line coverage"<br/>denotes it, ADV-P11-A03), S1/S5 packages (OD-158)"] --> REQ["required check-run `coverage`"]
     Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz, non-gating"]
 ```
 
@@ -61,7 +67,8 @@ flowchart LR
   corrected pass-4 D08 and again pass-5 A04): GitHub Actions always sets
   `CI=true`. RULED (pass-6 A12, orchestrator call 13): the dedicated
   `parity tier A (live corpus)` job (45-minute budget) is the ONE authoritative Tier A
-  run — the plain `go test` step EXCLUDES the Tier A selector, so the corpus never
+  run — the plain `go test` step EXCLUDES the ORACLE_TESTS selector (defined below), so
+  the corpus never
   executes under the test job's tighter 30-minute cap: one run, one timeout. The
   pass-3 "Tier A runs live inside the plain `go test` step" ordering rationale is
   superseded (pass-7 A08): setup-python + the `HYLO_PARITY_PYTHON` export survive only
@@ -72,10 +79,24 @@ flowchart LR
   OD-104 stands; the pass-5 exact-3.11.7 pin is WITHDRAWN by OD-185, pass-6 A02).
   Because the measured constants (JSON depth limits, Unicode 14.0 tables) were taken on
   3.11.7, the harness SELF-CHECKS them against the resolved oracle at start — measuring
-  the depth boundaries and `unicodedata.unidata_version`, failing closed on any mismatch
+  the depth boundaries, `unicodedata.unidata_version`, and a NUL-keeps probe (both
+  `posixpath.normpath('a\0b')` and `ntpath.normpath('a\0b')` must keep the NUL and
+  return `'a\x00b'` — the gh-106242-era behavior BC-1.02.022 PC-3 pins; a pre-fix
+  oracle silently truncates, orchestrator-measured on 3.11.7, ADV-P11-B08),
+  failing closed on any mismatch
   and printing the resolved version — and Tier B golden metadata records the resolved
   patch (RK-4); a moved boundary fails the staleness check loudly instead of flapping
   silently on patch drift.
+- **ORACLE_TESTS selector (ADV-P11-A07, pass-11 orchestrator call 8): ONE named
+  mechanism defines the oracle-dependent test set — the harness pattern constant
+  `ORACLE_TESTS = ^(TestParityTierA_Corpus|TestParityCanary_ShimLoaded|TestParityCacheSwap_FourCaches)$`
+  (single home: ARCH-07's OD-145 name table). Every test needing the resolved Python
+  oracle is a member — the three named today; a new oracle-dependent test EXTENDS the
+  pattern rather than inventing a second mechanism. The plain test step, the coverage
+  job and the release job pass `-skip $ORACLE_TESTS` (they install no interpreter;
+  BC-6.01.001's fail-closed interpreter rule would otherwise go red under `CI=true`),
+  and the dedicated Tier A job runs the same pattern via `-run $ORACLE_TESTS` — the one
+  authoritative oracle-dependent run.
 - **Generated-table staleness (OD-170):** the staleness step runs `go generate ./...` and then
   `git diff --exit-code` over the generated paths (Unicode 14.0 class tables and the
   pyfmt oracle tables, ARCH-06); any diff fails the leg — a stale committed table can
@@ -100,27 +121,50 @@ flowchart LR
   from IN-PROCESS tests only — Tier A is excluded because Tier A needs the Python
   oracle, which the coverage job does not install (ADV-P9-A07; Tier A runs every case
   in-process and a subset as the built binary — ARCH-07 — so the earlier blanket
-  "drives the built binary as a subprocess" premise is superseded) — hence parity runs
-  do NOT count toward statusline coverage (gate scope per OD-193). The job checks each
+  "drives the built binary as a subprocess" premise is superseded) — hence Tier A runs
+  do NOT count toward statusline coverage (gate scope per OD-193), while Tier B golden
+  tests and the harness-machinery tests run IN-PROCESS under `./internal/...` with
+  `-coverpkg=./internal/...` and DO credit `internal/statusline` (ADV-P11-A03 — the
+  earlier blanket "parity runs do not count" was false). The job checks each
   gated package that EXISTS and prints `coverage: G of 3 gated packages present`;
   `G` is compared with the COMMITTED package manifest — a manifest package missing
-  from the profile (renamed or moved) fails the job, and `G == 0` is allowed only
-  while no `internal/` Go package exists (skeleton era; ADV-P10-A06); it
-  enforces **line coverage
+  from the profile (renamed or moved) fails the job, and `G == 0` is allowed while
+  NONE of the three gated packages exists — the committed manifest lists the gated
+  packages PRESENT in the repo and grows as each lands, so `internal/platform` or
+  other non-gated `internal/` packages never bind (skeleton era and the approved build
+  order — `internal/platform` first, `internal/config` third, both BEFORE any gated
+  package — leave early PRs legitimately at `G == 0`; ADV-P11-A02). It enforces
+  **statement coverage
   >= 95 %** per package for S1 — `internal/statusline` and `internal/cost` — and
   S5 — `internal/pyfmt` (OD-158 stands unchanged per OD-193). `internal/cost` IS gated:
   SS-01 comprises `internal/statusline` and
   `internal/cost` (ARCH-INDEX Subsystem Registry) and module-criticality.md classes it
   CRITICAL by inheritance. `internal/parity` (S6) coverage is PROFILED AND REPORTED, not
   gated — OD-193 withdraws pass-7 call 12's addition of `internal/parity` to the gate.
-  The
-  mutation kill-rate targets stay Phase 6 targets (OD-158) — this gate is line coverage
-  only. Designed behaviour; see cicd-setup.md for the landed-ci.yml lag note.
+  Figure derivation (ADV-P11-A03): Go measures STATEMENT coverage, not line coverage —
+  the OD-158 gate name "line coverage" denotes Go's statement-coverage figure, computed
+  per gated package from the MERGED cross-package `-coverpkg=./internal/...` profile as
+  covered-statements-of-P / instrumented-statements-of-P, where the numerator counts
+  statements of package P hit by ANY test in the selection (including tests FROM OTHER
+  packages — the point of `-coverpkg`), reported per package by
+  `go tool cover -func` over the single merged profile. The
+  mutation kill-rate targets stay Phase 6 targets (OD-158) — this gate is statement
+  coverage only. Designed behaviour; see cicd-setup.md for the landed-ci.yml lag note.
 - **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report — per corpus
   case, 1 discarded warm-up + **20 timed runs**, samples sorted per case, nearest-rank
   p95 = **19th of the 20 sorted samples** (per nfr-catalog.md; with 5 samples the
   statistic degenerates to the maximum), p95 computed **per case** and binding per case,
-  no pooling; fake-VM handling time subtracted. The p95 <= 25 ms
+  no pooling; fake-VM handling time subtracted. Sampling unit (ADV-P11-A11): ONE timed
+  run executes the case's WHOLE step sequence end to end — a single-refresh case is one
+  process invocation, a multi-step case sums the per-invocation wall times (exec start
+  to exit each) across the sequence's invocations, a `--subagent` case is its single
+  panel invocation — matching BC-6.04.002's per-execution process-wall-time model with
+  the fake-VM server-side handling time subtracted for requests made during those
+  invocations. Between the 21 runs the case temp tree is RE-LAID from the committed
+  seeds (seed caches, transcript base, clock base) — no cache or seed state carries
+  across runs, so all 20 samples measure the same workload; within a run, later
+  refreshes see earlier refreshes' cache writes, which is the production shape legacy
+  exhibits too. The p95 <= 25 ms
   gate fails the build only with `HYLO_TIMING_GATE=1` (binds on the owner's Mac target).
   CONDITIONAL EXEMPTION (OD-187 + OD-191, pass-7 A02, orchestrator call 3): the >512 KB
   fixture is exempt from the 25 ms p95 target, but the gate FAILS if its p95 exceeds
@@ -129,8 +173,11 @@ flowchart LR
   exactly one case, and its transcript must exceed 512 KB (the corpus validator checks
   both) — and the report prints one line whenever the exemption is used.
 - **Public-repo hygiene (policy 21, NFR-006):** committed fixtures synthetic-only;
-  real inputs replayed from git-ignored `captures/`; gitleaks with
-  `--log-opts="--all"` plus the category pattern scan; `TestCorpusHygiene` in-tree.
+  real inputs replayed from git-ignored `captures/`; gitleaks scanning the SAME two-ref
+  set the comparison counts — `--log-opts="main factory-artifacts"` (ADV-P11-A04; with
+  `fetch-depth: 0` a `--all` scan also covers the PR merge ref, other remote branches
+  and tags, so the scanned count diverges from the compared count on essentially every
+  PR) — plus the category pattern scan; `TestCorpusHygiene` in-tree.
   The factory-artifacts branch is scanned by a scheduled (nightly) and manually
   dispatchable job running ON `main` that checks out the `factory-artifacts` ref and
   runs the category pattern scan over that checked-out tree — a push trigger on that
@@ -175,21 +222,28 @@ flowchart LR
   - Pattern scan: `hygiene: K files scanned, H hits` — fails if `K == 0` (scan ran over
     nothing) AND if `H > 0` (a found hit is a failure, pass-3 A18), so the scan cannot
     pass while flagging hygiene terms.
-  - Gitleaks (secret scan; ADV-P9-A05; positive comparison ADV-P10-A05): `gitleaks: N
+  - Gitleaks (secret scan; ADV-P9-A05; positive comparison ADV-P10-A05; rev-set
+    equality ADV-P11-A04): `gitleaks: N
     commits scanned` — fails if `N == 0` AND if `N` differs from
-    `git rev-list --count` over both refs; a shallow or narrowed `--log-opts` still
+    `git rev-list --count` over the SAME two refs the scan names (`main` and
+    `factory-artifacts`; the scan's `--log-opts` names exactly those two refs, so the
+    scanned rev set EQUALS the compared rev set by construction); a shallow or narrowed
+    scan still
     covers at least one commit and exits 0, so the zero-check alone cannot detect it —
-    the scanned count is COMPARED with the fetched commit count across main +
+    the scanned count is COMPARED with the rev count across main +
     factory-artifacts (fetch-depth 0).
   - Coverage gate (pass-5 A16; fail scope per pass-8 orchestrator call 1; presence scope
-    per ADV-P9-A04; manifest census ADV-P10-A04/A06): `coverage: G of 3 gated packages
-    present; min line coverage
+    per ADV-P9-A04; manifest census ADV-P10-A04/A06; manifest growth + skeleton-era
+    scope ADV-P11-A02): `coverage: G of 3 gated packages
+    present; min statement coverage
     M% >= 95` — checks each gated package that EXISTS — `internal/statusline`,
     `internal/cost`, `internal/pyfmt` — against the COMMITTED package manifest and
     fails if a manifest package is missing from the profile (renamed or moved), if one
     exists and reports `[no statements]` (a package trivially "passing" coverage by
-    having no statements is a failure, not a pass), or if `M < 95`; `G == 0` is allowed
-    only while no `internal/` Go package exists (skeleton era); the job runs on every PR
+    having no statements is a failure, not a pass), or if `M < 95`; the committed
+    manifest lists the gated packages present in the repo and GROWS as each lands, and
+    `G == 0` is allowed while NONE of the three gated packages exists, whatever other
+    `internal/` packages exist (early build-order PRs, ADV-P11-A02); the job runs on every PR
     and is never gated
     on `internal/parity` existing (ADV-P9-A04); `internal/parity`'s figure is reported for
     information and does not bind (OD-193).
@@ -211,7 +265,7 @@ flowchart LR
   pass-7 A09, orchestrator call 12; gate scope per OD-193): the
   HIGH-impact fake-pass-parity risk is mitigated in P1 NOT by the HIGH kill-rate tier
   (a Phase 6 target, OD-158) but by THIS census discipline plus the >= 95 %
-  line-coverage gate over the gated packages (S1/S5, named above) — the mitigation
+  statement-coverage gate over the gated packages (S1/S5, named above) — the mitigation
   names only gates that exist; the referee must demonstrably check something on every
   run (the Tier A census line), the refereed render path must be demonstrably exercised
   by in-process tests, and the

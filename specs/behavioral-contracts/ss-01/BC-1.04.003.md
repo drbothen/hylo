@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.7"
+version: "1.3.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
@@ -27,6 +27,7 @@ modified:
   - "1.3.5 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC2/PC3 name the registered keys statusline.sparkline.max_age_s and statusline.sparkline.min_gap_s beside their default literals)"
   - "1.3.6 2026-11-18: pass-9 residual sweep (call 9, ADV-P9-A2-04 disk sync) — the VP-030 quick-leg row names the registered keys (statusline.sparkline.history_cap, statusline.sparkline.max_age_s) instead of the 32/90 literals, states the pruning invariant on the success path only, and adds the failure-path verbatim re-save (SL:327, SL:353-355; Inv 2), matching VP-030's statement"
   - "1.3.7 2026-11-18: pass-10 remediation ADV-P10-C2-02 (EC-010 added — a dict point whose t is a huge exact JSON integer, magnitude >= 2**1024 - 2**970, raises OverflowError at the SL:336 age filter → errDegraded; OD-160 class; oracle-verified CPython 3.11.7)"
+  - "1.3.8 2026-11-18: pass-11 remediation ADV-P11-C2-01 (the VP-031 row names the four varied series v/k/f/p by their series names and pins the gen_rate5m fallback position — v inserted AFTER k and f — so the 16-subset table can no longer be misread as varying the insertion order)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -127,7 +128,7 @@ at the last 32 points.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | On the success path, saved history length ≤ `statusline.sparkline.history_cap` with every saved point satisfying `now - t < statusline.sparkline.max_age_s` or being the new point; the fetch-failure path re-saves the stored history verbatim, unpruned (SL:327, SL:353-355; Inv 2) | Go property test (testing/quick) (routed to the VP-030 quick leg, pass-8 call 12; VP-031 de-cited from this row) |
-| VP-030, VP-031 | Point key order equals legacy for every subset of the four series | manual (table over 16 subsets) |
+| VP-030, VP-031 | Point key order equals legacy for every subset of the four varied series — `v` (`dgx_sl:gen_rate1m`), `k` (`vllm:kv_cache_usage_perc`), `f` (`dgx_ttft:p95_30m`) and the preempt marker `p` (`dgx_preempt:rate5m`) — including the fallback cases: when `dgx_sl:gen_rate1m` is absent and `dgx_tokens:gen_rate5m` is present, the fallback fills `v` AFTER `k` and `f` (PC4; SL:344-345), so a subset table built from varying v/k/f/p exercises that order | manual (table over 16 subsets) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008/EC-009 foreign-cache crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped (ADV-P5-C2-17) | property test (VP-012, go test) |
 
 ## Traceability

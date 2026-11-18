@@ -1,14 +1,14 @@
 ---
 document_type: module-criticality
 level: ops
-version: "1.10"
+version: "1.11"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T00:30:00Z
+timestamp: 2026-11-21T03:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "a97d27b"
+input-hash: "69dbef0"
 traces_to: prd.md
 ---
 
@@ -34,8 +34,13 @@ oracles: metamorphic invariants plus spot-pins against the committed CPython tab
 
 **Gating schedule (OD-158):** the kill-rate targets in the table above are **Phase 6
 targets**, tracked by the formal hardening phase — they do not gate P1. The P1 exit gate
-for the module-critical modules (S1 Status Line, S5 Pyfmt) is **line coverage >= 95%**,
-asserted from the coverage report of the package `go test` runs. Gate scope is settled
+for the module-critical modules (S1 Status Line, S5 Pyfmt) is **>= 95% per package**,
+measured as Go **statement coverage** — Go's `go test -cover` counts statements, not
+lines (metric name corrected pass-11 A03/call 6) — and computed from the merged
+`-coverpkg=./internal/...` profile, so a package's figure counts its statements executed
+by ANY test binary in the run: Tier B golden tests and the parity-machinery tests do
+count toward S1/S5 coverage; only the Tier A oracle-differential runs are excluded.
+Gate scope is settled
 by OD-193 (owner 2026-11-18): S1 (`internal/statusline`, `internal/cost`) and S5
 (`internal/pyfmt`) only — `internal/parity` (S6) coverage is reported, not gated; the
 pass-7 widening of the gate to S6 is withdrawn. The 2026-11-17 owner

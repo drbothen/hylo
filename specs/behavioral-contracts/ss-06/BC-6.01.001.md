@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T06:00:00Z
+timestamp: 2026-11-21T09:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "a5a36c9"
+input-hash: "899610c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -30,6 +30,8 @@ modified:
   - "2026-11-19T03:00:00Z (1.2.3): ADV-P6 remediation D16/OD-185 — PC-4 extended: resolved oracle patch recorded AND measured constants self-checked before the first case (committed probe measures decode/dumps/dump boundaries 994/994/995 and unicodedata.unidata_version 14.0.0; fail closed printing the resolved version); the 3.11.x floating pin stands (OD-185 withdraws the pass-5 exact-3.11.7 call)"
   - "2026-11-19T08:30:00Z (1.2.4): ADV-P7 remediation D04 (orchestrator call 7) — PC-4 self-check probe redefined as the ONE end-to-end definition: the probe drives the real oracle (case argv, temp HOME/cwd) and asserts the laws' own constants at the pinned sites — stdin decode 993 accepted/994 rejected, session-cache save (json.dump, s=4) 991 writes/992 skips, subagent wire (json.dumps, s=3) 991 renders — replacing the inconsistent helper-scope triple (994/994/995); values measured this burst (CPython 3.11.7, unidata_version 14.0.0); VP-006 and ARCH-07 to copy"
   - "2026-11-21T06:00:00Z (1.2.5): ADV-P10 remediation D02 (orchestrator call 2) — PC-5 states the one subagent-family rule: an id of the form subagent-<nnn>[-<variant>] is the only shape that receives argv [\"--subagent\"]; the erroneous 'older -sub shorthand' notation removed (there is no -sub suffix rule)"
+  - "2026-11-21T07:00:00Z (1.2.6): ADV-P11 remediation A07 (orchestrator call 8) + B08 (call 15) — new PC-7 defines the oracle-dependent test set by ONE named mechanism, the build tag oracle (//go:build oracle) on every test needing the Python oracle (Tier A corpus, shim canary, four-cache swap, any other); plain test step, coverage and release exclude exactly that set; PC-4's self-check probe adds the normpath NUL-retention probe (posixpath.normpath('a\\0b') and ntpath.normpath('a\\0b') both keep the NUL, returning 'a\\x00b', orchestrator-measured CPython 3.11.7), grounding BC-1.02.022"
+  - "2026-11-21T09:00:00Z (1.2.7): pass-11 residual (orchestrator call, binding) — PC-7 respelled from the minted `oracle` build tag to the single ORACLE_TESTS -run/-skip pattern of the ARCH-07 OD-145 table (plain test/coverage/release pass `-skip $ORACLE_TESTS`; the dedicated Tier A job runs `-run $ORACLE_TESTS`; a new oracle-dependent test extends the pattern); no member change — the same three named tests"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -95,12 +97,18 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
    - **subagent wire** (BC-5.02.006 `json.dumps` law, `s = 3`): an id chain of 990
      (wire object 991, stdin document 993) renders its row — the attainable boundary;
      the next chain overruns the stdin decoder first (document 994 → zero rows).
+   - **normpath NUL retention** (BC-1.02.022; pass-11 B08, orchestrator call 15):
+     `posixpath.normpath('a\0b')` and `ntpath.normpath('a\0b')` both KEEP the NUL,
+     returning `'a\x00b'` (orchestrator-measured on CPython 3.11.7) — a pre-gh-106242
+     oracle that truncated at the NUL fails here instead of silently diverging from
+     the BC-1.02.022 `a\0b` → `a\0b` vector.
    The probe also prints `unicodedata.unidata_version` (pinned `14.0.0`). Any mismatch
    fails the run closed, printing the resolved version string; a reviewed spec
    amendment re-pins the constants when a future 3.11.x patch shifts an internal
    boundary. Measured under this method (pass-7 D04, CPython 3.11.7, default
    recursion limit 1000): decode 993 accepted / 994 rejected, save 991 writes / 992
-   skips, wire 991 renders, `unidata_version` `14.0.0` — identical to the laws'
+   skips, wire 991 renders, normpath NUL retained in both flavors, `unidata_version`
+   `14.0.0` — identical to the laws'
    constants, as the one definition requires. VP-006 and ARCH-07 state these same
    constants.
 5. **Exact argv for every oracle refresh:**
@@ -119,6 +127,20 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
    CI marker `CI=true` is absent, Tier A skips with
    `parity: HYLO_PARITY_PYTHON unset; Tier A (live differential) skipped`. Tier B still
    runs without Python. If the setting is unset and `CI=true` is present, Tier A fails.
+7. **Oracle-dependent test set: one named mechanism (ADV-P11-A07, orchestrator call 8; pass-11 residual respell to the ARCH-07 OD-145 binding).**
+   The oracle-dependent test set — the Tier A corpus suite
+   (`TestParityTierA_Corpus`), the clock-shim canary (`TestParityCanary_ShimLoaded`,
+   BC-6.01.003), the four-cache swap (`TestParityCacheSwap_FourCaches`, BC-6.02.004) and
+   any other oracle-dependent test — is selected by ONE named mechanism, the
+   `ORACLE_TESTS` pattern constant
+   (`^(TestParityTierA_Corpus|TestParityCanary_ShimLoaded|TestParityCacheSwap_FourCaches)$`,
+   ARCH-07 OD-145 table): the plain test step, the coverage job and the release job pass
+   `-skip $ORACLE_TESTS` and therefore exclude exactly that set, while the dedicated
+   Tier A job compiles and runs the set with `-run $ORACLE_TESTS`. The interpreter rules
+   above are unchanged inside an oracle-bearing run (unset locally skips per PC-6; unset
+   with `CI=true` fails per PC-6). There is no second selector mechanism and no build
+   tag: a new oracle-dependent test extends the `ORACLE_TESTS` pattern, never a second
+   mechanism.
 
 ## Invariants
 

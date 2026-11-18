@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.10"
+version: "1.4.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "1803249"
+input-hash: "7ea5e4f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -27,7 +27,9 @@ modified:
   - "1.3.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17 sibling sweep) — EC-004 register row respelled to the OD-178 canon (five canonical tests incl. TestD4EX3_Text; register closed at seven) and history labels version-prefixed ascending; no behavioral change"
   - "1.3.8 pass-6 remediation (ADV-P6-B11): PC3 guarded-site list now names the subagent crash family CP-A01..A05 (matching PC1's --subagent coverage and EC-007); no behavioral change; 2026-11-19T04:00:00Z"
   - "1.3.9 pass-7 remediation (ADV-P7-B03/B04/B09): PC3 guarded-site list gains the Windows MSVC localtime-domain OSError (CP-T09, ErrLocaltimeDomain — `_iso_ts` catches only ValueError, SL:984) per orchestrator call 8, and the CP-N03 anchor is corrected to BC-1.04.004/.005 (ADV-P7-B04; ARCH-03/error-taxonomy owners); EC-005 names the canonical test TestCPX03_WriteFailureExit0 (ADV-P7-B09); input-hash refreshed; no behavioral change; 2026-11-19T07:00:00Z"
-  - "1.3.10 pass-9 remediation (orchestrator call 4 / ADV-P9-B03): PC3 guarded-site overflow list extended with CP-O12 (cost-pick equivalence overflow at the SL:633 multiply; owner BC-1.02.029 EC-009) — crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
+  - "1.4 pass-9 remediation (orchestrator call 4 / ADV-P9-B03): PC3 guarded-site overflow list extended with CP-O12 (cost-pick equivalence overflow at the SL:633 multiply; owner BC-1.02.029 EC-009) — crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
+  - "1.4.2 pass-11 residual (OD-190 applied literally): Inv 2 respelled — the Windows LF comes from the comparator's open CRLF→LF conversion of the ORACLE's stdout before the byte comparison; hylo's bytes are never converted and the shim does no newline reconfigure; no behavioral change; 2026-11-21T09:00:00Z"
+  - "1.4.1 pass-11 remediation (ADV-P11-B04): PC3's CP-N anchor corrected — only CP-N03 belongs to BC-1.04.004/.005; CP-N01 and CP-N02 credited to their H1 owners BC-1.04.015 and BC-1.04.014 (matching the Related BCs line); the pass-9 label 1.3.10 respelled 1.4 so the patch sequence stays monotonic past nine (POLICY 14 leg 3); no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,8 +59,9 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
    (BC-2.02.001); in `--subagent` mode a config error prints **zero stdout bytes** (diagnostic on stderr) per
    OD-168 — the PRD/DI-008 carve-out for the agent-panel mode.
 3. During the refresh a fault occurs at any guarded site: a crash-path site CP-S01..S17 (stdin type confusion,
-   lone surrogate at output), CP-N01/N02/N03 (row-2 NaN paths and the metrics-borne numeric-`__name__` degrade,
-   BC-1.04.004/.005 per ARCH-03), the Windows MSVC localtime-domain OSError on a naive transcript timestamp
+   lone surrogate at output), CP-N01/N02 (the row-2 NaN paths: KV NaN, BC-1.04.015; sparkline NaN/+Inf,
+   BC-1.04.014) and CP-N03 (the metrics-borne numeric-`__name__` degrade, BC-1.04.004/.005 per ARCH-03), the
+   Windows MSVC localtime-domain OSError on a naive transcript timestamp
    (**CP-T09** — `_iso_ts` catches only ValueError, SL:984, so the OSError escapes and degrades the line;
    `ErrLocaltimeDomain`, ARCH-06), the OD-156 overflow sites routed to E-REN-002 through this guard (CP-O01..O05 at the row-1
    render sites, CP-O10/O11/O12 in the cost segment — the transcript family CP-O06..O08 and CP-O09 resolve to the
@@ -78,8 +81,10 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
 ## Invariants
 
 1. The degraded line is pure ASCII plus ESC; it cannot fail to encode.
-2. The line terminator is LF on every OS, including Windows (design IM-22; the harness pins legacy to
-   `newline="\n"`).
+2. The line terminator is LF on every OS, including Windows (design IM-22; OD-190: on
+   the Windows legs the comparator converts the ORACLE's stdout CRLF to LF before the
+   byte comparison; hylo's bytes are never converted and the shim does no newline
+   reconfigure).
 3. Exactly one write to stdout per refresh: Go builds the output in a buffer and either writes the rendered rows
    or the degraded line, never both (design IM-15/IM-22).
 4. The color code `\e[90m` and reset `\e[0m` are built-in named constants of the guard,

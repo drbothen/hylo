@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.6.4"
+version: "1.6.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "2b4b237"
+input-hash: "97409c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -27,6 +27,7 @@ modified:
   - "1.6.2 pass-6 remediation (ADV-P6-B01 call 10 + OD-184 wording): for-all thermometer rows re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); glyph length respelled to the OD-184 canon; 2026-11-19T04:00:00Z"
   - "1.6.3 pass-8 remediation (ADV-P8-B09): VP-041 width-formula row states the `%` term explicitly — 10 + 1 + len(number text) + 1 + len(denominator text) (PC7); VP-041 P-o sync is the architect's; no behavioral change; 2026-11-19T08:00:00Z"
   - "1.6.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O01 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "1.6.5 pass-11 remediation (ADV-P11-B01): EC-008 names the taxonomy id CP-S05 with its faithful trigger and raise site (SL:419), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -118,7 +119,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-005 | pct -3 | clamped to 0: 0 cells, `0%` |
 | EC-006 | `context_window_size` 0/missing/null | no denominator |
 | EC-007 | total 999999 | `/1000K` (K branch, half-even on 999.999); quirks `/0K`, `True`, NaN → BC-1.02.020 |
-| EC-008 | `context_window` a truthy non-object (`"x"`) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
+| EC-008 | `context_window` a truthy non-object (`"x"`) — taxonomy **CP-S05** (`context_window` truthy and not a dict, raise site SL:419) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table) |
 | EC-009 | pct NaN; non-numeric truthy total | crash cases CP-S06 / CP-S07 → guard line (BC-1.02.020) |
 | EC-010 | `context_window_size` above float max (~1.8e308), e.g. 2·10³⁰⁸ | `total >= 1e6` compares exact (no error); CPython converts the int operand to float first, so `total / 1e6` raises OverflowError at SL:435 (taxonomy CP-O01) → guard line (CP-S07 family, BC-1.02.020; stdin-borne render overflow, OD-156) |
 

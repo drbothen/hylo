@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T13:05:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5cb6c46"
+input-hash: "75de44d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_finish_turn, _mix_counts (SL:988-996, 1023, 1073-1079, 1150-1153)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C10/C11) — VP row: only C1 maps to BC-1.03.019 row 13; C2's native-hylo reference is row 15 plus appended A9/S11 (lr [90.0, false]); EC-005 quotes OD-32 literally (cur.t0 is a number) and credits CONV-ABS-15 for the non-numeric-out half"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C10/C11) — VP row: only C1 maps to BC-1.03.019 row 13; C2's native-hylo reference is row 15 plus appended A9/S11 (lr [90.0, false]); EC-005 quotes OD-32 literally (cur.t0 is a number) and credits CONV-ABS-15 for the non-numeric-out half", "1.3.1 2026-11-22T12:00:00Z: pass-11 remediation (ADV-P11-C03) — absent-out pin: a cur object with the out key absent does not fire the OD-32 rule (legacy coerces the missing key to 0, cur.get(out) or 0, SL:993) and never crashes; PC1 requires out present and non-numeric; EC-007 added, EC-005 and the VP predicate row name exclusion id OD-160 like siblings (BC-1.03.002 EC-007..009, BC-1.03.005 PC5)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,13 +37,16 @@ window, legacy saves the open turn with a non-numeric `out` (e.g. `"cur": {"id":
 1794650408.0, "out": "abc"}`) and then crashes at SL:994 on the first later refresh whose lines close that turn,
 stickily. hylo can meet such a **legacy-written** mix cache (cache-swap, first run after cutover). The reader rule
 (OD-32, amended per CONV-ABS-15): on load, treat `cur` as absent **only** when `cur.t0` is a number and `cur.out` is
-not int/float/bool; keep every other `cur` verbatim. hylo then never crashes on it; turn state converges with native
+not int/float/bool; keep every other `cur` verbatim. A `cur` with the `out` key **absent** does not fire the
+rule: legacy coerces the missing key to 0 (`cur.get("out") or 0`, SL:993) and never crashes on it; hylo keeps
+such `cur` verbatim (EC-007). hylo then never crashes on it; turn state converges with native
 hylo at the next turn event, with a known composition residual.
 
 ## Preconditions
 
-1. A mix cache loaded by BC-1.03.002 contains `cur` as an object with `t0` a number — "number" as defined in BC-1.03.018: int, float or bool, so a bool `t0` counts as a number and fires the rule (pinned; arises only with foreign caches) — and `out` a JSON
-   value that is not int/float/bool (string, array, object; see EC-004 for falsy non-numbers).
+1. A mix cache loaded by BC-1.03.002 contains `cur` as an object with `t0` a number — "number" as defined in BC-1.03.018: int, float or bool, so a bool `t0` counts as a number and fires the rule (pinned; arises only with foreign caches) — and `out` present and a JSON
+   value that is not int/float/bool (string, array, object; see EC-004 for falsy non-numbers). A `cur` with the
+   `out` key absent does not fire the rule (legacy coerces it to 0 at SL:993 — EC-007).
 2. Only a legacy-written cache can contain this form: hylo's own parser never writes it (it skips the opening line,
    BC-1.03.018 CP-T05).
 
@@ -75,8 +78,10 @@ hylo at the next turn event, with a known composition residual.
 | EC-002 | Poisoned cache, then a continuation line of the same id with no closer | legacy does **not** crash (it only moves `t1`); hylo opens a new turn instead → caches differ (C3 below); excluded under D4-EX-2 |
 | EC-003 | `out` is `["x"]` or `{"a": 1}` | same as `"abc"` (legacy crashes at the closer; hylo applies the rule) |
 | EC-004 | `out` is `true` or `1.5` (numbers) | rule does not fire; legacy and hylo agree (no crash) |
-| EC-005 | `out` null / `""` / `[]` / `{}` (falsy non-numbers) | unreachable from either writer (SL:1079 coerces falsy to 0); a foreign-cache state (CP-C class, out of byte-parity scope under ruling b). OD-32's literal text ("treat as no open turn when cur.t0 is a number") treats them as absent; the non-numeric-`out` half comes from CONV-ABS-15; hylo follows both |
+| EC-005 | `out` null / `""` / `[]` / `{}` (falsy non-numbers) | unreachable from either writer (SL:1079 coerces falsy to 0); a foreign-cache state (CP-C class, ruling b, exclusion id `OD-160` — sibling
+convention, BC-1.03.002 EC-007..009 / BC-1.03.005 PC5; out of byte-parity scope). OD-32's literal text ("treat as no open turn when cur.t0 is a number") treats them as absent; the non-numeric-`out` half comes from CONV-ABS-15; hylo follows both |
 | EC-006 | `cur.t0` null with `out` `"abc"` | rule does **not** fire (BC-1.03.021) |
+| EC-007 | `out` key absent, `t0` a number (foreign cache; neither writer emits a `cur` without `out` — SL:1079 always sets it) | rule does **not** fire: legacy coerces the missing key to 0 (`cur.get("out") or 0`, SL:993) and closes or continues the turn without crashing; hylo keeps `cur` verbatim and agrees (turn state converges from the next turn event); foreign-cache shape (ruling b, exclusion id `OD-160`) |
 
 ## Canonical Test Vectors
 
@@ -101,7 +106,7 @@ expectation = legacy run on the seed with `cur` replaced by null).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-013 | Rule fires iff `cur` is an object, `t0` is a number (int, float or bool), `out` is not a number | table test |
+| VP-029, VP-013 | Rule fires iff `cur` is an object, `t0` is a number (int, float or bool), `out` is present and not a number (an absent `out` key does not fire — EC-007) | table test |
 | VP-029, VP-013 | After the rule and one turn event, turn state equals native hylo's | table test (C1 vs BC-1.03.019 row 13; C2's native-hylo reference is row 15 plus appended `A9`, `S11`, giving `lr [90.0, false]`) |
 | VP-012 | Postcondition 5 closure: the OD-32 cache-swap cases are admitted under the closed D4-EX-2 register, each with an expected output file and a dedicated `TestMixCache_OD32_*` test; no globs | repository test over `exclusions.json` |
 

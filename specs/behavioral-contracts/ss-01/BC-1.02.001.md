@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "5ecc7b2"
+input-hash: "97409c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:441-449)"
@@ -22,6 +22,7 @@ modified:
   - "1.2 pass-4 remediation (ADV-P4-B16/B03): pill label words are config keys statusline.pill.label_* per OD-173 (D7 citation dropped); for-all pill-classification leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.3 pass-5 remediation (ADV-P5-B03): the pill glyph is named as the registry key statusline.glyphs.lane (default U+25E8, 1 code point/1 column; shared with the subagent lane tag, BC-1.07.006) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
   - "1.4 pass-6 remediation (ADV-P6-B16 + OD-184 wording): history labels version-prefixed; PC4 glyph length respelled to the OD-184 canon (exactly 1 code point, measured in legacy's render width); no behavioral change; 2026-11-19T04:00:00Z"
+  - "1.5 pass-11 remediation (ADV-P11-B01): EC-007 names the taxonomy ids CP-S01 and CP-S02 with their faithful triggers and raise sites (SL:442, SL:446), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -92,7 +93,7 @@ Notation: `\e` is the byte 0x1B; every other character is its UTF-8 encoding.
 | EC-004 | Case mismatch `Claude-sonnet` vs id `claude-sonnet-5-5` | ANTH pill (case-sensitive) |
 | EC-005 | `model` missing, null, `{}` or id `""` | `?` pill |
 | EC-006 | `display_name` present, id missing | `?` pill (display name never decides the lane) |
-| EC-007 | Truthy non-string id (e.g. `5`) with a non-empty prefix list, or truthy non-object `model` (e.g. `"x"`) | legacy raises AttributeError → whole run degrades to the guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (BC-1.01.001) |
+| EC-007 | Truthy non-string id (e.g. `5`) with a non-empty prefix list — taxonomy **CP-S02** (`model.id` truthy and not a str **and** `LOCAL_MODEL_PREFIXES` non-empty, raise site SL:446) — or truthy non-object `model` (e.g. `"x"`) — taxonomy **CP-S01** (`model` truthy and not a dict, raise site SL:442) | legacy raises AttributeError → whole run degrades to the guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (BC-1.01.001; error-taxonomy CP-S table) |
 | EC-008 | Truthy non-string id with an empty prefix list | no exception: `?` pill (the `startswith` call is never reached); the label renders per BC-1.02.021 |
 
 ## Canonical Test Vectors

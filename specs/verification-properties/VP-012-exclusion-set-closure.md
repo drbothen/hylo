@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.21"
+version: "1.22"
 status: draft
 producer: architect
 timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "045bcba"
+input-hash: "859167e"
 traces_to: prd.md
 source_bc: BC-6.03.004
-bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017]
+bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017, BC-1.04.018]
 module: internal/parity
 proof_method: mutation-test (fail-closed catalogue)
 feasibility: feasible
@@ -41,6 +41,7 @@ modified:
   - "1.19 2026-11-20T08:00:00Z: pass-8 fixes (A2-05, A2-06, C03) — OD-160 register riders corrected to BC-1.02.017 EC-004..006 (hand-edited proc_start shapes) and BC-1.01.008 PC3 (cached-branch lone surrogate), in both the Source Contract and the Named Tests note (EC-010 is the CP-O05 overflow; BC-1.01.008 has no EC-011); TestWindowAge_D4EX1_Windows_AncestorFound labelled the D4-EX-1 rider, never an OD-160 rider (1.18 entry label corrected in place); D4-EX-2 attribution gains the hylo-only vector carriers BC-1.03.014 and BC-1.03.016; OD-160 citation carriers gain BC-1.03.002 (EC-008/009) and BC-1.03.005 (PC5); bcs: gains those four contracts"
   - "1.20 2026-11-20T12:00:00Z: pass-9 fix (C2-04) — bcs: gains BC-1.05.009 (second OD-30 register contract beside BC-1.05.006; its body register row and Named Tests entry already named it — the frontmatter map row was the missing reciprocity); VP-INDEX coverage map synced in the same burst by the index owner; the 1.19 entry's lost closing quote restored (call 5 YAML repair)"
   - "1.21 2026-11-18T17:50:00Z: pass-10 fixes (A2-06, A2-10) — scope review stated honestly as a MANUAL obligation: the closure check verifies id membership, uniqueness, test existence and expected-file match, not that each entry's case lies inside its id's declared scope (OD-166 'and nothing else' / OD-181 transport are predicated by the rulings and BC bodies, not by an oracle; no structure mutant can attach a valid id to an out-of-scope case) — property statement and Honesty bullet state it (A2-06); the rider-existence leg additionally asserts RiderRegister()'s keys equal the twelve-element closed set (length + per-id presence — a register missing an id would silently skip that id's check) (A2-10)"
+  - "1.22 2026-11-21T09:00:00Z: pass-11 residual — bcs: gains BC-1.04.018 (its VP-table row routes the OD-160 exclusion to this closure check, citation carrier only, no riding test of its own; ADV-P11-C2-02), the Source Contract citation-carriers sentence names it; VP-INDEX map and recount synced in the same burst"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -137,7 +138,11 @@ nothing.
   BC-1.03.005 (OD-160 foreign cached `ids` shapes, PC5 — ADV-P8-C03 reciprocity, the
   siblings BC-1.03.015/BC-1.06.001 already carried their citations), BC-1.04.002 (OD-160 tag
   on EC-008), and BC-1.06.001 (temp-file-parity carrier; its PC-1 note states the
-  exclusion entry and its riding table test are validated by this closure check — SC-21).
+  exclusion entry and its riding table test are validated by this closure check — SC-21),
+  BC-1.04.018 (OD-160 tag on the PC-1 foreign exact-giant-int `lr[0]` mix-cache shape;
+  citation carrier only, no riding test of its own — the entry is validated by the
+  closure check's existing OD-160 member and the riding test
+  `TestForeignCacheShape_OD160_Vectors`; ADV-P11-C2-02, pass-11 residual).
 - **Invariant verified:** DI-012 (no blanket exclusions; every exclusion carries its
   own table tests); OD-105/OD-110; AD-09 (machinery fails closed).
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "74cdc97"
+input-hash: "73d2913"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.3.1 2026-11-18: pass-6 metadata alignment (ADV-P6-C2-15) — D22 sweep entry redated to the pass-4 burst date (2026-11-18) and timestamp raised above the last modified entry; no behavioral change"]
+modified: ["1.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.3.1 2026-11-18: pass-6 metadata alignment (ADV-P6-C2-15) — D22 sweep entry redated to the pass-4 burst date (2026-11-18) and timestamp raised above the last modified entry; no behavioral change", "1.3.2 2026-11-18: pass-11 OD-194 sibling sweep (note added after the exact row bytes — the label bytes in the table are the default spellings of the statusline.labels.* keys named in the forming contracts BC-1.04.004/006/007/008)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -69,6 +69,13 @@ Exact step-0 row bytes:
 `\e[32m◉\e[0m\e[2m · \e[0m\e[32mr1·q0\e[0m\e[2m · \e[0m\e[36mKV▰▰▱▱ 50%\e[0m\e[2m · \e[0m\e[90m▣\e[0m\e[97m80\e[0m\e[90mt/s\e[0m \e[38;2;38;93;104m▇\e[38;2;140;235;255m█\e[0m`.
 Exact step-2 row bytes:
 `\e[33m◉\e[0m\e[2m · \e[0m\e[32mr1·q0\e[0m\e[2m · \e[0m\e[36mKV▰▰▱▱ 50%\e[0m\e[2m · \e[0m\e[90m▣\e[0m\e[90m80\e[0m\e[90mt/s\e[0m\e[2m · \e[0m\e[2m(~4s old)\e[0m`.
+
+The label bytes in the table and exact rows (`r`/`q` with the `·` between them, `KV`,
+`t/s`, the `(~Ns old)` suffix) are the default spellings of the `statusline.labels.*`
+keys named in the forming contracts — `labels.rate`/`labels.queue` (defaults `r`/`q`,
+BC-1.04.006 PC3), `labels.kv`/`labels.host` (defaults `KV`/`host`, BC-1.04.007 PC5),
+`labels.tps` (default `t/s`, BC-1.04.008 PC1/PC2) and `labels.old` (default `old`,
+BC-1.04.004 PC2); OD-194.
 
 ## Invariants
 

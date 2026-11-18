@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.4"
+version: "1.5.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "2b4b237"
+input-hash: "97409c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -26,6 +26,7 @@ modified:
   - "1.5.2 pass-6 remediation (ADV-P6-B08): the lines arrows are named as the registry keys statusline.glyphs.lines_up / lines_down instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
   - "1.5.3 pass-8 remediation (ADV-P8-B05, orchestrator call 10): Inv 3 registered range respelled to the interface-definitions canon — units.lines = {`k`} (the `M` divisor is a registered render semantic, not an accepted value); no behavioral change; 2026-11-19T08:00:00Z"
   - "1.5.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O03 overflow degrade (EC-013) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "1.5.5 pass-11 remediation (ADV-P11-B01 + B06): EC-010 names the taxonomy id CP-S10 with its faithful trigger and raise site (SL:535); PC3.1's `?` fallback pinned as a named format constant, not config (D15); no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,13 +57,19 @@ Notation: `\e` is the byte 0x1B.
 ## Postconditions
 
 1. If neither `la` nor `lr` is truthy → no segment.
-2. Otherwise segment = `\e[32m▲` + fmt(la) + `\e[0m\e[2m/\e[0m\e[31m▼` + fmt(lr) + `\e[0m`.
+2. Otherwise segment = `\e[32m▲` + fmt(la) + `\e[0m\e[2m/\e[0m\e[31m▼` + fmt(lr) + `\e[0m`. The dim `\e[2m/\e[0m`
+   between the counts (SL:537) is a **named format constant** of this widget, not config (D15 rationale:
+   display-format markup of the output, parity-bound at four bytes; why not config = the theme's
+   `statusline.theme.separator` key governs inter-segment separators, not intra-segment markup — no ruling mints
+   a second key for this site).
 3. `fmt(n)` with the registered semantics of the single Text key `statusline.units.lines`
    (thresholds 10,000 (`>=` → k) and 1,000,000 (`>=` → M), per interface-definitions):
    1. `n = int(n)` with Python semantics (`pyfmt.ParseInt` for strings — surrounding
       whitespace and `_` digit separators accepted, BC-5.01.002; floats truncate toward
       zero; `true` → 1); a TypeError or ValueError (non-numeric string such as `"1e3"`,
-      list, object, NaN) → return `?`.
+      list, object, NaN) → return `?`. The `?` fallback is a **named format constant** of
+      this widget, not config (D15 rationale: display-format constant of the output,
+      one byte, parity-bound; why not config = no ruling mints a key for this site).
    2. `n >= 1,000,000` → F(n / 1e6, 1) + `M` (Python `'f'`, half-even on the binary value). The
       division is CPython `float_div`: an int operand is converted to float FIRST, so
       `OverflowError` fires at the int→float threshold |n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸
@@ -99,7 +106,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-007 | `"1e3"`, `"abc"`, `[1]`, NaN | `?` (NaN is truthy, so `▲?/▼0` shows) |
 | EC-008 | `true` | `1` |
 | EC-009 | negative below threshold, e.g. -20000 | `-20000` (thresholds are `>=` on signed value) |
-| EC-010 | `cost` truthy non-object | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
+| EC-010 | `cost` truthy non-object — taxonomy **CP-S10** (`cost` truthy and not a dict, raise site SL:535) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table) |
 | EC-011 | ±Infinity | OverflowError not caught → guard line (BC-1.02.026, CP-S11) |
 | EC-012 | `total_lines_added` a JSON integer beyond int64 but within float64, e.g. int(1e300) | `int(n)` is exact (Python arbitrary precision); `n / 1e6` converts `n` to float first (exact here) and rounds twice — the result is `float(n)/1e6`, not the correctly rounded exact quotient (e.g. n = 2**53+1 → 9007199254.740992, where the exact quotient rounds to …93; oracle-verified 2026-11-18) → hylo reproduces the oracle bytes by emulating the double rounding (OD-156, extends OD-137; oracle: `format(int(1e300)/1e6, ".1f")` = the 298-character `……1056.0M` string) |
 | EC-013 | a JSON integer beyond the int→float conversion threshold, e.g. 2·10³¹⁵ or 10**310 | **Positive side:** `n / 1e6` raises OverflowError because the int operand cannot be converted to float (|n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸; taxonomy **CP-O03**) — even though a 1e304 quotient would fit — uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156; oracle-verified 2026-11-18). A huge **negative** integer never divides: it fails both `>=` tests and renders exactly via `str(n)` (SL:860; oracle-verified 2026-11-17: `_fmt_lines(−10**400)` emits the exact decimal) |

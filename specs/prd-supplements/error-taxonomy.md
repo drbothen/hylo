@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.15"
+version: "1.16"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T00:30:00Z
+timestamp: 2026-11-21T03:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "a97d27b"
+input-hash: "69dbef0"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
@@ -21,6 +21,7 @@ modified:
   - "1.13 2026-11-20T12:00:00Z: pass-8 residual sweep — the `control character` Text example no longer cites a `statusline.lane.reroute_all_prefixes` entry (a control byte there yields the OD-179 List-entry reason of BC-2.01.004 PC-9, not this reason); examples are now `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; CP-O08 site cell records that SL:996 is unreachable at CP-O08 magnitudes (BC-1.03.010 EC-009)"
   - "1.14 2026-11-20T18:00:00Z: pass-9 remediation — CP-O12 minted (cost-pick equivalence: exact-int sum of two sub-bound tokens overflows at tot * dgx_mtok, SL:626/633; Surface 1 render-time degrade like CP-O04; owner BC-1.02.029, co-owner BC-1.05.003), register 48 → 49 paths (O family 11 → 12), E-REN-002 family list and carrier set completed (call 4/B03); Text-class reason `invalid UTF-8` mirrored byte for byte from BC-2.02.001 (D08); E-NET-001 dead rung states it follows `statusline.theme.red` and `statusline.glyphs.degraded` (A14); no behavioral change"
   - "1.15 2026-11-21T00:30:00Z: pass-10 remediation — path-grammar reason `not an absolute path` (minted pass-9 A11, BC-2.01.005 PC-3) added to the reason table and the E-CFG-001 reconciliation sentence (A07); numeric-range vocabulary sentence fixed to the six strings above (A14); stale minting-source-of-record note removed from `invalid UTF-8` (A15); CP-O08 owner set corrected to BC-1.03.010 (EC-009) and BC-1.03.018 (PC3) (C06); CP-A01..A03 site cells cite the raise sites SL:891/894/906, matching the CP-A04/A05 rows and BC-1.07.008 (C09); CP-C10 within-step order claim qualified — the current session's own src-cc entry faults at the SL:232 throttle check before save_cache (B05); CP-S disposition anchor names the BC-1.03.x outliers CP-S14 (BC-1.03.013 PC3) and CP-S16 (BC-1.03.015 PC5) (C10); no behavioral change"
+  - "1.16 2026-11-21T03:00:00Z: pass-11 remediation — new CP-S table defines the six range-only stdin type-confusion ids with (id, site, owner BC/EC): CP-S02 (SL:446, BC-1.02.001 EC-007), CP-S03 (SL:452, BC-1.02.003 EC-006), CP-S04 (SL:405/460, BC-1.02.003 EC-006), CP-S05 (SL:419, BC-1.02.006 EC-008), CP-S08 (SL:477, BC-1.02.008 EC-006), CP-S10 (SL:535, BC-1.02.014 EC-010) (B01/call 14; the owning ECs gain the id names in the same burst); E-REN-002 carrier list gains BC-1.02.003 and BC-1.02.008 (B07); no behavioral change"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -48,7 +49,7 @@ modified:
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.01.008, BC-1.02.001, BC-1.02.006, BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.029 (CP-O12 owner; pass-9 call 4), BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.003 (CP-O12 co-owner), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.01.008, BC-1.02.001, BC-1.02.003 (EC-006; CP-S03/S04; pass-11 B07), BC-1.02.006, BC-1.02.008 (EC-006; CP-S08; pass-11 B07), BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.029 (CP-O12 owner; pass-9 call 4), BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.003 (CP-O12 co-owner), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
@@ -289,6 +290,30 @@ the OD-160 closed-set label "CP-C01..C10" but not cited by any live BC or VP.
 Family-level citations: BC-1.06.001 EC-001 (the cache loader) and BC-1.04.002 EC-008
 (retention path) cite CP-C01..C10 as a class; VP-001 and VP-020 exercise CP-C09/C10 by
 fault injection (out of parity scope; never-blank/exit-0 per DI-008).
+
+## CP-S stdin type-confusion ids that were defined only as ranges (pass-11 B01)
+
+Six of the seventeen CP-S ids were previously defined only in the semport input tables
+and cited as ranges (BC-1.01.009 step 7a/7b; ARCH-03 step 7b). Their definitions —
+(id, site, owner BC/EC) — live here so a test author can map them from the specs alone
+(ADV-P11-B01; orchestrator call 14; raise sites and conditions measured against
+legacy/dgx_statusline.py):
+
+| Trigger id | Site (legacy SL) | Owning BC/EC | Trigger |
+|-----------|------------------|--------------|---------|
+| CP-S02 | SL:446 | BC-1.02.001 EC-007 | `model.id` truthy and not a str while the configured prefix list is non-empty — AttributeError at `startswith` |
+| CP-S03 | SL:452 | BC-1.02.003 EC-006 | `workspace` truthy and not a dict — AttributeError at `ws.get` |
+| CP-S04 | SL:405 (git on) / SL:460 (git off) | BC-1.02.003 EC-006 | the first truthy of `project_dir`/`current_dir`/`cwd` is not a str — AttributeError / TypeError |
+| CP-S05 | SL:419 | BC-1.02.006 EC-008 | `context_window` truthy and not a dict — AttributeError at `cw.get` |
+| CP-S08 | SL:477 | BC-1.02.008 EC-006 | `prompt_cache` truthy and not a dict — AttributeError at `.get("hit_ratio")` |
+| CP-S10 | SL:535 | BC-1.02.014 EC-010 | `cost` truthy and not a dict — AttributeError at `cost.get` |
+
+The remaining CP-S ids are named in their owning ECs and contracts (measured:
+CP-S01 BC-1.01.001/BC-1.01.002 EC-008; CP-S06/S07 BC-1.02.020 and BC-1.02.006 EC-009/EC-010;
+CP-S09 BC-1.02.010 EC-009 and BC-1.02.013 EC-010; CP-S11 BC-1.02.014 EC-011;
+CP-S12 BC-1.02.015 EC-009; CP-S13 BC-1.02.016 EC-008; CP-S14/S16 per the pass-10 C10
+anchors (BC-1.03.013 PC3, BC-1.03.015 PC5); CP-S15 BC-1.05.004; CP-S17 BC-1.01.008);
+this table adds only the six that lacked a spec-side definition.
 
 ## Crash-path register coverage
 

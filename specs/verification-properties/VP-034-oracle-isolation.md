@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.7"
+version: "1.9"
 status: draft
 producer: architect
 timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.01.001.md, behavioral-contracts/ss-06/BC-6.01.002.md, behavioral-contracts/ss-06/BC-6.01.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f0c2344"
+input-hash: "26fe0c7"
 traces_to: prd.md
 source_bc: BC-6.01.001
 bcs: [BC-6.01.001, BC-6.01.002, BC-6.01.003]
@@ -21,7 +21,8 @@ lifecycle_status: active
 introduced: "1.0"
 modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — per-OS child env: Windows TEMP/TMP + PYTHONUTF8/PYTHONIOENCODING pins; no literal temp paths (A2-17)", "1.3 2026-11-18T09:02:00Z: ADV-P3 fixes (A2-04) — Windows child env additionally pins USERPROFILE (and HOMEDRIVE/HOMEPATH) to the parity roots so ntpath.expanduser resolves caches inside the sandbox (CPython 3.8+ ntpath.expanduser reads USERPROFILE, ignores HOME), and preserves SYSTEMROOT (socket initialization); catalog note added: BC-1.01.004 → VP-034 is a stale pairing (A2-13)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-07, A02, D02) — child env asserted as the EXACT BC-6.01.002 allowlisted key set against a seeded forbidden parent; every PYTHON* variable except PYTHONPATH absent (PYTHONUTF8/PYTHONIOENCODING pins removed — stdio encoding comes from the shim UTF-8 reconfigure); TZ pinned to the case zone (UTC in parity, OD-177); Windows SYSTEMROOT looked up case-insensitively; new TestFrozenClock_Float64EndToEnd asserts the frozen instant is a float64 end to end — never round-tripped through time.Time nanoseconds (plan call 7, D02) on an ulp-spanning instant grid", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-06, OD-183: per-OS allowlists so the exact-set assert cannot red a correct windows-2025 run; the OD-183 Windows row PYTHONIOENCODING=utf-8 (stdio only, PYTHONUTF8 still forbidden) with the changes-stdio-only table-test pin)",
  "1.6 2026-11-19T18:00:00Z: pass-7 fixes (D05/A01 call 2, A2-19/OD-190) — the per-OS key sets are copied VERBATIM from BC-6.01.002 PC-1's authoritative consolidation: Windows oracle gains HOME/TMPDIR/LANG (were omitted), HOMEDRIVE/HOMEPATH withdrawn (NOT constructed keys on any OS — the v1.3 expanduser triple), the POSIX and Windows GO-binary allowlists added (XDG_CACHE_HOME, LOCALAPPDATA, HYLO_PATHS_CACHE_DIR, HYLO_BACKENDS_0_MODEL_PREFIXES; no PATH ever), conditional PATH/COLUMNS/setting keys named; OD-190 LF normalization named beside PYTHONIOENCODING=utf-8 (UTF-8 + LF on every OS), not hidden in the shim",
- "1.7 2026-11-19T20:00:00Z: pass-10 residual (ADV-P10-D01 sync) — the copied exact key sets gain the unconditional injected-metrics keys, verbatim from BC-6.01.002 PC-1: DGX_SL_VM_URL (= the injected fake metrics URL) in the POSIX/Windows oracle allowlists and HYLO_BACKENDS_0_METRICS_URL (= the same injected URL, unless the case itself sets backends[0].metrics_url — the case value wins) in the POSIX/Windows Go allowlists, property statement and skeleton alike; '+ the DGX_SL_* keys' respelled '+ the OTHER DGX_SL_* keys'"]
+ "1.7 2026-11-19T20:00:00Z: pass-10 residual (ADV-P10-D01 sync) — the copied exact key sets gain the unconditional injected-metrics keys, verbatim from BC-6.01.002 PC-1: DGX_SL_VM_URL (= the injected fake metrics URL) in the POSIX/Windows oracle allowlists and HYLO_BACKENDS_0_METRICS_URL (= the same injected URL, unless the case itself sets backends[0].metrics_url — the case value wins) in the POSIX/Windows Go allowlists, property statement and skeleton alike; '+ the DGX_SL_* keys' respelled '+ the OTHER DGX_SL_* keys'",
+ "1.8 2026-11-20T18:00:00Z: pass-11 fix (A2-02, orchestrator call 1) — OD-190 applied literally: the LF conversion lives in the COMPARATOR, not the shim — on the Windows legs the comparator converts the ORACLE's stdout CRLF to LF openly, before the byte comparison; hylo's bytes are never converted (hylo writes LF itself); 'the shim's newline=\\\"\\\\n\\\" reconfigure' wording withdrawn (the shim does no newline reconfigure)", "1.9 2026-11-21T09:00:00Z: pass-11 residual (call 3) — the injected-URL qualifier respelled: when the case itself sets backends[0].metrics_url, the case value is used on BOTH sides (DGX_SL_VM_URL and HYLO_BACKENDS_0_METRICS_URL), admitted only as a placeholder resolving to the fake server (optional path suffix), one value per key; replaces 'the case value wins'"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,8 +55,11 @@ withdrawn: `ntpath.expanduser` reads USERPROFILE first, and the BC does not allo
 extra keys); the POSIX Go-binary child carries exactly `HOME`, `USERPROFILE`, `TMPDIR`,
 `XDG_CACHE_HOME`, `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`,
 `HYLO_TEST_NOW`, `HYLO_BACKENDS_0_MODEL_PREFIXES`, `HYLO_BACKENDS_0_METRICS_URL` (=
-the injected fake metrics URL, the same URL as the oracle's `DGX_SL_VM_URL`, unless
-the case itself sets `backends[0].metrics_url` — the case value wins; ADV-P10-D01)
+the injected fake metrics URL, the same URL as the oracle's `DGX_SL_VM_URL`; when
+the case itself sets `backends[0].metrics_url`, the case value is used on BOTH sides
+(`DGX_SL_VM_URL` and `HYLO_BACKENDS_0_METRICS_URL`), admitted only as a placeholder
+resolving to the fake server (optional path suffix), one value per key; ADV-P10-D01;
+pass-11 residual call 3)
 (+ the `HYLO_*` setting keys the
 case sets, + `COLUMNS` when declared; no `PATH` ever — the built binary starts by
 absolute path), and the Windows Go child adds `TMP`, `TEMP`, `SYSTEMROOT` — asserted as
@@ -66,10 +70,13 @@ variable, `PYTHONIOENCODING=utf-8` (stdio encoding only; `PYTHONUTF8` stays
 FORBIDDEN; POSIX pins `LANG=en_US.UTF-8` instead), no inherited GP-1..GP-6
 variables; `SYSTEMROOT` is preserved and looked up CASE-INSENSITIVELY, because
 Windows env keys often spell `SystemRoot`; `TZ` pinned to the case zone — UTC in
-parity (OD-177); by OD-190 the Windows oracle's LF normalization is NAMED beside the
+parity (OD-177); by OD-190 (as applied by the pass-11 orchestrator call 1) the
+Windows legs' LF handling is NAMED beside the
 builder variable, never hidden in the shim: hylo writes UTF-8 + LF line endings on
-every OS (OD-190 extends OD-183) — the encoding from `PYTHONIOENCODING=utf-8`, the
-LF-only newlines from the shim's `newline="\n"` reconfigure;
+every OS (OD-190 extends OD-183) — the encoding from `PYTHONIOENCODING=utf-8`; on
+the Windows legs the COMPARATOR converts the ORACLE's stdout CRLF to LF openly,
+BEFORE the byte comparison, and hylo's bytes are NEVER converted (hylo writes LF
+itself); the shim does NO newline reconfigure;
 a table test pins that `PYTHONIOENCODING=utf-8` changes stdio encoding ONLY
 (files stay OD-159 strict UTF-8 reads), per the BC-6.01.002/BC-1.01.008 wording; and the
 canary test fails the harness if the shim did not load (BC-6.01.003), so a silently

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -22,6 +22,7 @@ modified:
   - "2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on invariant 3)"
   - "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (dead-marker word sourced to statusline.pill.label_local per OD-189, glyph named glyphs.degraded) + ADV-P7-C2-14 BC side (CP-N03 canonical vector row added; the sole-key AttributeError raise type oracle-verified)"
   - "2026-11-18 (v1.2.3) pass-10 remediation ADV-P10-C2-11 (VP-001 row added to Verification Properties for the metrics-borne CP-N03 sole-key degrade leg; VP Anchors entry)"
+  - "2026-11-18 (v1.2.4) pass-11 OD-194 consumer (PC2 names statusline.labels.old beside its default; the (~/s/) scaffolding around the word carries the named-format-constant note)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,8 +58,11 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
 1. If `sample` is falsy (none or empty): segments = `["\e[31m◌ DGX ?\e[0m"]`.
 2. Else if `not up` or `age > fresh_s`: segments = fields rendered with `stale=true`
    (BC-1.04.005..012), then, only if `age > 0`, one more segment
-   `"\e[2m(~" + F(age, 0) + "s old)\e[0m"` where `F(x,0)` is Python `f"{x:.0f}"`
-   (round-half-even on the binary value, BC-5.01.001).
+   `"\e[2m(~" + F(age, 0) + "s " + labels.old + ")\e[0m"` where `F(x,0)` is Python
+   `f"{x:.0f}"` (round-half-even on the binary value, BC-5.01.001) and `labels.old` =
+   `statusline.labels.old` (Text, default `old`, SL:700, OD-194; the `(~` prefix, the
+   `s` seconds unit and the `)` around the word stay literal — named format constants,
+   not config: template scaffolding, only the readable word varies).
 3. Else: segments = fields rendered with `stale=false`.
 
 ## Invariants

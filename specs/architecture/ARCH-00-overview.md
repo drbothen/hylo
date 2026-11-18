@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "overview"
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
 timestamp: 2026-11-18T18:00:00Z
 phase: 1b
 inputs: [prd.md, product-brief.md, domain-spec/invariants.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "7e041fe"
+input-hash: "e799adb"
 
 ---
 
@@ -99,7 +99,9 @@ section as its home; cross-references are by Go interface.
 - **Provable (pure core):** pyfmt arithmetic/JSON/string/time helpers; width/trim math;
   widget segment formatting; transcript state transitions; sample TTL machine; config
   grammars and registry ordering. Strategy: oracle-pinned tables + property/fuzz targets
-  (design doc §2.6). P1 gate for S1/S5: **line coverage >= 95%** per package (OD-135
+  (design doc §2.6). P1 gate for S1/S5: **line coverage >= 95%** per package — Go's
+  statement-coverage figure; the gate name "line coverage" denotes it (ADV-P11-A03;
+  OD-135
   CRITICAL tier as ruled by OD-158); the >= 95% **mutation kill rate is a Phase 6
   target** — reported by the formal-verifier, not gating P1 (OD-158). **Mutation
   tool (P19): gremlins** (go-gremlins/gremlins) — it drives the standard `go test`

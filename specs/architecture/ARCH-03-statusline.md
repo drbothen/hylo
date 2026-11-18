@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.13"
+version: "1.15"
 status: draft
 producer: architect
-timestamp: 2026-11-20T22:00:00Z
+timestamp: 2026-11-21T09:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "d3cf6d2"
+input-hash: "08c9ad1"
 
 ---
 
@@ -18,7 +18,8 @@ input-hash: "d3cf6d2"
 > The port target. Carries all S1 BCs (BC-1.01..1.07, including the OD-155 subagent
 > panel, BC-1.07.001..008). Classification: **mixed, core-dominant** —
 > pure widget/parser/format functions plus one ordered effect script. CRITICAL tier
-> (line coverage >= 95% for P1; mutation kill rate >= 95% is the Phase 6 target,
+> (statement coverage (the OD-158 gate's 'line coverage') >= 95% for P1; mutation
+> kill rate >= 95% is the Phase 6 target,
 > OD-135/OD-158).
 
 ### Decision: pure widgets plus an ordered effect script (AD-03)
@@ -52,9 +53,21 @@ seam that reads config at build time (pass-5 A11 — `Query`/`WindowStart` take 
 config argument, so pre-built arrivals are impossible):
 the `CacheStore` over `paths.cache_dir`, the `MetricsClient` over
 `backends[0].metrics_url` and `telemetry.timeout_s`, and the `ProcStarter` over
-`window_age.process_name` and `window_age.max_depth`; on any error it prints the E-CFG-001 line
+`window_age.process_name` and `window_age.max_depth`. On a `config.Load` error it prints
+the E-CFG-001 line
 (first error in registry order, full list to stderr) and returns 0 having written no
-caches — `Render` is never entered. `Render`'s precondition is `env.Config != nil &&
+caches — `Render` is never entered. A `CacheDir` error at step 0 is NOT a config error
+(ADV-P11-A08, pass-11 orchestrator call 9): `Main` wires the load-empty / save-no-op
+cache store BC-3.01.001 EC-004 pins and the render PROCEEDS (`Render`'s
+`env.Cache != nil` precondition is still satisfied — the no-op store IS a `CacheStore`;
+there is no E-CFG-001 and no exit from a directory-resolution failure).
+`Env.Loc` is derived exclusively from `platform.LocalZone(env)` (ARCH-05, single zone
+seam); LocalZone's error result is non-nil ONLY on the TZ-unset path when OS resolution
+fails (BC-3.01.001 PC-6) — on that error `Main` wires `Env.Loc = time.UTC` and the
+render proceeds (derived judgment call: never-raise at the orchestrator, DI-008; the
+spec family pins no config-error class for a zone failure, so a UTC fallback matching
+LocalZone's own empty/unparseable verdicts is the in-family disposition).
+`Render`'s precondition is `env.Config != nil &&
 env.Cache != nil`
 (non-error `*config.Config`), guaranteed by `Main`; the "no cache writes" guarantee
 follows because every cache write sits inside `Render`'s step script.
@@ -81,8 +94,12 @@ writes: a stdout write failure while printing rows stops writing and exits 0, wi
 degraded-line attempt); CP-X04 (signals) is out of scope.
 
 **Typed crash-path register (normative dispositions live in the owning BCs).** The
-script's Degrade? column names the CP families; the full trigger tables are
-error-taxonomy.md. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 + CP-T09
+script's Degrade? column names the CP families; each family id is DEFINED in
+error-taxonomy.md's crash-path register — the per-id rows there carry (id, legacy site,
+owner BC/EC) for every id, including the six crash paths whose owning ECs name them:
+CP-S02, CP-S03, CP-S04, CP-S05, CP-S08 and CP-S10 (pass-11 orchestrator call 14,
+ADV-P11-B01) — while the normative disposition per id lives in the owning BC. ARCH-03
+cites that register as the definition site of record. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 + CP-T09
 (transcript machine — a family of EIGHT; CP-T08 is a RETIRED id, append-only
 numbering; CP-T09 = the Windows MSVC localtime-domain OSError on a naive transcript
 timestamp, owner call 8 pass-7 D06/B03), CP-N01..N03 (row-2 telemetry; pass-4 C2-12), **CP-O01..O12** (OD-156 numeric-overflow family:
@@ -145,10 +162,10 @@ var errDegraded = errors.New("statusline degraded")
 
 type Env struct {
     Now     func() float64        // Python time.time() value; read ONCE per render (IM-14); the panel reads it too (BC-1.07.007). Frozen clock (pass-5 D02/call 7): HYLO_TEST_NOW is parsed to a float64 exactly as Python float() (within the BC grammar) and THAT float IS the time.time() value everywhere — never round-tripped through time.Time nanoseconds (float64 spacing at 1.79e18 ns exceeds the seconds-value ulp; cache bytes would drift); TimeFloat applies only to the real clock (ARCH-06 time.go)
-    Loc     *time.Location        // naive transcript timestamps (BC-5.04.001)
+    Loc     *time.Location        // naive transcript timestamps (BC-5.04.001); derived from platform.LocalZone — on its TZ-unset-path error, Main wires UTC and the render proceeds (step 0 above, ADV-P11-A08)
     EnvVar  EnvVars               // AD-10 seam (platform.EnvVars — declared in internal/platform, ARCH-05, single home ADV-P9-A12; Lookup + Names); backs the COLUMNS lookup (BC-1.01.005) and the unknown-HYLO_* sweep (BC-2.01.001 PC-6). The former bare Getenv func(string) string is superseded (ADV-P4-A06)
     Config  *config.Config        // filled by Main at step 0 (D15); Render precondition
-    Cache   CacheStore            // constructed by Main after step 0 over the resolved dir (OD-101); temp dir in tests
+    Cache   CacheStore            // constructed by Main after step 0 over the resolved dir (OD-101); a CacheDir error wires the load-empty / save-no-op store, never a config error (step 0 above, BC-3.01.001 EC-004); temp dir in tests
     Metrics MetricsClient         // constructed by Main after step 0 from backends[0].metrics_url + telemetry.timeout_s (pass-5 A11); raw-net.Listener fake in tests (VP-030 transport table; pass-7 C2-05)
     Proc    ProcStarter           // constructed by Main after step 0 from window_age.process_name + window_age.max_depth (pass-5 A11); fake in tests
     Files   FileSystem            // transcript and .git reads; os-backed by default

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.2.10"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T06:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "44c4e78"
+input-hash: "40dc1a1"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"
@@ -34,6 +34,7 @@ modified:
   - "2026-11-19T03:25:00Z (1.2.7): ADV-P6 remediation OD-186 — temp-file scope widened by ruling to cover the Windows sharing-violation rename-retry outcome (a successful retry persists a cache write legacy would not); retry delay becomes the config key statusline.cache.rename_retry_delay_ms (registered in BC-2.01.004 PC-11); attempt count stated as three attempts total (initial attempt + two retries), matching VP-018 and ARCH-04"
   - "2026-11-19T17:00:00Z (1.2.8): ADV-P7 remediation OD-188 - rename retry count becomes CONFIG: statusline.cache.rename_retry_limit (Int, default 2, range 0..10, judgment call, registered in BC-2.01.004 PC-11) bounds the retries; attempt count = 1 + limit (three at the default), stated once across BC-2.01.004 PC-11, VP-018 and ARCH-04"
   - "2026-11-21T06:00:00Z (1.2.9): ADV-P10 remediation D07 (orchestrator call 7) — the example corpus id flattened to the ARCH-07 grammar's flat cases/<case-id>/ form: cache/sid-slash-temp → cache-003 (PC-3 example entry and CTV row; example spelling only, no schema change)"
+  - "2026-11-21T07:00:00Z (1.2.10): ADV-P11 remediation D01 (orchestrator call 2) — the canonical temp-file case cache-003 DECLARES a subprocess-fake table (fake ps on the conditional fake PATH for the oracle, a ProcStarter fake for Go), so it needs no proc_start seed and never consults the real process tree — the fake-PATH machinery's first P1 consumer; its session-cache target stays intentionally UNSEEDED (seeding statusline-../x.json would mkdir statusline-.., os.replace would succeed and no temp would leak); Pre-2, PC-3 note and the cache-003 CTV row state it"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,6 +80,13 @@ difference rides the same named deviation.
    `CACHE_DIR`, and `os.replace` fails. Legacy leaves `x.json.<8 chars>` behind
    (BC-SL-078, OD-03). Each failed session-cache write leaks one temp. A refresh can
    leak up to two, from `effective_rl` (SL:308) and `get_sample` (SL:350 or 355).
+   Hermeticity (pass-11 D01, orchestrator call 2): the canonical case `cache-003`
+   DECLARES a subprocess-fake table — the fake `ps` on the conditional fake `PATH`
+   (BC-6.01.002 PC-1) for the oracle, a `ProcStarter` fake for Go — so it needs no
+   `proc_start` seed and never consults the real process tree, and its session-cache
+   target stays INTENTIONALLY unseeded: seeding `statusline-../x.json` would create
+   the directory `statusline-..`, legacy's `os.replace` would then succeed and no
+   temp file would leak, defeating the case.
 3. Go writes through `os.CreateTemp(cacheDir, base+".*")` plus `os.Rename`. On error
    it removes the temp (design IM-17; convention CV-01 "remove temp on error").
 
@@ -111,6 +119,8 @@ difference rides the same named deviation.
    "TestCacheStore_TempFile_CleanupOnFailedReplace"}` — the full six-key schema of
    BC-6.03.004 (ADV-P5-D20: the former four-key example would fail the missing-key
    validation, and the expected file is the mandated JSON object, not a `.txt`).
+   The `cache-003` case declares the subprocess-fake table of Pre-2 (pass-11 D01) —
+   the fake-PATH machinery's first P1 consumer.
    Its scope is the cache-file
    comparison only (OD-110). The expected file pins Go's cache-directory listing
    after each step, with no temp file present.
@@ -148,7 +158,7 @@ difference rides the same named deviation.
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | Normal case, no failed replace | No temp names on either side; filter removes nothing | happy-path |
-| `cache-003`: sid `../x`, one step | Oracle dir contains `x.json.<8 chars>`; Go dir contains none; stdout and exit equal; the Go listing matches the expected file; `TestCacheStore_TempFile_CleanupOnFailedReplace` passes | edge-case |
+| `cache-003`: sid `../x`, one step, fake process table declared (BC-6.01.002 PC-1 conditional `PATH`; no `proc_start` seed — the target stays unseeded) | Oracle dir contains `x.json.<8 chars>`; Go dir contains none; stdout and exit equal; the Go listing matches the expected file; `TestCacheStore_TempFile_CleanupOnFailedReplace` passes | edge-case |
 | Go store modified to skip cleanup | `TestCacheStore_TempFile_CleanupOnFailedReplace` FAIL; harness FAIL `go left temp x.json.<n>` | error |
 
 ## Verification Properties

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.11"
+version: "1.3.12"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -31,6 +31,7 @@ modified:
   - "2026-11-18 (v1.3.9) pass-8 residual — Refactoring Notes seam respelled to the ARCH-03 TEST SEAM ruling: raw net.Listener fake in tests, not httptest"
   - "2026-11-18 (v1.3.10) pass-9 remediation ADV-P9-C2-01 (interim skip = status 100 only; 101/102/103 final → HTTPError → no sample even with a 200 behind them; EC-025), ADV-P9-C2-02 (urlsplit sanitization before scheme guard and quote: leading C0/space stripped, TAB/CR/LF deleted anywhere, scheme lowercased; oracle: /a<TAB>b → /ab, <VT>/foo → /foo, HTTP:// hop followed), ADV-P9-C2-07 (Host = URL netloc as written, percent-unquoted, port only when written), ADV-P9-C2-06 (ARCH-03 citations as section anchors, line labels dropped)"
   - "2026-11-18 (v1.3.11) pass-10 remediation ADV-P10-C2-01 (the two guard-first passages reordered: loop-key normalization and the normative Go step list now put the urlsplit sanitization BEFORE the scheme guard, matching the scheme-guard paragraph and the stdlib parse-sanitize-guard order; the normative Go rule respelled to the minimal net.Conn HTTP/1.1 client driving the hops itself — no http.Client/CheckRedirect in the path, the pass-5 recipe noted as superseded), ADV-P10-C2-08 (PC1 one INITIAL GET plus the Inv 1 hops — a loop re-keys A, so a literal single-request assertion fails), ADV-P10-C2-11 (VP-001 row added for the metrics-borne CP-N03 leg, EC-013)"
+  - "2026-11-18 (v1.3.12) pass-11 remediation ADV-P11-C2-05 (the portless Host explanation now credits Request.host — set by Request._parse's _splithost plus unquote and added by do_request_ — instead of putrequest's urlsplit-netloc branch, which skip_host makes unreachable once Host is in the headers; wire output unchanged), ADV-P11-C2-08 (resp.read() site SL:172 → SL:171, matching ARCH-03)"
 
 deprecated: null
 deprecated_by: null
@@ -80,9 +81,13 @@ is byte 0x1B.
    each: `http://127.0.0.1:55785/...` → `Host: 127.0.0.1:55785`;
    `http://127.0.0.%31:55785/...` → `Host: 127.0.0.1:55785` — `Request._parse` does
    `self.host = unquote(self.host)`; a URL with no port sends `Host: 127.0.0.1` with
-   the port omitted — `HTTPConnection.putrequest`'s `urlsplit(url)`-netloc Host branch
-   emits the netloc verbatim, and `_get_hostport` normalizes the absent port to the
-   scheme default; the portless leg is source-derived, a privileged port not being
+   the port omitted — the emitted Host value comes from `Request.host`, set by
+   `Request._parse` (`_splithost` plus `unquote`) and added to the header list by
+   `do_request_`; because `Host` is already present, `_send_request` sets
+   `skip_host`, so `putrequest`'s `urlsplit(url)`-netloc Host branch never runs
+   (explanation corrected ADV-P11-C2-05 — the wire output is unchanged), and
+   `_get_hostport` normalizes the absent port to the scheme default; the portless leg
+   is source-derived, a privileged port not being
    wire-capturable; ADV-P9-C2-07) (header
    spelling and order verified from the CPython 3.11.7 stdlib source — `do_request_`
    adds `Host` then the `addheaders` `User-agent`, `do_open` appends `Connection:
@@ -123,7 +128,7 @@ is byte 0x1B.
    100/65536 are CPython stdlib class constants emulated
    for parity — named constants in hylo with a "why not config" comment, not config
    keys (P16). Body framing is `http.client`'s `HTTPResponse.read()` ladder, because
-   legacy `resp.read()` (SL:172) reads through `http.client`: (i)
+   legacy `resp.read()` (SL:171) reads through `http.client`: (i)
    `Transfer-Encoding: chunked` → the DE-CHUNKED concatenation, and chunked wins over
    a `Content-Length` (RFC 2616 §4.4 #3 as coded in `HTTPResponse.begin`) — where
    "chunked" means the EXACT equality `tr_enc.lower() == "chunked"` on the lowercased

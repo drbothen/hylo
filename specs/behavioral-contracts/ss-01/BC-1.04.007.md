@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "e27a750"
+input-hash: "8e821c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:754-763)"
@@ -23,6 +23,7 @@ modified:
   - "1.3.1 2026-11-18: pass-5 remediation ADV-P5-C2-20 (kv.cells cap rationale aligned to the ratified registry row) and ADV-P5-C2-12 (host +/-Inf pinned as EC-010/EC-011)"
   - "1.3.2 2026-11-18: pass-8 remediation ADV-P8-C2-01 (PC5 names the config keys statusline.glyphs.cell_on / cell_off / host beside their default literals — OD-189 sibling treatment)"
   - "1.3.3 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC4/PC5 name the registered keys statusline.kv.host_yellow_pct and statusline.kv.host_shown_pct beside their default literals)"
+  - "1.3.4 2026-11-18: pass-11 remediation — OD-194 consumer (PC5 names statusline.labels.kv and statusline.labels.host beside their defaults; %-unit scaffolding carries the named-format-constant note) + ADV-P11-C2-08 (THRESHOLDS §8b comment site SL:790 → SL:789)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +51,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
    line, keeping the 25 ms p95 budget — ratified in interface-definitions.md,
    `statusline.kv.cells` row, pass-5 ADV-P5-C2-20),
    `statusline.kv.host_yellow_pct` 5 (T-049, measured: THRESHOLDS §8 (SL:746);
-   §8b is the TTFT rule, SL:790),
+   §8b is the TTFT rule, SL:789),
    `statusline.kv.host_shown_pct` 0.5 (T-050, derived: at or below 0.5 the `.0f` value
    would print `0%`; OD-57 E-0).
 
@@ -62,15 +63,18 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
    (BC-5.01.003); with `C = statusline.kv.cells` (default 4), `n = Min(Ceil(kv / (100 / C)), C)` —
    the default `C = 4` is the legacy `/25`, `4` cell math.
 4. `warn = host_share is not none and host_share > statusline.kv.host_yellow_pct` (default 5).
-5. Segment = `("\e[33m" if warn else "\e[36m") + "KV" + glyphs.cell_on*n + glyphs.cell_off*(C-n) + " " + F(kv,0) + "%\e[0m"`,
-   where `glyphs.cell_on` = `statusline.glyphs.cell_on` (Text, default `▰` U+25B0) and
+5. Segment = `("\e[33m" if warn else "\e[36m") + labels.kv + glyphs.cell_on*n + glyphs.cell_off*(C-n) + " " + F(kv,0) + "%\e[0m"`,
+   where `labels.kv` = `statusline.labels.kv` (Text, default `KV`, SL:761, OD-194) and
+   `glyphs.cell_on` = `statusline.glyphs.cell_on` (Text, default `▰` U+25B0) and
    `glyphs.cell_off` = `statusline.glyphs.cell_off` (Text, default `▱` U+25B1)
    (BC-2.01.004 PC-6; the ▰/▱ literals in the vectors are the default spellings,
-   ADV-P8-C2-01),
+   ADV-P8-C2-01; the `%` unit marks and separator spaces around the words stay
+   literal — named format constants, not config: template scaffolding),
    then, if `host_share is not none and host_share > statusline.kv.host_shown_pct`
    (default 0.5), append
-   `" \e[2m" + glyphs.host + "host " + F(host_share,0) + "%\e[0m"` where `glyphs.host` =
-   `statusline.glyphs.host` (Text, default `↺` U+21BA, ADV-P8-C2-01).
+   `" \e[2m" + glyphs.host + labels.host + " " + F(host_share,0) + "%\e[0m"` where `glyphs.host` =
+   `statusline.glyphs.host` (Text, default `↺` U+21BA, ADV-P8-C2-01) and
+   `labels.host` = `statusline.labels.host` (Text, default `host`, SL:762, OD-194).
 6. Stale mode does not change this segment.
 
 ## Invariants

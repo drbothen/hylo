@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "e27a750"
+input-hash: "8e821c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:792-799)"
@@ -21,6 +21,7 @@ introduced: v0.1.0
 modified:
   - "1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.ttft with default ◔, OD-189 sibling treatment)"
   - "1.2.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC2/PC3/PC4 name the registered keys statusline.ttft.integer_from_s, statusline.ttft.min_samples and statusline.ttft.yellow_s beside their default literals)"
+  - "1.2.3 2026-11-18: pass-11 OD-194 consumer (PC3 names statusline.labels.max beside its default; the separating-space scaffolding carries the named-format-constant note)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +53,9 @@ otherwise. A NaN value hides the segment. Notation: `\e` is byte 0x1B.
 2. `val = F(ttft,0) + "s"` if `ttft >= statusline.ttft.integer_from_s` (default 10), else
    `F(ttft,1) + "s"` (formatting boundaries pinned in BC-1.04.019).
 3. If `n` is a number and `n < statusline.ttft.min_samples` (default 20): segment =
-   `"\e[90m" + glyphs.ttft + "max " + val + "\e[0m"`.
+   `"\e[90m" + glyphs.ttft + labels.max + " " + val + "\e[0m"`, where `labels.max` =
+   `statusline.labels.max` (Text, default `max`, SL:797, OD-194; the separating space
+   stays literal — a named format constant, not config: template scaffolding).
 4. Else: segment = `("\e[33m" if ttft > statusline.ttft.yellow_s (default 8) else "\e[90m") + glyphs.ttft + val + "\e[0m"`.
    In both forms `glyphs.ttft` = `statusline.glyphs.ttft` (Text, default `◔` U+25D4,
    BC-2.01.004 PC-6; the ◔ literals in the vectors are the default spelling,

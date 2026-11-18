@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "14065a4"
+input-hash: "4f8af84"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces the {:d}-family format spec used at legacy/dgx_statusline.py SL:1172, 525, 527, 548, 561, 829, 831)"
@@ -26,6 +26,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D15+D10+D33: countdown anchor corrected (no :3d in legacy, pads via :02d); SL:920 added; MinInt64 vector added and VP wording fixed"
   - "2026-11-20T18:30:00Z (1.2.3) ADV-P9 remediation D17 — beyond-int64 conversion rule stated for the {pct:>2d} site (SL:1171-1172): round() of a finite float64 is an exact unbounded int formatted in full decimal (verified CPython 3.11.7), no degradation; D's int64 signature is the bounded special case; the only caller degrade remains the preceding TrueDiv overflow (BC-5.01.007 PC-2)"
   - "2026-11-20T19:00:00Z (1.2.4) ADV-P10-A12 residual — PC-5 names the serving helper: pyfmt's big-integer formatter DBig(n *big.Int, width int, zeroPad bool) string (ARCH-06), applying PC-1's digit/width/padding rules to the exact beyond-int64 {pct:>2d} value; agrees with ARCH-06's num.go row and PC-5 comment"
+  - "2026-11-21T07:00:00Z (1.2.5) ADV-P11 remediation D14 (orchestrator call 16) — Pre-2's width-envelope rationale cites legacy's widest width 2 (the :02d pad) only: legacy has no :3d spec, matching the Related-BCs note; CTV MinInt64 cell's pipes escaped for the table linter"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,7 +49,9 @@ contract per OD-141.
 
 1. `n` any int64.
 2. `width` in 0..67 (rationale, derived: 67 exceeds the widest consumer cell in
-   `render_telemetry_fields`/`render_lane` with margin over legacy's 2 and 3 — an envelope,
+   `render_telemetry_fields`/`render_lane` with margin over legacy's 2 — the widest width
+   legacy spells in those renderers is the `:02d` pad; legacy has no `:3d` spec, cf. the
+   Related BCs — an envelope,
    not a legacy value; values above 67 are out of consumer range but behave by the same rule).
 3. `zeroPad` selects the `02d` form; `!zeroPad` the `>2d` form.
 
@@ -102,7 +105,7 @@ contract per OD-141.
 | `D(5, 2, false)` | `" 5"` | happy-path |
 | `D(-5, 3, true)` | `"-05"` | edge-case |
 | `D(0, 2, true)` | `"00"` | edge-case |
-| `D(-9223372036854775808, 0, false)` | `"-9223372036854775808"` (MinInt64: `|n|` overflows int64 magnitudes handled in unsigned form; sign never lost) | edge-case |
+| `D(-9223372036854775808, 0, false)` | `"-9223372036854775808"` (MinInt64: `\|n\|` overflows int64 magnitudes handled in unsigned form; sign never lost) | edge-case |
 
 Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle discipline).
 

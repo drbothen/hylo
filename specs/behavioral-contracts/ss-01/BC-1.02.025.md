@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.3"
+version: "1.5.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -26,6 +26,7 @@ modified:
   - "1.5.1 pass-8 remediation (ADV-P8-B05, orchestrator call 10): Inv 3 registered range respelled to the interface-definitions canon — units.tokens = {`M`} (the `k` divisor is a registered render semantic, not an accepted value); no behavioral change; 2026-11-19T08:00:00Z"
   - "1.5.2 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
   - "1.5.3 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-C2-11 reciprocity): Verification Properties gains the VP-001 ladder row for the CP-O04 overflow degrade (EC-010) — 29-byte line, exit 0; VP Anchors gains VP-001; VP-001 bcs: synced in the same burst (residual sweep)"
+  - "1.5.4 pass-11 remediation (ADV-P11-B06): PC1's `?` fallback pinned as a named format constant, not config (D15); no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,6 +54,8 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 
 1. `x = float(n)` with Python's grammar (`pyfmt.ParseFloat` for strings: surrounding whitespace, underscores between
    digits, `nan`/`inf` spellings, exponents; ints and bools convert numerically). TypeError or ValueError → return `?`.
+   The `?` fallback is a **named format constant** of this widget, not config (D15 rationale: display-format
+   constant of the output, one byte, parity-bound; why not config = no ruling mints a key for this site).
 2. With the registered semantics of the single Text key `statusline.units.tokens`
    (thresholds 1,000 (`>=` → k) and 1e6 (`>=` → M), per interface-definitions, T-042):
    `x >= 1e6` → `F(x/1e6, 1)` + `M`;

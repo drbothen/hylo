@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.21"
+version: "0.2.22"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T00:30:00Z
+timestamp: 2026-11-21T03:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "239bfdf"
+input-hash: "4df0361"
 traces_to: domain-spec/L2-INDEX.md
 modified:
   - "0.2.16 2026-11-19T12:00:00Z: pass-7 remediation — NFR-001 states the conditional >512 KB timing-fixture exemption with the OD-191 100 ms ceiling, case-flag identification and report line (A02/call 3); E-REN-002 carrier list completed and CP-T09 added (A14/B11/call 8); E-NET-001 gains the KEEP_DEAD dead rung (C2-13); §9 ASM-002 aligned with the revised assumption register (A15); ASM-007 validation moved before Phase 2 S1.07 story writing per OD-192 with corrected ASSUMP-107-1 precondition cites (A22/C13)"
@@ -25,6 +25,7 @@ modified:
   - "0.2.19 2026-11-20T18:00:00Z: pass-9 remediation — NFR-002 trigger list and §5 E-REN-002 gain the cost-pick equivalence overflow CP-O12 with its carrier cites (call 4/B03); E-NET-001 dead rung states it follows `statusline.theme.red` and `statusline.glyphs.degraded` (A14); §8 per-call-site recursion budget names all five measured sites including the metrics reply 992/993 (A10)"
   - "0.2.20 2026-11-21T00:00:00Z: pass-9 residual sweep — §2.06 BC-6.04.002 title row synced to the contract's H1 verbatim (large-transcript exemption: 100 ms ceiling; bc_h1_is_title_source_of_truth)"
   - "0.2.21 2026-11-21T00:30:00Z: pass-10 remediation — §4 NFR-006 target adds the nightly/manual `factory-artifacts` scan job from `main` (the ref carries no `.github/`, so a push trigger can never fire) with the local pre-push hook as the push-time guard, matching nfr-catalog NFR-006 (A03/call 16); E-NET-001 dead-rung cite corrected from BC-1.04.004 PC3 to BC-1.04.004 Precondition 3 (C2-10)"
+  - "0.2.22 2026-11-21T03:00:00Z: pass-11 remediation — §3.2 objects-read list rebuilt from every `.get(` on the stdin document and its sub-objects in legacy, fields legacy never reads removed and reads legacy makes added (A01/call 5); §1.6 and NFR-004 metric name aligned to Go statement coverage / Go 1.26.0 (A03; D03: NFR-004 aligned with the BC-6.04.001 floor pin); NFR-005 rescaled to the four per-refresh render-state caps with the stdlib/protocol constants named in their owning contracts (A05); E-REN-002 carrier list gains BC-1.02.003 (EC-006; CP-S03/S04) and BC-1.02.008 (EC-006; CP-S08) (B07); §8 per-call-site budget gains the two --subagent sites — subagent stdin 993/994, subagent wire json.dumps (SL:924, s=3) 991/992 (A10)"
 supplements:
   - prd-supplements/interface-definitions.md
   - prd-supplements/error-taxonomy.md
@@ -134,7 +135,7 @@ Owner-approved breakdown (2026-11-15; OD-131). BC numbering:
 **Total new BCs: 154** (108 mapped from legacy BC-SL-001..103 + 46 new contracts; see
 `behavioral-contracts/BC-ALLOCATION.md` for the authoritative mapping). Priority labels
 amended by OD-135: S1 and S5 are module-critical — the P1 exit gate for both is
-**line coverage >= 95%**; the >= 95% mutation kill rate is the Phase 6 target, not a P1
+**>= 95% coverage** (measured as Go statement coverage; ADV-P11-A03); the >= 95% mutation kill rate is the Phase 6 target, not a P1
 gate (OD-158; per `prd-supplements/module-criticality.md`). Gate scope is settled by
 OD-193: S1 (`internal/statusline`, `internal/cost`) and S5 (`internal/pyfmt`) only —
 `internal/parity` (S6) coverage is reported, not gated. The 2026-11-15 owner rulings
@@ -422,7 +423,7 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 
 | BC ID | Title | Legacy | Priority |
 |-------|-------|--------|----------|
-| [BC-6.04.001](behavioral-contracts/ss-06/BC-6.04.001.md) | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.x leg; -race; gitleaks | new | P0 |
+| [BC-6.04.001](behavioral-contracts/ss-06/BC-6.04.001.md) | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.0 leg; -race; gitleaks | new | P0 |
 | [BC-6.04.002](behavioral-contracts/ss-06/BC-6.04.002.md) | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling) | new | P1 |
 | [BC-6.04.003](behavioral-contracts/ss-06/BC-6.04.003.md) | Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs | new | P1 |
 
@@ -458,13 +459,18 @@ by the architect this round): any other flag is an unknown-flag one-line error, 
 One JSON object on stdin (Claude Code statusLine payload): text-mode
 `json.load` semantics — a BOM or invalid UTF-8 decodes to `{}` and the render continues
 (BC-1.01.002, BC-1.01.008); NaN/Infinity tokens accepted; nesting budget is a per-call-site
-constant (993 accepted / 994 rejected at stdin, BC-1.01.002). Objects read: `model`,
-`workspace`, `cwd` (SL:452; BC-1.02.003), `context_window` (SL:463; BC-1.02.006/.020),
-`transcript_path`, `session_id`, `cost`, `rate_limits`, `version`, and the
-newer optional fields (`output_style.name`, `pr.kind`, `workspace.repo.*`,
-`prompt_cache.*`, `rate_limits.spend_limit` with and without its dollar fields;
-market-intel §6.1) — all tolerated absent or null. Wrong inner types degrade per the
-crash-path register (CP-S01..S17), never fail.
+constant (993 accepted / 994 rejected at stdin, BC-1.01.002). Objects read (the fields
+legacy actually reads — derived from every `.get(` on the stdin document and its
+sub-objects in legacy/dgx_statusline.py; pass-11 A01/call 5): `model` (`.id`,
+`.display_name`), `workspace` (`.project_dir`, `.current_dir`), `cwd`, `context_window`
+(`.used_percentage`, `.context_window_size`), `transcript_path`, `session_id`,
+`prompt_cache` (`.hit_ratio`), `cost` (`total_duration_ms`, `total_lines_added`,
+`total_lines_removed`, `total_api_duration_ms`, `total_cost_usd`), `rate_limits`
+(`.five_hour`, `.seven_day`, each with `.used_percentage`/`.resets_at`) — all tolerated
+absent or null. NOT read by legacy, hence not contract inputs (former list corrected
+pass-11 A01): `version`, `output_style.name`, `pr.kind`, `workspace.repo.*`,
+`rate_limits.windows`/`.spend_limit`, `prompt_cache.last_miss_cause`/`miss_causes`.
+Wrong inner types degrade per the crash-path register (CP-S01..S17), never fail.
 
 ### 3.3 Configuration
 
@@ -490,8 +496,8 @@ the supplement.
 | NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Conditional >512 KB timing-fixture exemption (OD-187, ceiling OD-191): the exempt fixture is identified by a validated case flag `timing_exempt: large-transcript` (exactly one case in the corpus, and its transcript must exceed 512 KB — more than 524,288 bytes; 512 KiB, equal to the `transcript.read_cap_bytes` default); it is exempt from the 25 ms p95 target, but the gate still fails if its p95 exceeds 100 ms (judgment call: 4x the target, well under the refresh interval), and the timing job prints one report line when the exemption is used. Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
 | NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11/O12, CP-A01..A05, CP-T09) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
-| NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
-| NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20). The tunable cap keys (`transcript.read_cap_bytes`, `transcript.dedup_memory`, `sparkline.history_cap`) carry judgment-call config-VALIDATION upper bounds (67108864 / 65536 / 1000; supplement) — config range bounds, not new runtime caps (pass-5 A13) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
+| NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.0; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
+| NFR-005 | Memory/CPU envelope | bounded per-refresh render state, legacy caps only — the four-cap list is exhaustive FOR PER-RENDER STATE: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no render-state cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20). Legacy also fixes protocol/stdlib constants that are NOT render-state caps and are pinned in their owning contracts, not here (scope corrected pass-11 A05): http.client `_MAXHEADERS`=100 / `_MAXLINE`=65536 and urllib `max_repeats`=4 / `max_redirections` (metrics-client family, BC-1.04.001), the per-call-site JSON depth budgets (Section 8), CPython's 4,300-digit int limits (BC-5.01.002), and the ancestor-walk cap `window_age.max_depth`=6 (BC-3.02.001). The tunable cap keys (`transcript.read_cap_bytes`, `transcript.dedup_memory`, `sparkline.history_cap`) carry judgment-call config-VALIDATION upper bounds (67108864 / 65536 / 1000; supplement) — config range bounds, not new runtime caps (pass-5 A13) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
 | NFR-006 | Repo hygiene (public repo) | synthetic-only committed fixtures; gitleaks + pattern scan clean on CI; the pattern scan additionally runs nightly and on manual dispatch from `main` over the checked-out `factory-artifacts` ref (no push trigger there — the ref carries no `.github/`; pass-10 A03/call 16), the local pre-push hook staying the push-time guard | CI leg + scheduled/manual `factory-artifacts` scan + pre-push hook + TestCorpusHygiene | BC-6.02.001, BC-6.04.001 |
 
 ## 5. Error Taxonomy
@@ -504,7 +510,7 @@ the supplement.
 | Code | Surface | Observable | Exit | Contract |
 |---|---|---|---|---|
 | E-REN-001 | Panic guard (any crash path) | `\e[90mstatusline degraded\e[0m\n` (29 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`) | 0 | BC-1.01.001 |
-| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.01.008, BC-1.02.001, BC-1.02.006, BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.029 (CP-O12 owner; pass-9 call 4), BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.003 (CP-O12 co-owner), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
+| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.01.008, BC-1.02.001, BC-1.02.003 (EC-006; CP-S03/S04; pass-11 B07), BC-1.02.006, BC-1.02.008 (EC-006; CP-S08; pass-11 B07), BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.029 (CP-O12 owner; pass-9 call 4), BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.003 (CP-O12 co-owner), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
 | E-CFG-001 | D4-EX-3 config error (seven classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134; Text — OD-178) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
@@ -617,7 +623,10 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
   measured sites: stdin 993/994, transcript line 993/994, metrics reply 992/993, session-cache
   loaders 991/992, git cache 990/991 (derived per equal chain depth: get_sample,
   claude_window_start and mix-cache loaders 991/992; cost-history loaders 990/991 —
-  interface-definitions §stdin JSON Contract; ARCH-06 `json.go`) and whitespace sets (int/float vs
+  interface-definitions §stdin JSON Contract; ARCH-06 `json.go`), and the two `--subagent`
+  sites: the subagent stdin load (same 6-frame chain as MAIN stdin) 993/994 and the subagent
+  wire `json.dumps` (SL:924, s=3) 991/992 (BC-6.01.001 PC-4, VP-006; pass-11 A10) — and
+  whitespace sets (int/float vs
   str.isspace) are stated per site, never globally
   (BC-1.01.002, BC-5.02.003, BC-5.01.002, BC-5.03.002).
 - **Public-repo hygiene (policy 21).** Repo-relative paths only; synthetic fixtures;

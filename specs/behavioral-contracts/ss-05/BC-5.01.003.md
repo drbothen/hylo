@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "27f5d0f"
+input-hash: "11dfbf1"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython //, %, int(), math.ceil, max/min used throughout legacy/dgx_statusline.py)"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D10: subagent clock sites SL:919-920 added to served sites"
+  - "2026-11-21T07:00:00Z (1.2.3): ADV-P11 remediation D10 (orchestrator call 16) — Traceability Source respelled against legacy/dgx_statusline.py: SL:919-920 are FLOAT divmod sites (secs = max(now_ms - start, 0) / 1000 is a float at SL:919; secs // 60 / secs % 60 at SL:920), concurring with BC-1.07.007; the int() site list gains the omitted wrappers SL:525, 527, 529, 560 and 826"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -112,7 +113,7 @@ All values verified 2026-11-15 against CPython 3.11.7.
 | L2 Domain Invariants | DI-008 (typed errors feed the degraded ladder), DI-012 |
 | Architecture Module | `internal/pyfmt/num.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/num.go (divmod/mod, Int/Ceil, Max/Min) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
-| Source | New contract. OD-103; design IM-07, IM-08, IM-09; pitfalls PR-03, PR-04, PR-05. Legacy sites served: float `//`/`%` SL:525-529, 546, 560, 826; int `//`/`%` SL:548, 561, 829-831, 859, 919-920 (subagent clock `secs // 60`, `secs % 60`, `int()`; ADV-P3-D10); `int()` SL:148, 426, 546, 675, 683, 853, 920; `math.ceil` SL:759; `max`/`min` SL:146, 422, 479, 508, 671, 674-675, 758-759, 919, 1117 |
+| Source | New contract. OD-103; design IM-07, IM-08, IM-09; pitfalls PR-03, PR-04, PR-05. Legacy sites served: float `//`/`%` SL:525-529, 546, 560, 826, 919-920 (the subagent clock: `secs` is a float at SL:919, so `secs // 60` / `secs % 60` at SL:920 are float_divmod sites — ADV-P11-D10, concurring with BC-1.07.007); int `//`/`%` SL:548, 561, 829-831, 859; `int()` SL:148, 426, 525, 527, 529, 546, 560, 675, 683, 826, 853, 920; `math.ceil` SL:759; `max`/`min` SL:146, 422, 479, 508, 671, 674-675, 758-759, 919, 1117 |
 
 ## Related BCs (Recommended)
 

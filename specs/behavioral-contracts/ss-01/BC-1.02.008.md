@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6ebdaf1"
+input-hash: "97409c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:477-479)"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "1.2 pass-5 remediation (ADV-P5-B03): the cache-hit glyph is named as the registry key statusline.glyphs.cache_hit (default U+267B) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
+  - "1.3 pass-11 remediation (ADV-P11-B01): EC-006 names the taxonomy id CP-S08 with its faithful trigger and raise site (SL:477), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +68,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-003 | `hr` 0.015 / 0.025 | `2%` / `2%` (binary value of the product decides; oracle-pinned) |
 | EC-004 | `hr` 0.995 | `100%` |
 | EC-005 | `hr` `true` / `false` | `100%` / `0%` (bool is a number in Python) |
-| EC-006 | `prompt_cache` truthy non-object (`"x"`) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
+| EC-006 | `prompt_cache` truthy non-object (`"x"`) — taxonomy **CP-S08** (`prompt_cache` truthy and not a dict, raise site SL:477) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table) |
 | EC-007 | `hr` string `"0.9"`, null, missing | no segment |
 | EC-008 | `hr` NaN / ±inf | BC-1.02.023 (`♻ nan%`, `100%`/`0%`) |
 

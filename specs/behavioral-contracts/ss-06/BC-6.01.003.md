@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "07f32ce"
+input-hash: "a9458b8"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-19T03:15:00Z (1.2.5): ADV-P6 remediation D11 — canonical vector row 1 realigned to PC-4's strengthened canary instant 1794615009.4245193 (exact stdout); the superseded 1794615009.5 value stays only as EC-004's fractional-grammar case"
   - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D24 — stdio canary fixture respelled a non-ASCII code point (U+0664, UTF-8 D9 A4) and the probe script specified (testdata/clock_shim/stdio_canary.py, name per OD-145 delegation)"
   - "2026-11-20T18:30:00Z (1.2.7): ADV-P9 remediation D11 — the stdio canary's claim narrowed to what it can detect (POSIX leg observes but cannot detect a lost shim under the pinned UTF-8 locale; measured: even LC_ALL=C + PYTHONCOERCECLOCALE=0 round-trips U+0664 as UTF-8 on the reference build); PC-5 gains the Windows LF negative control (shim absent, normal builder env, raw bytes must contain CR LF)"
+  - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation A2-02 sibling (orchestrator call 1, OD-190 applied literally) — the shim's stdio duty is ENCODING only: sys.stdin/sys.stdout reconfigured to UTF-8 strict, NO newline reconfigure (the former newline=\\n claim withdrawn); Pre-1 cites the comparator's open CRLF→LF conversion (BC-6.03.002 PC-1/EC-006) as the Windows-leg LF disposition, and the canary's \\r\\n-free observation is scoped to the POSIX leg"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,8 +60,10 @@ oracle case runs, that the shim actually took effect.
 1. The shim file is `internal/statusline/testdata/pyhooks/sitecustomize.py`. It is
    stdlib-only, about 10 lines, and lives outside `legacy/` (D10). Besides the clock
    patches it performs the stdio reconfiguration assigned in BC-6.01.002 PC-4:
-   `sys.stdin` and `sys.stdout` are reconfigured to UTF-8 strict with `newline="\n"`
-   on import (ADV-P3-D23; relied on by BC-6.03.002 EC-006).
+   `sys.stdin` and `sys.stdout` are reconfigured to UTF-8 strict on import — ENCODING
+   only, NO newline reconfigure (pass-11 A2-02, orchestrator call 1: the Windows-leg
+   LF disposition is the comparator's open CRLF→LF conversion, BC-6.03.002 PC-1/EC-006;
+   ADV-P3-D23).
 2. The oracle runs with `-s` and the env of BC-6.01.002, which sets `PYTHONPATH` to the
    shim directory and `HYLO_TEST_NOW` to the step instant.
 3. `HYLO_TEST_NOW` is a decimal string produced by the harness with
@@ -123,9 +126,12 @@ oracle case runs, that the shim actually took effect.
      a non-ASCII CODE POINT — `\u0664` (U+0664 ARABIC-INDIC DIGIT FOUR, UTF-8 `D9 A4`; the
      sibling example of BC-2.02.001 EC-008; pass-8 D24: a lone byte \u2265 0x80 is not valid
      UTF-8, so the fixture is the encoded code point, not a "non-ASCII byte") — through
-     stdin and reads stdout as raw bytes; with the shim loaded, a `\r\n`-free,
-     UTF-8-strict round trip is observed (the probe prints the decoded code point back,
-     UTF-8-encoded, `newline="\n"`). Discrimination power is NARROWED per ADV-P9-D11
+     stdin and reads stdout as raw bytes; with the shim loaded, a UTF-8-strict round
+     trip is observed (the probe prints the decoded code point back, UTF-8-encoded);
+     the `\r\n`-free observation is a POSIX-leg fact — the shim performs no newline
+     reconfigure (pass-11 A2-02), and on the Windows legs the comparator's open
+     CRLF→LF conversion (BC-6.03.002 PC-1) governs the byte comparison.
+     Discrimination power is NARROWED per ADV-P9-D11
      (orchestrator call 14) to the delta between the shim's reconfiguration and the
      interpreter's defaults under the builder env: on POSIX under the pinned
      `LANG=en_US.UTF-8` the defaults already produce UTF-8 and LF, so the POSIX leg

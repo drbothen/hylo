@@ -1,13 +1,13 @@
 ---
 document_type: bc-component-map
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-11-18T00:30:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "5fac151"
+input-hash: "5bba821"
 traces_to: ../prd.md
 
 ---
@@ -240,10 +240,13 @@ traces_to: ../prd.md
 ## Coverage
 
 101 + 13 + 3 + 3 + 20 + 14 = **154/154**. Every row names exactly one primary component
-home and at least one ARCH section. Multi-home rows (pass-4 A18: the earlier "two-row
-exception" note wrongly implied BC-6.04.001 was the only one): BC-6.04.001 (par +
+home (the multi-home exceptions listed below) and at least one ARCH section. Multi-home rows (pass-4 A18: the earlier "two-row
+exception" note wrongly implied BC-6.04.001 was the only one; BC-6.01.003 added
+ADV-P11-A12): BC-6.04.001 (par +
 ARCH-08 workflow), BC-1.07.001 (cmd/hylo + sl/subagent.go; ARCH-03 + ARCH-01),
-BC-1.05.008 (sl/cost.go + cost/history.go), and BC-3.02.001 (plat/proc.go + sl/session.go;
-ARCH-05 + ARCH-03 — pass-5 A12). BC-1.03.015 collapsed to sl-only when OD-161
+BC-1.05.008 (sl/cost.go + cost/history.go), BC-3.02.001 (plat/proc.go + sl/session.go;
+ARCH-05 + ARCH-03 — pass-5 A12), and BC-6.01.003 (par/shim_canary.go +
+sl/testdata/pyhooks/sitecustomize.py — the harness canary test plus the shim fixture it
+guards). BC-1.03.015 collapsed to sl-only when OD-161
 removed the fd helpers (pass-3 A06). No BC unmapped; no component without a BC set
 except theme.go (serves BC-2.01.003 via cfg) and env.go seams (serve BC-1.01.009).

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.6"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "48d9a5b"
+input-hash: "57c01d5"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -27,7 +27,8 @@ modified:
   - "1.3.3 pass-6 residual sweep (orchestrator call 16): EC-014 resolved with no exclusion — internal/platform encodes WTF-8 path values to UTF-16 itself, keeping lone surrogates as single 16-bit units (no U+FFFD substitution), Windows table test (ARCH-05); deviation-ruling note removed; 2026-11-19T14:00:00Z"
   - "1.3.4 pass-7 remediation (ADV-P7-B07): the cwd read is stated, not hidden — abspath resolves a relative input directory against cwd (reachable via BC-1.02.003 EC-004) and the empty-string fallback reads it too; both route through Env.Cwd / platform.Abs, and the Purity row drops the 'unreachable fallback' wording; no behavioral change; 2026-11-19T07:00:00Z"
   - "1.3.5 pass-9 remediation (ADV-P9-B04/B05, orchestrator call 12; one measurement each on the pinned oracle): PC2.3 pins the chunk-scoped strict decode of the pointer read — readline() decodes a whole buffered chunk (io.DEFAULT_BUFFER_SIZE 8192), so an invalid byte after the first LF still fails the read (end-to-end: no ancestor fallback, the walk stops) — and PC3 partitions the error kinds: isdir/isfile catch (OSError, ValueError) and return False (probes: embedded NUL ValueError, mode-000 PermissionError errno 13), so stat-level errors only make the level count as not-a-directory and the walk continues upward; only open/read failures reach the SL:394 handler; vectors 11-12 added; 2026-11-19T16:00:00Z"
-  - "1.3.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B02/B06, orchestrator call 12): PC2.3 chunk boundary re-pinned to the orchestrator measurement — the text reader decodes the first 8192 bytes in one chunk (invalid byte at offset < 8192 fails, at >= 8192 the first line reads), independent of st_blksize (4096 on the measuring filesystem); the 4096-byte-prefetch note removed; boundary probes at offsets 8191/8192 stated; PC2.2/PC2.4 and PC3 state the stat semantics (isdir/isfile follow symlinks, unlike PC1's purely lexical abspath) so a port cannot pick lstat-only or DirEntry-type checks and diverge on a symlinked .git or HEAD"
+  - "1.3.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B02/B06, orchestrator call 12): PC2.3 chunk boundary re-pinned to the orchestrator measurement — the text reader decodes the first 8192 bytes in one chunk (invalid byte at offset < 8192 fails, at >= 8192 the whole line reads, independent of st_blksize (4096 on the measuring filesystem)); the 4096-byte-prefetch note removed; boundary probes at offsets 8191/8192 stated; PC2.2/PC2.4 and PC3 state the stat semantics (isdir/isfile follow symlinks, unlike PC1's purely lexical abspath) so a port cannot pick lstat-only or DirEntry-type checks and diverge on a symlinked .git or HEAD"
+  - "1.3.7 pass-11 remediation (ADV-P11-B02): PC2.4 pins the whole-read universal-newline translation — any interior CR or CRLF inside the HEAD file becomes LF before the strip (bytes ref: refs/heads/a\\rb\\n give branch a\\nb, interpreter-verified CPython 3.11.7), also written to the git cache; new EC-015 and canonical vector; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -105,11 +106,23 @@ error occurs (stat-level errors only skip a level — PC3). It never invokes the
       pointer file → raise; offset 9015 → first line reads; end-to-end through the real entry point: pointer
       `gitdir: ../gd\n` + raw `\xff` inside the first chunk → `""` immediately, no ancestor fallback despite a
       qualifying ancestor repo). Go must reproduce the chunk-scoped strict decode with the 8192-byte chunk, not a
-      validate-only-the-first-line read.
+      validate-only-the-first-line read. The 8192-byte chunk is **io.DEFAULT_BUFFER_SIZE**, inherited from
+      CPython's text-io buffering — a **named format constant** shared with legacy's runtime, not config (D15
+      rationale: parity-bound to the oracle's own stdlib default; why not config = a configurable chunk size
+      would change which pointer files decode, a behavior knob no ruling mints; unlike this BC's Inv 4 slice,
+      it is not even hylo's constant to tune).
    4. If `gitdir` is set and `join(gitdir, "HEAD")` is a regular file → read it whole in
       text mode, strip Python whitespace into `ref`, and **return**:
       `ref[len("ref: refs/heads/"):]` if `ref` starts with `ref: refs/heads/`, else
       `ref[:7]` (code points).
+
+      **Whole-read newline translation (pass-11 ADV-P11-B02, interpreter-verified CPython 3.11.7):** the whole
+      read is `open(...).read()` in text mode (SL:385-386), so universal newlines translate not only a trailing
+      terminator but any interior CR or CRLF inside the file to LF before the strip: HEAD bytes
+      `ref: refs/heads/a\rb\n` yield `ref` = `ref: refs/heads/a\nb\n` after the read (the stripped `ref` retains
+      the interior LF) and the returned branch is the two-line string `a\nb` — the same value a CRLF interior
+      produces; a raw-bytes port that skips the translation returns `a\rb` and diverges. The translated branch
+      string (LF inside) is also what the git cache stores (BC-1.02.005).
    5. `parent = dirname(d)`; if `parent == d` → return `""`; else `d = parent`.
 3. Errors partition by kind (pass-9 ADV-P9-B05, oracle-verified 2026-11-18): **stat-level errors never
    raise** — `os.path.isdir`/`isfile` catch `(OSError, ValueError)` and return `False` (oracle
@@ -147,6 +160,7 @@ error occurs (stat-level errors only skip a level — PC3). It never invokes the
 | EC-005 | worktree pointer `gitdir: ../wt/gitdirs/c` (relative) or absolute | resolved and read |
 | EC-006 | pointer first line terminated by a lone `\r` (`gitdir: ../wt/g\rjunk\n`) | first line is `gitdir: ../wt/g` (universal newlines) |
 | EC-007 | HEAD `ref: refs/heads/a\r\n` or with surrounding spaces/blank lines | `a` (strip) |
+| EC-015 | Interior CR or CRLF in HEAD (pass-11 ADV-P11-B02): bytes `ref: refs/heads/a\rb\n` or `ref: refs/heads/a\r\nb\n` | branch = the two-line string `a\nb` (whole-read universal-newline translation, PC2.4); the same translated value is written to the git cache (BC-1.02.005); a raw-bytes port gives `a\rb` and diverges |
 | EC-008 | HEAD `ref: refs/remotes/origin/main` | `ref: re` (first 7 code points; legacy behavior kept) |
 | EC-009 | empty HEAD | `""` and the walk stops (HEAD exists) |
 | EC-010 | HEAD bytes invalid UTF-8 | decode error → `""` (no further walking) |
@@ -176,6 +190,7 @@ the real entry point (`python3 -I -s legacy/dgx_statusline.py`, isolated HOME an
 | `<T>/h/.git/HEAD` = bytes `ref: refs/heads/\xff\xfe\n` | `""` | error |
 | `<T>/r/.git/HEAD` = `ref: refs/heads/ancestor\n`; `<T>/r/wt/.git` = `gitdir: ../gd\n` + raw `\xff` bytes; `<T>/gd/HEAD` = `ref: refs/heads/feature\n`; start `<T>/r/wt` | `""` (chunk-decode error stops the walk; no ancestor fallback) | error |
 | `<T>/u/.git/HEAD` = `ref: refs/heads/main\n`; start `<T>/u/child` where `child` is mode 000 (stat EACCES) | `main` (stat-level error: the walk continues upward) | edge-case |
+| `<T>/cr/.git/HEAD` = bytes `ref: refs/heads/a\rb\n` (interior CR); start `<T>/cr` | `a\nb` (the two-line string: interior CR translated to LF by the whole-read universal newlines, PC2.4; interpreter-verified CPython 3.11.7); the cached branch holds the same `a\nb` value | edge-case |
 
 ## Verification Properties
 

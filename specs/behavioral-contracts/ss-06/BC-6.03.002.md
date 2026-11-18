@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "664cb34"
+input-hash: "fc9529b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,6 +26,7 @@ introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D06: PC-3 waiver for scope-stdout exclusion entries cross-referenced"
   - "2026-11-19T17:00:00Z (1.2.2): ADV-P7 remediation D24 - PC-2 exit-code rule gains the pinned crash-leg exception: a closed id's pinned non-zero ORACLE exit (cp-x03, D4-EX-3 Number grammar-failure leg: exit 1) is the expectation, and equality with it is still required"
+  - "2026-11-21T07:00:00Z (1.2.3): ADV-P11 remediation A2-02 (orchestrator call 1, OD-190 applied literally) — PC-1 states the ONE open normalization: on the Windows legs the comparator converts the ORACLE's stdout CRLF to LF openly, BEFORE the byte comparison; hylo's bytes are never converted (hylo writes LF itself); apart from that conversion no normalization (no trimming, no SGR stripping, no Unicode normalization); EC-006 rewritten to the same disposition (the shim performs no newline reconfigure)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,8 +64,12 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
 
 ## Postconditions
 
-1. **stdout.** `bytes.Equal(oracleStdout, goStdout)` must hold. No normalization is
-   applied: no trimming, no CRLF folding, no SGR stripping, no Unicode normalization.
+1. **stdout.** `bytes.Equal(oracleStdout, goStdout)` must hold, after ONE open
+   normalization on the Windows legs: the comparator converts the ORACLE's stdout CRLF
+   to LF openly, BEFORE the byte comparison (orchestrator call 1, OD-190 applied
+   literally). Hylo's bytes are never converted — hylo writes LF itself. Apart from
+   that single open conversion, no normalization is applied: no trimming, no SGR
+   stripping, no Unicode normalization.
 2. **Exit code.** The oracle exit code must equal the Go exit code. Both are expected
    to be 0 on every step (DI-008); a mismatch or a non-zero value on either side is a
    failure — with the pinned exception for the CRASH-LEG riders: where BC-6.03.004's
@@ -111,7 +116,7 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
 | EC-003 | Session cache JSON identical except key order | FAIL. Byte comparison; key order is part of the format (BC-SL-091) |
 | EC-004 | Legacy leaked `x.json.ab12cd34` (sid with `/`) | Temp name removed before comparison (BC-6.03.003); not a failure |
 | EC-005 | D4-EX-3 case: Go prints the config-error line, legacy prints a row | stdout compared against the entry's expected file, not legacy; Go writes no cache (asserted by the entry) |
-| EC-006 | Windows oracle stdout ends `\r\n` | Cannot happen with the shim (`newline="\n"`). If it does, FAIL. Never normalized |
+| EC-006 | Windows oracle stdout ends `\r\n` | Expected on the Windows legs: the comparator converts the ORACLE's stdout CRLF to LF openly, before the byte comparison (hylo's bytes are never converted). The shim performs no newline reconfigure. Any other normalization still FAILs |
 
 ## Canonical Test Vectors
 

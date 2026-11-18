@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-20T12:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.001.md, behavioral-contracts/ss-02/BC-2.03.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, prd-supplements/error-taxonomy.md]
-input-hash: "53ed4e9"
+input-hash: "2f7f1dc"
 traces_to: prd.md
 source_bc: BC-4.01.001
 bcs: [BC-4.01.001, BC-4.01.003, BC-2.03.001, BC-2.03.002, BC-1.07.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-20T08:00:00Z: pass-8 fixes (A2-15, A2-07) — the usage-error norm names bare `hylo` (EC-004) and an unknown verb (EC-005, e.g. `hylo status`) exit 2 beside the non-statusline verbs (BC-4.01.001 PC-4), and the legal statusline states include BOTH entries (subagent: zero or more LF-terminated NDJSON lines, zero bytes allowed, config error = zero stdout bytes per OD-168, BC-1.07.001); the BC-4.01.001 for-all row gained a matching property leg: fuzz over all argv/env/stdin with args[0]==\"statusline\" (FuzzStatuslineExitSurface), method and Proof Method table updated; bcs: gains BC-1.07.001 (subagent NDJSON wire grammar of the subagent leg)", "1.3 2026-11-20T12:00:00Z: pass-9 fixes (A2-12, A2-20) — the MAIN fuzz leg's generator domain excludes `--subagent` (a `--subagent` anywhere in argv routes the run to the subagent renderer, whose legal zero-byte output false-failed the MAIN non-empty check; legacy routes on `--subagent` anywhere in argv, SL:1240-1241); the fuzz sketch derives argv/env from byte blobs — Go fuzzing supports only primitive parameter types, not []string or map[string]string (A2-20)", "1.4 2026-11-18T17:50:00Z: pass-10 fix (A2-01, orchestrator call 9) — the `--subagent` entry's legal output set stated exactly (DI-008 carve-out): zero or more NDJSON lines OR, on a catalogued renderer fault (CP-A01..A05), the 29-byte non-JSON degraded line; zero bytes allowed (empty task list, unparseable/non-object stdin, OD-168 config error) — the former NDJSON-only oracle falsely failed a correct port whose fuzzed stdin drove a tokenCount ≥ 2**1024 OverflowError into the guard (SL:876-880 → SL:1243-1244); property statement, method bullet and sketch's SUBAGENT check aligned"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-20T08:00:00Z: pass-8 fixes (A2-15, A2-07) — the usage-error norm names bare `hylo` (EC-004) and an unknown verb (EC-005, e.g. `hylo status`) exit 2 beside the non-statusline verbs (BC-4.01.001 PC-4), and the legal statusline states include BOTH entries (subagent: zero or more LF-terminated NDJSON lines, zero bytes allowed, config error = zero stdout bytes per OD-168, BC-1.07.001); the BC-4.01.001 for-all row gained a matching property leg: fuzz over all argv/env/stdin with args[0]==\"statusline\" (FuzzStatuslineExitSurface), method and Proof Method table updated; bcs: gains BC-1.07.001 (subagent NDJSON wire grammar of the subagent leg)", "1.3 2026-11-20T12:00:00Z: pass-9 fixes (A2-12, A2-20) — the MAIN fuzz leg's generator domain excludes `--subagent` (a `--subagent` anywhere in argv routes the run to the subagent renderer, whose legal zero-byte output false-failed the MAIN non-empty check; legacy routes on `--subagent` anywhere in argv, SL:1240-1241); the fuzz sketch derives argv/env from byte blobs — Go fuzzing supports only primitive parameter types, not []string or map[string]string (A2-20)", "1.4 2026-11-18T17:50:00Z: pass-10 fix (A2-01, orchestrator call 9) — the `--subagent` entry's legal output set stated exactly (DI-008 carve-out): zero or more NDJSON lines OR, on a catalogued renderer fault (CP-A01..A05), the 29-byte non-JSON degraded line; zero bytes allowed (empty task list, unparseable/non-object stdin, OD-168 config error) — the former NDJSON-only oracle falsely failed a correct port whose fuzzed stdin drove a tokenCount ≥ 2**1024 OverflowError into the guard (SL:876-880 → SL:1243-1244); property statement, method bullet and sketch's SUBAGENT check aligned", "1.5 2026-11-18T21:00:00Z: pass-11 fix (A2-07) — the '`runStatusline` cannot propagate a non-zero code' claim given its faulting-stdout detection mechanism: VP-003's writer-seam legs (pass-11) inject a counting failing writer under a NORMAL render in both entries and assert exit 0, so a port returning exit 1 on a faulted normal-row write fails VP-003 rather than passing every VP; method bullet states the fuzz injects no I/O faults"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +50,12 @@ the usage text on stdout, exit 0 (BC-4.01.001 PC-5); 2 for every dispatch-level 
 error — bare `hylo` with no args (EC-004), an unknown verb (EC-005, e.g. `hylo
 status`), and usage errors on non-statusline verbs — with the golden usage text on
 stderr (BC-4.01.001 PC-4). No verb/state pair exists
-outside the table, and `runStatusline` cannot propagate a non-zero code. For all argv
+outside the table, and `runStatusline` cannot propagate a non-zero code — including
+when the stdout write itself faults: VP-003's writer-seam legs (pass-11 A2-07)
+inject a counting failing writer under a NORMAL (non-degraded) render in BOTH entries
+and assert exit 0 (main: BC-1.01.001's VP-003 anchor row + ARCH-01 AD-11; subagent
+rows: BC-1.07.008 EC-009 / OD-172), so a port returning exit 1 on a faulted
+normal-row write fails VP-003. For all argv
 with `args[0]=="statusline"` and no `--subagent` argument — the BC-4.01.001 for-all
 row; the MAIN fuzz generator's domain EXCLUDES `--subagent` (A2-12: `--subagent`
 anywhere in argv routes the whole run to the subagent renderer, legacy SL:1240-1241,
@@ -86,7 +91,8 @@ correct port therefore fails the former NDJSON-only fuzz).
   stdout zero or more LF-terminated NDJSON
   lines with zero bytes legal, or exactly the 29-byte degraded line on a catalogued
   renderer fault (CP-A01..A05, DI-008/BC-1.07.008; BC-1.07.001; the subagent output
-  check of the BC row).
+  check of the BC row). The faulting-stdout slice of the table is evidenced by VP-003's
+  writer-seam legs (pass-11 A2-07), not by this fuzz, which injects no I/O faults.
 - **Honesty:** testable-only. The table is the proof object; exhaustiveness follows
   from the dispatcher being a closed switch (statically checkable, ARCH-01).
 

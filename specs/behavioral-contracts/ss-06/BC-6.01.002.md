@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T06:00:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "51c2f1a"
+input-hash: "19c2954"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.2.5): ADV-P8 remediation D13+D10 — in-process Go path env lookups respelled EnvVars.Lookup(name) (string, bool) per ARCH-01; the conditional fake-PATH bullet states it has no P1 consumer (OD-76 D1-D4 vectors are Go table tests; machinery kept for the validator rejection rule and later phases)"
   - "2026-11-20T18:30:00Z (1.2.6): ADV-P9 remediation D10 — PC-4's parenthetical no longer claims the Windows env differs from POSIX by that key alone: the delta is PYTHONIOENCODING plus TMP, TEMP and SYSTEMROOT (the PC-1 Windows delta), and the table test asserts the exact per-OS key sets"
   - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D01 (orchestrator call 1) — the fake metrics URL is an UNCONDITIONAL member of every exact key set: the harness always injects the run-time fake URL as DGX_SL_VM_URL (oracle) and HYLO_BACKENDS_0_METRICS_URL (Go), because the fake's port is only known at run time and a case cannot declare it; when the case itself sets backends[0].metrics_url the case value wins; PC-1 key sets, PC-2 and the CTVs copy that"
+  - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation A2-02 (orchestrator call 1, OD-190 applied literally) + D01 (call 2) + D02 (call 3) — PC-4: the shim does NO newline reconfigure (encoding only); the Windows-leg LF normalization is the COMPARATOR's open conversion of the ORACLE's stdout CRLF to LF before the byte comparison, named beside PYTHONIOENCODING=utf-8; hylo's bytes are never converted; PC-1 consumer note: the canonical temp-file case cache-003 declares a subprocess-fake table and is the fake-PATH machinery's FIRST P1 consumer; PC-1/PC-2: a case metrics URL wins on BOTH sides and is admitted only as a placeholder resolving to the fake server (optionally with a path suffix), one value per key"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -91,16 +92,21 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
      set explicitly (OD-111; BC-6.02.003), and except `DGX_SL_VM_URL`, which the harness
      ALWAYS sets to the injected fake metrics URL (ADV-P10-D01, orchestrator call 1: the
      fake's port is only known at run time, so a case cannot declare it; when the case
-     itself sets `backends[0].metrics_url`, the case value wins on the Go side and
-     supersedes the injection).
+     itself sets `backends[0].metrics_url`, the case value wins on BOTH sides —
+     `DGX_SL_VM_URL` and `HYLO_BACKENDS_0_METRICS_URL` — and supersedes the injection;
+     the validator admits a case metrics URL only as a placeholder that resolves to the
+     fake server, optionally with a path suffix — one value per key, pass-11 call 3).
    - On Windows only, `SYSTEMROOT` with the runner's value. CPython cannot start without
      it, and Go's `os/exec` adds it on Windows when it is missing.
    - `PATH=<case>/bin`, ONLY when the case declares a subprocess-fake table (the fake
      `ps` of BC-3.02.002). The value is the harness constant, never the runner's
      `PATH`; cases without a fake table get no `PATH` key (ADV-P1-D05 resolution).
-     Consumer status (pass-8 D10 / orchestrator call 16): NO P1 corpus case declares a
-     subprocess-fake table — the OD-76 D1-D4 vectors are Go table tests (BC-3.02.002) —
-     so the conditional machinery has no P1 consumer; it is kept for the validator's
+     Consumer status (updated pass-11 D01 / orchestrator call 2; formerly "no P1
+     consumer"): the canonical `temp-file` case `cache-003` DECLARES a subprocess-fake
+     table — the fake `ps` on the conditional fake `PATH` for the oracle, a
+     `ProcStarter` fake for Go — so it needs no `proc_start` seed and never consults
+     the real process tree; it is the fake-PATH machinery's FIRST P1 consumer. The
+     machinery is otherwise kept for the validator's
      rejection rule (BC-6.02.003 PC-6) and later phases. With
      no `PATH` key, CPython's subprocess fallback searches `os.defpath` (`/bin:/usr/bin`,
      SL:280) — which is why the harness rejects an unseeded case with a truthy
@@ -121,7 +127,8 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
        `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`, `HYLO_TEST_NOW`,
        `HYLO_BACKENDS_0_MODEL_PREFIXES`, `HYLO_BACKENDS_0_METRICS_URL` (= the injected
        fake metrics URL, the same URL as the oracle's `DGX_SL_VM_URL`, unless the case
-       itself sets `backends[0].metrics_url` — the case value wins; ADV-P10-D01)
+       itself sets `backends[0].metrics_url` — the case value wins on BOTH sides;
+       ADV-P10-D01, pass-11 call 3)
        (+ the `HYLO_*` setting keys the case sets, +
        `COLUMNS` when declared; no `PATH` ever — the built binary is started by
        absolute path).
@@ -144,7 +151,7 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    - `HYLO_BACKENDS_0_METRICS_URL` = the injected fake metrics URL — the same URL as the
      oracle's `DGX_SL_VM_URL` (BC-6.02.003 PC-5) — an unconditional member (ADV-P10-D01,
      orchestrator call 1); when the case itself sets `backends[0].metrics_url`, the case
-     value wins.
+     value wins on BOTH sides (pass-11 call 3).
    - On Windows, `SYSTEMROOT`.
    The in-process Go path receives the same values through the `platform.EnvVars`
    seam (BC-2.01.001 PC-6, orchestrator call 9 pass-5: `EnvVars` everywhere): env
@@ -169,7 +176,9 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    - `PATH` is not inherited. A child that needs one gets a fixed constant documented in
      the harness, not the runner's value.
 4. **Locale and stdio are pinned.** The shim reconfigures oracle `stdin` and `stdout`
-   to UTF-8 strict with `newline="\n"`. Windows text-mode stdout would otherwise write
+   to UTF-8 strict and performs NO newline reconfigure (pass-11 A2-02, orchestrator
+   call 1, OD-190 applied literally: encoding only; the former `newline="\n"`
+   reconfigure is gone). Windows text-mode stdout would otherwise write
    `\r\n` and encode as cp1252 (research P25). By OD-183 the Windows oracle child's
    stdio encoding additionally comes from the builder's `PYTHONIOENCODING=utf-8` —
    exactly one `PYTHON*` variable, stdio only; a table test proves it changes stdio
@@ -179,10 +188,10 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    longer claims "that key alone").
    By OD-190 this LF behavior is hylo-wide and named beside the builder variable,
    never hidden in the shim: hylo writes UTF-8 + LF line endings on every OS (OD-190
-   extends OD-183), and the Windows oracle's LF normalization is produced by the two
-   named mechanisms — the builder's `PYTHONIOENCODING=utf-8` (encoding) and the
-   shim's `newline="\n"` reconfigure (LF-only newlines) — both called out here so a
-   port knows the normalization is intentional.
+   extends OD-183), and on the Windows legs the ORACLE's stdout CRLF is converted to
+   LF OPENLY by the COMPARATOR, before the byte comparison (BC-6.03.002 PC-1/EC-006;
+   VP-034, VP-009/VP-011) — the shim does no newline reconfigure, and hylo's bytes
+   are never converted (hylo writes LF itself).
    The harness captures child stdout as raw
    bytes, never through text-mode decoding.
 5. **Assertion.** Before the first case, an env-builder unit test checks the exact

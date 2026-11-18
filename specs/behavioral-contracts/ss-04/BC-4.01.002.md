@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.5"
+version: "1.1.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "06d6b68"
+input-hash: "ad8a98f"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; --subagent is a valid P1 flag dispatched per BC-1.07.*, OD-155; legacy reference: the --subagent dispatch at legacy/dgx_statusline.py SL:1240-1241)"
@@ -26,6 +26,7 @@ modified:
   - "1.1.3 2026-11-18T01:42:00Z ADV-P3 remediation D05+D28: EC-004 exempts --subagent anywhere in argv[1:] incl. after -- (OD-155, SL:1240); stderr suffix amended"
   - "1.1.4 2026-11-18: ADV-P4 remediation D05 - parity argv row corrected: case argv admits only [] and [\"--subagent\"] in P1 (design call 9); subagent mode performs no flag validation (PC-4 qualifier); pass-4 sync-check SC-07 — repaired the unescaped double quotes that broke YAML parsing; no behavioral change"
   - "2026-11-19T21:00:00Z (1.1.5): ADV-P8 remediation D23 — VP-002 row states the --subagent routing carve-out the VP file already had (exact-argument --subagent routes before flag handling)"
+  - "2026-11-21T07:00:00Z (1.1.6): ADV-P11 remediation D13 (orchestrator call 16) — PC-4 states the unresolved question: configuration resolution does NOT run at all on an unknown-flag run (config.Load is never called), so stderr carries exactly the unknown-flag lines and no unknown-setting warnings — the stderr table test is writable (full-stderr assertion; BC-2.01.001 PC-5 cross-note)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,7 +65,10 @@ non-zero status (OD-112, same rule as D4-EX-3).
    flag in argv order (suffix amended per ADV-P3-D28; the former "takes no flags" text is
    false since OD-155).
 4. The check runs before configuration resolution: an unknown flag takes precedence over a
-   config error (BC-2.02.001 is not printed). MAIN MODE ONLY — the subagent mode performs
+   config error (BC-2.02.001 is not printed). Configuration resolution does NOT run at
+   all on an unknown-flag run — `config.Load` is never called — so stderr carries
+   exactly the unknown-flag lines of PC-3 and NO unknown-setting warnings (pass-11 D13:
+   the full-stderr table test is writable). MAIN MODE ONLY — the subagent mode performs
    no flag validation at all (BC-2.02.001 PC-8, ADV-P4-D04). No stdin read is required, no
    cache file is
    read or written, no network request or subprocess runs.

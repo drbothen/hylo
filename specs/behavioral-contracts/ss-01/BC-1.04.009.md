@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.3"
+version: "1.4.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -24,6 +24,7 @@ modified:
   - "1.4.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the ramp named as the config key statusline.glyphs.sparkline with its 8-glyph default, OD-189 sibling treatment)"
   - "1.4.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names statusline.sparkline.points and PC5/PC6 name the statusline.sparkline.colors members beside their default literals)"
   - "1.4.3 2026-11-18: pass-10 remediation ADV-P10-C2-06 (PC3 names the registered key statusline.sparkline.scale beside its fixed-top-k 1.0 literal, Pre 2 — the literal spells the default)"
+  - "1.4.4 2026-11-18: pass-11 remediation ADV-P11-C2-04 (Pre 1 lists the cached-path foreign-hist crash sites — dict/number/null hist TypeError at the SL:664 slice, short-list-point IndexError at SL:655 via SL:664, plotted giant exact int OverflowError at SL:674, non-numeric plotted value TypeError at SL:671/674; EC-011 added; OD-160 class)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,7 +45,16 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 
 ## Preconditions
 
-1. `hist` is the history list (dict points or legacy `[t, v]` lists).
+1. `hist` is the history list (dict points or legacy `[t, v]` lists). On the cached
+   path `hist` arrives raw (BC-1.04.002 PC1 — legacy `[t, v]` list points are not
+   normalized there), so foreign-cache shapes of `hist` itself crash this contract's
+   slice/normalize ladder, each out to the top-level guard → errDegraded
+   (BC-1.04.014's disposition; foreign-cache class, exclusion id **OD-160**): a dict,
+   number or null `hist` fails at `hist[-N:]` (SL:664, TypeError; a dict slice is
+   unhashable in CPython 3.11); a list point shorter than 2 elements raises
+   IndexError inside `_norm_pt` (SL:655 via SL:664); a plotted giant exact int raises
+   OverflowError (SL:674); a non-numeric plotted value raises TypeError
+   (SL:671/SL:674).
 2. Config: `statusline.sparkline.trace` enum `rate|kv|ttft` → key `v|k|f` (legacy
    `TRACE_KEYS`; unknown values are a config error in Go, BC-2.02.004, D4-EX-3);
    `statusline.sparkline.points` 12 (T-006, judgment "long flats read as blobs";
@@ -103,6 +113,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | EC-008 | `ttft` trace, `f` [0.02, 0.05] (floor 0.1) | `▂▅` |
 | EC-009 | idx at top 7: v/top*7 = 0.49 / 0.5 / 2.5 | glyph 0 / 1 / 3 (half-up) |
 | EC-010 | Legacy `DGX_SL_TRACE=mine` (or any unknown trace) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.004); legacy fell back to `rate`. OD-105 exclusion entry `D4-EX-3`, dedicated test `TestD4EX3_Enum` |
+| EC-011 | Cached-path foreign `hist` shapes (Pre 1; exclusion id **OD-160**): `hist` a dict/number/null; a stored point a list shorter than 2 elements; a plotted point's value a giant exact int (magnitude >= 2**1024 - 2**970) or a non-numeric scalar | TypeError at the `hist[-N:]` slice (SL:664; a dict slice is unhashable in CPython 3.11) / IndexError inside `_norm_pt` (SL:655 via SL:664) / OverflowError (SL:674) / TypeError (SL:671/SL:674) — each → errDegraded, same top-level-guard disposition as BC-1.04.014 (ADV-P11-C2-04) |
 
 ## Canonical Test Vectors
 

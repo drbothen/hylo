@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "3ee40d0"
+input-hash: "05fa0e0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-040 P5/P6"
   - "1.3.2 2026-11-18T04:00:00Z: pass-3 remediation (ADV-P3-B03): VP anchor names VP-040 P5/P6 instead of VP-027"
   - "1.3.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-3 stamp re-dated ascending (it predated the preceding 1.3.1 reconciliation entry); no behavioral change"
+  - "1.3.4 pass-11 remediation (ADV-P11-B05): Inv 1 widened \u2014 the prefix-of-segments reading is defeated not only by stdin text containing SEP but by a configured separator whose bytes occur inside built-in segment markup (theme.separator=/ makes SEP equal the lines segment's dim slash, SL:537; [/] collide with the tokens segment's dim brackets, SL:596), which is also where VP-040 P5's generator assumption fails; no behavioral change; 2026-11-21T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,9 +64,14 @@ single `\e[0m`. A row with no `SEP` is returned unchanged even if it is too wide
 ## Invariants
 
 1. The function is pure; the output is always a prefix of the input's segments plus at most one `RESET` — provided no
-   segment text contains the exact `SEP` byte string. Stdin text (model display name, project label; BC-1.01.004
-   PC3) can contain `SEP` verbatim, in which case `rsplit` cuts inside that segment and the "prefix of segments"
-   reading no longer holds (legacy SL:1196; the trimming behavior itself is pinned by Postcondition 1 either way).
+   segment text contains the exact `SEP` byte string. Two sources defeat the proviso: (a) stdin text (model display
+   name, project label; BC-1.01.004 PC3) can contain `SEP` verbatim; (b) the configured separator itself —
+   `statusline.theme.separator` is free text (no control bytes) — can make a **built-in** segment's own markup
+   contain `SEP`: a configured `/` makes `SEP` = `\e[2m/\e[0m`, the dim slash the lines segment embeds between its
+   counts (SL:537), and a configured `[` or `]` collides with the tokens segment's dim brackets (SL:596). In either
+   case `rsplit` cuts inside a segment, the "prefix of segments" reading no longer holds, and the VP-040 P5
+   generator's no-SEP assumption fails for such rows (the trimming behavior itself is pinned by Postcondition 1
+   either way; legacy SL:1196).
 2. The `rsplit` is on the exact `SEP` byte string (code-point semantics, `pyfmt.RSplit1`); a `·` that is not part of
    `SEP` is not a split point.
 

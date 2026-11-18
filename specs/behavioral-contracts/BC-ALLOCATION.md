@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "16741e6"
+input-hash: "adf58ea"
 traces_to: ../prd.md
 ---
 
@@ -351,7 +351,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 
 | New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
 |---|---|---|---|---|---|---|
-| BC-6.04.001 | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.x leg; -race; gitleaks | new | n.a. | design §5.5; CLAUDE.md | — | H |
+| BC-6.04.001 | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.0 floor leg; -race; gitleaks | new | n.a. | design §5.5; CLAUDE.md | — | H |
 | BC-6.04.002 | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling) | new | n.a. | OD-117 | — | H |
 | BC-6.04.003 | Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs | new | n.a. | design §5.1; O5 | — | H |
 

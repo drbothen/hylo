@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.7"
+version: "1.3.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "9c12e47"
+input-hash: "3c34a21"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -34,6 +34,7 @@ modified:
   - "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-011 CP-O10/CP-O11 degrades ride the never-blank ladder)"
   - "1.3.5 2026-11-18: pass-9 remediation ADV-P9-C2-03 cross-reference: the EC-011 threshold citation now points at BC-1.05.004 PC4 (skip moved to the write step)"
   - "1.3.6 2026-11-18: pass-10 remediation ADV-P10-C2-06 (PC4 names the registered key statusline.cost.percentiles beside its (0.75, 0.95) literals, Pre 3 — the literals spell the default) + ADV-P10-C2-12 sibling sweep (PC3's 3.6e6 ms-per-hour factor carries the unit-constant note, BC-1.05.002 Pre 4)"
+  - "1.3.8 2026-11-21T09:00:00Z: pass-11 residual — the Pre 3 defaults re-spelled to the env spellings {\"cc\":300000,\"other\":1800000} (T-023) and [0.75,0.95] (T-024; PC4's default statement follows), matching the interface-definitions.md Default cells exactly (pass-11 A09/call 4); no behavioral change"
   - "1.3.7 2026-11-18: pass-10 remediation ADV-P10-C2-11 reciprocity (VP-001 row added to Verification Properties for the history-borne CP-O10/CP-O11 overflow degrade legs, EC-011; VP Anchors entry; VP-001 bcs: synced in the same burst, residual sweep)"
 deprecated: null
 deprecated_by: null
@@ -64,8 +65,9 @@ qualifying sessions exist (cold start).
    (T-020, inclusive; OD-162 range: Int ≥ 1 — 0 is a number-range config error
    because with an empty qualifying list Python indexes `v[int(0.75 × −1)]` = `v[0]`
    of `[]` and raises IndexError, SL:257-261); `statusline.cost.rate_min_api_ms` =
-   `{cc: 300000, other: 1800000}` (T-023); `statusline.cost.percentiles` = (0.75, 0.95)
-   (T-024; OD-162 range, ordering leg completed by owner ruling 2026-11-18, ADV-P3-C2-07:
+   `{"cc":300000,"other":1800000}` (env spelling, pass-11 residual; T-023);
+   `statusline.cost.percentiles` = [0.75,0.95] (env spelling; T-024; OD-162 range,
+   ordering leg completed by owner ruling 2026-11-18, ADV-P3-C2-07:
    each a finite Float in [0, 1] — q > 1 overflows the index
    (`int(q × (n−1)) ≥ n` → IndexError) and q < 0 wraps into Python negative indexing,
    so both are number-range config errors — and the pair must be **ascending with
@@ -90,7 +92,7 @@ qualifying sessions exist (cold start).
    config, the BC-1.05.002 Pre 4 note; ADV-P10-C2-12 sibling sweep).
 4. Each list independently: `n < min_sessions` → None; else sort ascending and return
    `(v[int(lo * (n - 1))], v[int(hi * (n - 1))])` with `(lo, hi)` from
-   `statusline.cost.percentiles` (default (0.75, 0.95), Pre 3 — the literals in the
+   `statusline.cost.percentiles` (default [0.75,0.95], Pre 3 — the literals in the
    legacy line spell the default), the index computed as a float64 product truncated
    toward zero, exactly as Python does (SL:257-261).
 5. Return `(usd_pair | None, rate_pair | None)` (SL:262).
