@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:45:00Z
@@ -13,7 +13,7 @@ inputs:
   - domain-spec/ubiquitous-language.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "eb3c998"
+input-hash: "7a00df2"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445, 902-903)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-19T01:00:00Z (1.2.4) ADV-P5 remediation D31 — cardinality counts distinct REPRESENTED indices (a set HYLO_BACKENDS_0_* no longer double-counts); [from] tie-break redefined as the lexicographically smallest FIELD, defined for non-P1 fields"
   - "2026-11-19T04:30:00Z (1.2.5) ADV-P6 remediation D04 — VP-016 row restated: the backends-cardinality reason rides the closed SEVEN-class register (OD-178); no eighth class"
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D10+D25 - Pre-2 defines <FIELD> well-formedness (non-empty ASCII uppercase/digit/underscore; HYLO_BACKENDS_1 and HYLO_BACKENDS_1_ are unknown settings, no index; Windows case-fold applies, POSIX byte-exact); PC-4 pins the cardinality error's ordering (structural, after every registry-key error) and <value> provenance (synthesized count, escape grammar shared)"
+  - "2026-11-19T21:00:00Z (1.2.7): ADV-P8 remediation D17 — PC-4 rules P1-field values at index != 0 ARE validated per class (per-key error precedes the structural cardinality error of pass-7 D10) and cross-pins the BC-2.02.001 PC-6 case-twin tie-break (byte-exact supplied names, uppercase wins, winner spelling printed)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,7 +88,15 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
    tie-break is the lexicographically smallest `<FIELD>` name byte-exact (defined for
    non-P1 fields too, which have no registry order — ADV-P5-D31) — for a single extra
    variable that is that variable's own name (e.g. `HYLO_BACKENDS_1_METRICS_URL`) (spec
-   choice pinning BC-2.03.001 EC-005, ADV-P1-D12). Example:
+   choice pinning BC-2.03.001 EC-005, ADV-P1-D12). Windows case twins and printed-name
+   case: the tie-break compares the `<FIELD>` names byte-exact as supplied (uppercase
+   wins over a spelling differing only in case) and the printed name is the winner's
+   spelling, per BC-2.02.001 PC-6 (pass-8 D17). A P1 `<FIELD>` value at an index
+   ≠ 0 IS validated by its field's class (pass-8 D17 ruling: per-key validation runs
+   over every represented index — `HYLO_BACKENDS_1_METRICS_URL=ftp://x` contributes
+   `backends[1].metrics_url=ftp://x (scheme must be http or https)` in registry order,
+   BEFORE the structural cardinality error of pass-7 D10) — non-P1 field values are
+   never parsed. Example:
    `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11:8428` →
    `hylo: config error: backends=2 (exactly one backend entry until P6)`. ORDERING AND
    VALUE PROVENANCE (pass-7 D10): the backends cardinality error is STRUCTURAL — it is

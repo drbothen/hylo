@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.5"
+version: "1.0.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "96cf453"
+input-hash: "b6a3490"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main_subagent (SL:928-936)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: non-English term replaced with 'short-circuit' (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: parse notes re-anchored to pyfmt.Decode(ModeText), never encoding-json, with the four decoder-divergence reasons (ADV-P4-C03); non-UTF-8 leg tied to the BC-1.01.008 locale pin and BOM case added (ADV-P4-C14)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C15) — VP-006 citation added (row and anchor): reciprocal with VP-006 bcs listing", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: non-English term replaced with 'short-circuit' (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: parse notes re-anchored to pyfmt.Decode(ModeText), never encoding-json, with the four decoder-divergence reasons (ADV-P4-C03); non-UTF-8 leg tied to the BC-1.01.008 locale pin and BOM case added (ADV-P4-C14)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C15) — VP-006 citation added (row and anchor): reciprocal with VP-006 bcs listing", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format, "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,7 +40,7 @@ degraded line and never to a crash (DI-008 rung: silent emptiness).
 ## Preconditions
 
 1. ASSUMPTION (ASSUMP-107-1): the Claude Code 2.1.326 `subagentStatusLine` stdin payload is assumed
-   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 3.
+   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 2 writes the S1.07 stories (OD-192).
 2. The process was routed to the subagent renderer (BC-1.07.001) with the switch on (BC-1.07.002).
 
 ## Postconditions

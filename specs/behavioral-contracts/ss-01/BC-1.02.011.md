@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5"
+version: "1.5.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "1580f27"
+input-hash: "eaa745b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:510-522, 531-532)"
@@ -22,6 +22,7 @@ modified:
   - "1.3 pass-4 remediation (ADV-P4-B04): EC-010 names CP-O02 and states the exact int->float threshold; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
   - "1.4 pass-5 remediation (ADV-P5-B05): EC-010 scoped to huge positive resets_at; new EC-011 pins the huge-negative behavior — window passed at SL:506 (exact int/float compare), hidden at SL:513-514, no degrade (oracle-verified); CTV row added; 2026-11-18T05:42:56Z"
   - "1.5 pass-6 remediation (ADV-P6-B02 + B10 + B16): EC-011 and its CTV row re-vectored from −10³⁰⁰ to −OV (the negated EC-010 boundary — discriminates a float64-at-decode port; −10³⁰⁰ converted cleanly); the OV CTV row now states a numeric used_percentage so the shown window reaches SL:515; history labels version-prefixed; 2026-11-19T04:00:00Z"
+  - "1.5.1 pass-8 remediation (ADV-P8-B10): EC-011's hiding mechanism cited precisely — SL:510 widget drop for the canonical 5h-absent vector, SL:513-514 per-window continue when the other window is reported; outcome unchanged; 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -86,7 +87,7 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 | EC-008 | pct 44.5 / 45.5 | text `44%` / `46%` (half-even) |
 | EC-009 | pct NaN | `7dnan%` grey, countdown kept (BC-1.02.024 family, pass-3 r1 BC-SL-061) |
 | EC-010 | `resets_at` a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 **on the positive side** (oracle-verified 2026-11-17: `2**1024 − 2**970 − 1` converts, `2**1024 − 2**970` raises; e.g. 10³⁰⁹) | `reset - now` raises OverflowError at SL:515 (mixed int/float arithmetic converts the int) → guard line (stdin-borne render overflow, OD-156; taxonomy **CP-O02**) |
-| EC-011 | `resets_at` a huge **negative** JSON integer at the EC-010 magnitude, e.g. −OV (pass-6 ADV-P6-B02: the vector is now the negated EC-010 boundary, so a port that converts to float64 at decode overflows and diverges — the former −10³⁰⁰ converted cleanly and discriminated nothing) | no OverflowError, no degrade: the exact int/float compare `reset <= now_rl` (SL:506; −OV ≤ 1.7e9 is True — the comparison never converts the int) marks the window passed (pct = None) and the window is hidden at SL:513-514 (BC-1.02.010 unreported rule); SL:515 is never reached (oracle-verified 2026-11-17: loop simulation with resets_at = −10**400 hides the widget; re-verified 2026-11-18 with −OV: `-OV <= 1.7e9` is True, while `float(-OV)` raises OverflowError) |
+| EC-011 | `resets_at` a huge **negative** JSON integer at the EC-010 magnitude, e.g. −OV (pass-6 ADV-P6-B02: the vector is now the negated EC-010 boundary, so a port that converts to float64 at decode overflows and diverges — the former −10³⁰⁰ converted cleanly and discriminated nothing) | no OverflowError, no degrade: the exact int/float compare `reset <= now_rl` (SL:506; −OV ≤ 1.7e9 is True — the comparison never converts the int) marks the window passed (pct = None) and the window is hidden — for the canonical 5h-absent vector the widget is dropped by the SL:510 `any(...)` check; the SL:513-514 per-window continue applies when the other window is reported (BC-1.02.010 unreported rule); SL:515 is never reached (oracle-verified 2026-11-17: loop simulation with resets_at = −10**400 hides the widget; re-verified 2026-11-18 with −OV: `-OV <= 1.7e9` is True, while `float(-OV)` raises OverflowError) |
 
 ## Canonical Test Vectors
 

@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.9"
+modified: "0.2.10"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "c844d6b"
+input-hash: "3420014"
 traces_to: ../prd.md
 ---
 
@@ -240,7 +240,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-2.01.002 | backends array: exactly one entry validated until P6; backends[0].metrics_url / backends[0].model_prefixes; default prefixes claude-sonnet | new | n.a. | OD-123, OD-111 | — | F |
 | BC-2.01.003 | statusline.theme.* keys for SGR palette, pill codes and separator, legacy defaults | new | n.a. | OD-113 | — | F |
 | BC-2.01.004 | Key registry: every key declares type, range/operator, default and rationale | new | n.a. | D15, OD-57, OD-114 | — | F |
-| BC-2.01.005 | HYLO_* value grammars: typed bool, comma lists, ~ path expansion; COLUMNS excluded as protocol input | new | n.a. | OD-05, OD-74, OD-61 | — | F |
+| BC-2.01.005 | HYLO_* value grammars: Bool, List, Path, strict-JSON composites, Text, and default-only keys; COLUMNS excluded as protocol input | new | n.a. | OD-05, OD-74, OD-61 | — | F |
 
 ### S2.02 — Validation + config-error line (writer F)
 
@@ -264,7 +264,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 
 | New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
 |---|---|---|---|---|---|---|
-| BC-3.01.001 | Per-OS cache/config/state dirs; hylo cache dir from P1 (XDG/hylo, LOCALAPPDATA) | new | n.a. | OD-95, OD-101 | — | G |
+| BC-3.01.001 | Per-OS cache/config/state dirs (XDG/hylo, LOCALAPPDATA); LocalZone TZ resolution (OS zone, UTC on empty/unparseable) | new | n.a. | OD-95, OD-101 | — | G |
 
 ### S3.02 — Process start / window age (writer G)
 

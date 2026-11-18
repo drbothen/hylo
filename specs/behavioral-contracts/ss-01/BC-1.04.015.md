@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md]
-input-hash: "48dbb4d"
+input-hash: "f3f53df"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:754-763)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-09 (table pinned to C = 4; general-C math is BC-1.04.007 PC3)"]
+modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-09 (table pinned to C = 4; general-C math is BC-1.04.007 PC3)", "1.2.2 2026-11-18: pass-8 remediation ADV-P8-C2-01 (PC2 names the table's cell glyphs as the keys statusline.glyphs.cell_on / cell_off with their defaults, OD-189 sibling treatment)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +50,10 @@ paths. Notation: `\e` is byte 0x1B.
 2. Otherwise the cell count and percentage follow the table below exactly, which pins
    the default `C = statusline.kv.cells = 4` only; for a general configured `C` the
    cell math is `n = Min(Ceil(kv / (100 / C)), C)` per BC-1.04.007 PC3, and the NaN
-   crash path (postcondition 1) raises for any `C` (CP-N01).
+   crash path (postcondition 1) raises for any `C` (CP-N01). The table's cell glyphs
+   instantiate the config keys `statusline.glyphs.cell_on` (default `▰` U+25B0) and
+   `statusline.glyphs.cell_off` (default `▱` U+25B1), BC-2.01.004 PC-6, per
+   BC-1.04.007 PC5 (ADV-P8-C2-01).
 
 ## Invariants
 

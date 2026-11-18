@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "6a5b563"
+input-hash: "4529a98"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1016-1040)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: EC-008/009 float+negative cached-size classification (OD-160); dropped uncited DI-012 (ADV-P2-C09/C11)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C13/C18): float cached size classified per path (equality path never seeks), DI-012 cited for the OD-160 legs", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C13) — EC-007 carves JSON bool `size` out of the crash class: Python bool is an int (`size == 1` compare, `seek(true)` = `seek(1)`, oracle-verified 2026-11-18); the crash class keeps string/array/object/null"]
+modified: ["1.2.1 2026-11-17: EC-008/009 float+negative cached-size classification (OD-160); dropped uncited DI-012 (ADV-P2-C09/C11)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C13/C18): float cached size classified per path (equality path never seeks), DI-012 cited for the OD-160 legs", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C13) — EC-007 carves JSON bool `size` out of the crash class: Python bool is an int (`size == 1` compare, `seek(true)` = `seek(1)`, oracle-verified 2026-11-18); the crash class keeps string/array/object/null", "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row (VP-012) mirroring sibling BC-1.03.015's OD-161 row"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -108,6 +108,7 @@ legacy oracle (CPython 3.11).
 | VP-029 | `need_reset ⇔ off > 0 ∧ ∃k∈{tin,c_wr,mixv6}: k ∉ cache` | Go property test (testing/quick) over random key subsets and offsets |
 | VP-029 (no dedicated write-scope VP yet) | `size == off` after the reset step ⇒ zero Save calls | table test with fake `CacheStore` |
 | VP-029, VP-019 | Written cache key order is the fixed 16-key sequence (byte equality of the swapped caches) | golden byte comparison |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (foreign-cache crash class; EC-008 float and EC-009 negative cached size) — is covered by the exclusion-closure check over the `OD-160` entry and its riding table tests (mirrors sibling BC-1.03.015's OD-161 row; ADV-P8-C03) | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability
 
@@ -142,6 +143,7 @@ S-TBD — transcript parser and mix cache
 ## VP Anchors (Recommended)
 
 - VP-029, VP-019 — reset predicate (family table); key order → VP-019 swap parity
+- VP-012 — exclusion-closure cover for the named deviation `OD-160` (EC-008/EC-009 legs)
 
 ---
 

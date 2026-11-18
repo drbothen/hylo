@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "invariants"
-version: "1.9"
+version: "1.10"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T10:05:25Z
+timestamp: 2026-11-19T22:00:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "06ca9d0"
+input-hash: "8052278"
 traces_to: L2-INDEX.md
 ---
 
@@ -27,8 +27,8 @@ traces_to: L2-INDEX.md
 | DI-004 | Credentials never cross lanes: the backend credential only goes to the selected backend; client credentials are stripped before a local-lane forward; an unreadable credential fails closed. | DECIDED OD-06/OD-07 overriding the legacy fail-open path (pass-8 L0-01/L0-02). | Local 502 + routing-error event; replay marks as approved deviation. | deferred to P3 (OD-115) |
 | DI-005 | The ledger is append-only JSONL: one `write()` per line on an append-descriptor, event set and field order frozen until P7, `t` naive local time at write time. | D7; writer contract P2r4 §3.2. | Consumers (exporter, dashboards) break; parity fails. | deferred to P3 (OD-115) |
 | DI-006 | No consumer may assume request↔reply pairing in the ledger: lines interleave in write order across writers; pairing is by composite near-key only. | No flow id exists in the schema; retries are indistinguishable (P2r4 §3.3). | Replay/history views mispair — hence OD-25's reported ambiguities. | deferred to P3 (OD-115) |
-| DI-007 | The status line never reads the ledger. Its inputs are stdin, the transcript, the metrics store, its own caches, and the environment seams (git state, process table, clock, env; AD-03). Live per-request data may reach it only via exporter metrics or the D16 event feed. | LEGACY-OBSERVED (P2r4 §3.2) and kept deliberately — the status line stays a pure function decoupled from writer crashes. DECIDED OD-125 (permanent rule). **REVISIT at P7** (ledger redesign): allowing ledger-backed widgets then would amend DI-007 and add a BC7←BC4 dependency. | Coupling would import ledger corruption into rendering; a status-line ledger read violates the invariant until the P7 revisit (OD-125). | 38 SS-01 BCs, e.g. BC-1.01.009, BC-1.04.001 |
-| DI-008 | Rendering never fails: any fault produces the degraded ladder — one-line output, exit 0 (imports, config errors D4-EX-3, unknown flags OD-112 included). Carve-out (OD-155): in the `--subagent` agent-panel mode the pre-render rungs (unknown-flag line, config-error line) do not run, and stdout is exactly one of three classes — JSON rows (successful render); zero bytes (zero tasks BC-1.07.004 PC6, unparseable stdin BC-1.07.003, enabled=false BC-1.07.002 PC2, config errors OD-168 with the diagnostic on stderr); or the shared 29-byte non-JSON degraded line, exit 0, for the catalogued render faults CP-A01..A05 (BC-1.07.008: one ladder, one rung text) and the unmapped-panic backstop; rows and degraded line never mix within one refresh (buffer-then-print). The mode is routed on `--subagent` anywhere in argv before any flag handling (legacy SL:1240-1241). | LEGACY-OBSERVED CV-08 + DECIDED OD-102/OD-112/OD-155/OD-156/OD-168. | Blank/nonzero output violates the client contract — outside the carve-out's three classes. | 84 BCs across SS-01..06, e.g. BC-1.01.001, BC-1.01.002 |
+| DI-007 | The status line never reads the ledger. Its inputs are stdin, the transcript, the metrics store, its own caches, and the environment seams (git state, process table, clock, env; AD-03). Live per-request data may reach it only via exporter metrics or the D16 event feed. | LEGACY-OBSERVED (P2r4 §3.2) and kept deliberately — the status line stays a pure function decoupled from writer crashes. DECIDED OD-125 (adopted for now with a revisit flag). **REVISIT at P7** (ledger redesign): allowing ledger-backed widgets then would amend DI-007 and add a BC7←BC4 dependency. | Coupling would import ledger corruption into rendering; a status-line ledger read violates the invariant until the P7 revisit (OD-125). | 38 SS-01 BCs, e.g. BC-1.01.009, BC-1.04.001 |
+| DI-008 | Rendering never fails: any fault produces the degraded ladder — one-line output, exit 0 (imports, config errors D4-EX-3, unknown flags OD-112 included). Carve-out (OD-155): in the `--subagent` agent-panel mode the pre-render rungs (unknown-flag line, config-error line) do not run, and stdout is exactly one of three classes — JSON rows (successful render); zero bytes (zero tasks BC-1.07.004 PC6, unparseable stdin BC-1.07.003, enabled=false BC-1.07.002 PC2, config errors OD-168 with the diagnostic on stderr); or the shared 29-byte non-JSON degraded line, exit 0, for the catalogued render faults CP-A01..A05 (BC-1.07.008: one ladder, one rung text) and the unmapped-panic backstop; rows and degraded line never mix within one refresh (buffer-then-print). The mode is routed on `--subagent` anywhere in argv before any flag handling (legacy SL:1240-1241). | LEGACY-OBSERVED CV-08 + DECIDED OD-102/OD-112/OD-155/OD-156/OD-168. | Blank/nonzero output violates the client contract — outside the carve-out's three classes. | 85 BCs across SS-01..06, e.g. BC-1.01.001, BC-1.01.002 |
 | DI-009 | Observability never changes outcomes: diagnostic writes (decision log, hook log, flow log) are best-effort and isolated from routing, ledger and hook decisions. | DECIDED OD-45, fixing legacy note()-aborts (pass-8 L0-10). | A log failure would alter a routing result — prohibited. | deferred to P3-P4 (OD-115) |
 | DI-010 | Configuration precedence is config file, overridden by `HYLO_*` env, then the key's default (PLAN §6: env overrides file); every key is typed and validated with a stated rationale; invalid config never silently falls back to pass-through. | DECIDED D15, OD-05, OD-59, OD-102, OD-114. | Silent fallback would move billing between lanes unnoticed. | 13 SS-02 BCs: BC-2.01.001..005, BC-2.02.001..006, BC-2.03.001..002 |
 | DI-011 | Startup with invalid config refuses to start; reload failure keeps the last good config and raises a loud error event. | DECIDED OD-26, replacing legacy's plain-pass-through degradation (pass-8 L0-07). | The silent-pass-through state is the domain's most dangerous failure. | deferred to P4 (OD-115) |
@@ -43,7 +43,7 @@ Enforced by (BC) derives from a grep of `specs/behavioral-contracts/` (recounted
 2026-11-18; ADV-P3-A2-14, ADV-P4-A2-13). Counting method: a BC file counts toward DI-NNN iff its
 text cites that id at least once (`grep -rl "DI-NNN"` over
 `specs/behavioral-contracts/ss-0*/`, excluding BC-ALLOCATION.md); the latest re-grep by
-that method gives DI-007 = 38, DI-008 = 84, DI-012 = 76 (re-grep 2026-11-18; ADV-P5-A2-15, ADV-P6-A2-24). "e.g." abbreviates
+that method gives DI-007 = 38, DI-008 = 85, DI-012 = 76 (re-grep 2026-11-18; ADV-P5-A2-15, ADV-P6-A2-24; DI-008 recounted 85 on the pass-8 re-grep, ADV-P8-A2-13). "e.g." abbreviates
 a citing family — full ids are enumerated in BC-ALLOCATION.md). "Deferred to Pn (OD-115)" marks invariants whose BCs
 arrive with the covering capability's delivery phase per `capabilities.md` — the L2 is
 product-level (OD-115), Phase 1 elaborates only CAP-009/010/011/015, and BC coverage

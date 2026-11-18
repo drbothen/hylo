@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.6"
+version: "1.1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "48601a8"
+input-hash: "8e07087"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_SUB_GLYPH + render_subagent_rows (SL:845-846, 893-896, 921-922)"
@@ -19,7 +19,15 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 matrix leg", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: running glyph corrected to U+00BB with SL:845-846/921-922 cites (ADV-P3-C02); goldens re-derived ensure_ascii-escaped (ADV-P3-C01); glyph/color pairs sourced from statusline.subagent.* config keys, no Go map literal (ADV-P3-C05); str() rendering of non-string chain/status values specified (ADV-P3-C14)", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: PC3 suffix gate tied to the legacy `if st and st != \"running\"` truthy gate with a present-falsy-status edge case (ADV-P4-C06); unknown-status fallback named statusline.subagent.glyphs.unknown, independent of glyphs.killed (ADV-P4-C07, design call 4)", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C14) — EC-006 rewrote: the wire carries ensure_ascii \\uXXXX escapes, not verbatim UTF-8 (BC-1.07.004 PC3)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.6 2026-11-19T18:00:00Z: pass-7 remediation (ADV-P7-C11/C14) — the name fallback is the config key statusline.subagent.name_fallback (Text, default ?, OD-189), respelled in Description, PC2, EC-004 and the Refactoring Notes (ADV-P7-C11, P20); invariant 3's prose pseudo-escape replaced with the source glyph (ADV-P7-C14)"]
+modified:
+  - "1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 matrix leg"
+  - "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: running glyph corrected to U+00BB with SL:845-846/921-922 cites (ADV-P3-C02); goldens re-derived ensure_ascii-escaped (ADV-P3-C01); glyph/color pairs sourced from statusline.subagent.* config keys, no Go map literal (ADV-P3-C05); str() rendering of non-string chain/status values specified (ADV-P3-C14)"
+  - "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: PC3 suffix gate tied to the legacy `if st and st != \"running\"` truthy gate with a present-falsy-status edge case (ADV-P4-C06); unknown-status fallback named statusline.subagent.glyphs.unknown, independent of glyphs.killed (ADV-P4-C07, design call 4)"
+  - "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C14) — EC-006 rewrote: the wire carries ensure_ascii \\uXXXX escapes, not verbatim UTF-8 (BC-1.07.004 PC3)"
+  - "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "1.1.6 2026-11-19T18:00:00Z: pass-7 remediation (ADV-P7-C11/C14) — the name fallback is the config key statusline.subagent.name_fallback (Text, default ?, OD-189), respelled in Description, PC2, EC-004 and the Refactoring Notes (ADV-P7-C11, P20); invariant 3's prose pseudo-escape replaced with the source glyph (ADV-P7-C14)"
+  - "1.1.7 2026-11-20T12:30:00Z: pass-8 residual sweep (OD-192) — ASSUMP-107-1 capture deadline respelled: before Phase 2 writes the S1.07 stories, not before Phase 3"
+
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,7 +49,7 @@ else the configured name fallback (default `?`). Rows with a non-running status 
 ## Preconditions
 
 1. ASSUMPTION (ASSUMP-107-1): the Claude Code 2.1.326 `subagentStatusLine` stdin payload is assumed
-   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 3.
+   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 2 writes the S1.07 stories (OD-192).
 2. Task survived eligibility (BC-1.07.004); status is hashable (else BC-1.07.008 CP-A02).
 
 ## Postconditions

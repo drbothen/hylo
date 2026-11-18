@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -9,7 +9,7 @@ phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "0fe46cb"
+input-hash: "d877571"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python str() of values used at legacy/dgx_statusline.py SL:442, 453; BC-SL-058)"
@@ -23,6 +23,8 @@ introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D34+D10: dict repr key/value separator stated; subagent str() sites SL:896/908/922 added"
   - "1.2.2 2026-11-18: ADV-P4 remediation D14 - isprintable class pinned to the generated Unicode 14.0.0 tables (OD-170, BC-5.01.002 Pre-3)"
+  - "2026-11-19T21:00:00Z (1.2.3): ADV-P8 remediation D20 — PC-6 mints the recursion-limit outcome from the pinned measurement (CPython 3.11.7, limit 1000): decode accepts display_name nesting 989, str() reprs only to 988 in the same stack, so Str returns an error there and the caller prints the degraded line (exit 0); n >= 990 is the decode-side {} fallback; fresh repr budget 997"
+  - "2026-11-20T12:00:00Z (1.2.4): ADV-P8 residual sweep — PC-6 corrected: the 1.2.3 measurement was taken through a loader that added stack frames and is WRONG. Orchestrator end-to-end measurement through the real entry (`python3 -I -s legacy/dgx_statusline.py`, isolated HOME): n = 987..991 (document depth up to 993) all render normally with the full repr of the list in the model segment, exit 0, no stderr; n = 992 (document depth 994) fails the stdin decode, d = {}, the model segment shows ?. So no Str recursion outcome is reachable from stdin — Str of any stdin-decodable value succeeds at SL:442/453, and Str must not impose a lower nesting limit than the decode allows; the 989 degraded-line canonical vector is withdrawn"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,6 +68,23 @@ floats, so every `str()` site routes through this helper. Helper-level contract 
    non-ASCII code points (e.g. é, 言) are written as themselves, not escaped.
 5. All cases pure and deterministic; equal to CPython `str(value)` for every decoded value
    shape in the generated table (OD-104 oracle discipline).
+6. **Recursion budget (pass-8 D20, CORRECTED in the pass-8 residual sweep; measured END
+   TO END through the real entry — `python3 -I -s legacy/dgx_statusline.py`, isolated
+   HOME, CPython 3.11.7 — with stdin document
+   `{"session_id":"s1","model":{"display_name":[<n>-deep list]},"workspace":{"current_dir":"."}}`.)**
+   `Str` bounds container-repr recursion exactly as CPython's repr does, but **no `Str`
+   recursion outcome is reachable from stdin** at the SL:442/453 sites: the whole-input
+   `json.load(sys.stdin)` decode boundary binds first. Measured: display_name nesting
+   n = 987..991 (document depth up to 993) renders NORMALLY — the model segment shows the
+   full repr of the list, exit 0, no stderr; n = 992 (document depth 994) fails the stdin
+   decode and legacy falls back to `d = {}` (defaults), the model segment showing "?".
+   There is no n for which stdin delivers a decodable value `Str` cannot repr: **`Str` of
+   any stdin-decodable value succeeds at SL:442/453.** The port must therefore not impose
+   a lower nesting limit on `Str` than the decode allows (a higher limit is harmless —
+   the decode rejects first). The earlier 1.2.3 reading (a decodable 989-deep value whose
+   `str()` raises) was an artifact of a measurement loader that added stack frames.
+   Canonical vectors: display_name nested 991 → full repr in the model segment, exit 0;
+   display_name nested 992 → "?" via the `d = {}` fallback, exit 0.
 
 ## Invariants
 

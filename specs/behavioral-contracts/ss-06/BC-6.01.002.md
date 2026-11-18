@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T08:30:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b72f99f"
+input-hash: "d2e0a2c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D21 - TZ=UTC pinned for both binaries on every leg (OD-171, VP-026 posix-only tag removed); Env.Loc routed through internal/platform.LocalZone"
   - "2026-11-19T03:10:00Z (1.2.3): ADV-P6 remediation D27 + OD-183 - Description pins restated (GP-1..GP-4 forbidden outright, GP-5/GP-6 set to case temp values, nothing inherited); Windows oracle child gains exactly one extra variable PYTHONIOENCODING=utf-8 (stdio only; PYTHONUTF8 stays forbidden; POSIX unchanged), EC-002/CTV/VP rows aligned"
   - "2026-11-19T08:30:00Z (1.2.4): ADV-P7 remediation D05 (orchestrator call 2) + call 4 + OD-190 - this file is AUTHORITATIVE for the per-OS child-env allowlists: PC-1 consolidates the four exact key sets (POSIX/Windows × oracle/Go) with the conditional PATH/COLUMNS/setting keys, HOMEDRIVE/HOMEPATH explicitly not constructed, HOME+USERPROFILE on both OSes; PC-2 drops statusline.Env(Getenv,Home) for the platform.EnvVars seam with HomeDir(env)/LocalZone(env)/CacheDir(env) signatures; PC-4 names the OD-190 LF normalization (UTF-8 + LF on every OS) beside PYTHONIOENCODING=utf-8. ARCH-07 and VP-034 copy these sets verbatim"
+  - "2026-11-19T21:00:00Z (1.2.5): ADV-P8 remediation D13+D10 — in-process Go path env lookups respelled EnvVars.Lookup(name) (string, bool) per ARCH-01; the conditional fake-PATH bullet states it has no P1 consumer (OD-76 D1-D4 vectors are Go table tests; machinery kept for the validator rejection rule and later phases)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -90,7 +91,11 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
      it, and Go's `os/exec` adds it on Windows when it is missing.
    - `PATH=<case>/bin`, ONLY when the case declares a subprocess-fake table (the fake
      `ps` of BC-3.02.002). The value is the harness constant, never the runner's
-     `PATH`; cases without a fake table get no `PATH` key (ADV-P1-D05 resolution). With
+     `PATH`; cases without a fake table get no `PATH` key (ADV-P1-D05 resolution).
+     Consumer status (pass-8 D10 / orchestrator call 16): NO P1 corpus case declares a
+     subprocess-fake table — the OD-76 D1-D4 vectors are Go table tests (BC-3.02.002) —
+     so the conditional machinery has no P1 consumer; it is kept for the validator's
+     rejection rule (BC-6.02.003 PC-6) and later phases. With
      no `PATH` key, CPython's subprocess fallback searches `os.defpath` (`/bin:/usr/bin`,
      SL:280) — which is why the harness rejects an unseeded case with a truthy
      `session_id` unless a fake table is declared (ADV-P2-D12; BC-6.02.003 PC-6).
@@ -129,7 +134,8 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    - On Windows, `SYSTEMROOT`.
    The in-process Go path receives the same values through the `platform.EnvVars`
    seam (BC-2.01.001 PC-6, orchestrator call 9 pass-5: `EnvVars` everywhere): env
-   lookups via `EnvVars.Get`, the home directory via `platform.HomeDir(env EnvVars)`
+   lookups via `EnvVars.Lookup(name) (string, bool)` (ARCH-01's interface method;
+   pass-8 D13), the home directory via `platform.HomeDir(env EnvVars)`
    and the local zone via `platform.LocalZone(env EnvVars)` (orchestrator call 4,
    pass 7: no platform function reads the real process environment; the child's `TZ`
    feeds `LocalZone`). The same seam supplies `CacheDir(env EnvVars)`. It never reads

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
 timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md]
-input-hash: "eeeae1d"
+input-hash: "9961bcf"
 traces_to: prd.md
 source_bc: BC-1.01.004
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-34) — P7 split into its own quick.Check: negated-int64 cols from its own generator (the shared anchorCols config could not serve it) and the rows > 2 constraint expressed by construction; the shared segCfg now serves P1/P5/P6 only", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-15: P7 varies the statusline.rows setting (covering rows == 2) with cols < 0, instead of guarding on segment count)"]
+modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-34) — P7 split into its own quick.Check: negated-int64 cols from its own generator (the shared anchorCols config could not serve it) and the rows > 2 constraint expressed by construction; the shared segCfg now serves P1/P5/P6 only", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-15: P7 varies the statusline.rows setting (covering rows == 2) with cols < 0, instead of guarding on segment count)", "1.5 2026-11-20T12:00:00Z: pass-8 residual sweep (task 5) — P7 restated per BC-1.01.007 PC2 (incl. negative narrow_cols): row 2 is OMITTED iff rows == 2 and cols < narrow_cols; the former 'present iff rows > 2' phrasing dropped the narrow_cols condition"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +52,8 @@ this VP delivers the quantified legs:
   exact SEP bytes.
 - **P6 (BC-1.01.006):** after trim, `visible(out) <= cols` or out contains no SEP.
 - **P7 (BC-1.01.007):** for all `statusline.rows` settings and all cols < 0: rows
-  untrimmed, and row 2 present iff rows > 2 (hidden exactly at rows == 2).
+  untrimmed, and row 2 omitted iff rows == 2 and cols < narrow_cols
+  (BC-1.01.007 PC2, incl. negative narrow_cols).
 
 ## Source Contract
 

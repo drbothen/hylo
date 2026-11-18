@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "68cd3f4"
+input-hash: "d991296"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -27,6 +27,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation A04: canonical gate parameters 1 warm-up + 20 runs per case, nearest-rank p95 = 19th sample, binding per case, no pooling; test target moved to internal/parity"
   - "1.2.2 2026-11-18: ADV-P4 remediation D23 - gate binds on EVERY case p95 (worst case named); VP-036 de-pooled; unreachable EC-005 low-sample note withdrawn"
   - "1.2.3 2026-11-19T17:00:00Z: ADV-P7 remediation A02/OD-191/D26 (orchestrator call 3) - PC-3 gains the conditional large-transcript exemption: exactly one validated case flag timing_exempt: large-transcript (transcript must exceed 512 KB), exempt from the 25 ms target only when it misses it, ceiling 100 ms (OD-191), and exactly one report line whenever the exemption is used; PC-1 states the 20-timed-runs rationale (smallest round count with an interior nearest-rank p95, fixed n, CI-budget judgment call). ARCH-08 and PRD NFR-001 to copy"
+  - "2026-11-19T21:00:00Z (1.2.4): ADV-P8 remediation D19 (orchestrator call 17) — timing_exempt size condition pinned in bytes: 512 KB = more than 524,288 bytes (512 KiB, the read_cap_bytes default); report shorthand unchanged"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -98,8 +99,11 @@ removes.
    - **Large-transcript exemption (OD-187 + OD-191; pass-7 orchestrator call 3).** The
      corpus contains exactly one case carrying the validated flag
      `timing_exempt: large-transcript`; the corpus validator admits the flag only on
-     that one case and only when its transcript fixture exceeds 512 KB (OD-187's size
-     condition, validated, not assumed). That case is CONDITIONALLY exempt from the
+     that one case and only when its transcript fixture exceeds 512 KB — more than
+     524,288 bytes (512 KiB, equal to the `statusline.transcript.read_cap_bytes`
+     default; OD-187's size condition, validated, not assumed; unit pinned pass-8 D19;
+     the report tag's `>512 KB` shorthand below denotes the same 524,288-byte
+     threshold). That case is CONDITIONALLY exempt from the
      25 ms target: if its p95 ≤ 25 ms the ordinary target applies and no exemption is
      reported; if it misses 25 ms, the exemption applies and its ceiling is 100 ms —
      the gate fails if its p95 > 100 ms

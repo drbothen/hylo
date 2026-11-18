@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-19T07:00:00Z
+timestamp: 2026-11-19T21:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "ce592c4"
+input-hash: "c45dd57"
 
 ---
 
@@ -153,5 +153,6 @@ must target one of these.
   `runVersion`; BC-2.03.001 -> `runConfigValidate` (reuses `config.Load` errors verbatim);
   BC-2.03.002 -> `runConfigPath`; BC-1.07.001 -> `runStatuslineSubagent` (argv routing +
   self-contained config resolution per OD-168, panel body per ARCH-03 `subagent.go`).
-- Criticality MEDIUM (>= 80% kill rate, module-criticality.md). Every rule above gets a
+- Criticality MEDIUM (>= 80% kill rate — the Phase 6 mutation target, not a P1 gate;
+  OD-158; module-criticality.md). Every rule above gets a
   table test; usage.golden pins the usage text byte-for-byte.

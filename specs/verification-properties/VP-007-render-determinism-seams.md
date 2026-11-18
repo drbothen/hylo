@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-20T08:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.009.md, behavioral-contracts/ss-05/BC-5.04.003.md, domain-spec/invariants.md]
-input-hash: "3ab2bf9"
+input-hash: "d45c2a4"
 traces_to: prd.md
 source_bc: BC-5.04.003
 bcs: [BC-5.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T14:35:00Z: ADV-P4 fix (A2-10) — semantic re-anchor (P4): source_bc moved from BC-1.01.009 to BC-5.04.003, the contract whose VP table cites this VP (TimeFloat value discipline + one-read-per-render); BC-1.01.009 had explicitly dropped the citation (its :149-150 note: determinism, not effect order — ADV-P1-B11), so BC-1.01.009 is removed from bcs: and the VP-INDEX map is reconciled", "1.2 2026-11-18T23:45:00Z: ADV-P5 fix (A2-31) — the NowReads assert is stated against the cumulative counter: capture the count after the first Render and assert the per-render DELTA (exactly 1, IM-14), so a correct implementation reporting 2 after two renders on the same env passes", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-10) — the second render runs on a FRESH COPY of the recorded Env: the property claims render determinism, not effect-script idempotence at a fixed clock (legacy's first-run writes — rl_ts, fetch_ts, hist, mix offsets, proc_start, cost history — are effect-order concerns, BC-1.01.009/VP-008); the sketch no longer reuses the mutated env"]
+modified: ["1.1 2026-11-18T14:35:00Z: ADV-P4 fix (A2-10) — semantic re-anchor (P4): source_bc moved from BC-1.01.009 to BC-5.04.003, the contract whose VP table cites this VP (TimeFloat value discipline + one-read-per-render); BC-1.01.009 had explicitly dropped the citation (its :149-150 note: determinism, not effect order — ADV-P1-B11), so BC-1.01.009 is removed from bcs: and the VP-INDEX map is reconciled", "1.2 2026-11-18T23:45:00Z: ADV-P5 fix (A2-31) — the NowReads assert is stated against the cumulative counter: capture the count after the first Render and assert the per-render DELTA (exactly 1, IM-14), so a correct implementation reporting 2 after two renders on the same env passes", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-10) — the second render runs on a FRESH COPY of the recorded Env: the property claims render determinism, not effect-script idempotence at a fixed clock (legacy's first-run writes — rl_ts, fetch_ts, hist, mix offsets, proc_start, cost history — are effect-order concerns, BC-1.01.009/VP-008); the sketch no longer reuses the mutated env", "1.4 2026-11-20T08:00:00Z: pass-8 fix (A2-11) — the IM-14 clock-count checks now observe a render each: the first render's exactly-once assert reads the recording copy's counter after Render returns, and the replay's counter is read on the SAME fresh copy the second render ran on (the former sketch counted a throwaway FreshCopy that never rendered, subtracting a pre-render baseline — no render could ever be observed); the Method bullet states the per-render norm for both renders"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,7 +64,9 @@ that re-running the effect script at a fixed clock is a no-op.
 - **Method:** property-based test — a generator produces random `Env` recordings;
   each `Env` is replayed twice, the SECOND replay on a fresh copy of the recording
   (first-render cache writes invisible, A2-10), asserting identical
-  output bytes; a counting `Now` asserts exactly-one clock read.
+  output bytes; a counting `Now` asserts EACH render reads the clock exactly once —
+  the first render on the recording copy, the replay on the fresh copy it actually
+  ran on (IM-14; A2-11).
 - **Honesty:** testable-only. The random-sample property asserts replay determinism
   as its own oracle: a randomly recorded `Env` replayed twice (reads shuffle-safe)
   must yield byte-identical output — no live oracle exists or is needed. Seam-
@@ -87,14 +89,17 @@ func TestRender_DeterministicUnderSeams(t *testing.T) {
     for _, env := range generatedEnvs(200) {
         e := env.Record()
         a, _ := statusline.Render(stdin, e)
-        first := e.NowReads() // A2-31: the counter is cumulative on the env — capture
+        if first := e.NowReads(); first != 1 { // A2-11: the FIRST render is observed too —
+            t.Fatalf("first render read the clock %d times, want 1", first) // exactly one read (IM-14)
+        }
         // A2-10: the second render sees a FRESH COPY of the recording — the first
         // render's cache writes are invisible to it (render determinism, not
         // effect-script idempotence; no BC claims the latter).
-        b, _ := statusline.Render(stdin, e.FreshCopy())
+        replay := e.FreshCopy() // the copy the SECOND render runs on: its NowReads
+        b, _ := statusline.Render(stdin, replay) // counter is what the replay observable is
         if !bytes.Equal(a, b) { t.Fatal("nondeterministic render") }
-        if d := e.FreshCopy().NowReads() - first; d != 1 { // IM-14: one clock read per render,
-            t.Fatalf("clock read %d times in the second render", d) // counted on a fresh copy
+        if d := replay.NowReads(); d != 1 { // A2-11: counted on the copy that rendered,
+            t.Fatalf("clock read %d times in the second render", d) // not on a throwaway fresh copy
         }
     }
 }

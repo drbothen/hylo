@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "4bc28df"
+input-hash: "81a6f43"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:773-781)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.sess_rate with default », OD-189 sibling treatment) + ADV-P8-C2-08 (testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +50,11 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
    `False`, `None`, `[]`, `{}` are false; any non-empty string is true).
 3. `mine = "\e[90m" + F(sess_rate[0],0) + "\e[0m"` if dim, else
    `"\e[1m\e[97m" + F(sess_rate[0],0) + "\e[0m"`.
-4. Segment = `"\e[90m»\e[0m" + mine + "\e[90mt/s\e[0m"`, placed before the box segment.
+4. Segment = `"\e[90m" + glyphs.sess_rate + "\e[0m" + mine + "\e[90mt/s\e[0m"`, placed
+   before the box segment, where `glyphs.sess_rate` = `statusline.glyphs.sess_rate`
+   (Text, default `»` U+00BB, BC-2.01.004 PC-6; the subagent `running` glyph shares the
+   code point via its own family key; the » literals in the vectors are the default
+   spelling, ADV-P8-C2-01).
 5. Stale mode does not change this segment (it comes from the transcript, not the metrics
    store).
 
@@ -85,7 +89,7 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Segment presence and dimming equal legacy for every JSON value shape of `mix[7]` | Go property test (testing/quick) (generated Values) |
+| VP-030 | Segment presence and dimming equal legacy for every JSON value shape of `mix[7]` | Go property test (testing/quick) (generated Values; routed to the VP-030 quick leg, pass-8 call 12) |
 
 ## Traceability
 

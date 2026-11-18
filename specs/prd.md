@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.16"
+version: "0.2.18"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T06:00:00Z
@@ -16,10 +16,12 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "bf95442"
+input-hash: "ae77e22"
 traces_to: domain-spec/L2-INDEX.md
 modified:
   - "0.2.16 2026-11-19T12:00:00Z: pass-7 remediation — NFR-001 states the conditional >512 KB timing-fixture exemption with the OD-191 100 ms ceiling, case-flag identification and report line (A02/call 3); E-REN-002 carrier list completed and CP-T09 added (A14/B11/call 8); E-NET-001 gains the KEEP_DEAD dead rung (C2-13); §9 ASM-002 aligned with the revised assumption register (A15); ASM-007 validation moved before Phase 2 S1.07 story writing per OD-192 with corrected ASSUMP-107-1 precondition cites (A22/C13)"
+  - "0.2.17 2026-11-19T22:00:00Z: pass-8 remediation — NFR-002 trigger list ends with the Windows MSVC localtime-domain degrade CP-T09 (A02/call 2); NFR-001 pins the >512 KB timing threshold at more than 524,288 bytes (512 KiB, equal to the transcript.read_cap_bytes default; D19/call 17); §1 gate-scope sentence records OD-193: S6 internal/parity coverage is reported, not gated (A04)"
+  - "0.2.18 2026-11-20T12:00:00Z: pass-8 residual sweep — §2.01 BC-2.01.005 title row synced to the contract's H1 verbatim (bc_h1_is_title_source_of_truth)"
 supplements:
   - prd-supplements/interface-definitions.md
   - prd-supplements/error-taxonomy.md
@@ -130,7 +132,9 @@ Owner-approved breakdown (2026-11-15; OD-131). BC numbering:
 `behavioral-contracts/BC-ALLOCATION.md` for the authoritative mapping). Priority labels
 amended by OD-135: S1 and S5 are module-critical — the P1 exit gate for both is
 **line coverage >= 95%**; the >= 95% mutation kill rate is the Phase 6 target, not a P1
-gate (OD-158; per `prd-supplements/module-criticality.md`). The 2026-11-15 owner rulings
+gate (OD-158; per `prd-supplements/module-criticality.md`). Gate scope is settled by
+OD-193: S1 (`internal/statusline`, `internal/cost`) and S5 (`internal/pyfmt`) only —
+`internal/parity` (S6) coverage is reported, not gated. The 2026-11-15 owner rulings
 OD-132..OD-145 added seven contracts (BC-2.02.006; the six pyfmt helper BCs,
 OD-140/OD-141).
 
@@ -296,7 +300,7 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 | [BC-2.01.002](behavioral-contracts/ss-02/BC-2.01.002.md) | backends array: exactly one entry validated until P6; backends[0].metrics_url / backends[0].model_prefixes; default prefixes claude-sonnet | new | P0 |
 | [BC-2.01.003](behavioral-contracts/ss-02/BC-2.01.003.md) | statusline.theme.* keys for SGR palette, pill codes and separator, legacy defaults | new | P0 |
 | [BC-2.01.004](behavioral-contracts/ss-02/BC-2.01.004.md) | Key registry: every key declares type, range/operator, default and rationale | new | P1 |
-| [BC-2.01.005](behavioral-contracts/ss-02/BC-2.01.005.md) | HYLO_* value grammars: typed bool, comma lists, ~ path expansion; COLUMNS excluded as protocol input | new | P1 |
+| [BC-2.01.005](behavioral-contracts/ss-02/BC-2.01.005.md) | HYLO_* value grammars: Bool, List, Path, strict-JSON composites, Text, and default-only keys; COLUMNS excluded as protocol input | new | P1 |
 
 #### S2.02 Validation + config-error line (writer group F)
 
@@ -480,8 +484,8 @@ the supplement.
 
 | ID | Requirement | Target | Validation | Contract |
 |---|---|---|---|---|
-| NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Conditional >512 KB timing-fixture exemption (OD-187, ceiling OD-191): the exempt fixture is identified by a validated case flag `timing_exempt: large-transcript` (exactly one case in the corpus, and its transcript must exceed 512 KB); it is exempt from the 25 ms p95 target, but the gate still fails if its p95 exceeds 100 ms (judgment call: 4x the target, well under the refresh interval), and the timing job prints one report line when the exemption is used. Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
-| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11, CP-A01..A05) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
+| NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Conditional >512 KB timing-fixture exemption (OD-187, ceiling OD-191): the exempt fixture is identified by a validated case flag `timing_exempt: large-transcript` (exactly one case in the corpus, and its transcript must exceed 512 KB — more than 524,288 bytes; 512 KiB, equal to the `transcript.read_cap_bytes` default); it is exempt from the 25 ms p95 target, but the gate still fails if its p95 exceeds 100 ms (judgment call: 4x the target, well under the refresh interval), and the timing job prints one report line when the exemption is used. Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
+| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11, CP-A01..A05, CP-T09) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
 | NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20). The tunable cap keys (`transcript.read_cap_bytes`, `transcript.dedup_memory`, `sparkline.history_cap`) carry judgment-call config-VALIDATION upper bounds (67108864 / 65536 / 1000; supplement) — config range bounds, not new runtime caps (pass-5 A13) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |

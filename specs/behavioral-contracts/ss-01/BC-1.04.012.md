@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "e457c30"
+input-hash: "5f0276f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:822-834)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/12"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/12", "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.idle with default ☾, OD-189 sibling treatment)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,7 +54,10 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
    semantics, BC-5.01.003).
 3. Age text and boundaries per BC-1.04.017: `<d>d<hh>h` from 1440 min, `<h>h<mm>m` from
    60 min, else `<m>m`.
-4. Segment = `"\e[36m☾ idle " + age + "\e[0m"`, appended last in row 2.
+4. Segment = `"\e[36m" + glyphs.idle + " idle " + age + "\e[0m"`, appended last in row 2,
+   where `glyphs.idle` = `statusline.glyphs.idle` (Text, default `☾` U+263E,
+   BC-2.01.004 PC-6; the ☾ literals in the vectors are the default spelling,
+   ADV-P8-C2-01).
 
 ## Invariants
 

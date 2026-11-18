@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.4.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "1f8fde3"
+input-hash: "24a159a"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "1.2 pass-4 remediation (ADV-P4-B03): for-all suffix-presence leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.4 pass-6 remediation (ADV-P6-B16): history label version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
+  - "1.4.1 pass-8 remediation (ADV-P8-B08): new Inv 4 pins the suffix's `·` byte as a named format constant, not config (D15), distinct from statusline.theme.separator; no behavioral change; 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,6 +63,10 @@ concurrent (subagent) API calls can sum past it. The duration is formatted by `_
    observable; keep under D4).
 3. The 60000 default and its operator come from the `internal/config` key `statusline.timer.api_min_ms`
    (register T-039, derived: `_hm` has minute granularity, below one minute it would print `0m`).
+4. The `·` separator byte of the suffix (PC1's `\e[2m·`) is a **named format constant** of this
+   widget, not config (D15 rationale: display-format constant of the output, parity-bound at two
+   bytes, U+00B7; why not config = no ruling mints a key for this site). It is distinct from
+   `statusline.theme.separator` (the row segment separator, OD-113, default ` · `).
 
 ## Edge Cases
 

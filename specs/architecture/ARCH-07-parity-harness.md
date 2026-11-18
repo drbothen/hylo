@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.11"
+version: "1.13"
 status: draft
 producer: architect
-timestamp: 2026-11-19T20:00:00Z
+timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "431bb1a"
+input-hash: "fc57013"
 
 ---
 
@@ -17,7 +17,8 @@ input-hash: "431bb1a"
 
 > Referees D4: runner, fixture corpus, comparison, exclusion machinery, CI legs.
 > Classification: **infrastructure** (spawns interpreters and builds; test-only; never
-> imported by the render path). HIGH tier (>= 90%). The referee must be stronger than
+> imported by the render path). HIGH tier (>= 90% kill rate — the Phase 6 mutation
+> target, not a P1 gate; OD-158). The referee must be stronger than
 > the refereed — weak machinery fake-passes parity (module-criticality).
 
 ### Decision: three-tier harness with a closed named exclusion list (AD-09)
@@ -117,7 +118,11 @@ input-hash: "431bb1a"
   table get no `PATH` key (ADV-P1-D05 resolution) — with no `PATH` key, CPython's
   subprocess fallback searches `os.defpath` (`/bin:/usr/bin`, SL:280), which is why
   the harness rejects an unseeded case with a truthy `session_id` unless a fake table
-  is declared (ADV-P2-D12; BC-6.02.003 PC-6).
+  is declared (ADV-P2-D12; BC-6.02.003 PC-6). Consumer status (pass-8 D10 /
+  orchestrator call 16): NO P1 corpus case declares a subprocess-fake table — the
+  OD-76 D1-D4 vectors are Go table tests (BC-3.02.002) — so the conditional fake-`PATH`
+  machinery has no P1 consumer; it is kept for the validator's rejection rule
+  (BC-6.02.003 PC-6) and later phases (BC-6.01.002).
   Forbidden on both OSes: NO other `PYTHON*` variable except `PYTHONPATH` (EC-002: no
   `PYTHONUTF8` on either OS — BC-1.01.008 inv 2: `PYTHONUTF8=1` is NOT
   the parity mode; `PYTHONIOENCODING` appears on Windows only, as the OD-183
@@ -148,7 +153,11 @@ input-hash: "431bb1a"
   990/991. Governing formula: limit = 999 − Python frames from `<module>` down to json's
   raw_decode (full table and per-site recipes: VP-006). A boundary measured
   under a different invocation does not transfer.
-- Metrics directed to an httptest fake via the typed settings translation (legacy gets
+- Metrics directed to a RAW `net.Listener` fake via the typed settings translation —
+  ARCH-03's TEST SEAM ruling (pass-7 C2-05, orchestrator call 9): NOT httptest, whose
+  server canonicalises headers into a map and trims values, so it can neither reproduce
+  urllib's header order nor send `Location: /x ` (ADV-P8-A10; sibling references in
+  dtu-assessment.md updated separately). (Legacy gets
   `DGX_SL_*` + `LOCAL_MODEL_PREFIXES`; Go gets the `HYLO_*` equivalents per OD-05;
   outside-domain values legal only in D4-EX-3 cases).
 
@@ -167,7 +176,7 @@ input-hash: "431bb1a"
 | Cache swap | `TestParityCacheSwap_FourCaches` |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
 | Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` (corpus root; OD-148, matching BC-6.02.001/.003, BC-6.04.003) |
-| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpn01..cpn03, cpo01..cpo11, cpa01..cpa05. SUBAGENT FAMILY RULE (pass-7 D14): a subagent-family case is identified by the case-id SUFFIX `-sub` on a base case (e.g. `row1-003-sub`), the marker BC-6.01.001/BC-6.02.003/BC-6.03.001 use ("id suffix `-sub`"); the grammar's `subagent` token denotes that suffix family, NOT a `<subagent>-<nnn>` spelling, so the validator's rule is the determinate suffix match |
+| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpt09 (the Windows-only CP-T09 MSVC localtime-domain family, pass-8 orchestrator call 2 — cpt08 is retired and not reused), cpn01..cpn03, cpo01..cpo11, cpa01..cpa05. SUBAGENT FAMILY RULE (pass-7 D14): a subagent-family case is identified by the case-id SUFFIX `-sub` on a base case (e.g. `row1-003-sub`), the marker BC-6.01.001/BC-6.02.003/BC-6.03.001 use ("id suffix `-sub`"); the grammar's `subagent` token denotes that suffix family, NOT a `<subagent>-<nnn>` spelling, so the validator's rule is the determinate suffix match |
 | Case contents | `stdin.json.tmpl`, `settings`, `argv` (pass-4 ruling, ADV-P4-A15/D09: the HANDLER-RELATIVE argument list — the elements after the `statusline` verb; default `[]`. In P1 the corpus validator admits only `[]` and `["--subagent"]`; the oracle receives `[python, -s, script]` plus the same list, so the oracle — which has no `statusline` verb — sees exactly the handler arguments. Other argv shapes are covered by Go table tests (BC-4.01.002), never parity. Supersedes the pass-3 "passed to the built `hylo` binary verbatim, default `["statusline"]`" wording and BC-4.01.002:111's "no flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps` (clock step + transcript appends per step, carried INSIDE `case.json` — pass-4 D10 — not as a sibling `steps.jsonl`) |
 | Exclusions file | `internal/statusline/testdata/parity/exclusions.json` (beside the corpus root; OD-148 layout, BC-6.03.003/.004 PC-1); capture replays additionally use a git-ignored `captures/exclusions.json` validated by the same closed-set rule, CI never runs captures (pass-4 D12) |
 | Tier B goldens | `internal/statusline/testdata/goldens/*.golden`, `*.windows.golden` |

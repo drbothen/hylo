@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.6"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "a673200"
+input-hash: "ea5b57b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -26,6 +26,7 @@ modified:
   - "1.3.4 2026-11-18: sync-check adv-p5 closure (SC-19) \u2014 version field aligned with the trailing modified entry; no behavioral change"
   - "1.3.5 2026-11-18: pass-6 remediation ADV-P6-C2-09 (Invariant 1 now actually names the KeyError site alongside the IndexError site \u2014 the v1.3.3 changelog claim was ahead of the invariant text) + ADV-P6-C2-15 (SC-19 entry redated 2026-11-19 \u2192 2026-11-18; timestamp aligned)"
   - "1.3.6 2026-11-18: pass-7 remediation ADV-P7-C2-06 (Invariant 1 crash sites corrected and completed: the IndexError is _norm_pt SL:655 for any short list point via the SL:335 comprehension, hist[-1] is always a dict post-normalization, and the TypeError sites SL:324/325/336 are named) + ADV-P7-C2-03 (VP-012 closure row for OD-160/EC-008)"
+  - "1.3.7 2026-11-18: pass-8 remediation ADV-P8-C2-04 (Invariant 1 crash-site list completed for good — five TypeError sites: the SL:356 fetch-failure ts subtraction and the SL:335 non-iterable-hist comprehension added to the three previously named; the SL:324 non-object consult fault noted)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,11 +80,17 @@ it is younger than KEEP_DEAD.
    raise IndexError. The typed sites are: IndexError at SL:655 inside `_norm_pt` (called
    from the SL:335 comprehension) for ANY history point that is a list shorter than 2 —
    anywhere in the list, not only the newest (BC-1.04.003 EC-009); KeyError at SL:337
-   when the newest kept point is a dict without `"t"` (BC-1.04.003 EC-008); and three
-   TypeError sites for non-numeric scalars — `fetch_ts` compared `>` a float at SL:324,
-   `ts` in the SL:325 `now - c.get("ts", 9999)` subtraction, and `t` in the SL:336 age
-   filter `now - p.get("t", 0)` (all foreign-cache shapes, exclusion id OD-160). Cache
-   write errors are swallowed.
+   when the newest kept point is a dict without `"t"` (BC-1.04.003 EC-008); and FIVE
+   TypeError sites for non-numeric scalars — `fetch_ts` compared `>` a float at SL:324;
+   `ts` in the SL:325 `now - c.get("ts", 9999)` subtraction (cached path); `hist` not
+   iterable at the SL:335 comprehension (`for p in c.get("hist", [])` raises
+   `TypeError` when the stored `hist` is a JSON `null` or a number — ADV-P8-C2-04); `t`
+   in the SL:336 age filter `now - p.get("t", 0)`; and `ts` in the SL:356
+   `now - c.get("ts", 0)` age subtraction on the FETCH-FAILURE path (a JSON `null` or
+   string `ts`; the SL:325 site covers only the cached path — ADV-P8-C2-04) (all
+   foreign-cache shapes, exclusion id OD-160). A cache whose top level is not an object
+   faults earlier still, at the SL:324 `c.get` consult (AttributeError, the CP-C01
+   class, BC-1.06.001 EC-001/EC-008). Cache write errors are swallowed.
 2. KEEP_DEAD is applied **only** on the fetch path (pinned quirk: inside a TTL window
    after a failed fetch an over-300 s sample renders stale instead of `◌ DGX ?`).
 3. A failed fetch never deletes the stored sample.

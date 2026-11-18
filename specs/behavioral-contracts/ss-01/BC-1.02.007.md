@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "5ecc7b2"
+input-hash: "c324f8c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:mix_labels (SL:1157-1174), mix_segment (SL:1177-1183)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): for-all percentage row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the composition glyph/colour mapping names its registry keys tools/conversation/thinking instead of the wildcard statusline.glyphs.* (Inv 2 and Config keys row); 2026-11-19T04:00:00Z"]
+modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): for-all percentage row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the composition glyph/colour mapping names its registry keys tools/conversation/thinking instead of the wildcard statusline.glyphs.* (Inv 2 and Config keys row); 2026-11-19T04:00:00Z", "1.2.1 pass-8 remediation (ADV-P8-B08): new Inv 4 pins the ` <1%` zero-bucket body as a named format constant, not config (D15); no behavioral change; 2026-11-19T08:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,6 +64,9 @@ Notation: `\e` is the byte 0x1B.
    `statusline.glyphs.tools`, `statusline.glyphs.conversation`, `statusline.glyphs.thinking`,
    colours from `statusline.theme.*`; defaults SL:1167).
 3. Rounding is half-even, never half-up: 12.5 → 12, 62.5 → 62.
+4. The ` <1%` body of a zero bucket (PC2) is a **named format constant** of this widget, not
+   config (D15 rationale: display-format constant of the output, parity-bound at four bytes;
+   why not config = no ruling mints a key for this site).
 
 ## Edge Cases
 

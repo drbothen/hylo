@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-19T07:00:00Z
+timestamp: 2026-11-19T21:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "5ad3cbc"
+input-hash: "93ef1cd"
 
 ---
 
@@ -45,7 +45,7 @@ flowchart LR
     T --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
     TB --> HL["gitleaks --log-opts=--all + category pattern scan"]
     HL --> J["report timing per leg, non-gating (OD-117)"]
-    COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07):<br/>go test -coverpkg=./internal/... — cross-package exercise<br/>(internal/parity driving internal/statusline) counts;<br/>enforces >= 95 percent line coverage (OD-158)"] --> REQ["required check-run `coverage`"]
+    COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07; same Tier A exclusion as the<br/>plain test step — no Python, timeout kept):<br/>go test -coverpkg=./internal/... over IN-PROCESS tests (OD-193:<br/>Tier A drives the built binary as a subprocess, which -coverpkg<br/>does not profile); >= 95 percent line coverage, S1/S5 packages (OD-158)"] --> REQ["required check-run `coverage`"]
     Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz, non-gating"]
 ```
 
@@ -76,18 +76,24 @@ flowchart LR
   `testdata/gen/*.py` under the pinned oracle, and confining the step to ubuntu keeps
   Python off the Windows leg's critical path — Windows consumes committed Tier B
   goldens, which need no interpreter.
-- **Coverage gate (OD-158, pass-4 A13; restructured pass-7 A07, orchestrator call 12):**
+- **Coverage gate (OD-158, pass-4 A13; restructured pass-7 A07, orchestrator call 12; gate
+  scope per OD-193 and Tier A exclusion per pass-8 orchestrator call 1):**
   coverage is its OWN JOB on ubuntu-24.04 — required checks bind to check-runs
   (jobs), and a step inside a 3-OS matrix job emits no `coverage` check-run — and it
-  produces the profile with `go test -count=1 -coverpkg=./internal/...` so CROSS-PACKAGE
-  execution counts: `internal/parity` exercising `internal/statusline` through the
-  referee contributes to the referee's covered lines. The job enforces **line coverage
-  >= 95 %** per package for `internal/statusline`, `internal/cost`,
-  `internal/pyfmt` and `internal/parity`. `internal/cost` IS gated: SS-01 comprises `internal/statusline` and
+  produces the profile with `go test -count=1 -coverpkg=./internal/...` over the SAME
+  Tier A exclusion the plain test step applies (the dedicated Tier A job is the one
+  authoritative run). The coverage job therefore installs NO interpreter (no Python
+  consumer) and keeps its 10-minute timeout: one run, one timeout. S1/S5 coverage comes
+  from IN-PROCESS tests only: Tier A drives the built binary as a subprocess, which
+  `-coverpkg` does not profile, so parity runs do NOT count toward statusline coverage
+  (OD-193 corrects the pass-7 A07 cross-package premise). The job enforces **line coverage
+  >= 95 %** per package for S1 — `internal/statusline` and `internal/cost` — and
+  S5 — `internal/pyfmt` (OD-158 stands unchanged per OD-193). `internal/cost` IS gated:
+  SS-01 comprises `internal/statusline` and
   `internal/cost` (ARCH-INDEX Subsystem Registry) and module-criticality.md classes it
-  CRITICAL by inheritance, so the "S1/S5" gate reading covers all three packages.
-  `internal/parity` joins the gate (pass-7 A09: R-004's P1 mitigation must name only
-  real gates — the referee is itself gated). The
+  CRITICAL by inheritance. `internal/parity` (S6) coverage is PROFILED AND REPORTED, not
+  gated — OD-193 withdraws pass-7 call 12's addition of `internal/parity` to the gate.
+  The
   mutation kill-rate targets stay Phase 6 targets (OD-158) — this gate is line coverage
   only. Designed behaviour; see cicd-setup.md for the landed-ci.yml lag note.
 - **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report — per corpus
@@ -138,10 +144,12 @@ flowchart LR
   - Pattern scan: `hygiene: K files scanned, H hits` — fails if `K == 0` (scan ran over
     nothing) AND if `H > 0` (a found hit is a failure, pass-3 A18), so the scan cannot
     pass while flagging hygiene terms.
-  - Coverage gate (pass-5 A16): `coverage: P packages profiled, min line coverage
-    M% >= 95` — fails if any of the three gated packages is ABSENT from the profile or
+  - Coverage gate (pass-5 A16; fail scope per pass-8 orchestrator call 1): `coverage: P packages profiled, min line coverage
+    M% >= 95` — fails if any gated package — `internal/statusline`, `internal/cost`,
+    `internal/pyfmt` — is ABSENT from the profile or
     reports `[no statements]` (a package trivially "passing" coverage by having no
-    statements is a failure, not a pass).
+    statements is a failure, not a pass); `internal/parity`'s figure is reported for
+    information and does not bind (OD-193).
   - Generated-table staleness (pass-5 A16): `generate: N generated paths checked,
     D regenerated` — fails if `N == 0` (a tree with zero `go:generate` directives
     checks nothing and must not pass) and if `D > 0`.
@@ -156,12 +164,13 @@ flowchart LR
   and from then on every activation of the job must satisfy its coverage line —
   `skip` on a required detector is investigated, not accepted.
   R-004 mitigation restated for P1 (pass-6 A17 adjudication inside call 13; corrected
-  pass-7 A09, orchestrator call 12): the
+  pass-7 A09, orchestrator call 12; gate scope per OD-193): the
   HIGH-impact fake-pass-parity risk is mitigated in P1 NOT by the HIGH kill-rate tier
   (a Phase 6 target, OD-158) but by THIS census discipline plus the >= 95 %
-  line-coverage gate, which now INCLUDES the referee's own package `internal/parity`
-  among the gated packages — the mitigation names only gates that exist; the
-  referee must demonstrably check something on every run; the
+  line-coverage gate over the gated packages (S1/S5, named above) — the mitigation
+  names only gates that exist; the referee must demonstrably check something on every
+  run (the Tier A census line), the refereed render path must be demonstrably exercised
+  by in-process tests, and the
   kill-rate tier takes over in Phase 6.
 
 ### Decision: gate on three OSes per change; release via GitHub Releases (AD-11)

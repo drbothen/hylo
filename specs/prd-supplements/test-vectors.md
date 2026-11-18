@@ -1,17 +1,18 @@
 ---
 document_type: test-vectors
 level: L3
-version: "1.6"
+version: "1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "fbe1339"
+input-hash: "109a0cc"
 traces_to: prd.md
 modified:
-  - "1.6 2026-11-19T12:00:00Z: pass-7 remediation — CP-N03 vector-row locator corrected (rows in BC-1.04.001 EC-013 and BC-1.04.005 EC-007; BC-1.04.004 carries the invariant only, C2-14); FromISOFormat table notes the CP-T09 Windows localtime-domain degrade rows (call 8/B03); no table bytes changed"
+  - "1.6 2026-11-19T12:00:00Z: pass-7 remediation — CP-N03 vector-row locator corrected (rows in BC-1.04.001 EC-013 and BC-1.04.005 EC-007; BC-1.04.004 carries the invariant — and, re-counted pass-8 C2-11, its own canonical CP-N03 row as well); FromISOFormat table notes the CP-T09 Windows localtime-domain degrade rows (call 8/B03); no table bytes changed"
+  - "1.7 2026-11-19T22:00:00Z: pass-8 remediation — OD-156 owner list gains BC-1.05.005 (EC-011, the SL:255 history-bearer raise site; A09); CP-N03 locator re-corrected: BC-1.04.004 also carries its own canonical CP-N03 vector row ({5: 1.0} → degraded), so the pass-7 'no vector row of its own' note is withdrawn (C2-11)"
 ---
 
 # Test Vectors: hylo P1 canonical golden tables
@@ -42,7 +43,7 @@ modified:
 | D4-EX-3 class vectors (one per key class + reason strings) | 1+ per class | BC-2.02.001..006, BC-2.01.003/.005 | spec-pinned (OD-114) |
 | Number-range extremes: int64-overflow and Duration-ceiling rows (OD-164) | 1+ per keyed site | BC-2.02.002 | spec-pinned (OD-164) |
 | Per-OS file-read encoding vectors — every file read as UTF-8 on all OSes; locale-decode differences ride exclusion id `OD-159` | vector set | transcript/cache BCs (BC-1.03.x, BC-1.06.x), BC-5.02.003 | spec-pinned (OD-159) |
-| OD-156 numeric-overflow vectors (CP-O01..O05, CP-O10/O11 stdin/metrics/cache-borne at render → 29-byte line; CP-O06..O08 transcript-borne → skip line, CP-O09 → legacy no-write save; CP-A04/A05 subagent conversions → 29-byte line; CP-N03 metrics-borne, SL:717) | 1+ per trigger — including an overflow (≥ 2**1024 − 2**970) row in each owning BC's table: pass-4 B04 restores the missing rows in BC-1.02.006/.011/.012/.014/.017/.020/.025 and names the CP-O id in the corresponding EC registers | BC-1.02.006/.011/.012/.014/.017/.020/.025, BC-1.03.005/.006/.007/.010/.016/.018, BC-1.04.001/.004/.005 (CP-N03 owners; the CP-N03 vector rows live in BC-1.04.001 EC-013 and BC-1.04.005 EC-007 — BC-1.04.004 carries the CP-N03 invariant with no vector row of its own, pass-7 C2-14), BC-1.05.007, BC-1.05.002 (CP-O11 co-owner), BC-1.06.001, BC-1.07.007 | spec-pinned (OD-156; register in error-taxonomy.md) |
+| OD-156 numeric-overflow vectors (CP-O01..O05, CP-O10/O11 stdin/metrics/cache-borne at render → 29-byte line; CP-O06..O08 transcript-borne → skip line, CP-O09 → legacy no-write save; CP-A04/A05 subagent conversions → 29-byte line; CP-N03 metrics-borne, SL:717) | 1+ per trigger — including an overflow (≥ 2**1024 − 2**970) row in each owning BC's table: pass-4 B04 restores the missing rows in BC-1.02.006/.011/.012/.014/.017/.020/.025 and names the CP-O id in the corresponding EC registers | BC-1.02.006/.011/.012/.014/.017/.020/.025, BC-1.03.005/.006/.007/.010/.016/.018, BC-1.04.001/.004/.005 (CP-N03 owners; the CP-N03 vector rows live in BC-1.04.001 EC-013, BC-1.04.005 EC-007 and BC-1.04.004's own canonical row — the sole-key `{5: 1.0}` → degraded case, pass-8 C2-11), BC-1.05.007, BC-1.05.005 (EC-011, the SL:255 history-bearer raise site; A09), BC-1.05.002 (CP-O11 co-owner), BC-1.06.001, BC-1.07.007 | spec-pinned (OD-156; register in error-taxonomy.md) |
 | `--subagent` / custom agent-panel row vectors (config off switch; legacy BC-SL-097 surface) | vector set | BC-1.07.001..008, BC-4.01.002 | spec-pinned (OD-155) |
 
 Escape convention: in vector cells, `\uXXXX` escapes (e.g. `\u200B`, `\u00A0`) denote that

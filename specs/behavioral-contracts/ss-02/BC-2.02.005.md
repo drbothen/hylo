@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:45:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "d6b1c84"
+input-hash: "e81b9f5"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy URL handling at legacy/dgx_statusline.py SL:73, SL:165-187)"
@@ -25,6 +25,7 @@ introduced: "0.1"
 modified:
   - "2026-11-19T04:40:00Z (1.2.1): ADV-P6 remediation D19 — PC-4 pins the empty-host test: Go's u.Host after net/url.Parse (a port-only form http://:8428 has Host == :8428, is accepted, and builds a query URL with an empty hostname), resolving the Hostname()-vs-Host ambiguity"
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D23 - Inv 1 and the VP row aligned to PC-4: acceptance is a non-empty u.Host; port-only http://:8428 qualifies with Hostname() empty"
+  - "2026-11-20T12:00:00Z (1.2.3): ADV-P8 residual sweep — Inv 2 drops the Go `Transport{Proxy: nil}` residue: the metrics client is a minimal HTTP/1.1 client over net.Conn with no proxy machinery at all (BC-1.04.001 PC1/PC2); wording only"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -76,8 +77,9 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
    the VP row with PC-4); reachability is not checked
    at load (an unreachable host yields the backend telemetry dead ladder at render, as in
    legacy).
-2. The metrics request bypasses proxy env (legacy SL:168; Go `Transport{Proxy: nil}`); not
-   part of this BC, stated for context.
+2. The metrics request bypasses proxy env (legacy SL:168): the metrics client is a
+   minimal HTTP/1.1 client over net.Conn with no proxy machinery at all (BC-1.04.001
+   PC1/PC2); not part of this BC, stated for context.
 
 ## Edge Cases
 

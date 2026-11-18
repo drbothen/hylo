@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "274da00"
+input-hash: "86e67c3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -35,6 +35,7 @@ modified:
   - "2026-11-19T16:00:00Z (1.2.9): sync-check adv-p6 closure (SC-27) — the dipping 1.2.3 stamp re-dated ascending and respelled to the sibling version-leading form; no behavioral change"
   - "2026-11-19T17:00:00Z (1.3.0): ADV-P7 remediation D15 - PC-3's Number-value enumeration is the exhaustive union of the BC-2.02.002/BC-2.02.003 exclusion lists: the formerly unstated float-accepted values 2_0, ٢, -inf, 99999999999999999999 (int64 overflow) and 9223372036.854776 (Duration ceiling) now render-and-write on the oracle leg under the standard two-legged asymmetry"
   - "2026-11-19T19:00:00Z (1.3.1): pass-7 residual remediation — cp-x03's dedicated table test named TestCPX03_WriteFailureExit0 (OD-145 provisional name settled; ADV-P7-B09; VP-003, VP-012 and BC-1.01.001 EC-005 agree); OD-159 rider citation corrected from BC-1.03.001 PC-3 (the stat-race postcondition, which never mentions OD-159) to its real home BC-1.02.004 TestGitTextReads_OD159_StrictUTF8, the closure-validated riding test (VP-012's OD-159 row corrected to match); no behavioral change"
+  - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation A2-05+D14 — OD-160 register riders corrected to the on-disk-verified anchors BC-1.02.017 EC-004..006 and BC-1.01.008 PC3 (the former EC-010/EC-011 pointed at the CP-O05 overflow row and a nonexistent row); PC-3 float-accepted enumeration respelled as the union of the float-accepted values in the BC-2.02.002/003 exclusion case lists AND edge cases (1e400 is BC-2.02.002 EC-004, not a named case)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -100,7 +101,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
    | `cp-x03` | OD-136 | degraded-line write itself fails (stdout closed); Go swallows the error and exits 0 where legacy CP-X03 exits 1 | BC-1.01.001 EC-005 (dedicated table test `TestCPX03_WriteFailureExit0` — the OD-145 provisional name settled; ADV-P7-B09) |
    | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01; rider: BC-1.02.004 riding table test `TestGitTextReads_OD159_StrictUTF8` — the deviation's defining UTF-8-read contract, ADV-P3-D19) |
-   | `OD-160` | OD-160 | foreign-cache shapes in the cache directories | stories owning the cache-store verbs (SS-01; riders: BC-1.02.017 EC-010, BC-1.01.008 EC-011 directional tests, ADV-P3-D19) |
+   | `OD-160` | OD-160 | foreign-cache shapes in the cache directories | stories owning the cache-store verbs (SS-01; riders: BC-1.02.017 EC-004..006, BC-1.01.008 PC3 directional tests, ADV-P3-D19; anchors verified on disk and corrected from EC-010/EC-011 by pass-8 A2-05 — EC-010 is the CP-O05 overflow row and BC-1.01.008 has no EC-011) |
    | `OD-161` | OD-161 | integer `transcript_path` → no transcript | stories owning the stdin path-field verbs (SS-01; rider: BC-1.03.015 PC-3 directional test, ADV-P3-D19) |
    | `OD-166` | OD-169 | cost-history bytes written after a refresh whose `usd` or `api_ms` could not convert to float (nothing else) | BC-1.05.004 (dedicated table test; VP-012 closure row per OD-169) |
    | `OD-181` | OD-181 | metrics transport beyond plain http: non-http(s) redirect targets (hylo: no sample) and TLS trust-store differences for https (hylo: OS trust store); parity cases use plain http only, table tests pin hylo's behaviour | BC-1.04.001 (dedicated table tests) |
@@ -151,7 +152,9 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    (corrected per value, ADV-P5-D04 / owner call 12; the BC's own canonical
    `config/ttl-nan` case previously pinned a crash real legacy does not perform). For
    those values the standard two-legged asymmetry applies, and the enumeration here is
-   the exhaustive union of the BC-2.02.002 and BC-2.02.003 exclusion lists (pass-7 D15:
+   the union of the float-accepted values in the BC-2.02.002 and BC-2.02.003 exclusion
+   case lists AND edge cases — BC-2.02.002's `1e400` is its EC-004 edge case, not a
+   named exclusion case (pass-8 D14) — (pass-7 D15:
    `2_0`, `٢`, the two range-miss values and `-inf` were formerly unstated). The
    Boolean, Enum and URL
    classes — and the float-accepted Number values — use the two-legged asymmetry; PC-3

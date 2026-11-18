@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "745f562"
+input-hash: "1c8a549"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "OD-30"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)", "1.3.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.4 2026-11-18: pass-5 remediation ADV-P5-C2-05 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD30_NumericSidStringKey)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)", "1.3.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.4 2026-11-18: pass-5 remediation ADV-P5-C2-05 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD30_NumericSidStringKey)", "1.3.5 2026-11-18: pass-8 remediation ADV-P8-C2-14 (Invariant 2 casing caveat: sid true's history key is JSON \"true\" but the session-cache file name is Python str()'s statusline-True.json — same file only on case-insensitive filesystems) + ADV-P8-C2-07 (row-2 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,7 +87,12 @@ works. Claude Code always sends string session ids, so this shape is non-product
 
 1. Exactly one cost-history key per session id in any Go-written file.
 2. The session-cache **file name** is unaffected by this rule and stays byte-exact
-   (`statusline-777.json`, BC-1.06.001).
+   (`statusline-777.json`, BC-1.06.001). Casing caveat (ADV-P8-C2-14): for sid `true`
+   the cost-history key is the JSON spelling `"true"` (PC1) while the session-cache
+   file name follows Python `str()`, giving `statusline-True.json` (capital T,
+   BC-1.06.001 PC4) — an implementer who reuses the PC1 string-form helper would write
+   `statusline-true.json` and diverge. The two names differ on case-sensitive (Linux)
+   filesystems but are the SAME file on case-insensitive ones.
 3. The deviation is visible only for non-string sids; string sids are byte-exact.
 
 ## Edge Cases
@@ -118,7 +123,7 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-020 | For any non-string hashable sid with no transcript present, Go output equals legacy output for `str_form(sid)` as a string sid (with a transcript legacy degrades on the numeric sid, CP-S14) | manual (paired oracle runs) |
-| VP-020 | No Go-written cost history contains a duplicate key | Go property test (testing/quick) |
+| VP-020 | No Go-written cost history contains a duplicate key | Go property test (testing/quick) (routed to the VP-020 property leg, pass-8 call 12) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-30` (numeric sid keyed by string form; one key per sid) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-30` entry and its riding table test `TestCostHistory_OD30_NumericSidStringKey`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability

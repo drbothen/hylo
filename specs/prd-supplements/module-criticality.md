@@ -1,14 +1,14 @@
 ---
 document_type: module-criticality
 level: ops
-version: "1.8"
+version: "1.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "0149ffc"
+input-hash: "109a0cc"
 traces_to: prd.md
 ---
 
@@ -35,7 +35,10 @@ oracles: metamorphic invariants plus spot-pins against the committed CPython tab
 **Gating schedule (OD-158):** the kill-rate targets in the table above are **Phase 6
 targets**, tracked by the formal hardening phase — they do not gate P1. The P1 exit gate
 for the module-critical modules (S1 Status Line, S5 Pyfmt) is **line coverage >= 95%**,
-asserted from the coverage report of the package `go test` runs. The 2026-11-17 owner
+asserted from the coverage report of the package `go test` runs. Gate scope is settled
+by OD-193 (owner 2026-11-18): S1 (`internal/statusline`, `internal/cost`) and S5
+(`internal/pyfmt`) only — `internal/parity` (S6) coverage is reported, not gated; the
+pass-7 widening of the gate to S6 is withdrawn. The 2026-11-17 owner
 rulings OD-155..OD-165 are settled constraints for this schedule.
 
 ## Module Inventory

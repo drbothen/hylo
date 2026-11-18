@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "6a5b563"
+input-hash: "4529a98"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1029-1034, 1096-1103, 1153)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02/C13) — dedup_memory range bounded to Int 1..65536 (upper bound labeled judgment call J, pass-5 A13/call 16, registry); PC5 qualifies duplicates-can-not-occur to caches hylo authored and carries foreign duplicate/non-list `ids` shapes as OD-160 table tests"]
+modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02/C13) — dedup_memory range bounded to Int 1..65536 (upper bound labeled judgment call J, pass-5 A13/call 16, registry); PC5 qualifies duplicates-can-not-occur to caches hylo authored and carries foreign duplicate/non-list `ids` shapes as OD-160 table tests", "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row for the PC5 foreign-`ids` legs (VP-012) mirroring sibling BC-1.03.015"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -118,6 +118,7 @@ serialized with Python `json.dumps` defaults, one per line. `u` = `{"input_token
 |--------|----------|-------------|
 | VP-029, VP-031 | Each truthy id contributes usage at most once per stored-window lifetime | Go property test (testing/quick) |
 | VP-029, VP-031 | `len(ids) ≤ N` and `ids` has no duplicates after every write | Go property test (testing/quick) |
+| VP-012 | The foreign-cached `ids` shapes of PC5 (duplicate-containing and non-list) ride the named deviation `OD-160`; covered by the exclusion-closure check over the `OD-160` entry and its riding table tests (ADV-P8-C03) | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability
 
@@ -150,6 +151,7 @@ S-TBD — transcript parser
 ## VP Anchors (Recommended)
 
 - VP-029, VP-031 — usage counted once per id
+- VP-012 — exclusion-closure cover for the named deviation `OD-160` (PC5 foreign-`ids` legs)
 
 ---
 

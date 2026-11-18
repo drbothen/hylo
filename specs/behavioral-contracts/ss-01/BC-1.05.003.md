@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r6.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "c7734db"
+input-hash: "7595210"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:626-636)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-4 residual sweep — key renamed to statusline.cost.display_floor_usd (OD-174)"]
+modified: ["1.3 2026-11-17: pass-4 residual sweep — key renamed to statusline.cost.display_floor_usd (OD-174)", "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the pick named as the config key statusline.glyphs.cost_pick with default ⛏, OD-189 sibling treatment)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,10 +66,13 @@ equivalent, unless that is below half a cent.
 
 1. `basis_ok` = `dgx_rate` is a number and `dgx_rate >= basis_min_mtok_month`, **and**
    `dgx_mtok` is a number and `dgx_mtok > 0` (SL:628-629).
-2. Not `basis_ok` → append exactly `\e[90m ⛏n/a\e[0m` (SL:631).
+2. Not `basis_ok` → append exactly `\e[90m ` + glyphs.cost_pick + `n/a\e[0m` (SL:631),
+   where `glyphs.cost_pick` = `statusline.glyphs.cost_pick` (Text, default `⛏` U+26CF,
+   KD-002, BC-2.01.004 PC-6; the ⛏ literals in the vectors are the default spelling,
+   ADV-P8-C2-01).
 3. `basis_ok` → `eq = tot * dgx_mtok / 1e6` (left-to-right double arithmetic, SL:633);
-   if `eq >= display_floor_usd` append `\e[90m ⛏` + F(eq, 2) + `\e[0m` (SL:634-635);
-   else append nothing (not `n/a`).
+   if `eq >= display_floor_usd` append `\e[90m ` + glyphs.cost_pick + F(eq, 2) + `\e[0m`
+   (SL:634-635); else append nothing (not `n/a`).
 4. The text is appended after `$` and any `$/h`, inside the same segment, with no
    separator (SL:636).
 

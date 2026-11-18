@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.5"
+version: "1.0.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "0d1940f"
+input-hash: "7ad8a24"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "new contract (OD-155 config off switch; no legacy counterpart)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format, "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,7 +41,7 @@ treats omitted rows as "keep the default body").
 ## Preconditions
 
 1. ASSUMPTION (ASSUMP-107-1): the Claude Code 2.1.326 `subagentStatusLine` stdin payload is assumed
-   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 3.
+   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 2 writes the S1.07 stories (OD-192).
    (With the switch off, compatibility does not matter — nothing is emitted.)
 2. Configuration resolved per BC-2.01.001; the key participates in the typed-boolean grammar
    (BC-2.02.00x classes) like every other `statusline.*` boolean.

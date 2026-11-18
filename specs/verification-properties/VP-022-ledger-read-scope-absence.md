@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-19T22:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-04-data-files.md, architecture/ARCH-09-reserved-boundaries.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "1c178bc"
+input-hash: "a0cd016"
 traces_to: prd.md
 source_bc: BC-1.04.001
 bcs: [BC-1.04.001, BC-1.01.009]
@@ -19,7 +19,8 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)", "1.4 2026-11-18T14:40:00Z: ADV-P4 fixes — the AST/imports lint leg gets a tracked owner (the ARCH-08 cicd-setup story that wires the lint job) and a POL-11 positive-coverage assertion (one planted ledger-opening mutant flagged + zero flags on the real tree, asserted in CI) (A2-17); BC-1.01.009 added to bcs: to match the body's partial-coverage claim, enumerated as a prose-only exception in VP-INDEX (A2-11); runStatusline call shape unified (A2-22)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-17) — the dangling '(see Propagation note)' pointer removed (the file has no such section; the lint-wiring lag is owned by the ARCH-08 cicd-setup story, named directly); the allowed path set's 'metrics caches' noun corrected — no metrics cache exists, the sample lives in the session cache (ENT-14)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)", "1.4 2026-11-18T14:40:00Z: ADV-P4 fixes — the AST/imports lint leg gets a tracked owner (the ARCH-08 cicd-setup story that wires the lint job) and a POL-11 positive-coverage assertion (one planted ledger-opening mutant flagged + zero flags on the real tree, asserted in CI) (A2-17); BC-1.01.009 added to bcs: to match the body's partial-coverage claim, enumerated as a prose-only exception in VP-INDEX (A2-11); runStatusline call shape unified (A2-22)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-17) — the dangling '(see Propagation note)' pointer removed (the file has no such section; the lint-wiring lag is owned by the ARCH-08 cicd-setup story, named directly); the allowed path set's 'metrics caches' noun corrected — no metrics cache exists, the sample lives in the session cache (ENT-14)", "1.6 2026-11-19T22:00:00Z: pass-8 fixes (ADV-P8-A2-14: DI-007 disposition respelled to OD-125's settled wording, 'adopted for now with a revisit flag', replacing 'permanent rule'; ADV-P8-A2-17: the primary-BC anchor note's stale '`Proxy: nil` transport' residue corrected to BC-1.04.001 PC1's minimal HTTP/1.1 client over a raw net.Conn, no http.Transport)"]
+
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,13 +67,15 @@ this label, not a fetch-parity property.
   a cross-cutting invariant whose enforcers are the SS-01 effect contracts
   (invariants.md names BC-1.01.009 and BC-1.04.001 as examples). The primary anchor is
   therefore **BC-1.04.001** (fetch_sample — the one contract defining a non-file input
-  edge beyond stdin/transcript/caches; `Proxy: nil` transport, D14-(b) precedent);
+  edge beyond stdin/transcript/caches; a minimal HTTP/1.1 client over a raw `net.Conn`,
+  no `http.Transport` — BC-1.04.001 PC1, the D14-(b) precedent in kind);
   BC-1.06.001 was a mis-anchor (it owns cache load/save, not read scope — ADV-P2-C05)
   and is removed from this VP. DI-007 (REVISIT P7, OD-125) remains the invariant under
   test.
 - **Partial coverage:** BC-1.01.009 (the render write set — the recording test observes
   opens against the same effect contracts).
-- **Invariant verified:** DI-007 in force (permanent rule with REVISIT P7, OD-125);
+- **Invariant verified:** DI-007 in force (adopted for now with a revisit flag; REVISIT
+  at P7, OD-125);
   ARCH-09 boundary rule 3 (Env read scope has no ledger seam).
 
 ## Property Class and Verification Method

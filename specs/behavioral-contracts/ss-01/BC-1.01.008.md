@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "3ee40d0"
+input-hash: "67b13d8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg", "1.2.3 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B13/B10): vector table merged (blank line removed); ARCH-03 anchor normalized to #statusline-guard", "1.2.4 2026-11-18T12:00:00Z: pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set ids", "1.2.5 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — 1.2.4 entry re-dated ascending (its stamp predated 1.2.3); no behavioral change", "1.2.6 pass-6 remediation (ADV-P6-B06 + OD-183 wording): new EC-007 pins raw encoded-surrogate bytes (ED A0 80) on stdin as invalid UTF-8 -> {} with an oracle-verified vector; PC2 adds the pyfmt code-point-iteration (never plain rune ranges) discipline for WTF-8 values; 2026-11-19T04:00:00Z"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg", "1.2.3 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B13/B10): vector table merged (blank line removed); ARCH-03 anchor normalized to #statusline-guard", "1.2.4 2026-11-18T12:00:00Z: pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set ids", "1.2.5 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — 1.2.4 entry re-dated ascending (its stamp predated 1.2.3); no behavioral change", "1.2.6 pass-6 remediation (ADV-P6-B06 + OD-183 wording): new EC-007 pins raw encoded-surrogate bytes (ED A0 80) on stdin as invalid UTF-8 -> {} with an oracle-verified vector; PC2 adds the pyfmt code-point-iteration (never plain rune ranges) discipline for WTF-8 values; 2026-11-19T04:00:00Z", "1.2.7 pass-8 remediation (ADV-P8-B04): OD-183 propagated — Description states UTF-8 stdio on every OS, the Windows oracle's `PYTHONIOENCODING=utf-8` variable and the stdio-encoding-only table test; new Inv 3; PC2 names the Windows-oracle variables; verification note qualifies the `LANG` pin as POSIX-leg (BC-1.02.004); Decisions row cites OD-183 and OD-190 (LF on every OS); 2026-11-19T08:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,14 +35,20 @@ removal_reason: null
 ## Description
 
 The status line reads stdin and writes stdout as strict UTF-8, matching the production locale (owner ruling (a):
-`LANG=en_US.UTF-8`, no UTF-8 mode, no surrogateescape). Invalid UTF-8 anywhere in stdin is a decode failure, so the
+`LANG=en_US.UTF-8`, no UTF-8 mode, no surrogateescape). By OD-183 hylo reads and writes UTF-8 on every OS; the Windows
+parity oracle gets exactly one extra variable, `PYTHONIOENCODING=utf-8` (stdio only; `PYTHONUTF8` stays forbidden),
+and a table test shows that variable changes stdio encoding only (BC-6.01.002). By OD-190 hylo writes LF line endings
+on every OS (UTF-8 + LF), and the Windows oracle's LF normalization is named beside `PYTHONIOENCODING=utf-8`, not
+hidden in the shim. Invalid UTF-8 anywhere in stdin is a decode failure, so the
 refresh renders from `{}` (BC-1.01.002). A rendered string that holds a lone surrogate (reachable only through a
 JSON `\uXXXX` escape) cannot be encoded at output and degrades the refresh (CP-S17), after all cache writes.
 
 ## Preconditions
 
 1. stdin bytes as delivered by Claude Code; configuration resolved.
-2. Parity mode is the strict column of P3r1 §A9; the harness pins legacy to it (BC-6.01.002).
+2. Parity mode is the strict column of P3r1 §A9; the harness pins legacy to it (BC-6.01.002). On Windows the oracle
+   runs with exactly one extra variable, `PYTHONIOENCODING=utf-8` (OD-183), plus the oracle's named LF normalization
+   (OD-190); the `LANG=en_US.UTF-8` pin is a POSIX-leg locale detail and has no effect on Windows (BC-1.02.004).
 
 ## Postconditions
 
@@ -67,6 +73,9 @@ JSON `\uXXXX` escape) cannot be encoded at output and degrades the refresh (CP-S
 1. No raw invalid byte is ever written to stdout.
 2. The surrogateescape behavior (`PYTHONUTF8=1` or C locale, which echoes `0xFF` back) is **not** the parity mode
    (CONTRA-3 resolved by owner ruling (a)).
+3. OD-183's `PYTHONIOENCODING=utf-8` changes stdio encoding only — a table test (BC-6.01.002) shows it never alters
+   the decode success/failure classes pinned in this contract (invalid stdin still fails, WTF-8 escapes still kept,
+   surrogates still degrade at output). By OD-190 hylo writes LF on every OS; no CRLF appears in any rendered row.
 
 ## Edge Cases
 
@@ -94,7 +103,8 @@ Config: defaults, `HYLO_STATUSLINE_ROWS=1`, git disabled, COLUMNS unset, empty c
 | `{"model":{"display_name":["\ud800"]}}` (list -> `repr`) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m['\ud800']\e[0m\n` (the six ASCII characters `\ud800` inside quotes; no degrade) | edge-case |
 | `{"x\ud800":1,"model":{"display_name":"Z"}}` (surrogate in an unrendered key) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mZ\e[0m\n` | edge-case |
 
-All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`), plus EC-004 (`\udcff` -> degraded).
+All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, a POSIX-leg pin — on Windows the oracle's codec
+is fixed by `PYTHONIOENCODING=utf-8` per OD-183, since `LANG` has no effect there), plus EC-004 (`\udcff` -> degraded).
 Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...\e[97mA` `FF` `B\e[0m\n`.
 
 ## Verification Properties
@@ -114,7 +124,7 @@ Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`main` (SL:1201-1206, 1234) |
 | Legacy contract | BC-SL-076 (new P3r1 §A9; strict mode ruled P3r2 §0 (a); index P3r4 §7.3); crash path CP-S17 |
-| Decisions | owner ruling (a) strict stdio; D4; OD-104/OD-109 (oracle and env from scratch) |
+| Decisions | owner ruling (a) strict stdio; D4; OD-104/OD-109 (oracle and env from scratch); OD-183 (UTF-8 stdio on every OS; Windows oracle gets `PYTHONIOENCODING=utf-8`; table test stdio-encoding-only); OD-190 (LF on every OS; Windows-oracle LF normalization named) |
 
 ## Related BCs (Recommended)
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.7"
+version: "1.3.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "fcee7c9"
+input-hash: "465db67"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
@@ -18,7 +18,18 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-08/09/13/14", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-04/05/10 (redirect loop detection; OverflowError catch; 1e400; key identity)", "2026-11-18 (v1.3.2) sync — Verification Properties row relabeled; VP-022 (partial: network edge only) now states its own property (the status line never reads the ledger, DI-007) instead of VP-030's differential-equivalence text", "2026-11-18 (v1.3.3) pass-4 remediation ADV-P4-C2-01/02 (overflow vector >= 2**1024 - 2**970; metric wrapper on the two-key vector), ADV-P4-C2-07 (37-hop worst case; normalized redirect key; rebuilt chain example), ADV-P4-C2-08 (URI header fallback), ADV-P4-C2-09 (Accept-Encoding: identity / DisableCompression), ADV-P4-C2-12 (CP-N03 named on EC-013)", "2026-11-18 (v1.3.4) pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)", "2026-11-18 (v1.3.5) pass-5 remediation ADV-P5-C2-01/02 (manual redirect loop: unconditional ErrUseLastResponse, hylo-driven hops, empty-Location self-redirect, quote safe=string.punctuation, urlunparse round trip), ADV-P5-C2-03 (userinfo metrics URL: dead rung, OD-180), ADV-P5-C2-04 (VP-030 scoped to body bytes over well-formed HTTP)", "2026-11-18 (v1.3.6) pass-6 remediation ADV-P6-C2-02/05/06/07/08/11/12 (empty-Location target = urljoin at the requesting hop's URL; minimal net.Conn HTTP/1.1 client with urllib's exact header set/order and compat32 header-value spaces; fetch-site JSON depth measured 992 accepted / 993 rejected; ftp and TLS deviations named under exclusion id OD-181; empty-fragment key drop)", "2026-11-18 (v1.3.7) pass-7 remediation ADV-P7-C2-01/02/04/08 (body framing = the http.client read ladder: chunked, then Content-Length, else EOF; compat32 header rule corrected to lstrip space/tab then rstrip CRLF — leading whitespace stripped too; http/https client versus plain-http parity corpus disentangled; the next GET drops the URL fragment) + ADV-P7-C2-03 (VP-012 closure row for OD-181) + ADV-P7-C2-09 (stale ARCH-03 line label corrected)"]
+modified:
+  - "2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-08/09/13/14"
+  - "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-04/05/10 (redirect loop detection; OverflowError catch; 1e400; key identity)"
+  - "2026-11-18 (v1.3.2) sync — Verification Properties row relabeled; VP-022 (partial: network edge only) now states its own property (the status line never reads the ledger, DI-007) instead of VP-030's differential-equivalence text"
+  - "2026-11-18 (v1.3.3) pass-4 remediation ADV-P4-C2-01/02 (overflow vector >= 2**1024 - 2**970; metric wrapper on the two-key vector), ADV-P4-C2-07 (37-hop worst case; normalized redirect key; rebuilt chain example), ADV-P4-C2-08 (URI header fallback), ADV-P4-C2-09 (Accept-Encoding: identity / DisableCompression), ADV-P4-C2-12 (CP-N03 named on EC-013)"
+  - "2026-11-18 (v1.3.4) pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)"
+  - "2026-11-18 (v1.3.5) pass-5 remediation ADV-P5-C2-01/02 (manual redirect loop: unconditional ErrUseLastResponse, hylo-driven hops, empty-Location self-redirect, quote safe=string.punctuation, urlunparse round trip), ADV-P5-C2-03 (userinfo metrics URL: dead rung, OD-180), ADV-P5-C2-04 (VP-030 scoped to body bytes over well-formed HTTP)"
+  - "2026-11-18 (v1.3.6) pass-6 remediation ADV-P6-C2-02/05/06/07/08/11/12 (empty-Location target = urljoin at the requesting hop's URL; minimal net.Conn HTTP/1.1 client with urllib's exact header set/order and compat32 header-value spaces; fetch-site JSON depth measured 992 accepted / 993 rejected; ftp and TLS deviations named under exclusion id OD-181; empty-fragment key drop)"
+  - "2026-11-18 (v1.3.7) pass-7 remediation ADV-P7-C2-01/02/04/08 (body framing = the http.client read ladder: chunked, then Content-Length, else EOF; compat32 header rule corrected to lstrip space/tab then rstrip CRLF — leading whitespace stripped too; http/https client versus plain-http parity corpus disentangled; the next GET drops the URL fragment) + ADV-P7-C2-03 (VP-012 closure row for OD-181) + ADV-P7-C2-09 (stale ARCH-03 line label corrected)"
+  - "2026-11-18 (v1.3.8) pass-8 remediation ADV-P8-C2-02 (followed-3xx body drained under the PC1 framing ladder before the next hop; a drain failure raises IncompleteRead and gives no sample with one fewer wire request), ADV-P8-C2-03 (chunked = the exact equality tr_enc.lower() == \"chunked\"; trailing-space and list values fall to Content-Length/EOF), ADV-P8-C2-13 (_MAXHEADERS = 100, the 65536-byte header-line limit, and the interim 1xx skip pinned), ADV-P8-C2-10 (ARCH-03 line anchors re-verified on disk: 187/270), ADV-P8-A2-17 (stale Transport{Proxy: nil} residue dropped from PC2)"
+  - "2026-11-18 (v1.3.9) pass-8 residual — Refactoring Notes seam respelled to the ARCH-03 TEST SEAM ruling: raw net.Listener fake in tests, not httptest"
+
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -78,10 +89,30 @@ is byte 0x1B.
    safe punctuation set); (c) an empty `Location` makes `http.Client` skip
    `CheckRedirect` entirely. Status line and headers are therefore parsed exactly as
    `http.client` does (compat32: `lstrip(' \t')` then `rstrip('\r\n')` — rule (a)
-   above). Body framing is `http.client`'s `HTTPResponse.read()` ladder, because legacy
-   `resp.read()` (SL:172) reads through `http.client`: (i) `Transfer-Encoding: chunked`
-   (case-insensitive) → the DE-CHUNKED concatenation, and chunked wins over a
-   `Content-Length` (RFC 2616 §4.4 #3 as coded in `HTTPResponse.begin`); (ii) else
+   above). The observable http.client header limits are parity behaviour, not
+   implementation detail (ADV-P8-C2-13; oracle-verified through urllib on CPython
+   3.11.7, 2026-11-18, one run each against a local listener): more than
+   `_MAXHEADERS` = 100 header lines raises `HTTPException` ("got more than 100
+   headers") → no sample; a header line longer than `_MAXLINE` = 65536 bytes raises
+   `LineTooLong` ("got more than 65536 bytes when reading header line") → no sample;
+   an INTERIM `1xx` response header block (e.g. `HTTP/1.1 100 Continue` with no body)
+   is SKIPPED — `HTTPResponse.begin` reads the next status line and the caller sees
+   the real response (oracle: a 100-block followed by a 200-block yields status 200
+   and the body). The constants 100/65536 are CPython stdlib class constants emulated
+   for parity — named constants in hylo with a "why not config" comment, not config
+   keys (P16). Body framing is `http.client`'s `HTTPResponse.read()` ladder, because
+   legacy `resp.read()` (SL:172) reads through `http.client`: (i)
+   `Transfer-Encoding: chunked` → the DE-CHUNKED concatenation, and chunked wins over
+   a `Content-Length` (RFC 2616 §4.4 #3 as coded in `HTTPResponse.begin`) — where
+   "chunked" means the EXACT equality `tr_enc.lower() == "chunked"` on the lowercased
+   compat32 value, NOT a trimmed or membership test: `Transfer-Encoding: Chunked␠`
+   (trailing space survives compat32) and `Transfer-Encoding: gzip, chunked` are both
+   NON-chunked — the body falls to the Content-Length/EOF ladders and the raw
+   chunk-size lines reach `json.loads` (there is no sample); oracle-verified CPython
+   3.11.7, 2026-11-18: `TE: Chunked␠` and `TE: gzip, chunked` each read the body
+   `3\r\n{"a\r\n4\r\n: 1}\r\n0\r\n\r\n` verbatim while `TE: chunked` reads
+   `{"a: 1}` (ADV-P8-C2-03, replacing the former "case-insensitive" wording — the
+   only case rule is the `.lower()` inside the exact equality); (ii) else
    `Content-Length` → exactly that many bytes (a value that fails `int()` or is negative
    is treated as ABSENT; a truncated body raises `IncompleteRead` → outer
    `except Exception` → no sample); (iii) else (neither header) → read to EOF
@@ -94,6 +125,17 @@ is byte 0x1B.
    urllib's default `HTTPRedirectHandler` (active because
    `build_opener(ProxyHandler({}))` keeps it, SL:168-171) — a 301/302/303/307/308 is
    followed by GET and the **final** body is parsed; other statuses are not redirected.
+   Followed-3xx body drain (ADV-P8-C2-02; CPython 3.11.7 `http_error_302`, oracle-verified
+   through urllib 2026-11-18): before opening the next hop, urllib DRAINS the body of a 3xx
+   it decides to follow (`fp.read(); fp.close()`) under the SAME http.client framing ladder
+   as above — the drain honours Content-Length, chunked and EOF framing. A drain failure
+   gives NO SAMPLE and, because the raise precedes the next hop, one FEWER wire request: an
+   oracle hop 1 announcing `Content-Length: 100` but sending 3 bytes then closing raises
+   `IncompleteRead(3 bytes read, 97 more expected)` with exactly ONE wire request observed
+   and no sample; a bad chunk line in the drained body and a no-length drained body held
+   open to the timeout raise the same way (outer `except Exception` → no sample). A client
+   that skips the drain and jumps straight to the next hop obtains a sample where legacy
+   obtains none.
    Header read (CPython 3.11.7 `http_error_302`, verified from the 3.11.7 stdlib source
    on 2026-11-17): the target is the first `Location` header, falling back to the first
    `URI` header when `Location` is absent; a 30x carrying neither header is returned
@@ -169,7 +211,11 @@ is byte 0x1B.
    way urllib does — the fetch fails to "no sample" (outer `except Exception`, SL:186) —
    and must never parse the refused 3xx body.
 2. Proxy environment variables are ignored for this request (legacy `ProxyHandler({})`,
-   SL:168; Go `Transport{Proxy: nil}`). Userinfo (OD-180, ADV-P5-C2-03): a metrics URL
+   SL:168): hylo's PC1 minimal client has NO proxy machinery at all — there is no
+   `http.Transport` to configure, and nothing in the dial path reads `HTTP(S)_PROXY`;
+   the connection goes directly to the metrics host (ADV-P8-A2-17 dropped the stale
+   `Transport{Proxy: nil}` spelling, a residue of the pre-pass-6 net/http design).
+   Userinfo (OD-180, ADV-P5-C2-03): a metrics URL
    carrying a `userinfo@` component (`http://u:p@192.0.2.10:8428`) reproduces legacy's
    dead rung — urllib hands `u:p@192.0.2.10` to `HTTPConnection` as the host, the name
    lookup fails, and the fetch is **no sample**; hylo must not strip the userinfo and
@@ -257,6 +303,9 @@ is byte 0x1B.
 | EC-019 | `value[1]` = `1e400` (bare JSON float literal) | `json.loads` decodes it to +Inf; `float(+Inf)` = +Inf → series stored (`{"x": +Inf}`) |
 | EC-020 | two series, `__name__` = string `"5"` and int `5` | both stored (distinct keys, insertion order); `json.dump` emits two `"5"` keys; the cache reload keeps the **last** (ADV-P3-C2-10) |
 | EC-021 | two series, both `__name__` = `NaN` | one shared NaN object → dict identity collides → first wins (ADV-P3-C2-10) |
+| EC-022 | followed 302 announces `Content-Length: 100`, sends 3 body bytes, closes; target 200 serves valid JSON | the drain of the 3xx body raises `IncompleteRead(3 bytes read, 97 more expected)` before the next hop → **no sample**, exactly ONE wire request observed (oracle-verified CPython 3.11.7, 2026-11-18, ADV-P8-C2-02) |
+| EC-023 | `Transfer-Encoding: Chunked␠` (trailing space) or `gzip, chunked`, chunked-style body, no `Content-Length` | NOT chunked (exact equality `tr_enc.lower() == "chunked"`); the raw chunk-size lines `3\r\n{"a\r\n4\r\n: 1}\r\n0\r\n\r\n` reach `json.loads` → **no sample**; bare `chunked` de-chunks to `{"a: 1}` (oracle-verified CPython 3.11.7, 2026-11-18, ADV-P8-C2-03) |
+| EC-024 | reply with 101 header lines / a 70,000-byte header line / a `100 Continue` block then a 200 block | >100 headers → `HTTPException` ("got more than 100 headers") → **no sample**; >65536-byte line → `LineTooLong` → **no sample**; interim 1xx skipped, caller sees status 200 and the body (oracle-verified CPython 3.11.7, 2026-11-18, ADV-P8-C2-13) |
 
 ## Canonical Test Vectors
 
@@ -289,7 +338,7 @@ is byte 0x1B.
 | L2 Capability | CAP-010 |
 | L2 Domain Invariants | DI-007, DI-008, DI-012 (metrics-URL D4-EX-3 deviation, BC-2.02.005; ftp/TLS transport deviations named under exclusion id OD-181, ADV-P6-C2-07/08) |
 | Decisions | OD-123 (metrics URL under backends[0]), OD-56 (timeout = total deadline), OD-57 E-0 (T-005), D14 (proxy bypass is defense in depth) |
-| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces — `MetricsClient` interface at line 183, `telemetry.go` in the file list at line 235) |
+| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces — `MetricsClient` interface at line 187, `telemetry.go` in the file list at line 270; line anchors re-verified on disk 2026-11-18, ADV-P8-C2-10) |
 | Stories | TBD (story-writer) |
 
 ## Related BCs (Recommended)
@@ -342,7 +391,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 
 #### Refactoring Notes
 
-Split into a `MetricsClient.Query` seam (I/O, `httptest` fake in tests) and a pure
+Split into a `MetricsClient.Query` seam (I/O, raw `net.Listener` fake in tests — not httptest, whose server canonicalises headers into a map and trims values; ARCH-03 TEST SEAM, ADV-P7-C2-05) and a pure
 `parseSample(body []byte) (Value, bool)` that carries the catch-list semantics. Timeout
 semantics differ by owner ruling OD-56: legacy's 1.5 s is per socket operation, Go's is
 a total deadline. The parity corpus never exercises timeouts (fake metrics failure

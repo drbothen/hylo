@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.11"
+version: "1.2.12"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "beda395"
+input-hash: "4529a98"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1149; raise sites SL:994, 1069, 1072, 1079, 1097, 1099, 1108, 1112, 1143, 1145)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-18T23:45:00Z (v1.2.9): pass-6 remediation (ADV-P6-C01/C10/C17) — Windows MSVC-domain naive-timestamp OSError propagated to Inv3 and the crash-path count (eleventh, OS-dependent degrade leg; BC-5.04.001 PC6); delete-the-line oracle PC4(a) counts each deleted line's terminator (\r\n 2 B, bare \r 1 B), not '+1 for its LF'; CP-T07 mutation column gains the timed user/system closer leg"
   - "2026-11-19T14:00:00Z (v1.2.10): pass-6 residual sweep — closed-set exclusion count restated to twelve ids with OD-181 (ADV-P6-C2-07/08; owner ruling OD-181)"
   - "2026-11-19T19:00:00Z (v1.2.11): pass-7 residual remediation (call 8/B03) — the eleventh, OS-dependent degrade leg named crash id CP-T09 (Windows MSVC localtime domain OSError on a naive transcript timestamp; CP-T08 retired; register 48 paths, T family 8) in the Description and invariant 3, with a PC3 table row marked as a degrade, not a skip; no behavioral change"
+  - "2026-11-19T23:59:00Z (v1.2.12): pass-8 remediation (ADV-P8-C03/C06; A2-07 call 12) — PC5 and the Exclusion-entry traceability row add the D4-EX-2 skip rows of BC-1.03.014 (single-line CP-T06) and BC-1.03.016 (T15) to the dedicated-test closure list; CP-O08's legacy raise-site cell states the SL:996 divide is unreachable at CP-O08 magnitudes (BC-1.03.010 EC-009); the delete-the-line fuzz row names VP-013's property-method home (pass-8 call 12)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -97,7 +98,7 @@ transcript-borne overflow skips the offending line AND drops the in-flight turn"
 | CP-T07 | not `cb`; `m.usage` is an object (even `{}`); `m.id` truthy and unhashable (array or object) | SL:1099 | with `ts_ok` and `assistant`: previous turn closed and `cur = {id: [..], …}` opened; with a **timed user or system line** (no `ts_ok`/type gate on SL:1099): the turn still closes (`lr = finish(cur, lr)`) and `lu` advances before the raise at SL:1099 (ADV-P6-C17); hylo applies none of these mutations |
 | CP-O06 | The line's numbers are all JSON numbers, yet a usage-accumulation step raises `OverflowError`: an exact int with \|value\| ≥ 2^1024 − 2^970 (CPython's int→double overflow bound; JSON admits ints up to 4,300 digits, and magnitudes below the bound — DBL_MAX ≈ 1.7976e308 included — convert silently, oracle-verified 2026-11-17) meets a float operand at **any** accumulation site (general rule, ADV-P4-C08: `tin` SL:1108, `c_in` SL:1109, `c_wr` SL:1110, `c_rd` SL:1111, `tout` SL:1112) | SL:1108-1112 | turn step (SL:1069-1087: previous turn closed via `lr = finish(cur, lr)`; opening assistant: `cur` opened for this line's id; continuation: `cur["t1"] = ts`; timed user/system closer: previous closed, `cur` → null), `lu` advanced for timed user lines; `seen_ids.add`/`recent_ids.append` (SL:1102-1103); the sums preceding the failing `+=` in `tin, c_in, c_wr, c_rd, tout` order (at the `tin` site none, at `tout` all four); `rb`/`pp` not reached. **hylo:** skip the line whole **and drop the in-flight turn** (OD-167) — no partial accumulation, `lr`/`lu` unchanged |
 | CP-O07 | Same overflow condition at the **rebuild-check** step (owner BC-1.03.007): SL:1117-1118 in either direction — a float `pp` carried from an earlier counted line meeting a huge exact int `_w` (the canonical leg; its own SL:1108 accumulation is int-only and overflow-free when `tin` is an int), **or a huge exact int `pp` meeting a float `prompt`** (mirror leg, ADV-P4-C08) | SL:1117-1118 | turn step (as CP-O06), `lu` for timed user lines, `seen_ids.add`/`recent_ids.append`, and **all five** accumulations `tin/c_in/c_wr/c_rd/tout` (they precede SL:1117 and succeed); `rb += 1` and `pp = prompt` are not reached. **hylo:** skip the line whole **and drop the in-flight turn** (OD-167) — `rb`/`pp` unchanged, `lr`/`lu` unchanged |
-| CP-O08 | Same overflow condition at the turn-machine steps: SL:994 `stale_factor × out / floor_tps` or SL:996 `out / span` with a huge exact int `out` (lazy: the raise surfaces while processing the **closer** line). **Deviation (ruling OD-167):** hylo skips the closer line **and drops the in-flight turn** (`cur` → null; `lr`, `lu` unchanged), so later lines parse normally — no sticky state (ARCH-03 `#transcript`) | SL:994, 996 | for the lazy `_finish_turn` sites: the closer line's own turn/lu bookkeeping (legacy keeps the bad turn open, so every later closer re-raises inside `finish` and is skipped too: new-id assistant lines, real user prompts and timed system/`compact_boundary` lines stop counting — totals freeze for the rest of the session) |
+| CP-O08 | Same overflow condition at the turn-machine steps: SL:994 `stale_factor × out / floor_tps` or SL:996 `out / span` with a huge exact int `out` (lazy: the raise surfaces while processing the **closer** line). **Deviation (ruling OD-167):** hylo skips the closer line **and drops the in-flight turn** (`cur` → null; `lr`, `lu` unchanged), so later lines parse normally — no sticky state (ARCH-03 `#transcript`) | SL:994 (the SL:996 divide is unreachable at CP-O08 magnitudes — the SL:994 multiply raises first; BC-1.03.010 EC-009) | for the lazy `_finish_turn` sites: the closer line's own turn/lu bookkeeping (legacy keeps the bad turn open, so every later closer re-raises inside `finish` and is skipped too: new-id assistant lines, real user prompts and timed system/`compact_boundary` lines stop counting — totals freeze for the rest of the session) |
 | CP-T09 | **Not a W-predicate — degrade leg, not a skip** (legacy degrades; hylo reproduces the degrade, invariant 3): a naive transcript timestamp whose `LocalToUnix` probe leaves MSVC's domain — on or before 1970-01-01, or year 3001 or later, at any of the four conversion probes t, u1, u1−86400, u2 (owner call 8) | `_iso_ts` SL:983-985 (catches `ValueError` only, so the `OSError` escapes; `ErrLocaltimeDomain`) | **not a skip** — the whole line degrades exactly as legacy (BC-5.04.001 PC6); no mutation to suppress and no skip effect to license |
 
 4. **Equivalence oracle:** hylo on transcript T yields the same mix cache and render as legacy on T with the skipped
@@ -112,8 +113,9 @@ transcript-borne overflow skips the offending line AND drops the in-flight turn"
    hylo dropped (timestamped CP-O06/O07 vectors in BC-1.03.006/.007 settle exactly this in `lr`).
 5. **Exclusion:** every input that triggers a predicate is listed in the parity harness's named exclusion list
    (OD-105/OD-110), entry id `D4-EX-2`, file `internal/statusline/testdata/parity/exclusions.json`; each entry names
-   its expected output file and its dedicated table test (BC-1.03.019). An entry without a test fails the harness; no
-   globs. CP-O06..O08 entries additionally cite ruling `OD-156`.
+   its expected output file and its dedicated table test (BC-1.03.019 for the CP-T legs; the D4-EX-2 skip rows of
+   BC-1.03.014 — single-line CP-T06 — and BC-1.03.016 — T15 — carry their own dedicated rows, ADV-P8-C03). An entry
+   without a test fails the harness; no globs. CP-O06..O08 entries additionally cite ruling `OD-156`.
 
 ## Invariants
 
@@ -157,7 +159,7 @@ BC-1.03.010 (CP-O08); the CP-O06/O07 legs are timestamped so the OD-167 in-fligh
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-029, VP-013 | For every W-line, parser state after = state before (bit-identical) | Go property test (testing/quick) with generated W-lines per CP |
-| VP-029, VP-013 | Delete-the-line equivalence holds on random transcripts with injected W-lines, modulo the OD-167 exception of PC4(b): at each overflow skip the post-skip state additionally includes `cur` → null (the open turn discarded, never finished) | fuzz (oracle on the transcript with W deleted, state-adjusted per PC4(b)) |
+| VP-029, VP-013 | Delete-the-line equivalence holds on random transcripts with injected W-lines, modulo the OD-167 exception of PC4(b): at each overflow skip the post-skip state additionally includes `cur` → null (the open turn discarded, never finished) | fuzz (oracle on the transcript with W deleted, state-adjusted per PC4(b); the property method lives in VP-013 — pass-8 call 12) |
 | VP-012 | Postcondition 5 closure: every predicate-triggering input is a named D4-EX-2 exclusion entry carrying its own expected-output file and dedicated table test; no globs | repository test over `exclusions.json` |
 
 ## Traceability
@@ -169,7 +171,7 @@ BC-1.03.010 (CP-O08); the CP-O06/O07 legs are timestamped so the OD-167 in-fligh
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1059-1149), _finish_turn (SL:988-996); raise sites as tabulated |
 | Legacy contract | BC-SL-098 (pass-3 r2 §A6; refined r3); replaces BC-SL-068 (sticky crash) |
 | Parity class | **D4-EX-2** (approved deviation, owner ruling Q-c 2026-11-14) |
-| Exclusion entry | OD-105 / OD-110 named list, id `D4-EX-2`; CP-O06..O08 entries cite ruling `OD-156` (there is no exclusion id `OD-156`; the closed set is now twelve ids incl. `OD-166` and `OD-181` (OD-169, OD-181)); dedicated tests = BC-1.03.019 (21 rows, CP-T legs) + the CP-O06..O08 vector rows in BC-1.03.006, BC-1.03.007, BC-1.03.010 + BC-1.03.020 rows (DI-012) |
+| Exclusion entry | OD-105 / OD-110 named list, id `D4-EX-2`; CP-O06..O08 entries cite ruling `OD-156` (there is no exclusion id `OD-156`; the closed set is now twelve ids incl. `OD-166` and `OD-181` (OD-169, OD-181)); dedicated tests = BC-1.03.019 (21 rows, CP-T legs) + the CP-O06..O08 vector rows in BC-1.03.006, BC-1.03.007, BC-1.03.010 + BC-1.03.020 rows (DI-012) + the D4-EX-2 skip rows of BC-1.03.014 (single-line CP-T06) and BC-1.03.016 (T15) (ADV-P8-C03) |
 | Confidence note | M — predicates must leave no partial mutation (design §8) |
 | Architecture Module | `internal/statusline/transcript_wshape.go` |
 | Stories | S-TBD |

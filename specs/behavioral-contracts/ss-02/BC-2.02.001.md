@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:30:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "8c07e45"
+input-hash: "56a3705"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.4): sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
   - "2026-11-19T04:35:00Z (1.2.5) ADV-P6 remediation D12+D13+D14 — PC-6 [from] tie-break restated to ADV-P5-D31 (lexicographically smallest FIELD, no registry order); Refactoring Notes seam restated: Load receives the environment only through platform.EnvVars (call 9), never a raw Go map; class-count paragraph scoped to the parity half (five TestD4EX3 members; theme rejected by the validator; TestD4EX3_Text is a Go table test backing no parity entry; Text reasons minted in BC-2.01.005/2.02.003 with no separate class contract)"
   - "2026-11-19T17:30:00Z (1.3.0): ADV-P7 remediation D02+D03 (orchestrator call 6) - canonical vocabulary completed: the pass-6 strings (ascending pair violated (k_from <= m_from); expected non-empty control-free text in every entry) homed byte for byte; cost.percentiles gets its OWN ascending-pair reason (p75 <= p95); glyph reasons corrected per OD-184 to expected exactly 1 code point / expected exactly 8 code points (sparkline); control character maps to the Text class for non-theme free text and List entries; NEW normative section 'Numeric-range failures by type' pins the Int/Float/composite reason mapping with the BC-2.02.002 precedence"
+  - "2026-11-19T21:00:00Z (1.3.1): ADV-P8 remediation D04+D05+D17 + A2-07 BC rows - `control character` row example corrected (the reroute-all entry range supersedes: a reroute entry yields `expected non-empty control-free text in every entry` per BC-2.01.004 PC-9, so the List-entry example is a model_prefixes item); Text-class minting list drops BC-2.02.003 (number-grammar only); `expected ...` count five -> six; PC-6 [from] tie-break pinned for Windows case twins (byte-exact supplied-name comparison, winner's spelling printed) and index != 0 P1-field values ruled validated per class (per-key error precedes the structural cardinality error); VP-table for-all env-map legs annotated as carried by VP-016 (pass-8 call 12)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,7 +88,13 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
    tie-broken by the lexicographically smallest `<FIELD>` name byte-exact — non-P1 fields
    have no registry order, ADV-P5-D31; ADV-P6-D12, e.g. `HYLO_BACKENDS_1_METRICS_URL` — the `EnvName`
    of the key alone does not fit these entries, ADV-P3-D32); no `[from ...]` suffix when
-   the failing value came from the defaults layer. stderr is not part of the parity
+   the failing value came from the defaults layer. Windows case twins (pass-8 D17):
+   the tie-break compares the `<FIELD>` names BYTE-EXACT AS SUPPLIED — uppercase bytes
+   sort below lowercase, so of two entries whose names differ only in case the
+   uppercase spelling wins — and the printed `<ENVNAME>` is the winning variable's
+   name exactly as supplied (mixed case preserved); on POSIX a lowercase spelling is
+   not a `HYLO_*` variable at all (BC-2.01.001 PC-6), so case twins arise only through
+   the seam's injected test double. stderr is not part of the parity
    comparison; it is asserted by Go table tests only.
 7. **No side effects:** no file under the cache directory (`paths.cache_dir`, OD-101) is
    created, modified, renamed or deleted, and the directory itself is not created; no
@@ -113,7 +120,7 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 | `scheme must be http or https` | URL | BC-2.02.005 |
 | `not a URL` | URL | BC-2.02.005 |
 | `missing host` | URL | BC-2.02.005 |
-| `control character` | URL / theme / Text | BC-2.02.005 (URL class), BC-2.01.003 (theme class), BC-2.01.005 (TEXT class: a control byte in a non-theme free-text key or List entry — e.g. `statusline.subagent.joiner` or a `statusline.lane.reroute_all_prefixes` entry; OD-178, pass-6 A14) |
+| `control character` | URL / theme / Text | BC-2.02.005 (URL class), BC-2.01.003 (theme class), BC-2.01.005 (TEXT class: a control byte in a non-theme free-text key or List item — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; a `statusline.lane.reroute_all_prefixes` entry instead yields `expected non-empty control-free text in every entry`, BC-2.01.004 PC-9 superseding per pass-8 D04; OD-178, pass-6 A14) |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `empty path` | path | BC-2.01.005 |
 | `home directory unknown` | path | BC-2.01.005 |
@@ -137,11 +144,12 @@ theme has none (theme settings are rejected by the corpus validator, so no parit
 exist) and Text's parity half is the GO TABLE TEST ONLY — `TestD4EX3_Text` backs no parity
 exclusion entry (Text keys have no legacy analog). Dedicated CLASS CONTRACTS exist for the
 numeric/enum/URL/theme/boolean classes (BC-2.02.002..006); the Text class's reasons are
-minted in BC-2.01.005, BC-2.01.004 (List entries) and BC-2.02.003 with no separate
-BC-2.02.00x contract (OD-178 disposition).
+minted in BC-2.01.005 and BC-2.01.004 (List entries) with no separate
+BC-2.02.00x contract (OD-178 disposition; pass-8 D05: BC-2.02.003 mints only
+number-grammar reasons).
 The Text class carries the composite-shape, pill-label, glyph, List-entry and empty-text
-errors: the five `expected ...` reasons in the table above (pass-7 D02 added the
-List-entry reason). The
+errors: the six `expected ...` reasons in the table above (pass-7 D02 split the glyph
+reason in two and added the List-entry reason). The
 `path` and `backends` columns above are reason categories without dedicated class contracts;
 their reasons map to the raising contracts (BC-2.01.005, BC-2.01.002), and `control
 character` maps to the URL class when raised by BC-2.02.005 and to the theme class when
@@ -230,9 +238,9 @@ every registered numeric-range miss in P1 has exactly one reason string.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-016, VP-012 (frontmatter closure) | For every env map, stdout is either the config-error line (exactly one LF, ending `\e[0m\n`) or not; exit is always 0 | Go property test (testing/quick) (Go fuzz over env maps) |
+| VP-016, VP-012 (frontmatter closure) | For every env map, stdout is either the config-error line (exactly one LF, ending `\e[0m\n`) or not; exit is always 0. VP-016 carries this for-all env-map property leg per pass-8 call 12 (A2-07) | Go property test (testing/quick) (Go fuzz over env maps) |
 | VP-016, VP-012 (frontmatter closure) | A config-error run leaves the cache directory byte-identical (snapshot before/after) | table test |
-| VP-016, VP-012 (frontmatter closure) | statusline prints the config-error line iff `config validate` exits non-zero | Go property test (testing/quick) |
+| VP-016, VP-012 (frontmatter closure) | statusline prints the config-error line iff `config validate` exits non-zero. VP-016 carries this property leg per pass-8 call 12 (A2-07) | Go property test (testing/quick) |
 
 ## Traceability
 

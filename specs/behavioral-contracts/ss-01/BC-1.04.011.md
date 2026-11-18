@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "12ee8f9"
+input-hash: "5f0276f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:801-820)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.watts with default ⚡, OD-189 sibling treatment)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,7 +48,9 @@ wall estimate `·<wall>W` carrying the color (red above 95 %, yellow above 80 % 
 1. Segment exists only if `w is not None`.
 2. `wc` = `"\e[31m"` if `wall > 1520`, `"\e[33m"` if `wall > 1280`, else `"\e[97m"`,
    evaluated only when `wall` is truthy; otherwise `"\e[97m"`.
-3. `txt = "\e[97m⚡" + F(w,0) + "W\e[0m"`.
+3. `txt = "\e[97m" + glyphs.watts + F(w,0) + "W\e[0m"`, where `glyphs.watts` =
+   `statusline.glyphs.watts` (Text, default `⚡` U+26A1, BC-2.01.004 PC-6; the ⚡
+   literals in the vectors are the default spelling, ADV-P8-C2-01).
 4. If `wall` truthy: `txt += "\e[90m·\e[0m" + wc + F(wall,0) + "W\e[0m"`.
 5. If `t is not None`: `txt += "\e[90m " + F(t,0) + "°\e[0m"`.
 6. If `wall` and `rate_c` both truthy: `txt += "\e[90m " + F(wall / 1000 * rate_c * 100, 0) + "¢/h\e[0m"`

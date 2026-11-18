@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.2.11"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T22:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "8d8509c"
+input-hash: "9aa66bc"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -34,6 +34,8 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.7): sync-check adv-p5 closure (SC-15) — 1.2.6 entry requoted single-quoted (the Windows path-escape spelling is not a YAML double-quoted-scalar escape); no behavioral change"
   - "2026-11-19T03:20:00Z (1.2.8): ADV-P6 remediation D05 / orchestrator call 3 — PC-8 gains the OD-76 disposition: the difference-table rows (America/Chicago repeated-DST hour, identical-row epochs) close the exclusion as Go table tests, never parity corpus cases; the corpus validator keeps rejecting non-UTC tz, so the corpus stays UTC-only"
   - "2026-11-19T17:00:00Z (1.2.9): ADV-P7 remediation D14+D17 - subagent cases identified by the ARCH-07 `subagent` case-id family (the -sub shorthand noted as the same family), not a bare id suffix; stale 'architect to align ARCH-07' note closed (ARCH-07:135 already aligned); provenance SL:92 corrected to SL:89 (SL:92 is a comment); PC-8 LocalZone legs gain `empty` (five legs, BC-3.01.001 PC-6)"
+  - "2026-11-19T21:00:00Z (1.2.10): ADV-P8 remediation D10 — PC-8 OD-76 closure widened: no D1-D4 corpus case at all (corpus UTC-only), matching BC-3.02.002 and orchestrator call 16"
+  - "2026-11-20T12:30:00Z (1.2.11): pass-8 residual (C2-05 seam) - the metrics fake respelled: one fake VictoriaMetrics server per case is a raw net.Listener fake (DTU-3), not httptest, whose server canonicalises headers into a map and trims values; serving both sides unchanged"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -135,7 +137,7 @@ directory.
    (BC-6.03.004). Examples: TTL `nan`, `4_0`, an unknown trace. Otherwise the harness
    fails with `parity: case <name>: <key>=<value> outside Go domain without D4-EX-3
    exclusion`.
-5. **Metrics source.** One fake VictoriaMetrics server (`httptest`, DTU-3) per case
+5. **Metrics source.** One fake VictoriaMetrics server (raw `net.Listener` — not httptest, whose server canonicalises headers into a map and trims values; DTU-3) per case
    serves both sides:
    - legacy reaches it through `DGX_SL_VM_URL`;
    - Go reaches it through `backends[0].metrics_url`;
@@ -170,8 +172,9 @@ directory.
    (BC-3.02.002 Pre-3, CTV) — close the exclusion as GO TABLE TESTS run under
    `TZ=America/Chicago`, never parity corpus cases (orchestrator call 3, ADV-P6-D05):
    the repeated DST hour cannot exist in UTC, the corpus validator rejects non-UTC
-   `tz` values, so the OD-76 closed-set entry's parity half carries no D1 case and the
-   corpus stays UTC-only.
+   `tz` values, so the OD-76 closed-set entry's parity half carries NO D1-D4 case at all
+   (widened from "no D1 case" by pass-8 D10 / orchestrator call 16 — D2-D4 work under UTC
+   but never enter the corpus either) and the corpus stays UTC-only.
 
 ## Invariants
 

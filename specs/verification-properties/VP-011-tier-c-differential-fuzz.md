@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
 timestamp: 2026-11-19T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "1ccf916"
+input-hash: "c56cae2"
 traces_to: prd.md
 source_bc: BC-6.04.003
 bcs: [BC-6.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — property reclassified from liveness to safety (bounded-budget observation: every observed divergence carries a closed-set exclusion id); BC-6.04.003:65-67 domain filter (seeded proc_start, no numeric sids) enforced in the generator; the generator seed is logged for reproduction (A2-26)", "1.4 2026-11-18: ADV-P4 pass-4 fix — RK-2 disposition recounted from the taxonomy's declared ranges: 47 catalogued crash paths (CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4+17+7+3+11+5), agreeing with gene-transfusion-assessment.md; foreign-cache shapes are OD-160, not a CP family", "1.5 2026-11-18T23:45:00Z: ADV-P5 fix (A2-09, plan call 17) — resolved the VP-011↔VP-012 contradiction: Tier C generators exclude every ruled-class input BY CONSTRUCTION (each constraint named after its closed-set id and table-tested in that id's rider table); any observed divergence fails; isClosedExclusion runtime classifier removed; per-case machinery stays in VP-012", "1.6 2026-11-19T12:00:00Z: pass-6 fixes (A2-11: stale every-divergence-carries-an-id passage respelled to the 1.5 rule (generator exclusion by construction); compared-case counter with a zero-comparison red (P11))", "1.7 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-30) — live Partial-coverage recount mirrors the pass-7 register: 48 paths (4+17+8+3+11+5), CP-T09 minted / CP-T08 retired; the 1.4 history entry keeps its as-of-pass-4 figures"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — property reclassified from liveness to safety (bounded-budget observation: every observed divergence carries a closed-set exclusion id); BC-6.04.003:65-67 domain filter (seeded proc_start, no numeric sids) enforced in the generator; the generator seed is logged for reproduction (A2-26)", "1.4 2026-11-18: ADV-P4 pass-4 fix — RK-2 disposition recounted from the taxonomy's declared ranges: 47 catalogued crash paths (CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4+17+7+3+11+5), agreeing with gene-transfusion-assessment.md; foreign-cache shapes are OD-160, not a CP family", "1.5 2026-11-18T23:45:00Z: ADV-P5 fix (A2-09, plan call 17) — resolved the VP-011↔VP-012 contradiction: Tier C generators exclude every ruled-class input BY CONSTRUCTION (each constraint named after its closed-set id and table-tested in that id's rider table); any observed divergence fails; isClosedExclusion runtime classifier removed; per-case machinery stays in VP-012", "1.6 2026-11-19T12:00:00Z: pass-6 fixes (A2-11: stale every-divergence-carries-an-id passage respelled to the 1.5 rule (generator exclusion by construction); compared-case counter with a zero-comparison red (P11))", "1.7 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-30) — live Partial-coverage recount mirrors the pass-7 register: 48 paths (4+17+8+3+11+5), CP-T09 minted / CP-T08 retired; the 1.4 history entry keeps its as-of-pass-4 figures, "1.8 2026-11-19T22:00:00Z: pass-8 fix (ADV-P8-A2-18) - the statement names the OD-190 Windows-oracle stdio normalization normatively (oracle-side stdout CRLF->LF before stepwise byte comparison on Windows, named openly per VP-009's Tier A wording), closing the sibling gap where Tier C ran the oracle on Windows without naming the normalization VP-009 names openly""]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,6 +42,12 @@ closed-set id and table-tested in that id's rider table — so any observed dive
 a failure and the harness cannot excuse one (no runtime classifier, plan call 17,
 ADV-P5-A2-09; per-case machinery stays in VP-012). Budget 0 skips (PR legs); the
 nightly workflow sets `HYLO_PARITY_FUZZSECONDS=1800` (30 minutes per OS, OD-149).
+Because the nightly extends to all three OSes, the comparator applies the owner-ruled
+Windows-oracle stdio normalization openly, exactly as VP-009 names it for Tier A
+(OD-190, extending OD-183): the WINDOWS oracle's stdout is normalized to LF — legacy's
+Windows text-mode `print()` emits CRLF, SL:1234, while hylo reads and writes UTF-8 + LF
+on every OS — before stepwise byte comparison; the normalization is a named harness
+step, never a hidden shim, and is applied to the oracle side only.
 
 ## Source Contract
 

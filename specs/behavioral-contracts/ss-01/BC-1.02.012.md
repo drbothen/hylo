@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5"
+version: "1.5.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5ca0c29"
+input-hash: "f9f5fe0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:523-530)"
@@ -22,6 +22,7 @@ modified:
   - "1.3 pass-4 remediation (ADV-P4-B04): EC-012 names CP-O02 and states the exact int->float threshold; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
   - "1.4 pass-5 remediation (ADV-P5-B05): EC-012 scoped to huge positive resets_at; new EC-013 pins the huge-negative behavior — window hidden at SL:513-514 before the SL:515 subtraction, no countdown, no degrade (oracle-verified, BC-1.02.011 EC-011); 2026-11-18T05:42:56Z"
   - "1.5 pass-6 remediation (ADV-P6-B02 + B16): EC-013 re-vectored from −10³⁰⁰ to −OV (negated EC-012 boundary, discriminating); history labels version-prefixed; 2026-11-19T04:00:00Z"
+  - "1.5.1 pass-8 remediation (ADV-P8-B08/B10): new Inv 4 pins the `->` countdown prefix as a named format constant, not config (D15); EC-013's hiding mechanism cited precisely — SL:510 widget drop for the canonical 5h-absent vector, SL:513-514 per-window continue when the other window is reported; 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -68,6 +69,9 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 2. Units 86400 / 3600 / 60 are time-unit constants, not configuration.
 3. Rationale for 1.15 (D15, T-035): owner judgment, OD-57 E-A — "15 % slack before a reset
    time counts as bogus".
+4. The `->` prefix of PC3 is ASCII hyphen-minus + greater-than — a **named format constant** of this
+   widget, not config (D15 rationale: display-format constant of the output, parity-bound at two
+   bytes; why not config = no ruling mints a key for this site).
 
 ## Edge Cases
 
@@ -85,7 +89,7 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 | EC-010 | rem NaN (`resets_at` NaN) | gate false → no countdown, absolute bands (pass-3 r1 BC-SL-061) |
 | EC-011 | float dividends near unit boundaries | must match CPython `float_divmod` exactly (reason for confidence M) |
 | EC-012 | `resets_at` a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 **on the positive side** (oracle-verified 2026-11-17; e.g. 10³⁰⁹) | `rem = reset - now` raises OverflowError at SL:515 before any gate → guard line (stdin-borne render overflow, OD-156; same site as BC-1.02.011 EC-010; taxonomy **CP-O02**) |
-| EC-013 | `resets_at` a huge **negative** JSON integer at the EC-012 magnitude, e.g. −OV = −(2**1024 − 2**970) (pass-6 ADV-P6-B02: re-vectored from the former −10³⁰⁰, which converted cleanly to float and discriminated nothing; see BC-1.02.011 EC-011) | no countdown, no degrade: SL:506 marks the window passed (exact int/float compare, no conversion), so pct = None and the window is hidden at SL:513-514 before SL:515's subtraction (oracle-verified 2026-11-17, BC-1.02.011 EC-011) |
+| EC-013 | `resets_at` a huge **negative** JSON integer at the EC-012 magnitude, e.g. −OV = −(2**1024 − 2**970) (pass-6 ADV-P6-B02: re-vectored from the former −10³⁰⁰, which converted cleanly to float and discriminated nothing; see BC-1.02.011 EC-011) | no countdown, no degrade: SL:506 marks the window passed (exact int/float compare, no conversion), so pct = None and the window is hidden before SL:515's subtraction — for the canonical 5h-absent vector the widget is dropped by the SL:510 `any(...)` check; the SL:513-514 per-window continue applies when the other window is reported (oracle-verified 2026-11-17, BC-1.02.011 EC-011) |
 
 ## Canonical Test Vectors
 

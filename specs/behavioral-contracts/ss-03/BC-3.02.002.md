@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "49357ad"
+input-hash: "7aa5104"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "2026-11-18T00:00:00Z (1.2.1): ADV-P4 remediation D29 — fake-ps weekdays corrected to Fri (2026-11-06 and 2026-11-13)"
   - "2026-11-18T00:00:00Z (1.2.2): pass-5 residual sweep (ADV-P5-B14) — comma inside the flow-list element removed (YAML flow-scalar hazard); no behavioral change"
   - "2026-11-19T04:10:00Z (1.2.3): ADV-P6 remediation D05 / orchestrator call 3 — CTV intro states the D1-D4 difference rows and Chicago-valued vectors are GO TABLE TESTS under TZ=America/Chicago, never parity corpus cases (the corpus validator keeps rejecting non-UTC tz; the OD-76 parity half carries no D1 case)"
+  - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D10 (orchestrator call 16) — all OD-76 D1-D4 vectors are Go table tests; no D1-D4 case is a parity corpus case (corpus stays UTC-only): PC preamble, Inv 2, CTV note and VP row respelled; Pre-3 states the fake-PATH machinery has no P1 consumer (kept for the validator rejection rule and later phases)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,15 +52,19 @@ named exclusion entry for "OD-76 + the native process probe on macOS/Linux"); D4
    `ProcStarter` describing the same process (same pid chain, same true start instant).
    These cases run UNSEEDED (no cached `proc_start`) by design; BC-3.02.001 Invariant 4
    applies to ordinary render-parity cases, not to this difference table
-   (ADV-P1-D05 resolution).
+   (ADV-P1-D05 resolution). Pass-8 D10 / call 16: because D1-D4 never run as corpus
+   cases, NO P1 corpus case declares a subprocess-fake table — the conditional
+   fake-`PATH` machinery of BC-6.01.002 has no P1 consumer; it is kept for the
+   validator's rejection rule (BC-6.02.003 PC-6) and later phases.
 
 ## Postconditions
 
 Each class below is one row of the named difference table. "Exclusion" rows are cases on the OD-105/OD-110 named
-exclusion list under the entry id `OD-76` (native probe, macOS/Linux): the harness skips the legacy diff for them and
-instead requires the Go output to match the case's own expected-output file, checked by a dedicated table test
-(proposed name `TestWindowStart_OD76_*`; final name fixed by BC-6.03.004). "Identical" rows must pass the ordinary
-byte comparison.
+exclusion list under the entry id `OD-76` (native probe, macOS/Linux): their check is ENTIRELY the dedicated Go table
+test (proposed name `TestWindowStart_OD76_*`; final name fixed by BC-6.03.004), which requires the Go output to match
+the case's own expected-output file — pass-8 D10 / orchestrator call 16: NO D1-D4 case runs as a parity corpus case
+(the corpus stays UTC-only; D2-D4 happen to work under UTC, but they never enter the corpus either). "Identical" rows
+must pass the ordinary byte comparison.
 
 | # | Input class | Legacy result (SL ref) | Go result | Class |
 |---|---|---|---|---|
@@ -78,7 +83,8 @@ byte comparison.
 
 1. Differences are limited to rows D1-D4; any other observed difference is a defect or needs a new owner ruling,
    never a silent exclusion ("no blanket exclusions", OD-105).
-2. Every D-row case in the corpus has an exclusion entry naming one concrete case and an expected-output file; no
+2. Every D-row case has an exclusion entry naming one concrete case and an expected-output file, checked by the
+   dedicated Go table test — no D-row case is a parity corpus case (UTC-only corpus, pass-8 D10); no
    globs (OD-105).
 3. Linux start = `btime + starttime_ticks / USER_HZ` with integer division (procps computes `lstart` the same way,
    so I1/I3 hold). `USER_HZ` is a named constant, 100, with the rationale "kernel ABI value for `/proc` tick fields on
@@ -102,7 +108,8 @@ Legacy side: fake `ps` table (`pid|ppid comm lstart`), `startPID = 500`, `TZ=Ame
 These vectors — and the D1-D4 difference rows above, including the America/Chicago repeated-DST hour
 (D1) and the Chicago-valued I1/I2 epochs — are exercised as GO TABLE TESTS in this package's own test
 binary, never as parity corpus cases: the P1 corpus validator rejects a non-UTC `tz` (BC-6.02.003 PC-8,
-orchestrator call 3, ADV-P6-D05), so the `OD-76` closed-set entry's parity half carries no D1 case and
+orchestrator call 3, ADV-P6-D05; pass-8 D10 / call 16 widened it to all four rows), so the
+`OD-76` closed-set entry's parity half carries NO D1-D4 case at all and
 the corpus stays UTC-only.
 
 | Input | Expected Output | Category |
@@ -122,7 +129,7 @@ Legacy column verified 2026-11-15 against CPython 3.11.7 on macOS running `claud
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-033, VP-012 (frontmatter closure) | For seeded `proc_start`, legacy and Go outputs are byte-identical on every corpus case | parity harness (Tier A) |
-| VP-033, VP-012 (frontmatter closure) | Every D1-D4 corpus case has exactly one named exclusion entry and a passing dedicated table test | harness self-check (BC-6.03.004) |
+| VP-033, VP-012 (frontmatter closure) | Every D1-D4 case has exactly one named exclusion entry and a passing dedicated Go table test; no D1-D4 case is a parity corpus case (UTC-only corpus, pass-8 D10) | harness self-check (BC-6.03.004) |
 
 ## Traceability
 

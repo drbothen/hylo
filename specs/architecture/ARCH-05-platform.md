@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "platform"
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-19T07:00:00Z
+timestamp: 2026-11-19T21:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "5ad3cbc"
+input-hash: "93ef1cd"
 
 ---
 
@@ -17,13 +17,14 @@ input-hash: "5ad3cbc"
 
 > All OS-specific code, build-tag confined (D5, NFR-004). Classification:
 > **infrastructure** — syscalls and Win32; no parity logic; every function returns data
-> consumed by pure code. HIGH tier (>= 90%).
+> consumed by pure code. HIGH tier (>= 90% kill rate — the Phase 6 mutation target, not a
+> P1 gate; OD-158).
 
 ## Files (design doc §2.5)
 
 | File | Content |
 |---|---|
-| `paths.go` + `paths_unix.go` / `paths_windows.go` | `CacheDir(env EnvVars)`, `ConfigDir(env EnvVars)`, `StateDir(env EnvVars)` built explicitly per OD-95/OD-101/OD-144 (never `os.UserCacheDir`); relative/empty `XDG_*` ignored (OD-144); Windows `%LOCALAPPDATA%\hylo\cache` / `...\hylo\state` |
+| `paths.go` + `paths_unix.go` / `paths_windows.go` | `CacheDir(env EnvVars) (string, error)`, `ConfigDir(env EnvVars) (string, error)`, `StateDir(env EnvVars) (string, error)` built explicitly per OD-95/OD-101/OD-144 (never `os.UserCacheDir`); error return per pass-8 D01, orchestrator call 7 — BC-3.01.001 EC-004 requires the error when a directory cannot be determined and `config path` exits 1 on it; relative/empty `XDG_*` ignored (OD-144); Windows `%LOCALAPPDATA%\hylo\cache` / `...\hylo\state` |
 | `proc.go` | `FindAncestor(startPID int, name string, maxDepth int) (float64, bool)`; walk from `os.Getppid()` checking the parent first, at most `maxDepth` levels, stop at pid <= 1, `basename(comm)` match with `.exe` stripped case-insensitively on Windows. The caller passes `statusline.window_age.max_depth` (default 6, legacy T-025, SL:279; BC-3.02.001) — the depth is registry config (D15), not a magic number (ADV-P1-A18) |
 | `proc_darwin.go` | `unix.SysctlKinfoProc("kern.proc.pid", pid)`: `Eproc.Ppid`, `P_comm`, `P_starttime` |
 | `proc_linux.go` | `/proc/<pid>/stat` after the last `)`; start = `btime` + ticks/`procUserHZ`, with `procUserHZ = 100` a named constant, not config: Linux procfs emits times in USER_HZ, a fixed kernel-ABI unit (= 100, independent of CONFIG_HZ) that equals the glibc `sysconf(_SC_CLK_TCK)`/`CLK_TCK` value on every supported kernel — Go's stdlib has no sysconf, and the constant reproduces that ABI rather than a tunable (ADV-P1-A18) |
@@ -78,7 +79,7 @@ this section and BC-1.03.015 remapped (BC-COMPONENT-MAP).
 
 - **Context:** Go's `time.Local` ignores `TZ` on Windows, while CPython's MSVC runtime
   honors it; a naive local-time case would diverge on a non-UTC Windows host.
-- **Decision:** hylo resolves its local zone ONLY through `platform.LocalZone()`, which
+- **Decision:** hylo resolves its local zone ONLY through `platform.LocalZone(env EnvVars) (*time.Location, error)`, which
   honors `TZ` with libc semantics on every OS (OD-177): `TZ` unset → the OS zone;
   `TZ` set but empty or unparseable → UTC. The parity harness pins `TZ=UTC` for both
   binaries; the Windows

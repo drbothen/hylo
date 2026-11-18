@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "039fda1"
+input-hash: "9343374"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,7 @@ modified:
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.3.2 pass-6 remediation (ADV-P6-B08): the house glyph is named as the registry key statusline.glyphs.window_age instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
   - "1.3.3 pass-7 remediation (ADV-P7-B15): Inv 3 spells the concrete exclusion test name TestWindowAge_D4EX1_Windows_AncestorFound (VP-012) instead of the wildcard; no behavioral change; 2026-11-19T07:00:00Z"
+  - "1.3.4 pass-8 remediation (ADV-P8-B11): EC-007 gains the inline OD-160 hand-edited-cache tag its siblings EC-004..006 and BC-1.02.028 EC-005 already carry (Inv 3 covers it); no behavioral change; 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -86,7 +87,7 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
 | EC-004 | `win_start` = NaN (hand-edited-cache shape, **OD-160**: Go's encoder never emits NaN) | hidden (comparison false) |
 | EC-005 | `win_start` = `+Infinity` (hand-edited-cache shape, **OD-160**) | `win_ms = -inf` → hidden |
 | EC-006 | `win_start` = `-Infinity` (hand-edited-cache shape, **OD-160**) | `win_ms = +inf` passes the gate; `int(inf // 60000)` raises ValueError at SL:560 → 29-byte degraded line (BC-1.02.028 EC, BC-1.01.001) |
-| EC-007 | `win_start` = `true` (only reachable through a hand-edited cache `proc_start`) | treated as epoch second 1; at now = 1794600000 renders `⌂20770d19h` |
+| EC-007 | `win_start` = `true` (only reachable through a hand-edited cache `proc_start`, **OD-160**; cf. BC-1.02.028 EC-005) | treated as epoch second 1; at now = 1794600000 renders `⌂20770d19h` |
 | EC-008 | stdin has no `session_id` | acquisition is skipped (SL:1229), `win_start = None` → no suffix |
 | EC-009 | FMA contraction of `(now - win_start)*1000 - dur` | forbidden; tests for this site run on arm64 (macos-15 runner), where fusion is detectable (design IM-10) |
 | EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17), e.g. 10³⁰⁹, **with `win_start` numeric** (the SL:559 subtraction is reached) | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int; taxonomy **CP-O05**). With a *non-numeric* `win_start` the gate block is skipped and legacy renders the exact huge `_hm(10**309)` timer text (integer arithmetic only) with no degrade — PC1's "timer shown" plus numeric `win_start` is what reaches the crash site |

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "5066fd5"
+input-hash: "430cb73"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-625)"
@@ -24,7 +24,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-14 (seed count corrected to 21)"]
+modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-14 (seed count corrected to 21)", "1.2.2 2026-11-18: pass-8 remediation ADV-P8-C2-15 (every seed row spells its lane explicitly — the committed seed file needs it; anth unless noted)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,21 +52,23 @@ must reproduce every byte.
    (cloud lane, `anth`) unless noted; stdin carries only `session_id`, `model`, `cost`.
 3. The cost history is seeded before each render with the table below (key order as
    listed; all entries `ts = now − 3600` unless noted; `src: "backfill"` unless noted;
-   `api_ms` 3,600,000 unless noted). Golden seed file (proposed path):
-   `internal/statusline/testdata/cost/bc-1.05.008-seed.json`, synthetic, committed.
+   `api_ms` 3,600,000 unless noted). Every row spells its `lane` explicitly — the
+   committed seed file carries it (anth unless noted; ADV-P8-C2-15). Golden seed file
+   (proposed path): `internal/statusline/testdata/cost/bc-1.05.008-seed.json`,
+   synthetic, committed.
 
 | Key | Entry | Counts in $ | Counts in $/h | Why |
 |---|---|---|---|---|
 | `s01`…`s12` | lane anth, usd 2.0, 4.0, …, 24.0 | yes | yes (rate = usd) | 1 h ≥ 1,800,000 |
-| `g13-cc-short` | **cc**, usd 30.0, api 400,000 | yes | yes (270 $/h) | cc gate 300,000 |
-| `g14-bf-short` | usd 30.0, api 1,000,000 | yes | no | other gate 1,800,000 |
-| `g15-small` | usd 0.99 | no | no | < min_usd |
+| `g13-cc-short` | lane anth, **cc**, usd 30.0, api 400,000 | yes | yes (270 $/h) | cc gate 300,000 |
+| `g14-bf-short` | lane anth, usd 30.0, api 1,000,000 | yes | no | other gate 1,800,000 |
+| `g15-small` | lane anth, usd 0.99 | no | no | < min_usd |
 | `g16-dgx` | lane dgx, usd 100.0 | no | no | other lane |
-| `g17-old` | usd 50.0, ts = now − 2,592,000.001 | no | no | `now − ts > 30 d` |
-| `g18-edge` | usd 26.0, ts = now − 2,592,000 | yes | yes | window test strict `>` |
-| `g19-str` | usd `"5"` | no | no | not a number |
-| `g20-noapi` | usd 28.0, api `null` | yes | no | no model time |
-| `sess-self` | **cc**, usd 500.0, ts = now − 10 | no | no | self-exclusion; also throttles its own write, so the seed is not rewritten |
+| `g17-old` | lane anth, usd 50.0, ts = now − 2,592,000.001 | no | no | `now − ts > 30 d` |
+| `g18-edge` | lane anth, usd 26.0, ts = now − 2,592,000 | yes | yes | window test strict `>` |
+| `g19-str` | lane anth, usd `"5"` | no | no | not a number |
+| `g20-noapi` | lane anth, usd 28.0, api `null` | yes | no | no model time |
+| `sess-self` | lane anth, **cc**, usd 500.0, ts = now − 10 | no | no | self-exclusion; also throttles its own write, so the seed is not rewritten |
 
 ## Postconditions
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T15:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "207f026"
+input-hash: "1dff169"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "OD-30, OD-166"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.3.1) pass-4 remediation ADV-P4-C2-05 (Description and exclusion scope list both permitted differences: OD-30 sub-case and OD-166 record skip; EC-010; parity_class)", "2026-11-18 (v1.3.2) pass-5 remediation ADV-P5-C2-06 (Decisions-row riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)"]
+modified: ["2026-11-18 (v1.3.1) pass-4 remediation ADV-P4-C2-05 (Description and exclusion scope list both permitted differences: OD-30 sub-case and OD-166 record skip; EC-010; parity_class)", "2026-11-18 (v1.3.2) pass-5 remediation ADV-P5-C2-06 (Decisions-row riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)", "2026-11-18 (v1.3.3) pass-8 remediation ADV-P8-C2-07 (Dumps-differential fuzz row rerouted to VP-024, the pyfmt JSON-equivalence VP whose bcs gains BC-1.05.009, per pass-8 call 12; cache-swap row keeps VP-020/VP-019)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -118,7 +118,7 @@ Clock 1794615009.0.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-020, VP-019 | `pyfmt.Dumps` equals CPython `json.dumps` (defaults) on generated ordered values incl. NaN/inf, ints, surrogates | fuzz (differential vs the oracle) |
+| VP-024 | `pyfmt.Dumps` equals CPython `json.dumps` (defaults) on generated ordered values incl. NaN/inf, ints, surrogates | fuzz (differential vs the oracle) (routed to VP-024, the pyfmt JSON-equivalence differential — pass-8 call 12; VP-020/VP-019 had no fuzz leg) |
 | VP-020, VP-019 | Python-written file → Go record → bytes equal Python record on the same file (string sids) | manual (cache-swap test) |
 
 ## Traceability
@@ -153,7 +153,7 @@ S-N.MM — cost history (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-020, VP-019 — Dumps differential equivalence
+- VP-024 — Dumps differential fuzz (pass-8 call 12); VP-020, VP-019 — cache-swap parity (row 2)
 
 
 #### Source Evidence

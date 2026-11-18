@@ -281,3 +281,71 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   source, or the call is re-worded, before the copy is dispatched.
 
 **Closes:** D-448(b) codified (exhaustive copy-call-citation-verification strand)
+
+## L-PG-27 [process-gap] — A respelling fix re-checks meaning at every use site
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-8 burst) The pass-7 B06 fix
+  was a respelling: a config key was renamed for consistency. Names were
+  changed without re-checking what the renamed thing means at each use site,
+  and one site's meaning shifted under the new name — a HIGH regression
+  (ADV-P8-B01) filed against the pass-8 report.
+- **Remedy:** A fix brief whose effect is renaming or respelling must direct
+  the agent to re-read every use site and confirm the referent's meaning is
+  unchanged; a site whose meaning differs is escalated to the orchestrator,
+  not silently conformed.
+
+**Closes:** D-448(b) codified (exhaustive rename-meaning-recheck strand)
+
+## L-PG-28 [process-gap] — Depth/recursion facts are measured through the real entry point
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-8 burst, ADV-P8-D20) A
+  measurement taken through a test harness that loads `legacy/` via a custom
+  loader added stack frames and produced a wrong recursion boundary: the
+  brief claimed a 989-frame boundary; measured end to end, none is reachable.
+  A wrapper probe answers questions about the wrapper, not the program.
+- **Remedy:** Depth and recursion facts are measured only through the real
+  entry point (`python3 -I -s legacy/dgx_statusline.py`, isolated HOME, per
+  L-PG-06/L-PG-17); the orchestrator re-runs any measurement that mints a
+  new outcome before that outcome is propagated into specs.
+
+**Closes:** D-448(b) codified (exhaustive real-entry-point-measurement strand)
+
+## L-PG-29 [process-gap] — Sync checks resolve citations, not just copies
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-8 burst, ADV-P8-A2-05) The
+  sync check passed a register whose citations did not resolve: the pass-7
+  OD-160 riders were compared copy-vs-copy while the IDs and anchors they
+  cite pointed at nothing on disk. Comparing copies compares only equality.
+- **Remedy:** Sync-check briefs must require resolving every rider/anchor
+  citation on disk (each cited ID and anchor exists and points at the
+  intended content), in addition to the copy-vs-copy comparison.
+
+**Closes:** D-448(b) codified (exhaustive sync-check-citation-resolution strand)
+
+## L-PG-30 [process-gap] — Calls touching gates or scope are checked against the OD log
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-8 burst, ADV-P8-A04) A
+  remediation-plan design call (pass-7 call 12: fold `internal/parity` into
+  the coverage gate) contradicted settled OD-158; the owner reaffirmed the
+  settled ruling as OD-193. Repeat of L-PG-13 (pass-4 plan call 10 vs
+  OD-148): the same failure mode recurred because the check is not built
+  into call preparation.
+- **Remedy:** Every orchestrator call that touches a gate, threshold or
+  scope boundary is diffed against the OD log before issue; settled ODs are
+  cited by ID in the call itself so the agent sees the boundary.
+
+**Closes:** D-448(b) codified (exhaustive call-vs-OD-log-check strand)
+
+## L-PG-31 [process-gap] — Hook parser drift: flow-style `modified:` lists with ", " entries
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-8 burst) The
+  validate-cross-site-correspondence hook mis-parses flow-style `modified:`
+  YAML lists whose entries contain ", " (comma inside an entry) and blocks
+  edits that are actually valid. Forty-eight spec files were converted from
+  flow style to block style to appease the parser — content unchanged.
+- **Remedy:** Recorded as tooling drift for the plugin owner: the hook's
+  flow-style list parser should respect quoted entries (or the block-style
+  conversion should be adopted as the standard); either way the hook and the
+  formatting convention must agree.
+
+**Closes:** recorded as a Drift Item in STATE.md (plugin owner, tooling drift)

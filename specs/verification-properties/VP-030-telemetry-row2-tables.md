@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-19T22:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.04.002.md, behavioral-contracts/ss-01/BC-1.04.004.md, behavioral-contracts/ss-01/BC-1.04.009.md, behavioral-contracts/ss-01/BC-1.04.014.md, behavioral-contracts/ss-01/BC-1.04.020.md, prd-supplements/test-vectors.md]
-input-hash: "c530f76"
+input-hash: "1356e78"
 traces_to: prd.md
 source_bc: BC-1.04.002
 bcs: [BC-1.04.001, BC-1.04.002, BC-1.04.003, BC-1.04.004, BC-1.04.005, BC-1.04.006, BC-1.04.007, BC-1.04.008, BC-1.04.009, BC-1.04.010, BC-1.04.011, BC-1.04.012, BC-1.04.013, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.04.017, BC-1.04.018, BC-1.04.019, BC-1.04.020, BC-1.04.021]
@@ -19,7 +19,16 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — OD-130 not verified in P1; P1 asserts legacy ±Inf behavior per BC-1.04.014 (OD-157, A2-01)", "1.3 2026-11-18T09:17:00Z: ADV-P3 fix (C2-08) — the legs the BC VP-tables route here now exist in this document: testing/quick for-all leg (BC-1.04.002/004/006/007/009/013/017/021 invariants) and Tier C differential-fuzz rows (BC-1.04.001 fetch/redirect sampling, BC-1.04.009 sparkline scale), with skeleton", "1.4 2026-11-18T14:20:00Z: ADV-P4 fix (A2-05) — quick.Values filler rewritten to the assigning form args[0] = reflect.ValueOf(genRow2State(r))", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-12, OD-181: quick-leg oracle respelled as harness re-derivation; TestMetricsClient_OD181_TransportTable transport rows (OD-181 rider per VP-012))", "1.6 2026-11-19T18:00:00Z: pass-7 fix (ADV-P7-C2-05) — the transport table's wire fake is a raw net.Listener (or hijacked connection), not httptest: httptest canonicalises header order into a map and writeSubset trims values, so it can neither replay urllib's order nor send a trailing-space Location value"]
+modified:
+  - "1.1 2026-11-17: ADV-P1 pass-1 fixes"
+  - "1.2 2026-11-17: ADV-P2 fix — OD-130 not verified in P1; P1 asserts legacy ±Inf behavior per BC-1.04.014 (OD-157, A2-01)"
+  - "1.3 2026-11-18T09:17:00Z: ADV-P3 fix (C2-08) — the legs the BC VP-tables route here now exist in this document: testing/quick for-all leg (BC-1.04.002/004/006/007/009/013/017/021 invariants) and Tier C differential-fuzz rows (BC-1.04.001 fetch/redirect sampling, BC-1.04.009 sparkline scale), with skeleton"
+  - "1.4 2026-11-18T14:20:00Z: ADV-P4 fix (A2-05) — quick.Values filler rewritten to the assigning form args[0] = reflect.ValueOf(genRow2State(r))"
+  - "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-12, OD-181: quick-leg oracle respelled as harness re-derivation; TestMetricsClient_OD181_TransportTable transport rows (OD-181 rider per VP-012))"
+  - "1.6 2026-11-19T18:00:00Z: pass-7 fix (ADV-P7-C2-05) — the transport table's wire fake is a raw net.Listener (or hijacked connection), not httptest: httptest canonicalises header order into a map and writeSubset trims values, so it can neither replay urllib's order nor send a trailing-space Location value"
+  - "1.7 2026-11-19T22:00:00Z: pass-8 fixes (ADV-P8-C2-08: the testing/quick for-all legs now cover the five BCs the pass-8 recount added - BC-1.04.003/008/015/018/019 predicates stated normatively in the Property Statement; ADV-P8-C2-09: the transport table respelled from 'pins hylo\'s plain-http client behaviour' to the minimal HTTP/1.1 client over plain http AND https-through-crypto/tls per BC-1.04.001 PC1, only the parity CORPUS being plain http, OD-181; ADV-P8-A2-19: Named Tests gains TestMetricsClient_OD181_TransportTable)"
+  - "1.8 2026-11-20T12:30:00Z: pass-8 residual (C2-05 seam): Proof Method and Feasibility tables respelled — every metrics fake in this document is a RAW net.Listener fake, the status/body fault rows included; not httptest, whose server canonicalises headers into a map and trims values"
+
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,7 +49,16 @@ cache key order, history point rules (90 s cap, 2 s gap) with `_norm_pt`, freshn
 ladder + stale suffix, health dot (green-while-success rule), queue/KV/throughput/
 sparkline/TTFT/power/idle segments incl. format boundaries, mine segment, VM fetch
 whenever ROWS >= 2, and the NaN/+Inf crash paths (CP-N01/N02) with wall-colour
-mismatch quirk.
+mismatch quirk. The testing/quick for-all legs cover every row-2 invariant whose BC
+VP-table routes a "Go property test (testing/quick)" row here — BC-1.04.002/003/
+004/006/007/008/009/013/015/017/018/019/021 — including, for the five added on the
+pass-8 recount (ADV-P8-C2-08): saved history length <= 32 with every saved point
+satisfying `now - t < 90` or being the new point (BC-1.04.003, joint with VP-031's
+quick leg); the box segment never ending in a space (BC-1.04.008); degrade-iff-NaN
+for the KV gauge (BC-1.04.015, finite/±Inf rows table-equal legacy); segment
+presence and dimming equal to legacy for every JSON value shape of `mix[7]`
+(BC-1.04.018); and TTFT text equal to CPython for random doubles in [0, 10^4] and
+all tie points k+0.05 (BC-1.04.019).
 
 ## Source Contract
 
@@ -61,16 +79,20 @@ mismatch quirk.
   transition matrices, freshness-ladder rows, sparkline glyph/color/scale tables, NaN/inf
   fault rows; PLUS the legs the BC VP-tables route here (C2-08): testing/quick
   for-all legs for the row-2 invariants marked "property proof" in
-  BC-1.04.002/004/006/007/009/013/017/021 (TTL/freshness monotonicity, redirect
-  visited-cap sampling behaviour, cells caps, sparkline scale bounds, TTFT
-  rounding bands, idle-age ordering, power-format invariants — the quick-leg oracle
+  BC-1.04.002/003/004/006/007/008/009/013/015/017/018/019/021 (TTL/freshness
+  monotonicity, history cap and point-age order, redirect
+  visited-cap sampling behaviour, cells caps, box-segment trailing space, NaN-iff
+  degrade, mix[7] shape presence/dimming, sparkline scale bounds, TTFT
+  rounding bands and ties, idle-age ordering, power-format invariants — the quick-leg oracle
   INDEPENDENTLY RE-DERIVES each BC rule in the harness; a canonical table cannot
   oracle randomly generated states, the VP-041 A2-08 lesson), and Tier C
   differential-fuzz rows for the
   surfaces marked "fuzz" in BC-1.04.001 (fetch/redirect sampling) and BC-1.04.009
   (sparkline scale), budgeted by `HYLO_PARITY_FUZZSECONDS`, same oracle discipline
   as VP-011. The metrics-client transport table (`TestMetricsClient_OD181_TransportTable`,
-  OD-181 rider per VP-012) pins hylo's plain-http client behaviour here: urllib's
+  OD-181 rider per VP-012) pins hylo's minimal HTTP/1.1 client behaviour here — plain
+  http AND https upgraded through `crypto/tls` per BC-1.04.001 PC1 (only the parity
+  CORPUS is plain http, OD-181, ADV-P8-C2-09): urllib's
   exact header set/order, the empty-`Location` urljoin rule, the visited-cap worst
   case, and the OD-181 non-http/https table rows (no sample / OS trust store). The
   wire fake for the transport table is a RAW `net.Listener` (or a hijacked
@@ -88,8 +110,8 @@ mismatch quirk.
 |--------|------|----------|----------|
 | Sequence table | Go test, 11 canonical steps | yes | get_sample pinned sequence |
 | Segment tables | Go test | yes | all row-2 segments x freshness states |
-| Fault rows | Go test (httptest fake for the status/body fault rows; RAW `net.Listener` for the transport table, ADV-P7-C2-05) | yes | down/500/garbage/±Inf metrics |
-| Property legs | `testing/quick`, *quick.Config with Values | sized | BC-1.04.002/004/006/007/009/013/017/021 for-all rows |
+| Fault rows | Go test (RAW `net.Listener` fake for every metrics fake — the status/body fault rows included, not only the transport table; not httptest, whose server canonicalises headers into a map and trims values, ADV-P7-C2-05) | yes | down/500/garbage/±Inf metrics |
+| Property legs | `testing/quick`, *quick.Config with Values | sized | BC-1.04.002/003/004/006/007/008/009/013/015/017/018/019/021 for-all rows (ADV-P8-C2-08) |
 | Differential fuzz | parity harness, `HYLO_PARITY_FUZZSECONDS` | budget-bounded | BC-1.04.001, BC-1.04.009 |
 
 ## Proof Harness Skeleton
@@ -126,7 +148,9 @@ func TestRow2Props_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
 
 `row2` parity family (ARCH-07 case-id grammar) + the metrics-mode rows
 (down/500/garbage) of the ARCH-07 case model; in-tree
-`TestGetSample_Pinned11StepSequence`.
+`TestGetSample_Pinned11StepSequence` and
+`TestMetricsClient_OD181_TransportTable` (defined here per VP-012's rider register,
+ADV-P8-A2-19).
 
 ## Feasibility Assessment
 
@@ -134,7 +158,7 @@ func TestRow2Props_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
 |--------|-----------|-------|
 | Input space size | Sequence + segment tables | bounded |
 | Proof complexity | N/A | |
-| Tool support | Full | httptest fake + raw `net.Listener` (transport table, ADV-P7-C2-05) |
+| Tool support | Full | RAW `net.Listener` fake for every metrics fake (transport table and status/body fault rows alike, ADV-P7-C2-05) — not httptest |
 | Estimated proof time | Weeks | segment volume |
 
 ## Lifecycle

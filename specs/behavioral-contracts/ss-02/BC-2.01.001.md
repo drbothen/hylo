@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:45:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - domain-spec/invariants.md
-input-hash: "f2d5042"
+input-hash: "e7fed40"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444, 902-903)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-19T00:55:00Z (1.2.4) ADV-P5 remediation D32+D25 — present-but-empty rule covers Text, SGR and composite types; env case-matching moved behind the platform.Environ seam (build-tagged fold, POSIX-testable double), raw Go maps out"
   - "2026-11-19T04:30:00Z (1.2.5) ADV-P6 remediation D15 — PC-6 gains the backend-variable carve-out: a well-formed HYLO_BACKENDS_<i>_<FIELD> variable is a backend-entry variable (BC-2.01.002 PC-4/PC-5), never an unknown setting, closing the undefined-stderr gap for HYLO_BACKENDS_1_METRICS_URL"
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D08 - PC-2 empty-Text rule keyed to the REGISTERED range: free-text (theme.separator, subagent.joiner) and any-text (telemetry.query) keys accept the empty string; only non-empty-bound Text keys error"
+  - "2026-11-19T21:00:00Z (1.2.7): ADV-P8 remediation D18 — PC-6 pins the unknown-setting warning ORDER: ascending byte-lexicographic by variable name (deterministic spec choice; Go map iteration is unordered), so the BC-2.03.001 same-order cross-reference resolves"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -85,7 +86,11 @@ happens once per process, before any side effect.
    within one run).
 6. A present `HYLO_*` variable that names no registry key and is not a reserved name is
    ignored, with one stderr warning line `hylo: warning: unknown setting <NAME> (ignored)\n`
-   (OD-01). Carve-out (ADV-P6-D15): a well-formed `HYLO_BACKENDS_<i>_<FIELD>` variable is
+   (OD-01). Warning ORDER (pass-8 D18): multiple unknown-setting warnings are emitted in
+   ascending byte-lexicographic order of the variable name — a deterministic spec choice
+   (Go map iteration is unordered; `os.Environ` order varies by OS), pinned so
+   `hylo config validate`'s stderr (BC-2.03.001 PC-2) and any table test are
+   reproducible. Carve-out (ADV-P6-D15): a well-formed `HYLO_BACKENDS_<i>_<FIELD>` variable is
    NOT an unknown setting — even though `backends[<i>]` has no registry entry in P1 — it is
    a backend-entry variable governed by BC-2.01.002 PC-4/PC-5 (a P1 `<FIELD>` establishes
    the index and draws the cardinality error; a non-P1 `<FIELD>` warns as an unknown

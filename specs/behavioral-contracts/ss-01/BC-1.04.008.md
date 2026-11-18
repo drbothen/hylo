@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "12ee8f9"
+input-hash: "5f0276f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:772-785)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (config keys statusline.glyphs.sess_rate / box_rate named beside their default literals in PC1/PC2) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,9 +48,14 @@ things and are never combined. Notation: `\e` is byte 0x1B.
 ## Postconditions
 
 1. **Mine segment**: rendered per BC-1.04.018 and appended first when non-empty:
-   `"\e[90m»\e[0m" + mine + "\e[90mt/s\e[0m"`.
+   `"\e[90m»\e[0m" + mine + "\e[90mt/s\e[0m"`, where the marker is the config key
+   `statusline.glyphs.sess_rate` (Text, default `»` U+00BB, BC-2.01.004 PC-6; owned by
+   BC-1.04.018 PC4 — ADV-P8-C2-01).
 2. **Box segment**: if `rate is not None`:
-   `box = "\e[90m▣\e[0m" + ("\e[90m" if stale else "\e[97m") + F(rate,0) + "\e[0m\e[90mt/s\e[0m"`;
+   `box = "\e[90m" + glyphs.box_rate + "\e[0m" + ("\e[90m" if stale else "\e[97m") + F(rate,0) + "\e[0m\e[90mt/s\e[0m"`,
+   where `glyphs.box_rate` = `statusline.glyphs.box_rate` (Text, default `▣` U+25A3,
+   BC-2.01.004 PC-6; the ▣ literals in the vectors are the default spelling,
+   ADV-P8-C2-01);
    `sp = ""` if stale or sparkline disabled, else `sparkline(hist)` (BC-1.04.009);
    segment = `(box + " " + sp).rstrip()` (Python `rstrip()` of whitespace: an empty
    sparkline leaves no trailing space).
@@ -86,7 +91,7 @@ things and are never combined. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Box segment never ends in a space | Go property test (testing/quick) |
+| VP-030 | Box segment never ends in a space | Go property test (testing/quick) (routed to the VP-030 quick leg, pass-8 call 12) |
 | VP-030 | Six-case review #16 table reproduces legacy bytes | manual (table) |
 
 ## Traceability

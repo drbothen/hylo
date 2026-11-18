@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "4bc28df"
+input-hash: "81a6f43"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:792-799)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-08 (testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,7 +77,7 @@ byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | TTFT text equals CPython for random doubles in [0, 10^4] and all tie points k+0.05 | Go property test (testing/quick) against a CPython-generated table |
+| VP-030 | TTFT text equals CPython for random doubles in [0, 10^4] and all tie points k+0.05 | Go property test (testing/quick) against a CPython-generated table (routed to the VP-030 quick leg, pass-8 call 12) |
 
 ## Traceability
 

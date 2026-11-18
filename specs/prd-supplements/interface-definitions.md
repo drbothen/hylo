@@ -1,18 +1,19 @@
 ---
 document_type: prd-supplement-interface-definitions
 level: L3
-version: "1.13"
+version: "1.14"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T12:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "fbe1339"
+input-hash: "109a0cc"
 modified:
   - "1.11 2026-11-19T02:00:00Z: pass-5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] → [base, span] and law restated as base + span·i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
   - "1.12 2026-11-19T06:00:00Z: pass-6 remediation — glyph width rule restated in legacy's render width (code points; OD-184); `statusline.cache.rename_retry_delay_ms` registered (OD-186); default-only keys given exact env spellings (A13); Text-class reason strings for List-entry violations and non-theme control bytes (A14); subagent token ascending-pair check fire-at and D4-EX-3 naming rule (A19); rationale codes aligned to the owning BCs (B07); stale glyphs-never-named sentence fixed (B15); metrics_url row notes the OD-181 plain-http parity scope"
   - "1.13 2026-11-19T12:00:00Z: pass-7 remediation — unit-selector defaults resolved to their single accepted spellings with the legacy-letter rationale (A04/A05/D01, orchestrator call 5); `git.ttl_s` mirrored floor pinned in the Seconds-class note and the row (A06); `statusline.telemetry.timeout_s` validation ceiling labeled (A21); `Float quad` type named for `sparkline.scale` (D09); `statusline.cache.rename_retry_limit` registered (OD-188); dead-backend labels `statusline.labels.vllm_down`/`lmcache_down` and `statusline.subagent.name_fallback` registered (OD-189); registry back-references completed for `units.tokens`/`limits.windows`/`timer.min_ms` (B10) and the S1.07 consumers (C10)"
+  - "1.14 2026-11-19T22:00:00Z: pass-8 remediation — context-denominator rationale cites BC-1.02.006 (the existing contract), not the nonexistent BC-2.01.006 (A01); `Float triple` shape name `array of 3 numbers` added to the Composite-Type grammar for `statusline.theme.heat` (A12); Default/Range cells of `theme.heat` and `limits.windows` re-spelled to the env spellings `[0.22,0.85,0.80]` / `5h,7d` (D06/call 11); `cost.percentiles` ascending check clarified as an intra-key member-pair check whose D4-EX-3 line names the whole key with its full JSON env value (A11)"
 traces_to: prd.md
 ---
 
@@ -121,6 +122,7 @@ range:
 
 1. The value must parse as strict JSON (no `NaN`/`Infinity` tokens, no trailing data)
    with exactly the declared shape. Shape names: `array of 2 numbers` (Float pair),
+   `array of 3 numbers` (Float triple — `statusline.theme.heat`),
    `array of 4 numbers` (Float quad — `statusline.sparkline.scale`; the type name "Float
    triple" was wrong for this key; pass-5 A03, type named pass-7 D09),
    `object {cc,other} of integers` (Int map),
@@ -200,7 +202,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.units.context` | Text | `K` | default-only: range = {`K`}; registered semantics `1e6` → `M`, else `K` — default-only because the M/K divisors are fixed format constants that define the unit spellings, not because the widget formula is hard-coded (pass-4 B10) | DOC | BC-1.02.006 |
 | `statusline.units.lines` | Text | `k` | default-only: range = {`k`}; registered render semantics: thresholds 10,000 (`>=` → k), 1,000,000 (`>=` → M) | DOC | BC-1.02.014 |
 | `statusline.units.tokens` | Text | `M` | default-only: range = {`M`}; registered render semantics: thresholds 1,000 (`>=` → k), 1e6 (`>=` → M) | DOC (T-042) | BC-1.02.025, BC-1.02.018 |
-| `statusline.theme.heat` | Float (triple) | 0.22/0.85/0.80 | default-only: range = {`0.22/0.85/0.80`} — BC-1.02.019's HSV gradient is defined only for the default triple (PC2 covers sectors i ∈ {0,1}, hue span ≥ 1/3), so any other triple is a number-range config error (OD-162); default's env spelling is the strict-JSON array `[0.22,0.85,0.80]` (pass-6 A13/call 8); pass-4 B01/design call 6 | DOC (T-030) | BC-1.02.019 |
+| `statusline.theme.heat` | Float (triple) | `[0.22,0.85,0.80]` | default-only: range = {`[0.22,0.85,0.80]`} — BC-1.02.019's HSV gradient is defined only for the default triple (PC2 covers sectors i ∈ {0,1}, hue span ≥ 1/3), so any other triple is a number-range config error (OD-162); the Default/Range cells carry the env spelling, the strict-JSON array (pass-6 A13/call 8; cells re-spelled from the display form pass-8 D06/call 11); pass-4 B01/design call 6 | DOC (T-030) | BC-1.02.019 |
 | `statusline.transcript.read_cap_bytes` | Int (bytes) | 524288 | `1..67108864` (upper bound 64 MiB, labeled judgment call (J): caps per-refresh read buffering far beyond any real transcript step; pass-5 A13/call 16) | J (T-054) | BC-1.03.003 |
 | `statusline.transcript.dedup_memory` | Int | 256 | `1..65536` (upper bound labeled judgment call (J), pass-5 A13/call 16) | Dv (T-060) | BC-1.03.005 |
 | `statusline.transcript.rebuild_excess` | Int | 20000 | `>= 0` | M (T-056) | BC-1.03.007 |
@@ -214,7 +216,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.sparkline.history_cap` | Int | 32 | `1..1000` (upper bound labeled judgment call (J), same render-budget rationale as `kv.cells`; pass-5 A13/call 16) | Dv (T-009) | BC-1.04.003/.009 |
 | `statusline.sparkline.scale` | Float quad (composite) | `[1.0, 1.0, 0.1, 1e-9]` = `[k_top, v_floor, f_floor, other]` | array of 4 finite numbers (`array of 4 numbers`), each `> 0` (strict JSON env grammar, per-key shape in Composite-Type Env Grammar; pass-5 A03/call 3; `Float quad` joins the BC-2.01.004 `Type` enum — pass-7 D09) | Dv (T-045) | BC-1.04.009 |
 | `statusline.cost.min_sessions` | Int | 10 | `>= 1` (0 raises IndexError on an empty list in legacy, SL:261) | OWNER (T-020) | BC-1.05.005 |
-| `statusline.cost.percentiles` | Float pair | (0.75, 0.95) | each a finite Float in `[0, 1]`, ASCENDING pair: `p75 <= p95` is ratified — a descending pair is a number-range config error (strict JSON env grammar, see Composite-Type Env Grammar; pass-3 C2-07; ratified in BC-1.05.005 on its own grounds — index overflow and negative wrap — not mirrored from the limits bands, whose chained red-first comparison is comparison-total for any finite pair, so no ordering constraint is ratified there) | OWNER (T-024) | BC-1.05.005 |
+| `statusline.cost.percentiles` | Float pair | (0.75, 0.95) | each a finite Float in `[0, 1]`, ASCENDING pair: `p75 <= p95` is ratified — a descending pair is a number-range config error (strict JSON env grammar, see Composite-Type Env Grammar; pass-3 C2-07; ratified in BC-1.05.005 on its own grounds — index overflow and negative wrap — not mirrored from the limits bands, whose chained red-first comparison is comparison-total for any finite pair, so no ordering constraint is ratified there); when the ascending check fails, the D4-EX-3 line names the WHOLE key `statusline.cost.percentiles` with its full JSON env value (intra-key member-pair check — both members live in the one key's JSON value, no per-member env spelling; cf. the two-key `subagent.tokens` pair, which names the second key; pass-8 A11) | OWNER (T-024) | BC-1.05.005 |
 | `statusline.cost.min_usd` | Float | 1.0 | finite `>= 0` (grey test strict `<`) | Dv (T-019) | BC-1.05.001 |
 | `statusline.cost.cold_yellow_usd` | Float | 25.0 | finite `>= 0` (cold test inclusive `>=`) | OWNER (T-021) | BC-1.05.001 |
 | `statusline.idle.running_below` | Float | 1 | finite `>= 0`, NaN rejected | DOC (T-108) | BC-1.04.012 |
@@ -234,7 +236,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.subagent.tokens.m_from` | Float | 1000000 | finite `> 0`; ascending pair `k_from <= m_from` (as above). Pair-fire rule (pass-6 A19): the ascending-pair check runs at `m_from`'s own validation, after both keys pass their single-key range checks; when it fails, the D4-EX-3 line names `statusline.subagent.tokens.m_from` with its own value, reason `ascending pair violated (k_from <= m_from)` (number-range class) | DOC (T-042) | BC-1.07.007 |
 | `statusline.subagent.tokens.suffix` | Text | ` tok` (U+0020 + `tok`) | non-empty, no control bytes (mirrors BC-2.01.003 PC-3); the `k_from`/`m_from` values are display thresholds only — the divisors 1e3/1e6 are format constants that define the K/M units, not config (why-not-config comment required at the call site; pass-4 C05/design call 3) | DOC (T-042) | BC-1.07.007 |
 | `statusline.limits.keep_s` | Seconds | 1800 | finite `> 0` (`<` age gate, comparison-total in legacy; pass-3 A05) | J (T-010, owner group A) | BC-1.02.013, BC-1.02.030 |
-| `statusline.limits.windows` | List | `5h/7d` | default-only: range = {`5h/7d`} (window lengths 18000 s / 604800 s; non-default selectors undefined) | DOC (T-031, Anthropic convention) | BC-1.02.010, BC-1.02.011, BC-1.02.024 |
+| `statusline.limits.windows` | List | `5h,7d` | default-only: range = {`5h,7d`} (comma-list env grammar, OD-74; window lengths 18000 s / 604800 s; non-default selectors undefined; Default/Range cells re-spelled from the display form pass-8 D06/call 11) | DOC (T-031, Anthropic convention) | BC-1.02.010, BC-1.02.011, BC-1.02.024 |
 | `statusline.limits.countdown_max_factor` | Float | 1.15 | any finite number (multiplier in the `<=` countdown gate) | J (T-035, owner judgment; OD-57 E-A; BC-1.02.012) | BC-1.02.012 |
 | `statusline.limits.projection_min_elapsed` | Float | 0.10 | any finite number (`>=` elapsed-fraction gate) | DOC (T-032) | BC-1.02.011, BC-1.02.024 |
 | `statusline.limits.projected_bands` | Float pair | `[80, 100]` = `[yellow, red]` | each a finite Float; ELEMENTS NAMED: position 0 is the yellow threshold (compared `>=`, inclusive), position 1 the red threshold (compared `>`, strict), red checked first in legacy's chained comparison (SL:519); strict JSON env grammar, see Composite-Type Env Grammar (pass-5 A15/call 3) | DOC (T-033) | BC-1.02.011, BC-1.02.024 |
@@ -297,7 +299,7 @@ Exact env spellings of the default-only defaults (binding, pass-6 A13/call 8): a
 default-only key compares the PARSED env value to the default, and the env spellings are
 `HYLO_STATUSLINE_UNITS_CONTEXT=K`;
 `HYLO_STATUSLINE_THEME_HEAT=[0.22,0.85,0.80]` (strict-JSON array of 3 numbers — the
-`0.22/0.85/0.80` table cell is the display spelling only);
+Default table cell above carries this env spelling, pass-8 D06/call 11);
 `HYLO_STATUSLINE_UNITS_LINES=k`; `HYLO_STATUSLINE_UNITS_TOKENS=M`;
 `HYLO_STATUSLINE_LIMITS_WINDOWS=5h,7d` (comma-list grammar, OD-74). Any other parse that
 differs from the default after parsing is a number-range config error (OD-162).
@@ -311,7 +313,7 @@ renders: `units.lines` = `k` — the compact tier of `_fmt_lines` paints lowerca
 (SL:858, `n // 1000` + `k`); `units.tokens` = `M` — the token formatter's million tier
 paints uppercase `M` (SL:870, `f"{n / 1e6:.1f}M"`, the approved-mockup docstring's own
 example "88.0M"); `units.context` = `K` — the context denominator below 1e6 paints
-uppercase `K` (SL:436; BC-2.01.006 "else `K`"). Case follows the rendered byte per
+uppercase `K` (SL:436; BC-1.02.006 "else `K`"). Case follows the rendered byte per
 formatter (lowercase `k` in the line/token formatters, uppercase `K` in the context
 denominator); which of a widget's two rendered suffixes NAMES the key default is a
 convention ratified by the orchestrator call (lines named by its lower tier, tokens by its

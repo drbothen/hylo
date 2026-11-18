@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "bd55d2b"
+input-hash: "4529a98"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_finish_turn, _mix_counts (SL:988-996, 1073-1079, 1150-1153)"
@@ -22,6 +22,7 @@ introduced: "0.1"
 modified:
   - "1.2.1 2026-11-17: dropped uncited DI-012 (byte-exact, no exclusion entry; ADV-P2-C11)"
   - "1.2.2 2026-11-19T14:00:00Z: pass-6 residual sweep (ADV-P6-A2-07) — Decisions row states both amended OD-32 conditions (numeric cur.t0 AND non-numeric cur.out, BC-1.03.020)"
+  - "1.2.3 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C02) — the verbatim round-trip bounded by the mix-save encoder boundary (EC-004 added, oracle end-to-end 2026-11-18: transcript-borne worst case payload doc 993 saves cleanly — the 993 decode edge binds below the save boundary, so no reachable save failure, no temp leak, no per-refresh repeat); PC5 and the VP-029 row state the bound"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +53,11 @@ it. This is a normal, crash-free state: `finish` returns early on `t0 == null` b
 3. Closing the turn (newer id, real user prompt, timed system line) calls `finish`, which returns `lr` unchanged
    because `t0` is null; `cur` becomes null; no error.
 4. On load, the OD-32 reader rule (BC-1.03.020) does **not** fire because `t0` is not a number.
-5. The Go mix-cache type stores `cur` (and `cur.out`) as `pyfmt.Value`, never a typed number.
+5. The Go mix-cache type stores `cur` (and `cur.out`) as `pyfmt.Value`, never a typed number. Raw nesting is
+   bounded in practice: the transcript decode edge (993 total document depth, BC-1.03.004 EC-009) caps any
+   input-borne value below the mix-save encoder boundary (measured end-to-end 2026-11-18: transcript-borne worst
+   case — payload document depth 993 — saves cleanly; boundary 994 saves / 995 fails at the legacy frame shape,
+   ADV-P8-C02), so the verbatim round-trip never trips the save budget from the transcript alone.
 
 ## Invariants
 
@@ -66,6 +71,7 @@ it. This is a normal, crash-free state: `finish` returns early on `t0 == null` b
 | EC-001 | Continuation line of the same id, no closer | `t1` updated, `out` still `"abc"` |
 | EC-002 | Then a timed system line | `cur` null, `lr` unchanged (null), no crash |
 | EC-003 | Applying the original (unamended) OD-32 rule here | would give `"out": 900` after a continuation — **wrong** (diverges from legacy); prohibited |
+| EC-004 | Deeply nested `message.id` (timed assistant line without usage; line doc depth 992–993, list- or dict-nested) rides `cur.id` verbatim into the mix-cache payload | end-to-end oracle 2026-11-18 (CPython 3.11.7, isolated temp HOME/cwd): the payload saves cleanly — the mcache holds the nested id, exit 0, identical row rendered, refresh 2 a no-op; no RecursionError, no leaked temp, no per-refresh repeat. The mix-save encoder boundary sits above the 993 decode ceiling (frame-shape replica: payload doc 994 saves / 995 fails), so a transcript-borne value cannot trip the save budget (ADV-P8-C02) |
 
 ## Canonical Test Vectors
 
@@ -85,7 +91,7 @@ legacy oracle (hylo must produce identical bytes).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029 | `cur.out` round-trips verbatim through load/save for any JSON value | Go property test (testing/quick) |
+| VP-029 | `cur.out` round-trips verbatim through load/save for any JSON value within the mix-save encoder boundary (transcript-borne worst case — payload doc 993 — measured saving cleanly; deeper values are unreachable from input because the 993 decode edge binds first, ADV-P8-C02) | Go property test (testing/quick, boundary-aware generator) |
 | VP-029 | `finishTurn` never errors when `t0` is null | Go property test (testing/quick) |
 
 ## Traceability

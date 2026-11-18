@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.6"
+version: "1.0.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "a3e067c"
+input-hash: "2227c92"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ dispatch (SL:1240-1241)"
@@ -19,7 +19,16 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: stale anchor labels refreshed — ARCH-03:137-138 for the subagent.go placement and legacy/claude-dgx:177 for the launcher wiring (ADV-P4-C12)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C11) — stale ARCH-03 line anchors replaced with the stable fragment #subagent (second drift after ADV-P4-C12; call 19)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.0.6 2026-11-19T19:30:00Z: pass-7 remediation (ADV-P7-C06) — stale BC-4.01.002 cross-references refreshed: its EC-004 no longer carries the superseded \"positional data\" reading (aligned v1.1.3), so EC-003 and Related BCs now state the agreement"]
+modified:
+  - "1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)"
+  - "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)"
+  - "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: stale anchor labels refreshed — ARCH-03:137-138 for the subagent.go placement and legacy/claude-dgx:177 for the launcher wiring (ADV-P4-C12)"
+  - "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C11) — stale ARCH-03 line anchors replaced with the stable fragment #subagent (second drift after ADV-P4-C12; call 19)"
+  - "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "1.0.6 2026-11-19T19:30:00Z: pass-7 remediation (ADV-P7-C06) — stale BC-4.01.002 cross-references refreshed: its EC-004 no longer carries the superseded \"positional data\" reading (aligned v1.1.3), so EC-003 and Related BCs now state the agreement"
+  - "1.0.7 2026-11-20T12:00:00Z: pass-8 residual sweep — VP table and VP Anchors gain VP-004 (A2-07): VP-004's closed exit-surface statement verifies the subagent entry leg (exit 0; stdout zero or more LF-terminated NDJSON lines, zero bytes legal; OD-168 config-error case) whose wire grammar this contract's Pre-1/Inv 2/vector row 1 pin; VP-004 bcs: already carries this BC (agent 3)"
+  - "1.0.8 2026-11-20T12:30:00Z: pass-8 residual sweep (OD-192) — ASSUMP-107-1 capture deadline respelled: the capture lands before Phase 2 writes the S1.07 stories, not before Phase 3"
+
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,7 +56,7 @@ not flag parsing, and it precedes every other mode decision.
 2. ASSUMPTION (ASSUMP-107-1): the Claude Code 2.1.326 `subagentStatusLine` stdin payload is assumed
    compatible with the 2.1.322 contract legacy parsed (`{"columns": N, "tasks": [...]}`; per task
    `id, name, agentType, status, description, label, startTime(ms), model, tokenCount`); to be verified
-   by a capture before Phase 3.
+   by a capture before Phase 2 writes the S1.07 stories (OD-192).
 3. All other argv elements (if any) are ignored by this contract; unknown-flag handling (OD-112) is
    BC-4.01.002's concern only for argv routed to the main render.
 
@@ -78,7 +87,7 @@ not flag parsing, and it precedes every other mode decision.
 | EC-001 | `--subagent` given twice | Single routing decision; behavior identical to one occurrence |
 | EC-002 | `--subagent` together with other unknown flags | Still routes to the subagent renderer; unknown flags are not validated in this mode |
 | EC-003 | `--subagent` after a `--` separator (`hylo statusline -- --subagent`) | Routes to the subagent renderer: membership in `argv[1:]` holds at any index (ADV-P3-A01/D05 ruling); BC-4.01.002's EC-004 states the same routing (aligned, v1.1.3+ — no superseded reading remains) |
-| EC-004 | Launcher wiring | `claude-dgx` launches `hylo statusline --subagent` (legacy/claude-dgx:177 wires the CC `subagentStatusLine` command `--subagent`); the captured CC stdin payload must be verified per ASSUMP-107-1 before Phase 3 |
+| EC-004 | Launcher wiring | `claude-dgx` launches `hylo statusline --subagent` (legacy/claude-dgx:177 wires the CC `subagentStatusLine` command `--subagent`); the captured CC stdin payload must be verified per ASSUMP-107-1 before Phase 2 writes the S1.07 stories (OD-192) |
 | EC-005 | Empty argv (no args at all) | Main render (BC-1.01.001) |
 
 ## Canonical Test Vectors
@@ -98,6 +107,7 @@ SL:1240-1241 (`"--subagent" in sys.argv[1:]`); routing order from SL:1239-1244.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-002 | Dispatcher fuzz (argv vectors incl. the BC-1.07.001 routing rows) asserts exact-member `--subagent` at any index routes to the subagent renderer before flag handling and every non-matching form falls to the main path — realizing the exactly-one-renderer invariant observationally over the fuzzed argv space | fuzz (`go test -fuzz`, NUL-decoded argv) |
+| VP-004 | Closed verb-scoped exit surface, subagent entry leg: for all argv/env/stdin with `args[0]=="statusline"`, the `--subagent` entry exits 0 with stdout zero or more LF-terminated NDJSON lines, zero bytes legal (config error = zero stdout bytes per OD-168) — the exit/wire-grammar surface this contract's Pre-1, Inv 2 and vector row 1 pin (pass-8 A2-07) | for-all fuzz (`FuzzStatuslineExitSurface`, `go test -fuzz`, `cmd/hylo`) |
 
 ## Traceability
 
@@ -129,6 +139,7 @@ TBD — filled by story-writer
 ## VP Anchors (Recommended)
 
 - VP-002 (dispatcher fuzz: exact-member `--subagent` routing + unknown-flag complement)
+- VP-004 (closed exit-code surface: the subagent NDJSON exit-surface leg of the for-all fuzz, pass-8 A2-07)
 
 ---
 

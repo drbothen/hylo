@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
-input-hash: "e3c1a9b"
+input-hash: "8315059"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy CACHE_DIR at legacy/dgx_statusline.py SL:78)"
@@ -24,6 +24,7 @@ modified:
   - "2026-11-19T01:05:00Z (1.2.3) ADV-P5 remediation D23+D24 — PC-6 refined to OD-177 libc semantics on every OS: TZ unset → OS zone; TZ empty or unparseable → UTC (was OS zone); leading-colon TZ form pinned; canonical table legs gain empty; H1/Description now name the LocalZone responsibility (P7)"
   - "2026-11-19T04:05:00Z (1.2.4) ADV-P6 remediation D21+D26 — PC-6 accuracy: the UTC-on-unparseable verdict is a ruled hylo verdict (libc itself honors POSIX TZ strings; TZ=Local reaches Go's LoadLocation special case, a documented OS-dependent quirk); LocalZone's error result pinned (non-nil only on the TZ-unset path when OS resolution fails); EC table row order fixed (EC-010 row moved before EC-011/012, ids unchanged)"
   - "2026-11-19T17:00:00Z (1.2.5): ADV-P7 remediation D12 + orchestrator call 4 — Pre-2 home source routed through the seam: HomeDir(env EnvVars) (HOME on Unix, USERPROFILE on Windows); no platform function reads the real process environment (Inv 3); signatures canonized as CacheDir(env EnvVars) and LocalZone(env EnvVars)"
+  - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D01+D08+D16 — PC-1/PC-2 directory resolvers canonized with full signatures and error results (ConfigDir/StateDir/CacheDir all (env EnvVars) (string, error)); Inv 1 names the PC-11 rename-retry keys as the no-legacy-analog default exceptions; TZ-unset canonical leg oracle qualified (runner-relative: assert non-nil zone + nil error, never a parity oracle)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,13 +56,13 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 ## Postconditions
 
 1. **macOS and Linux** (identical rules; macOS does not use `~/Library`):
-   - `CacheDir(env EnvVars)` = `$XDG_CACHE_HOME/hylo` if `XDG_CACHE_HOME` is set, non-empty and absolute; else `$HOME/.cache/hylo`.
-   - `ConfigDir()` = `$XDG_CONFIG_HOME/hylo` under the same rule; else `$HOME/.config/hylo`.
-   - `StateDir()` = `$XDG_STATE_HOME/hylo` under the same rule; else `$HOME/.local/state/hylo`.
+   - `CacheDir(env EnvVars) (string, error)` = `$XDG_CACHE_HOME/hylo` if `XDG_CACHE_HOME` is set, non-empty and absolute; else `$HOME/.cache/hylo`.
+   - `ConfigDir(env EnvVars) (string, error)` = `$XDG_CONFIG_HOME/hylo` under the same rule; else `$HOME/.config/hylo`.
+   - `StateDir(env EnvVars) (string, error)` = `$XDG_STATE_HOME/hylo` under the same rule; else `$HOME/.local/state/hylo`.
 2. **Windows:**
-   - `CacheDir(env EnvVars)` = `%LOCALAPPDATA%\hylo\cache`; `StateDir()` = `%LOCALAPPDATA%\hylo\state`
+   - `CacheDir(env EnvVars) (string, error)` = `%LOCALAPPDATA%\hylo\cache`; `StateDir(env EnvVars) (string, error)` = `%LOCALAPPDATA%\hylo\state`
      (separate subdirectories, OD-144; amending the PLAN §6 "cache and state under
-     `%LOCALAPPDATA%\hylo`" shared-dir reading); `ConfigDir()` = `%APPDATA%\hylo`.
+     `%LOCALAPPDATA%\hylo`" shared-dir reading); `ConfigDir(env EnvVars) (string, error)` = `%APPDATA%\hylo`.
    - `XDG_*` variables are ignored on Windows.
 3. **Status-line cache directory** used by the cache store = the value of `paths.cache_dir` when set (after `~`
    expansion, OD-61), otherwise `CacheDir(env EnvVars)`. The legacy literal `~/.cache/dgx-llm` is never used as a default and
@@ -88,7 +89,13 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
    verdict, EC-009).
    It never calls `time.Local` directly for the decision (Go's `time.Local`
    ignores `TZ` on Windows); the (c) fallback itself may resolve through the runtime's
-   local-time machinery. Documented limitation (OD-171): POSIX-style TZ strings (e.g.
+   local-time machinery. TZ-UNSET LEG ORACLE (pass-8 D16): because the runtime's
+   local-time machinery reads the real process `TZ` on POSIX, the canonical `TZ`-unset
+   leg's expected value is runner-relative by construction; the leg therefore asserts
+   only a non-nil location with a nil error (never a specific zone), is asserted against
+   the runtime's own local zone on the same runner, and is never used as a parity oracle
+   (parity pins `TZ=UTC`, EC-010); Inv 3 governs the function's own reads only, not the
+   runtime's. Documented limitation (OD-171): POSIX-style TZ strings (e.g.
    `EST5EDT`) may differ between Go's zone loader and the MSVC runtime on Windows; parity
    cases therefore pin `TZ=UTC` only (parity harness, BC-6.01.002). Canonical table legs:
    `TZ` unset / `UTC` / IANA name / empty / unparseable.
@@ -98,7 +105,10 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 1. The default of `paths.cache_dir` is one of the TWO explicit owner exceptions to D15's "defaults equal
    `legacy/` until cutover" (OD-101); its registry rationale cites OD-101. The other is
    `backends[0].model_prefixes` (`claude-sonnet`, OD-111, BC-2.01.004 PC-4). Every other P1 default equals
-   legacy (ADV-P3-D17 alignment).
+   legacy, EXCEPT the two PC-11 Windows rename-retry keys
+   (`statusline.cache.rename_retry_delay_ms`, `statusline.cache.rename_retry_limit`),
+   which have no legacy analog (legacy `save_cache` SL:198-206 never retries; pass-8 D08)
+   (ADV-P3-D17 alignment).
 2. The last path component is always the literal `hylo` (product name; a format constant, not config).
 3. The result depends only on the environment passed in (the function takes an env lookup, so tests inject it).
 
@@ -130,7 +140,7 @@ Synthetic environments only (no real home paths).
 | linux, `HOME=/t/h`, `XDG_CACHE_HOME=/t/xc`, `XDG_STATE_HOME=/t/xs` | cache `/t/xc/hylo`, config `/t/h/.config/hylo`, state `/t/xs/hylo` | happy-path |
 | windows, `LOCALAPPDATA=X:\local`, `APPDATA=X:\roaming` | cache `X:\local\hylo\cache`, state `X:\local\hylo\state`, config `X:\roaming\hylo` (OD-144 subdirectories) | happy-path |
 | linux, `HOME=/t/h`, `XDG_CACHE_HOME=rel` | cache `/t/h/.cache/hylo` | edge-case |
-| linux, `HOME=/t/h`, `HYLO_PATHS_CACHE_DIR=/t/c` | status-line cache dir `/t/c`; `CacheDir()` still `/t/h/.cache/hylo` | edge-case |
+| linux, `HOME=/t/h`, `HYLO_PATHS_CACHE_DIR=/t/c` | status-line cache dir `/t/c`; `CacheDir(env EnvVars)` still `/t/h/.cache/hylo` | edge-case |
 | windows, `LOCALAPPDATA` unset | `CacheDir(env EnvVars)` returns an error | error |
 
 ## Verification Properties

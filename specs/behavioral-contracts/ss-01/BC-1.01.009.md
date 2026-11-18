@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.9"
+version: "1.3.10"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6005118"
+input-hash: "46afaea"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -28,6 +28,7 @@ modified:
   - "1.3.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17) — EC-005 row respelled to the OD-178 canon (five canonical tests incl. TestD4EX3_Text; register closed at seven); no behavioral change"
   - "1.3.8 pass-6 remediation (ADV-P6-B04, orchestrator call 11): PC2 names the history-borne CP-O10/O11 raise as a second within-step exception (record_cost write of step 7c persists; reachable via a Python-written history, VP-019 swap — not foreign-shaped); VP-008 row aligned; 2026-11-19T04:00:00Z"
   - "1.3.9 pass-7 remediation (ADV-P7-B02/B03/B08/B14): PC2 mix-cache bearer removed — `cost_thresholds` reads only `COST_HIST` (SL:245), no mix-cache value reaches SL:255; step-2 degrade cell gains the Windows MSVC localtime-domain OSError (CP-T09, orchestrator call 8); CP-S14/S16 footnote marker retired (they are degrading crash paths, not the OD-156 overflow family); EC-001 qualifies the mix-cache write (only when a transcript exists and has grown, SL:1009-1011/1039-1040); no behavioral change; 2026-11-19T07:00:00Z"
+  - "1.3.10 pass-8 remediation (ADV-P8-B06/B07/B11): step 7c distinguishes the foreign-cache fault order — CP-C09 raises inside record_cost BEFORE its write (SL:229/230 ahead of SL:237, nothing written), CP-C10 after it (error-taxonomy rows 277-278); EC-001's mix-cache write condition made exact — at least one complete new line readable, shrunk file resets and re-reads, unchanged or no-complete-line returns without saving (SL:1035-1040, 1055-1057); VP-022 added to VP Anchors (was only in the VP table); 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +68,7 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
    | 6 | window start, only with a truthy `session_id` | SL:1229 | may write `proc_start` | no catalogued vector; foreign-cache CP-C01 only (non-dict cache at SL:273-275, outside its try) (OD-160)¹ |
    | 7a | badge, model, project; git segment | SL:441-462, 411 | git cache | CP-S01..S04 (S04 before the git write); foreign-cache CP-C08 (string `ts` / array cache — BC-1.02.005 EC-009/EC-010) (OD-160)¹ |
    | 7b | thermometer, composition, cache hit, limits, lines, timer, window age, tokens | SL:463-600 | none | CP-S05..S13; OD-156 overflow CP-O01..O05² (E-REN-002) |
-   | 7c | `record_cost`, then `cost_thresholds` | SL:606-607 | cost history | CP-S15 (before the write); unconvertible `usd`/`api_ms` is **not recorded** (OD-166)²; the **history-borne** CP-O10/O11 degrade raises here, in `cost_thresholds` at SL:255 (owner BC-1.05.005 EC-011 — a huge exact int already recorded in the history, not at the render sites); foreign-cache CP-C09/C10 fault **after** the record_cost write (OD-160)¹ |
+   | 7c | `record_cost`, then `cost_thresholds` | SL:606-607 | cost history | CP-S15 (before the write); unconvertible `usd`/`api_ms` is **not recorded** (OD-166)²; the **history-borne** CP-O10/O11 degrade raises here, in `cost_thresholds` at SL:255 (owner BC-1.05.005 EC-011 — a huge exact int already recorded in the history, not at the render sites); foreign-cache CP-C09 faults **before** the record_cost write — `h.setdefault`/`s.get` raise inside `record_cost` (SL:229/SL:230) ahead of `save_cache` (SL:237), so nothing is written — while CP-C10 faults **after** the write, in `cost_thresholds` (OD-160)¹ |
    | 7d | `$`, `$/h`, ⛏ | SL:608-636 | none | **stdin-borne** CP-O10/O11² (E-REN-002: a huge exact int `usd`/`api_ms` from the current stdin meets float conversion at SL:616 / SL:622-623) |
    | 8 | trim, surrogate check, single stdout write | SL:1232-1234 | stdout | CP-S17 (after every write) |
 
@@ -112,7 +113,7 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Row-2 crash (CP-N01, KV NaN) | session cache written; the step-2 mix cache too — but only when a transcript path exists and the file has grown since the cached offset (SL:1009-1011, 1039-1040); no `proc_start`, no git cache, no cost-history write |
+| EC-001 | Row-2 crash (CP-N01, KV NaN) | session cache written; the step-2 mix cache too — but only when a transcript path exists and at least one complete new line is readable beyond the cached offset (a shrunk file resets the offset and re-reads from the start; an unchanged file, `size == off`, or new bytes with no complete LF-terminated line return without saving; SL:1035-1040, 1055-1057); no `proc_start`, no git cache, no cost-history write |
 | EC-002 | Thermometer crash (CP-S06, `used_percentage` NaN) | git cache written; cost history **not** written |
 | EC-003 | Lone surrogate at output (CP-S17) | every write of the refresh done, then degraded line |
 | EC-004 | Wrong-shape transcript line (legacy CP-T01..T07 degrade at step 2 and stay sticky) | Go does **not** degrade at step 2 — approved deviation **D4-EX-2** (BC-1.03.018, legacy BC-SL-098). Excluded from the parity diff by the OD-105 exclusion entry `D4-EX-2`, covered by the 21 table rows of BC-1.03.019 plus BC-1.03.020/021 rows |
@@ -172,7 +173,8 @@ TBD — frame skeleton (design step S2), completed in goldens/burn-down (step S8
 
 ## VP Anchors (Recommended)
 
-- VP-008 — writes-before-fault property; VP-009 — per-step differential. The
+- VP-008 — writes-before-fault property; VP-009 — per-step differential; VP-022 —
+  read-scope containment (no ledger access, DI-007; recording-filesystem wrapper). The
   render-determinism VP was dropped from both rows as a mechanical citation (determinism,
   not effect order — pass-1 finding ADV-P1-B11) and is anchored to BC-5.04.003.
 

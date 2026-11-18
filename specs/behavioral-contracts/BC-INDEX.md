@@ -12,7 +12,7 @@ origin: greenfield
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.9"
+modified: "0.2.10"
 extracted_from: "behavioral-contracts/ss-01..ss-06 frontmatter and H1 headings (generated; do not hand-edit rows)"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -22,7 +22,7 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "c5a28b3"
+input-hash: "0fdce60"
 traces_to: ../prd.md
 
 ---
@@ -204,7 +204,7 @@ traces_to: ../prd.md
 | BC-2.01.002 | backends array: exactly one entry validated until P6; backends[0].metrics_url / backends[0].model_prefixes; default prefixes claude-sonnet | S2.01 | new | n.a. | — | draft | [BC-2.01.002](ss-02/BC-2.01.002.md) |
 | BC-2.01.003 | statusline.theme.* keys for SGR palette, pill codes and separator, legacy defaults | S2.01 | new | n.a. | — | draft | [BC-2.01.003](ss-02/BC-2.01.003.md) |
 | BC-2.01.004 | Key registry: every key declares type, range/operator, default and rationale | S2.01 | new | n.a. | — | draft | [BC-2.01.004](ss-02/BC-2.01.004.md) |
-| BC-2.01.005 | HYLO_* value grammars: typed bool, comma lists, ~ path expansion; COLUMNS excluded as protocol input | S2.01 | new | n.a. | — | draft | [BC-2.01.005](ss-02/BC-2.01.005.md) |
+| BC-2.01.005 | HYLO_* value grammars: Bool, List, Path, strict-JSON composites, Text, and default-only keys; COLUMNS excluded as protocol input | S2.01 | new | n.a. | — | draft | [BC-2.01.005](ss-02/BC-2.01.005.md) |
 
 ### S2.02 — Validation + config-error line
 

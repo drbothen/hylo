@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.4.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "6869c11"
+input-hash: "81a6f43"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (points/scale ranges, OD-162)", "1.4 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (points/scale ranges, OD-162)", "1.4 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.4.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the ramp named as the config key statusline.glyphs.sparkline with its 8-glyph default, OD-189 sibling treatment)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,8 +52,10 @@ yield an empty string. Notation: `\e` is byte 0x1B.
    `_SPARK_FIXED.get(key) or …` (SL:671) and silently falls back to the window max,
    and a floor ≤ 0 breaks zero-anchoring); `statusline.sparkline.colors` = trail RGB
    (70,170,190), fade 0.55..1.0, amber (220,170,60), head (140,235,255), preempt-marked
-   head = theme yellow `\e[33m` (T-046, owner judgment, presentation); glyph key = exactly 8 ordered
-   glyphs `▁▂▃▄▅▆▇█` (OD-02).
+   head = theme yellow `\e[33m` (T-046, owner judgment, presentation); the glyph ramp is
+   the config key `statusline.glyphs.sparkline` = exactly 8 ordered
+   glyphs `▁▂▃▄▅▆▇█` (default; U+2581..U+2588, OD-02, BC-2.01.004 PC-6 — the ramp
+   literals in the vectors are the default spelling, ADV-P8-C2-01).
 
 ## Postconditions
 

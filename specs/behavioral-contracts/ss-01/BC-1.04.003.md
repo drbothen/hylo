@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "0144844"
+input-hash: "5f0276f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:329-350)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)", "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-13/14/15 (preempt_marker_above config key + queue.yellow independence; output-neutrality qualified by points <= history_cap; EC-008 KeyError degrade outcome)", "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (EC-008 KeyError scoped to hist[-1] + OD-160 tag) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and design call 16 (history_cap range 1..1000; preempt_marker_above Float >= 0)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)", "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-13/14/15 (preempt_marker_above config key + queue.yellow independence; output-neutrality qualified by points <= history_cap; EC-008 KeyError degrade outcome)", "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (EC-008 KeyError scoped to hist[-1] + OD-160 tag) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and design call 16 (history_cap range 1..1000; preempt_marker_above Float >= 0)", "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-008/EC-009 degrades ride the never-blank ladder) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, VP-031 de-cited; pass-8 call 12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -117,7 +117,7 @@ at the last 32 points.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030, VP-031 | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | Go property test (testing/quick) |
+| VP-030 | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | Go property test (testing/quick) (routed to the VP-030 quick leg, pass-8 call 12; VP-031 de-cited from this row) |
 | VP-030, VP-031 | Point key order equals legacy for every subset of the four series | manual (table over 16 subsets) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008/EC-009 foreign-cache crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped (ADV-P5-C2-17) | property test (VP-012, go test) |
 
@@ -128,7 +128,7 @@ at the last 32 points.
 | Source | legacy/dgx_statusline.py:get_sample (SL:329-350); _norm_pt (SL:652-656); SPARK_MAX_AGE/HIST_MIN_GAP (SL:83-84) |
 | Legacy contract | BC-SL-042 (P3 base) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-007, DI-012 (foreign-cache shapes OD-160 under the named-deviation rule) |
+| L2 Domain Invariants | DI-007, DI-008 (the EC-008/EC-009 KeyError/IndexError degrades ride the never-blank ladder: 29-byte line, exit 0; ADV-P8-C2-05), DI-012 (foreign-cache shapes OD-160 under the named-deviation rule) |
 | Decisions | OD-55, OD-57 E-0 (T-007/T-008/T-009) |
 | Architecture Module | `internal/statusline/sample.go` |
 | Stories | TBD |

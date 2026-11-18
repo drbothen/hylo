@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: "L3"
 section: "configuration"
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-19T04:00:00Z
+timestamp: 2026-11-19T21:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "c1f2422"
+input-hash: "1189db1"
 
 ---
 
@@ -36,15 +36,18 @@ status (BC-2.01.001). Grammar per type in `types.go`: typed bool
 `true|false|1|0|yes|no` (OD-05), comma lists (OD-74), `~` expansion in paths (OD-61,
 `~user` left as written), `COLUMNS` excluded as protocol input (BC-1.01.005, BC-2.01.005).
 Per-OS env/path behavior (P18, ADV-P1-D21) is build-tag confined in `internal/platform`
-and consumed by `config`: `platform.HomeDir()` backs `~` expansion (on Windows `~` and
+and consumed by `config`: `platform.HomeDir(env EnvVars)` backs `~` expansion (on Windows `~` and
 `~\` expand against `USERPROFILE`, BC-2.01.005). Environment access is the injected
 `EnvVars` seam of ARCH-01 (AD-10) — `Lookup(name) (string, bool)` plus `Names()`; the
 Windows NT case-insensitive `HYLO_*` name matching is a `platform`-provided
 **implementation of that same interface**, injected into `config.Load` at the seam —
 never a call around it (ADV-P2-A02), so tests fake env behavior on every OS. The
 `paths.*` **defaults are
-owned by `internal/platform`** (`CacheDir()`/`StateDir()`/`ConfigDir()`, OD-95/OD-101/OD-144;
-ADV-P1-A16) — the registry stores the resolver, not a literal. The cfg→plat edge is
+owned by `internal/platform`** (`CacheDir(env EnvVars) (string, error)` / `StateDir(env EnvVars) (string, error)` /
+`ConfigDir(env EnvVars) (string, error)`, OD-95/OD-101/OD-144;
+ADV-P1-A16; env-injected signatures with error returns per pass-8 D01, orchestrator call 7 —
+BC-3.01.001 EC-004 requires the error when a directory cannot be determined, and
+`config path` exits 1 on it) — the registry stores the resolver, not a literal. The cfg→plat edge is
 drawn in ARCH-00's dependency graph; pyfmt and platform remain the two sinks.
 
 - **Context:** legacy parsed `DGX_*` ad hoc at import; a malformed number crashed before
@@ -151,4 +154,5 @@ links must target one of these.
 ## Mapping
 
 BC-2.01.001..005 -> registry/types/load; BC-2.02.001..006 -> errors.go classes;
-BC-2.03.001/.002 -> cmd/hylo consuming these errors (ARCH-01). Criticality HIGH (>= 90%).
+BC-2.03.001/.002 -> cmd/hylo consuming these errors (ARCH-01). Criticality HIGH (>= 90%
+kill rate — the Phase 6 mutation target, not a P1 gate; OD-158).

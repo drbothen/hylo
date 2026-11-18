@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "389f30f"
+input-hash: "4529a98"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_iso_ts, _finish_turn, _mix_counts (SL:954-996, 1064-1087)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: CP-O08 vector made self-contained (exact line templates, 100/467/160 B) and byte math re-pinned from the oracle — size 727 = 567 + 160 deleted, conv 3, cur null per OD-167 (was 656/conv 5/131 B; ADV-P4-C09)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C05/C02) — EC-009 pins the CP-O08 close-reached shortcuts (t0 null, out <= 0, span <= 0; SL:996 divide unreachable) with three oracle-run non-raising vectors; CP-O08 vector names the PC4(b) oracle explicitly", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C01/C03) — Pre2 and EC-008 gain the Windows MSVC-domain naive-timestamp `ErrLocaltimeDomain` leg (whole line degrades; BC-5.04.001 PC6); PC2 and Inv2 pin Python `==` turn identity (no identity shortcut; NaN id opens a new turn per line) vs dedup's set-membership identity short-circuit, with the full-cache 420 B NaN-id oracle vector; VP table and VP Anchors gain the owned CP-O08 D4-EX-2 legs (VP-013 register, VP-012 closure; ADV-P6-C06)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C03) — NaN-id row respelled: the 420 B file holds under the default json.dumps separators (measured 100 + 160 + 160), not compact separators"]
+modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: CP-O08 vector made self-contained (exact line templates, 100/467/160 B) and byte math re-pinned from the oracle — size 727 = 567 + 160 deleted, conv 3, cur null per OD-167 (was 656/conv 5/131 B; ADV-P4-C09)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C05/C02) — EC-009 pins the CP-O08 close-reached shortcuts (t0 null, out <= 0, span <= 0; SL:996 divide unreachable) with three oracle-run non-raising vectors; CP-O08 vector names the PC4(b) oracle explicitly", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C01/C03) — Pre2 and EC-008 gain the Windows MSVC-domain naive-timestamp `ErrLocaltimeDomain` leg (whole line degrades; BC-5.04.001 PC6); PC2 and Inv2 pin Python `==` turn identity (no identity shortcut; NaN id opens a new turn per line) vs dedup's set-membership identity short-circuit, with the full-cache 420 B NaN-id oracle vector; VP table and VP Anchors gain the owned CP-O08 D4-EX-2 legs (VP-013 register, VP-012 closure; ADV-P6-C06)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C03) — NaN-id row respelled: the 420 B file holds under the default json.dumps separators (measured 100 + 160 + 160), not compact separators", "1.2.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C02) — PC2 states the verbatim write-back bound: the 993 decode edge caps input-borne nesting below the mix-save encoder boundary, so holding a raw deeply nested id never trips the save budget (measured end-to-end 2026-11-18; BC-1.03.021 EC-004)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +67,10 @@ segment (BC-1.04.018).
    - if `cur` is non-empty and `cur.id == m.id`: `cur.t1 = t_line` (position of `t1` in `cur` kept). The comparison
      is Python `==` over the decoded values — **no identity shortcut** (SL:1074), so `NaN == NaN` is False and every
      line with a decoded `NaN` id opens a **new turn** (ADV-P6-C03); this is the opposite of dedup membership, which
-     set membership short-circuits on the shared NaN object (BC-1.03.005 PC5(a));
+     set membership short-circuits on the shared NaN object (BC-1.03.005 PC5(a)). A raw id of arbitrary nesting is
+     held and written back verbatim; the 993 decode edge (BC-1.03.004 EC-009) caps input-borne nesting below the
+     mix-save encoder boundary, so the write-back never trips the save budget (measured end-to-end 2026-11-18,
+     ADV-P8-C02; BC-1.03.021 EC-004);
    - else: `lr = finish(cur, lr)`; `cur = {"id": m.id, "t0": lu, "t1": t_line, "out": (m.usage or {}).output_tokens
      or 0}` (key order `id, t0, t1, out`).
 3. **Timed assistant line without a truthy id**: no change.

@@ -2,13 +2,13 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.17"
+version: "1.19"
 status: draft
 producer: architect
-timestamp: 2026-11-19T20:00:00Z
+timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
-input-hash: "4e7a209"
+input-hash: "b938138"
 traces_to: ../architecture/ARCH-INDEX.md
 lifecycle_status: active
 introduced: "1.0"
@@ -28,7 +28,9 @@ modified:
   - "1.14 2026-11-19T14:00:00Z: pass-6 residual sweep \u2014 union re-machine-checked: 254 directed VP\u2192BC bcs: edges, 0 forward-only; pass-6 owed rows all delivered and disk-verified (BC-5.02.004's VP table gains VP-006; the eight BC-1.02.x VP-041 rows and three BC-1.03.x VP-013 rows verified on disk); map rows for BC-1.03.006/.007/.010 gain VP-012; VP-012 bcs: gains BC-1.03.006/.007/.010 (reciprocity over exception-listing); Uncovered-BCs exception list reduced to exactly the standing residue (3 design references + 3 removal-note citations)"
   - "1.15 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-21) \u2014 reciprocity over exception-listing: VP-019 bcs: gains BC-1.01.009 (PC2 names the swap legs' Python-written history), VP-012 bcs: gains BC-1.06.001 (PC-1 cites the closure check), VP-018 bcs: gains BC-2.01.004 (PC-11 key cross-reference); the three corresponding map rows gain those VP ids and the union re-machine-checks at 257 directed bcs: edges, 0 forward-only, residue exactly the standing 3 design references + 3 removal-note citations; no catalog or class changes"
   - "1.16 2026-11-19T18:00:00Z: pass-7 closure reciprocity (A2-02/C2-03/C05, orchestrator call 10) \u2014 VP-012 v1.16 copies the BC-6.03.004 rider register exactly and its bcs: gains BC-1.04.001 (OD-181 rider carrier) and BC-1.04.002 (OD-160-tagged EC-008 citation carrier); the two corresponding map rows gain VP-012 (union: 259 directed bcs: edges, 0 forward-only, standing residue unchanged); the reciprocal BC-body VP-table rows in BC-1.04.001, BC-1.04.002 and BC-1.06.001 are owed by the ss-01 contracts and enumerated in the residuals prose"
-  - "1.17 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — reciprocity over exception-listing: VP-006 bcs: gains BC-6.01.001 (PC-4 states this VP pins the same measured self-check constants, pass-7 D04) and VP-012 bcs: gains BC-1.02.017 (Inv 3 names the OD-160 rider test TestWindowAge_D4EX1_Windows_AncestorFound, ADV-P7-B15); the two corresponding map rows gain those VP ids and the union re-machine-checks at 261 directed bcs: edges, 0 forward-only, residue exactly the standing 3 design references + 3 removal-note citations + 2 enumerated VP-041 scope-split contrast mentions; no catalog or class changes"
+  - "1.17 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — reciprocity over exception-listing: VP-006 bcs: gains BC-6.01.001 (PC-4 states this VP pins the same measured self-check constants, pass-7 D04) and VP-012 bcs: gains BC-1.02.017 (Inv 3 names the D4-EX-1 rider test TestWindowAge_D4EX1_Windows_AncestorFound, ADV-P7-B15); the two corresponding map rows gain those VP ids and the union re-machine-checks at 261 directed bcs: edges, 0 forward-only, residue exactly the standing 3 design references + 3 removal-note citations + 2 enumerated VP-041 scope-split contrast mentions; no catalog or class changes"
+  - "1.18 2026-11-19T22:00:00Z: pass-8 first sync (agent 4) — VP-024 bcs: gains BC-1.05.009 (ADV-P8-C2-07, orchestrator call 12: VP-024 is the owning home of the pyfmt.Dumps differential-fuzz leg that BC-1.05.009's VP-table routes; the reciprocal BC-body VP-table row is owed by the ss-01 contract, ADV-P8-C2-07 BC-row owner) and the BC-1.05.009 map row gains VP-024 (+1 directed edge over the recorded 261 → 262 attributable to agent 4, one transient forward-only edge enumerated below); A2-06 label fix, the TestWindowAge_D4EX1_Windows_AncestorFound mis-label 'the OD-160 rider test' respelled 'the D4-EX-1 rider test' (history entries above re-dated in place, current prose below); FINAL UNION RE-MACHINE-CHECK DEFERRED to the pass-8 residual sweep: agent 3's VP-001..020 bcs: deltas are already on disk (VP-004, VP-012, VP-013 at burst time) and await its report before the next index sync"
+  - "1.19 2026-11-20T12:00:00Z: pass-8 residual sweep — agent 3's bcs: deltas synced: VP-004 bcs: gains BC-1.07.001 (subagent NDJSON exit-surface leg; the reciprocal BC-body VP-table row delivered in BC-1.07.001 v1.0.7 this burst), VP-012 bcs: gains BC-1.03.002/.005/.014/.016 and VP-013 bcs: gains BC-1.03.014/.016 (reciprocal BC-body VP-table rows verified on disk, ADV-P8-C03); the five map rows gain the ids; the 1.18 transient forward-only edge VP-024 in BC-1.05.009 is resolved (BC-1.05.009 v1.3.3 delivered the VP-024 row); final union re-machine-check 2026-11-20T12:00:00Z scripted over all 41 VP files x 154 BC bodies: 269 directed bcs: edges, 0 forward-only, reverse-only residue exactly the standing 3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -167,10 +169,10 @@ modified:
 | BC | VPs |
 |---|---|
 | BC-1.03.001 | VP-029 |
-| BC-1.03.002 | VP-019, VP-029 |
+| BC-1.03.002 | VP-019, VP-029, VP-012 |
 | BC-1.03.003 | VP-029, VP-031 |
 | BC-1.03.004 | VP-006, VP-029, VP-038 |
-| BC-1.03.005 | VP-029, VP-031 |
+| BC-1.03.005 | VP-029, VP-031, VP-012 |
 | BC-1.03.006 | VP-013, VP-029, VP-012 |
 | BC-1.03.007 | VP-013, VP-029, VP-012 |
 | BC-1.03.008 | VP-029 |
@@ -179,9 +181,9 @@ modified:
 | BC-1.03.011 | VP-029 |
 | BC-1.03.012 | VP-029 |
 | BC-1.03.013 | VP-029 |
-| BC-1.03.014 | VP-029 |
+| BC-1.03.014 | VP-029, VP-012, VP-013 |
 | BC-1.03.015 | VP-012, VP-029 |
-| BC-1.03.016 | VP-029 |
+| BC-1.03.016 | VP-029, VP-012, VP-013 |
 | BC-1.03.017 | VP-029 |
 | BC-1.03.018 | VP-012, VP-013, VP-029 |
 | BC-1.03.019 | VP-012, VP-013, VP-029 |
@@ -226,7 +228,7 @@ modified:
 | BC-1.05.006 | VP-012, VP-020 |
 | BC-1.05.007 | VP-001, VP-021 |
 | BC-1.05.008 | VP-021 |
-| BC-1.05.009 | VP-019, VP-020 |
+| BC-1.05.009 | VP-019, VP-020, VP-024 |
 
 ### S1.06 (2)
 
@@ -239,7 +241,7 @@ modified:
 
 | BC | VPs |
 |---|---|
-| BC-1.07.001 | VP-002 |
+| BC-1.07.001 | VP-002, VP-004 |
 | BC-1.07.002 | VP-005, VP-009 |
 | BC-1.07.003 | VP-005, VP-006 |
 | BC-1.07.004 | VP-010 |
@@ -330,8 +332,15 @@ modified:
 
 None. 154/154 covered (union of VP `bcs:` frontmatter and VP anchors in the BC
 bodies' Verification Properties / VP Anchors sections; re-machine-checked
-2026-11-19T20:00:00Z after the sync-check adv-p7 closure: 261 directed VP→BC `bcs:`
-edges, 0 forward-only, exactly 3 reverse-only VP-table residuals plus the 3
+2026-11-20T12:00:00Z after the pass-8 residual sweep: 269 directed VP→BC `bcs:`
+edges, 0 forward-only. Pass-8 second sync (residual sweep): agent 3's `bcs:` deltas
+reported and synced — VP-004 gains BC-1.07.001 (subagent NDJSON exit-surface leg of
+the for-all fuzz; the reciprocal BC-body VP-table row delivered in BC-1.07.001
+v1.0.7), VP-012 gains BC-1.03.002/.005/.014/.016 and VP-013 gains
+BC-1.03.014/.016 (reciprocal BC-body VP-table rows verified on disk, ADV-P8-C03);
+the five map rows gain the ids; the 1.18 TRANSIENT forward-only edge VP-024 in
+BC-1.05.009 is RESOLVED (BC-1.05.009 v1.3.3 delivered the VP-024 VP-table row)).
+Standing residuals otherwise unchanged: exactly 3 reverse-only VP-table residuals plus the 3
 removal-note citations and the 2 VP-041 scope-split contrast mentions enumerated
 below — the lists are therefore exactly the residue). Design references, not
 citations (excluded by ruling):
@@ -355,7 +364,7 @@ preferred over exception-listing, the SC-13/SC-14 convention — which is why
 those three edges no longer appear as residuals. In this version (SC-29, sync-check
 adv-p7): VP-006 `bcs:` gains BC-6.01.001 (PC-4 states this VP pins the same measured
 self-check constants, pass-7 D04) and VP-012 `bcs:` gains BC-1.02.017 (Inv 3 names the
-OD-160 rider test TestWindowAge_D4EX1_Windows_AncestorFound, B15) — reciprocity
+D4-EX-1 rider test TestWindowAge_D4EX1_Windows_AncestorFound, B15) — reciprocity
 preferred over exception-listing, the SC-13/SC-14 convention — which is why those two
 edges no longer appear as residuals. Pass-6 owed reciprocal BC-body rows — all delivered and
 disk-verified 2026-11-19 (ADV-P6-B01/C06/A2-17): BC-1.02.002/.003/.006/.007/

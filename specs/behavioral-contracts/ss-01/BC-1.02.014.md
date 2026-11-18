@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.2"
+version: "1.5.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6ebdaf1"
+input-hash: "c324f8c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -24,6 +24,7 @@ modified:
   - "1.5 pass-5 remediation (ADV-P5-B12/B05): units.lines thresholds cited at SL:856/858 (was the stale SL:866-867); EC-013 scoped to the positive side and notes a huge negative renders exactly via str(n) (SL:860, oracle-verified); 2026-11-18T05:42:56Z"
   - "1.5.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.5.2 pass-6 remediation (ADV-P6-B08): the lines arrows are named as the registry keys statusline.glyphs.lines_up / lines_down instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
+  - "1.5.3 pass-8 remediation (ADV-P8-B05, orchestrator call 10): Inv 3 registered range respelled to the interface-definitions canon — units.lines = {`k`} (the `M` divisor is a registered render semantic, not an accepted value); no behavioral change; 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,8 +81,9 @@ Notation: `\e` is the byte 0x1B.
    1,000,000 `>=` → M, SL:856 and SL:858) are baked into the single derivable semantics, and no
    alternative scheme is derivable from the legacy program — so per OD-162's test its valid
    range is its registered default only; any other value is a number-range config error
-   (BC-2.02.003, OD-162). Range for architect registration: units.lines = {`k`/`M`}
-   (registered default). Byte parity (vectors) is obligated at the defaults.
+   (BC-2.02.003, OD-162). Range for architect registration: units.lines = {`k`}
+   (registered default, matching interface-definitions; `M` is a registered render SEMANTIC of the key, not an
+   accepted value). Byte parity (vectors) is obligated at the defaults.
 
 ## Edge Cases
 

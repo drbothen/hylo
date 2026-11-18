@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f118c73"
+input-hash: "9f5cdd9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,7 @@ modified:
   - "1.3 pass-5 remediation (ADV-P5-B10): PC4 gains the reroute-all carve-out — SL:489 short-circuits to rl = {}, so a malformed window is never touched and nothing raises (oracle-verified); new EC-010 pins the malformed-window-under-reroute-all case; 2026-11-18T05:42:56Z"
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.3.2 pass-7 remediation (ADV-P7-B06/B12): reroute-all control and markers respelled to the OD-179 config key `statusline.lane.reroute_all_prefixes` (PC3, EC-007, EC-010, Config-keys row); history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
+  - "1.3.3 pass-8 remediation (ADV-P8-B01, orchestrator call 5): reroute-all trigger restated in the membership form of BC-1.02.009 PC1 — any configured model prefix, trailing `*` stripped, member of `statusline.lane.reroute_all_prefixes` (PC3, EC-007, EC-010); EC-010 states the default-`model_prefixes=claude-sonnet` degrade (oracle 2026-11-17); Config-keys row lists `backends[0].model_prefixes` beside the marker key; 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,7 +52,11 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
    and file naming, BC-1.06.002 temp handling, BC-3.01.001 the cache directory).
 2. `now` = the single per-render clock value (design IM-14), frozen by the harness.
 3. Config `statusline.limits.keep_s` default 1800 (T-010; owner group A judgment: "30 min of plan limits between Claude
-   Code reports"). `statusline.lane.reroute_all_prefixes` controls reroute-all (BC-1.02.009 PC1; OD-179).
+   Code reports"). Reroute-all holds when any configured model prefix — the `backends[0].model_prefixes` list parsed per
+   BC-1.02.001 Precondition 4, with trailing `*` stripped — is a **member of** the List key
+   `statusline.lane.reroute_all_prefixes` (the membership set, default `["claude", "claude-"]`):
+   `any(p.rstrip("*") in reroute_all_prefixes for p in prefixes)` (SL:487-488; BC-1.02.009 PC1; OD-179). Under the
+   default `model_prefixes=claude-sonnet` no prefix qualifies and reroute-all does **not** hold.
 4. `effective_rl` runs before the row-1 render (legacy step order, BC-1.01.009).
 
 ## Postconditions
@@ -66,7 +71,7 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
 4. The returned value replaces `d["rate_limits"]` for the limits widget (BC-1.02.009..012). A returned window value
    that is truthy and not an object (string, non-empty list, non-zero number, `true`) makes the limits loop raise at
    SL:503 (CP-S09) → whole stdout is `\e[90mstatusline degraded\e[0m\n`, with the cache write of step 1 already
-   done — **unless** reroute-all is in effect (BC-1.02.009): SL:489 then binds `rl = {}` without evaluating
+   done — **unless** reroute-all is in effect (Precondition 3; BC-1.02.009): SL:489 then binds `rl = {}` without evaluating
    `d["rate_limits"]` (short-circuited conditional, oracle-verified 2026-11-17), so the malformed window is never
    touched and nothing raises; the widget is hidden.
 
@@ -86,10 +91,10 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
 | EC-004 | bad cached window, then a good stdin object | recovers at once (stdin overwrites the cache) |
 | EC-005 | `{five_hour: 0, seven_day: {…}}` | saved verbatim; `0` counts as an absent window |
 | EC-006 | `{seven_day: {}}` | saved; widget hidden (no percentage) |
-| EC-007 | reroute-all (`statusline.lane.reroute_all_prefixes` contains bare `claude`) | still written to the cache; widget hidden |
+| EC-007 | reroute-all in effect (some configured model prefix, trailing `*` stripped, is a member of `statusline.lane.reroute_all_prefixes` — e.g. `backends[0].model_prefixes=claude` or `claude-*`; under the default `model_prefixes=claude-sonnet` reroute-all does **not** hold, BC-1.02.009 PC1) | still written to the cache; widget hidden |
 | EC-008 | foreign cache with `rl` but no `rl_ts` (foreign-cache shape, **OD-160**: Go stores only non-empty rl dicts with `rl_ts`, SL:305-308) | hidden (`ts` defaults to 0) |
 | EC-009 | cache `rl_ts` in the future | shown |
-| EC-010 | malformed window under reroute-all (stdin `{"five_hour": "x"}`, `statusline.lane.reroute_all_prefixes` contains bare `claude`) | still written to the cache (PC1); no raise and no degrade — SL:489 binds `rl = {}` and the limits loop never sees the malformed value; widget hidden (extends EC-007 to malformed windows; PC4) |
+| EC-010 | malformed window under reroute-all (stdin `{"five_hour": "x"}`, reroute-all in effect per Precondition 3 — e.g. `model_prefixes=claude`) | still written to the cache (PC1); no raise and no degrade — SL:489 binds `rl = {}` and the limits loop never sees the malformed value; widget hidden (extends EC-007 to malformed windows; PC4). Under the default `model_prefixes=claude-sonnet` reroute-all does not hold and the same stdin degrades (EC-003/PC4; oracle-verified 2026-11-17) |
 
 ## Canonical Test Vectors
 
@@ -136,7 +141,7 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:effective_rl (SL:298-312); call site legacy/dgx_statusline.py:main (SL:1216); crash site legacy/dgx_statusline.py:render_lane (SL:502-503) |
 | Legacy contract | BC-SL-093 (deep pass-3 round 2 §A3) |
-| Config keys | `statusline.limits.keep_s` (T-010), `paths.cache_dir` (OD-101), `statusline.lane.reroute_all_prefixes` (OD-179; reroute-all control, BC-1.02.009 PC1) |
+| Config keys | `statusline.limits.keep_s` (T-010), `paths.cache_dir` (OD-101), `backends[0].model_prefixes` (OD-111/OD-123; the trigger list whose members are tested), `statusline.lane.reroute_all_prefixes` (OD-179; the reroute-all membership set, BC-1.02.009 PC1) |
 | Parity | byte-exact for stdout and cache content authored by Go; hand-edited-cache vectors carry exclusion **OD-160** (foreign-cache shapes, ruling Q-b). Go temp-file cleanup on a failed replace (legacy leaks the temp file) is the OD-110 temp-file exclusion entry (owned by BC-1.06.002 with its own table tests), applied to the cache-directory comparison only; it does not affect any vector here |
 
 ## Related BCs (Recommended)

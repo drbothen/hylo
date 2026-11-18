@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.3"
+version: "1.1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:45:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - docs/RESUME.md
-input-hash: "98fb45d"
+input-hash: "44eb202"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy entry point legacy/dgx_statusline.py SL:1238-1245 is the statusline-only analogue)"
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout", "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - PC-3 notes config path's flag ownership (--config[=]<value>; a bare --config is a flag error, exit 2, this contract's golden usage surface)"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout", "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - PC-3 notes config path's flag ownership (--config[=]<value>; a bare --config is a flag error, exit 2, this contract's golden usage surface)", "1.1.4 2026-11-19T21:00:00Z: ADV-P8 remediation D12+A2-07 — Pre-1/PC-1 signatures per ARCH-01: run(os.Args[1:], env, stdin, stdout, stderr) with the platform.EnvVars seam; runStatusline(env, stdin, stdout, stderr) takes no arg slice (the unknown-flag scan runs in run); VP-004 row names the for-all leg VP-004 carries per pass-8 call 12"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,12 +43,15 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 ## Preconditions
 
-1. `main` calls `run(os.Args[1:], stdin, stdout, stderr)` and exits with its return value
+1. `main` calls `run(os.Args[1:], env, stdin, stdout, stderr)` — the `env` parameter is
+   the `platform.EnvVars` seam (ARCH-01; pass-8 D12) — and exits with its return value
    (design §2.1).
 
 ## Postconditions
 
-1. `args[0] == "statusline"` → `runStatusline(args[1:], ...)`, which **always returns 0**.
+1. `args[0] == "statusline"` → `runStatusline(env, stdin, stdout, stderr)`, which
+   **always returns 0** (per ARCH-01 it takes no argument slice: the unknown-flag scan
+   of `args[1:]` runs in `run`, which dispatches here; pass-8 D12).
    Within it: argv carrying `--subagent` anywhere in `args[1:]` selects the subagent
    renderer (BC-1.07.001), whose stdout may be ZERO bytes (zero eligible rows, BC-1.07.004
    PC-6) — main mode otherwise: unknown flags → BC-4.01.002; config errors → BC-2.02.001;
@@ -103,7 +106,7 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0; MAIN-mode argv (no `--subagent`): stdout ends with `\n` and is non-empty; SUBAGENT-mode argv: stdout is zero or more LF-terminated NDJSON lines, zero bytes allowed (BC-1.07.001) | fuzz (`go test -fuzz`) |
+| VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0; MAIN-mode argv (no `--subagent`): stdout ends with `\n` and is non-empty; SUBAGENT-mode argv: stdout is zero or more LF-terminated NDJSON lines, zero bytes allowed (BC-1.07.001). VP-004 carries this for-all leg — argv/env/stdin fuzz incl. the subagent NDJSON check — per pass-8 call 12 (A2-07) | fuzz (`go test -fuzz`) |
 | VP-002 | Partial coverage: the flag-less/positional branch of the same dispatcher fuzz asserts exit 0 with a normal (non-empty, LF-terminated) render for positional-only argv | fuzz (`go test -fuzz`) |
 
 ## Traceability

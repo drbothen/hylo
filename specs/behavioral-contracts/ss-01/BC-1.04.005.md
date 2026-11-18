@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "c9e9a60"
+input-hash: "5f0276f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:serving_state (SL:705-722)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on EC-007)", "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (down-label words sourced to new Text keys statusline.labels.vllm_down / statusline.labels.lmcache_down with legacy byte defaults, per OD-189)"]
+modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on EC-007)", "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (down-label words sourced to new Text keys statusline.labels.vllm_down / statusline.labels.lmcache_down with legacy byte defaults, per OD-189)", "2026-11-18 (v1.2.3) pass-8 remediation ADV-P8-C2-01 (the dot named as the config key statusline.glyphs.telemetry_dot, default ◉ U+25C9, beside the hard-coded literal in PC4 — OD-189 sibling treatment)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,8 +51,12 @@ byte 0x1B.
    P20) if `vllm:lmcache_mp_lookup_duration_seconds_count` is present **and**
    `m.get("up:lmcache") == 0`.
 3. Else `down = none`.
-4. Segment = `"\e[31m◉ " + down + "\e[0m"` if `down`, else `"\e[33m◉\e[0m"` when stale,
-   `"\e[32m◉\e[0m"` when fresh. A down state is red regardless of `stale`.
+4. Segment = `"\e[31m" + glyphs.telemetry_dot + " " + down + "\e[0m"` if `down`, else
+   `"\e[33m" + glyphs.telemetry_dot + "\e[0m"` when stale,
+   `"\e[32m" + glyphs.telemetry_dot + "\e[0m"` when fresh. The dot is the config key
+   `statusline.glyphs.telemetry_dot` (Text, default `◉` U+25C9, BC-2.01.004 PC-6) — the
+   literal ◉ above and in every vector is the default spelling (ADV-P8-C2-01). A down
+   state is red regardless of `stale`.
 
 ## Invariants
 

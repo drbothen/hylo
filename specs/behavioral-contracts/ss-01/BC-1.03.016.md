@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "4529a98"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_finish_turn, _mix_counts (SL:988-996, 1064-1087)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the owned T15 D4-EX-2 legs (VP-013 register, VP-012 closure; BC-1.03.018 PC5 names this contract's T15 row among the dedicated tests)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -107,6 +107,8 @@ Full-cache goldens for three rows (re-pinned 2026-11-15, legacy oracle, CPython 
 |--------|----------|-------------|
 | VP-029 | All 20 rows pass as Go table tests | table test (20 rows) |
 | VP-029 | All rows except T15 match legacy byte-for-byte in the parity harness | parity harness (Tier A) |
+| VP-013 | The T15 vector row this contract owns is a D4-EX-2 wrong-shape leg: the CP-T05 opening-line skip leaves no partial mutation (previous turn, `lu` and composition unchanged by the skipped line; register VP-013; ADV-P8-C03) | Go property/table test over the owned vector |
+| VP-012 | The T15 exclusion entry this contract owns rides the D4-EX-2 closure check (BC-1.03.018 PC5 names this contract's T15 row among the dedicated tests) | repository test over `exclusions.json` |
 
 ## Traceability
 
@@ -138,6 +140,8 @@ S-TBD — turn machine
 ## VP Anchors (Recommended)
 
 - VP-029 — 20-row table
+- VP-013 — the owned T15 D4-EX-2 leg (no partial mutation)
+- VP-012 — closure cover for the owned D4-EX-2 exclusion entry
 
 ---
 

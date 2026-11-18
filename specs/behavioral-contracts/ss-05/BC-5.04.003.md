@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "59089af"
+input-hash: "4d0d663"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python time.time() value discipline at the ten legacy clock reads, P3r1 §A0, DET-01..08)"
@@ -27,6 +27,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D03+D27+D10: TimeFloat takes time.Time per ARCH-06 canon; HYLO_TEST_NOW resolved once to time.Time (never a raw string), malformed = non-finite/non-decimal; subagent now_ms read SL:889 added to consumers"
   - "2026-11-18T22:00:00Z (1.2.4) ADV-P4 remediation D24+D34 - HYLO_TEST_NOW grammar pinned (finite decimal within time.Time range; nan/inf/0x/underscore/whitespace/1e300 malformed) with BC-6.01.003 as the single owner; pyfmt contract de-duplicated to value discipline only"
   - "2026-11-18T23:58:00Z (1.2.5) ADV-P5 remediation D02+D19 — frozen clock never round-trips through time.Time nanoseconds (the parsed float64 IS time.time(); ~17% of fractional values drift otherwise; owner call 7); TimeFloat applies to the real clock only; range bound fixed to the asymmetric epoch-seconds span [-62135596800, 253402300799] (D19)"
+  - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D21 — PC-1 states the _PyTime_AsSecondsDouble whole-second branch and pins the divergence: float64(ns)/1e9 differs from it only for |ns| >= 2^62 on the real-clock path (frozen HYLO_TEST_NOW never routes through ns); the truncated spelling is ruled"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,7 +72,13 @@ value is that float64 itself, never a `time.Time` — see precondition 2 and PC 
 
 1. `TimeFloat(ns) = float64(ns) / 1e9` — the Python `time.time()` value, correct
    to the ns-derived float64 (≥ 1 ns granularity below the second is lost to float64, the
-   same as Python).
+   same as Python). CPython's constructor `_PyTime_AsSecondsDouble` splits whole seconds
+   first (`(double)secs + (double)ns / 1e9` after the negative-`ns` floor adjustment);
+   the truncated spelling pinned here differs from it only for |ns| ≥ 2^62 — reachable
+   only on the real-clock path, never under a frozen `HYLO_TEST_NOW` (which parses as a
+   decimal float and never routes through ns, BC-6.01.003 PC-3). Ruled pinned divergence,
+   not a defect (pass-8 D21): the port keeps `float64(ns) / 1e9`; parity cases cannot
+   observe the difference.
 2. Read once per render and passed down; the idle widget's two legacy reads (SL:825, 826)
    receive one value (DET-08 minute-straddle fix).
 3. Frozen-clock neutrality (rewritten, ADV-P5-D02 / owner call 7): under the harness shim

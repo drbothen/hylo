@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "bec9327"
+input-hash: "07f2944"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -26,6 +26,7 @@ modified:
   - "2026-11-18T23:30:00Z (1.2.5) ADV-P5 remediation D17 — PC-7 reconciliation sentence: encoder budgets measured per site under the unified law 993 − W (BC-5.02.006 PC-6), strictly below the decoder acceptance at every shared context"
   - "2026-11-19T02:00:00Z (1.2.6) pass-5 remediation sweep — PC-7 encoder reconciliation restated to the re-measured sweep-C law (995 − s json.dump / 994 − s json.dumps, s = frames at the encode call inclusive; per-site budgets session/mix 991, record_cost/git 990, composition 991/990; Save budget equals Load budget; exposure = stdin rate_limits value depth 991..992, session-save document flip 991 saved / 992 skipped), matching BC-5.02.006 PC-6 and ARCH-06"
   - "2026-11-19T14:00:00Z (1.2.7) pass-6 residual sweep (call 5) — PC-1 rider: the one-line rule governs the stdin/transcript/cache line-splitting sites; the metrics reply body is decoded whole (ModeBytes, may be multi-line) at 992 accepted / 993 rejected (BC-1.04.001 PC3, VP-006)"
+  - "2026-11-19T21:00:00Z (1.2.8): ADV-P8 remediation D03 — Pre-1 corrected: stdin (json.load(sys.stdin), SL:930/1202) and the cache loaders (json.load(fh)) read the WHOLE input; only the transcript is line-split; the metrics reply stays the named whole-input fetch site"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,12 +48,14 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
 ## Preconditions
 
 1. `b` is one line produced by `SplitLinesBytes` (BC-5.03.002) from the complete-lines blob (SL:1055-1059); it never
-   contains `\n` or `\r`. This one-line rule governs the line-splitting sites — the stdin decode (BC-1.01.002), the
-   transcript lines (this contract) and the cache loaders (ARCH-04) — where the input is split into lines first. The
-   metrics reply is the one whole-input exception: BC-1.04.001 PC3 decodes the complete reply body,
-   `json.loads(resp.read())` on bytes (ModeBytes detection; the acceptance mechanics of this contract apply
-   unchanged), and the body may be multi-line, at the fetch site's measured boundary **992 accepted / 993
-   rejected** (F = 7 frames; VP-006 per-site table).
+   contains `\n` or `\r`. The TRANSCRIPT is the only input legacy splits into lines and decodes line by line
+   (pass-8 D03): the stdin decode (BC-1.01.002) reads the whole input with one `json.load(sys.stdin)`
+   (legacy SL:930, and SL:1202 for the subagent path), and the cache loaders (ARCH-04) read the whole file with
+   one `json.load(fh)` — neither is line-split (a port that split pretty-printed stdin into lines would diverge;
+   this Pre-1 previously mislabeled both sites as line-splitting). The metrics reply is likewise a whole-input
+   site: BC-1.04.001 PC3 decodes the complete reply body, `json.loads(resp.read())` on bytes (ModeBytes
+   detection; the acceptance mechanics of this contract apply unchanged), and the body may be multi-line, at the
+   fetch site's measured boundary **992 accepted / 993 rejected** (F = 7 frames; VP-006 per-site table).
 2. The caller treats any returned error as "skip this line" (SL:1062-1063) and never degrades on it.
 
 ## Postconditions

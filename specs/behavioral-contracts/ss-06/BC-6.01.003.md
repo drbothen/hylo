@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "3dc2513"
+input-hash: "08ebff4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-19T00:05:00Z (1.2.3) ADV-P5 remediation D02+D19 — the parsed float64 IS the frozen time.time() value, never round-tripped through time.Time ns (owner call 7); grammar range fixed to the asymmetric epoch-seconds span [-62135596800, 253402300799] (D19); shim N anchored to the Pre-3 grammar; canary instant strengthened to the round-trip-discriminating 1794615009.4245193"
   - "2026-11-19T02:00:00Z (1.2.4): sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
   - "2026-11-19T03:15:00Z (1.2.5): ADV-P6 remediation D11 — canonical vector row 1 realigned to PC-4's strengthened canary instant 1794615009.4245193 (exact stdout); the superseded 1794615009.5 value stays only as EC-004's fractional-grammar case"
+  - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D24 — stdio canary fixture respelled a non-ASCII code point (U+0664, UTF-8 D9 A4) and the probe script specified (testdata/clock_shim/stdio_canary.py, name per OD-145 delegation)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -118,9 +119,15 @@ oracle case runs, that the shim actually took effect.
    - On any other output the run fails, not skips, with
      `parity: clock shim not loaded (OD-109 canary): got "<stdout>"`. No oracle case runs.
    - A second canary leg proves the stdio duty (ADV-P3-D23): the harness feeds the probe
-     a non-ASCII byte through stdin and reads stdout as raw bytes; with the shim loaded,
-     a `\r\n`-free, UTF-8-strict round trip is observed (the probe prints the decoded
-     code point back, UTF-8-encoded, `newline="\n"`). Failure leg message:
+     a non-ASCII CODE POINT — `\u0664` (U+0664 ARABIC-INDIC DIGIT FOUR, UTF-8 `D9 A4`; the
+     sibling example of BC-2.02.001 EC-008; pass-8 D24: a lone byte \u2265 0x80 is not valid
+     UTF-8, so the fixture is the encoded code point, not a "non-ASCII byte") — through
+     stdin and reads stdout as raw bytes; with the shim loaded, a `\r\n`-free,
+     UTF-8-strict round trip is observed (the probe prints the decoded code point back,
+     UTF-8-encoded, `newline="\n"`). The probe script is the harness's stdio canary,
+     `testdata/clock_shim/stdio_canary.py` — it reads stdin as strict UTF-8 text
+     (CPython default), prints the first code point, exits 0 (proposed name, settled by
+     the implementer per the OD-145 delegation). Failure leg message:
      `parity: stdio shim not loaded (ADV-P3-D23 canary): got "<raw bytes>"`. No oracle
      case runs on failure.
 5. **Canary negative control.** A table test runs the same canary probe with `-I`

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "2375ca5"
+input-hash: "37a6c61"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,7 @@ modified:
   - "1.3.2 2026-11-18T04:00:00Z: pass-3 remediation (ADV-P3-B03/B15/B10): VP anchor names VP-040 P1; PC5 source lines corrected (project label is SL:460-462); ARCH-03 anchor normalized to #statusline-width"
   - "1.3.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-3 stamp re-dated ascending (it predated the preceding 1.3.1 reconciliation entry); no behavioral change"
   - "1.3.4 pass-7 remediation (ADV-P7-B01): H1 and Description state the rows > 2 override (width hides row 2 only when rows == 2; SL:1224); Related-BCs note synced; no postcondition change (PC1 was already correct); 2026-11-19T07:00:00Z"
+  - "1.3.5 pass-8 remediation (ADV-P8-B03, orchestrator call 6): the dead-marker ` ?` is a literal format constant owned by BC-1.04.004 (OD-189), not `statusline.pill.label_unknown` (sole consumer: BC-1.02.001 lane pill); vector preamble corrected; no postcondition change; 2026-11-19T08:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -89,8 +90,10 @@ operator `>=` keeps row 2 — owner judgment (presentation), catalogue resolutio
 
 Config: defaults, `HYLO_STATUSLINE_GIT_ENABLED=0`, metrics URL pointing at a closed local port, empty cache dir,
 stdin `{}`. R1 = `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m`; R2 = `\e[31m◌ DGX ?\e[0m` (fetch failed, no
-cache; the dead-marker word is `statusline.pill.label_local`'s default per OD-189 reuse of OD-173, the `?` is
-`statusline.pill.label_unknown`'s default; renders shown at legacy defaults).
+cache; the dead-marker word is `statusline.pill.label_local`'s default per OD-189 reuse of OD-173, and the ` ?` after
+it is a literal — a named format constant of the dead-marker rung owned by BC-1.04.004 (OD-189), NOT
+`statusline.pill.label_unknown`, whose sole consumer is the lane pill of BC-1.02.001; renders shown at legacy
+defaults).
 
 | Input (rows, COLUMNS) | Expected Output | Category |
 |-------|----------------|----------|

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.4.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:30:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "d6b1c84"
+input-hash: "1fcae87"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.5): ADV-P5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] to [base, span] and law restated as base + span-times-i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
   - "2026-11-19T04:20:00Z (1.3.0): ADV-P6 remediation D01+D04+OD-184 — PC-7 default-only spellings minted per orchestrator call 8 (theme.heat env spelling is the strict-JSON array [0.22,0.85,0.80]; comparison on the PARSED value, not bytes; limits.windows 5h,7d; units.lines k; units.tokens M); EC-010/EC-011 realigned (0.5/0.5/0.5 is now the shape error it always was under PC-5); glyph PC-6 wording states the OD-184 code-point enforcement behind the fixed reason string; VP-016 row and VP anchor say seven classes"
   - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09 (orchestrator call 5) — PC-7 env names canonized under EnvName (HYLO_STATUSLINE_LIMITS_WINDOWS, HYLO_STATUSLINE_UNITS_LINES=k, HYLO_STATUSLINE_UNITS_TOKENS=M, HYLO_STATUSLINE_UNITS_CONTEXT=K) with registry Defaults single-valued (= the accepted spelling), legacy derivations and a stated reason why the letters differ; PC-6 glyph reasons corrected per OD-184 to expected exactly 1 code point / expected exactly 8 code points (sparkline); PC-5 scale attributed to NumberList with a registry-declared fixed length of 4"
+  - "2026-11-19T21:00:00Z (1.4.0): ADV-P8 remediation D04+D05+D07+D15 — H1/Description/Pre-1 broadened to cover PC-5/PC-6/PC-7 (P7); PC-2 item wording corrected: List items get the PC-6 control-free check (a control byte in an item is the Text-class `control character` error, OD-178/pass-6 A14) with key-specific entry ranges superseding; PC-5 type enumeration completed with FloatQuad (the 1.3.1 changelog's 'NumberList' wording for scale is superseded — the registry type is FloatQuad, fixed length 4) and an overflowing JSON member classified: a literal such as `1e400` parses to ±Inf, passes the strict-JSON shape check and fails the member-wise range check with `not finite` (BC-2.02.001 precedence check 1); PC-6 gains the control-character rule and now mints five reason strings"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,11 +38,13 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-2.01.005: HYLO_* value grammars: typed bool, comma lists, ~ path expansion; COLUMNS excluded as protocol input
+# Behavioral Contract BC-2.01.005: HYLO_* value grammars: Bool, List, Path, strict-JSON composites, Text, and default-only keys; COLUMNS excluded as protocol input
 
 ## Description
 
-Defines how a `HYLO_*` string becomes a typed value for the non-numeric shared types:
+Defines how a `HYLO_*` string becomes a typed value for the non-numeric shared types —
+the plain grammars (`Bool` PC 1, `List` PC 2, `Path` PC 3), the composite strict-JSON
+types (PC 5), `Text` (PC 6) and the default-only keys (PC 7):
 booleans accept only `true/false/1/0/yes/no` (OD-05), lists are comma-encoded (OD-74), and
 path values expand a leading `~` (OD-61). `COLUMNS` is a Claude Code protocol input read by
 the renderer with the Python `int()` grammar (BC-1.01.005), never a config key (ENV-15).
@@ -49,8 +52,9 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 
 ## Preconditions
 
-1. A registry key of type `Bool`, `List` or `Path` whose `EnvName` is present
-   (BC-2.01.001).
+1. A registry key whose type is `Bool`, `List` or `Path` (PC 1-3), a composite numeric
+   type (PC 5), or `Text` (PC 6), or that the registry marks default-only (PC 7), and
+   whose `EnvName` is present (BC-2.01.001).
 
 ## Postconditions
 
@@ -66,7 +70,12 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 2. **List:** the value is split on `,`; each item is stripped with Python `str.strip()`
    semantics (`pyfmt.Strip`, OD-103); empty items are dropped; order and duplicates are kept.
    `""` → empty list (valid). This reproduces legacy SL:444-445 for
-   `backends[0].model_prefixes`. Items are not otherwise validated in P1.
+   `backends[0].model_prefixes`. Items are otherwise validated only by the PC-6
+   control-free check (pass-8 D04: a control byte in an item is the Text-class
+   `control character` error, OD-178/pass-6 A14); where the registry declares a
+   key-specific entry range — `statusline.lane.reroute_all_prefixes` (BC-2.01.004 PC-9,
+   reason `expected non-empty control-free text in every entry`) — that range supersedes
+   for the key's entries. No other item validation in P1.
 3. **Path:** a value equal to `~`, or starting with `~/` (or `~\` on Windows), has that `~`
    replaced by the user home directory (`HOME` on macOS/Linux, `USERPROFILE` on Windows);
    `~user` forms are left literal; other values are used as given. `""` yields
@@ -81,9 +90,11 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 5. **Composite numeric types (ADV-P4-D19, orchestrator design call 1; shapes written
    out per key and matched to their defaults, ADV-P5-D06/D07/D13 / owner call 3):** a
    key whose registry type is composite — `FloatPair` (Float pair), `FloatTriple`
-   (Float triple), `IntMap` (Int map), `RGBTriplesFloat` (RGB triples + Float) or
-   `NumberList` (any list of numbers) — takes its env value as **strict JSON** of the
-   declared shape. A value that is not valid JSON of the declared shape yields
+   (Float triple), `FloatQuad` (Float quadruple — sole member `statusline.sparkline.scale`,
+   declared shape `array of 4 numbers`), `IntMap` (Int map), `RGBTriplesFloat`
+   (RGB triples + Float) or `NumberList` (any list of numbers) — takes its env value as
+   **strict JSON** of the declared shape. A value that is not valid JSON of the declared
+   shape yields
    `<key>=<value> (expected JSON <shape>)`, where `<shape>` spells the key's declared
    shape (per-key, from the registry):
    - `array of 2 numbers` (FloatPair). Elements are named per key:
@@ -118,7 +129,11 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    - `array of numbers` (NumberList).
    Strict JSON only (no `NaN`/`Infinity` tokens, no trailing data). Range checks
    (registry `Range`) apply **after** the shape check, member-wise. Shape errors belong
-   to the Text class (OD-178).
+   to the Text class (OD-178). An OVERFLOWING member (pass-8 D15): a JSON number literal
+   too large for float64 (e.g. `1e400`, which Python's JSON parser maps to +Inf) is not an
+   `Infinity` token, so it PASSES the shape check and fails the member-wise range check
+   with the number-range reason `not finite` (BC-2.02.001's numeric-range precedence,
+   check 1) — the only way a composite reaches `not finite`.
 6. **Text keys (OD-173, ADV-P4-B16; runtime reasons minted ADV-P5-D05/OD-178):**
    - The lane-pill label keys `statusline.pill.label_local`, `label_cloud` and
      `label_unknown` (display width 1..16, judgment call keeping the pill short): a
@@ -137,7 +152,16 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      (`statusline.subagent.tokens.suffix`, `statusline.window_age.process_name`,
      `statusline.labels.input`, ...): a violating value yields
      `<key>=<value> (expected non-empty control-free text)`.
-   All three reason strings ride the Text class (OD-178) on the E-CFG-001 surface.
+   - **Control bytes (OD-178; pass-6 A14, normative here per pass-8 D04):** a control
+     byte (0x00-0x1F, 0x7F) anywhere in a non-theme free-text key value or in a `List`
+     item — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item —
+     yields the Text-class reason `control character`. Precedence: where the registry
+     declares a key-specific entry range (`statusline.lane.reroute_all_prefixes`,
+     BC-2.01.004 PC-9), that range's own reason
+     (`expected non-empty control-free text in every entry`) supersedes for the key's
+     entries.
+   All five reason strings of this PC ride the Text class (OD-178) on the E-CFG-001
+   surface.
 
 7. **Default-only keys (ADV-P5-D07 / owner call 3, OD-162; spellings ADV-P6-D01 /
    orchestrator call 8, pass 6):** for a key the registry

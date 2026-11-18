@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "80ba575"
+input-hash: "5dd0bf2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_sessions/percentiles ranges; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (foreign-history overflow EC-011) + ADV-P3-C2-02 (OD-160 on EC-010) + ADV-P3-C2-07 (percentile ordering rule)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-10 (EC-011 extended to the exact-int api_ms leg; crash ids CP-O10/CP-O11 named) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and ADV-P5-C2-20 (stale architect-carry note removed) and design call 16 (rate_min_api_ms values Int > 0)", "1.3.3 2026-11-18: pass-7 remediation ADV-P7-C2-10 (EC-011 overflow threshold corrected to >= 2**1024 − 2**970, matching BC-1.05.004 PC1 / BC-1.05.007 PC6)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_sessions/percentiles ranges; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (foreign-history overflow EC-011) + ADV-P3-C2-02 (OD-160 on EC-010) + ADV-P3-C2-07 (percentile ordering rule)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-10 (EC-011 extended to the exact-int api_ms leg; crash ids CP-O10/CP-O11 named) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and ADV-P5-C2-20 (stale architect-carry note removed) and design call 16 (rate_min_api_ms values Int > 0)", "1.3.3 2026-11-18: pass-7 remediation ADV-P7-C2-10 (EC-011 overflow threshold corrected to >= 2**1024 − 2**970, matching BC-1.05.004 PC1 / BC-1.05.007 PC6)", "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-011 CP-O10/CP-O11 degrades ride the never-blank ladder)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -132,7 +132,7 @@ qualifying sessions exist (cold start).
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 (percentile bands) |
-| L2 Domain Invariants | DI-007, DI-012 (foreign-history shapes OD-160 under the named-deviation rule) |
+| L2 Domain Invariants | DI-007, DI-008 (the EC-011 CP-O10/CP-O11 OverflowError degrades ride the never-blank ladder: 29-byte line, exit 0; ADV-P8-C2-05), DI-012 (foreign-history shapes OD-160 under the named-deviation rule) |
 | Architecture Module | `internal/cost` history.go `ForLane` (BC-COMPONENT-MAP: internal/cost/history.go (p75/p95; NaN usd OD-138) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:cost_thresholds (SL:240-262); constants (SL:217-221) |

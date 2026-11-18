@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T16:00:00Z
+timestamp: 2026-11-20T08:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.04.001.md, behavioral-contracts/ss-05/BC-5.04.002.md, behavioral-contracts/ss-05/BC-5.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4d6f1b8"
+input-hash: "f6f6178"
 traces_to: prd.md
 source_bc: BC-5.04.002
 bcs: [BC-5.04.001, BC-5.04.002, BC-5.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P2 fixes — golden count stated consistently; tzdata wording corrected; Windows-CRT note added (A2-24)", "1.2 2026-11-18T09:14:00Z: ADV-P3 fix (A2-11) — corpus rule added: naive local-time conversion cases are tagged posix-only and run on the Linux/macOS legs; the Windows Tier A leg skips them by rule, so no unexplained diff can arise", "1.3 2026-11-18T14:25:00Z: ADV-P4 fix (A2-06, OD-171) — the posix-only class skip is REMOVED: hylo resolves the local zone through internal/platform honouring TZ on every OS (named zone, OS-zone fallback); the parity harness pins TZ=UTC for both binaries so the naive local-time cases run on all three legs with no skip and no blanket carve-out; TZ table test added; documented POSIX-TZ-string limitation recorded", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-06, OD-177) — TZ semantics refined to libc on every OS: TZ unset → OS zone (via os.Unsetenv with original-TZ cleanup — t.Setenv(TZ, empty) is a DIFFERENT case), TZ empty or unparseable → UTC; fallback rows guarded against vacuity on UTC runners with an explicit skip reason", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-04: the OD-177 rows are independent t.Run subtests — a UTC-runner vacuity skip no longer ends the whole test)", "1.6 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-28) — the zone-grid harness sketch respelled to the call-2 signature LocalToUnix(fields, loc, msvcDomain bool) (int64, error), returning the pair; sketch-only (OD-182); no property change"]
+modified: ["1.1 2026-11-17: ADV-P2 fixes — golden count stated consistently; tzdata wording corrected; Windows-CRT note added (A2-24)", "1.2 2026-11-18T09:14:00Z: ADV-P3 fix (A2-11) — corpus rule added: naive local-time conversion cases are tagged posix-only and run on the Linux/macOS legs; the Windows Tier A leg skips them by rule, so no unexplained diff can arise", "1.3 2026-11-18T14:25:00Z: ADV-P4 fix (A2-06, OD-171) — the posix-only class skip is REMOVED: hylo resolves the local zone through internal/platform honouring TZ on every OS (named zone, OS-zone fallback); the parity harness pins TZ=UTC for both binaries so the naive local-time cases run on all three legs with no skip and no blanket carve-out; TZ table test added; documented POSIX-TZ-string limitation recorded", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-06, OD-177) — TZ semantics refined to libc on every OS: TZ unset → OS zone (via os.Unsetenv with original-TZ cleanup — t.Setenv(TZ, empty) is a DIFFERENT case), TZ empty or unparseable → UTC; fallback rows guarded against vacuity on UTC runners with an explicit skip reason", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-04: the OD-177 rows are independent t.Run subtests — a UTC-runner vacuity skip no longer ends the whole test)", "1.6 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-28) — the zone-grid harness sketch respelled to the call-2 signature LocalToUnix(fields, loc, msvcDomain bool) (int64, error), returning the pair; sketch-only (OD-182); no property change", "1.7 2026-11-20T08:00:00Z: pass-8 fix (A2-04) — the third LocalToUnix/FromISOFormat caller outcome stated normatively: with msvcDomain set (statusline passes platform.IsWindows(), AD-02) a naive wall time on or before 1970-01-01 or at or after year 3001 returns the distinct ErrLocaltimeDomain sentinel, which the caller degrades on (BC-5.04.001/BC-5.04.002); the zone-grid sketch accepts an expected sentinel (WantErr) instead of failing on any error, and the sentinel rows' oracle is declared as the ruled design (Linux-generated CPython goldens cannot produce the MSVC domain error), flagged for a Windows runner"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,7 +37,13 @@ removal_reason: null
 `FromISOFormat` implements the Python 3.11 grammar (naive = local, fraction truncation
 beyond µs); `LocalToUnix` is the CPython `_mktime` port with gap/overlap semantics
 achieving 0 mismatches over the committed CPython goldens — 10,893 rows per zone grid,
-four grids (Go `time.Date` differs — that is why the port exists); `TimeFloat` holds the
+four grids (Go `time.Date` differs — that is why the port exists) — and it carries a
+THIRD caller outcome beside the value and `ErrValue`: with `msvcDomain` set
+(statusline passes `platform.IsWindows()`; pure pyfmt imports no platform package,
+AD-02), a naive wall time on or before 1970-01-01 or at or after year 3001 leaves
+MSVC `localtime_s`'s domain at one of the conversion probes (`t`, `u1`, `u1 − 86400`,
+`u2`) and the function returns the distinct `ErrLocaltimeDomain` sentinel, which the
+caller degrades on (BC-5.04.001, BC-5.04.002; ADV-P8-A2-04). `TimeFloat` holds the
 Python time.time() value discipline (ns→s float, read once per render). Embedded
 `time/tzdata` serves as a fallback zone-data source when the OS zoneinfo is absent —
 zone resolution no longer depends on local tzdata files, though the OS zoneinfo wins
@@ -75,7 +81,12 @@ under the Windows MS CRT than under IANA loading; parity cases use `TZ=UTC` only
   row is an independent `t.Run` subtest, so a vacuity skip suppresses only that row,
   never the OD-177 matrix (A2-04).
   Goldens are TZ-independent input/output rows — with `TZ=UTC` pinned for both binaries
-  they run identically on every leg.
+  they run identically on every leg. The `ErrLocaltimeDomain` sentinel rows are NOT
+  CPython-golden rows — the committed goldens are generated on Linux, which cannot
+  produce the MSVC domain error — so their oracle is the ruled design itself
+  (BC-5.04.002's every-probe domain check), authored as Go table rows and flagged for
+  a Windows runner; the sketch accepts an expected sentinel instead of failing on any
+  error (ADV-P8-A2-04).
 - **Honesty:** testable-only; zone-grid breadth is the strongest table-pinning in the
   repo but remains empirical.
 
@@ -84,6 +95,7 @@ under the Windows MS CRT than under IANA loading; parity cases use `TZ=UTC` only
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
 | Zone-grid goldens | Go test, 10,893 rows per grid x 4 grids | yes — committed grid | gap/overlap/all-zones |
+| MSVC-domain sentinel rows | Go test (design-ruled rows, Windows runner) | ruled probe-sequence domain rule (BC-5.04.002) | the `ErrLocaltimeDomain` outcome |
 | Grammar tables | Go test | yes | FromISOFormat rows |
 | Counter assert | Go test | exact | one TimeFloat read per render |
 
@@ -94,6 +106,14 @@ under the Windows MS CRT than under IANA loading; parity cases use `TZ=UTC` only
 func TestLocalToUnix_ZoneGridGoldens(t *testing.T) {
     for _, g := range LoadGolden("testdata/mktime.golden") {
         got, err := pyfmt.LocalToUnix(g.Fields, g.Loc, g.MsvcDomain)
+        if g.WantErr != nil { // A2-04: an expected-sentinel row (ErrLocaltimeDomain,
+            // the MSVC-domain rule) PASSES on that sentinel — the former blanket
+            // `err != nil` Fatalf made such a row unpassable
+            if !errors.Is(err, g.WantErr) {
+                t.Fatalf("%s %v: got err %v, want sentinel %v", g.Zone, g.Wall, err, g.WantErr)
+            }
+            continue
+        }
         if err != nil || got != g.Unix {
             t.Fatalf("%s %v: got %v want %v", g.Zone, g.Wall, got, g.Unix)
         }

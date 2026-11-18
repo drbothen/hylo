@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.7"
+version: "1.0.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "1b04441"
+input-hash: "0191254"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_tokens + token/elapsed branches (SL:909-921, 876-885)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C07/C03) — clock base is the injected Env.Now() float seconds with the time.time()*1000 float-product rule (call 7); UnixMilli guidance removed; theme keys named for the token/clock colours", "1.0.5 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the CP-A04/A05 legs ride the never-blank ladder); no behavioral change", "1.0.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.0.7 2026-11-19T18:30:00Z: pass-7 remediation (ADV-P7-C04/C14) — EC-010/EC-011 added and oracle-pinned: tokenCount Infinity/1e400 renders infM tok (Python float-repr spelling, not Go's +Inf); startTime Infinity clamps to 00:00; PC1's misplaced <suffix> clause reattached to the token-bit sentence (ADV-P7-C14)"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C07/C03) — clock base is the injected Env.Now() float seconds with the time.time()*1000 float-product rule (call 7); UnixMilli guidance removed; theme keys named for the token/clock colours", "1.0.5 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the CP-A04/A05 legs ride the never-blank ladder); no behavioral change", "1.0.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.0.7 2026-11-19T18:30:00Z: pass-7 remediation (ADV-P7-C04/C14) — EC-010/EC-011 added and oracle-pinned: tokenCount Infinity/1e400 renders infM tok (Python float-repr spelling, not Go's +Inf); startTime Infinity clamps to 00:00; PC1's misplaced <suffix> clause reattached to the token-bit sentence (ADV-P7-C14)", "1.0.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C01) — Infinity-row expected content re-pinned to the pure-ASCII wire form with ✔ and · escaped (oracle byte-exact) + CTV byte-notation note added, "1.0.9 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,7 +45,7 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 ## Preconditions
 
 1. ASSUMPTION (ASSUMP-107-1): the Claude Code 2.1.326 `subagentStatusLine` stdin payload is assumed
-   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 3.
+   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 2 writes the S1.07 stories (OD-192).
 2. Wall clock read once per render (`now_ms = time.time() * 1000`, SL:889 — a PR-15 site).
 3. `tokenCount` and `startTime` taken from the eligible task dict.
 
@@ -109,6 +109,9 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 
 ## Canonical Test Vectors
 
+(Byte notation, as BC-1.07.001: `\e` = ESC (0x1B). Expected contents are wire forms — pure ASCII,
+`ensure_ascii`-escaped per BC-1.07.004 PC3/Inv 2; non-ASCII characters never appear raw on the wire.)
+
 | Input (task fields) | Expected Output | Category |
 |---|---|---|
 | `tokenCount=12345`, running, `startTime=<now-125000>` | `\e[36m12.3k tok\e[0m \u00b7 \e[90m02:05\e[0m` (within the BC-1.07.004 pinned row) | happy-path |
@@ -119,7 +122,7 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 | `tokenCount = 2**1024 - 2**970`, running, `startTime=<now-125000>` | exactly `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 (CP-A04) | error |
 | `tokenCount = 2**1024 - 2**970 - 1`, running (largest convertible int) | renders; `float` value is the IEEE-754 maximum; tok bit present, no degrade | edge-case |
 | `startTime = 2**1024 - 2**970`, running | exactly `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 (CP-A05) | error |
-| `tokenCount=Infinity`, completed (stdin token `Infinity` or `1e400` — both decode to float `inf`) | one line, content `"\u001b[32m✔ n\u001b[0m · \u001b[36minfM tok\u001b[0m · \u001b[90mcompleted\u001b[0m"` (ADV-P7-C04, oracle 2026-11-18: `inf`/`+Inf` never spelled Go-style) | edge-case |
+| `tokenCount=Infinity`, completed (stdin token `Infinity` or `1e400` — both decode to float `inf`) | one line, content `"\u001b[32m✔ n\u001b[0m · \u001b[36minfM tok\u001b[0m · \u001b[90mcompleted\u001b[0m"` (pure-ASCII wire, oracle byte-exact 2026-11-18; `✔`/`·` escaped per BC-1.07.004 — ADV-P8-C01) | edge-case |
 | `startTime=Infinity`, running | content opens `\e[33m` + U+00BB + ` n`, then `\e[90m00:00\e[0m` (oracle 2026-11-18) | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`): every cell above reproduced, including the

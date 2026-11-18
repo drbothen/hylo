@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.4"
+version: "1.1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "7c5b42b"
+input-hash: "06d6b68"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; --subagent is a valid P1 flag dispatched per BC-1.07.*, OD-155; legacy reference: the --subagent dispatch at legacy/dgx_statusline.py SL:1240-1241)"
@@ -25,6 +25,7 @@ modified:
   - "1.1.2 2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "1.1.3 2026-11-18T01:42:00Z ADV-P3 remediation D05+D28: EC-004 exempts --subagent anywhere in argv[1:] incl. after -- (OD-155, SL:1240); stderr suffix amended"
   - "1.1.4 2026-11-18: ADV-P4 remediation D05 - parity argv row corrected: case argv admits only [] and [\"--subagent\"] in P1 (design call 9); subagent mode performs no flag validation (PC-4 qualifier); pass-4 sync-check SC-07 — repaired the unescaped double quotes that broke YAML parsing; no behavioral change"
+  - "2026-11-19T21:00:00Z (1.1.5): ADV-P8 remediation D23 — VP-002 row states the --subagent routing carve-out the VP file already had (exact-argument --subagent routes before flag handling)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -104,7 +105,7 @@ non-zero status (OD-112, same rule as D4-EX-3).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-002 | For any argv containing a flag before `--`: stdout is one line beginning `\e[90mhylo: unknown flag `, exit 0 | fuzz |
+| VP-002 | For any argv containing a flag before `--` (MAIN-mode statusline only: the exact argument `--subagent` routes to the subagent renderer before flag handling, so subagent-mode argv is carved out of this row): stdout is one line beginning `\e[90mhylo: unknown flag `, exit 0 | fuzz |
 
 ## Traceability
 

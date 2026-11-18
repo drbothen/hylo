@@ -189,3 +189,7 @@
 | OD-190 | Extends OD-183: hylo writes LF line endings on every OS (UTF-8 + LF). The Windows oracle's LF normalization is named beside `PYTHONIOENCODING=utf-8`, not hidden in the shim. | rules ADV-P7-A2-19 |
 | OD-191 | The >512 KB timing fixture (OD-187) gets a ceiling: exempt from the 25 ms p95 target, but the gate fails if its p95 exceeds 100 ms (judgment call: 4x the target, well under the refresh interval). | rules ADV-P7-A2-18 |
 | OD-192 | ASM-007 (Claude Code 2.1.326 subagentStatusLine payload) must be validated by an owner capture into git-ignored `captures/` before Phase 2 writes the S1.07 stories; the rest of Phase 2 is not blocked. | rules ADV-P7-A22 |
+
+<!-- Phase-1d pass-8 remediation rulings by the owner, 2026-11-18 (owner chose the recommended option each time; next free OD-194) -->
+
+| OD-193 | OD-158 stands unchanged: the P1 >=95% line-coverage gate covers S1 (`internal/statusline`, `internal/cost`) and S5 (`internal/pyfmt`) only. `internal/parity` (S6) coverage is reported, not gated. Pass-7 call 12's addition of `internal/parity` to the gate is withdrawn. | ADV-P8-A04 |

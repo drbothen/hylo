@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "2c02b9f"
+input-hash: "06d6b68"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -25,6 +25,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D16: validate stderr order aligned with statusline emission order (warnings then errors)"
   - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D33 — unknown-setting warning order pinned to lexicographic byte-wise name order (os.Environ order is OS-dependent)"
   - "2026-11-19T04:30:00Z (1.2.3): ADV-P6 remediation D15 — EC-005 expected stderr pinned: exactly one line, the backends cardinality error with [from HYLO_BACKENDS_1_METRICS_URL]; no unknown-setting warning (backend-entry variables are not unknown settings, BC-2.01.001 PC-6 carve-out)"
+  - "2026-11-19T21:00:00Z (1.2.4): ADV-P8 remediation D18 — PC-2 warning-order cross-reference now cites the freshly pinned BC-2.01.001 PC-6 lexicographic warning order instead of asserting an order the statusline side never pinned"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,8 +55,9 @@ when `config.Load` returns any error. The error set is identical to the set that
    lexicographic byte-wise order of the variable name — a pinned, OS-independent order,
    NOT `os.Environ` encounter order, which varies by OS (ADV-P4-D33) — FOLLOWED by one
    line per error in registry order — the same
-   emission order as the statusline side (BC-2.01.002 pins the example: warning first,
-   then the fatal load error; ADV-P3-D16 aligning this file with it), in the same form as
+   emission order as the statusline side, whose warning order BC-2.01.001 PC-6 pins to
+   the same lexicographic byte-wise order (pass-8 D18; BC-2.01.002 pins the example:
+   warning first, then the fatal load error; ADV-P3-D16 aligning this file with it), in the same form as
    the statusline stderr detail,
    `hylo: config error: <key>=<value> (<reason>) [from <ENVNAME>]\n` (value escaping and
    reasons per BC-2.02.001, no SGR codes); exit 1.

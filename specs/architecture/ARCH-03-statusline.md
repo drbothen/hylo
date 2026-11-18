@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.9"
+version: "1.11"
 status: draft
 producer: architect
-timestamp: 2026-11-19T19:00:00Z
+timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "5c34ef8"
+input-hash: "1f97431"
 
 ---
 
@@ -39,7 +39,7 @@ input-hash: "5c34ef8"
 - **Consequences:** every nondeterminism source is an `Env` interface; the pure renders
   are table-testable without a temp dir; the seams double as harness hooks (ARCH-07).
 - **Verification feasibility:** pure renders — **provable-grade** oracle-pinned tables,
-  mutation target >= 95%; the effect order — **testable-only**, order-asserting recording
+  mutation target >= 95% (the Phase 6 target, not a P1 gate; OD-158); the effect order — **testable-only**, order-asserting recording
   fakes plus parity steps (ARCH-07). A widget that needs I/O gets redesigned, not patched
   (iron law).
 
@@ -165,7 +165,9 @@ type CacheStore interface {
     //
     //     file          Load(decode)  Save(encode)   reachable from input?
     //     session       991           991            YES — Save re-encodes the stdin-borne rl
-    //     mix           991           991            no — flat legacy-computed payload
+    //     mix           991           994            yes — cur.id/cur.out carry input nesting; save failure
+    //                                                  unreachable: payload 994 saves / 995 fails, above the
+    //                                                  993 transcript decode edge (pass-8 residual sweep)
     //     git           990           990            no — flat legacy-computed payload
     //     cost-history  990           990            no — flat legacy-computed payload
     //
@@ -190,10 +192,11 @@ type MetricsClient interface {
     // PLAIN http ONLY — OD-181): Go's net/http trims header values
     // (textproto) and url.Parse rejects "%" without two hex digits, while urllib
     // keeps both — so net/http cannot reproduce urllib's targets byte-exactly.
-    // The client sends exactly urllib's request headers (method GET, `Host`,
-    // `User-Agent: Python-urllib/3.11`, `Accept-Encoding: identity`,
-    // `Connection: close`, in urllib's order; verify against the CPython 3.11.7
-    // source) and parses status line and headers as http.client does (compat32:
+    // The client sends exactly urllib's request headers (request line
+    // `GET <selector> HTTP/1.1`, then `Accept-Encoding: identity`, `Host`,
+    // `User-Agent: Python-urllib/3.11`, `Connection: close` — Accept-Encoding
+    // FIRST, the wire order BC-1.04.001 pins, verified against the CPython 3.11.7
+    // source; ADV-P8-C2-12a) and parses status line and headers as http.client does (compat32:
     // a header value is value.lstrip(' \t') then rstrip('\r\n') — leading
     // spaces/tabs ARE stripped, inner bytes kept, trailing CR/LF stripped and a
     // trailing space KEPT; verified `Location: \t /x ` parses to `'/x '` —
@@ -208,9 +211,11 @@ type MetricsClient interface {
     // the OS trust store (system roots on Linux; macOS/Windows system stores).
     // There is no http.Transport and no proxy consultation. https URLs get a
     // sample when the store answers; PARITY CASES use plain http only (OD-181 —
-    // the ruled closed-set exclusion "metrics transport beyond plain http":
-    // non-http(s) schemes, non-http(s) redirect targets, TLS trust-store
-    // differences for https).
+    // the ruled closed-set exclusion "metrics transport beyond plain http" —
+    // covers non-http(s) REDIRECT TARGETS and TLS trust-store differences ONLY
+    // (orchestrator call 13, pass-8); a non-http(s) CONFIGURED metrics URL is
+    // not OD-181 at all: it is the D4-EX-3 URL class, BC-2.02.005 /
+    // BC-1.04.001 (ADV-P8-C2-12b)).
     // MANUAL REDIRECT LOOP: hylo drives the hops itself, so urllib's rules apply
     // exactly: follow `location` then `uri` headers; a present-but-EMPTY Location
     // resolves by urljoin(<URL of the request that received this 3xx>, "") — from
@@ -224,9 +229,10 @@ type MetricsClient interface {
     // safe=string.punctuation), then urljoin (verified in CPython 3.11.7 source).
     // Hop rules are urllib's visited-set/max_repeats/max_redirections limits — 37 is
     // the worst-case chain length, NOT a hop budget (pass-6 C2-03, call 4;
-    // BC-1.04.001). Schemes outside http/https give NO sample — the ruled closed-set
-    // exclusion OD-181, "metrics transport beyond plain http" (non-http(s) redirect
-    // targets included; parity cases use plain http only).
+    // BC-1.04.001). Schemes outside http/https give NO sample as the D4-EX-3 URL
+    // class (BC-2.02.005; dedicated test `TestD4EX3_URL`) — NOT the OD-181
+    // exclusion, whose scope is redirect targets and TLS trust only (orchestrator
+    // call 13, pass-8; parity cases use plain http only).
     // UserInfo (pass-5 C2-03 ruling OD-180): a metrics URL with userinfo reproduces
     // legacy — NO sample (urllib puts u:p@host into HTTPConnection's host, DNS fails,
     // the dead rung); no exclusion id.

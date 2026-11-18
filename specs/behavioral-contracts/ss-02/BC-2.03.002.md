@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:45:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "4633caa"
+input-hash: "cbe06a0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -27,6 +27,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D36: empty override = not present; trailing separator printed as given, OD-165 agreement held at Clean-ed granularity"
   - "2026-11-19T04:45:00Z (1.2.4): ADV-P6 remediation D20 — PC-5 tension resolved: the no-validation claim is scoped to HYLO_* CONFIG-VALUE settings; the two path overrides the command consumes (HYLO_CONFIG, HYLO_PATHS_CACHE_DIR) keep their full path grammar including the empty-path error (PC-3/EC-011 stand)"
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - the --config=<path> equals spelling parses as the separated form; a bare --config is a flag error on the golden usage surface, exit 2 (BC-4.01.001 PC-3 cross-referenced)"
+  - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D01 — the three directory resolvers carry the env seam everywhere in this file: ConfigDir(env EnvVars), CacheDir(env EnvVars), StateDir(env EnvVars), matching BC-3.01.001 and ARCH-05"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,7 +47,7 @@ gives `~/Library/Application Support`). Every line prints the EFFECTIVE path (OD
 fixing ADV-P2-D11): the `config:` line applies its `--config <path>` / `HYLO_CONFIG`
 override, and the `cache:` line applies the `paths.cache_dir` env override
 (`HYLO_PATHS_CACHE_DIR`, BC-3.01.001 PC-3) — the same directory the status line actually
-uses — not the platform default `CacheDir()`. The command neither reads nor creates any
+uses — not the platform default `CacheDir(env EnvVars)`. The command neither reads nor creates any
 file; in P1 the
 file layer does not exist yet (OD-107), so the output is informational. It ships in P1
 (OD-107).
@@ -70,12 +71,12 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
      macOS and Linux `$XDG_CONFIG_HOME/hylo/config.yaml` when `XDG_CONFIG_HOME` is set,
      non-empty and absolute (a relative value is ignored, per the XDG spec and OD-144),
      otherwise `$HOME/.config/hylo/config.yaml`; Windows `%APPDATA%\hylo\config.yaml`.
-     The per-OS directory comes from `internal/platform.ConfigDir()` (BC-3.01.001).
+     The per-OS directory comes from `internal/platform.ConfigDir(env EnvVars)` (BC-3.01.001).
    - `cache:` the EFFECTIVE status-line cache directory (OD-165): `paths.cache_dir` after
      `~` expansion when the env override `HYLO_PATHS_CACHE_DIR` is set
-     (BC-3.01.001 PC-3), otherwise the platform default (`CacheDir()`, BC-3.01.001) — on
+     (BC-3.01.001 PC-3), otherwise the platform default (`CacheDir(env EnvVars)`, BC-3.01.001) — on
      Windows `%LOCALAPPDATA%\hylo\cache` (OD-144 subdirectory ruling).
-   - `state:` the hylo state DIRECTORY (`StateDir()`, BC-3.01.001) — on Windows
+   - `state:` the hylo state DIRECTORY (`StateDir(env EnvVars)`, BC-3.01.001) — on Windows
      `%LOCALAPPDATA%\hylo\state` (OD-144).
 3. Override paths (a)/(b) get `~` expansion (OD-61, BC-2.01.005) and are otherwise printed
    as given (not made absolute, not cleaned). Overrides are applied wherever they exist:

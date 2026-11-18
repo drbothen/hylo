@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:30:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "f6f73c3"
+input-hash: "5a0c1e7"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.6): sync-check adv-p5 closure (SC-16) — the four call-16 range keys registered in PC-10 (statusline.transcript.read_cap_bytes, statusline.transcript.dedup_memory, statusline.sparkline.history_cap, statusline.cost.burn_min_api_ms) and the Preconditions-1 amendment sentence extended through call 16, type/default/range per interface-definitions.md; no behavioral change"
   - "2026-11-19T04:15:00Z (1.3.0): ADV-P6 remediation D02+D03+D23+OD-186 — glyph column rule restated per OD-184: every statusline.glyphs.*/subagent.glyphs.* member is exactly 1 code point measured in legacy's render width, sparkline = exactly 8 ordered code points; the EAW validation width no longer applies to glyph members (it keeps the pill-label 1..16 bound), so the W-class watts default ⚡ (U+26A1) is in range; PC-9 scope note with the 中文-measures-4 grounding; reroute-all anchor corrected to SL:487-488 (markers tuple; SL:489 is the rl reset); PC-11 mints statusline.cache.rename_retry_delay_ms (Int, default 10, range 1..1000, J; consumer BC-6.03.003)"
   - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09+D13+D18+D21+OD-188+OD-189 — PC-1 NumberList may declare a fixed length (scale = array of 4 numbers, D09); PC-9 validation-width scope tightened to the pill-label bound only (D21); PC-6 lane row cites SL:906-907 for the subagent tag (D18); PC-8 states the two registry ascending-pair checks with both reason strings (D02); PC-11 adds statusline.cache.rename_retry_limit (Int, default 2, range 0..10, J; attempts = 1 + limit) and retargets the PRODUCT consumer to BC-1.06.001 (D13, OD-188); PC-12 mints statusline.labels.vllm_down / lmcache_down / statusline.subagent.name_fallback (Text, OD-189; dead-backend word reuses pill.label_local)"
+  - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation D08 — PC-3(f) names the PC-11 Windows rename-retry keys (statusline.cache.rename_retry_delay_ms, _limit) as golden-default exceptions beside the two PC-4 exceptions: they have no legacy analog (legacy save_cache SL:198-206 never retries); PC-4 lists them"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -103,11 +104,15 @@ incomplete, whose default fails its own validation, or whose env name collides.
    whose members are milliseconds (`IntMap`, e.g. `statusline.cost.rate_min_api_ms`;
    ADV-P5-D14); (f) a default differs from the legacy value
    recorded in the golden table `internal/config/testdata/legacy_defaults.golden` (key →
-   legacy value → SL line), except the two documented exceptions in PC-4.
+   legacy value → SL line), except the documented exceptions: the two in PC-4, and the
+   PC-11 Windows rename-retry keys `statusline.cache.rename_retry_delay_ms` and
+   `statusline.cache.rename_retry_limit`, which have NO legacy analog (legacy
+   `save_cache` SL:198-206 never retries), so check (f) skips them (pass-8 D08).
 4. Documented default exceptions to "defaults equal legacy until cutover" (D15), each
    carrying the OD in its rationale: `paths.cache_dir` (platform cache dir, not
-   `~/.cache/dgx-llm`; OD-101) and `backends[0].model_prefixes` (`claude-sonnet`, legacy
-   status line default `""`; OD-111, OD-123).
+   `~/.cache/dgx-llm`; OD-101), `backends[0].model_prefixes` (`claude-sonnet`, legacy
+   status line default `""`; OD-111, OD-123) and — having no legacy analog at all — the
+   PC-11 Windows rename-retry keys (pass-8 D08).
 5. Registry order is stable and is the order used for config-error reporting
    (BC-2.02.001).
 6. **Glyph registry enumeration (ADV-P4-A05, orchestrator design call 2; column rule

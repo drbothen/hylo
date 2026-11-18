@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "data-files"
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-19T07:00:00Z
+timestamp: 2026-11-19T21:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "2665978"
+input-hash: "32c0741"
 ---
 
 # ARCH-04 — Data files: cache dir, atomic writes, reserved ledger
@@ -20,7 +20,7 @@ input-hash: "2665978"
 
 ## Layout
 
-Cache dir resolution is `internal/platform.CacheDir()` (ARCH-05): macOS/Linux
+Cache dir resolution is `internal/platform.CacheDir(env EnvVars) (string, error)` (ARCH-05; env-injected signature with error return per pass-8 D01, orchestrator call 7): macOS/Linux
 `$XDG_CACHE_HOME/hylo` else `~/.cache/hylo` (relative/empty `XDG_*` ignored, OD-144);
 Windows `%LOCALAPPDATA%\hylo\cache` (OD-144, separate `...\hylo\state` subdir for state).
 Four legacy-compatible cache files, file-name formats are legacy-shared named constants

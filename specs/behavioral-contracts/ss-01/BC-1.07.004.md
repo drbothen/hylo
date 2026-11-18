@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.7"
+version: "1.1.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "48601a8"
+input-hash: "8e07087"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows (SL:888-936)"
@@ -19,7 +19,16 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: joiner sourced from statusline.subagent.joiner (ADV-P4-C04); parse/emit notes re-anchored to pyfmt.Decode + ordered pyfmt.Value, never encoding-json (ADV-P4-C03)", "1.1.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C13) — killed row relabelled: explicit statusline.subagent.glyphs.killed map entry, not the glyph fallback (SL:845-846 vs SL:894)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C04/C05) — PC4 rewrote the id echo as the decoded value re-serialized by pyfmt Dumps (raw tokens do not survive; float-id vector added; SL:924 dump runs under the measured per-site budget, see BC-5.02.006); PC3 corrected: ASCII controls, \" and \\ are escaped, the ESC inside an SGR sequence included", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.7 2026-11-19T20:00:00Z: pass-7 remediation (ADV-P7-C02/C14, OD-190) — PC3 escape list completed with the CPython short escapes \\b and \\f (orchestrator-verified json.dumps emissions; ADV-P7-C02); vector-row prose pseudo-escape replaced with the em dash (ADV-P7-C14); PC5 states OD-190 LF-on-every-OS with the Windows oracle normalization declared beside PYTHONIOENCODING=utf-8"]
+modified:
+  - "1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)"
+  - "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7"
+  - "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: joiner sourced from statusline.subagent.joiner (ADV-P4-C04); parse/emit notes re-anchored to pyfmt.Decode + ordered pyfmt.Value, never encoding-json (ADV-P4-C03)"
+  - "1.1.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C13) — killed row relabelled: explicit statusline.subagent.glyphs.killed map entry, not the glyph fallback (SL:845-846 vs SL:894)"
+  - "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C04/C05) — PC4 rewrote the id echo as the decoded value re-serialized by pyfmt Dumps (raw tokens do not survive; float-id vector added; SL:924 dump runs under the measured per-site budget, see BC-5.02.006); PC3 corrected: ASCII controls, \" and \\ are escaped, the ESC inside an SGR sequence included"
+  - "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "1.1.7 2026-11-19T20:00:00Z: pass-7 remediation (ADV-P7-C02/C14, OD-190) — PC3 escape list completed with the CPython short escapes \\b and \\f (orchestrator-verified json.dumps emissions; ADV-P7-C02); vector-row prose pseudo-escape replaced with the em dash (ADV-P7-C14); PC5 states OD-190 LF-on-every-OS with the Windows oracle normalization declared beside PYTHONIOENCODING=utf-8"
+  - "1.1.8 2026-11-20T12:30:00Z: pass-8 residual sweep (OD-192) — ASSUMP-107-1 capture deadline respelled: before Phase 2 writes the S1.07 stories, not before Phase 3"
+
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,7 +52,7 @@ before a single print, so a render fault never leaves partial rows on stdout.
 ## Preconditions
 
 1. ASSUMPTION (ASSUMP-107-1): the Claude Code 2.1.326 `subagentStatusLine` stdin payload is assumed
-   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 3.
+   compatible with the 2.1.322 contract legacy parsed; to be verified by a capture before Phase 2 writes the S1.07 stories (OD-192).
 2. stdin parsed per BC-1.07.003; tasks iterable (else BC-1.07.008).
 
 ## Postconditions

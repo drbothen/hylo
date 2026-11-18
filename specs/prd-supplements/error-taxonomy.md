@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.11"
+version: "1.13"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T06:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "fbe1339"
+input-hash: "f17e8d1"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
@@ -17,6 +17,8 @@ modified:
   - "1.9 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19/SC-20) — history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - "1.10 2026-11-19T06:00:00Z: pass-6 remediation — closed exclusion set extended to twelve ids (OD-181 metrics transport beyond plain http); `control character` reason extended to the Text class for non-theme free-text keys and List entries; new List-entry violation reason string; TestD4EX3_Text is a Go table test only, not a parity exclusion entry (beside the Theme note); E-REN-002 gains the CP-N03 carrier cites; CP-O10 history-bearer trigger narrowed to the SL:255 division only; no behavioral change (ADV-P6-A14/D14/C2-13; OD-181)"
   - "1.11 2026-11-19T12:00:00Z: pass-7 remediation — glyph reason strings corrected to the OD-184 code-point counts (`expected exactly 1 code point`; sparkline `expected exactly 8 code points`) with the numeric-range reason precedence defined by type (A13/A16/D03, orchestrator call 6); descending `cost.percentiles` pair gets its own ascending-pair reason; CP-T09 minted (Windows MSVC localtime domain OSError on a naive transcript timestamp; CP-T08 retired), register 47 → 48 paths, T family 7 → 8 (call 8/B03); E-REN-002 carrier list completed (CP-N03 owner set BC-1.04.001/.004/.005, A14; CP-O01..O05 and CP-S owners, B11); E-NET-001 gains the KEEP_DEAD dead rung (C2-13); no behavioral change"
+  - "1.12 2026-11-19T22:00:00Z: pass-8 remediation — `ascending pair violated (p75 <= p95)` restated as an INTRA-key member-pair check on the one composite key `statusline.cost.percentiles`: the D4-EX-3 line names the whole key with its full JSON env value, no per-member spelling (A11); the only-cross-key sentence rescoped to one cross-KEY case (subagent.tokens) plus one intra-key composite case (A11); no behavioral change"
+  - "1.13 2026-11-20T12:00:00Z: pass-8 residual sweep — the `control character` Text example no longer cites a `statusline.lane.reroute_all_prefixes` entry (a control byte there yields the OD-179 List-entry reason of BC-2.01.004 PC-9, not this reason); examples are now `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; CP-O08 site cell records that SL:996 is unreachable at CP-O08 magnitudes (BC-1.03.010 EC-009)"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -82,13 +84,13 @@ checked before E-CFG-001.
 | `not a number` / `not an integer` | number-grammar | BC-2.02.003 |
 | `not finite` / `negative` / `must be > 0` / `out of range` | number-range | BC-2.02.002/.003 |
 | `ascending pair violated (k_from <= m_from)` | number-range (cross-key pair check, fired at `m_from`'s validation; pass-6 A19) | BC-2.01.004 pair rule |
-| `ascending pair violated (p75 <= p95)` | number-range (cross-key pair check for `statusline.cost.percentiles`, fired at the second member `p95`'s validation, same fire-at rule as the `m_from` check; pass-7 A13/D02, call 6 — cost.percentiles' OWN reason, the k_from string is not reused) | BC-2.01.004 pair rule (widget owner BC-1.05.005) |
+| `ascending pair violated (p75 <= p95)` | number-range (INTRA-key member-pair check on the ONE composite key `statusline.cost.percentiles` — both pair members are members of the key's single JSON value, unlike the cross-KEY `subagent.tokens` pair; it fires at that key's validation, after both members pass their single-member range checks, `p95` second under the same fire-at-second rule as the `m_from` check; pass-7 A13/D02, call 6 — cost.percentiles' OWN reason, the k_from string is not reused; when it fails, the D4-EX-3 line names the WHOLE key `statusline.cost.percentiles` with its full JSON env value — a member has no separate env spelling, pass-8 A11) | BC-2.01.004 pair rule (widget owner BC-1.05.005) |
 | `expected exactly 1 code point` | Text (glyph family and `statusline.subagent.glyphs.*` runtime values; the enforced rule is the OD-184 code-point count measured in legacy's render width — there is NO display-column check under OD-184; pass-7 A16/call 6) | BC-2.01.005, BC-2.01.004 |
 | `expected exactly 8 code points` | Text (sole member `statusline.glyphs.sparkline`, the U+2581..U+2588 ramp; OD-02/OD-184; pass-7 A16/call 6) | BC-2.01.005, BC-2.01.004 |
 | `not a boolean (true\|false\|1\|0\|yes\|no)` | boolean | BC-2.01.005 |
 | `unknown value (<v1>\|<v2>\|...)` | enum | BC-2.02.004 |
 | `scheme must be http or https` / `not a URL` / `missing host` | URL | BC-2.02.005 |
-| `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) / Text (OD-178: control bytes in non-theme free-text keys and List entries — e.g. `statusline.subagent.joiner`, a `statusline.lane.reroute_all_prefixes` entry; pass-6 A14) | BC-2.02.005, BC-2.01.003, BC-2.01.005 |
+| `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) / Text (OD-178: control bytes in non-theme free-text keys and List entries — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; a control byte in a `statusline.lane.reroute_all_prefixes` entry instead yields the OD-179 List-entry reason of BC-2.01.004 PC-9; pass-6 A14) | BC-2.02.005, BC-2.01.003, BC-2.01.005 |
 | `expected non-empty control-free text in every entry` | Text (List-entry violations, e.g. `statusline.lane.reroute_all_prefixes` empty or control-byte entry; OD-179 range + OD-178 class; pass-6 A14) | BC-2.01.004 |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `expected JSON <shape>` (`<shape>` = e.g. `array of 2 numbers`, `object {cc,other} of integers`) | Text (composite shape; OD-178) | BC-2.01.005 |
@@ -117,7 +119,9 @@ below a registered `>= 0` floor → `negative`; every other registered-bound bre
 member produces the line): each member fires its own type's string — a non-finite member →
 `not finite`, a member outside its per-member bound → `out of range` (or `must be > 0` for
 an exclusive-positive member bound, e.g. a `scale` member at 0); the pair checks above are
-the only cross-key number-range cases.
+the only ascending-pair number-range cases — one cross-KEY (`subagent.tokens.k_from <=
+m_from`, two registry keys) and one INTRA-key composite (`cost.percentiles` member
+`p75 <= p95`, both members of one key's JSON value; pass-8 A11).
 
 Reconciliation with the closed register: the seven closed classes (OD-114 four + OD-134 +
 OD-140 + Text by OD-178) are the classes with dedicated class contracts and D4-EX-3
@@ -203,7 +207,7 @@ behavior.
 |-----------|------------------|--------------|---------|
 | CP-O06 | usage accumulation (SL:1108-1112, widened per BC-1.03.018; ADV-P4-C08) | BC-1.03.006 | `_i + _w`, a cached float `tin`, or the `c_*`/`tout` updates at SL:1109-1112 meet a 310+-digit `cache_creation_input_tokens` |
 | CP-O07 | rebuild-excess check (SL:1117, `_w - max(0, prompt - pp) > REBUILD_EXCESS`) | BC-1.03.007 | `prompt - pp` with a huge exact int and a float operand on either side: a float `pp` meeting a huge int `prompt`, or the mirror case — a huge-int `pp` meeting a float `prompt` (ADV-P3-C03: this is the rebuild predicate, not the turn machine; mirror case added ADV-P4-C08) |
-| CP-O08 | turn machine (SL:994/996) | BC-1.03.010, BC-1.03.016 | `TURN_STALE * out` or `out / span` with a huge exact int `out` |
+| CP-O08 | turn machine (SL:994/996; SL:996 unreachable at CP-O08 magnitudes; BC-1.03.010 EC-009) | BC-1.03.010, BC-1.03.016 | `TURN_STALE * out` or `out / span` with a huge exact int `out` |
 
 **Surface 2 consequence — reachable in hylo (ADV-P3-C09; not moot):** two 4,300-digit
 ints add without ever meeting a float, so no CP-O06..O08 skip fires and the accumulated
