@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.15"
+version: "0.2.16"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T06:00:00Z
@@ -16,8 +16,10 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "e0eb887"
+input-hash: "bf95442"
 traces_to: domain-spec/L2-INDEX.md
+modified:
+  - "0.2.16 2026-11-19T12:00:00Z: pass-7 remediation — NFR-001 states the conditional >512 KB timing-fixture exemption with the OD-191 100 ms ceiling, case-flag identification and report line (A02/call 3); E-REN-002 carrier list completed and CP-T09 added (A14/B11/call 8); E-NET-001 gains the KEEP_DEAD dead rung (C2-13); §9 ASM-002 aligned with the revised assumption register (A15); ASM-007 validation moved before Phase 2 S1.07 story writing per OD-192 with corrected ASSUMP-107-1 precondition cites (A22/C13)"
 supplements:
   - prd-supplements/interface-definitions.md
   - prd-supplements/error-taxonomy.md
@@ -154,11 +156,11 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 |-------|-------|--------|----------|
 | [BC-1.01.001](behavioral-contracts/ss-01/BC-1.01.001.md) | Guard prints the 29-byte degraded line and exits 0 | BC-SL-001 | P0 |
 | [BC-1.01.002](behavioral-contracts/ss-01/BC-1.01.002.md) | Non-JSON or non-object stdin decodes to an empty object | BC-SL-002 | P0 |
-| [BC-1.01.003](behavioral-contracts/ss-01/BC-1.01.003.md) | Rows join with LF; row 2 shown only when width permits | BC-SL-003 | P0 |
+| [BC-1.01.003](behavioral-contracts/ss-01/BC-1.01.003.md) | Rows join with LF; width hides row 2 only when rows == 2 | BC-SL-003 | P0 |
 | [BC-1.01.004](behavioral-contracts/ss-01/BC-1.01.004.md) | Visible width counts code points after stripping SGR | BC-SL-004 | P0 |
 | [BC-1.01.005](behavioral-contracts/ss-01/BC-1.01.005.md) | COLUMNS parses with the Python int grammar, else 0 | BC-SL-005 | P0 |
 | [BC-1.01.006](behavioral-contracts/ss-01/BC-1.01.006.md) | trim_to_fit double-resets; single reset on the recycle row | BC-SL-054 | P0 |
-| [BC-1.01.007](behavioral-contracts/ss-01/BC-1.01.007.md) | Negative COLUMNS disables trim and hides row 2 | BC-SL-055 | P0 |
+| [BC-1.01.007](behavioral-contracts/ss-01/BC-1.01.007.md) | Negative COLUMNS disables trim and hides row 2 only when rows == 2 | BC-SL-055 | P0 |
 | [BC-1.01.008](behavioral-contracts/ss-01/BC-1.01.008.md) | Strict UTF-8 stdio; invalid stdin UTF-8 renders from {} | BC-SL-076 | P0 |
 | [BC-1.01.009](behavioral-contracts/ss-01/BC-1.01.009.md) | Side effects run in legacy order; a degrade keeps earlier writes | BC-SL-077 | P0 |
 | [BC-1.01.010](behavioral-contracts/ss-01/BC-1.01.010.md) | Trim breakpoint matrix across widths | BC-SL-090 | P0 |
@@ -301,7 +303,7 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 | BC ID | Title | Legacy | Priority |
 |-------|-------|--------|----------|
 | [BC-2.02.001](behavioral-contracts/ss-02/BC-2.02.001.md) | D4-EX-3 config-error line: exact format, exit 0, stderr detail, no cache writes | BC-SL-087 | P0 |
-| [BC-2.02.002](behavioral-contracts/ss-02/BC-2.02.002.md) | Number-range class: non-finite/negative durations are config errors; TTL 0 stays valid | new | P0 |
+| [BC-2.02.002](behavioral-contracts/ss-02/BC-2.02.002.md) | Number-range class: non-finite/negative durations are config errors, except the git.ttl_s negative exception; TTL 0 stays valid | new | P0 |
 | [BC-2.02.003](behavioral-contracts/ss-02/BC-2.02.003.md) | Number-grammar class: underscore and Unicode-digit numerals are config errors | new | P0 |
 | [BC-2.02.004](behavioral-contracts/ss-02/BC-2.02.004.md) | Enum class: unknown sparkline trace value is a config error | new | P0 |
 | [BC-2.02.005](behavioral-contracts/ss-02/BC-2.02.005.md) | URL class: non-http(s) metrics URL is a config error | new | P0 |
@@ -478,7 +480,7 @@ the supplement.
 
 | ID | Requirement | Target | Validation | Contract |
 |---|---|---|---|---|
-| NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
+| NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Conditional >512 KB timing-fixture exemption (OD-187, ceiling OD-191): the exempt fixture is identified by a validated case flag `timing_exempt: large-transcript` (exactly one case in the corpus, and its transcript must exceed 512 KB); it is exempt from the 25 ms p95 target, but the gate still fails if its p95 exceeds 100 ms (judgment call: 4x the target, well under the refresh interval), and the timing job prints one report line when the exemption is used. Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
 | NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11, CP-A01..A05) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
@@ -495,12 +497,12 @@ the supplement.
 | Code | Surface | Observable | Exit | Contract |
 |---|---|---|---|---|
 | E-REN-001 | Panic guard (any crash path) | `\e[90mstatusline degraded\e[0m\n` (29 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`) | 0 | BC-1.01.001 |
-| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
+| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.01.008, BC-1.02.001, BC-1.02.006, BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
 | E-CFG-001 | D4-EX-3 config error (seven classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134; Text — OD-178) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
 | E-VAL-001 | `config validate` on invalid config | plain reason lines (no SGR) on stdout | 1 | BC-2.03.001 |
-| E-NET-001 | Metrics unreachable / 500 / garbage | freshness ladder down to the stale suffix; render never fails | 0 | BC-1.04.001/.004 |
+| E-NET-001 | Metrics unreachable / 500 / garbage | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (marker word from `statusline.pill.label_local`, OD-189); render never fails | 0 | BC-1.04.001/.004, BC-1.04.002 |
 | E-FS-001 | Cache load/save faults | never-raise; render continues from defaults; failed replace persists nothing | 0 | BC-1.06.001/.002 |
 | E-HAR-001 | Harness integrity (canary, missing table test, glob entry, id outside closed set) | harness run FAILs with a named reason | non-zero (harness only) | BC-6.01.003, BC-6.03.004 |
 
@@ -623,8 +625,11 @@ cycle relies on:
 - **ASM-001 — Oracle pin.** CPython 3.11.7 with a strict UTF-8 locale is the parity
   oracle (OD-104); CI installs 3.11.x (floating patch) and the harness self-checks the
   measured constants against the resolved oracle at start (OD-185) — validated.
-- **ASM-002 — Client surface stability.** Claude Code 2.1.325 is the tested statusLine
-  surface; the stdin field list is unchanged since 2026-11-14 (BC-1.01.002) — validated.
+- **ASM-002 — Client surface stability.** Claude Code 2.1.325 was the tested statusLine
+  surface at mint time; the installed client is 2.1.326 (BC-1.07.001), and
+  `subagentStatusLine` payload compatibility for it is tracked separately as ASM-007
+  (ASSUMP-107-1); the main stdin field list is unchanged since 2026-11-14 (BC-1.01.002) —
+  validated.
 - **ASM-003 — Settings translation.** Legacy `DGX_SL_*`/`LOCAL_MODEL_PREFIXES` translate
   to typed `HYLO_*` per case (OD-05, BC-1.02.005 EC-011) — validated.
 - **ASM-004 — Binding latency target.** The p95 <= 25 ms target binds on the owner's Mac
@@ -637,8 +642,9 @@ cycle relies on:
 - **ASM-007 — Agent-panel surface (OD-155).** `--subagent` and the custom agent-panel rows
   are portable in P1 behind a config off switch (OD-155, superseding OD-14); compatibility
   with the Claude Code 2.1.326 `subagentStatusLine` payload (vs the 2.1.322 contract
-  legacy parsed) is assumed (ASSUMP-107-1, BC-1.07.001/.002 PC-2) — open (disclosed): to
-  be verified by a capture before Phase 3.
+  legacy parsed) is assumed (ASSUMP-107-1, BC-1.07.001 PC-2, BC-1.07.002 PC-1) — open
+  (disclosed): to be validated by an owner capture into git-ignored `captures/` before
+  Phase 2 writes the S1.07 stories; the rest of Phase 2 is not blocked (OD-192).
 
 The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-008).
 

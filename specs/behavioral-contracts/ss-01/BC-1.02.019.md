@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.1"
+version: "1.4.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "0fbd8ab"
+input-hash: "b8b756c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,9 +19,10 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B03): for-all grid-equality and blue-channel legs re-anchored to VP-041 (B01: this BC's default-only Inv 3 stands; the contradicting registry row is the architect's fix); 2026-11-18T03:00:00Z"
+  - "1.2 pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
+  - "1.3 pass-4 remediation (ADV-P4-B03): for-all grid-equality and blue-channel legs re-anchored to VP-041 (B01: this BC's default-only Inv 3 stands; the contradicting registry row is the architect's fix); 2026-11-18T03:00:00Z"
   - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.4.2 pass-7 remediation (ADV-P7-B12): history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null

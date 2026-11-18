@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
-input-hash: "f07d388"
+input-hash: "e3c1a9b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy CACHE_DIR at legacy/dgx_statusline.py SL:78)"
@@ -23,6 +23,7 @@ modified:
   - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D21/D30 — platform LocalZone contract added (OD-171: TZ honoured on every OS, OS-zone fallback, TZ=UTC parity pins); purity table rescoped to the paths functions (pure over injected env)"
   - "2026-11-19T01:05:00Z (1.2.3) ADV-P5 remediation D23+D24 — PC-6 refined to OD-177 libc semantics on every OS: TZ unset → OS zone; TZ empty or unparseable → UTC (was OS zone); leading-colon TZ form pinned; canonical table legs gain empty; H1/Description now name the LocalZone responsibility (P7)"
   - "2026-11-19T04:05:00Z (1.2.4) ADV-P6 remediation D21+D26 — PC-6 accuracy: the UTC-on-unparseable verdict is a ruled hylo verdict (libc itself honors POSIX TZ strings; TZ=Local reaches Go's LoadLocation special case, a documented OS-dependent quirk); LocalZone's error result pinned (non-nil only on the TZ-unset path when OS resolution fails); EC table row order fixed (EC-010 row moved before EC-011/012, ids unchanged)"
+  - "2026-11-19T17:00:00Z (1.2.5): ADV-P7 remediation D12 + orchestrator call 4 — Pre-2 home source routed through the seam: HomeDir(env EnvVars) (HOME on Unix, USERPROFILE on Windows); no platform function reads the real process environment (Inv 3); signatures canonized as CacheDir(env EnvVars) and LocalZone(env EnvVars)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,27 +46,31 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 1. The process environment is readable. Inputs: `HOME` (macOS, Linux), `XDG_CACHE_HOME`, `XDG_CONFIG_HOME`,
    `XDG_STATE_HOME` (macOS, Linux), `LOCALAPPDATA`, `APPDATA` (Windows), and the config key `paths.cache_dir`
    (env `HYLO_PATHS_CACHE_DIR` in P1, OD-107).
-2. The home directory comes from `os.UserHomeDir` (`HOME` on Unix, `USERPROFILE` on Windows).
+2. The home directory comes from the injected environment via the platform seam
+   (pass-7 D12, orchestrator call 4): `HomeDir(env EnvVars)` returns `HOME` on Unix /
+   `USERPROFILE` on Windows — the same seam every platform function reads (Inv 3,
+   BC-2.01.001 PC-6's config-reads-go-only-through-`platform.EnvVars` rule); no
+   platform function reads the real process environment.
 
 ## Postconditions
 
 1. **macOS and Linux** (identical rules; macOS does not use `~/Library`):
-   - `CacheDir()` = `$XDG_CACHE_HOME/hylo` if `XDG_CACHE_HOME` is set, non-empty and absolute; else `$HOME/.cache/hylo`.
+   - `CacheDir(env EnvVars)` = `$XDG_CACHE_HOME/hylo` if `XDG_CACHE_HOME` is set, non-empty and absolute; else `$HOME/.cache/hylo`.
    - `ConfigDir()` = `$XDG_CONFIG_HOME/hylo` under the same rule; else `$HOME/.config/hylo`.
    - `StateDir()` = `$XDG_STATE_HOME/hylo` under the same rule; else `$HOME/.local/state/hylo`.
 2. **Windows:**
-   - `CacheDir()` = `%LOCALAPPDATA%\hylo\cache`; `StateDir()` = `%LOCALAPPDATA%\hylo\state`
+   - `CacheDir(env EnvVars)` = `%LOCALAPPDATA%\hylo\cache`; `StateDir()` = `%LOCALAPPDATA%\hylo\state`
      (separate subdirectories, OD-144; amending the PLAN §6 "cache and state under
      `%LOCALAPPDATA%\hylo`" shared-dir reading); `ConfigDir()` = `%APPDATA%\hylo`.
    - `XDG_*` variables are ignored on Windows.
 3. **Status-line cache directory** used by the cache store = the value of `paths.cache_dir` when set (after `~`
-   expansion, OD-61), otherwise `CacheDir()`. The legacy literal `~/.cache/dgx-llm` is never used as a default and
+   expansion, OD-61), otherwise `CacheDir(env EnvVars)`. The legacy literal `~/.cache/dgx-llm` is never used as a default and
    never read (OD-101, OD-05).
 4. Paths are returned joined with the OS separator (`/` on Unix, `\` on Windows), with no trailing separator.
 5. No directory is created and no file is touched by these functions.
 6. **Local zone resolution (OD-171 as refined by OD-177, ADV-P4-D21; accuracy notes ADV-P6-D21):** `internal/platform`
    also provides
-   `LocalZone(env) (*time.Location, error)`, the only way hylo derives its local zone
+   `LocalZone(env EnvVars) (*time.Location, error)`, the only way hylo derives its local zone
    (`Env.Loc` is populated from it; BC-5.04.001, BC-6.01.002, BC-6.02.003 route through
    it). On every OS it applies the OD-177 verdicts (ruled, and close to libc but not
    identical — libc itself honors POSIX TZ strings that are not in the zone database,
@@ -105,7 +110,7 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 | EC-002 | `XDG_CACHE_HOME=rel/dir` (relative) | Ignored per the XDG Base Directory spec ("relative paths are invalid and should be ignored"): `$HOME/.cache/hylo`. Owner-ruled OD-144 (adopting the XDG-spec convention; empty values likewise ignored, EC-001) |
 | EC-003 | `XDG_CACHE_HOME=/x/` (trailing slash) | `/x/hylo` (cleaned, no doubled separator) |
 | EC-004 | Home directory cannot be determined and no XDG override applies (Unix), or `LOCALAPPDATA`/`APPDATA` empty (Windows) | The function returns an error ("unavailable"). The status line still renders: the never-raise cache helpers treat an unavailable dir as load-empty / save-no-op (BC-1.06.001). `hylo config path` reports the error (BC-2.03.002). Legacy instead used the literal relative path `~/.cache/dgx-llm` when `HOME` was unset; not a parity case |
-| EC-005 | `HYLO_PATHS_CACHE_DIR=~/c` | `$HOME/c` (OD-61 `~` expansion); `CacheDir()` is not consulted |
+| EC-005 | `HYLO_PATHS_CACHE_DIR=~/c` | `$HOME/c` (OD-61 `~` expansion); `CacheDir(env EnvVars)` is not consulted |
 | EC-006 | Windows with `XDG_CACHE_HOME` set | Ignored; `%LOCALAPPDATA%\hylo\cache` |
 | EC-007 | Parity harness run (OD-101, design §3.2) | The harness sets `HYLO_PATHS_CACHE_DIR=<temp>/hylo-cache` and points `XDG_CACHE_HOME` and `LOCALAPPDATA` into the temp tree; caches are compared by file name across the two directories (design §5.3), so the directory difference is not a parity diff and needs no exclusion entry |
 | EC-008 | `TZ=Europe/Paris` (valid IANA name) | `LocalZone` returns that zone, on all three OSes (OD-171) |
@@ -126,7 +131,7 @@ Synthetic environments only (no real home paths).
 | windows, `LOCALAPPDATA=X:\local`, `APPDATA=X:\roaming` | cache `X:\local\hylo\cache`, state `X:\local\hylo\state`, config `X:\roaming\hylo` (OD-144 subdirectories) | happy-path |
 | linux, `HOME=/t/h`, `XDG_CACHE_HOME=rel` | cache `/t/h/.cache/hylo` | edge-case |
 | linux, `HOME=/t/h`, `HYLO_PATHS_CACHE_DIR=/t/c` | status-line cache dir `/t/c`; `CacheDir()` still `/t/h/.cache/hylo` | edge-case |
-| windows, `LOCALAPPDATA` unset | `CacheDir()` returns an error | error |
+| windows, `LOCALAPPDATA` unset | `CacheDir(env EnvVars)` returns an error | error |
 
 ## Verification Properties
 

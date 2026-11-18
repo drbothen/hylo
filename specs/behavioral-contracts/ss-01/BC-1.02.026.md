@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "278b2ba"
+input-hash: "6005118"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,7 +19,8 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-3 remediation (ADV-P3-B11): degraded-line SGR constant credited to OD-113 (BC-2.02.001 inv 2), not OD-162; 2026-11-18T02:00:00Z"
+  - "1.1 pass-3 remediation (ADV-P3-B11): degraded-line SGR constant credited to OD-113 (BC-2.02.001 inv 2), not OD-162; 2026-11-18T02:00:00Z"
+  - "1.1.2 pass-7 remediation (ADV-P7-B12): history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null

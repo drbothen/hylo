@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.5"
+version: "1.1.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T08:00:00Z
+timestamp: 2026-11-19T20:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "929459e"
+input-hash: "da8081c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ guard over main_subagent (SL:1242-1245; sites SL:891, 894, 906, 878, 919)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths added to the catalog as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919), five crash paths total (ADV-P3-C04); guard anchor cites the real ARCH-03 Interfaces heading (ADV-P3-C15)", "1.1.2 2026-11-18T08:00:00Z: pass-4 remediation: row-write stdout failure ruled stop-and-exit-0 with no degraded attempt, riding cp-x03 per OD-172 (ADV-P4-C13); stale LOCAL_MODEL_PREFIXES cite corrected to SL:902-903 (ADV-P4-C12)", "1.1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C14/C11/C17) — refactoring note folds CP-A01..A05; stale ARCH-03 line anchor replaced with #statusline-guard; EC table reordered EC-001..009", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C07) — crash-register count reconciled to 47 (error-taxonomy register: 4+17+7+3+11+5)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.1.1 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths added to the catalog as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919), five crash paths total (ADV-P3-C04); guard anchor cites the real ARCH-03 Interfaces heading (ADV-P3-C15)", "1.1.2 2026-11-18T08:00:00Z: pass-4 remediation: row-write stdout failure ruled stop-and-exit-0 with no degraded attempt, riding cp-x03 per OD-172 (ADV-P4-C13); stale LOCAL_MODEL_PREFIXES cite corrected to SL:902-903 (ADV-P4-C12)", "1.1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C14/C11/C17) — refactoring note folds CP-A01..A05; stale ARCH-03 line anchor replaced with #statusline-guard; EC table reordered EC-001..009", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C07) — crash-register count reconciled to 47 (error-taxonomy register: 4+17+7+3+11+5)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.6 2026-11-19T19:00:00Z: pass-7 remediation (ADV-P7-C12/C14) — VP-001/VP-003 row respelled to the actual promise (render-time faults end in the 29 degraded bytes; stdin faults absorb to zero bytes per BC-1.07.003; row-write EPIPE stops with no degraded attempt per EC-009/OD-172); EC-003's stray '{}'-less garble respelled to the falsy-values list", "1.1.7 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-31) — Legacy-contract cell's pass-6 register count marked as history (47 at ADV-P6-C07; 48 since pass-7 CP-T09)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,7 +80,7 @@ after a complete render, no partial row output precedes the line.
 |----|-------------|-------------------|
 | EC-001 | Fault on the 3rd task of 5 | Degraded line only; tasks 1-2 bytes never reach stdout (buffer-then-print) |
 | EC-002 | CP-A03 with prefixes empty | No crash: grey `123` segment renders (truthy non-str model only faults when the pill branch calls startswith) |
-| EC-003 | CP-A01 with falsy tasks (`0`, `""`, `null`, `{}`-less) | No crash: `or []` yields empty iteration (BC-1.07.003 EC-004) |
+| EC-003 | CP-A01 with falsy tasks (`0`, `""`, `null`, `{}`) | No crash: `or []` yields empty iteration (BC-1.07.003 EC-004) |
 | EC-004 | Go panic unmapped to any CP site in subagent mode | `recover()` backstop prints the same 29 bytes, exit 0 (BC-1.01.001 EC-003 rule extended to the second entry point) |
 | EC-005 | stdout closed / EPIPE while printing degraded line | OD-136 rule: swallow, exit 0 (named exclusion `cp-x03` extended to this entry point) |
 | EC-006 | CP-A04: `{"tasks":[{"id":"a","status":"running","tokenCount":2**1024 - 2**970}]}` | Degraded line, exit 0 (gate passes; `float(n)` overflows) |
@@ -109,7 +109,7 @@ are the SL:127-133 defaults (GREY `\e[90m`, RESET `\e[0m`) as pinned in BC-1.01.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-001, VP-003 | Every fault routed to the subagent renderer ends in exactly the 29 degraded bytes, exit 0, never blank and never non-zero | go test -fuzz (extend VP-001's differential corpus with the `--subagent` stdin argv); VP-003 covers the write-failure leg |
+| VP-001, VP-003 | Every render-time fault (CP-A01..A05 and any unmapped panic) ends in exactly the 29 degraded bytes, exit 0 — stdin faults absorb silently to zero bytes (BC-1.07.003) and a row-write EPIPE stops with exit 0 and NO degraded attempt (EC-009, OD-172); never blank and never non-zero | go test -fuzz (extend VP-001's differential corpus with the `--subagent` stdin argv); VP-003 covers the write-failure leg |
 
 ## Traceability
 
@@ -120,7 +120,7 @@ are the SL:127-133 defaults (GREY `\e[90m`, RESET `\e[0m`) as pinned in BC-1.01.
 | Architecture Module | `internal/statusline` guard (`guard.go`, design §2.2) shared with BC-1.01.001 |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py: guard (SL:1242-1245); CP sites SL:891, 894, 906, 878, 919 |
-| Legacy contract | BC-SL-097 (CP-A01..A03 enumerated P3r1 §A7; CP-A04..A05 adv-p3, OD-156 + new ids; crash register count 47 total, ADV-P6-C07) |
+| Legacy contract | BC-SL-097 (CP-A01..A03 enumerated P3r1 §A7; CP-A04..A05 adv-p3, OD-156 + new ids; crash register 47 at ADV-P6-C07, 48 since pass-7 CP-T09) |
 | Decisions | OD-155 (restores CP-A family to scope), OD-156 ("like O2": catalogued crash paths reproduce the 29-byte line), OD-136 (EPIPE), OD-172 (cp-x03 extends to row writes: stop and exit 0, no degraded attempt — ADV-P4-C13), D4 |
 
 ## Related BCs (Recommended)

@@ -1,17 +1,18 @@
 ---
 document_type: prd-supplement-interface-definitions
 level: L3
-version: "1.12"
+version: "1.13"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T06:00:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "4093cad"
+input-hash: "fbe1339"
 modified:
   - "1.11 2026-11-19T02:00:00Z: pass-5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] → [base, span] and law restated as base + span·i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
   - "1.12 2026-11-19T06:00:00Z: pass-6 remediation — glyph width rule restated in legacy's render width (code points; OD-184); `statusline.cache.rename_retry_delay_ms` registered (OD-186); default-only keys given exact env spellings (A13); Text-class reason strings for List-entry violations and non-theme control bytes (A14); subagent token ascending-pair check fire-at and D4-EX-3 naming rule (A19); rationale codes aligned to the owning BCs (B07); stale glyphs-never-named sentence fixed (B15); metrics_url row notes the OD-181 plain-http parity scope"
+  - "1.13 2026-11-19T12:00:00Z: pass-7 remediation — unit-selector defaults resolved to their single accepted spellings with the legacy-letter rationale (A04/A05/D01, orchestrator call 5); `git.ttl_s` mirrored floor pinned in the Seconds-class note and the row (A06); `statusline.telemetry.timeout_s` validation ceiling labeled (A21); `Float quad` type named for `sparkline.scale` (D09); `statusline.cache.rename_retry_limit` registered (OD-188); dead-backend labels `statusline.labels.vllm_down`/`lmcache_down` and `statusline.subagent.name_fallback` registered (OD-189); registry back-references completed for `units.tokens`/`limits.windows`/`timer.min_ms` (B10) and the S1.07 consumers (C10)"
 traces_to: prd.md
 ---
 
@@ -111,17 +112,18 @@ composite types as strict JSON of the declared shape (below). Full registry (eve
 type, range, default, unit, op, rationale, rationale code): BC-2.01.004 + golden
 `internal/config/testdata/legacy_defaults.golden`.
 
-### Composite-Type Env Grammar (Float pair / Float triple / Int map / RGB triples + Float)
+### Composite-Type Env Grammar (Float pair / Float triple / Float quad / Int map / RGB triples + Float)
 
-A key whose registry type is composite — `Float pair`, `Float triple`, `Int map`,
-`RGB triples + Float`, or any list of numbers — takes its env value as **strict JSON of
+A key whose registry type is composite — `Float pair`, `Float triple`, `Float quad`,
+`Int map`, `RGB triples + Float`, or any list of numbers — takes its env value as **strict JSON of
 the declared shape** (pass-4 design call; ADV-P4-A04/D19). Parsing is shape-first, then
 range:
 
 1. The value must parse as strict JSON (no `NaN`/`Infinity` tokens, no trailing data)
    with exactly the declared shape. Shape names: `array of 2 numbers` (Float pair),
-   `array of 4 numbers` (`statusline.sparkline.scale` — the type name "Float triple" was
-   wrong for this key; pass-5 A03), `object {cc,other} of integers` (Int map),
+   `array of 4 numbers` (Float quad — `statusline.sparkline.scale`; the type name "Float
+   triple" was wrong for this key; pass-5 A03, type named pass-7 D09),
+   `object {cc,other} of integers` (Int map),
    `object {trail,fade,amber,head}` (RGB triples + Float).
 2. Range checks apply after the shape check, member by member: a member outside its
    range is the number-range error with the existing vocabulary; a default-only
@@ -161,32 +163,33 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 
 | Key | Type | Default | Range / op | Rationale (code) | Contract |
 |---|---|---|---|---|---|
-| `statusline.rows` | Int | 2 | any int64 (legacy semantics for negative and large values); row 2 shown when `rows >= 2` and the rendered width permits (BC-1.01.003; pass-4 B22) | C (T-002, convention; BC-1.01.003) | BC-1.01.003, BC-1.04.013, BC-2.02.003 |
+| `statusline.rows` | Int | 2 | any int64 (legacy semantics for negative and large values); row 2 shown when `rows >= 2` and (`rows > 2` or `cols == 0` or `cols >= narrow_cols`) — the width rule hides row 2 only when `rows == 2` (BC-1.01.003; pass-4 B22; pass-7 B01) | C (T-002, convention; BC-1.01.003) | BC-1.01.003, BC-1.04.013, BC-2.02.003 |
 | `statusline.narrow_cols` | Int | 72 | any Int (comparison-total `cols >= narrow_cols` gate — non-negative and negative gate values both gate total, pass-3 B08) | OWNER (T-014, group B; OD-57 E-B; BC-1.01.003) | BC-1.01.003 |
 | `statusline.git.enabled` | Bool | true | on/off segment gate | DOC | BC-1.02.005 |
-| `statusline.git.ttl_s` | Seconds | 5 | any finite number; negative = "never fresh" for ordinary timestamps — the gate `now - ts > ttl` (SL:409) is comparison-total, so a `ts` more than \|ttl\| in the future still counts as fresh (BC-1.02.005 EC-007; pass-5 B11); the Duration ceiling still applies (Seconds-class note below), the negative admission is an exception to the `>= 0` floor only (pass-5 A14). Behavior legacy defines (SL:99), so negatives are admitted (pass-3 B08). Explicit per-key exception to the BC-2.02.002 Seconds class (BC-2.02.002 carries the exception list; pass-4 A03) | C (T-013) | BC-1.02.005 |
+| `statusline.git.ttl_s` | Seconds | 5 | any finite number in `[-9223372036.854775, 9223372036.854775]` (the ceiling mirrored by an explicit floor; a value below the floor is `out of range`, BC-2.02.002 — pass-7 A06); negative = "never fresh" for ordinary timestamps — the gate `now - ts > ttl` (SL:409) is comparison-total, so a `ts` more than \|ttl\| in the future still counts as fresh (BC-1.02.005 EC-007; pass-5 B11); the Duration ceiling still applies (Seconds-class note below), the negative admission is an exception to the `>= 0` floor only (pass-5 A14). Behavior legacy defines (SL:99), so negatives are admitted (pass-3 B08). Explicit per-key exception to the BC-2.02.002 Seconds class (BC-2.02.002 carries the exception list; pass-4 A03) | C (T-013) | BC-1.02.005 |
 | `statusline.telemetry.ttl_s` | Seconds | 4 | finite, `>= 0`, `<= 9223372036.854775`; strict `fetch_ts > now - ttl` | DOC (T-001) | BC-1.04.002, BC-2.02.002 |
 | `backends[0].metrics_url` | URL | `http://192.0.2.10:8428` | scheme http(s), host present; a URL with userinfo (`http://u:p@host:8428`) loads and then reproduces legacy: no sample (the dead rung) — no exclusion id (OD-180, pass-5 C2-03). Parity metrics cases use plain http only (OD-181 closed-set id: non-http(s) redirect targets → hylo no sample; https verifies against the OS trust store — table-tested, out of byte-parity scope) | OWNER (OD-123) | BC-2.01.002, BC-2.02.005 |
-| `backends[0].model_prefixes` | List | `claude-sonnet` | comma list; startswith match | OWNER (OD-111/123) | BC-2.01.002, BC-1.02.001 |
+| `backends[0].model_prefixes` | List | `claude-sonnet` | comma list; startswith match | OWNER (OD-111/123) | BC-2.01.002, BC-1.02.001, BC-1.07.006, BC-1.07.008 |
 | `statusline.lane.reroute_all_prefixes` | List | `["claude", "claude-"]` (legacy) | comma list; every entry non-empty, no control bytes (OD-179, pass-5 B09: the reroute-all markers become config, sourcing the hard-coded "named constant" in BC-1.02.009); entry violation reason `expected non-empty control-free text in every entry`, Text class (OD-178; pass-6 A14) | OWNER (OD-179) | BC-1.02.009 |
 | `paths.cache_dir` | Path | per-OS hylo cache dir | not the legacy literal (exception) | OWNER (OD-101) | BC-3.01.001 |
 | `statusline.cache.rename_retry_delay_ms` | Int | 10 | `1..1000` — both bounds labeled judgment call (J): long enough to clear a Windows sharing violation, short enough to stay inside the refresh budget (OD-186, pass-6 A09: the retry delay was a timing value outside the registry) | J (OD-186) | BC-1.06.001 |
+| `statusline.cache.rename_retry_limit` | Int | 2 | `0..10` — both bounds labeled judgment call (J); TOTAL attempts = 1 + limit (limit 0 = the initial replace only, no retry). Beside its sibling `rename_retry_delay_ms`; supersedes the `renameRetryLimit = 2` code constant (OD-188, pass-7 A19/A2-07: the knob decides whether a Windows cache write persists, which is parity-visible via the `temp-file` exclusion, so the "no parity-visible behavior" reason for keeping it a constant no longer holds) | J (OD-188) | BC-1.06.001 |
 | `statusline.theme.reset` | SGR | `0` | SGR parameter list (non-list = config error, BC-2.01.003) | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.dim` | SGR | `2` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.bold` | SGR | `1` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.white` | SGR | `97` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
-| `statusline.theme.cyan` | SGR | `36` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
+| `statusline.theme.cyan` | SGR | `36` | SGR parameter list | DOC (OD-113) | BC-2.01.003, BC-1.07.006, BC-1.07.007 |
 | `statusline.theme.green` | SGR | `32` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.yellow` | SGR | `33` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.red` | SGR | `31` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
-| `statusline.theme.grey` | SGR | `90` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
-| `statusline.theme.magenta` | SGR | `35` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
+| `statusline.theme.grey` | SGR | `90` | SGR parameter list | DOC (OD-113) | BC-2.01.003, BC-1.07.006, BC-1.07.007 |
+| `statusline.theme.magenta` | SGR | `35` | SGR parameter list | DOC (OD-113) | BC-2.01.003, BC-1.07.006 |
 | `statusline.theme.boldred` | SGR | `1;91` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.pill_local` | SGR | `106;30;1` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.pill_cloud` | SGR | `105;30;1` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.pill_unknown` | SGR | `100;37;1` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
-| `statusline.pill.label_local` | Text | `DGX` | non-empty, no control bytes, display width 1..16 (judgment call: keeps the pill short; OD-173) | OWNER (OD-173) | BC-1.02.001 |
-| `statusline.pill.label_cloud` | Text | `ANTH` | non-empty, no control bytes, display width 1..16 (as above; OD-173) | OWNER (OD-173) | BC-1.02.001 |
+| `statusline.pill.label_local` | Text | `DGX` | non-empty, no control bytes, display width 1..16 (judgment call: keeps the pill short; OD-173); the marker word of the dead-backend rung `◌ <label_local> ?` too (OD-189, pass-7 C2-07) | OWNER (OD-173) | BC-1.02.001, BC-1.07.006 |
+| `statusline.pill.label_cloud` | Text | `ANTH` | non-empty, no control bytes, display width 1..16 (as above; OD-173) | OWNER (OD-173) | BC-1.02.001, BC-1.07.006 |
 | `statusline.pill.label_unknown` | Text | `?` | non-empty, no control bytes, display width 1..16 (as above; OD-173) | OWNER (OD-173) | BC-1.02.001 |
 | `statusline.theme.separator` | Text | ` · ` (U+00B7) | free text, no control bytes (control byte = config error, BC-2.01.003 PC-3) | DOC (OD-113) | BC-2.01.003 |
 | `statusline.window_age.process_name` | Text | `claude` | non-empty, no control bytes; exact basename match (Windows `.exe` stripped) | OWNER (OD-133) | BC-3.02.001/.002 |
@@ -195,8 +198,8 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.context.plain_max` | Float | 50 | any finite number (comparison-total `pct > plain_max` colour gate — plain percentage vs heat-coloured number; not the `min(…,n)` cells formula; BC-1.02.006 PC3-PC5; type aligned to the BC's "any finite JSON number", pass-4 B08) | DOC | BC-1.02.006 |
 | `statusline.context.red_from` | Float | 85 | any finite number (band threshold, operator `>=`; BC-1.02.006 PC3-PC5; type aligned to the BC, pass-4 B08) | DOC | BC-1.02.006 |
 | `statusline.units.context` | Text | `K` | default-only: range = {`K`}; registered semantics `1e6` → `M`, else `K` — default-only because the M/K divisors are fixed format constants that define the unit spellings, not because the widget formula is hard-coded (pass-4 B10) | DOC | BC-1.02.006 |
-| `statusline.units.lines` | Text | `k`/`M` | default-only: range = {`k`/`M`}; thresholds 10,000 (`>=` → k), 1,000,000 (`>=` → M) | DOC | BC-1.02.014 |
-| `statusline.units.tokens` | Text | `k`/`M` | default-only: range = {`k`/`M`}; thresholds 1,000 (`>=` → k), 1e6 (`>=` → M) | DOC (T-042) | BC-1.02.025 |
+| `statusline.units.lines` | Text | `k` | default-only: range = {`k`}; registered render semantics: thresholds 10,000 (`>=` → k), 1,000,000 (`>=` → M) | DOC | BC-1.02.014 |
+| `statusline.units.tokens` | Text | `M` | default-only: range = {`M`}; registered render semantics: thresholds 1,000 (`>=` → k), 1e6 (`>=` → M) | DOC (T-042) | BC-1.02.025, BC-1.02.018 |
 | `statusline.theme.heat` | Float (triple) | 0.22/0.85/0.80 | default-only: range = {`0.22/0.85/0.80`} — BC-1.02.019's HSV gradient is defined only for the default triple (PC2 covers sectors i ∈ {0,1}, hue span ≥ 1/3), so any other triple is a number-range config error (OD-162); default's env spelling is the strict-JSON array `[0.22,0.85,0.80]` (pass-6 A13/call 8); pass-4 B01/design call 6 | DOC (T-030) | BC-1.02.019 |
 | `statusline.transcript.read_cap_bytes` | Int (bytes) | 524288 | `1..67108864` (upper bound 64 MiB, labeled judgment call (J): caps per-refresh read buffering far beyond any real transcript step; pass-5 A13/call 16) | J (T-054) | BC-1.03.003 |
 | `statusline.transcript.dedup_memory` | Int | 256 | `1..65536` (upper bound labeled judgment call (J), pass-5 A13/call 16) | Dv (T-060) | BC-1.03.005 |
@@ -209,7 +212,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.queue.yellow` | Bool | true | both booleans defined: `true` = rule `q > 0 or preempt > 0`, `false` = never yellow (BC-1.04.006; ratified as a P1 Bool key by OD-175, pass-4 D26) | Dv (T-047) | BC-1.04.006 |
 | `statusline.sparkline.points` | Int | 12 | `1..100` — upper bound 100 is a labeled judgment call (J), same rationale as `kv.cells`: caps O(points) render work and segment width within the 25 ms p95 budget; the T-code justifies the default, not the bound (pass-3 A27) | J (T-006) | BC-1.04.009 |
 | `statusline.sparkline.history_cap` | Int | 32 | `1..1000` (upper bound labeled judgment call (J), same render-budget rationale as `kv.cells`; pass-5 A13/call 16) | Dv (T-009) | BC-1.04.003/.009 |
-| `statusline.sparkline.scale` | array of 4 numbers (composite) | `[1.0, 1.0, 0.1, 1e-9]` = `[k_top, v_floor, f_floor, other]` | array of 4 finite numbers, each `> 0` (strict JSON env grammar, per-key shape in Composite-Type Env Grammar; pass-5 A03/call 3) | Dv (T-045) | BC-1.04.009 |
+| `statusline.sparkline.scale` | Float quad (composite) | `[1.0, 1.0, 0.1, 1e-9]` = `[k_top, v_floor, f_floor, other]` | array of 4 finite numbers (`array of 4 numbers`), each `> 0` (strict JSON env grammar, per-key shape in Composite-Type Env Grammar; pass-5 A03/call 3; `Float quad` joins the BC-2.01.004 `Type` enum — pass-7 D09) | Dv (T-045) | BC-1.04.009 |
 | `statusline.cost.min_sessions` | Int | 10 | `>= 1` (0 raises IndexError on an empty list in legacy, SL:261) | OWNER (T-020) | BC-1.05.005 |
 | `statusline.cost.percentiles` | Float pair | (0.75, 0.95) | each a finite Float in `[0, 1]`, ASCENDING pair: `p75 <= p95` is ratified — a descending pair is a number-range config error (strict JSON env grammar, see Composite-Type Env Grammar; pass-3 C2-07; ratified in BC-1.05.005 on its own grounds — index overflow and negative wrap — not mirrored from the limits bands, whose chained red-first comparison is comparison-total for any finite pair, so no ordering constraint is ratified there) | OWNER (T-024) | BC-1.05.005 |
 | `statusline.cost.min_usd` | Float | 1.0 | finite `>= 0` (grey test strict `<`) | Dv (T-019) | BC-1.05.001 |
@@ -226,16 +229,17 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.subagent.colors.failed` | SGR | `31` (legacy RED) | SGR parameter list (as above; independence from `statusline.theme.red`, pass-4 A21) | J (OD-02; SL:131-132, 845-846) | BC-1.07.005 |
 | `statusline.subagent.colors.killed` | SGR | `90` (legacy GREY) | SGR parameter list (as above; independence from `statusline.theme.grey`, pass-4 A21) | J (OD-02; SL:131-132, 845-846) | BC-1.07.005 |
 | `statusline.subagent.joiner` | Text | `\u0020\u00b7\u0020` (space, U+00B7, space) | free text, no control bytes (control byte = config error, Text class per OD-178, raised by BC-2.01.005; pass-6 A14) | DOC (SL:924) | BC-1.07.004 |
+| `statusline.subagent.name_fallback` | Text | `?` | non-empty, no control bytes (fallback for a row with no usable name; OD-189 sources the hard-coded literal — pass-7 C11/C2-07: the equivalent `?` in the lane pill is a key, so this one is too) | OWNER (OD-189) | BC-1.07.005 |
 | `statusline.subagent.tokens.k_from` | Float | 1000 | finite `> 0`; ascending pair `k_from <= m_from` (OD-162 every-key-has-a-range; pass-3 A14/C05) | DOC (T-042) | BC-1.07.007 |
 | `statusline.subagent.tokens.m_from` | Float | 1000000 | finite `> 0`; ascending pair `k_from <= m_from` (as above). Pair-fire rule (pass-6 A19): the ascending-pair check runs at `m_from`'s own validation, after both keys pass their single-key range checks; when it fails, the D4-EX-3 line names `statusline.subagent.tokens.m_from` with its own value, reason `ascending pair violated (k_from <= m_from)` (number-range class) | DOC (T-042) | BC-1.07.007 |
 | `statusline.subagent.tokens.suffix` | Text | ` tok` (U+0020 + `tok`) | non-empty, no control bytes (mirrors BC-2.01.003 PC-3); the `k_from`/`m_from` values are display thresholds only — the divisors 1e3/1e6 are format constants that define the K/M units, not config (why-not-config comment required at the call site; pass-4 C05/design call 3) | DOC (T-042) | BC-1.07.007 |
 | `statusline.limits.keep_s` | Seconds | 1800 | finite `> 0` (`<` age gate, comparison-total in legacy; pass-3 A05) | J (T-010, owner group A) | BC-1.02.013, BC-1.02.030 |
-| `statusline.limits.windows` | List | `5h/7d` | default-only: range = {`5h/7d`} (window lengths 18000 s / 604800 s; non-default selectors undefined) | DOC (T-031, Anthropic convention) | BC-1.02.010, BC-1.02.024 |
+| `statusline.limits.windows` | List | `5h/7d` | default-only: range = {`5h/7d`} (window lengths 18000 s / 604800 s; non-default selectors undefined) | DOC (T-031, Anthropic convention) | BC-1.02.010, BC-1.02.011, BC-1.02.024 |
 | `statusline.limits.countdown_max_factor` | Float | 1.15 | any finite number (multiplier in the `<=` countdown gate) | J (T-035, owner judgment; OD-57 E-A; BC-1.02.012) | BC-1.02.012 |
 | `statusline.limits.projection_min_elapsed` | Float | 0.10 | any finite number (`>=` elapsed-fraction gate) | DOC (T-032) | BC-1.02.011, BC-1.02.024 |
 | `statusline.limits.projected_bands` | Float pair | `[80, 100]` = `[yellow, red]` | each a finite Float; ELEMENTS NAMED: position 0 is the yellow threshold (compared `>=`, inclusive), position 1 the red threshold (compared `>`, strict), red checked first in legacy's chained comparison (SL:519); strict JSON env grammar, see Composite-Type Env Grammar (pass-5 A15/call 3) | DOC (T-033) | BC-1.02.011, BC-1.02.024 |
 | `statusline.limits.absolute_bands` | Float pair | `[70, 90]` = `[yellow, red]` | each a finite Float; ELEMENTS NAMED: position 0 yellow, position 1 red, both compared `>`, red checked first (SL:520); strict JSON env grammar, see Composite-Type Env Grammar (pass-5 A15/call 3) | DOC (T-034) | BC-1.02.011, BC-1.02.024 |
-| `statusline.timer.min_ms` | Int | 60000 | any Int (comparison-total display gate, operator `>`) | Dv (T-038, derived; BC-1.02.015) | BC-1.02.015 |
+| `statusline.timer.min_ms` | Int | 60000 | any Int (comparison-total display gate, operator `>`) | Dv (T-038, derived; BC-1.02.015) | BC-1.02.015, BC-1.02.016, BC-1.02.027 |
 | `statusline.timer.api_min_ms` | Int | 60000 | any Int (operator `>=`) | Dv (T-039, derived; BC-1.02.016) | BC-1.02.016, BC-1.02.027 |
 | `statusline.cost.window_s` | Seconds | 2592000 (30 d) | finite `> 0` (history filter; pass-3 A05) | OWNER (T-018) | BC-1.05.005 |
 | `statusline.cost.record_throttle_s` | Seconds | 60 | finite `> 0` (strict `<` throttle; pass-3 A05) | Dv (T-022) | BC-1.05.004 |
@@ -244,7 +248,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.cost.display_floor_usd` | Float | 0.005 | finite Float (operator `>=`); renamed from `cost.basis_min_shown_usd` by OD-174 (pass-4 B21: the key is a display floor for the `⛏` pick, not a basis minimum; not yet shipped, so the rename is free of compatibility debt) | Dv (T-044) | BC-1.02.029 |
 | `statusline.cost.basis_min_mtok_month` | Float | 30.4 | finite Float (operator `>=`) | Dv (T-012) | BC-1.02.029, BC-1.05.003 |
 | `statusline.telemetry.query` | Text | legacy `QUERY` literal (SL:102-123, byte-pinned golden) | any text (percent-encoded into the URL; upstream errors give no sample — the dead rung of the freshness ladder, never a CP-S degrade: BC-1.04.001 PC3/PC5; disposition corrected pass-5 C2-16) | DOC | BC-1.04.001 |
-| `statusline.telemetry.timeout_s` | Seconds | 1.5 | finite Float > 0 (HTTP client timeout; <= 0 not legacy-covered) | J (T-005) | BC-1.04.001 |
+| `statusline.telemetry.timeout_s` | Seconds | 1.5 | finite Float > 0, validation ceiling `<= 25` (HTTP client timeout; <= 0 not legacy-covered). Ceiling rationale (J, pass-7 A21): ~16x the 1.5 s default and an order of magnitude under the 300 s `keep_dead_s` retention horizon — OD-56 makes the fetch a synchronous total deadline inside the render, so an unbounded accepted value could stall the line for its whole duration; the numeric ceiling is a labeled judgment call, not a measured bound | J (T-005) | BC-1.04.001 |
 | `statusline.telemetry.fresh_s` | Seconds | 15 | finite `> 0` (freshness comparison; pass-3 A05) | Dv (T-003) | BC-1.04.004 |
 | `statusline.telemetry.keep_dead_s` | Seconds | 300 | finite `> 0` (retention comparison; pass-3 A05) | J (T-004) | BC-1.04.002 |
 | `statusline.ttft.min_samples` | Int | 20 | any Int (sample-count gate; below it p95 = max) | Dv (T-015) | BC-1.04.010 |
@@ -263,6 +267,8 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.sparkline.preempt_marker_above` | Float | 0 | `>= 0` (finite); the history `p` marker shows when preempt > value; independent of `statusline.queue.yellow` (pass-4 C2-13/design call 5; type Int → Float pass-5 C2-11/call 16 — `dgx_preempt:rate5m` is a per-second rate, so an Int could not express the historical > 0.01/s rule, SL:737-738) | Dv (T-107) | BC-1.04.003 |
 | `statusline.sparkline.colors` | RGB triples + Float | `{"trail":[70,170,190],"fade":[0.55,0.45],"amber":[220,170,60],"head":[140,235,255]}` | object with exactly the members `trail`/`amber`/`head` (arrays of 3 integers) and `fade` (array of 2 finite numbers `[base, span]` — the trail fade factor is `base + span·i/max(n-2, 1)`, per BC-2.01.005 PC-5); components any Int, fade finite (presentation formatter plugs them in; strict JSON env grammar, per-key shape in Composite-Type Env Grammar; pass-5 A03/call 3) | J (T-046, presentation) | BC-1.04.009 |
 | `statusline.labels.input` | Text | `in` | non-empty, no control bytes; a two-character LABEL, not a glyph (member ranges per family rule; OD-02's 1-code-point rule does not apply to labels; pass-4 A05/B15 design call 2) | DOC (OD-02) | BC-1.02.018 |
+| `statusline.labels.vllm_down` | Text | `vLLM down` | non-empty, no control bytes (dead-backend marker label, OD-189: the `up:vllm` dead-backend word is config, not a constant — pass-7 C2-07) | OWNER (OD-189) | BC-1.04.004, BC-1.04.005 |
+| `statusline.labels.lmcache_down` | Text | `LMCache down` | non-empty, no control bytes (as above; OD-189) | OWNER (OD-189) | BC-1.04.004, BC-1.04.005 |
 | `statusline.glyphs.*` (family, 27 members) | Text | legacy glyph set (OD-02) | exactly 1 code point, measured in legacy's render width (code points — the count legacy's layout uses; OD-184, pass-6 A04), non-empty, no control bytes (one-line output invariant; mirrors BC-2.01.003 PC-3); sole exception `sparkline` = exactly 8 ordered code points (OD-02, OD-184). The East-Asian-Width validation width (OD-170 tables) applies only to the pill-label 1..16 bound (OD-173), not to glyphs — so `watts` U+26A1 (East-Asian-Width W) is 1 column under the glyph rule. COMPLETE MEMBER LIST (with env names via PC-2 `EnvName`; defaults verified against legacy, pass-5 A18/calls 1-2; order, names and consumer cites unified verbatim with BC-2.01.004 PC-6, pass-5 residual sweep): `tools` U+25A4 (SL:1167; BC-1.02.007), `conversation` U+2759 (SL:1167; BC-1.02.007), `thinking` U+25C8 (SL:1167; BC-1.02.007), `lines_up` U+25B2 (SL:537; BC-1.02.014), `lines_down` U+25BC (SL:537; BC-1.02.014), `timer` U+23F1 (SL:549; BC-1.02.015, BC-1.02.028), `window_age` U+2302 (SL:562; BC-1.02.017, BC-1.02.028), `tokens_up` U+2191 (SL:587; BC-1.02.018), `write` U+270D (SL:592; BC-1.02.018), `cache_read` U+27F3 (SL:594; renamed from `reroute` — not shipped, no alias; pass-5 call 2; BC-1.02.018), `tokens_down` U+2193 (SL:597; BC-1.02.018), `cache_rebuild` U+21BB (SL:598-599; renamed from `stale`, as above; BC-1.02.018), `cache_hit` U+267B (SL:479; BC-1.02.008, BC-1.02.023), `lane` U+25E8 (SL:447-449 main pill AND SL:906-907 subagent tag; BC-1.02.001, BC-1.07.006), `git` U+2387 (SL:413; BC-1.02.005), `cell_on` U+25B0 (SL:428 thermometer, SL:761 KV; BC-1.02.006, BC-1.04.007, BC-1.04.015), `cell_off` U+25B1 (as above), `cost_pick` U+26CF (SL:631/635; BC-1.02.029, BC-1.05.003), `telemetry_dot` U+25C9 (SL:730; BC-1.04.005 — dot colour coupled to BC-1.04.004), `degraded` U+25CC (SL:696; BC-1.04.004), `ttft` U+25D4 (SL:797/799; BC-1.04.010, BC-1.04.019), `watts` U+26A1 (SL:813; BC-1.04.011), `idle` U+263E (SL:834; BC-1.04.012, BC-1.04.017), `box_rate` U+25A3 (SL:783; BC-1.04.008), `sess_rate` U+00BB (SL:781; BC-1.04.018 — value from BC-1.03.010; shared default with `subagent.glyphs.running`, independent key), `host` U+21BA (SL:762; BC-1.04.007), `sparkline` U+2581..U+2588 ramp (SL:136; BC-1.04.009). The subagent lane-tag WORDS come from the OD-173 keys `statusline.pill.label_local`/`label_cloud` (BC-1.07.006 joins BC-1.02.001 as a consumer); the subagent token colour is `statusline.theme.cyan` and the model/clock colour `statusline.theme.grey` (pass-5 C03 product-owner part) | J (OD-02) | BC-1.02.001/.005/.006/.007/.014/.015/.017/.018/.023/.028/.029, BC-1.04.004/.005/.007/.008/.009/.010/.011/.012/.015/.017, BC-1.05.003, BC-1.07.006 |
 
 Seconds-class note (pass-5 A14): the Duration ceiling `<= 9223372036.854775` (int64
@@ -271,8 +277,11 @@ above — `telemetry.ttl_s`, `git.ttl_s`, `limits.keep_s`, `cost.window_s`,
 `cost.record_throttle_s`, `telemetry.timeout_s`, `fresh_s`, `keep_dead_s`,
 `ttft.integer_from_s`, `ttft.yellow_s`, `idle.after_s`, `sparkline.max_age_s`,
 `sparkline.min_gap_s` — in addition to any per-key range (BC-2.02.002 is authoritative).
-The `git.ttl_s` exception (pass-3 B08) waives the `>= 0` floor only, not the ceiling; it
-has no negative floor of its own (any finite value above the ceiling's magnitude bound).
+The `git.ttl_s` exception (pass-3 B08) waives the `>= 0` floor only, not the ceiling; its
+ceiling is mirrored by a floor of `-9223372036.854775` (the Duration ceiling's magnitude,
+negated): a value below the floor is rejected as `out of range`, so the conversion
+well-definedness invariant holds for the exception too (BC-2.02.002 check 3 mirror,
+ADV-P5-D11; pass-7 A06).
 
 Default-only parameters (the owning BC hard-codes the formula and leaves non-default
 values undefined — non-default behavior: see the BC; per OD-162 such a key's valid range
@@ -292,6 +301,21 @@ default-only key compares the PARSED env value to the default, and the env spell
 `HYLO_STATUSLINE_UNITS_LINES=k`; `HYLO_STATUSLINE_UNITS_TOKENS=M`;
 `HYLO_STATUSLINE_LIMITS_WINDOWS=5h,7d` (comma-list grammar, OD-74). Any other parse that
 differs from the default after parsing is a number-range config error (OD-162).
+
+Unit-selector default spellings resolved (pass-7 A04/A05/D01, orchestrator call 5): each
+unit-selector key's Default cell is the SINGLE code point the parsed env value is compared
+to — this is the cell that lands in `legacy_defaults.golden` — while the k/M pair in each
+row's Range cell is the key's registered RENDER semantics (the suffixes the widget paints),
+unchanged. The three siblings pick different letters, derived from the bytes legacy
+renders: `units.lines` = `k` — the compact tier of `_fmt_lines` paints lowercase `k`
+(SL:858, `n // 1000` + `k`); `units.tokens` = `M` — the token formatter's million tier
+paints uppercase `M` (SL:870, `f"{n / 1e6:.1f}M"`, the approved-mockup docstring's own
+example "88.0M"); `units.context` = `K` — the context denominator below 1e6 paints
+uppercase `K` (SL:436; BC-2.01.006 "else `K`"). Case follows the rendered byte per
+formatter (lowercase `k` in the line/token formatters, uppercase `K` in the context
+denominator); which of a widget's two rendered suffixes NAMES the key default is a
+convention ratified by the orchestrator call (lines named by its lower tier, tokens by its
+million tier, so the two sibling selectors' golden cells stay distinct).
 `statusline.context.cells`, `statusline.context.plain_max`, `statusline.context.red_from`
 are NOT default-only any more: BC-1.02.006 PC3-PC5 now
 define non-default behavior, and their ranges are registered in the table above
@@ -324,13 +348,16 @@ OD-179): `statusline.lane.reroute_all_prefixes` added; the glyph family grows fr
 `telemetry_dot`, `degraded`, `host`, `sess_rate`, `box_rate`, `ttft`, `watts`,
 `idle`) and renames `reroute` → `cache_read`, `stale` → `cache_rebuild` (not shipped, no
 alias); BC-2.01.004 PC-6 and this row were unified name-for-name in the pass-5 residual
-sweep (2026-11-19).
+sweep (2026-11-19). Pass-7 registration addendum (OD-188/OD-189):
+`statusline.cache.rename_retry_limit`, `statusline.labels.vllm_down`,
+`statusline.labels.lmcache_down`, `statusline.subagent.name_fallback` added.
 Deliberately NOT registry keys
 (setting them yields only the unknown-setting warning, BC-2.01.002 PC-7, OD-123):
 `statusline.telemetry.url` and `routing.local_model_prefixes`. The inert key
 `statusline.window_age.ps_timeout_s` was removed by OD-147 (BC-3.02.001) and is likewise
 not registered. Judgment-label calls worth owner eyes: `statusline.telemetry.timeout_s`
-(finite Float > 0 — a <= 0 timeout has no legacy-covered behavior) and
+(finite Float > 0, validation ceiling `<= 25` — a <= 0 timeout has no legacy-covered
+behavior; the ceiling is the pass-7 A21 judgment call) and
 `statusline.sparkline.colors` (component/float domain judged from the presentation
 formatter).
 

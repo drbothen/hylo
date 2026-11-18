@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.02.001.md, behavioral-contracts/ss-01/BC-1.02.004.md, behavioral-contracts/ss-01/BC-1.02.016.md, behavioral-contracts/ss-01/BC-1.02.018.md, behavioral-contracts/ss-01/BC-1.02.019.md, behavioral-contracts/ss-01/BC-1.02.021.md, behavioral-contracts/ss-01/BC-1.02.022.md, behavioral-contracts/ss-01/BC-1.02.023.md, behavioral-contracts/ss-01/BC-1.02.025.md, behavioral-contracts/ss-01/BC-1.02.027.md, behavioral-contracts/ss-01/BC-1.02.028.md, prd-supplements/test-vectors.md]
-input-hash: "8a25d38"
+input-hash: "ff30841"
 traces_to: prd.md
 source_bc: BC-1.02.001
 bcs: [BC-1.02.001, BC-1.02.004, BC-1.02.016, BC-1.02.018, BC-1.02.019, BC-1.02.021, BC-1.02.022, BC-1.02.023, BC-1.02.025, BC-1.02.027, BC-1.02.028, BC-1.02.002, BC-1.02.003, BC-1.02.006, BC-1.02.007, BC-1.02.009, BC-1.02.010, BC-1.02.013, BC-1.02.015]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.0 2026-11-18T15:05:00Z: created — ADV-P4 fix (B03, plan item 18): S1.02 for-all property legs split from VP-028, exactly as VP-040 was split from VP-027 in pass 3; VP-028 keeps the bounded golden tables", "1.1 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-04, B08, A2-08) — the four BC-routed legs now exist as properties: P-i BC-1.02.019 dense-grid triple equality over [-10, 110] (arm64 generated table vs CPython oracle), P-j BC-1.02.025 float64 token-format fuzz, P-k BC-1.02.027 _hm fuzz, P-l BC-1.02.028 win_ms fuzz in [300000, 1e12]; P-b and P-g oracles restated as LIVE pinned-CPython calls per generated input (ARCH-07 recipe) — a static pinned table cannot oracle random inputs (A2-08)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (B01/call 10, A2-16: eight properties P-m..P-t added for the ADV-P6-B01 BCs (bcs: and the generator table extended); P-g's live-oracle half moves to the Tier C harness (VP-038 discipline); P-h has no oracle half)"]
+modified: ["1.0 2026-11-18T15:05:00Z: created — ADV-P4 fix (B03, plan item 18): S1.02 for-all property legs split from VP-028, exactly as VP-040 was split from VP-027 in pass 3; VP-028 keeps the bounded golden tables", "1.1 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-04, B08, A2-08) — the four BC-routed legs now exist as properties: P-i BC-1.02.019 dense-grid triple equality over [-10, 110] (arm64 generated table vs CPython oracle), P-j BC-1.02.025 float64 token-format fuzz, P-k BC-1.02.027 _hm fuzz, P-l BC-1.02.028 win_ms fuzz in [300000, 1e12]; P-b and P-g oracles restated as LIVE pinned-CPython calls per generated input (ARCH-07 recipe) — a static pinned table cannot oracle random inputs (A2-08)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (B01/call 10, A2-16: eight properties P-m..P-t added for the ADV-P6-B01 BCs (bcs: and the generator table extended); P-g's live-oracle half moves to the Tier C harness (VP-038 discipline); P-h has no oracle half)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-11) — P-b's live `_hm` oracle half moves to the Tier C harness with P-g's (pass-6 A2-16 left it behind): the Generators table row no longer claims a live in-tree oracle call, the Method quick-set lists the structural halves only, and the Tier C Proof Method row gains P-b"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,10 +106,11 @@ delivers the quantified legs:
 ## Property Class and Verification Method
 
 - **Class:** invariant (universality rows).
-- **Method:** property test (testing/quick) for the structural rows P-a, P-b, P-c,
-  P-d, P-g (in-tree: the structural half only — no live interpreter call, per
+- **Method:** property test (testing/quick) for the structural rows P-a, P-c,
+  P-d and the STRUCTURAL HALVES of P-b and P-g (in-tree: the structural half only —
+  no live interpreter call, per
   VP-038's oracle discipline, A2-16); Tier C differential fuzz for the oracle rows
-  P-e, P-f, P-g, P-j, P-k, P-l, P-n, budgeted by
+  P-e, P-f, P-g, P-j, P-k, P-l, P-n AND P-b's differential half, budgeted by
   `HYLO_PARITY_FUZZSECONDS` (nightly leg, ARCH-08), same oracle discipline as VP-011;
   fake-FileSystem table for P-h's write-scope observation (P-h has no oracle half);
   a planted-mutant lint leg
@@ -123,7 +124,7 @@ delivers the quantified legs:
 | Row | Generator | Oracle |
 |---|---|---|
 | P-a | sized string pairs: id and comma-split prefix lists crossing match/mismatch/case boundaries | structural: re-derive `any(HasPrefix)` |
-| P-b | float64 api spread around 60000 ± ulp, plus NaN/-0/Inf dispositions | structural presence predicate + live `_hm` oracle call (ARCH-07 recipe; a pinned table cannot cover generated inputs, ADV-P5-A2-08) |
+| P-b | float64 api spread around 60000 ± ulp, plus NaN/-0/Inf dispositions | structural presence predicate in-tree; differential half = pinned CPython 3.11 `_hm` oracle, live call per generated input UNDER THE TIER C HARNESS only (A2-11, same discipline as P-g; a pinned table cannot cover generated inputs, ADV-P5-A2-08) |
 | P-c | part tuples with zeros, positives, and >0 counts 0..5 | structural bracket predicate |
 | P-d | finite float64 grid | structural constant-30 observation |
 | P-i | dense float64 grid over [-10, 110] | pinned CPython 3.11 heat oracle, per-cell (ARCH-07 recipe) |
@@ -149,7 +150,7 @@ delivers the quantified legs:
 |--------|------|----------|----------|
 | Property test | `testing/quick` | sized (quick does not shrink) | P-a, P-b, P-c, P-d, P-g (structural half), P-m..P-t |
 | Generated table vs oracle | Go test, arm64 leg | yes — dense grid | P-i |
-| Tier C differential fuzz | parity harness | `HYLO_PARITY_FUZZSECONDS` | P-e, P-f, P-g, P-n, P-j, P-k, P-l (oracle halves under the harness, A2-16) |
+| Tier C differential fuzz | parity harness | `HYLO_PARITY_FUZZSECONDS` | P-e, P-f, P-g, P-n, P-j, P-k, P-l, P-b (oracle halves under the harness, A2-16/A2-11) |
 | Fake-FileSystem table | Go test, temp dirs + syscall log | yes — bounded depth/width | P-h write scope + termination |
 | Planted-mutant lint | ARCH-08 lint job leg | 1 mutant flagged, real tree 0 | `filepath.Clean` absence |
 

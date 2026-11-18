@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5867379"
+input-hash: "f118c73"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,10 +19,11 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-008, the no-rl_ts vector) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set id OD-160; 2026-11-18T03:00:00Z"
+  - "1.1 pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-008, the no-rl_ts vector) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
+  - "1.2 pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set id OD-160; 2026-11-18T03:00:00Z"
   - "1.3 pass-5 remediation (ADV-P5-B10): PC4 gains the reroute-all carve-out — SL:489 short-circuits to rl = {}, so a malformed window is never touched and nothing raises (oracle-verified); new EC-010 pins the malformed-window-under-reroute-all case; 2026-11-18T05:42:56Z"
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.3.2 pass-7 remediation (ADV-P7-B06/B12): reroute-all control and markers respelled to the OD-179 config key `statusline.lane.reroute_all_prefixes` (PC3, EC-007, EC-010, Config-keys row); history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +51,7 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
    and file naming, BC-1.06.002 temp handling, BC-3.01.001 the cache directory).
 2. `now` = the single per-render clock value (design IM-14), frozen by the harness.
 3. Config `statusline.limits.keep_s` default 1800 (T-010; owner group A judgment: "30 min of plan limits between Claude
-   Code reports"). `backends[0].model_prefixes` controls reroute-all (BC-1.02.009).
+   Code reports"). `statusline.lane.reroute_all_prefixes` controls reroute-all (BC-1.02.009 PC1; OD-179).
 4. `effective_rl` runs before the row-1 render (legacy step order, BC-1.01.009).
 
 ## Postconditions
@@ -85,10 +86,10 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
 | EC-004 | bad cached window, then a good stdin object | recovers at once (stdin overwrites the cache) |
 | EC-005 | `{five_hour: 0, seven_day: {…}}` | saved verbatim; `0` counts as an absent window |
 | EC-006 | `{seven_day: {}}` | saved; widget hidden (no percentage) |
-| EC-007 | reroute-all (`backends[0].model_prefixes` contains bare `claude`) | still written to the cache; widget hidden |
+| EC-007 | reroute-all (`statusline.lane.reroute_all_prefixes` contains bare `claude`) | still written to the cache; widget hidden |
 | EC-008 | foreign cache with `rl` but no `rl_ts` (foreign-cache shape, **OD-160**: Go stores only non-empty rl dicts with `rl_ts`, SL:305-308) | hidden (`ts` defaults to 0) |
 | EC-009 | cache `rl_ts` in the future | shown |
-| EC-010 | malformed window under reroute-all (stdin `{"five_hour": "x"}`, `backends[0].model_prefixes` contains bare `claude`) | still written to the cache (PC1); no raise and no degrade — SL:489 binds `rl = {}` and the limits loop never sees the malformed value; widget hidden (extends EC-007 to malformed windows; PC4) |
+| EC-010 | malformed window under reroute-all (stdin `{"five_hour": "x"}`, `statusline.lane.reroute_all_prefixes` contains bare `claude`) | still written to the cache (PC1); no raise and no degrade — SL:489 binds `rl = {}` and the limits loop never sees the malformed value; widget hidden (extends EC-007 to malformed windows; PC4) |
 
 ## Canonical Test Vectors
 
@@ -135,7 +136,7 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:effective_rl (SL:298-312); call site legacy/dgx_statusline.py:main (SL:1216); crash site legacy/dgx_statusline.py:render_lane (SL:502-503) |
 | Legacy contract | BC-SL-093 (deep pass-3 round 2 §A3) |
-| Config keys | `statusline.limits.keep_s` (T-010), `paths.cache_dir` (OD-101), `backends[0].model_prefixes` (OD-123) |
+| Config keys | `statusline.limits.keep_s` (T-010), `paths.cache_dir` (OD-101), `statusline.lane.reroute_all_prefixes` (OD-179; reroute-all control, BC-1.02.009 PC1) |
 | Parity | byte-exact for stdout and cache content authored by Go; hand-edited-cache vectors carry exclusion **OD-160** (foreign-cache shapes, ruling Q-b). Go temp-file cleanup on a failed replace (legacy leaks the temp file) is the OD-110 temp-file exclusion entry (owned by BC-1.06.002 with its own table tests), applied to the cache-directory comparison only; it does not affect any vector here |
 
 ## Related BCs (Recommended)

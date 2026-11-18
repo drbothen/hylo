@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "65d04ee"
+input-hash: "0874f93"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,7 @@ modified:
   - "2026-11-18T22:00:00Z (1.2.2) 2026-11-18: ADV-P4 remediation D21 - Env.Loc routed through internal/platform.LocalZone (OD-171); phantom HYLO_TEST_* zone citation replaced by TZ=UTC harness pin"
   - "2026-11-18T23:55:00Z (1.2.3) ADV-P5 remediation D01 — Windows MSVC localtime_s OSError (naive wall time on/before 1970-01-01 or from year 3001) now reproduces legacy: it propagates and DEGRADES the line (SL:984 catches ValueError only); rule in internal/platform with a table test; no exclusion id"
   - "2026-11-19T04:00:00Z (1.2.4) ADV-P6 remediation D06 + D10 / orchestrator call 2 — signatures carry the third outcome in pure pyfmt: FromISOFormat(s, loc, msvcDomain bool) (float64, error) with sentinels ErrValue (None) and ErrLocaltimeDomain (caller degrades); LocalToUnix(fields, loc, msvcDomain bool) (int64, error); statusline injects msvcDomain = platform.IsWindows(), no platform import (AD-02); Pre-2 TZ reading aligned to OD-177 (empty or unparseable TZ → UTC; unset → OS-zone fallback)"
+  - "2026-11-19T17:00:00Z (1.2.5): ADV-P7 remediation D06+D07 (orchestrator call 8) — Description states the every-probe domain rule: all MSVC calls (t, u1, u1-86400, u2) are domain-checked, so the working domain is left-open (1970-01-01T00:00:00, year 3001) — a naive wall time on or before 1970-01-01 degrades via the fold-0 u1-86400 dip (PC-6 already correct; Description's [1970-01-01, ...) interval fixed); Pre-1 non-str ownership stated (caller's Value resolution; canon (float64, error) with ErrValue), superseding (0, false). Crash id CP-T09 names the degrade"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,15 +45,25 @@ under CPython 3.11
 Its `error` result carries the three caller outcomes (ADV-P6-D06, orchestrator call 2): nil = a value,
 `ErrValue` = None (parse failure, non-str, whitespace), `ErrLocaltimeDomain` = the Windows MSVC
 domain failure, which the CALLER degrades on — `LocalToUnix(fields, loc, msvcDomain bool) (int64, error)`
-returns that distinct sentinel when `msvcDomain` is set and the instant lies outside MSVC's
-[1970-01-01, year 3001) domain. The flag is injected — statusline passes
+returns that distinct sentinel when `msvcDomain` is set and the instant's probe sequence
+leaves MSVC's domain. Every MSVC call in the conversion — the probes `t`, `u1`, `u1 - 86400`
+and `u2` — is checked against MSVC `localtime_s`'s domain (pass-7 D06, orchestrator
+call 8), so a NAIVE wall time ON OR BEFORE 1970-01-01 (the fold-0 `u1 - 86400` probe
+already dips below MSVC's 1970-01-01 floor) or AT OR AFTER YEAR 3001 degrades; the
+working domain of the whole conversion is therefore left-open `(1970-01-01T00:00:00,
+year 3001)`, not the MSVC range itself. The flag is injected — statusline passes
 `msvcDomain = platform.IsWindows()` — so the rule stays in pure pyfmt with no platform
 import (AD-02).
 
 ## Preconditions
 
-1. `s` is the Value at the transcript's `timestamp` field; a non-string Value returns `(0, false)` (None) without
-   parsing (SL:979-980).
+1. The caller resolves the transcript's `timestamp` field first (SL:979-980): a
+   NON-STRING Value is None before any parsing — the non-str check is owned by the
+   caller's Value resolution (a `string`-typed parameter cannot receive one), and the
+   canon is `FromISOFormat(s string, loc, msvcDomain bool) (float64, error)` with
+   `ErrValue` = None (parse failure, whitespace) and `ErrLocaltimeDomain` = the
+   Windows degrade (ADV-P6-D06; pass-7 D07 supersedes the former `(0, false)`
+   wording).
 2. `loc` is the injected `*time.Location` (`Env.Loc`), derived exclusively through
    `internal/platform.LocalZone` (BC-3.01.001 PC-6, OD-171): `TZ` is honored on every OS
    (named zone → that zone; empty or unparseable `TZ` → UTC, OD-177; unset `TZ` →

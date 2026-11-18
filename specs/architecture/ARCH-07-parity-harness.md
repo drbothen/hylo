@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.9"
+version: "1.11"
 status: draft
 producer: architect
-timestamp: 2026-11-19T04:00:00Z
+timestamp: 2026-11-19T20:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "e1dae94"
+input-hash: "431bb1a"
 
 ---
 
@@ -63,30 +63,66 @@ input-hash: "e1dae94"
   patch while the measured constants were taken on 3.11.7): the harness measures the
   JSON depth boundaries and `unicodedata.unidata_version` against the RESOLVED oracle
   and FAILS CLOSED on any mismatch, printing the resolved version; Tier B golden
-  metadata records the resolved patch (RK-4).
+  metadata records the resolved patch (RK-4). Pinned constants, copied verbatim from
+  BC-6.01.001 PC-4 (pass-7 D04, the ONE end-to-end definition; CPython 3.11.7, default
+  recursion limit 1000): stdin decode 993 accepted / 994 rejected; session-cache save
+  991 writes / 992 skips; subagent wire 991 renders; `unicodedata.unidata_version`
+  `14.0.0` — identical to the laws' constants.
   invoked with `-s`, never `-I`/`-E` — `-I` would drop the sitecustomize clock shim
   (OD-109). Child environment constructed from scratch — ALLOWLIST construction, never
   inherit-then-strip (BC-6.01.002:70/:157 authoritative; pass-5 A02 aligns VP-034 and
-  this section to it). Per-OS allowlists (exact key sets; the VP-034 skeleton asserts
-  the exact allowlisted key set):
-  - POSIX: `HOME` (fixed per-case temp dir), `TMPDIR`, `PATH`,
-    `LANG=en_US.UTF-8` (the strict UTF-8 parity locale, BC-1.01.008 inv 2),
-    `PYTHONPATH` (sitecustomize clock shim only), `TZ=UTC` (pin, OD-171/OD-177).
-  - Windows: `USERPROFILE` (fixed per-case temp dir), `TMP`, `TEMP`, `SYSTEMROOT`
-    (canonical NT spellings as constructed; the child env is built from scratch, so
-    the host shell's case-insensitive key matching never applies — pass-5 A2-07),
-    `PATH`, `PYTHONPATH` (shim only), `TZ=UTC`, and exactly ONE extra variable,
-    `PYTHONIOENCODING=utf-8` (OD-183, pass-6 A03: CPython 3.11 piped stdio on
-    Windows otherwise uses the ANSI code page, so the strict-UTF-8 parity mode of
-    BC-1.01.008 could not be reached on the windows-2025 oracle and glyphs outside
-    cp1252 would degrade the Windows goldens; stdio only — a table test pins that
-    the variable changes stdio encoding and nothing else; `PYTHONUTF8` stays
-    forbidden).
-  - Both OSes: NO other `PYTHON*` variable except `PYTHONPATH` (EC-002: no
-    `PYTHONUTF8` on either OS — BC-1.01.008 inv 2: `PYTHONUTF8=1` is NOT
-    the parity mode; `PYTHONIOENCODING` appears on Windows only, as the OD-183
-    `=utf-8` stdio pin above), no `*_proxy`, no inherited GP-1..GP-6 variables (e.g. no
-    `DGX_SL_TTL`, which changes legacy TTL).
+  this section to it). AUTHORITATIVE EXACT KEY SETS (copied verbatim from
+  BC-6.01.002 PC-1 "Authoritative exact key sets", pass-7 D05, orchestrator call 2 —
+  ARCH-07 and VP-034 copy these sets verbatim; with no fake table and no declared
+  `COLUMNS` the constructed key sets are exactly:
+  - POSIX oracle child: `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
+    `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES` (+ the `DGX_SL_*` keys
+    the case sets, + `COLUMNS` when declared, + `PATH` when a fake table is
+    declared).
+  - Windows oracle child: the POSIX set, plus `TMP`, `TEMP`, `SYSTEMROOT` and
+    `PYTHONIOENCODING=utf-8` (OD-183; the same conditional additions apply: + the
+    `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when a fake
+    table is declared).
+  - POSIX Go child: `HOME`, `USERPROFILE`, `TMPDIR`, `XDG_CACHE_HOME`,
+    `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`, `HYLO_TEST_NOW`,
+    `HYLO_BACKENDS_0_MODEL_PREFIXES` (+ the `HYLO_*` setting keys the case sets, +
+    `COLUMNS` when declared; NO `PATH` ever — the built binary is started by
+    absolute path).
+  - Windows Go child: the POSIX Go set, plus `TMP`, `TEMP`, `SYSTEMROOT` (the same
+    conditional additions apply).
+  `HOMEDRIVE`/`HOMEPATH` are NOT constructed keys on any OS (home is
+  `HOME`+`USERPROFILE`); no key set on any OS includes `PATH` unless the fake-table
+  condition holds; `HOME` is present on BOTH OSes (Windows included) and
+  `USERPROFILE` on BOTH OSES (POSIX included), always the same case-temp value —
+  both are set because Python 3.8+ `expanduser` ignores `HOME` on Windows, and
+  legacy writes its caches to `<case-home>/.cache/dgx-llm/` (SL:78)).
+  Value spellings: `LANG=en_US.UTF-8` (the strict UTF-8 parity locale, BC-1.01.008
+  inv 2), `TZ=UTC` on every leg (pin, OD-171/OD-177), `PYTHONPATH` carrying only the
+  sitecustomize clock shim, `SYSTEMROOT` with the runner's value (CPython cannot
+  start without it; Go's `os/exec` adds it on Windows when missing), the child env
+  built from scratch so the host shell's case-insensitive key matching never applies
+  (pass-5 A2-07). Windows stdio, exactly ONE extra variable,
+  `PYTHONIOENCODING=utf-8` (OD-183, pass-6 A03: CPython 3.11 piped stdio on
+  Windows otherwise uses the ANSI code page, so the strict-UTF-8 parity mode of
+  BC-1.01.008 could not be reached on the windows-2025 oracle and glyphs outside
+  cp1252 would degrade the Windows goldens; stdio only — a table test pins that
+  the variable changes stdio encoding and nothing else; `PYTHONUTF8` stays
+  forbidden). By OD-190 this LF behavior is hylo-wide and named beside the builder
+  variable, never hidden in the shim: hylo writes UTF-8 + LF line endings on every
+  OS, and the Windows oracle's LF normalization is produced by the two named
+  mechanisms — the builder's `PYTHONIOENCODING=utf-8` (encoding) and the shim's
+  `newline="\n"` reconfigure (LF-only newlines). Conditional `PATH`: `PATH=<case>/bin`,
+  ONLY when the case declares a subprocess-fake table (the fake `ps` of BC-3.02.002);
+  the value is the harness constant, never the runner's `PATH`; cases without a fake
+  table get no `PATH` key (ADV-P1-D05 resolution) — with no `PATH` key, CPython's
+  subprocess fallback searches `os.defpath` (`/bin:/usr/bin`, SL:280), which is why
+  the harness rejects an unseeded case with a truthy `session_id` unless a fake table
+  is declared (ADV-P2-D12; BC-6.02.003 PC-6).
+  Forbidden on both OSes: NO other `PYTHON*` variable except `PYTHONPATH` (EC-002: no
+  `PYTHONUTF8` on either OS — BC-1.01.008 inv 2: `PYTHONUTF8=1` is NOT
+  the parity mode; `PYTHONIOENCODING` appears on Windows only, as the OD-183
+  `=utf-8` stdio pin above), no `*_proxy`, no inherited GP-1..GP-6 variables (e.g. no
+  `DGX_SL_TTL`, which changes legacy TTL).
 - Clock shim `internal/statusline/testdata/pyhooks/sitecustomize.py` on `PYTHONPATH`
   freezes `time.time`/`strftime`/`localtime`/`gmtime` from `HYLO_TEST_NOW` (decimal
   string parsed by both sides), stepped between refreshes; canary test fails the harness
@@ -131,7 +167,7 @@ input-hash: "e1dae94"
 | Cache swap | `TestParityCacheSwap_FourCaches` |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
 | Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` (corpus root; OD-148, matching BC-6.02.001/.003, BC-6.04.003) |
-| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpn01..cpn03, cpo01..cpo11, cpa01..cpa05 |
+| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpn01..cpn03, cpo01..cpo11, cpa01..cpa05. SUBAGENT FAMILY RULE (pass-7 D14): a subagent-family case is identified by the case-id SUFFIX `-sub` on a base case (e.g. `row1-003-sub`), the marker BC-6.01.001/BC-6.02.003/BC-6.03.001 use ("id suffix `-sub`"); the grammar's `subagent` token denotes that suffix family, NOT a `<subagent>-<nnn>` spelling, so the validator's rule is the determinate suffix match |
 | Case contents | `stdin.json.tmpl`, `settings`, `argv` (pass-4 ruling, ADV-P4-A15/D09: the HANDLER-RELATIVE argument list — the elements after the `statusline` verb; default `[]`. In P1 the corpus validator admits only `[]` and `["--subagent"]`; the oracle receives `[python, -s, script]` plus the same list, so the oracle — which has no `statusline` verb — sees exactly the handler arguments. Other argv shapes are covered by Go table tests (BC-4.01.002), never parity. Supersedes the pass-3 "passed to the built `hylo` binary verbatim, default `["statusline"]`" wording and BC-4.01.002:111's "no flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps` (clock step + transcript appends per step, carried INSIDE `case.json` — pass-4 D10 — not as a sibling `steps.jsonl`) |
 | Exclusions file | `internal/statusline/testdata/parity/exclusions.json` (beside the corpus root; OD-148 layout, BC-6.03.003/.004 PC-1); capture replays additionally use a git-ignored `captures/exclusions.json` validated by the same closed-set rule, CI never runs captures (pass-4 D12) |
 | Tier B goldens | `internal/statusline/testdata/goldens/*.golden`, `*.windows.golden` |
@@ -139,7 +175,7 @@ input-hash: "e1dae94"
 | pyfmt generators/tables | `internal/pyfmt/testdata/gen/*.py`; tables `internal/pyfmt/testdata/*.golden` |
 | Replay captures (git-ignored) | `captures/` (repo root) |
 | D4-EX-3 class tests | `TestD4EX3_{Boolean,Enum,URL,Number,Text}` — FIVE names, five classes (OD-178, pass-5 A07; superseding the pass-4 four-name set): `Number` covers both number-range (BC-2.02.002) and number-grammar (BC-2.02.003; the grammar class maps to `_Number`); `Text` is the OD-178 seventh D4-EX-3 class covering composite-shape, pill-label, glyph and empty-text errors, with exact reason strings in the taxonomy vocabulary and its own table test `TestD4EX3_Text`. No Theme member — theme settings are rejected by the corpus validator (BC-6.02.003 EC-007), so a Theme D4-EX-3 case cannot exist in the corpus and no `TestD4EX3_Theme` name is canonical; the split rationale is NOT legacy analogs — Text also has none, yet keeps its Go table test precisely because its keys ARE registry-declared (composite-shape, pill-label, glyph, empty-text): `TestD4EX3_Text` is a Go table test only, not a parity exclusion entry (pass-6 A20, call 1). Superseding the earlier six-name list |
-| D4-EX-1 test | `TestWindowAge_D4EX1_Windows` |
+| D4-EX-1 test | `TestWindowAge_D4EX1_Windows_AncestorFound` (settled name, VP-012 v1.13; pass-7 A2-05) |
 | Seeds reference | `seed/` holds the four cache files under their legacy file-name formats (legacy-shared named constants, BC-1.06.001; not renamed by the harness) |
 
 Fixture co-location ADR (AD-13, OD-148): the synthetic corpus root is

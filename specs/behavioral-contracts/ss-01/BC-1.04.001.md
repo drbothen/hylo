@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.6"
+version: "1.3.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T12:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "420933f"
+input-hash: "fcee7c9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-08/09/13/14", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-04/05/10 (redirect loop detection; OverflowError catch; 1e400; key identity)", "2026-11-18 (v1.3.2) sync — Verification Properties row relabeled; VP-022 (partial: network edge only) now states its own property (the status line never reads the ledger, DI-007) instead of VP-030's differential-equivalence text", "2026-11-18 (v1.3.3) pass-4 remediation ADV-P4-C2-01/02 (overflow vector >= 2**1024 - 2**970; metric wrapper on the two-key vector), ADV-P4-C2-07 (37-hop worst case; normalized redirect key; rebuilt chain example), ADV-P4-C2-08 (URI header fallback), ADV-P4-C2-09 (Accept-Encoding: identity / DisableCompression), ADV-P4-C2-12 (CP-N03 named on EC-013)", "2026-11-18 (v1.3.4) pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)", "2026-11-18 (v1.3.5) pass-5 remediation ADV-P5-C2-01/02 (manual redirect loop: unconditional ErrUseLastResponse, hylo-driven hops, empty-Location self-redirect, quote safe=string.punctuation, urlunparse round trip), ADV-P5-C2-03 (userinfo metrics URL: dead rung, OD-180), ADV-P5-C2-04 (VP-030 scoped to body bytes over well-formed HTTP)", "2026-11-18 (v1.3.6) pass-6 remediation ADV-P6-C2-02/05/06/07/08/11/12 (empty-Location target = urljoin at the requesting hop's URL; minimal net.Conn HTTP/1.1 client with urllib's exact header set/order and compat32 header-value spaces; fetch-site JSON depth measured 992 accepted / 993 rejected; ftp and TLS deviations named under exclusion id OD-181; empty-fragment key drop)"]
+modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-08/09/13/14", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-04/05/10 (redirect loop detection; OverflowError catch; 1e400; key identity)", "2026-11-18 (v1.3.2) sync — Verification Properties row relabeled; VP-022 (partial: network edge only) now states its own property (the status line never reads the ledger, DI-007) instead of VP-030's differential-equivalence text", "2026-11-18 (v1.3.3) pass-4 remediation ADV-P4-C2-01/02 (overflow vector >= 2**1024 - 2**970; metric wrapper on the two-key vector), ADV-P4-C2-07 (37-hop worst case; normalized redirect key; rebuilt chain example), ADV-P4-C2-08 (URI header fallback), ADV-P4-C2-09 (Accept-Encoding: identity / DisableCompression), ADV-P4-C2-12 (CP-N03 named on EC-013)", "2026-11-18 (v1.3.4) pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)", "2026-11-18 (v1.3.5) pass-5 remediation ADV-P5-C2-01/02 (manual redirect loop: unconditional ErrUseLastResponse, hylo-driven hops, empty-Location self-redirect, quote safe=string.punctuation, urlunparse round trip), ADV-P5-C2-03 (userinfo metrics URL: dead rung, OD-180), ADV-P5-C2-04 (VP-030 scoped to body bytes over well-formed HTTP)", "2026-11-18 (v1.3.6) pass-6 remediation ADV-P6-C2-02/05/06/07/08/11/12 (empty-Location target = urljoin at the requesting hop's URL; minimal net.Conn HTTP/1.1 client with urllib's exact header set/order and compat32 header-value spaces; fetch-site JSON depth measured 992 accepted / 993 rejected; ftp and TLS deviations named under exclusion id OD-181; empty-fragment key drop)", "2026-11-18 (v1.3.7) pass-7 remediation ADV-P7-C2-01/02/04/08 (body framing = the http.client read ladder: chunked, then Content-Length, else EOF; compat32 header rule corrected to lstrip space/tab then rstrip CRLF — leading whitespace stripped too; http/https client versus plain-http parity corpus disentangled; the next GET drops the URL fragment) + ADV-P7-C2-03 (VP-012 closure row for OD-181) + ADV-P7-C2-09 (stale ARCH-03 line label corrected)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +52,10 @@ is byte 0x1B.
    `<url>/api/v1/query?query=<QUERY percent-encoded as Python quote(QUERY, safe='')>`
    (space as `%20`, never `+`; the encoded prefix is
    `%7B__name__%3D~%22vllm%3Anum_requests_running%7C...`). Transport: hylo's metrics
-   client is a MINIMAL HTTP/1.1 client over a `net.Conn` (plain http only; OD-181). It
+   client is a MINIMAL HTTP/1.1 client over a `net.Conn`: an `http` URL dials plain TCP;
+   an `https` URL upgrades the SAME `net.Conn` through `crypto/tls` with SNI, ALPN
+   `http/1.1` only, and the OS trust store (system roots on Linux) — it is the PARITY
+   CORPUS that is plain http only (OD-181), never the client (ADV-P7-C2-04). It
    sends exactly what urllib sends, byte for byte and in urllib's order — request line
    `GET <selector> HTTP/1.1`, then `Accept-Encoding: identity`, `Host: <host:port>`,
    `User-Agent: Python-urllib/3.11`, `Connection: close` — and nothing else (header
@@ -63,15 +66,31 @@ is byte 0x1B.
    listener, 2026-11-18; ADV-P6-C2-12). It parses the response body raw and never
    decompresses (legacy asks for `identity`; Go's default Transport would send
    `Accept-Encoding: gzip` and silently decompress — ADV-P4-C2-09). The minimal client
-   is required, not a style choice: Go's `net/http`/`textproto` (a) TRIMS header
-   values, while CPython's email compat32 keeps inner and trailing spaces, stripping
-   only CR/LF — a `Location: /x␠` value parses to `/x␠` (quoted `/x%20`), not `/x`
-   (oracle-verified CPython 3.11.7, 2026-11-18; ADV-P6-C2-05); (b) `url.Parse` rejects
+   is required, not a style choice: Go's `net/http`/`textproto` (a) TRIMS BOTH ENDS of
+   every header value (`textproto.TrimString`), while CPython 3.11.7 compat32
+   `header_source_parse` does `value.lstrip(' \t')` then `rstrip('\r\n')` — leading
+   spaces/tabs are STRIPPED TOO, and inner and TRAILING spaces/tabs are KEPT
+   (oracle-verified CPython 3.11.7, 2026-11-18: `Location: ␉␠/x␠` parses to `/x␠`;
+   ADV-P7-C2-02, correcting the ADV-P6-C2-05 wording). The sides diverge on TRAILING
+   whitespace: a `Location: /x␠` value parses to `/x␠` (quoted `/x%20`) under compat32
+   but `/x` under Go's trim; (b) `url.Parse` rejects
    a `%` not followed by two hex digits, which urllib passes through (`%` is in the
    safe punctuation set); (c) an empty `Location` makes `http.Client` skip
    `CheckRedirect` entirely. Status line and headers are therefore parsed exactly as
-   `http.client` does (compat32: values keep inner and trailing spaces; only CR/LF
-   stripped). Redirects: the Go client follows HTTP redirects exactly as
+   `http.client` does (compat32: `lstrip(' \t')` then `rstrip('\r\n')` — rule (a)
+   above). Body framing is `http.client`'s `HTTPResponse.read()` ladder, because legacy
+   `resp.read()` (SL:172) reads through `http.client`: (i) `Transfer-Encoding: chunked`
+   (case-insensitive) → the DE-CHUNKED concatenation, and chunked wins over a
+   `Content-Length` (RFC 2616 §4.4 #3 as coded in `HTTPResponse.begin`); (ii) else
+   `Content-Length` → exactly that many bytes (a value that fails `int()` or is negative
+   is treated as ABSENT; a truncated body raises `IncompleteRead` → outer
+   `except Exception` → no sample); (iii) else (neither header) → read to EOF
+   (connection close). Oracle-verified on CPython 3.11.7, 2026-11-18: chunks
+   `3\r\n{"a\r\n4\r\n: 1}\r\n0\r\n\r\n` read as
+   `{"a: 1}`; `Content-Length: 5` yields exactly `hello`; neither header yields the
+   stream until close (ADV-P7-C2-01). A literal client that hands the raw body —
+   chunk-size lines included — to `json.loads` yields no sample for every chunked reply
+   where legacy gets one. Redirects: the Go client follows HTTP redirects exactly as
    urllib's default `HTTPRedirectHandler` (active because
    `build_opener(ProxyHandler({}))` keeps it, SL:168-171) — a 301/302/303/307/308 is
    followed by GET and the **final** body is parsed; other statuses are not redirected.
@@ -107,7 +126,11 @@ is byte 0x1B.
    params component is dropped, so `/x?` and `/x` are ONE key; an EMPTY fragment is
    dropped too — `urlunsplit` adds `#` only when the fragment is non-empty — so `/x#`
    and `/x` are ONE key; parameters and a NON-EMPTY fragment are kept as part of the
-   key; ADV-P6-C2-11), percent-encoding of non-ASCII
+   key — the fragment is a LOOP-KEY component only: the next GET splits it off, since
+   urllib's `Request` strips the fragment from the wire target (oracle:
+   `Request('http://h:8428/p?x=1#frag').selector` = `/p?x=1`, CPython 3.11.7,
+   2026-11-18), so a request line never carries `#frag` (ADV-P7-C2-08); ADV-P6-C2-11),
+   percent-encoding of non-ASCII
    and special bytes (`quote(newurl, encoding="iso-8859-1", safe=string.punctuation)` —
    the `safe` set is ALL ASCII punctuation, not the default `'/'`; read with the default
    the rule would encode `:` and double-encode existing `%XX`, giving loop keys urllib
@@ -138,7 +161,8 @@ is byte 0x1B.
    `quote(..., "iso-8859-1", safe=string.punctuation)` → `urljoin`), then consult the
    `redirect_dict` emulation — refuse (no sample, and never parse the refused 3xx body)
    iff `count[normalized] >= 4 || len(count) >= 10`, otherwise `count[normalized]++` and
-   issue the next GET. Only this structure reproduces the empty-`Location` self-redirect,
+   issue the next GET (its request target drops the fragment; only the loop key keeps
+   it). Only this structure reproduces the empty-`Location` self-redirect,
    the urllib-normalized key and the non-http(s)-target no-sample guard: `CheckRedirect`
    alone sees none of them (Go skips it on an empty `Location` and cannot rewrite the
    target). Hylo must reproduce every refusal mode the
@@ -250,10 +274,11 @@ is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | For any response **body** delivered over well-formed HTTP framing, the Go fetch returns the same map (keys incl. Python key identity per PC4 — distinct `"5"`/`5`, shared NaN; order; float bits) or "no sample" as legacy. Wire-framing parse differences (malformed header lines tolerated by Python's email parser, LF-only line endings, duplicate Content-Length) are out of scope by design: net/http and http.client frame-parse differently, so the Tier C oracle emits well-formed framing and varies status, header values and body only (ADV-P5-C2-04) | fuzz (Tier C differential) + table |
+| VP-030 | For any response **body** delivered over well-formed HTTP framing, the Go fetch returns the same map (keys incl. Python key identity per PC4 — distinct `"5"`/`5`, shared NaN; order; float bits) or "no sample" as legacy. Malformed wire framing (header lines Python's email parser tolerates, LF-only line endings, duplicate Content-Length) is out of scope by design: the Tier C oracle emits WELL-FORMED framing per the PC1 ladder (chunked / Content-Length / EOF) and varies status, header values and body only (ADV-P5-C2-04; the stale net/http reason removed ADV-P7-C2-01 — framing is hylo's own code since pass 6) | fuzz (Tier C differential) + table |
 | VP-022 (partial: network edge only) | The status line never reads the ledger (DI-007): the metrics fetch reads only the VictoriaMetrics HTTP response at the network edge — no ledger/file reads in the render path | static analysis (read-scope absence) |
 | VP-030 | The function never panics or returns an error to the caller | fuzz |
 | VP-030 | Request URL bytes equal legacy's for the default query | manual (golden) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-181` (metrics transport beyond plain http: non-http(s) redirect targets give no sample; https TLS trust-store differences) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-181` entry and its riding table test `TestMetricsClient_OD181_TransportTable` (defined in VP-030), and the mutation test fails closed if that entry is dropped (ADV-P7-C2-03) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -264,7 +289,7 @@ is byte 0x1B.
 | L2 Capability | CAP-010 |
 | L2 Domain Invariants | DI-007, DI-008, DI-012 (metrics-URL D4-EX-3 deviation, BC-2.02.005; ftp/TLS transport deviations named under exclusion id OD-181, ADV-P6-C2-07/08) |
 | Decisions | OD-123 (metrics URL under backends[0]), OD-56 (timeout = total deadline), OD-57 E-0 (T-005), D14 (proxy bypass is defense in depth) |
-| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces, line 114) |
+| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces — `MetricsClient` interface at line 183, `telemetry.go` in the file list at line 235) |
 | Stories | TBD (story-writer) |
 
 ## Related BCs (Recommended)

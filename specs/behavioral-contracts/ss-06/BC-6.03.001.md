@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "f2ba5d0"
+input-hash: "4c53355"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04: subagent corpus family added to the Python-written goldens with --subagent oracle argv (OD-155)"
   - "1.2.2 2026-11-18: ADV-P4 remediation D10 - -update relocated to ./internal/parity (corpus-owning package, canonical layout)"
   - "2026-11-19T00:25:00Z (1.2.3) ADV-P5 remediation D29 — -update per-OS write path defined: .windows.golden variants are written by an -update run ON Windows; a Linux run never fabricates them; metadata records the writing OS"
+  - "2026-11-19T17:00:00Z (1.2.4): ADV-P7 remediation D14 - subagent cases identified by the ARCH-07 `subagent` case-id family (the -sub shorthand noted as the same family), not a bare id suffix; oracle argv text unchanged"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,7 +47,9 @@ removal_reason: null
 
 Three full-refresh fixtures pin the complete status line output end to end, as
 committed Tier B goldens — plus the subagent family (ADV-P3-D04): every subagent
-corpus case (id suffix `-sub`, BC-6.02.002/003) is refreshed with the oracle argv
+corpus case — the `subagent` family of the ARCH-07 case-id grammar
+`<family>-<nnn>[-<variant>]` (the older "-sub" shorthand denotes the same family;
+pass-7 D14; BC-6.02.002/003) — is refreshed with the oracle argv
 `[<python>, "-s", <abs>/legacy/dgx_statusline.py, "--subagent"]` (OD-155, superseding
 OD-14) and its committed goldens are Python-written the same way, so the
 legacy-parity half of the agent-panel mode is Tier-A/Tier-B verifiable:

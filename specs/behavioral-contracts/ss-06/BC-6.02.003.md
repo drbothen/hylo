@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T22:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "70c10a9"
+input-hash: "8d8509c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,7 @@ modified:
   - '2026-11-19T00:10:00Z (1.2.6) ADV-P5 remediation D03+D21 — placeholder substitution only inside JSON string values with JSON-escaped path insertion (Windows \U/\t round-trip table test); Bool settings mapped by parsed value through the BC-2.01.005 grammar (operator strings, not JSON literals); outside-grammar Bool verbatim only in D4-EX-3 cases'
   - "2026-11-19T02:00:00Z (1.2.7): sync-check adv-p5 closure (SC-15) — 1.2.6 entry requoted single-quoted (the Windows path-escape spelling is not a YAML double-quoted-scalar escape); no behavioral change"
   - "2026-11-19T03:20:00Z (1.2.8): ADV-P6 remediation D05 / orchestrator call 3 — PC-8 gains the OD-76 disposition: the difference-table rows (America/Chicago repeated-DST hour, identical-row epochs) close the exclusion as Go table tests, never parity corpus cases; the corpus validator keeps rejecting non-UTC tz, so the corpus stays UTC-only"
+  - "2026-11-19T17:00:00Z (1.2.9): ADV-P7 remediation D14+D17 - subagent cases identified by the ARCH-07 `subagent` case-id family (the -sub shorthand noted as the same family), not a bare id suffix; stale 'architect to align ARCH-07' note closed (ARCH-07:135 already aligned); provenance SL:92 corrected to SL:89 (SL:92 is a comment); PC-8 LocalZone legs gain `empty` (five legs, BC-3.01.001 PC-6)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -89,11 +90,14 @@ directory.
    (`hylo statusline <argv...>`) and for the oracle (`[python, -s, <script>] +
    <argv>`; BC-6.01.001 PC-5). Default `[]` (a plain `hylo statusline`). The P1 corpus
    validator admits only `[]` and `["--subagent"]` (orchestrator design call 9,
-   ADV-P4-D09); subagent-family cases (id suffix `-sub`, ARCH-07 case grammar) carry
-   `["--subagent"]`, exercising the `main_subagent` path (SL:1240) on both sides
-   identically. Every other argv shape is Go-table-test territory (BC-4.01.002), never
+   ADV-P4-D09); subagent-family cases — the `subagent` family of the ARCH-07 case-id
+   grammar `<family>-<nnn>[-<variant>]` (the older "-sub" shorthand denotes the same
+   family; pass-7 D14) — carry `["--subagent"]`, exercising the `main_subagent` path
+   (SL:1240) on both sides identically. Every other argv shape is Go-table-test
+   territory (BC-4.01.002), never
    parity. The verb itself is never part of `argv` (ARCH-07's "full binary argv,
-   default `["statusline"]`" reading is superseded — architect to align ARCH-07).
+   default `["statusline"]`" reading is superseded; ARCH-07's case grammar is the
+   aligned authority — pass-7 D17 closes the former "architect to align" note).
 
 ## Postconditions
 
@@ -159,7 +163,8 @@ directory.
    `TZ=UTC` only). The windows-2025 leg therefore runs the naive local-time cases with
    NO skip (VP-026's `posix-only` tag removed by the architect; superseding the
    ADV-P2-D02 OS restriction). LocalZone's own verdicts (`TZ` unset / `UTC` / IANA name /
-   unparseable) are Go table tests of `internal/platform` (BC-3.01.001 PC-6), never
+   `empty` / unparseable — the five legs BC-3.01.001 PC-6 lists) are Go table tests of
+   `internal/platform` (BC-3.01.001 PC-6), never
    corpus cases. The OD-76 difference-table rows — including the America/Chicago
    repeated-DST hour and the identical-row epochs I1/I2, which are Chicago values
    (BC-3.02.002 Pre-3, CTV) — close the exclusion as GO TABLE TESTS run under
@@ -209,7 +214,7 @@ directory.
 
 | Field | Value |
 |-------|-------|
-| Source | design §5.2 case model (`stdin.json.tmpl`, settings declared once and translated — Bools by value, design call 11 — `metrics.json` or mode `down`/`500`/`garbage`, optional cache seed, transcript generator spec, `steps` inside `case.json`; out-of-domain setting legal only in a D4-EX-3 case); design §3.2 (metrics, process start, cache dir seams); research Q3b; OD-05; OD-111; OD-123 (`backends[0].*` keys); legacy provenance `legacy/dgx_statusline.py` SL:73-79, 92, 444 (env reads), SL:273-275 (`proc_start` short-circuit), SL:405-406 (git cache key); handler-relative `argv` field and `subagent` case family (sync-check SC-03, pass-3 A03, OD-155/OD-168; design call 9, ADV-P4-D09); TZ=UTC harness pin (OD-171) |
+| Source | design §5.2 case model (`stdin.json.tmpl`, settings declared once and translated — Bools by value, design call 11 — `metrics.json` or mode `down`/`500`/`garbage`, optional cache seed, transcript generator spec, `steps` inside `case.json`; out-of-domain setting legal only in a D4-EX-3 case); design §3.2 (metrics, process start, cache dir seams); research Q3b; OD-05; OD-111; OD-123 (`backends[0].*` keys); legacy provenance `legacy/dgx_statusline.py` SL:73-79, 89, 444 (env reads; the pass-6 provenance cited SL:92, a comment line — SL:89 is the env read, pass-7 D17), SL:273-275 (`proc_start` short-circuit), SL:405-406 (git cache key); handler-relative `argv` field and `subagent` case family (sync-check SC-03, pass-3 A03, OD-155/OD-168; design call 9, ADV-P4-D09); TZ=UTC harness pin (OD-171) |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |

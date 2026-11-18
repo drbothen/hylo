@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "0bc6938"
+input-hash: "68cd3f4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,6 +26,7 @@ introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation A04: canonical gate parameters 1 warm-up + 20 runs per case, nearest-rank p95 = 19th sample, binding per case, no pooling; test target moved to internal/parity"
   - "1.2.2 2026-11-18: ADV-P4 remediation D23 - gate binds on EVERY case p95 (worst case named); VP-036 de-pooled; unreachable EC-005 low-sample note withdrawn"
+  - "1.2.3 2026-11-19T17:00:00Z: ADV-P7 remediation A02/OD-191/D26 (orchestrator call 3) - PC-3 gains the conditional large-transcript exemption: exactly one validated case flag timing_exempt: large-transcript (transcript must exceed 512 KB), exempt from the 25 ms target only when it misses it, ceiling 100 ms (OD-191), and exactly one report line whenever the exemption is used; PC-1 states the 20-timed-runs rationale (smallest round count with an interior nearest-rank p95, fixed n, CI-budget judgment call). ARCH-08 and PRD NFR-001 to copy"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -68,6 +69,12 @@ removes.
      not skew the timed runs) and then 20 timed executions (nearest-rank p95 = the 19th
      ordered sample, BINDING per case — per case, never pooled across cases or steps).
      The former R = 5 pooled-times formulation was wrong and is superseded.
+     Rationale for 20 (pass-7 D26, labeled judgment call): 20 is the smallest round
+     sample count whose nearest-rank p95 is an interior order statistic (the 19th of
+     20 ordered samples, two steps from the max, so one outlier cannot own the
+     percentile) while keeping the timing job's wall time inside the CI budget; the
+     count is fixed by construction, so the percentile is comparable across runs and
+     OSes.
    - Render time per execution = process wall time (exec start to exit) minus the fake
      VM's server-side handling time for requests made during that execution.
    - Loopback connect and transfer time stays counted against hylo, which is the
@@ -88,6 +95,19 @@ removes.
      `timing: p95 <p95> ms > 25 ms target (OD-117, judgment call)` naming the worst
      case. The owner sets
      this setting on the macOS arm64 machine; it is a harness setting, not a D15 key.
+   - **Large-transcript exemption (OD-187 + OD-191; pass-7 orchestrator call 3).** The
+     corpus contains exactly one case carrying the validated flag
+     `timing_exempt: large-transcript`; the corpus validator admits the flag only on
+     that one case and only when its transcript fixture exceeds 512 KB (OD-187's size
+     condition, validated, not assumed). That case is CONDITIONALLY exempt from the
+     25 ms target: if its p95 ≤ 25 ms the ordinary target applies and no exemption is
+     reported; if it misses 25 ms, the exemption applies and its ceiling is 100 ms —
+     the gate fails if its p95 > 100 ms
+     (OD-191, judgment call: 4x the target, well under the refresh interval) — and the
+     job prints exactly one report line, e.g.
+     `timing: <case> exempt from 25 ms target (timing_exempt: large-transcript, >512 KB); p95 <p95> ms <= 100 ms ceiling`,
+     whenever the exemption is used, so a used exemption is never silent. Every other
+     case keeps an unconditional 25 ms target.
    - CI never sets `HYLO_TIMING_GATE`. CI legs print the report and pass whatever the
      value.
 4. **Threshold rationale in code.** The 25 ms constant lives in the timing test as a

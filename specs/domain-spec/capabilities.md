@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "capabilities"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T08:15:29Z
+timestamp: 2026-11-18T10:05:25Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "4a28fa1"
+input-hash: "06ca9d0"
 traces_to: L2-INDEX.md
 ---
 
@@ -26,7 +26,7 @@ traces_to: L2-INDEX.md
 | CAP-004 | **Backend credential handling** | Credential resolved before retargeting; failure → local error, never forward; client credentials stripped on the local lane (DI-004) | P3 | P0 |
 | CAP-005 | **Response relaying + SSE usage tap** | Streams responses; taps usage/cache/stop-reason from SSE events without altering them; buffers only where legacy does; non-streamed local replies contribute no usage event — legacy behavior preserved through parity, P6 revisit config-gated (OD-126) | P3 | P0 |
 | CAP-006 | **Observability ledger** | Every lane decision, reply and usage observation lands as an append-only JSONL event (13 legacy-named events, D7-frozen); diagnostic side-logs never affect outcomes (DI-005, DI-006, DI-009) | P3 | P0 |
-| CAP-007 | **Plan-limit capture** | Cloud rate-limit headers captured on change per session for ledger/exporter use; status-line plan-window widgets read stdin `rate_limits` when a refresh carries them and otherwise the session cache's last-seen `rl` (shown-unless-stale, kept RL_KEEP = 1800 s — legacy `effective_rl`, SL:297-312, SL:85) — never captured headers or the ledger (DI-001, DI-007) | P1 (plan-window widgets, BC-1.02.030) → P3 (header capture) | P0 |
+| CAP-007 | **Plan-limit capture** | Cloud rate-limit headers captured on change per session for ledger/exporter use; status-line plan-window widgets read stdin `rate_limits` when a refresh carries them and otherwise the session cache's last-seen `rl` (shown-unless-stale, kept RL_KEEP = 1800 s — legacy `effective_rl`, SL:298-312, SL:85) — never captured headers or the ledger (DI-001, DI-007) | P3 (header capture, PRD S9); the plan-window widgets render in the CAP-009 status-line path (BC-1.02.030, Phase 1) | P0 |
 | CAP-008 | **Metrics exposition** | 28 metric names recomputed from the whole ledger + hook log on `/metrics`; exposition bytes are part of parity | P2 | P1 |
 | CAP-009 | **Lane-aware status line** | Render reads stdin, transcript, metrics store, its own caches and environment seams (git state, process table, clock, env — AD-03), never the ledger (DI-007); always exits 0 and the output is never blank — faults fall down the degraded ladder (DI-008; carve-out: the `--subagent` agent-panel mode prints one of JSON rows, zero stdout bytes, or the shared 29-byte degraded line for catalogued render faults CP-A01..A05, per OD-155 + BC-1.07.008, with OD-168 routing config-error diagnostics to stderr); rows: session/lane row, backend strip, and agent-panel rows (`--subagent`, ported in P1 with a config off switch — OD-155) | P1 | P0 |
 | CAP-010 | **Backend telemetry strip** | Health, queue, KV, throughput, TTFT, power, idle from the metrics store, with a freshness ladder (fresh/stale/dead/serving-down) | P1 | P1 |

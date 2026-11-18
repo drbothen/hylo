@@ -1,17 +1,17 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-19T17:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "10a26f4"
+input-hash: "d6b1c84"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy URL handling at legacy/dgx_statusline.py SL:73, SL:165-187)"
@@ -24,6 +24,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-19T04:40:00Z (1.2.1): ADV-P6 remediation D19 — PC-4 pins the empty-host test: Go's u.Host after net/url.Parse (a port-only form http://:8428 has Host == :8428, is accepted, and builds a query URL with an empty hostname), resolving the Hostname()-vs-Host ambiguity"
+  - "2026-11-19T17:45:00Z: ADV-P7 remediation D23 - Inv 1 and the VP row aligned to PC-4: acceptance is a non-empty u.Host; port-only http://:8428 qualifies with Hostname() empty"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -69,7 +70,10 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
 
 ## Invariants
 
-1. A loaded metrics URL always has scheme http/https and a host; reachability is not checked
+1. A loaded metrics URL always has scheme http/https and a non-empty `u.Host` (Go's
+   host-or-host:port run — a port-only form `http://:8428` has `u.Host == ":8428"` and
+   qualifies, with `Hostname()` possibly empty; pass-7 D23 aligns this invariant and
+   the VP row with PC-4); reachability is not checked
    at load (an unreachable host yields the backend telemetry dead ladder at render, as in
    legacy).
 2. The metrics request bypasses proxy env (legacy SL:168; Go `Transport{Proxy: nil}`); not
@@ -102,7 +106,7 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-016, VP-012 (frontmatter closure) | Accepted URL ⇒ scheme ∈ {http, https}, host ≠ "", no trailing `/` | Go property test (testing/quick) / fuzz |
+| VP-016, VP-012 (frontmatter closure) | Accepted URL ⇒ scheme ∈ {http, https}, `u.Host` non-empty (`Hostname()` may be empty for port-only forms, pass-7 D23), no trailing `/` | Go property test (testing/quick) / fuzz |
 
 ## Traceability
 

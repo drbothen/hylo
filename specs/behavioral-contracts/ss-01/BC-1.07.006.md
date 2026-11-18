@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.6"
+version: "1.1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "5c0f944"
+input-hash: "48601a8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows model branch (SL:898-907)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)", "1.1.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C03/C06) — lane-tag square pinned to statusline.glyphs.lane (U+25E8) and words to statusline.pill.label_local/label_cloud (OD-173); theme.grey named for the model bit; refactoring note uses pyfmt.Strip, never TrimSpace (OD-170)", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)", "1.1.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C03/C06) — lane-tag square pinned to statusline.glyphs.lane (U+25E8) and words to statusline.pill.label_local/label_cloud (OD-173); theme.grey named for the model bit; refactoring note uses pyfmt.Strip, never TrimSpace (OD-170)", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.7 2026-11-19T21:00:00Z: pass-7 remediation (ADV-P7-C14) — the three prose pseudo-escapes replaced with the source glyph (U+25E8, source bytes e2 97 a8): Description lane-pill clause and EC-003; escaped golden wire forms kept as depict the wire"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -32,8 +32,8 @@ removal_reason: null
 
 ## Description
 
-When a task carries a truthy `model`, the row gains a second bit: the optional lane pill (cyan `\u25e8DGX`
-`\e[36m` when `model` starts with any configured prefix, magenta `\u25e8ANTH` `\e[35m` otherwise — only when
+When a task carries a truthy `model`, the row gains a second bit: the optional lane pill (cyan `◨DGX`
+`\e[36m` when `model` starts with any configured prefix, magenta `◨ANTH` `\e[35m` otherwise — only when
 the configured prefix list yields at least one non-empty entry) followed by the model id in grey `\e[90m`.
 The same prefix rule as the main lane pill (BC-1.02.001) so a Haiku subagent inside a DGX session shows
 it is served by Anthropic (review 2026-11-13 #21.4).
@@ -78,7 +78,7 @@ it is served by Anthropic (review 2026-11-13 #21.4).
 | EC-002 | `model = 123` with prefixes configured | AttributeError site in legacy — degraded line (CP-A03, BC-1.07.008); in Go the Num coercion must NOT occur: route non-str truthy models to the degraded predicate |
 | EC-003 | `model = 123`, prefixes empty | Grey segment `123` via `str()` coercion (same rendering for `True`, `1.0`, `['x']`, `{'a': 1}`), no crash, no pill |
 | EC-004 | Prefixes with spaces (`" claude-sonnet , foo "`) | Entries trimmed of Python Unicode whitespace (`pyfmt.Strip`, NBSP included); whitespace-only entries dropped |
-| EC-005 | Model `Claude-Sonnet-5-5` vs prefix `claude-sonnet` (case mismatch) | No hit → \u25e8ANTH (case-sensitive) |
+| EC-005 | Model `Claude-Sonnet-5-5` vs prefix `claude-sonnet` (case mismatch) | No hit → ◨ANTH (case-sensitive) |
 
 ## Canonical Test Vectors
 

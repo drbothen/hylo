@@ -71,3 +71,13 @@ Finding progression across adversarial passes in this cycle.
 - Tags: 7 [owner-question], 2 [process-gap] (ADV-P6-INDEX row tags).
 - Trajectory note: total −24 vs pass 5 (148 → 124), the largest total drop of the series, though HIGH ticked up 24 → 27; the drop follows the pass-5 remediation's widest-yet propagation (OD-176..180 scope, seventh D4-EX-3 class).
 - Verdict: NOT_CONVERGED. Next: owner rulings OD-181..187 + fix burst (executed same burst; OD-181 closes the exclusion set at 12 ids; OD-182 makes VP Go sketches non-normative; sync check adv-p6 PASS-WITH-FINDINGS, SC-21..28 closed), then pass 7.
+
+### Pass 7 — 2026-11-18 (phase-1d adversarial spec review)
+
+- Scope: full P1 spec package, re-reviewed as the same six fresh-context perimeters as passes 1-6. Verbatim reports: `adversarial-reviews/pass-7.md`; index: `adversarial-reviews/ADV-P7-INDEX.md`.
+- Perimeter counts: A 22, A2 22, B 15, C 14, C2 14, D 27.
+- Perimeter severities: A 3H/10M/9L/0C; A2 0H/12M/9L/1C (zero HIGH — first time); B 1H/6M/7L/1C; C 1H/4M/7L/2C; C2 3H/4M/7L/0C; D 6H/11M/10L/0C.
+- Novelty: pass-level MEDIUM (index frontmatter; report: all perimeters MEDIUM).
+- Tags: 8 [owner-question], 0 [process-gap] (ADV-P7-INDEX row tags).
+- Trajectory note: total −10 vs pass 6 (124 → 114) with HIGH nearly halved 27 → 14; the orchestrator spot-verified six findings on disk and against CPython 3.11.7, all held.
+- Verdict: NOT_CONVERGED (per OD-176: three consecutive cosmetic-only passes required — 0 so far). Next: owner rulings OD-188..192 + fix burst (executed same burst; OD-188 rename_retry_limit; OD-192 ASM-007 owner capture before Phase 2 S1.07; crash register 48 paths, CP-T09 minted / CP-T08 retired; VP↔BC edges 261; sync check adv-p7 PASS-WITH-FINDINGS — 114 closed / 0 open, SC-29..31 closed), then pass 8.

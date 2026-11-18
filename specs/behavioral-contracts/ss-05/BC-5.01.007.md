@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.3"
+version: "1.0.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "d788bd5"
+input-hash: "fec6cca"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython mixed int/float coercion behind legacy/dgx_statusline.py arithmetic: SL:435, 599, 882-885, 919)"
@@ -26,6 +26,7 @@ modified:
   - "2026-11-18T22:00:00Z (1.0.1) ADV-P4 remediation D15+D16 — ErrZeroDivision for ANY zero divisor (float zero included, CPython-verified); NumCmp NaN verdict (unordered → 0) and Max/Min Python-derivation formulas; Inv 3 rewritten (cross-multiplication, no quotient); phantom NumToInt64Aware name dropped from EC-011"
   - "2026-11-18T23:45:00Z (1.0.2) ADV-P5 remediation D09+D27 — relational helpers NumLT/NumLE/NumGT/NumGE/NumEQ/NumNE added (PC 3b: any NaN operand → false except NumNE); NumCmp narrowed to ordered operands; Inv 1 mandates the helpers at every cross-kind comparison site (SL:254 case pinned EC-014); TrueDiv precedence pinned: dividend overflow precedes zero-divisor check (10**400 / 0.0 → OverflowError, EC-013)"
   - "2026-11-19T03:50:00Z (1.0.3) ADV-P6 remediation D09+D18 — NumCmp error return specified: total, nil on every path (PC 3), so Max/Min NaN folds cannot error (PC 4); TrueDiv EC-005 rationale corrected — int/int operands are never converted (float(10**310) itself raises; the overflow is a quotient-range error, measured under CPython 3.11.7)"
+  - "2026-11-19T17:00:00Z (1.0.4): ADV-P7 remediation D19 — the concrete NaN parity case names the gate correctly: the gate is isinstance(api,(int,float)) and api >= need at SL:254; the api/3.6e6 division at SL:255 only follows the gate inside the appended branch"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -103,7 +104,9 @@ OD-141. ADV-P3-D08 disposition.
    `__eq__`/`__ne__` on the exact values: any NaN operand makes every helper false **except `NumNE`**
    (NaN is unequal to everything, including itself: `NumNE(nan, nan)` is true). Verified
    `python3 -I`: `nan >= 1`, `nan >= 2`, `nan == nan` are all false. Concrete parity case: cost-history
-   `api_ms` = NaN against the int `need` at SL:254 — legacy's `api_ms / 3.6e6` gate reads false and the
+   `api_ms` = NaN against the int `need` at SL:254 — the GATE is `isinstance(api, (int, float)) and api >= need`
+   (SL:254; the `api / 3.6e6` division at SL:255 only follows the gate inside the appended branch); with
+   `api` = NaN the `>=` comparison reads false and the
    record appends nothing; a `NumCmp(a, b) >= 0` derivation appends and changes the percentile colors.
    Every cross-kind comparison site uses these helpers (Invariant 1).
 4. **Max/Min exactness:** `Max(a, b)` (BC-5.01.003 PC 5) is exactly Python's `b if b > a else a`, i.e.

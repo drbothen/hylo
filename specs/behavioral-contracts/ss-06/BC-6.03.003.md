@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "723c432"
+input-hash: "769473c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-19T00:20:00Z (1.2.5) ADV-P5 remediation D20 — temp-file example entry completed to the six-key schema (package, scope=go-cache-listing) with the JSON-object expected file"
   - "2026-11-19T02:00:00Z (1.2.6): sync-check adv-p5 closure (SC-19/SC-20) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - "2026-11-19T03:25:00Z (1.2.7): ADV-P6 remediation OD-186 — temp-file scope widened by ruling to cover the Windows sharing-violation rename-retry outcome (a successful retry persists a cache write legacy would not); retry delay becomes the config key statusline.cache.rename_retry_delay_ms (registered in BC-2.01.004 PC-11); attempt count stated as three attempts total (initial attempt + two retries), matching VP-018 and ARCH-04"
+  - "2026-11-19T17:00:00Z (1.2.8): ADV-P7 remediation OD-188 - rename retry count becomes CONFIG: statusline.cache.rename_retry_limit (Int, default 2, range 0..10, judgment call, registered in BC-2.01.004 PC-11) bounds the retries; attempt count = 1 + limit (three at the default), stated once across BC-2.01.004 PC-11, VP-018 and ARCH-04"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,10 +59,12 @@ handles the difference in two parts:
 It is never a blanket exclusion. By ruling (OD-186) the `temp-file` scope is widened to
 cover the Windows sharing-violation rename-retry outcome: Go retries the rename —
 `statusline.cache.rename_retry_delay_ms` (Int, default 10, range 1..1000, judgment
-call) between attempts, three attempts total (the initial attempt plus two retries,
-the one number VP-018 and ARCH-04 state) — so a retry that ultimately succeeds
-persists a cache write legacy would not. That byte difference rides the same named
-deviation.
+call) between attempts and `statusline.cache.rename_retry_limit` (Int, default 2,
+range 0..10, judgment call; OD-188) limiting the retries — so the attempt count is
+1 + limit (three attempts at the default limit 2: the initial attempt plus two
+retries, the one number BC-2.01.004 PC-11, VP-018 and ARCH-04 state) — so a retry
+that ultimately succeeds persists a cache write legacy would not. That byte
+difference rides the same named deviation.
 
 ## Preconditions
 
@@ -136,7 +139,7 @@ deviation.
 | EC-001 | sid `../x`, ROWS 2, stdin carries non-empty `rate_limits`, metrics canned | Legacy leaks two temps (`x.json.<8>` ×2); Go leaks none. stdout equal; named caches equal (the only named caches are git and mix, plus cost history if recorded) |
 | EC-002 | A sid containing `.json.` such as `a.json.b` | Session cache `statusline-a.json.b.json` ends in `.json` and is compared normally |
 | EC-003 | Go's `os.CreateTemp` random part is decimal digits (ADV-P2-D07: the `*` is replaced by a decimal of VARIABLE length, not always 8 chars — so a short Go random part can fail to match the 8-char pattern; the store invariant still forbids leftovers, and the table test requires that none remain) | Go temps are cleaned up before comparison regardless of length; none remain |
-| EC-004 | Windows: rename fails on a sharing violation under concurrent refreshes (RK-3) | Not a corpus case. Go retries the rename on `statusline.cache.rename_retry_delay_ms` between attempts — three attempts total (initial attempt + two retries; OD-186, the number VP-018 and ARCH-04 state) — then swallows and cleans up; a retry that ultimately succeeds persists a write legacy would not, riding the widened `temp-file` scope. Covered by Go unit tests only |
+| EC-004 | Windows: rename fails on a sharing violation under concurrent refreshes (RK-3) | Not a corpus case. Go retries the rename on `statusline.cache.rename_retry_delay_ms` between attempts, with `statusline.cache.rename_retry_limit` bounding the retries — 1 + limit attempts total (three at the default limit 2: initial attempt + two retries; OD-186/OD-188, the number VP-018 and ARCH-04 state) — then swallows and cleans up; a retry that ultimately succeeds persists a write legacy would not, riding the widened `temp-file` scope. Covered by Go unit tests only |
 | EC-005 | A temp-pattern file appears in a case with no `temp-file` entry | Ignored by the filter for comparison. If the file is on the Go side, the store invariant is violated, and the harness fails the case with `go left temp <name>` |
 
 ## Canonical Test Vectors

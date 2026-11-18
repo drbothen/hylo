@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "5ea52a3"
+input-hash: "317afb0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy float()/int() parse at legacy/dgx_statusline.py SL:74-75)"
@@ -69,7 +69,8 @@ BC-2.02.001):
    `<key>=<value> (not an integer)` (e.g. `2.0`, `1e1`, `nan`, `""`, `0x2`). A result
    outside int64 → `<key>=<value> (out of range)`.
 5. Otherwise the parsed number goes to the range check (BC-2.02.002 for `Seconds`; the key's
-   registry range for `Int`/`Float`). `statusline.rows` (legacy `DGX_SL_ROWS`, SL:75) has
+   registry range for `Int`/`Float`, whose exact reason bytes and precedence are the
+   'Numeric-range failures by type' section of BC-2.02.001 — pass-7 D03). `statusline.rows` (legacy `DGX_SL_ROWS`, SL:75) has
    range "any int64" in P1, preserving legacy semantics for negative and large values
    (`rows >= 2` / `> 2`, SL:1217, SL:1224).
 

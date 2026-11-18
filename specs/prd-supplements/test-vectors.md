@@ -1,15 +1,17 @@
 ---
 document_type: test-vectors
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "0149ffc"
+input-hash: "fbe1339"
 traces_to: prd.md
+modified:
+  - "1.6 2026-11-19T12:00:00Z: pass-7 remediation — CP-N03 vector-row locator corrected (rows in BC-1.04.001 EC-013 and BC-1.04.005 EC-007; BC-1.04.004 carries the invariant only, C2-14); FromISOFormat table notes the CP-T09 Windows localtime-domain degrade rows (call 8/B03); no table bytes changed"
 ---
 
 # Test Vectors: hylo P1 canonical golden tables
@@ -35,12 +37,12 @@ traces_to: prd.md
 | heat() HSV cell colours | cell table | BC-1.02.019 | oracle run |
 | Freshness ladder thresholds + stale suffix | ladder table | BC-1.04.004 | oracle run |
 | Row goldens A/B/C (committed Tier B strings, per-OS variants) | 3 goldens | BC-6.03.001 | P3r2 strings; totals recomputed |
-| CPython-generated pyfmt expectation tables (Round/RoundN/F, ParseInt/ParseFloat, divmod/mod, Strip sets, FromISOFormat) | generated per helper | BC-5.01.001..003, BC-5.03.001..004, BC-5.04.001 | committed generator output (design §2.6) |
+| CPython-generated pyfmt expectation tables (Round/RoundN/F, ParseInt/ParseFloat, divmod/mod, Strip sets, FromISOFormat; FromISOFormat includes the CP-T09 Windows MSVC localtime-domain degrade rows — naive timestamps on or before 1970-01-01 and from year 3001, every probe t/u1/u1−86400/u2 domain-checked) | generated per helper | BC-5.01.001..003, BC-5.03.001..004, BC-5.04.001 | committed generator output (design §2.6); CP-T09 minted pass-7 call 8/B03 |
 | `-0.0` spellings (cache-hit segment, thermometer) | 2 vectors | BC-1.02.023, BC-1.02.020 | oracle run (writer-added pins) |
 | D4-EX-3 class vectors (one per key class + reason strings) | 1+ per class | BC-2.02.001..006, BC-2.01.003/.005 | spec-pinned (OD-114) |
 | Number-range extremes: int64-overflow and Duration-ceiling rows (OD-164) | 1+ per keyed site | BC-2.02.002 | spec-pinned (OD-164) |
 | Per-OS file-read encoding vectors — every file read as UTF-8 on all OSes; locale-decode differences ride exclusion id `OD-159` | vector set | transcript/cache BCs (BC-1.03.x, BC-1.06.x), BC-5.02.003 | spec-pinned (OD-159) |
-| OD-156 numeric-overflow vectors (CP-O01..O05, CP-O10/O11 stdin/metrics/cache-borne at render → 29-byte line; CP-O06..O08 transcript-borne → skip line, CP-O09 → legacy no-write save; CP-A04/A05 subagent conversions → 29-byte line; CP-N03 metrics-borne, SL:717) | 1+ per trigger — including an overflow (≥ 2**1024 − 2**970) row in each owning BC's table: pass-4 B04 restores the missing rows in BC-1.02.006/.011/.012/.014/.017/.020/.025 and names the CP-O id in the corresponding EC registers | BC-1.02.006/.011/.012/.014/.017/.020/.025, BC-1.03.005/.006/.007/.010/.016/.018, BC-1.04.001/.004/.005 (CP-N03 owners), BC-1.05.007, BC-1.05.002 (CP-O11 co-owner), BC-1.06.001, BC-1.07.007 | spec-pinned (OD-156; register in error-taxonomy.md) |
+| OD-156 numeric-overflow vectors (CP-O01..O05, CP-O10/O11 stdin/metrics/cache-borne at render → 29-byte line; CP-O06..O08 transcript-borne → skip line, CP-O09 → legacy no-write save; CP-A04/A05 subagent conversions → 29-byte line; CP-N03 metrics-borne, SL:717) | 1+ per trigger — including an overflow (≥ 2**1024 − 2**970) row in each owning BC's table: pass-4 B04 restores the missing rows in BC-1.02.006/.011/.012/.014/.017/.020/.025 and names the CP-O id in the corresponding EC registers | BC-1.02.006/.011/.012/.014/.017/.020/.025, BC-1.03.005/.006/.007/.010/.016/.018, BC-1.04.001/.004/.005 (CP-N03 owners; the CP-N03 vector rows live in BC-1.04.001 EC-013 and BC-1.04.005 EC-007 — BC-1.04.004 carries the CP-N03 invariant with no vector row of its own, pass-7 C2-14), BC-1.05.007, BC-1.05.002 (CP-O11 co-owner), BC-1.06.001, BC-1.07.007 | spec-pinned (OD-156; register in error-taxonomy.md) |
 | `--subagent` / custom agent-panel row vectors (config off switch; legacy BC-SL-097 surface) | vector set | BC-1.07.001..008, BC-4.01.002 | spec-pinned (OD-155) |
 
 Escape convention: in vector cells, `\uXXXX` escapes (e.g. `\u200B`, `\u00A0`) denote that

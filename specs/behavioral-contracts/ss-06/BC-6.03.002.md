@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "db24750"
+input-hash: "664cb34"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,6 +25,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D06: PC-3 waiver for scope-stdout exclusion entries cross-referenced"
+  - "2026-11-19T17:00:00Z (1.2.2): ADV-P7 remediation D24 - PC-2 exit-code rule gains the pinned crash-leg exception: a closed id's pinned non-zero ORACLE exit (cp-x03, D4-EX-3 Number grammar-failure leg: exit 1) is the expectation, and equality with it is still required"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,7 +67,11 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
    applied: no trimming, no CRLF folding, no SGR stripping, no Unicode normalization.
 2. **Exit code.** The oracle exit code must equal the Go exit code. Both are expected
    to be 0 on every step (DI-008); a mismatch or a non-zero value on either side is a
-   failure.
+   failure — with the pinned exception for the CRASH-LEG riders: where BC-6.03.004's
+   rider register pins a non-zero ORACLE exit for a closed id's crash leg (cp-x03, and
+   the D4-EX-3 Number grammar-failure leg: exit 1, zero stdout, empty cache listing),
+   the pinned non-zero value is the expectation and the comparison still requires
+   equality with it (pass-7 D24).
 3. **Named caches.** Let `N_py` and `N_go` be the names of regular files directly in
    each cache dir, after removing mkstemp temp names (BC-6.03.003).
    - `N_py` must equal `N_go` as sets. A cache file present on one side only is a

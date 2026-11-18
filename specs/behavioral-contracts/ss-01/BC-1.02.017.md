@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "7e9aa61"
+input-hash: "039fda1"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,7 @@ modified:
   - "1.3 pass-4 remediation (ADV-P4-B05/B04/B07): Inv 3 self-contradiction removed (rendering carries no exclusion; acquisition and foreign-cache shapes do — OD-160); EC-004..006 and the -Infinity vector tagged OD-160 (hand-edited-cache shapes); EC-010 names CP-O05 with the exact threshold; canonical OV overflow vector added; DI-012 cited; 2026-11-18T03:00:00Z"
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.3.2 pass-6 remediation (ADV-P6-B08): the house glyph is named as the registry key statusline.glyphs.window_age instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
+  - "1.3.3 pass-7 remediation (ADV-P7-B15): Inv 3 spells the concrete exclusion test name TestWindowAge_D4EX1_Windows_AncestorFound (VP-012) instead of the wildcard; no behavioral change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +68,7 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
 3. Rendering given a `win_start` value is byte-exact on every OS. The approved deviations for this widget live in
    acquisition, not here: **D4-EX-1** (on Windows legacy has no `ps`, so it never shows `⌂`, while Go's native probe can
    return a start) is excluded from the parity diff through the OD-105 exclusion-list entry `D4-EX-1` with dedicated
-   tests `TestWindowAge_D4EX1_Windows*`; the macOS/Linux native-probe differences (true start in the repeated DST hour,
+   tests `TestWindowAge_D4EX1_Windows_AncestorFound` (VP-012 concrete name); the macOS/Linux native-probe differences (true start in the repeated DST hour,
    `⌂` where legacy's localized `ps` fails) are the OD-76 entry named by OD-110, with their own table tests
    (BC-3.02.002). The rendering rules of this contract itself carry no exclusion; the foreign-cache shapes
    (EC-004..EC-007's hand-edited `proc_start`; ruling Q-b) carry exclusion id **OD-160**: vectors that rely on a

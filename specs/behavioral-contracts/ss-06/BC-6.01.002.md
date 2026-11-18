@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-19T08:30:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "cfc7cd2"
+input-hash: "b72f99f"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-17T21:45:00Z: patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D21 - TZ=UTC pinned for both binaries on every leg (OD-171, VP-026 posix-only tag removed); Env.Loc routed through internal/platform.LocalZone"
   - "2026-11-19T03:10:00Z (1.2.3): ADV-P6 remediation D27 + OD-183 - Description pins restated (GP-1..GP-4 forbidden outright, GP-5/GP-6 set to case temp values, nothing inherited); Windows oracle child gains exactly one extra variable PYTHONIOENCODING=utf-8 (stdio only; PYTHONUTF8 stays forbidden; POSIX unchanged), EC-002/CTV/VP rows aligned"
+  - "2026-11-19T08:30:00Z (1.2.4): ADV-P7 remediation D05 (orchestrator call 2) + call 4 + OD-190 - this file is AUTHORITATIVE for the per-OS child-env allowlists: PC-1 consolidates the four exact key sets (POSIX/Windows × oracle/Go) with the conditional PATH/COLUMNS/setting keys, HOMEDRIVE/HOMEPATH explicitly not constructed, HOME+USERPROFILE on both OSes; PC-2 drops statusline.Env(Getenv,Home) for the platform.EnvVars seam with HomeDir(env)/LocalZone(env)/CacheDir(env) signatures; PC-4 names the OD-190 LF normalization (UTF-8 + LF on every OS) beside PYTHONIOENCODING=utf-8. ARCH-07 and VP-034 copy these sets verbatim"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,6 +94,28 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
      no `PATH` key, CPython's subprocess fallback searches `os.defpath` (`/bin:/usr/bin`,
      SL:280) — which is why the harness rejects an unseeded case with a truthy
      `session_id` unless a fake table is declared (ADV-P2-D12; BC-6.02.003 PC-6).
+   - **Authoritative exact key sets (pass-7 D05, orchestrator call 2 — ARCH-07 and
+     VP-034 copy these sets verbatim).** With no fake table and no declared `COLUMNS`,
+     the constructed key sets are exactly:
+     - POSIX oracle child: `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
+       `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES` (+ the `DGX_SL_*` keys
+       the case sets, + `COLUMNS` when declared, + `PATH` when a fake table is
+       declared).
+     - Windows oracle child: the POSIX set, plus `TMP`, `TEMP`, `SYSTEMROOT` and
+       `PYTHONIOENCODING=utf-8` (OD-183; the same conditional additions apply: + the
+       `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when a fake
+       table is declared).
+     - POSIX Go child: `HOME`, `USERPROFILE`, `TMPDIR`, `XDG_CACHE_HOME`,
+       `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`, `HYLO_TEST_NOW`,
+       `HYLO_BACKENDS_0_MODEL_PREFIXES` (+ the `HYLO_*` setting keys the case sets, +
+       `COLUMNS` when declared; no `PATH` ever — the built binary is started by
+       absolute path).
+     - Windows Go child: the POSIX Go set, plus `TMP`, `TEMP`, `SYSTEMROOT` (the same
+       conditional additions apply).
+     `HOMEDRIVE`/`HOMEPATH` are NOT constructed keys on any OS (home is
+     `HOME`+`USERPROFILE`); no key set on any OS includes `PATH` unless the fake-table
+     condition holds; `HOME` is present on BOTH OSes (Windows included) and
+     `USERPROFILE` on BOTH OSes (POSIX included), always the same case-temp value.
 2. **Go child env** (built binary). It contains exactly these keys:
    - `HOME` and `USERPROFILE` as above.
    - `TMPDIR`, plus `TMP`/`TEMP` on Windows (GP-5).
@@ -104,10 +127,13 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    - `COLUMNS` when declared.
    - The HYLO_* spelling of the case settings (S2 key registry).
    - On Windows, `SYSTEMROOT`.
-   The in-process Go path receives the same values through `statusline.Env` (`Getenv`,
-   `Home`, `Now`, `Loc`); `Env.Loc` is derived through `internal/platform.LocalZone` from
-   the child's `TZ` (BC-3.01.001 PC-6, OD-171) — never directly through `time.Local`,
-   which ignores `TZ` on Windows. It never reads the real process environment.
+   The in-process Go path receives the same values through the `platform.EnvVars`
+   seam (BC-2.01.001 PC-6, orchestrator call 9 pass-5: `EnvVars` everywhere): env
+   lookups via `EnvVars.Get`, the home directory via `platform.HomeDir(env EnvVars)`
+   and the local zone via `platform.LocalZone(env EnvVars)` (orchestrator call 4,
+   pass 7: no platform function reads the real process environment; the child's `TZ`
+   feeds `LocalZone`). The same seam supplies `CacheDir(env EnvVars)`. It never reads
+   the real process environment.
 3. **Forbidden in every child:**
    - every proxy variable in any case: `http_proxy`, `https_proxy`, `no_proxy`,
      `all_proxy` and the upper-case forms (GP-3);
@@ -128,6 +154,12 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    stdio encoding additionally comes from the builder's `PYTHONIOENCODING=utf-8` —
    exactly one variable, stdio only; a table test proves it changes stdio encoding
    only (the constructed env differs from the POSIX builder in that key alone).
+   By OD-190 this LF behavior is hylo-wide and named beside the builder variable,
+   never hidden in the shim: hylo writes UTF-8 + LF line endings on every OS (OD-190
+   extends OD-183), and the Windows oracle's LF normalization is produced by the two
+   named mechanisms — the builder's `PYTHONIOENCODING=utf-8` (encoding) and the
+   shim's `newline="\n"` reconfigure (LF-only newlines) — both called out here so a
+   port knows the normalization is intentional.
    The harness captures child stdout as raw
    bytes, never through text-mode decoding.
 5. **Assertion.** Before the first case, an env-builder unit test checks the exact

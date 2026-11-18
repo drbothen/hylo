@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - domain-spec/invariants.md
-input-hash: "46f5ff8"
+input-hash: "f2d5042"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444, 902-903)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-18T12:00:00Z ADV-P4 remediation D01+D27: all-defaults vector queue.yellow corrected to true (OD-175); LOCAL_MODEL_PREFIXES second legacy read site SL:902-903 cited and BC-1.07.006 consumer listed"
   - "2026-11-19T00:55:00Z (1.2.4) ADV-P5 remediation D32+D25 — present-but-empty rule covers Text, SGR and composite types; env case-matching moved behind the platform.Environ seam (build-tagged fold, POSIX-testable double), raw Go maps out"
   - "2026-11-19T04:30:00Z (1.2.5) ADV-P6 remediation D15 — PC-6 gains the backend-variable carve-out: a well-formed HYLO_BACKENDS_<i>_<FIELD> variable is a backend-entry variable (BC-2.01.002 PC-4/PC-5), never an unknown setting, closing the undefined-stderr gap for HYLO_BACKENDS_1_METRICS_URL"
+  - "2026-11-19T17:45:00Z: ADV-P7 remediation D08 - PC-2 empty-Text rule keyed to the REGISTERED range: free-text (theme.separator, subagent.joiner) and any-text (telemetry.query) keys accept the empty string; only non-empty-bound Text keys error"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +63,12 @@ happens once per process, before any side effect.
 2. A present-but-empty variable is "set to empty", never "unset": list keys become the empty
    list (OD-111: the parity cases for an unset prefix set an explicit empty value); number,
    boolean, enum, URL, path, Text, SGR and composite keys yield a config error
-   (BC-2.02.001) — an empty Text value fails the non-empty range (BC-2.01.005 PC 6), an
+   (BC-2.02.001) — an empty Text value fails the non-empty range WHERE THE REGISTERED
+   RANGE STATES ONE (BC-2.01.005 PC 6), while Text keys registered as FREE TEXT with only
+   the control-byte bound (`statusline.theme.separator`, `statusline.subagent.joiner`)
+   or ANY TEXT (`statusline.telemetry.query`) ACCEPT the empty string — it carries no
+   control byte, so it is in range (pass-7 D08; an empty value still renders the
+   separator/joiner as the empty string) — an
    empty SGR value is not a parameter list (BC-2.01.003 PC 2), and an empty composite
    value fails the shape check (BC-2.01.005 PC 5) (type coverage completed, ADV-P5-D32).
 3. No config file is opened: not the per-OS default path (BC-2.03.002), not `HYLO_CONFIG`,

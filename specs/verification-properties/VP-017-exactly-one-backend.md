@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4a856f9"
+input-hash: "c3567f7"
 traces_to: prd.md
 source_bc: BC-2.01.002
 bcs: [BC-2.01.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T14:48:00Z: ADV-P4 fix (A2-18) — Method no longer claims cardinality 0 is tested through Load: 1 and 2 run through Load, the backends=0 guard is exercised directly at the validator seam (unreachable through Load in P1), joining the Load-driven table at P4", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-01) — skeleton aligned with the ARCH-02 API: the typed error is taken via ErrorSet.First() (Load returns (*Config, *ErrorSet))", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-09: statement/method/skeleton agree the backends=0 guard is exercised now at the validator seam (Load row joins at P4); the two BC-2.01.002 quick legs (Load ⇒ one entry; metrics_url never ends '/') delivered)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T14:48:00Z: ADV-P4 fix (A2-18) — Method no longer claims cardinality 0 is tested through Load: 1 and 2 run through Load, the backends=0 guard is exercised directly at the validator seam (unreachable through Load in P1), joining the Load-driven table at P4", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-01) — skeleton aligned with the ARCH-02 API: the typed error is taken via ErrorSet.First() (Load returns (*Config, *ErrorSet))", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-09: statement/method/skeleton agree the backends=0 guard is exercised now at the validator seam (Load row joins at P4); the two BC-2.01.002 quick legs (Load ⇒ one entry; metrics_url never ends '/') delivered)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-15) — the leftover A2-09-fix sentence 'validated directly when the P4 file layer makes the case reachable' removed; the now-seam wording (validator unit test with an empty entry slice, joining the Load-driven table at P4) is the single disposition"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -39,8 +39,7 @@ entry is a config error carrying the value `backends=<count>` and the reason `ex
 one backend entry until P6` (rendered `hylo: config error: backends=2 (…)`, riding the
 D4-EX-3 output path). Zero entries are unreachable in P1 — the built-in defaults always
 create index 0 (BC-2.01.002 Invariant 2) — so no P1 test exercises the `backends=0`
-guard through `Load`; the guard is validated directly when the P4 file layer makes the
-case reachable. The status line's metrics URL and model
+guard through `Load`. The status line's metrics URL and model
 prefixes are read exclusively at `backends[0].metrics_url` / `backends[0].model_prefixes`
 (default `claude-sonnet`), the `backends=0` guard is exercised NOW directly at the
 validator seam (a Go unit test calls the validator with an empty entry slice), joining

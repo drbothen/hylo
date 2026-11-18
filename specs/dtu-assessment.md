@@ -1,15 +1,17 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.7"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-19T04:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "e8df28a"
+input-hash: "1bfbd99"
+modified:
+  - "1.9 2026-11-19T18:00:00Z: pass-7 fix (A2-05, call 13) — the D4-EX-1 riding test name respelled to the settled TestWindowAge_D4EX1_Windows_AncestorFound in the Tier tables and the Dependency Summary (VP-012 v1.13's fixed name)"
 
 ---
 
@@ -30,7 +32,8 @@ API, ARCH-03) and five non-network external contracts (statusLine stdin, the
 tables). All six are
 reproducible at seam level with fakes the parity harness
 already mandates — and the Tier A differential design actively requires the httptest
-fake, because the legacy oracle must hit the *same* fake in-process through the
+fake, because the legacy oracle must hit the *same* fake from its separate child
+process (VP-034) through the
 `DGX_SL_*` settings translation (ARCH-07). A Docker-packaged clone cannot serve the
 oracle side and adds nothing the fakes lack. Extension vectors for each fake are
 registered below so the boundary behaviors are pinned, not improvised.
@@ -45,7 +48,7 @@ carries their boundaries.
 
 | # | Service | Protocol | Fidelity | DTU? | Justification |
 |---|---------|----------|----------|------|---------------|
-| 1 | Prometheus-compatible metrics query API (VictoriaMetrics) | HTTP GET `/api/v1/query` | L2 | No | Stateless request/response; entire boundary = a handful of response envelopes. Existing httptest fake (ARCH-07) plus the register's sample-string extension rows (defensive-parse ratification is P6 per OD-157, not P1 — pass-3 A2-16 removes the stale OD-130-as-P1 vectors); a Docker clone cannot serve the in-process legacy oracle in Tier A. |
+| 1 | Prometheus-compatible metrics query API (VictoriaMetrics) | HTTP GET `/api/v1/query` | L2 | No | Stateless request/response; entire boundary = a handful of response envelopes. Existing httptest fake (ARCH-07) plus the register's sample-string extension rows (defensive-parse ratification is P6 per OD-157, not P1 — pass-3 A2-16 removes the stale OD-130-as-P1 vectors); a Docker clone cannot serve the child-process legacy oracle in Tier A (VP-034; wording updated pass-7 A2-22). |
 | 2 | Claude Code statusLine stdin JSON | One JSON object on stdin per render | L3 (decode semantics only) | No | Not a network service — an upstream push contract. Its clone *is* the harness corpus (`stdin.json.tmpl` cases). Decode edges carry 101 S1 BCs and are already corpus-pinned. |
 | 5 | Claude Code `subagentStatusLine` agent-panel stdin (OD-155) | One JSON object on stdin per panel render: `{"columns": N, "tasks": [{id, name, agentType, status, description, label, startTime, model, tokenCount, ...}]}` | L3 (decode + per-task render semantics, BC-1.07.003..008) | No | Not a network service — a SECOND upstream push contract, separate from the statusLine stdin (added pass-3 A2-16). Its clone is the `subagent`-family harness corpus rows (`argv` field + `stdin.json.tmpl`, ARCH-07). Compatibility with the 2.1.326 payload is ASSUMP-107-1, still to be verified by a capture before Phase 3. |
 | 6 | Claude Code transcript JSONL (pass-5 A2-23) | Upstream-owned append-only JSONL file read through a seek/read window (`transcript_path`): one JSON object per line — `type`/`message`/`timestamp`/`uuid`/`parentUuid`/... driving the transcript machine (accumulation, boundaries, turn recorder, W-predicates) | L3 (line-machine decode semantics; 21 S1.03 BCs, BC-1.03.001..021) | No | Not a network service — the THIRD upstream push contract. Its clone is the `transcript`-family harness corpus rows plus the seeded mix/`BASE` caches (ARCH-07; BC-1.03.019's 21-row D4-EX-2 table). Format is UPSTREAM-OWNED: the compatibility assumption is that the 2.x line-object schema is stable for P1, pinned by capture replay from git-ignored `captures/` before Phase 3 — the same assumption discipline as ASSUMP-107-1, not a Docker clone. Extension vectors: the D4-EX-2 wrong-shape table and CP-O06..O08 overflow rows pin boundary behaviors at the seam. |
@@ -77,7 +80,7 @@ None identified — P1 emits no telemetry. The P2 exporter and its separate orac
 | # | Service | Protocol | Fidelity | DTU? | Justification |
 |---|---------|----------|----------|------|---------------|
 | 3 | git repository state | Filesystem reads: `.git` dir-or-file walk and HEAD (BC-1.02.004) — **not a subprocess** in the ported design; `Env.FileSystem`/`Cwd` seams, ARCH-03 | L1 | No | Static content behind a well-known layout; clone = a seeded directory tree (happy, shallow `.git` file, detached HEAD, missing/ corrupt `.git`) driving the `Files`/`Cwd` fakes. Real git used only in Tier A platform-family cases. |
-| 4 | Per-OS process tables (window-age probe) | `ProcStarter.WindowStart() (float64, ok)` over `platform.FindAncestor` (ARCH-03; D4-EX-1) | L1 | No | Docker cannot faithfully clone host process tables on macOS/Windows anyway; the seam fake plus `TestWindowAge_D4EX1_Windows` and platform-family parity cases is the only faithful approach. |
+| 4 | Per-OS process tables (window-age probe) | `ProcStarter.WindowStart() (float64, ok)` over `platform.FindAncestor` (ARCH-03; D4-EX-1) | L1 | No | Docker cannot faithfully clone host process tables on macOS/Windows anyway; the seam fake plus `TestWindowAge_D4EX1_Windows_AncestorFound` and platform-family parity cases is the only faithful approach. |
 
 ## Dependency Summary
 
@@ -86,7 +89,7 @@ None identified — P1 emits no telemetry. The P2 exporter and its separate orac
 | 1 | Metrics query API (VictoriaMetrics) | Inbound | L2 | No | ≈0.5 | Envelope-matched httptest fake; extension rows are the register's sample-string/error-envelope modes (defensive-parse ratification is P6 per OD-157 — no stale OD-130-as-P1 vectors, pass-3 A2-16) |
 | 2 | Claude Code statusLine stdin | Inbound | L3 (decode) | No | ≈0.5 | Fixture corpus is the clone; add one `unknown-future-field` variant |
 | 3 | git repository state | Enrichment/lookup (local) | L1 | No | 0 | Seeded `.git` trees behind `Files`/`Cwd` seams; already scheduled |
-| 4 | Per-OS process tables | Enrichment/lookup (local) | L1 | No | 0 | `ProcStarter` recording fake + `TestWindowAge_D4EX1_Windows`; already scheduled |
+| 4 | Per-OS process tables | Enrichment/lookup (local) | L1 | No | 0 | `ProcStarter` recording fake + `TestWindowAge_D4EX1_Windows_AncestorFound`; already scheduled |
 | 5 | Claude Code `subagentStatusLine` agent-panel stdin | Inbound | L3 (decode + render) | No | ≈0.5 | Second stdin push contract (OD-155); cloned by the `subagent`-family corpus rows with the new `argv` field (ARCH-07); BC-1.07.001..008 + ASSUMP-107-1 capture pending |
 | 6 | Claude Code transcript JSONL (pass-5 A2-23) | Inbound | L3 (line-machine decode) | No | ≈0.5 | Third upstream push contract, read through a seek/read window; cloned by the `transcript`-family corpus rows plus the seeded mix/`BASE` caches (BC-1.03.019's 21-row D4-EX-2 table); 2.x line-schema stability pinned by capture replay from git-ignored `captures/` before Phase 3 (pass-6 A2-20: row was missing from this summary though present in the inventory) |
 
@@ -154,13 +157,13 @@ Existing corpus coverage (rows 1–3, 5) suffices; only the row-4 variant is new
 
 Seeded `.git` trees and scripted `WindowStart` outputs, respectively, as inventoried
 above; no further extension beyond the platform-family cases already scheduled
-(`TestWindowAge_D4EX1_Windows`; D4-EX-1 exclusions in the closed set).
+(`TestWindowAge_D4EX1_Windows_AncestorFound`; D4-EX-1 exclusions in the closed set).
 
 ## Services NOT Requiring DTU
 
 | # | Service | Reason |
 |---|---------|--------|
-| 1 | Metrics query API (VictoriaMetrics) | Stateless envelope-matched fake serves both oracle and implementation in Tier A parity; Docker clone can't participate in the in-process oracle leg |
+| 1 | Metrics query API (VictoriaMetrics) | Stateless envelope-matched fake serves both oracle and implementation in Tier A parity; Docker clone can't participate in the child-process oracle leg (VP-034; pass-7 A2-22) |
 | 2 | Claude Code statusLine stdin | Upstream push contract — clone *is* the fixture corpus, already mandated by ARCH-07 |
 | 3 | git repository state | Local filesystem content; seeded tree behind `Files`/`Cwd` seams is exact |
 | 4 | Per-OS process tables | Host-fidelity impossible in containers on macOS/Windows; seam fake is the only faithful clone |
@@ -176,7 +179,7 @@ replaces it; environment overrides are already contractual:
 |---------|-----------|---------------------------|
 | Metrics endpoint | `backends[0].metrics_url` (default `http://192.0.2.10:8428`) | httptest listener URL via typed settings translation (ARCH-07) |
 | stdin payload | Claude Code per refresh | `stdin.json.tmpl` corpus cases |
-| Transport hygiene | system resolver/proxy env | child env built from scratch, no `*_proxy`, `Proxy: nil` client (D14 precedent, ARCH-09) |
+| Transport hygiene | system resolver/proxy env | child env built from scratch, no `*_proxy`; proxy-free direct net.Conn dial — no http.Transport, no `*_proxy` consultation (the D14 precedent in kind, ARCH-09; wording updated pass-7 A17) |
 | Process/window age | host process table | `ProcStarter` recording fake + clock shim `HYLO_TEST_NOW` |
 
 ## Clone Development Approach

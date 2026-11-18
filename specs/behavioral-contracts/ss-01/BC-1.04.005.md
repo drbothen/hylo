@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "76b3a2d"
+input-hash: "c9e9a60"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:serving_state (SL:705-722)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on EC-007)"]
+modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on EC-007)", "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (down-label words sourced to new Text keys statusline.labels.vllm_down / statusline.labels.lmcache_down with legacy byte defaults, per OD-189)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,10 +44,12 @@ byte 0x1B.
 
 ## Postconditions
 
-1. `down = "vLLM down"` if `m.get("up:vllm") == 0`, or if `up:vllm` is absent **and** no
-   key starts with `vllm:`.
-2. Else `down = "LMCache down"` if `vllm:lmcache_mp_lookup_duration_seconds_count` is
-   present **and** `m.get("up:lmcache") == 0`.
+1. `down = statusline.labels.vllm_down` (Text, default `vLLM down` — OD-189, P20: the
+   label is a key because `telemetry.query` is configurable) if `m.get("up:vllm") == 0`,
+   or if `up:vllm` is absent **and** no key starts with `vllm:`.
+2. Else `down = statusline.labels.lmcache_down` (Text, default `LMCache down` — OD-189,
+   P20) if `vllm:lmcache_mp_lookup_duration_seconds_count` is present **and**
+   `m.get("up:lmcache") == 0`.
 3. Else `down = none`.
 4. Segment = `"\e[31m◉ " + down + "\e[0m"` if `down`, else `"\e[33m◉\e[0m"` when stale,
    `"\e[32m◉\e[0m"` when fresh. A down state is red regardless of `stale`.

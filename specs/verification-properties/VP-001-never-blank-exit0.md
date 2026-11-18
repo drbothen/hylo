@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-00-overview.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.001.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, prd-supplements/error-taxonomy.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2f6a424"
+input-hash: "998a475"
 traces_to: prd.md
 source_bc: BC-1.01.001
 bcs: [BC-1.01.001, BC-1.02.020, BC-1.02.026, BC-1.02.027, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.05.004, BC-1.05.007, BC-1.06.001, BC-1.07.007, BC-1.07.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)", "1.3 2026-11-18T09:05:00Z: ADV-P3 fixes (A2-07) — FaultInjectionTable comment names the CP-A01..A03 subagent fault rows; fuzz leg asserts the promised output-set membership ({render, 29-byte line, subagent JSON lines, zero bytes}) instead of only exit-0/non-blank, with OD-168 placing a subagent config error at zero bytes", "1.4 2026-11-18T14:05:00Z: ADV-P4 fixes — catalogue closed over the pass-3 register: CP-O10/O11 (cost-history borne, BC-1.05.007), CP-A04/A05 (BC-1.07.007) and CP-N03 (metrics-borne degrade, SL:717) added (A2-03); the never-degraded claim limited to the parse path with a coded parseFault condition — subagent renderer faults (CP-A01..A05) are EXPECTED to end in the line (A2-02); frontmatter proof_method/feasibility line unmerged (A2-12); OD-167 turn-drop and OD-166 record-guard legs cross-referenced to VP-029/VP-020", "1.5 2026-11-18T23:30:00Z: pass-4 sync SC-05 — BC-1.01.002 dropped from bcs: and from Partial coverage: that contract deliberately removed VP-001 from its VP Anchors in the pass-4 burst (ADV-P4-B11 + A2-16 sibling sweep; its invalid-stdin-renders-from-{} seam is VP-005's property, whose source BC it is); VP-INDEX catalog/map reconciled in the same burst", "1.6 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-10, A2-11) — the subagent renderer regime of assertPromisedOutputSet now asserts positively: the degraded line and row output never mix (DI-008), and isJSONObject is specified as Python-semantics decode (ARCH-06 ModeBytes: NaN/Infinity tokens) so byte classification cannot false-fail; BC-1.07.007 and BC-1.05.007 added to bcs: and Partial coverage (their CP-A04/A05 and CP-O10/O11 legs are this ladder's — reciprocal BC-body rows are the BC owners' fixes, ADV-P5-A2-11/C15)", "1.7 2026-11-19T00:20:00Z: pass-5 sweep C — the headline catalogue enumeration is closed over CP-A01..A05 (the --subagent renderer faults, BC-1.07.008/.007), which the opening list had left to the second sentence; Source Contract CP-A rows unchanged", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-01, A2-21) — assertPromisedOutputSet returns at the end of the subagent regime (the main-entry check no longer runs on subagent stdout; legal zero bytes and NDJSON rows cannot false-red); the ladder guards an empty FaultInjectionTable (P11); every fenced sketch labelled non-normative (OD-182)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)", "1.3 2026-11-18T09:05:00Z: ADV-P3 fixes (A2-07) — FaultInjectionTable comment names the CP-A01..A03 subagent fault rows; fuzz leg asserts the promised output-set membership ({render, 29-byte line, subagent JSON lines, zero bytes}) instead of only exit-0/non-blank, with OD-168 placing a subagent config error at zero bytes", "1.4 2026-11-18T14:05:00Z: ADV-P4 fixes — catalogue closed over the pass-3 register: CP-O10/O11 (cost-history borne, BC-1.05.007), CP-A04/A05 (BC-1.07.007) and CP-N03 (metrics-borne degrade, SL:717) added (A2-03); the never-degraded claim limited to the parse path with a coded parseFault condition — subagent renderer faults (CP-A01..A05) are EXPECTED to end in the line (A2-02); frontmatter proof_method/feasibility line unmerged (A2-12); OD-167 turn-drop and OD-166 record-guard legs cross-referenced to VP-029/VP-020", "1.5 2026-11-18T23:30:00Z: pass-4 sync SC-05 — BC-1.01.002 dropped from bcs: and from Partial coverage: that contract deliberately removed VP-001 from its VP Anchors in the pass-4 burst (ADV-P4-B11 + A2-16 sibling sweep; its invalid-stdin-renders-from-{} seam is VP-005's property, whose source BC it is); VP-INDEX catalog/map reconciled in the same burst", "1.6 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-10, A2-11) — the subagent renderer regime of assertPromisedOutputSet now asserts positively: the degraded line and row output never mix (DI-008), and isJSONObject is specified as Python-semantics decode (ARCH-06 ModeBytes: NaN/Infinity tokens) so byte classification cannot false-fail; BC-1.07.007 and BC-1.05.007 added to bcs: and Partial coverage (their CP-A04/A05 and CP-O10/O11 legs are this ladder's — reciprocal BC-body rows are the BC owners' fixes, ADV-P5-A2-11/C15)", "1.7 2026-11-19T00:20:00Z: pass-5 sweep C — the headline catalogue enumeration is closed over CP-A01..A05 (the --subagent renderer faults, BC-1.07.008/.007), which the opening list had left to the second sentence; Source Contract CP-A rows unchanged", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-01, A2-21) — assertPromisedOutputSet returns at the end of the subagent regime (the main-entry check no longer runs on subagent stdout; legal zero bytes and NDJSON rows cannot false-red); the ladder guards an empty FaultInjectionTable (P11); every fenced sketch labelled non-normative (OD-182)", "1.9 2026-11-19T18:00:00Z: pass-7 fix (A2-13) — the renderer regime states where zero tasks fall: zero tasks are a legal ZERO-BYTE output (BC-1.07.004 PC6), the renderer branch's legal set is {degraded line, NDJSON rows, zero bytes on empty task list}, and the sketch returns on len(stdout)==0 before the isNDJSONRows membership check instead of assuming isNDJSONRows(\"\")]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -85,7 +85,11 @@ current refresh and so are covered by this ladder.
   bytes}; a subagent config error is zero bytes (OD-168) and the degraded line never
   appears via the parse path — the any-stdin leg BC-1.01.001
   anchors (formerly attributed to Tier C; it is this in-tree fuzz, and Tier C's
-  VP-011 hunt).
+  VP-011 hunt). In the RENDERER regime zero tasks are a legal ZERO-BYTE output
+  (BC-1.07.004 PC6): the renderer branch's legal set is {29-byte degraded line,
+  NDJSON rows, zero bytes when the task list is empty}, so a zero-byte stdout with
+  exit 0 passes there too and no membership check assumes
+  `isNDJSONRows("")` (A2-13).
 - **Honesty (iron law):** testable-only. This is an empirical property over an
   enumerated trigger list, not a formal proof; completeness rests on the taxonomy being
   closed (error-taxonomy.md) and Tier C fuzz hunting for unenumerated paths (VP-011).
@@ -156,6 +160,11 @@ func assertPromisedOutputSet(t *testing.T, id string, subagent, parseFault bool,
         // either exactly the 29-byte line (a renderer fault ended the refresh) or
         // NDJSON rows with no degraded line anywhere in them.
         if stdout == degradedLine {
+            return
+        }
+        // A2-13: zero tasks emit ZERO bytes legally (BC-1.07.004 PC6) — a legal
+        // renderer outcome; isNDJSONRows("") is deliberately NOT assumed.
+        if len(stdout) == 0 {
             return
         }
         if !isNDJSONRows(stdout) || strings.Contains(stdout, degradedLine) {

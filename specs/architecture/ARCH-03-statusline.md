@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.7"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-19T04:00:00Z
+timestamp: 2026-11-19T19:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "0258ea6"
+input-hash: "5c34ef8"
 
 ---
 
@@ -63,7 +63,7 @@ follows because every cache write sits inside `Render`'s step script.
 |---|---|---|---|
 | 0 | config resolved by `Main` (precondition; D4-EX-3 before any write) | `config.Load` (in `Main`) | config-error line |
 | 1 | stdin decode (`pyfmt.Decode`, ModeText) | stdin | no — invalid => `{}` (BC-1.01.002/.008) |
-| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010); Windows: a naive timestamp on/before 1970-01-01 or from year ≥ 3001 makes MSVC `localtime_s` raise OSError out of `_iso_ts` (which catches only ValueError) and DEGRADES the whole line (BC-5.04.001 v1.2.3, owner call 8; pass-6 C01 — Windows test vectors derived from the pre-call-8 BCs assert the wrong outcome) |
+| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010); Windows: a naive timestamp on/before 1970-01-01 or from year ≥ 3001 makes MSVC `localtime_s` raise OSError out of `_iso_ts` (which catches only ValueError) and DEGRADES the whole line (CP-T09; BC-5.04.001 v1.2.3, owner call 8; pass-6 C01 — Windows test vectors derived from the pre-call-8 BCs assert the wrong outcome) |
 | 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no |
 | 4 | get_sample when ROWS >= 2: fetch, then session-cache write | `Metrics`, `Cache`, `Now` | no |
 | 5 | row-2 render (width rule) | pure | CP-N01/N02/N03 |
@@ -82,8 +82,10 @@ degraded-line attempt); CP-X04 (signals) is out of scope.
 
 **Typed crash-path register (normative dispositions live in the owning BCs).** The
 script's Degrade? column names the CP families; the full trigger tables are
-error-taxonomy.md. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 (transcript
-machine), CP-N01..N03 (row-2 telemetry; pass-4 C2-12), **CP-O01..O11** (OD-156 numeric-overflow family:
+error-taxonomy.md. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 + CP-T09
+(transcript machine — a family of EIGHT; CP-T08 is a RETIRED id, append-only
+numbering; CP-T09 = the Windows MSVC localtime-domain OSError on a naive transcript
+timestamp, owner call 8 pass-7 D06/B03), CP-N01..N03 (row-2 telemetry; pass-4 C2-12), **CP-O01..O11** (OD-156 numeric-overflow family:
 CP-O01..O05 stdin/metrics-borne at render → E-REN-002, the 29-byte line, exit 0, earlier
 writes kept; CP-O06..O08 transcript-borne → the offending line is skipped whole under the
 extended D4-EX-2 discipline, no sticky state, and the in-flight turn is dropped
@@ -100,8 +102,10 @@ correction, propagated pass-5 A09), same E-REN-002 disposition, owner BC-1.05.00
 EC-011, bearer the cost-history cache), and **CP-A01..A05** (subagent panel, BC-1.07.008: typed degrades to the 29-byte
 line, exit 0; CP-A04/A05 = huge-int `tokenCount`/`startTime` OverflowError paths added
 by the pass-3 ruling, owners BC-1.07.007/.008), and **CP-N03** (pass-4 C2-12: the
-metrics-borne degrade — a numeric `__name__` key sorting ahead of every `vllm:` key so
-`k.startswith` raises AttributeError, SL:717; owner BC-1.04.005 EC-007 / BC-1.04.004
+metrics-borne degrade — a numeric `__name__` key positioned ahead of every `vllm:` key
+in the metrics dict's INSERTION order — dicts are not sorted; SL:717 is `any()` over
+the dict, corrected pass-7 C2-12 — so `k.startswith` raises AttributeError; owner
+BC-1.04.005 EC-007 / BC-1.04.004
 (pass-5 A24 correction — the degrade sits in `serving_state`), E-REN-002 disposition).
 
 ## Interfaces (design doc §2.2, reused as the contract)
@@ -140,7 +144,7 @@ type Env struct {
     EnvVar  EnvVars               // AD-10 seam (ARCH-01: Lookup + Names); backs the COLUMNS lookup (BC-1.01.005) and the unknown-HYLO_* sweep (BC-2.01.001 PC-6). The former bare Getenv func(string) string is superseded (ADV-P4-A06)
     Config  *config.Config        // filled by Main at step 0 (D15); Render precondition
     Cache   CacheStore            // constructed by Main after step 0 over the resolved dir (OD-101); temp dir in tests
-    Metrics MetricsClient         // constructed by Main after step 0 from backends[0].metrics_url + telemetry.timeout_s (pass-5 A11); httptest fake in tests
+    Metrics MetricsClient         // constructed by Main after step 0 from backends[0].metrics_url + telemetry.timeout_s (pass-5 A11); raw-net.Listener fake in tests (VP-030 transport table; pass-7 C2-05)
     Proc    ProcStarter           // constructed by Main after step 0 from window_age.process_name + window_age.max_depth (pass-5 A11); fake in tests
     Files   FileSystem            // transcript and .git reads; os-backed by default
     Cwd     func() string         // git fallback when no project dir
@@ -181,21 +185,41 @@ type CacheStore interface {
     Save(name string, v pyfmt.Value) error // reports the write outcome to the caller (ADV-P2-A25, VP-018); Render swallows it — DI-008 never-raise at the orchestrator
 }
 type MetricsClient interface {
-    // MINIMAL HTTP/1.1 CLIENT OVER net.Conn, plain http only (pass-6 C2-02/C2-05,
-    // call 4; OD-181 limits parity to http): Go's net/http trims header values
+    // MINIMAL HTTP/1.1 CLIENT OVER net.Conn (pass-6 C2-02/C2-05, call 4; TLS and
+    // framing added pass-7 A11/C2-04/C2-05, orchestrator call 9; PARITY CASES ARE
+    // PLAIN http ONLY — OD-181): Go's net/http trims header values
     // (textproto) and url.Parse rejects "%" without two hex digits, while urllib
     // keeps both — so net/http cannot reproduce urllib's targets byte-exactly.
     // The client sends exactly urllib's request headers (method GET, `Host`,
     // `User-Agent: Python-urllib/3.11`, `Accept-Encoding: identity`,
     // `Connection: close`, in urllib's order; verify against the CPython 3.11.7
     // source) and parses status line and headers as http.client does (compat32:
-    // header values keep inner and trailing spaces, only CR/LF stripped).
+    // a header value is value.lstrip(' \t') then rstrip('\r\n') — leading
+    // spaces/tabs ARE stripped, inner bytes kept, trailing CR/LF stripped and a
+    // trailing space KEPT; verified `Location: \t /x ` parses to `'/x '` —
+    // pass-7 C2-02, orchestrator call 9).
+    // RESPONSE BODY FRAMING exactly as http.client (pass-7 C2-01, orchestrator
+    // call 9): Transfer-Encoding: chunked de-chunked first, then Content-Length,
+    // else read to EOF — the parsed body, never raw chunk-size lines, reaches
+    // json.loads (legacy resp.read(), SL:171).
+    // HTTPS (pass-7 A11/C2-04, orchestrator call 9): the SAME net.Conn wrapped
+    // with crypto/tls — SNI from the URL host, ALPN pinned to http/1.1 only
+    // (h2 negotiation would change the framing), certificates verified against
+    // the OS trust store (system roots on Linux; macOS/Windows system stores).
+    // There is no http.Transport and no proxy consultation. https URLs get a
+    // sample when the store answers; PARITY CASES use plain http only (OD-181 —
+    // the ruled closed-set exclusion "metrics transport beyond plain http":
+    // non-http(s) schemes, non-http(s) redirect targets, TLS trust-store
+    // differences for https).
     // MANUAL REDIRECT LOOP: hylo drives the hops itself, so urllib's rules apply
     // exactly: follow `location` then `uri` headers; a present-but-EMPTY Location
     // resolves by urljoin(<URL of the request that received this 3xx>, "") — from
     // the second hop on that is the CURRENT hop's URL, not the first request's
     // (pass-6 C2-02, call 4; supersedes the "redirects to the original URL" rule).
     // An empty fragment is dropped by urlunsplit, so /x# and /x are one loop key.
+    // A NON-empty fragment never reaches the wire either: the next GET's request
+    // line drops it (urllib's Request splits it off, _splittag) — the loop KEY
+    // keeps a non-empty fragment, the REQUEST does not (pass-7 C2-08, call 9).
     // After urlunparse, normalize quote(url, encoding="iso-8859-1",
     // safe=string.punctuation), then urljoin (verified in CPython 3.11.7 source).
     // Hop rules are urllib's visited-set/max_repeats/max_redirections limits — 37 is
@@ -206,11 +230,18 @@ type MetricsClient interface {
     // UserInfo (pass-5 C2-03 ruling OD-180): a metrics URL with userinfo reproduces
     // legacy — NO sample (urllib puts u:p@host into HTTPConnection's host, DNS fails,
     // the dead rung); no exclusion id.
-    // Total deadline, Proxy: nil. Raw bytes in, no transparent decompression (urllib
+    // Total deadline; proxy-free by construction — a raw net.Conn dialed from the
+    // URL host: no http.Transport and no *_proxy consultation (there is no
+    // Transport to configure; the D14-(b) precedent in kind — wording updated
+    // pass-7 A17). Raw bytes in, no transparent decompression (urllib
     // sends Accept-Encoding: identity and parses the body raw; an auto-gzip response
     // legacy never asked for would give Go a sample where legacy gets none, a
     // spurious VP-030 divergence — the net.Conn design has no auto-gzip by
     // construction, superseding the DisableCompression transport note).
+    // TEST SEAM (pass-7 C2-05, orchestrator call 9): VP-030's transport table
+    // drives a RAW net.Listener fake — not httptest, whose server canonicalises
+    // headers into a map and trims values (textproto.TrimString), so it can
+    // neither reproduce urllib's header order nor send `Location: /x `.
     // Reply decode: pyfmt.Decode(b, ModeBytes, depthMetricsReply = 992) (pass-6 A07,
     // call 5 — legacy fetch_sample calls json.loads(resp.read()) on bytes, SL:171,
     // so BOM/UTF-16/32 detection applies; BC-5.02.004).

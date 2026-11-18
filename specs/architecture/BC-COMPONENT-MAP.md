@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T00:30:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "0464e6a"
+input-hash: "5fac151"
 traces_to: ../prd.md
 
 ---
@@ -54,7 +54,7 @@ traces_to: ../prd.md
 | BC-1.02.010 | sl/limits.go (expired window unreported) | ARCH-03 |
 | BC-1.02.011 | sl/limits.go (pace/absolute bands) | ARCH-03 |
 | BC-1.02.012 | sl/limits.go (countdown, 1.15 gate) | ARCH-03 |
-| BC-1.02.013 | sl/limits.go (smoothing 1800 s + session cache) | ARCH-03 |
+| BC-1.02.013 | sl/cache.go (rate-limit smoothing 1800 s — SESSION-cache row; mis-anchor corrected pass-6 A15 / pass-7 A12) | ARCH-03 |
 | BC-1.02.014 | sl/session.go (_fmt_lines) | ARCH-03 |
 | BC-1.02.015 | sl/session.go (_hm) | ARCH-03 |
 | BC-1.02.016 | sl/session.go (API-time suffix) | ARCH-03 |

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "6869c11"
+input-hash: "e4f8db5"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry (SL:693-702)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on invariant 3)"]
+modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on invariant 3)", "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (dead-marker word sourced to statusline.pill.label_local per OD-189, glyph named glyphs.degraded) + ADV-P7-C2-14 BC side (CP-N03 canonical vector row added; the sole-key AttributeError raise type oracle-verified)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,8 +42,12 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
 2. `fresh_s` = `statusline.telemetry.fresh_s`, default 15 (T-003, derived: one metrics
    scrape interval; inert at the default TTL 4 and effective only when `ttl_s > 15`;
    OD-55, OD-57 E-0).
-3. Colors and the dead label come from `statusline.theme.*` / glyph keys whose defaults
-   equal legacy (OD-113, OD-02).
+3. Colors come from `statusline.theme.*`; the dead-marker glyph ◌ is
+   `statusline.glyphs.degraded` (U+25CC, SL:696) and the dead-marker WORD is
+   `statusline.pill.label_local` (Text, default `DGX` — OD-189 extends OD-173's key
+   reuse to the dead-backend marker, closing the P20 gap), so PC1's dead segment is
+   `"\e[31m" + glyphs.degraded + " " + pill.label_local + " ?" + "\e[0m"` with every
+   default byte-equal to legacy (OD-113, OD-02, OD-189).
 
 ## Postconditions
 
@@ -88,6 +92,7 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 | age 4.0, up false | `["\e[33m◉\e[0m", "\e[2m(~4s old)\e[0m"]` | edge-case |
 | age 15.5, up true | `["\e[33m◉\e[0m", "\e[2m(~16s old)\e[0m"]` | edge-case |
 | sample none | `["\e[31m◌ DGX ?\e[0m"]` | error |
+| `{5: 1.0}` (sole, numeric key), age 2.0, up true | degraded line (errDegraded, BC-1.01.001): `serving_state` raises AttributeError at SL:717 (`'int' object has no attribute 'startswith'`, oracle-verified CPython 3.11.7, 2026-11-18) — metrics-borne crash id **CP-N03**, sole-key case of BC-1.04.001 EC-013; a leading `"vllm:x"` key short-circuits `any()` and renders normally (BC-1.04.005 EC-007) | error |
 
 ## Verification Properties
 

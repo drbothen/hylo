@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.8"
+version: "1.10"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.01.002.md, behavioral-contracts/ss-05/BC-5.02.003.md, behavioral-contracts/ss-01/BC-1.03.004.md, prd-supplements/nfr-catalog.md]
-input-hash: "6a89473"
+input-hash: "9a52927"
 traces_to: prd.md
 source_bc: BC-5.02.003
-bcs: [BC-5.02.003, BC-5.02.004, BC-1.01.002, BC-1.03.004, BC-1.07.003]
+bcs: [BC-5.02.003, BC-5.02.004, BC-1.01.002, BC-1.03.004, BC-1.07.003, BC-6.01.001]
 module: internal/pyfmt (json.go)
 proof_method: fuzz
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — per-site table states both protocol sites at 993/994 (measured end to end on legacy 2026-11-17, superseding the 989/990 direct-probe figure); cache-load sites declared unmeasured/open, due before Phase 3 (A2-13); proof_file_hash field added (A2-29)", "1.3 2026-11-17: pass-2 follow-up — ADV-P2-A07 closed: governing formula limit = 999 − Python frames from <module> down to json.raw_decode recorded; all eight loader sites stated (stdin/transcript 993/994, session cache 991/992 and git cache 990/991 measured; get_sample, claude_window_start, mix cache and the cost-history loaders derived from equal chain depth); per-site measurement recipe added; harness asserts limit/limit+1 at every site", "1.4 2026-11-18T09:07:00Z: ADV-P3 fixes — main_subagent depth row added: same 6-frame chain as stdin, 993/994, over-limit input renders zero bytes (BC-1.07.003), not the degraded line (A2-22); line-number citations to BC-5.02.003 stripped in favor of content anchors (anchor drift, ADV-P3-D29)", "1.5 2026-11-18T14:38:00Z: ADV-P4 fixes — recipe observable corrected per BC-1.01.002: depth L+1 decodes to {} and renders the 45-byte default line, not the degraded line (A2-16); subagent chain re-labelled <module> → main_subagent (legacy calls main_subagent from <module>, SL:1240-1241); BC-1.07.003 added to bcs: to match the body's row (A2-11)", "1.6 2026-11-18T23:45:00Z: ADV-P5 fix (A2-05) — metrics-reply decode site added to the per-site table and harness: main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames, 992 accepted / 993 rejected — MEASURED end to end (localhost HTTP reply carrying a nested list under an ignored metric key, isolated HOME/cwd per run, python3 -I, 2026-11-18), confirming the 7-frame derivation; BC-5.02.004 names metrics replies pyfmt.Value decodes, so a Go budget drift here is now detected", "1.7 2026-11-19T03:00:00Z: ADV-P5 residual fix — the ModeText cache-loader citation's line-number pointer replaced with the ARCH-04 heading fragment anchor (anchor-drift lesson, ADV-P3-D29)", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-17, OD-185: harness budgets are pinned literals (subagent row added; BC-5.02.004 in bcs:); production call sites reference named per-site constants; OD-185 oracle self-check leg re-measures the flip depths on the resolved 3.11.x oracle, fails closed, prints the resolved version)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — per-site table states both protocol sites at 993/994 (measured end to end on legacy 2026-11-17, superseding the 989/990 direct-probe figure); cache-load sites declared unmeasured/open, due before Phase 3 (A2-13); proof_file_hash field added (A2-29)", "1.3 2026-11-17: pass-2 follow-up — ADV-P2-A07 closed: governing formula limit = 999 − Python frames from <module> down to json.raw_decode recorded; all eight loader sites stated (stdin/transcript 993/994, session cache 991/992 and git cache 990/991 measured; get_sample, claude_window_start, mix cache and the cost-history loaders derived from equal chain depth); per-site measurement recipe added; harness asserts limit/limit+1 at every site", "1.4 2026-11-18T09:07:00Z: ADV-P3 fixes — main_subagent depth row added: same 6-frame chain as stdin, 993/994, over-limit input renders zero bytes (BC-1.07.003), not the degraded line (A2-22); line-number citations to BC-5.02.003 stripped in favor of content anchors (anchor drift, ADV-P3-D29)", "1.5 2026-11-18T14:38:00Z: ADV-P4 fixes — recipe observable corrected per BC-1.01.002: depth L+1 decodes to {} and renders the 45-byte default line, not the degraded line (A2-16); subagent chain re-labelled <module> → main_subagent (legacy calls main_subagent from <module>, SL:1240-1241); BC-1.07.003 added to bcs: to match the body's row (A2-11)", "1.6 2026-11-18T23:45:00Z: ADV-P5 fix (A2-05) — metrics-reply decode site added to the per-site table and harness: main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames, 992 accepted / 993 rejected — MEASURED end to end (localhost HTTP reply carrying a nested list under an ignored metric key, isolated HOME/cwd per run, python3 -I, 2026-11-18), confirming the 7-frame derivation; BC-5.02.004 names metrics replies pyfmt.Value decodes, so a Go budget drift here is now detected", "1.7 2026-11-19T03:00:00Z: ADV-P5 residual fix — the ModeText cache-loader citation's line-number pointer replaced with the ARCH-04 heading fragment anchor (anchor-drift lesson, ADV-P3-D29)", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-17, OD-185: harness budgets are pinned literals (subagent row added; BC-5.02.004 in bcs:); production call sites reference named per-site constants; OD-185 oracle self-check leg re-measures the flip depths on the resolved 3.11.x oracle, fails closed, prints the resolved version)", "1.9 2026-11-19T18:00:00Z: pass-7 fixes (D04/call 7, A2-21) — the OD-185 self-check leg states BC-6.01.001 v1.2.4's ONE end-to-end definition and its measured constants (stdin decode 993 accepted / 994 rejected; session-cache save 991 writes / 992 skips; subagent wire 991 renders; unicodedata.unidata_version 14.0.0; CPython 3.11.7, default recursion limit 1000) instead of the skeleton's old helper-scope pair; Partial-coverage bullet names BC-5.02.004 and BC-1.07.003, matching bcs:", "1.10 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — bcs: gains BC-6.01.001, whose PC-4 states this VP pins the same measured self-check constants (reciprocity preferred over exception-listing, SC-13/SC-14 convention); no property or table change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,7 +80,9 @@ isolated HOME and cwd per run, ADV-P5-A2-05, measured 992/993 on 2026-11-18.
 
 - **Primary BC:** BC-5.02.003 — json.loads(bytes) acceptance set (depth bounds).
 - **Partial coverage:** BC-1.01.002 (stdin text-mode budget via Decode ModeText),
-  BC-1.03.004 (transcript bytes-mode consumption).
+  BC-1.03.004 (transcript bytes-mode consumption), BC-5.02.004 (metrics replies are
+  pyfmt.Value decodes — the metrics-reply row of the table), BC-1.07.003 (subagent
+  stdin over-limit renders zero bytes — the subagent row's observable).
 - **Invariant verified:** NFR-003 plumbing (hand-written decoder, banned stdlib codecs
   on protocol inputs, cannot silently change the budget).
 
@@ -92,8 +94,11 @@ isolated HOME and cwd per run, ADV-P5-A2-05, measured 992/993 on 2026-11-18.
   the absence of stack exhaustion below budget. Production call sites pass named
   per-site budget constants pinned to the measured flips in the harness table, so a
   wrong budget at a production call site is a detected defect, not an input the test
-  blesses (A2-17). OD-185: the harness self-checks the measured constants against the
-  resolved 3.11.x oracle at start (re-measure the flip depths; fail closed on any
+  blesses (A2-17). OD-185 + pass-7 D04: the harness self-checks the pinned constants
+  against the resolved 3.11.x oracle at start, by BC-6.01.001's ONE end-to-end
+  definition (drive the real oracle with the case argv and a temp HOME/cwd; assert
+  stdin decode 993/994, save 991/992, wire 991 renders, `unidata_version` 14.0.0;
+  fail closed on any
   mismatch, printing the resolved version; golden metadata records the resolved patch,
   VP-010/RK-4).
 - **Honesty:** testable-only; the budget parameterisation is statically checkable
@@ -135,16 +140,33 @@ func TestDecode_DepthBudgetsPerCallSite(t *testing.T) { // A2-17: budgets are PI
     }
 }
 
-func TestOracleSelfCheck_MeasuredConstants(t *testing.T) { // OD-185: the measured
-    // constants were taken on 3.11.7 but CI resolves the latest 3.11.x patch — the
-    // harness self-checks them against the RESOLVED oracle at start and fails closed
-    // on any mismatch, printing the resolved version.
-    v := resolvedOracleVersion() // e.g. "3.11.9"; golden metadata records it (VP-010, RK-4)
-    if reMeasuredFlipDepth(resolvedOracle, stdinChain) != 993 {
-        t.Fatalf("resolved oracle %s disagrees with the pinned stdin flip depth 993", v)
+func TestOracleSelfCheck_MeasuredConstants(t *testing.T) { // OD-185 + pass-7 D04 (call 7):
+    // ONE definition, stated in BC-6.01.001 v1.2.4 PC-4: the committed probe drives
+    // the REAL oracle END TO END — the same argv as every case (PC-5), an isolated
+    // temp HOME and cwd, deep stdin serialized by concatenation — never a
+    // helper-scope surrogate. The constants are the LAWS' own constants
+    // (BC-5.02.003/BC-5.02.006); BC-6.01.001, VP-006 and ARCH-07 state the same
+    // values. Measured under this method: CPython 3.11.7, recursion limit 1000.
+    v := resolvedOracleVersion() // printed once per Tier A run; Tier B golden
+                                 // metadata records it (VP-010, RK-4)
+    // stdin decode (BC-5.02.003 law, F = 6): 993 accepted, 994 rejected.
+    if d := oracleStdinDecode(resolvedOracle, "--subagent"); d.accept != 993 || d.reject != 994 {
+        t.Fatalf("resolved oracle %s disagrees with the pinned stdin decode flip 993/994", v)
     }
-    if reMeasuredFlipDepth(resolvedOracle, metricsReplyChain) != 992 {
-        t.Fatalf("resolved oracle %s disagrees with the pinned metrics-reply flip depth 992", v)
+    // session-cache save (BC-5.02.006 json.dump law, s = 4): a rate_limits chain
+    // nesting 991 writes the "rl" member; 992 skips the deep write (the observer
+    // is the member, not the file — the later flat save still persists it).
+    if s := oracleSessionSave(resolvedOracle); s.writesAt != 991 || s.skipsAt != 992 {
+        t.Fatalf("resolved oracle %s disagrees with the pinned save boundary 991/992", v)
+    }
+    // subagent wire (BC-5.02.006 json.dumps law, s = 3): an id chain of 990
+    // (wire object 991, stdin document 993) renders its row — the attainable
+    // boundary; the next chain overruns the stdin decoder first (document 994).
+    if !oracleWireRendersAt(resolvedOracle, 990) {
+        t.Fatalf("resolved oracle %s disagrees with the pinned wire boundary 991", v)
+    }
+    if u := oracleUnicodeVersion(resolvedOracle); u != "14.0.0" {
+        t.Fatalf("resolved oracle %s reports unicodedata %q, pinned 14.0.0", v, u)
     }
 }
 ```

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "6a5b563"
+input-hash: "389f30f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094; REBUILD_EXCESS SL:968-972)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)", "1.2.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C10) — EC-007 names the OD-167 in-flight-turn drop; timestamped CP-O07 turn-drop vector added (`lr` observable: hylo null vs plain-deletion [50.0, true], oracle-run 2026-11-18); DI-012 lifted to the traceability row (sibling convention, ADV-P5-C10)", "1.2.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O07 D4-EX-2 legs (VP-013 register, VP-012 closure)"]
+modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)", "1.2.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C10) — EC-007 names the OD-167 in-flight-turn drop; timestamped CP-O07 turn-drop vector added (`lr` observable: hylo null vs plain-deletion [50.0, true], oracle-run 2026-11-18); DI-012 lifted to the traceability row (sibling convention, ADV-P5-C10)", "1.2.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O07 D4-EX-2 legs (VP-013 register, VP-012 closure)", "1.2.5 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C07) — the CP-O07 turn-drop leg seed made self-consistent: it is the CP-O07 seed with ids [\"x\"] in place of [] (the variant that the A_x dedup and the expected ids require), not the \"same seed cache\""]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -103,7 +103,7 @@ CP-O07 vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18): seed cache e
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | seed + the line above | legacy: `OverflowError` at SL:1117, degraded line, exit 0, cache keeps its seed bytes; hylo (D4-EX-2): cache exactly `{"size": 415, "res": 0, "conv": 0, "think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 5.0, "ids": [], "lr": null, "lu": null, "cur": null}` | error |
-| CP-O07 turn-drop leg (timestamped; ADV-P5-C01/C02): the same seed cache (float `pp` 5.0, int `tin`, `ids` `["x"]`) plus four timed lines (TZ=UTC, compact `json.dumps`, LF-terminated): `U_a` ts 10:00:00Z (92 B), `A_x` id `x` usage `{'input_tokens': 5, 'output_tokens': 100}` ts 10:00:02Z (163 B — mid `x` is in the seed's `ids`, so the usage is **deduplicated**: `pp` stays 5.0 while the turn machine still opens the turn), `A_y` id `y` usage `{'cache_creation_input_tokens': 10^309}` ts 10:00:04Z (467 B — SL:1108 is int-only and overflow-free; the rebuild check `prompt − pp` = `10^309 − 5.0` raises), `U_b` ts 10:00:06Z (92 B). Legacy on the full window: `OverflowError` at SL:1117, degraded, seed bytes kept (oracle-run 2026-11-18). Plain-deletion oracle: legacy on `U_a, A_x, U_b` + seed = `{'size': 347, ..., 'lr': [50.0, true], 'lu': 1794650406.0, 'cur': null}` (oracle-run). hylo (OD-167): `A_y` skipped and the open turn discarded — cache exactly `{'size': 814, 'res': 0, 'conv': 5, 'think': 0, 'tin': 0, 'tout': 0, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 5.0, 'ids': ['x'], 'lr': null, 'lu': 1794650406.0, 'cur': null}` (`'size'` 814 = 347 + 467 deleted bytes; `'lr'` null is the ruled drop observable; `'pp'` stays the float 5.0) | error |
+| CP-O07 turn-drop leg (timestamped; ADV-P5-C01/C02): seed cache = the CP-O07 seed above with `ids` `["x"]` in place of `[]` (float `pp` 5.0 and int `tin` unchanged — the `["x"]` variant is what A_x's dedup and the expected `'ids': ['x']` below require; ADV-P7-C07) plus four timed lines (TZ=UTC, compact `json.dumps`, LF-terminated): `U_a` ts 10:00:00Z (92 B), `A_x` id `x` usage `{'input_tokens': 5, 'output_tokens': 100}` ts 10:00:02Z (163 B — mid `x` is in the seed's `ids`, so the usage is **deduplicated**: `pp` stays 5.0 while the turn machine still opens the turn), `A_y` id `y` usage `{'cache_creation_input_tokens': 10^309}` ts 10:00:04Z (467 B — SL:1108 is int-only and overflow-free; the rebuild check `prompt − pp` = `10^309 − 5.0` raises), `U_b` ts 10:00:06Z (92 B). Legacy on the full window: `OverflowError` at SL:1117, degraded, seed bytes kept (oracle-run 2026-11-18). Plain-deletion oracle: legacy on `U_a, A_x, U_b` + seed = `{'size': 347, ..., 'lr': [50.0, true], 'lu': 1794650406.0, 'cur': null}` (oracle-run). hylo (OD-167): `A_y` skipped and the open turn discarded — cache exactly `{'size': 814, 'res': 0, 'conv': 5, 'think': 0, 'tin': 0, 'tout': 0, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 5.0, 'ids': ['x'], 'lr': null, 'lu': 1794650406.0, 'cur': null}` (`'size'` 814 = 347 + 467 deleted bytes; `'lr'` null is the ruled drop observable; `'pp'` stays the float 5.0) | error |
 
 ## Verification Properties
 

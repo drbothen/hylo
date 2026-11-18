@@ -1,17 +1,17 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:30:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "10a26f4"
+input-hash: "d6b1c84"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -28,6 +28,7 @@ modified:
   - "2026-11-19T00:40:00Z (1.2.4): ADV-P5 remediation D05+D06+D07+D12+D13 — PC-5 shapes written per key and matched to defaults (colors object spelling supersedes the positional triple-array; IntMap exact-keys/JSON-integer/int64/duplicate rules; scale is a 4-number array); PC-6 Text reasons minted for glyph and general Text keys; PC-7 default-only rule (byte-equal accepted, else out of range, OD-162); FloatPair example corrected to the registered [0.5,0.9] range (D12)"
   - "2026-11-19T02:00:00Z (1.2.5): ADV-P5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] to [base, span] and law restated as base + span-times-i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
   - "2026-11-19T04:20:00Z (1.3.0): ADV-P6 remediation D01+D04+OD-184 — PC-7 default-only spellings minted per orchestrator call 8 (theme.heat env spelling is the strict-JSON array [0.22,0.85,0.80]; comparison on the PARSED value, not bytes; limits.windows 5h,7d; units.lines k; units.tokens M); EC-010/EC-011 realigned (0.5/0.5/0.5 is now the shape error it always was under PC-5); glyph PC-6 wording states the OD-184 code-point enforcement behind the fixed reason string; VP-016 row and VP anchor say seven classes"
+  - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09 (orchestrator call 5) — PC-7 env names canonized under EnvName (HYLO_STATUSLINE_LIMITS_WINDOWS, HYLO_STATUSLINE_UNITS_LINES=k, HYLO_STATUSLINE_UNITS_TOKENS=M, HYLO_STATUSLINE_UNITS_CONTEXT=K) with registry Defaults single-valued (= the accepted spelling), legacy derivations and a stated reason why the letters differ; PC-6 glyph reasons corrected per OD-184 to expected exactly 1 code point / expected exactly 8 code points (sparkline); PC-5 scale attributed to NumberList with a registry-declared fixed length of 4"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,9 +95,11 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      ratified for the bands pairs — legacy's chained red-first comparison is
      comparison-total for any finite pair.
    - `array of 3 numbers` (FloatTriple; `statusline.theme.heat`, default-only).
-   - `array of 4 numbers` (`statusline.sparkline.scale` = `[k_top, v_floor, f_floor,
-     other]`; legacy default `[1.0, 1.0, 0.1, 1e-9]` from `_SPARK_FIXED`/`_SPARK_FLOOR`
-     SL:648-649 and the 1e-9 fallback SL:671; each member finite `> 0`).
+   - `array of 4 numbers` — registry type `FloatQuad` (`statusline.sparkline.scale` =
+     `[k_top, v_floor, f_floor, other]`; a JSON array of 3 numbers misses the declared
+     shape and is a shape error with the same bytes, pass-7 D09); legacy default
+     `[1.0, 1.0, 0.1, 1e-9]` from `_SPARK_FIXED`/`_SPARK_FLOOR`
+     SL:648-649 and the 1e-9 fallback SL:671; each member finite `> 0`.
    - `object {trail,fade,amber,head}` (RGBTriplesFloat;
      `statusline.sparkline.colors`: trail/amber/head each an array of 3 integers, fade
      an array of 2 numbers `[base, span]`, the trail fade factor
@@ -122,12 +125,14 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      violating value yields
      `<key>=<value> (expected non-empty control-free text of display width 1..16)`.
    - The glyph-family keys (`statusline.glyphs.*`, `statusline.subagent.glyphs.*`):
-     a value that is not non-empty control-free text of exactly 1 code point — the
-     sparkline member exactly 8 ordered code points — yields
-     `<key>=<value> (expected exactly 1 code point and 1 display column)`. The reason
-     string is fixed vocabulary; the ENFORCED rule is the OD-184 code-point count
-     (legacy's render width), not a terminal-column check — the OD-170 validation width
-     is not consulted for glyph members (BC-2.01.004 PC-6/PC-9, ADV-P6-D02/D03).
+     a value that is not non-empty control-free text of exactly 1 code point yields
+     `<key>=<value> (expected exactly 1 code point)`; the sparkline member yields
+     `<key>=<value> (expected exactly 8 code points)`. The reason strings are fixed
+     vocabulary (OD-184, pass-7 D02: the former "... and 1 display column" suffix is
+     withdrawn — columns are counted in legacy's render width, i.e. code points, not
+     terminal columns); the ENFORCED rule is the OD-184 code-point count (8 for the
+     sparkline ramp) — the OD-170 validation width is not consulted for glyph members
+     (BC-2.01.004 PC-6/PC-9, ADV-P6-D02/D03).
    - Every other `Text` key with the non-empty/no-control-bytes range
      (`statusline.subagent.tokens.suffix`, `statusline.window_age.process_name`,
      `statusline.labels.input`, ...): a violating value yields
@@ -145,11 +150,26 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    riding the number-range class, reason `out of range` (OD-162: the key's valid range
    is its default value only; the number-range class is the OD-162-designated class even
    for Text/List default-only keys). The default's env spelling — the exact string that
-   parses to the default — for each default-only key: `HYLO_STATUSLINE_THEME_HEAT` =
-   `[0.22,0.85,0.80]` (strict-JSON FloatTriple; the slash spelling `0.22/0.85/0.80` is
-   NOT the grammar and is a shape error); `HYLO_LIMITS_WINDOWS` = `5h,7d` (comma list);
-   `HYLO_UNITS_LINES` = `k`; `HYLO_UNITS_TOKENS` = `M`; `HYLO_UNITS_CONTEXT` = the
-   default Text of `statusline.units.context`. It is definite: `HYLO_STATUSLINE_THEME_HEAT`
+   parses to the default — for each default-only key, with the registry `Default` a
+   SINGLE value equal to that spelling (pass-7 D01, orchestrator call 5):
+   `HYLO_STATUSLINE_THEME_HEAT` = `[0.22,0.85,0.80]` (strict-JSON FloatTriple; the
+   slash spelling `0.22/0.85/0.80` is NOT the grammar and is a shape error);
+   `HYLO_STATUSLINE_LIMITS_WINDOWS` = `5h,7d` (comma list; registry Default `5h,7d`);
+   `HYLO_STATUSLINE_UNITS_LINES` = `k` (registry Default `k` — legacy `_fmt_lines`
+   spells whole thousands lowercase `184k`, SL:860);
+   `HYLO_STATUSLINE_UNITS_TOKENS` = `M` (registry Default `M` — the token segment's
+   millions denamination `88.0M`, SL:871/882, the binding spelling of pass-6 call 8
+   reaffirmed by pass-7 call 5);
+   `HYLO_STATUSLINE_UNITS_CONTEXT` = `K` (registry Default `K` — legacy `fmt_ctx`
+   spells the sub-million denominator uppercase `/967K`, SL:436-437). WHY THE LETTERS
+   DIFFER (judgment call, pass-7 call 5): the three selectors each store the letter
+   legacy's own formatter spells for the denamination its governing review names —
+   lowercase `k` for the lines base (`184k`), uppercase `K` for the context
+   denominator (SI convention trailing a slash-bound total), and the millions `M` for
+   the token segment whose approved-mockup headline is the top denamination (`500,
+   970k, 88.0M`, SL:864); the widgets never read them (fixed divisors are format
+   constants), so the only tested fact is parse-equality with the single default. It
+   is definite: `HYLO_STATUSLINE_THEME_HEAT`
    at any parsed-non-default
    value is a config error, never a warning and never silence. (The former PC-5 claim
    that default-only keys "never read their env name" is superseded; the former
@@ -177,7 +197,7 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 | EC-010 | `HYLO_STATUSLINE_THEME_HEAT='[0.22,0.85,0.80]'` (the default's env spelling, strict JSON) | accepted, no error (PC 7, call 8) |
 | EC-011 | `HYLO_STATUSLINE_THEME_HEAT='0.5/0.5/0.5'` | `\e[90mhylo: config error: statusline.theme.heat=0.5/0.5/0.5 (expected JSON array of 3 numbers)\e[0m\n` — a SHAPE error riding the Text class, caught before the default comparison (PC 5, PC 7, ADV-P6-D01) |
 | EC-012 | `HYLO_STATUSLINE_COST_RATE_MIN_API_MS='{"cc":1.0,"other":2}'` | shape error: `expected JSON object {cc,other} of integers` (`1.0` has a fraction, PC 5) |
-| EC-013 | `HYLO_STATUSLINE_GLYPHS_TIMER='ab'` | `\e[90mhylo: config error: statusline.glyphs.timer=ab (expected exactly 1 code point and 1 display column)\e[0m\n` (PC 6, OD-178) |
+| EC-013 | `HYLO_STATUSLINE_GLYPHS_TIMER='ab'` | `\e[90mhylo: config error: statusline.glyphs.timer=ab (expected exactly 1 code point)\e[0m\n` (PC 6, OD-178, pass-7 D02 wording) |
 
 ## Canonical Test Vectors
 

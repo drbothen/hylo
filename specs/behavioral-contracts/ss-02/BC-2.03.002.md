@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "6625cfb"
+input-hash: "4633caa"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -26,6 +26,7 @@ modified:
   - "2026-11-18T00:30:00Z (1.2.3): ADV-P4 remediation D20 — empty HYLO_PATHS_CACHE_DIR reports the same empty-path error as the status line (no platform-default fallback, OD-165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D36: empty override = not present; trailing separator printed as given, OD-165 agreement held at Clean-ed granularity"
   - "2026-11-19T04:45:00Z (1.2.4): ADV-P6 remediation D20 — PC-5 tension resolved: the no-validation claim is scoped to HYLO_* CONFIG-VALUE settings; the two path overrides the command consumes (HYLO_CONFIG, HYLO_PATHS_CACHE_DIR) keep their full path grammar including the empty-path error (PC-3/EC-011 stand)"
+  - "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - the --config=<path> equals spelling parses as the separated form; a bare --config is a flag error on the golden usage surface, exit 2 (BC-4.01.001 PC-3 cross-referenced)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +53,11 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 
 ## Preconditions
 
-1. Invoked as `hylo config path` or `hylo config path --config <path>`.
+1. Invoked as `hylo config path`, `hylo config path --config <path>` or the EQUALS
+   spelling `hylo config path --config=<path>`, which parses exactly as the separated
+   form (Go `flag` package convention; pass-7 D27). A BARE `--config` with no value is
+   a flag error of the subcommand: usage text on stderr (BC-4.01.001's golden surface),
+   exit 2, no stdout.
 
 ## Postconditions
 

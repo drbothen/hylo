@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T04:00:00Z
+timestamp: 2026-11-19T07:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "3258e18"
+input-hash: "5ad3cbc"
 
 ---
 
@@ -41,25 +41,26 @@ flowchart LR
     L --> M{"matrix:<br/>ubuntu-24.04 / macos-15 (arm64) / windows-2025"}
     M --> PY["setup-python 3.11.x (floating latest patch, OD-104/OD-185;<br/>harness self-checks measured constants, fail closed on drift) -> absolute path -> HYLO_PARITY_PYTHON<br/>(pass-5 A04: setup-python precedes go generate, so the<br/>staleness step never falls back to PATH Python, OD-104)"]
     PY --> GEN["go generate ./... staleness check: git diff --exit-code (OD-170)<br/>ubuntu-24.04 ONLY — the Windows Tier B leg needs no Python (goldens committed)"]
-    GEN --> T["go test -race (Linux/macOS) -count=1 ./... — Tier A included; setup-python BEFORE go test (pass-3 D22, pass-4 D08)"]
+    GEN --> T["go test -race (Linux/macOS) -count=1 ./... — Tier A EXCLUDED (pass-6 A12); setup-python BEFORE go test/generate (pass-3 D22, pass-4 D08)"]
     T --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
-    TB --> COV["coverage gate: >= 95 percent line coverage internal/statusline, internal/cost, internal/pyfmt (OD-158)"]
-    COV --> HL["gitleaks --log-opts=--all + category pattern scan"]
+    TB --> HL["gitleaks --log-opts=--all + category pattern scan"]
     HL --> J["report timing per leg, non-gating (OD-117)"]
+    COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07):<br/>go test -coverpkg=./internal/... — cross-package exercise<br/>(internal/parity driving internal/statusline) counts;<br/>enforces >= 95 percent line coverage (OD-158)"] --> REQ["required check-run `coverage`"]
     Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz, non-gating"]
 ```
 
 - Race detector on Linux and macOS; the resolved Python patch version is recorded in
-  Tier B golden metadata (RK-4). Ordering (pass-3 D22; diagram corrected pass-4 D08 and
-  again pass-5 A04): GitHub Actions always sets
-  `CI=true`, and Tier A runs live inside the plain `go test ./...` step — so every
-  `test` job installs setup-python and exports `HYLO_PARITY_PYTHON` BEFORE the
-  `go test` step; the plain test step never discovers the interpreter afterwards.
-  Alternatively a leg may exclude the Tier A selector from the plain step, but env-first
-  is the designed default. RULED (pass-6 A12, orchestrator call 13): the dedicated
+  Tier B golden metadata (RK-4). Ordering (pass-3 D22 as superseded pass-7 A08; diagram
+  corrected pass-4 D08 and again pass-5 A04): GitHub Actions always sets
+  `CI=true`. RULED (pass-6 A12, orchestrator call 13): the dedicated
   `parity tier A (live corpus)` job (45-minute budget) is the ONE authoritative Tier A
   run — the plain `go test` step EXCLUDES the Tier A selector, so the corpus never
-  executes under the test job's tighter 30-minute cap: one run, one timeout.
+  executes under the test job's tighter 30-minute cap: one run, one timeout. The
+  pass-3 "Tier A runs live inside the plain `go test` step" ordering rationale is
+  superseded (pass-7 A08): setup-python + the `HYLO_PARITY_PYTHON` export survive only
+  where a Python consumer remains — the ubuntu staleness step (OD-170), the dedicated
+  Tier A job, and nightly Tier C; legs without a Python consumer (macOS/Windows test
+  legs, release job) install no interpreter.
   Pin: setup-python installs **3.11.x** (python-version: '3.11', the latest patch —
   OD-104 stands; the pass-5 exact-3.11.7 pin is WITHDRAWN by OD-185, pass-6 A02).
   Because the measured constants (JSON depth limits, Unicode 14.0 tables) were taken on
@@ -75,12 +76,18 @@ flowchart LR
   `testdata/gen/*.py` under the pinned oracle, and confining the step to ubuntu keeps
   Python off the Windows leg's critical path — Windows consumes committed Tier B
   goldens, which need no interpreter.
-- **Coverage gate (OD-158, pass-4 A13):** a required `coverage` step produces the
-  profile (`go test -count=1 -coverprofile` per package) and enforces **line coverage
-  >= 95 %** per package for `internal/statusline`, `internal/cost` and
-  `internal/pyfmt`. `internal/cost` IS gated: SS-01 comprises `internal/statusline` and
+- **Coverage gate (OD-158, pass-4 A13; restructured pass-7 A07, orchestrator call 12):**
+  coverage is its OWN JOB on ubuntu-24.04 — required checks bind to check-runs
+  (jobs), and a step inside a 3-OS matrix job emits no `coverage` check-run — and it
+  produces the profile with `go test -count=1 -coverpkg=./internal/...` so CROSS-PACKAGE
+  execution counts: `internal/parity` exercising `internal/statusline` through the
+  referee contributes to the referee's covered lines. The job enforces **line coverage
+  >= 95 %** per package for `internal/statusline`, `internal/cost`,
+  `internal/pyfmt` and `internal/parity`. `internal/cost` IS gated: SS-01 comprises `internal/statusline` and
   `internal/cost` (ARCH-INDEX Subsystem Registry) and module-criticality.md classes it
-  CRITICAL by inheritance, so the "S1/S5" gate reading covers all three packages. The
+  CRITICAL by inheritance, so the "S1/S5" gate reading covers all three packages.
+  `internal/parity` joins the gate (pass-7 A09: R-004's P1 mitigation must name only
+  real gates — the referee is itself gated). The
   mutation kill-rate targets stay Phase 6 targets (OD-158) — this gate is line coverage
   only. Designed behaviour; see cicd-setup.md for the landed-ci.yml lag note.
 - **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report — per corpus
@@ -89,6 +96,12 @@ flowchart LR
   statistic degenerates to the maximum), p95 computed **per case** and binding per case,
   no pooling; fake-VM handling time subtracted. The p95 <= 25 ms
   gate fails the build only with `HYLO_TIMING_GATE=1` (binds on the owner's Mac target).
+  CONDITIONAL EXEMPTION (OD-187 + OD-191, pass-7 A02, orchestrator call 3): the >512 KB
+  fixture is exempt from the 25 ms p95 target, but the gate FAILS if its p95 exceeds
+  100 ms (judgment call: 4x the target, well under the refresh interval). The exempt
+  fixture is identified by the validated case flag `timing_exempt: large-transcript` —
+  exactly one case, and its transcript must exceed 512 KB (the corpus validator checks
+  both) — and the report prints one line whenever the exemption is used.
 - **Public-repo hygiene (policy 21, NFR-006):** committed fixtures synthetic-only;
   real inputs replayed from git-ignored `captures/`; gitleaks with
   `--log-opts="--all"` plus the category pattern scan; `TestCorpusHygiene` in-tree.
@@ -104,7 +117,11 @@ flowchart LR
   - Tier B: `tier-b: N goldens compared` — fails if `N == 0` OR if `N` differs from
     the number of committed golden files found by the same runtime census
     (pass-5 A19: a partially lost golden set must not pass — the Tier A
-    case-directory census discipline applied to Tier B).
+    case-directory census discipline applied to Tier B). The census counts ONLY the
+    HOST OS's golden set — `*.golden` on POSIX legs, `*.windows.golden` on the
+    Windows leg (the same native-set discipline as `-update`, pass-5 D29): a lost
+    `*.windows.golden` variant is caught by the Windows leg's census, and a POSIX
+    census never recounts Windows variants as present (pass-7 A18).
   - Tier C: `tier-c: N inputs per side, M oracle spawns`; the PR-side budget skip
     (`t.Skip` on unset/0 `HYLO_PARITY_FUZZSECONDS`) is allowed only because the job is
     non-gating — on the nightly schedule a 0/unset budget FAILS, it does not skip, and
@@ -131,16 +148,20 @@ flowchart LR
   - Timing report (pass-3 A16/D39): the timing job executes the in-tree timing test
     (`go test ./internal/parity -run '^TestTiming$' -count=1`, `par/timing.go`) and
     prints `timing: N cases timed > 0` — fails if `N == 0` (an activated job reporting
-    on zero cases must not pass).
+    on zero cases must not pass) AND if `N` differs from the corpus case census (the
+    same runtime census Tier A applies to the case directories — timing 1 of N cases
+    must not pass; pass-7 A20).
   A skipped required check must never stand in for a pass: probe-gated placeholder jobs
   are added to branch protection's required set only when they can execute (Phase 3),
   and from then on every activation of the job must satisfy its coverage line —
   `skip` on a required detector is investigated, not accepted.
-  R-004 mitigation restated for P1 (pass-6 A17 adjudication inside call 13): the
+  R-004 mitigation restated for P1 (pass-6 A17 adjudication inside call 13; corrected
+  pass-7 A09, orchestrator call 12): the
   HIGH-impact fake-pass-parity risk is mitigated in P1 NOT by the HIGH kill-rate tier
-  (a Phase 6 target, OD-158) but by THIS census discipline plus the >= 95 % line-coverage
-  gate over the referee's own packages (`internal/parity` included via the gate's
-  census lines) — the referee must demonstrably check something on every run; the
+  (a Phase 6 target, OD-158) but by THIS census discipline plus the >= 95 %
+  line-coverage gate, which now INCLUDES the referee's own package `internal/parity`
+  among the gated packages — the mitigation names only gates that exist; the
+  referee must demonstrably check something on every run; the
   kill-rate tier takes over in Phase 6.
 
 ### Decision: gate on three OSes per change; release via GitHub Releases (AD-11)

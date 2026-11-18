@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.6"
+version: "1.1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "5c0f944"
+input-hash: "48601a8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows (SL:888-936)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: joiner sourced from statusline.subagent.joiner (ADV-P4-C04); parse/emit notes re-anchored to pyfmt.Decode + ordered pyfmt.Value, never encoding-json (ADV-P4-C03)", "1.1.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C13) — killed row relabelled: explicit statusline.subagent.glyphs.killed map entry, not the glyph fallback (SL:845-846 vs SL:894)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C04/C05) — PC4 rewrote the id echo as the decoded value re-serialized by pyfmt Dumps (raw tokens do not survive; float-id vector added; SL:924 dump runs under the measured per-site budget, see BC-5.02.006); PC3 corrected: ASCII controls, \" and \\ are escaped, the ESC inside an SGR sequence included", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: joiner sourced from statusline.subagent.joiner (ADV-P4-C04); parse/emit notes re-anchored to pyfmt.Decode + ordered pyfmt.Value, never encoding-json (ADV-P4-C03)", "1.1.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C13) — killed row relabelled: explicit statusline.subagent.glyphs.killed map entry, not the glyph fallback (SL:845-846 vs SL:894)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C04/C05) — PC4 rewrote the id echo as the decoded value re-serialized by pyfmt Dumps (raw tokens do not survive; float-id vector added; SL:924 dump runs under the measured per-site budget, see BC-5.02.006); PC3 corrected: ASCII controls, \" and \\ are escaped, the ESC inside an SGR sequence included", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.7 2026-11-19T20:00:00Z: pass-7 remediation (ADV-P7-C02/C14, OD-190) — PC3 escape list completed with the CPython short escapes \\b and \\f (orchestrator-verified json.dumps emissions; ADV-P7-C02); vector-row prose pseudo-escape replaced with the em dash (ADV-P7-C14); PC5 states OD-190 LF-on-every-OS with the Windows oracle normalization declared beside PYTHONIOENCODING=utf-8"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,8 +55,10 @@ before a single print, so a render fault never leaves partial rows on stdout.
    on the wire as a `\uXXXX` escape (ESC→`\u001b`, U+00BB→`\u00bb`, U+00B7→`\u00b7`,
    U+25E8→`\u25e8`, U+2714→`\u2714`, U+2718→`\u2718`, U+00E9→`\u00e9`, lone surrogate→`\ud800`);
    ASCII **printable** characters pass through unescaped; ASCII **control** characters are escaped
-   (ESC — including the ESC that opens an SGR sequence — as `\u001b`, plus short escapes `\n`, `\t`,
-   `\r` and `\uXXXX` for the rest, e.g. BEL→`\u0007`), as are `\"` and `\\`
+   (ESC — including the ESC that opens an SGR sequence — as `\u001b`, plus short escapes `\b`, `\f`,
+   `\n`, `\t`, `\r` and `\uXXXX` for the rest, e.g. BEL→`\u0007`; ADV-P7-C02: CPython's `ensure_ascii`
+   encoder emits `\b` (0x08) and `\f` (0x0C) as short escapes, so a name holding a backspace or form
+   feed goes on the wire as `\b`/`\f`, never `\u0008`/`\u000c`), as are `\"` and `\\`
    (ADV-P6-C05: an SGR sequence is NOT exempt — its ESC and any inner quotes/backslashes are escaped
    like any other character).
 4. The `id` is the **decoded value re-serialized by `pyfmt` `Dumps`** (ADV-P6-C04; SL:924
@@ -67,7 +69,9 @@ before a single print, so a render fault never leaves partial rows on stdout.
    `/opt/homebrew/anaconda3/bin/python3 -I` 3.11.7); it is not coerced to string before dumping. The
    dump runs under the per-site encoder recursion budget measured for the SL:924 site — measured
    budget, see BC-5.02.006.
-5. Lines are LF-terminated; the last line carries the terminating LF (print semantics).
+5. Lines are LF-terminated on every OS (OD-190: UTF-8 + LF everywhere; the Windows parity oracle's
+   CRLF-to-LF normalization is declared beside its `PYTHONIOENCODING=utf-8` variable, not hidden in
+   the shim); the last line carries the terminating LF (print semantics).
 6. Zero eligible tasks: zero bytes, exit 0.
 7. Between content bits the joiner is the configured `statusline.subagent.joiner` (D15; Text key
    registered in the BC-2.01.004 registry, free text with no control bytes, BC-2.01.003 PC-3), whose
@@ -103,7 +107,7 @@ before a single print, so a render fault never leaves partial rows on stdout.
 | `{"tasks":[]}` | zero bytes, exit 0 | happy-path |
 | `{"tasks":[{"id":"a9","name":"a\ud800b","status":"completed"}]}` | one line: `{"id": "a9", "content": "\u001b[32m\u2714 a\ud800b\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}`, exit 0 | edge-case |
 | `{"tasks":[{"id":["x"],"name":"n","status":"completed"}]}` | one line: `{"id": ["x"], "content": "\u001b[32m\u2714 n\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}` (id array echoed from its decoded value), exit 0 | edge-case |
-| `{"tasks":[{"id": 1.50, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": 1E2, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": "A", "name":"n","status":"completed"}]}` (ADV-P6-C04) | one line each: `{"id": 1.5, ...}`, `{"id": 100.0, ...}`, `{"id": "A", ...}` \u2014 decoded value re-serialized, not the raw token (oracle-verified 2026-11-18) | edge-case |
+| `{"tasks":[{"id": 1.50, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": 1E2, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": "A", "name":"n","status":"completed"}]}` (ADV-P6-C04) | one line each: `{"id": 1.5, ...}`, `{"id": 100.0, ...}`, `{"id": "A", ...}` — decoded value re-serialized, not the raw token (oracle-verified 2026-11-18) | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`, legacy module imported and exercised; goldens
 re-derived escaped after the adv-p3 C01 escape-decoding incident): rows 1, 2, 4, 5 byte-reproduced;

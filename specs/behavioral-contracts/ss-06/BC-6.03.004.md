@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T16:00:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "6deff33"
+input-hash: "274da00"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,8 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.7): sync-check adv-p5 closure (SC-19/SC-20) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - "2026-11-19T03:30:00Z (1.2.8): ADV-P6 remediation OD-181 + D14 + D24 — closed set = TWELVE ids (OD-181 'metrics transport beyond plain http' added with its own scope row); D4-EX-3 row states TestD4EX3_Text is a Go table test only backing no parity entry (Text keys have no legacy analog, same no-legacy-equivalent rule as Theme); EC-006 'defaulting' wording aligned with the required scope key (ADV-P5-D20)"
   - "2026-11-19T16:00:00Z (1.2.9): sync-check adv-p6 closure (SC-27) — the dipping 1.2.3 stamp re-dated ascending and respelled to the sibling version-leading form; no behavioral change"
+  - "2026-11-19T17:00:00Z (1.3.0): ADV-P7 remediation D15 - PC-3's Number-value enumeration is the exhaustive union of the BC-2.02.002/BC-2.02.003 exclusion lists: the formerly unstated float-accepted values 2_0, ٢, -inf, 99999999999999999999 (int64 overflow) and 9223372036.854776 (Duration ceiling) now render-and-write on the oracle leg under the standard two-legged asymmetry"
+  - "2026-11-19T19:00:00Z (1.3.1): pass-7 residual remediation — cp-x03's dedicated table test named TestCPX03_WriteFailureExit0 (OD-145 provisional name settled; ADV-P7-B09; VP-003, VP-012 and BC-1.01.001 EC-005 agree); OD-159 rider citation corrected from BC-1.03.001 PC-3 (the stat-race postcondition, which never mentions OD-159) to its real home BC-1.02.004 TestGitTextReads_OD159_StrictUTF8, the closure-validated riding test (VP-012's OD-159 row corrected to match); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -96,8 +98,8 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    | `OD-30` | OD-30, OD-110 | numeric sid: one string-form cost-history key | BC-1.05.006, BC-1.05.009 |
    | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails) | BC-3.02.002 |
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
-   | `cp-x03` | OD-136 | degraded-line write itself fails (stdout closed); Go swallows the error and exits 0 where legacy CP-X03 exits 1 | BC-1.01.001 EC-005 (dedicated table test, name provisional — architect (OD-145)) |
-   | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01; rider: BC-1.03.001 PC-3 directional test, ADV-P3-D19) |
+   | `cp-x03` | OD-136 | degraded-line write itself fails (stdout closed); Go swallows the error and exits 0 where legacy CP-X03 exits 1 | BC-1.01.001 EC-005 (dedicated table test `TestCPX03_WriteFailureExit0` — the OD-145 provisional name settled; ADV-P7-B09) |
+   | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01; rider: BC-1.02.004 riding table test `TestGitTextReads_OD159_StrictUTF8` — the deviation's defining UTF-8-read contract, ADV-P3-D19) |
    | `OD-160` | OD-160 | foreign-cache shapes in the cache directories | stories owning the cache-store verbs (SS-01; riders: BC-1.02.017 EC-010, BC-1.01.008 EC-011 directional tests, ADV-P3-D19) |
    | `OD-161` | OD-161 | integer `transcript_path` → no transcript | stories owning the stdin path-field verbs (SS-01; rider: BC-1.03.015 PC-3 directional test, ADV-P3-D19) |
    | `OD-166` | OD-169 | cost-history bytes written after a refresh whose `usd` or `api_ms` could not convert to float (nothing else) | BC-1.05.004 (dedicated table test; VP-012 closure row per OD-169) |
@@ -141,11 +143,17 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    at import (SL:74 `TTL = float(...)` / SL:75 `ROWS = int(...)`; CP-X01/X02: exit 1,
    empty stdout), so the oracle leg pins exactly that — exit 1, zero stdout bytes, empty
    cache listing — while the Go leg pins the config-error line via the expected file.
-   The float-accepted Number values (`nan`, `inf`, `-1`, `1e400`, `4_0` and non-ASCII
-   digits such as `٤`) parse at SL:74: legacy renders normally and writes its caches
+   The float-accepted Number values (`nan`, `inf`, `-inf`, `-1`, `1e400`, `4_0`, `2_0`,
+   non-ASCII digits such as `٤` and `٢`, and the range-miss values `99999999999999999999`
+   (int64 overflow) and `9223372036.854776` (Duration ceiling) — all accepted by legacy
+   `float()`/`int()`, so legacy renders and writes its caches for every one of them)
+   parse at SL:74/75: legacy renders normally and writes its caches
    (corrected per value, ADV-P5-D04 / owner call 12; the BC's own canonical
    `config/ttl-nan` case previously pinned a crash real legacy does not perform). For
-   those values the standard two-legged asymmetry applies. The Boolean, Enum and URL
+   those values the standard two-legged asymmetry applies, and the enumeration here is
+   the exhaustive union of the BC-2.02.002 and BC-2.02.003 exclusion lists (pass-7 D15:
+   `2_0`, `٢`, the two range-miss values and `-inf` were formerly unstated). The
+   Boolean, Enum and URL
    classes — and the float-accepted Number values — use the two-legged asymmetry; PC-3
    of the class contracts names them exhaustively.
    The Go side asserts the EMPTY-listing invariant of BC-2.02.001 PC-6 ("Go writes no

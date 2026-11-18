@@ -228,3 +228,56 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   against the statement.
 
 **Closes:** D-448(b) codified (exhaustive non-normative-VP-sketches-labelled strand)
+
+## L-PG-23 [process-gap] — Diff each fix agent's file set on disk; re-dispatch the remainder
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-7 burst) A fix agent can make
+  a few correct edits and then break down mid-burst — its final report came
+  back garbled partway through, so the report alone could not say which of
+  its assigned edits had landed. Some edits before the breakdown were good;
+  the remainder simply did not happen.
+- **Remedy:** The orchestrator diffs each agent's assigned file set on disk
+  (`git diff --name-only` plus content checks) against the remediation plan
+  and re-dispatches only the unlanded remainder to a fresh agent. The report
+  is never trusted as the record of what happened; the disk is.
+
+**Closes:** D-448(b) codified (exhaustive mid-burst-breakdown-recovery strand)
+
+## L-PG-24 [process-gap] — Parallel fix agents stay inside their assigned file set
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-7 burst) Parallel fix agents
+  edited files outside their assigned set — well-intentioned consistency
+  touches, but they collide with sibling agents working the same files and
+  break the plan's accountability of which call changed what.
+- **Remedy:** Briefs explicitly forbid edits outside the assigned set and
+  require the agent to list out-of-set hits in its report instead of editing
+  them; the orchestrator verifies with `git diff --name-only` against the
+  set and routes any out-of-set finding to the call that owns the file.
+
+**Closes:** D-448(b) codified (exhaustive parallel-dispatch-file-isolation strand)
+
+## L-PG-25 [process-gap] — Validator/sync-check reports use repo-relative paths
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-7 burst; residue from pass 6)
+  Validator and sync-check reports have written absolute home paths into
+  their inputs/provenance text (the pass-6 sync check carried an absolute
+  home path that had to be fixed before commit).
+- **Remedy:** Every report brief requires repo-relative paths everywhere in
+  the report body, frontmatter and tables; the orchestrator scans the diff
+  for the absolute-home pattern and fixes hits before staging the commit.
+
+**Closes:** D-448(b) codified (exhaustive repo-relative-report-paths strand)
+
+## L-PG-26 [process-gap] — Verify the source's citations before ordering an exact copy
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-7 burst) A remediation call
+  ordered an "exact copy of the authoritative source" (pass-7 call 10) and
+  thereby propagated an error already present in the source: the OD-159 rider
+  cited BC-1.03.001 PC-3 instead of BC-1.02.004. Copying faithfully copies
+  defects too.
+- **Remedy:** Before dispatching a copy call, the orchestrator verifies the
+  source's internal citations resolve (IDs and anchors exist and point at the
+  intended content); a citation defect found in the source is fixed at the
+  source, or the call is re-worded, before the copy is dispatched.
+
+**Closes:** D-448(b) codified (exhaustive copy-call-citation-verification strand)

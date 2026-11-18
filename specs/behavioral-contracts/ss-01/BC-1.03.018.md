@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.10"
+version: "1.2.11"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "1994f9f"
+input-hash: "beda395"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1149; raise sites SL:994, 1069, 1072, 1079, 1097, 1099, 1108, 1112, 1143, 1145)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-18T23:00:00Z (v1.2.8): pass-5 remediation — OD-167 drop applied to every transcript-borne overflow skip (CP-O06, CP-O07 and CP-O08; ADV-P5-C01); delete-the-line oracle gains the OD-167 exception (PC4; ADV-P5-C02); pre-raise legacy mutation table corrected for CP-O06/O07 (ADV-P5-C04); overflow vectors timestamped so the drop is observable in `lr`"
   - "2026-11-18T23:45:00Z (v1.2.9): pass-6 remediation (ADV-P6-C01/C10/C17) — Windows MSVC-domain naive-timestamp OSError propagated to Inv3 and the crash-path count (eleventh, OS-dependent degrade leg; BC-5.04.001 PC6); delete-the-line oracle PC4(a) counts each deleted line's terminator (\r\n 2 B, bare \r 1 B), not '+1 for its LF'; CP-T07 mutation column gains the timed user/system closer leg"
   - "2026-11-19T14:00:00Z (v1.2.10): pass-6 residual sweep — closed-set exclusion count restated to twelve ids with OD-181 (ADV-P6-C2-07/08; owner ruling OD-181)"
+  - "2026-11-19T19:00:00Z (v1.2.11): pass-7 residual remediation (call 8/B03) — the eleventh, OS-dependent degrade leg named crash id CP-T09 (Windows MSVC localtime domain OSError on a naive transcript timestamp; CP-T08 retired; register 48 paths, T family 8) in the Description and invariant 3, with a PC3 table row marked as a degrade, not a skip; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,7 +45,9 @@ removal_reason: null
 
 **Approved deviation D4-EX-2** (owner ruling Q-c, 2026-11-14; extended by rulings OD-156 and OD-167, 2026-11-17/18). Legacy has
 ten transcript crash paths, CP-T01..T07 and CP-O06..O08 — plus, on Windows only, an eleventh, OS-dependent
-degrade leg: a naive transcript timestamp outside MSVC `localtime_s`'s domain raises `OSError` out of
+degrade leg — crash id **CP-T09**, the Windows MSVC localtime domain `OSError` on a naive transcript
+timestamp (append-only id; the crash register is 48 paths, the T family 8 — T01..T07 plus T09, CP-T08
+retired): a naive transcript timestamp outside MSVC `localtime_s`'s domain raises `OSError` out of
 `_iso_ts` and degrades the whole line (BC-5.04.001 PC6, ADV-P5-D01/owner call 8; not a W-predicate — legacy
 degrades, hylo reproduces the degrade, see invariant 3):
 a decoded line with a wrong-shaped field raises mid-parse, the refresh degrades, the mix cache is not saved, and the
@@ -95,6 +98,7 @@ transcript-borne overflow skips the offending line AND drops the in-flight turn"
 | CP-O06 | The line's numbers are all JSON numbers, yet a usage-accumulation step raises `OverflowError`: an exact int with \|value\| ≥ 2^1024 − 2^970 (CPython's int→double overflow bound; JSON admits ints up to 4,300 digits, and magnitudes below the bound — DBL_MAX ≈ 1.7976e308 included — convert silently, oracle-verified 2026-11-17) meets a float operand at **any** accumulation site (general rule, ADV-P4-C08: `tin` SL:1108, `c_in` SL:1109, `c_wr` SL:1110, `c_rd` SL:1111, `tout` SL:1112) | SL:1108-1112 | turn step (SL:1069-1087: previous turn closed via `lr = finish(cur, lr)`; opening assistant: `cur` opened for this line's id; continuation: `cur["t1"] = ts`; timed user/system closer: previous closed, `cur` → null), `lu` advanced for timed user lines; `seen_ids.add`/`recent_ids.append` (SL:1102-1103); the sums preceding the failing `+=` in `tin, c_in, c_wr, c_rd, tout` order (at the `tin` site none, at `tout` all four); `rb`/`pp` not reached. **hylo:** skip the line whole **and drop the in-flight turn** (OD-167) — no partial accumulation, `lr`/`lu` unchanged |
 | CP-O07 | Same overflow condition at the **rebuild-check** step (owner BC-1.03.007): SL:1117-1118 in either direction — a float `pp` carried from an earlier counted line meeting a huge exact int `_w` (the canonical leg; its own SL:1108 accumulation is int-only and overflow-free when `tin` is an int), **or a huge exact int `pp` meeting a float `prompt`** (mirror leg, ADV-P4-C08) | SL:1117-1118 | turn step (as CP-O06), `lu` for timed user lines, `seen_ids.add`/`recent_ids.append`, and **all five** accumulations `tin/c_in/c_wr/c_rd/tout` (they precede SL:1117 and succeed); `rb += 1` and `pp = prompt` are not reached. **hylo:** skip the line whole **and drop the in-flight turn** (OD-167) — `rb`/`pp` unchanged, `lr`/`lu` unchanged |
 | CP-O08 | Same overflow condition at the turn-machine steps: SL:994 `stale_factor × out / floor_tps` or SL:996 `out / span` with a huge exact int `out` (lazy: the raise surfaces while processing the **closer** line). **Deviation (ruling OD-167):** hylo skips the closer line **and drops the in-flight turn** (`cur` → null; `lr`, `lu` unchanged), so later lines parse normally — no sticky state (ARCH-03 `#transcript`) | SL:994, 996 | for the lazy `_finish_turn` sites: the closer line's own turn/lu bookkeeping (legacy keeps the bad turn open, so every later closer re-raises inside `finish` and is skipped too: new-id assistant lines, real user prompts and timed system/`compact_boundary` lines stop counting — totals freeze for the rest of the session) |
+| CP-T09 | **Not a W-predicate — degrade leg, not a skip** (legacy degrades; hylo reproduces the degrade, invariant 3): a naive transcript timestamp whose `LocalToUnix` probe leaves MSVC's domain — on or before 1970-01-01, or year 3001 or later, at any of the four conversion probes t, u1, u1−86400, u2 (owner call 8) | `_iso_ts` SL:983-985 (catches `ValueError` only, so the `OSError` escapes; `ErrLocaltimeDomain`) | **not a skip** — the whole line degrades exactly as legacy (BC-5.04.001 PC6); no mutation to suppress and no skip effect to license |
 
 4. **Equivalence oracle:** hylo on transcript T yields the same mix cache and render as legacy on T with the skipped
    lines deleted, except (a) `size`, which equals legacy's plus each deleted line's full consumed span — the line's
@@ -120,8 +124,9 @@ transcript-borne overflow skips the offending line AND drops the in-flight turn"
    (T06− list), unhashable id without usage (T07− no usage), and the CP-T05 shape when `lu` is null (T05− lu none).
 3. On POSIX the status line never degrades on any transcript line content in hylo (DI-008). On Windows a naive
    transcript timestamp whose `LocalToUnix` probe leaves MSVC's domain — on or before 1970-01-01, or year 3001 or
-   later — raises `OSError` out of `_iso_ts` (SL:983-985 catches `ValueError` only) and the whole line **degrades**;
-   hylo reproduces this exactly (BC-5.04.001 PC6, ADV-P5-D01/owner call 8; ADV-P6-C01). CP-S14/S16 (sid / path
+   later — raises `OSError` out of `_iso_ts` (SL:983-985 catches `ValueError` only) and the whole line
+   **degrades** (crash id CP-T09); hylo reproduces this exactly (BC-5.04.001 PC6, ADV-P5-D01/owner call 8;
+   ADV-P6-C01). CP-S14/S16 (sid / path
    types) still degrade on every OS (byte-parity scope).
 
 ## Edge Cases

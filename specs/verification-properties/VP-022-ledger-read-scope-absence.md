@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:40:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-04-data-files.md, architecture/ARCH-09-reserved-boundaries.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "1f28bb5"
+input-hash: "1c178bc"
 traces_to: prd.md
 source_bc: BC-1.04.001
 bcs: [BC-1.04.001, BC-1.01.009]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)", "1.4 2026-11-18T14:40:00Z: ADV-P4 fixes — the AST/imports lint leg gets a tracked owner (the ARCH-08 cicd-setup story that wires the lint job) and a POL-11 positive-coverage assertion (one planted ledger-opening mutant flagged + zero flags on the real tree, asserted in CI) (A2-17); BC-1.01.009 added to bcs: to match the body's partial-coverage claim, enumerated as a prose-only exception in VP-INDEX (A2-11); runStatusline call shape unified (A2-22)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)", "1.4 2026-11-18T14:40:00Z: ADV-P4 fixes — the AST/imports lint leg gets a tracked owner (the ARCH-08 cicd-setup story that wires the lint job) and a POL-11 positive-coverage assertion (one planted ledger-opening mutant flagged + zero flags on the real tree, asserted in CI) (A2-17); BC-1.01.009 added to bcs: to match the body's partial-coverage claim, enumerated as a prose-only exception in VP-INDEX (A2-11); runStatusline call shape unified (A2-22)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-17) — the dangling '(see Propagation note)' pointer removed (the file has no such section; the lint-wiring lag is owned by the ARCH-08 cicd-setup story, named directly); the allowed path set's 'metrics caches' noun corrected — no metrics cache exists, the sample lives in the session cache (ENT-14)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,8 +45,9 @@ Enforcement is by construction (the `Env` seam set) and is verified **non-vacuou
 within an honestly stated seam scope: a
 recording-filesystem test asserts that every file path opened **through the
 `Env.Files` seam** during a full render over
-the fault table belongs to the allowed statusline path set (transcript, session caches,
-mix/git/metrics caches, cost history, git-widget `.git`/`HEAD` reads up the ancestor
+the fault table belongs to the allowed statusline path set (transcript, session caches
+— which hold the metrics sample, ENT-14, there being no metrics cache — mix/git
+caches, cost history, git-widget `.git`/`HEAD` reads up the ancestor
 walk, Linux `/proc` probe reads) and that no opened path matches the D7 ledger
 language. The wrapper does not see a direct `os.Open` inside the package — that
 residual is covered by the compile-time AST/imports lint (leg (c) below), so the
@@ -87,7 +88,7 @@ this label, not a fetch-parity property.
   lint asserting `internal/statusline` and `internal/cost` reference no ledger package
   or file language AND perform no direct `os.Open`/`os.Create` outside the Env seam
   implementation — owned by the ARCH-08 cicd-setup story, which wires the lint job
-  (currently gofmt + vet only; see Propagation note); the leg carries a POL-11
+  (currently gofmt + vet only); the leg carries a POL-11
   positive-coverage assertion: CI plants one ledger-opening mutant fixture and asserts
   the lint flags exactly it, while the real tree flags zero files — 1 planted
   violation flagged per rule + 0 on the real tree, so the lint cannot pass inert

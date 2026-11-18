@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "e1469f0"
+input-hash: "8d8509c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -30,6 +30,7 @@ modified:
   - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - promotion target path restored to the OD-148 corpus root internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
   - "2026-11-19T00:25:00Z (1.2.4) ADV-P5 remediation D10+D30 — Windows skip removed per OD-171/OD-177 (naive-timestamp cases run on all three legs; BC-5.04.001 OSError rule cited); HYLO_PARITY_FUZZSECONDS named as this contract's harness budget with the 0/unset-fails-on-schedule semantics (D30)"
   - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
+  - "1.2.6 2026-11-19T17:00:00Z: ADV-P7 remediation D06 + D16 (orchestrator call 8) - the MSVC OSError rule applies at EVERY MSVC call in the local-to-UTC conversion (probes t, u1, u1-86400, u2), not only range-end extremes; new crash id CP-T09 named (Windows MSVC localtime domain OSError on a naive transcript timestamp; append-only, CP-T08 retired); Tier C out-of-domain list gains the OD-166 huge-int usd/api_ms divergence and the D4-EX-2 transcript-overflow extension; Inv 3 restated: entries are path-keyed, generated cases are covered by the PC-3 domain exclusion plus the rider register"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,13 +78,19 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
    OS-scoped notes (ADV-P3-D25, as amended by ADV-P5-D10): there is NO Windows skip —
    the harness pins `TZ=UTC` for both binaries on every leg (OD-171/OD-177;
    BC-6.02.003 PC-8, BC-5.04.002 Invariant 2), so generated cases with naive
-   timestamps run on all three legs. On Windows the MSVC `localtime_s` OSError range
-   rule of BC-5.04.001 PC-6 applies to range-end probes (before 1970-01-01 / from
-   year 3001); present-day generated `now` values never enter it. The OD-159/160/161
+   timestamps run on all three legs. On Windows the MSVC `localtime_s` OSError rule of
+   BC-5.04.001 PC-6 is checked at EVERY MSVC call in the local-to-UTC conversion — the
+   probes `t`, `u1`, `u1 - 86400` and `u2` (call 8, pass 7; crash id CP-T09: a naive
+   transcript timestamp on or before 1970-01-01, or from year 3001, degrades wherever
+   its probe leaves the domain) — so the hole is not limited to extreme range-end
+   probes; generated present-day values never enter it, and CP-T09's directional leg
+   is the committed rider test, not a generated case. The OD-159/160/161
    foreign-shape classes are out of the generator's domain (their
    shapes are seeded by the dedicated directional tests, BC-6.03.004 riders).
    Inputs whose difference is owner-ruled are out of the generator's domain: D4-EX-2
-   wrong-shape lines, D4-EX-3 out-of-domain settings, OD-30 numeric sids, and
+   wrong-shape lines and the D4-EX-2 transcript-overflow extension (pass-7 D16), the
+   OD-166 huge-int `usd`/`api_ms` cost-history divergence, D4-EX-3 out-of-domain
+   settings, OD-30 numeric sids, and
    D4-EX-1/OD-76 process probing (`proc_start` is always seeded). IN domain since
    OD-155 (ADV-P3-D04/D25): the `--subagent` invocation family — generated cases
    exercise `main_subagent` with agent-panel stdin shapes, run under the same
@@ -120,8 +127,13 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
 1. Tier C uses the same oracle runner, env builder, clock shim and comparator as
    Tier A. There is no separate, looser comparison.
 2. Generated inputs never include real data.
-3. The exclusion list (BC-6.03.004) still applies if a generated case happens to hit a
-   listed case shape. Otherwise every difference counts as a divergence.
+3. Exclusion machinery (BC-6.03.004): exclusion entries are keyed by COMMITTED case
+   path, so a generated case never carries one and no path-keyed entry can match a
+   generated case. Instead, the owner-ruled difference shapes stay OUT of the
+   generator's domain by construction (the PC-3 list), and every closed-set id is
+   backed by a dedicated directional rider test (BC-6.03.004) — that rider register,
+   not the path-keyed list, is what covers generated shapes. Any difference in a
+   generated case outside the ruled shapes counts as a divergence.
 
 ## Edge Cases
 

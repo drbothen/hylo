@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-19T17:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -13,7 +13,7 @@ inputs:
   - domain-spec/ubiquitous-language.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "af0ed3c"
+input-hash: "eb3c998"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445, 902-903)"
@@ -28,6 +28,7 @@ modified:
   - "2026-11-18T23:00:00Z (1.2.3): ADV-P4 remediation D27 — second LOCAL_MODEL_PREFIXES read site SL:902-903 cited; BC-1.07.006 consumer listed"
   - "2026-11-19T01:00:00Z (1.2.4) ADV-P5 remediation D31 — cardinality counts distinct REPRESENTED indices (a set HYLO_BACKENDS_0_* no longer double-counts); [from] tie-break redefined as the lexicographically smallest FIELD, defined for non-P1 fields"
   - "2026-11-19T04:30:00Z (1.2.5) ADV-P6 remediation D04 — VP-016 row restated: the backends-cardinality reason rides the closed SEVEN-class register (OD-178); no eighth class"
+  - "2026-11-19T17:45:00Z: ADV-P7 remediation D10+D25 - Pre-2 defines <FIELD> well-formedness (non-empty ASCII uppercase/digit/underscore; HYLO_BACKENDS_1 and HYLO_BACKENDS_1_ are unknown settings, no index; Windows case-fold applies, POSIX byte-exact); PC-4 pins the cardinality error's ordering (structural, after every registry-key error) and <value> provenance (synthesized count, escape grammar shared)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,8 +52,15 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 
 1. Resolution per BC-2.01.001 (P1: `HYLO_*` env + defaults).
 2. Env names for array entries follow `EnvName` (BC-2.01.004): `HYLO_BACKENDS_<i>_<FIELD>`,
-   with `<i>` a decimal index without leading zeros. P1 names:
-   `HYLO_BACKENDS_0_METRICS_URL`, `HYLO_BACKENDS_0_MODEL_PREFIXES`.
+   with `<i>` a decimal index without leading zeros and `<FIELD>` WELL-FORMED when it is
+   non-empty and consists only of ASCII uppercase letters, digits and underscores
+   (pass-7 D25). `HYLO_BACKENDS_1` (no `_FIELD` run) and `HYLO_BACKENDS_1_` (empty
+   `<FIELD>`) are NOT backend-entry variables: each warns as an unknown setting
+   (BC-2.01.001 PC-6) and establishes no index. On Windows the OS case-fold applies to
+   the whole name (BC-2.01.001 PC-6 seam), so a lowercase
+   `hylo_backends_1_metrics_url` IS the well-formed variable; on POSIX the match is
+   byte-exact and a lowercase spelling is not a `HYLO_*` variable at all (silent). P1
+   fields: `METRICS_URL`, `MODEL_PREFIXES`.
 
 ## Postconditions
 
@@ -81,7 +89,17 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
    variable that is that variable's own name (e.g. `HYLO_BACKENDS_1_METRICS_URL`) (spec
    choice pinning BC-2.03.001 EC-005, ADV-P1-D12). Example:
    `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11:8428` →
-   `hylo: config error: backends=2 (exactly one backend entry until P6)`. A variable
+   `hylo: config error: backends=2 (exactly one backend entry until P6)`. ORDERING AND
+   VALUE PROVENANCE (pass-7 D10): the backends cardinality error is STRUCTURAL — it is
+   synthesized after per-key validation has run, so it appears in the reported error
+   list AFTER every registry-key error; when any registry key failed, the first
+   registry-order error (BC-2.02.001 PC-1) wins and the cardinality error is reported
+   only on stderr (PC-6 of BC-2.02.001), with e.g. `HYLO_STATUSLINE_ROWS=x` beating
+   `HYLO_BACKENDS_1_METRICS_URL` for the stdout line. Its `<value>` is the synthesized
+   decimal count, not a raw supplied string — `<key>`/`<value>` rendering and the
+   control-byte/invalid-UTF-8 ESCAPE grammar of BC-2.02.001 PC-3 still apply to it; the
+   PC-3 "raw string as supplied" phrasing describes registry keys, which the
+   cardinality error is not. A variable
    `HYLO_BACKENDS_<i>_<FIELD>` whose `<FIELD>` is not a P1 key warns as an unknown setting
    for every index, `0` included (same discipline as PC-5). The two effects are
    independent and BOTH apply (ADV-P2-D10 disposition): a non-P1 field on a non-zero

@@ -1,10 +1,10 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T08:15:29Z
+timestamp: 2026-11-18T10:05:25Z
 phase: 1a
 inputs:
   - CLAUDE.md
@@ -85,8 +85,10 @@ Notes:
   every exclusion carries its own table tests (OD-105, OD-110, OD-169, OD-181). Rationale: D4 — parity is
   the definition of done for P1–P3.
 - Speed: a labeled JUDGMENT CALL (target ≈3× faster; a static binary removes interpreter
-  start). CI reports per-OS timing, but the target binds only on the owner's Mac. If the
-  >512 KB-line fixture misses the target, the spec states that exception explicitly.
+  start). CI reports per-OS timing, but the target binds only on the owner's Mac. The one
+  exception is stated here and in the spec: the >512 KB-line fixture is exempt from the
+  25 ms p95 target, but its p95 must stay under 100 ms (OD-191; 4× the target, well under
+  the refresh interval).
 - Cutover: "0 rollbacks" is a labeled judgment call; PLAN P5 keeps the Python prototype
   runnable for 2 weeks as the rollback path.
 - What P1 success means: byte parity on the owner's real recorded inputs plus the synthetic

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T08:30:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "02cd4f8"
+input-hash: "b360e38"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -28,6 +28,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04+D26: oracle argv allows --subagent for the subagent corpus family (OD-155 supersedes OD-14); Architecture Module anchor corrected to internal/parity"
   - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D09 — case.json argv minted as the HANDLER-RELATIVE list (after the verb), default [], P1 validator admits [] and [\"--subagent\"] only (design call 9); PC-5/VP-034 aligned"
   - "2026-11-19T03:00:00Z (1.2.3): ADV-P6 remediation D16/OD-185 — PC-4 extended: resolved oracle patch recorded AND measured constants self-checked before the first case (committed probe measures decode/dumps/dump boundaries 994/994/995 and unicodedata.unidata_version 14.0.0; fail closed printing the resolved version); the 3.11.x floating pin stands (OD-185 withdraws the pass-5 exact-3.11.7 call)"
+  - "2026-11-19T08:30:00Z (1.2.4): ADV-P7 remediation D04 (orchestrator call 7) — PC-4 self-check probe redefined as the ONE end-to-end definition: the probe drives the real oracle (case argv, temp HOME/cwd) and asserts the laws' own constants at the pinned sites — stdin decode 993 accepted/994 rejected, session-cache save (json.dump, s=4) 991 writes/992 skips, subagent wire (json.dumps, s=3) 991 renders — replacing the inconsistent helper-scope triple (994/994/995); values measured this burst (CPython 3.11.7, unidata_version 14.0.0); VP-006 and ARCH-07 to copy"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,25 +73,43 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
    under the child environment of BC-6.01.002. Stdout must match
    `^CPython 3 11 [0-9]+\n$`. Anything else, including a non-zero exit, fails the run with
    the observed string in the message.
-4. **Resolved patch recorded, measured constants self-checked (OD-185).** The patch
-   number from step 3 (e.g. `3.11.7`) is written into the Tier B golden metadata when
-   goldens are regenerated (BC-6.03.001; design risk RK-4). It is also printed once per
-   Tier A run. Because the measured constants pinned in this spec set (the JSON depth
-   laws of BC-5.02.003/BC-5.02.006 and the OD-170 Unicode 14.0 tables) were taken on
-   CPython 3.11.7 while CI installs the latest 3.11.x patch (OD-104, OD-185), the
-   harness then self-checks the resolved oracle before the first case: a committed
-   probe (one helper function at script scope, run as `<value> -s <probe.py>`,
-   constructing nested lists) measures the resolved interpreter's module-adjacent
-   boundaries — decode 994, `json.dumps` 994, `json.dump` 995 — and prints
-   `unicodedata.unidata_version` (pinned `14.0.0`). Any mismatch fails the run closed,
-   printing the resolved version string; a reviewed spec amendment re-pins the
-   constants when a future 3.11.x patch shifts an internal boundary.
+4. **Resolved patch recorded, measured constants self-checked (OD-185; pass-7 D04).**
+   The patch number from step 3 (e.g. `3.11.7`) is written into the Tier B golden
+   metadata when goldens are regenerated (BC-6.03.001; design risk RK-4). It is also
+   printed once per Tier A run. Because the measured constants pinned in this spec set
+   (the JSON depth laws of BC-5.02.003/BC-5.02.006 and the OD-170 Unicode 14.0 tables)
+   were taken on CPython 3.11.7 while CI installs the latest 3.11.x patch (OD-104,
+   OD-185), the harness then self-checks the resolved oracle before the first case.
+   ONE definition (pass-7 orchestrator call 7): the committed probe drives the REAL
+   oracle END TO END — the same argv as every case (PC-5), an isolated temp HOME and
+   cwd, deep stdin serialized by concatenation — and asserts the pinned constants at
+   the pinned sites, not helper-scope surrogates:
+   - **stdin decode** (BC-5.02.003 law, `F = 6`): a `--subagent` stdin document of
+     total nesting 993 renders its task row (accepted); 994 renders zero rows
+     (rejected).
+   - **session-cache save** (BC-5.02.006 `json.dump` law, `s = 4`): a `rate_limits`
+     chain whose saved document nests 991 writes the `"rl"` member; 992 skips the deep
+     write (the later flat save still persists the file, so the observer is the
+     `"rl"` member, not the file's existence).
+   - **subagent wire** (BC-5.02.006 `json.dumps` law, `s = 3`): an id chain of 990
+     (wire object 991, stdin document 993) renders its row — the attainable boundary;
+     the next chain overruns the stdin decoder first (document 994 → zero rows).
+   The probe also prints `unicodedata.unidata_version` (pinned `14.0.0`). Any mismatch
+   fails the run closed, printing the resolved version string; a reviewed spec
+   amendment re-pins the constants when a future 3.11.x patch shifts an internal
+   boundary. Measured under this method (pass-7 D04, CPython 3.11.7, default
+   recursion limit 1000): decode 993 accepted / 994 rejected, save 991 writes / 992
+   skips, wire 991 renders, `unidata_version` `14.0.0` — identical to the laws'
+   constants, as the one definition requires. VP-006 and ARCH-07 state these same
+   constants.
 5. **Exact argv for every oracle refresh:**
    `[<value>, "-s", <abs>/legacy/dgx_statusline.py]` followed by the case's
    **handler-relative argv** — the `argv` field of `case.json`, which lists arguments AFTER
    the `statusline` verb and defaults to `[]` (orchestrator design call 9, ADV-P4-D09; the
-   P1 corpus validator admits only `[]` and `["--subagent"]`, the latter for the `-sub`
-   family per OD-155 which supersedes OD-14, exercising the `main_subagent` path, SL:1240,
+   P1 corpus validator admits only `[]` and `["--subagent"]`, the latter for the
+   `subagent` case-id family of ARCH-07's grammar `<family>-<nnn>[-<variant>]` (the
+   older "-sub" shorthand denotes the same family, pass-7 D14) per OD-155 which
+   supersedes OD-14, exercising the `main_subagent` path, SL:1240,
    exactly as the Go side does). No other interpreter flags, no `-X` options; the oracle
    never receives the verb itself, and any other argv shape is Go-table-test territory
    (BC-4.01.002), never parity.

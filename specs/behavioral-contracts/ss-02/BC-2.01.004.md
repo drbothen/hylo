@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T01:30:00Z
+timestamp: 2026-11-19T17:30:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "50dde61"
+input-hash: "f6f73c3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-19T01:30:00Z (1.2.5) pass-5 residual sweep A — glyph-registry consumer cites corrected to the verified renderers and unified with interface-definitions.md (telemetry_dot BC-1.04.005, colour coupled to BC-1.04.004; degraded BC-1.04.004; box_rate BC-1.04.008; sess_rate BC-1.04.018, value from BC-1.03.010; cache_hit adds BC-1.02.008; cell_on/off add BC-1.04.015; ttft adds BC-1.04.019; idle adds BC-1.04.017; cost_pick adds BC-1.05.003); member names, defaults and code points unchanged"
   - "2026-11-19T02:00:00Z (1.2.6): sync-check adv-p5 closure (SC-16) — the four call-16 range keys registered in PC-10 (statusline.transcript.read_cap_bytes, statusline.transcript.dedup_memory, statusline.sparkline.history_cap, statusline.cost.burn_min_api_ms) and the Preconditions-1 amendment sentence extended through call 16, type/default/range per interface-definitions.md; no behavioral change"
   - "2026-11-19T04:15:00Z (1.3.0): ADV-P6 remediation D02+D03+D23+OD-186 — glyph column rule restated per OD-184: every statusline.glyphs.*/subagent.glyphs.* member is exactly 1 code point measured in legacy's render width, sparkline = exactly 8 ordered code points; the EAW validation width no longer applies to glyph members (it keeps the pill-label 1..16 bound), so the W-class watts default ⚡ (U+26A1) is in range; PC-9 scope note with the 中文-measures-4 grounding; reroute-all anchor corrected to SL:487-488 (markers tuple; SL:489 is the rl reset); PC-11 mints statusline.cache.rename_retry_delay_ms (Int, default 10, range 1..1000, J; consumer BC-6.03.003)"
+  - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09+D13+D18+D21+OD-188+OD-189 — PC-1 NumberList may declare a fixed length (scale = array of 4 numbers, D09); PC-9 validation-width scope tightened to the pill-label bound only (D21); PC-6 lane row cites SL:906-907 for the subagent tag (D18); PC-8 states the two registry ascending-pair checks with both reason strings (D02); PC-11 adds statusline.cache.rename_retry_limit (Int, default 2, range 0..10, J; attempts = 1 + limit) and retargets the PRODUCT consumer to BC-1.06.001 (D13, OD-188); PC-12 mints statusline.labels.vllm_down / lmcache_down / statusline.subagent.name_fallback (Text, OD-189; dead-backend word reuses pill.label_local)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,7 +72,9 @@ incomplete, whose default fails its own validation, or whose env name collides.
      `^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*|\[[0-9]+\])*$` (CV-19).
    - `Type`: one of `Seconds, Int, Float, Bool, Enum, URL, List, Path, SGR, Text`; the
      composite numeric types `FloatPair` (Float pair), `FloatTriple` (Float triple),
-     `IntMap` (Int map), `RGBTriplesFloat` (RGB triples + Float) and `NumberList` (any list
+     `FloatQuad` (Float quadruple — sole member `statusline.sparkline.scale`, declared
+     shape `array of 4 numbers`; type named pass-7 D09), `IntMap` (Int map),
+     `RGBTriplesFloat` (RGB triples + Float) and `NumberList` (any list
      of numbers) are additional registry types whose env grammar is strict JSON of the
      declared shape (BC-2.01.005 PC-5, ADV-P4-D19).
    - `Range`: the valid domain stated explicitly (e.g. ttl_s: finite, `>= 0`,
@@ -129,7 +132,7 @@ incomplete, whose default fails its own validation, or whose env name collides.
    | `statusline.glyphs.tokens_down` | `↓` (U+2193) | BC-1.02.018 |
    | `statusline.glyphs.cache_rebuild` | `↻` (U+21BB; SL:598-599 — renamed from `stale`, ADV-P5-B04/call 2: the glyph means cache rebuilds; not shipped, so no alias) | BC-1.02.018 |
    | `statusline.glyphs.cache_hit` | `♻` (U+267B; SL:479) | BC-1.02.008, BC-1.02.023 |
-   | `statusline.glyphs.lane` | `◨` (U+25E8; the main pill marker AND the subagent-tag marker, SL:447-449/SL:902-903) | BC-1.02.001, BC-1.07.006 |
+   | `statusline.glyphs.lane` | `◨` (U+25E8; the main pill marker, SL:447-449, AND the subagent-tag marker, SL:906-907 — the pass-6 text cited the SL:902-903 prefix read; pass-7 D18) | BC-1.02.001, BC-1.07.006 |
    | `statusline.glyphs.git` | `⎇` (U+2387; SL:413) | BC-1.02.005 |
    | `statusline.glyphs.cell_on` | `▰` (U+25B0; filled cell) | BC-1.02.006, BC-1.04.007, BC-1.04.015 |
    | `statusline.glyphs.cell_off` | `▱` (U+25B1; empty cell) | BC-1.02.006, BC-1.04.007, BC-1.04.015 |
@@ -175,15 +178,23 @@ incomplete, whose default fails its own validation, or whose env name collides.
    `statusline.queue.yellow`; env `HYLO_STATUSLINE_SPARKLINE_PREEMPT_MARKER_ABOVE`).
    The `k_from`/`m_from` values are display thresholds only — the divisors 1e3/1e6 are
    format constants that define the K/M units, not config (why-not-config comment
-   required at the call site).
+   required at the call site). **Cross-key pair checks (registry-declared; reason
+   strings of BC-2.02.001):** the registry declares two ASCENDING pairs —
+   `statusline.subagent.tokens.k_from <= statusline.subagent.tokens.m_from` and
+   `statusline.cost.percentiles` member `p75 <= p95` — and carries their violation
+   reason strings: a descending `subagent.tokens` pair yields
+   `ascending pair violated (k_from <= m_from)`; a descending `cost.percentiles` pair
+   yields its OWN string `ascending pair violated (p75 <= p95)` (pass-7 D02). Each
+   check fires after both keys' single-key range checks pass, at the SECOND key's
+   validation (pass-6 A19), naming that key with its own value.
 
 9. **Pass-5 additions (ADV-P5-B03/C03/A18/D14/D15, orchestrator calls 1-2, OD-179):**
    - **Reroute-all key (OD-179):** the reroute-all markers become the List key
      `statusline.lane.reroute_all_prefixes` (default `["claude", "claude-"]`, markers
      tuple legacy SL:487-488; SL:489 is the `rl = {}` reset the markers feed,
      ADV-P6-D23), range: every entry non-empty and control-free; it is never a hard-coded
-     literal in logic. Consumer: BC-1.02.011 (reroute-all hiding, with BC-1.02.009's
-     provenance).
+     literal in logic. Consumer: BC-1.02.009 (PC1 — reroute-all hiding; pass-7 ADV-P7-B05:
+     BC-1.02.011 is the pace/absolute-bands contract, not this key's consumer).
    - **Derived members:** the PC-6 table above is the complete enumeration of the
      behavior-shaping glyph roles legacy prints; every literal printed glyph is a
      member. Punctuation and format characters (`·`, `°`, `¢`, `->`) are format
@@ -197,9 +208,11 @@ incomplete, whose default fails its own validation, or whose env name collides.
      widths). The OD-170 generated-table set grows the East-Asian-Width table
      (coordination: ARCH-06 adds the width class to its OD-170 table list).
      Punctuation-or-format characters are not widths; the width function is total over
-     valid UTF-8 input. Scope (OD-184): this validation width is consulted ONLY for the
-     registry ranges that state a display width — the pill-label 1..16 bound (OD-173)
-     and the general Text ranges of BC-2.01.005 PC-6 — never for glyph-family
+     valid UTF-8 input. Scope (OD-184, tightened pass-7 D21): this validation width is
+     consulted ONLY for the registry range that states a display width — the pill-label
+     1..16 bound (OD-173). The general Text ranges of BC-2.01.005 PC-6 state NO display
+     width (non-empty, control-free, code-point counts for glyphs) and do not consult
+     it; never for glyph-family
      validation, which counts code points (PC-6). Grounding: under this function
      `中文` measures 4 (both code points EAW W), and the watts default ⚡ measures 2
      while remaining a valid 1-code-point glyph (ADV-P6-D02, ADV-P6-D17).
@@ -225,14 +238,30 @@ incomplete, whose default fails its own validation, or whose env name collides.
      C2-08/call 16; RationaleCode `Dv`, T-043); consumer BC-1.05.002; env
      `HYLO_STATUSLINE_COST_BURN_MIN_API_MS`.
 
-11. **Windows rename-retry delay (OD-186, ADV-P6 remediation):** the registry carries
+11. **Windows rename-retry keys (OD-186 + OD-188, ADV-P6/P7 remediations):** the
+   registry carries
    `statusline.cache.rename_retry_delay_ms` — `Int (ms)`, default `10`, range `1..1000`
    (labeled judgment call: long enough to let a concurrent Windows reader close its
    handle, far below any perceptible refresh latency; RationaleCode `J`). Millisecond
-   delay between rename-retry attempts in the cache Save path after a sharing violation
-   (attempt count stated once — three attempts total, initial attempt + two retries — in
-   BC-6.03.003, ARCH-04 and VP-018); consumer BC-6.03.003; env
-   `HYLO_STATUSLINE_CACHE_RENAME_RETRY_DELAY_MS`.
+   delay between rename-retry attempts in the cache Save path after a sharing violation.
+   Beside it (OD-188, pass-7): `statusline.cache.rename_retry_limit` — `Int`, default
+   `2`, range `0..10` (labeled judgment call; RationaleCode `J`; env
+   `HYLO_STATUSLINE_CACHE_RENAME_RETRY_LIMIT`) — bounding the retries, so the attempt
+   count is 1 + limit (three attempts at the default: the initial attempt plus two
+   retries — the one number BC-6.03.003, ARCH-04 and VP-018 state). PRODUCT consumer:
+   BC-1.06.001 (the product cache-store Save path — the Windows retry behavior is
+   product logic, pass-7 D13); BC-6.03.003 is the harness-side cleanup rider.
+   Envs `HYLO_STATUSLINE_CACHE_RENAME_RETRY_DELAY_MS` (and `_LIMIT`).
+
+12. **Dead-backend and name-fallback label keys (OD-189, pass-7; sources C2-07, C11):**
+   the registry carries three new `Text` keys, range non-empty, no control bytes
+   (mirroring BC-2.01.005 PC-6's general Text range):
+   `statusline.labels.vllm_down` (default `vLLM down`, env
+   `HYLO_STATUSLINE_LABELS_VLLM_DOWN`), `statusline.labels.lmcache_down` (default
+   `LMCache down`, env `HYLO_STATUSLINE_LABELS_LMCACHE_DOWN`) and
+   `statusline.subagent.name_fallback` (default `?`, env
+   `HYLO_STATUSLINE_SUBAGENT_NAME_FALLBACK`). The dead-backend marker WORD reuses
+   `statusline.pill.label_local` (OD-173) — no fourth key is minted for it.
 
 ## Invariants
 

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-19T17:30:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "121a7ff"
+input-hash: "ad596a8"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy-accepted TTL values at legacy/dgx_statusline.py SL:74, SL:324)"
@@ -27,6 +27,7 @@ modified:
   - "1.2.1 2026-11-18: ADV-P4 remediation A03 — per-key exception: statusline.git.ttl_s admits any finite value, negative = never fresh (legacy SL:409); TestD4EX3_Name rename (D22)"
   - "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
   - "2026-11-19T00:50:00Z (1.2.3) ADV-P5 remediation D11 (A14 sibling) — git.ttl_s bounded by the mirrored Duration floor -9223372036.854775 (values below yield out of range), Inv 1 restated to the symmetric span, VP property row corrected to the per-key exception, EC-011 added"
+  - "2026-11-19T17:30:00Z (1.2.4): ADV-P7 remediation D11 — H1 admits the git.ttl_s negative exception (postcondition PC-2 already did); BC-INDEX and PRD title columns synced"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,7 +36,7 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-2.02.002: Number-range class: non-finite/negative durations are config errors; TTL 0 stays valid
+# Behavioral Contract BC-2.02.002: Number-range class: non-finite/negative durations are config errors, except the git.ttl_s negative exception; TTL 0 stays valid
 
 ## Description
 

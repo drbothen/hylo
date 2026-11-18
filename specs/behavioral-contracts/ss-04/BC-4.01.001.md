@@ -1,17 +1,17 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.2"
+version: "1.1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-19T17:45:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - docs/RESUME.md
-input-hash: "e487064"
+input-hash: "98fb45d"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy entry point legacy/dgx_statusline.py SL:1238-1245 is the statusline-only analogue)"
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout", "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - PC-3 notes config path's flag ownership (--config[=]<value>; a bare --config is a flag error, exit 2, this contract's golden usage surface)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,7 +58,9 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
    `--subagent`, SL:1240).
 2. `args[0] == "version"` → BC-4.01.003.
 3. `args[0] == "config"` and `args[1] == "validate"` → BC-2.03.001; `args[1] == "path"` →
-   BC-2.03.002.
+   BC-2.03.002 (which also owns the `--config[=]<value>` flag spellings; a bare
+   `--config` with no value is a flag error on THIS contract's golden usage surface,
+   exit 2 — pass-7 D27).
 4. `args` empty, or `args[0]` not one of the above (including `config` alone or
    `config <other>`): usage text on stderr, exit 2. Usage bytes are pinned by the golden
    `cmd/hylo/testdata/usage.golden`, which lists the four P1 command forms.

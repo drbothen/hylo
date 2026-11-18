@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.001.md, behavioral-contracts/ss-01/BC-1.05.002.md, behavioral-contracts/ss-01/BC-1.05.003.md, behavioral-contracts/ss-01/BC-1.05.005.md, behavioral-contracts/ss-01/BC-1.05.007.md, behavioral-contracts/ss-01/BC-1.05.008.md]
-input-hash: "8a7b92e"
+input-hash: "0ead974"
 traces_to: prd.md
 source_bc: BC-1.05.008
 bcs: [BC-1.05.001, BC-1.05.002, BC-1.05.003, BC-1.05.005, BC-1.05.007, BC-1.05.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))"]
+modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))", "1.4 2026-11-19T18:00:00Z: pass-7 fix (A2-14) — the quick leg's quantifier is the filtered population (SL:240-262): recorded sid/lane, 30-day window, rates length >= COST_MIN_N (= 10), $1 gate on the goldens side; the COST_MIN_N cold-start case (no threshold, no colour) is pinned as a table leg, so a correct implementation no longer false-fails on arbitrary-length rates"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,7 +38,12 @@ Across the 21 canonical seeded sessions (12 s-seeded + 8 g-seeded + `sess-self`,
 per BC-1.05.008): the $ colour derives from the lane percentile
 thresholds exactly (p75/p95 percentiles per the cost_thresholds math), $/h threshold
 colouring, the ⛏ pick inside the $ block, and the $ / $/h number formatting match the
-oracle-pinned goldens byte-for-byte, including colour-band boundary rows.
+oracle-pinned goldens byte-for-byte, including colour-band boundary rows. The
+for-all percentile leg is quantified over the population cost_thresholds actually
+filters (SL:240-262, A2-14): a single recorded sid and lane, the 30-day window,
+rates of length >= COST_MIN_N (= 10; shorter histories are the cold-start case
+returning no threshold — no colour — pinned as a table leg, not a quick leg), and
+the $1 session-minimum gate honoured on the goldens side.
 
 ## Source Contract
 
@@ -94,7 +99,12 @@ func TestCostProps_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
         // A2-12: the thresholds ARE the percentiles of the rates (BC-1.05.005), so
         // the generator produces rates and derives th from them — an independent th
         // would be unconstrained by the percentile assertions.
-        rates := genFiniteRates(r) // recorded lane rates, FINITE only (BC-1.05.005 qualifier; OD-138 NaN usd rows are pinned table legs)
+        // A2-14: the for-all quantifier is the FILTERED population — recorded sid
+        // and lane, 30-day window, rates length >= COST_MIN_N (= 10); the
+        // cold-start case (len < COST_MIN_N → no threshold, no colour) is a
+        // pinned table leg, not a quick leg, so a correct implementation no
+        // longer false-fails on arbitrary-length rates.
+        rates := genFiniteRatesMinN(r, costMinN) // FINITE only and len >= 10 (BC-1.05.005 qualifier; OD-138 NaN usd rows are pinned table legs)
         args[0] = reflect.ValueOf(derivePercentile(rates, 0.75))
         args[1] = reflect.ValueOf(rates)
     }}

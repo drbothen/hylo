@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "ba8c0ef"
+input-hash: "902314c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -25,6 +25,7 @@ modified:
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.3.2 pass-6 remediation (ADV-P6-B05 + B12): PC2 pin marked POSIX-only with the Windows lone-surrogate outcome spun out as new EC-014 (wide-string stat; Go U+FFFD substitution flagged for a named-deviation ruling, OD-188); detached-HEAD ref[:7] marked a named format constant, not config, with the D15 rationale (Inv 4); 2026-11-19T04:00:00Z"
   - "1.3.3 pass-6 residual sweep (orchestrator call 16): EC-014 resolved with no exclusion — internal/platform encodes WTF-8 path values to UTF-16 itself, keeping lone surrogates as single 16-bit units (no U+FFFD substitution), Windows table test (ARCH-05); deviation-ruling note removed; 2026-11-19T14:00:00Z"
+  - "1.3.4 pass-7 remediation (ADV-P7-B07): the cwd read is stated, not hidden — abspath resolves a relative input directory against cwd (reachable via BC-1.02.003 EC-004) and the empty-string fallback reads it too; both route through Env.Cwd / platform.Abs, and the Purity row drops the 'unreachable fallback' wording; no behavioral change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,9 +48,12 @@ error occurs. It never invokes the git binary.
 ## Preconditions
 
 1. Called with a non-empty directory string (render path: the raw `proj_dir` of
-   BC-1.02.003, only when the git segment is enabled, BC-1.02.005). The legacy
-   `directory or os.getcwd()` fallback (SL:373) is unreachable from rendering; the Go side
-   keeps it behind the `Env.Cwd` seam (design §2.2).
+   BC-1.02.003, only when the git segment is enabled, BC-1.02.005). **Environment input (pass-7 ADV-P7-B07):**
+   `os.path.abspath` (SL:373) resolves any *relative* directory against the process cwd — a reachable input,
+   since BC-1.02.003 EC-004 renders `"."` and `rel/dir` — and the `directory or os.getcwd()` fallback (SL:373)
+   reads cwd for an empty string. Go routes both cwd reads through the `Env.Cwd` seam
+   (`platform.Abs(env.Cwd(), directory)`, design §2.2), so harness results never depend on the real
+   process cwd; the legacy fallback stays unreachable from rendering.
 2. The filesystem is read through the `Env.Files` seam; text decoding is strict UTF-8 on
    every OS as a **named deviation** — exclusion id **OD-159** ("Go reads files as UTF-8 on all
    OSes"): legacy's `open()` has no encoding argument (SL:380-381, 385-386), so on Windows the
@@ -75,7 +79,8 @@ error occurs. It never invokes the git binary.
 ## Postconditions
 
 1. `d = abspath(directory)` (host OS path module; no symlink resolution, no existence
-   check).
+   check) — relative inputs resolve against the seam-provided cwd (PC1; `Env.Cwd` /
+   `platform.Abs`, not the real process environment).
 2. Loop, for each `d` from the start up to the root:
    1. `dotgit = join(d, ".git")`; `gitdir = None`.
    2. If `dotgit` is a directory → `gitdir = dotgit`.
@@ -209,7 +214,7 @@ TBD — branch segment story
 | Property | Assessment |
 |----------|-----------|
 | **I/O operations** | reads only (stat + two small file reads per qualifying level) |
-| **Global state access** | none (cwd only on the unreachable fallback) |
+| **Global state access** | cwd, read by `abspath` for any relative input directory (and by the empty-string fallback) — routed through the `Env.Cwd` seam (PC1; pass-7 ADV-P7-B07) |
 | **Deterministic** | yes for a fixed filesystem |
 | **Thread safety** | n.a. |
 | **Overall classification** | effectful shell |

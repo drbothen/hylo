@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.5"
+version: "1.0.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "f6c4d27"
+input-hash: "a3e067c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ dispatch (SL:1240-1241)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: stale anchor labels refreshed — ARCH-03:137-138 for the subagent.go placement and legacy/claude-dgx:177 for the launcher wiring (ADV-P4-C12)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C11) — stale ARCH-03 line anchors replaced with the stable fragment #subagent (second drift after ADV-P4-C12; call 19)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: stale anchor labels refreshed — ARCH-03:137-138 for the subagent.go placement and legacy/claude-dgx:177 for the launcher wiring (ADV-P4-C12)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C11) — stale ARCH-03 line anchors replaced with the stable fragment #subagent (second drift after ADV-P4-C12; call 19)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.0.6 2026-11-19T19:30:00Z: pass-7 remediation (ADV-P7-C06) — stale BC-4.01.002 cross-references refreshed: its EC-004 no longer carries the superseded \"positional data\" reading (aligned v1.1.3), so EC-003 and Related BCs now state the agreement"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,7 +77,7 @@ not flag parsing, and it precedes every other mode decision.
 |----|-------------|-------------------|
 | EC-001 | `--subagent` given twice | Single routing decision; behavior identical to one occurrence |
 | EC-002 | `--subagent` together with other unknown flags | Still routes to the subagent renderer; unknown flags are not validated in this mode |
-| EC-003 | `--subagent` after a `--` separator (`hylo statusline -- --subagent`) | Routes to the subagent renderer: membership in `argv[1:]` holds at any index (ADV-P3-A01/D05 ruling); BC-4.01.002's "positional data" reading is superseded for this occurrence |
+| EC-003 | `--subagent` after a `--` separator (`hylo statusline -- --subagent`) | Routes to the subagent renderer: membership in `argv[1:]` holds at any index (ADV-P3-A01/D05 ruling); BC-4.01.002's EC-004 states the same routing (aligned, v1.1.3+ — no superseded reading remains) |
 | EC-004 | Launcher wiring | `claude-dgx` launches `hylo statusline --subagent` (legacy/claude-dgx:177 wires the CC `subagentStatusLine` command `--subagent`); the captured CC stdin payload must be verified per ASSUMP-107-1 before Phase 3 |
 | EC-005 | Empty argv (no args at all) | Main render (BC-1.01.001) |
 
@@ -116,7 +116,7 @@ SL:1240-1241 (`"--subagent" in sys.argv[1:]`); routing order from SL:1239-1244.
 - BC-1.07.003 — composes with (stdin ingestion inside the renderer)
 - BC-1.07.004 — composes with (output framing)
 - BC-1.07.008 — related to (faults inside the renderer end in the 29-byte line)
-- BC-4.01.002 — related to (per the ADV-P3-A01/D05 ruling it must defer to membership routing: an occurrence after `--` or beside other flags routes here, superseding its EC-004 "positional data" reading)
+- BC-4.01.002 — related to (its EC-004 defers to this routing by agreement: an occurrence after `--` or beside other flags routes here; the "positional data" reading it once held was aligned away in v1.1.3 — ADV-P7-C06)
 
 ## Architecture Anchors (Recommended)
 

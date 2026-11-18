@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.001.md, behavioral-contracts/ss-02/BC-2.01.004.md, behavioral-contracts/ss-02/BC-2.01.005.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "8a99179"
+input-hash: "b842ad5"
 traces_to: prd.md
 source_bc: BC-2.01.001
 bcs: [BC-2.01.001, BC-2.01.004, BC-2.01.005, BC-2.01.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P2 pass-2 fixes — the totality oracle now asserts the DI-010 substance: generated-invalid values must return a typed Error identifying the offending key (no silent fallback to the default); unknown HYLO_* must warn on stderr with unchanged exit status; DGX_*-only environments must yield the exact default config (A2-08)", "1.2 2026-11-18T09:21:00Z: ADV-P3 fix (A2-25) — multi-invalid determinism pinned: with several invalid values the typed error identifies the FIRST invalid variable in registry order (BC-2.02.001); the generated-invalid assert relies on this", "1.3 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-01, A2-24) — skeletons and statement aligned with the ARCH-02 API: Load returns (*Config, *ErrorSet) and the offending error is taken via the nil-safe First(); the unknown-HYLO_* exit-status invariant is now ASSERTED (validate entrypoint over the same environment, exit 0) with the generator pool excluding known cardinality-flipping names such as HYLO_BACKENDS_1_NAME", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-28: the unknown-setting check reads Load's captured warnings return (ARCH-02 (*Config, []Warning, *ErrorSet)), not a helper on the generated env)"]
+modified: ["1.1 2026-11-17: ADV-P2 pass-2 fixes — the totality oracle now asserts the DI-010 substance: generated-invalid values must return a typed Error identifying the offending key (no silent fallback to the default); unknown HYLO_* must warn on stderr with unchanged exit status; DGX_*-only environments must yield the exact default config (A2-08)", "1.2 2026-11-18T09:21:00Z: ADV-P3 fix (A2-25) — multi-invalid determinism pinned: with several invalid values the typed error identifies the FIRST invalid variable in registry order (BC-2.02.001); the generated-invalid assert relies on this", "1.3 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-01, A2-24) — skeletons and statement aligned with the ARCH-02 API: Load returns (*Config, *ErrorSet) and the offending error is taken via the nil-safe First(); the unknown-HYLO_* exit-status invariant is now ASSERTED (validate entrypoint over the same environment, exit 0) with the generator pool excluding known cardinality-flipping names such as HYLO_BACKENDS_1_NAME", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-28: the unknown-setting check reads Load's captured warnings return (ARCH-02 (*Config, []Warning, *ErrorSet)), not a helper on the generated env)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-16) — Honesty dichotomy respelled to the statement's non-empty typed *ErrorSet (the First()-rendered single error is a projection of the set, not a distinct return shape), removing the single-vs-set wording mismatch"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,7 +73,9 @@ protocol input.
   registry); plus the `legacy_defaults.golden` pin.
 - **Honesty:** the random-sample property asserts the typed-result dichotomy as its
   own oracle — every generated environment terminates in exactly one of {*Config,
-  single typed *Error}, never a crash or silent fallback; no live CPython call exists
+  non-empty typed *ErrorSet}, matching the statement's dichotomy (A2-16; the
+  single typed error rendered via `First()` is the projection of that set, never a
+  distinct return shape), never a crash or silent fallback; no live CPython call exists
   on this surface (equivalence corners are the `legacy_defaults.golden` pin). Totality
   is established empirically (generator breadth) over a pure
   function — provable-grade surface, testable-only artifact; the collision check is the

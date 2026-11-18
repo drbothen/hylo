@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "3ee40d0"
+input-hash: "6775882"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P7"
   - "1.3.2 2026-11-18T04:00:00Z: pass-3 remediation (ADV-P3-B03): VP anchor names VP-040 P7 instead of VP-027"
   - "1.3.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-3 stamp re-dated ascending (it predated the preceding 1.3.1 reconciliation entry); no behavioral change"
+  - "1.3.4 pass-7 remediation (ADV-P7-B01): H1 states the rows == 2 qualifier (negative COLUMNS hides row 2 only when rows == 2; rows >= 3 keeps it untrimmed per PC3/EC-004, SL:1224); no postcondition change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -30,7 +31,7 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-1.01.007: Negative COLUMNS disables trim and hides row 2
+# Behavioral Contract BC-1.01.007: Negative COLUMNS disables trim and hides row 2 only when rows == 2
 
 > Byte notation: `\e` = ESC (0x1B); `\n` = LF.
 
@@ -70,7 +71,8 @@ treats it as follows: trimming is skipped (`cols > 0` is false) and, when `rows 
 ## Canonical Test Vectors
 
 Config: defaults, git disabled, metrics URL at a closed local port, empty cache, stdin `{}`.
-R1 = `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m`; R2 = `\e[31m◌ DGX ?\e[0m`.
+R1 = `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m`; R2 = `\e[31m◌ DGX ?\e[0m` (dead-marker word =
+`statusline.pill.label_local` default per OD-189 reuse of OD-173).
 
 | Input (rows, COLUMNS) | Expected Output | Category |
 |-------|----------------|----------|

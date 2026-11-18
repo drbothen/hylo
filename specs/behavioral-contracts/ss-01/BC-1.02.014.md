@@ -7,7 +7,7 @@ producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "5ecc7b2"
+input-hash: "6ebdaf1"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -130,7 +130,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | fmt equals CPython `_fmt_lines` for ints in [-1e7, 1e8] sampled around thresholds and ties | property test vs CPython goldens |
+| VP-028 | fmt equals CPython `_fmt_lines` for ints in [-1e7, 1e8] sampled around thresholds and ties | property test vs CPython goldens — a bounded golden sweep on an authored fixed sampling grid, staying on VP-028 per the VP-041 scope split (VP-041 takes generator-based for-all legs only) |
 | VP-028 | fmt of strings equals CPython for the BC-5.01.002 grammar corpus | table test |
 
 ## Traceability

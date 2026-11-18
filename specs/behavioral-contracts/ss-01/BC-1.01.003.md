@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "c6cdca4"
+input-hash: "2375ca5"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P1 (catalog lists this BC)"
   - "1.3.2 2026-11-18T04:00:00Z: pass-3 remediation (ADV-P3-B03/B15/B10): VP anchor names VP-040 P1; PC5 source lines corrected (project label is SL:460-462); ARCH-03 anchor normalized to #statusline-width"
   - "1.3.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-3 stamp re-dated ascending (it predated the preceding 1.3.1 reconciliation entry); no behavioral change"
+  - "1.3.4 pass-7 remediation (ADV-P7-B01): H1 and Description state the rows > 2 override (width hides row 2 only when rows == 2; SL:1224); Related-BCs note synced; no postcondition change (PC1 was already correct); 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -30,16 +31,17 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-1.01.003: Rows join with LF; row 2 shown only when width permits
+# Behavioral Contract BC-1.01.003: Rows join with LF; width hides row 2 only when rows == 2
 
 > Byte notation: `\e` = ESC (0x1B); `\n` = LF.
 
 ## Description
 
 The status line output is row 1 (session/lane row) optionally followed by row 2 (backend telemetry strip), joined
-by a single LF and terminated by one trailing LF, written once. Row 2 is included only when the configured row
-count allows it and the terminal width (COLUMNS) is unknown or wide enough. Each row's segments are joined by the
-separator `SEP`.
+by a single LF and terminated by one trailing LF, written once. Row 2 is included when the configured row count
+allows it and the width rule admits it: the width rule hides row 2 only when `rows == 2` and the terminal width
+(COLUMNS) is known and narrower than `narrow_cols` — a `rows > 2` override forces row 2 at any width (SL:1224).
+Each row's segments are joined by the separator `SEP`.
 
 ## Preconditions
 
@@ -87,7 +89,8 @@ operator `>=` keeps row 2 — owner judgment (presentation), catalogue resolutio
 
 Config: defaults, `HYLO_STATUSLINE_GIT_ENABLED=0`, metrics URL pointing at a closed local port, empty cache dir,
 stdin `{}`. R1 = `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m`; R2 = `\e[31m◌ DGX ?\e[0m` (fetch failed, no
-cache; legacy default label text).
+cache; the dead-marker word is `statusline.pill.label_local`'s default per OD-189 reuse of OD-173, the `?` is
+`statusline.pill.label_unknown`'s default; renders shown at legacy defaults).
 
 | Input (rows, COLUMNS) | Expected Output | Category |
 |-------|----------------|----------|
@@ -125,7 +128,7 @@ COLUMNS=72 -> widths [61, 56], 642 bytes (P3r2 §A1; BC-1.01.010).
 
 - BC-1.01.005 — depends on (COLUMNS parse)
 - BC-1.01.006 — composes with (trim after the row decision)
-- BC-1.01.007 — related to (negative COLUMNS hides row 2)
+- BC-1.01.007 — related to (negative COLUMNS hides row 2 only when rows == 2)
 - BC-1.04.013 — related to (fetch runs whenever rows >= 2)
 - BC-2.01.004 — depends on (key registry entries for rows / narrow_cols)
 

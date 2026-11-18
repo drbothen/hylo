@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.02.001.md, behavioral-contracts/ss-02/BC-2.02.002.md, behavioral-contracts/ss-02/BC-2.02.003.md, behavioral-contracts/ss-02/BC-2.02.004.md, behavioral-contracts/ss-02/BC-2.02.005.md, behavioral-contracts/ss-02/BC-2.02.006.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "e0bc085"
+input-hash: "c4e440e"
 traces_to: prd.md
 source_bc: BC-2.02.001
 bcs: [BC-2.01.002, BC-2.01.003, BC-2.01.005, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-2.03.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go", "1.3 2026-11-18: ADV-P4 pass-4 fix (D22) — test names canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}: the Number table covers both number-range and number-grammar rows; no Theme member (theme settings are rejected by the corpus validator, BC-6.02.003 EC-007)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-03, A2-25) — class register is seven with the OD-178 Text class (composite-shape, pill-label, runtime glyph-rule, empty-text; own table TestD4EX3_Text, exact reason strings in the taxonomy vocabulary); BC-2.01.003's two homeless legs carried here: TestTheme_DefaultGolden (SL:127-134 golden table) and TestTheme_SGREscapeFree (quick property over accepted values) — legs, not a D4-EX-3 class table; FirstErrorRegistryOrder expects a PINED literal instead of the function under test, so a consistently wrong order can no longer pass", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-08, A2-03: seven-class count propagated (Proof Method table, feasibility); TestTheme_SGREscapeFree captures the quick.Check error, generates accepted-grammar values, builds expected bytes by append)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go", "1.3 2026-11-18: ADV-P4 pass-4 fix (D22) — test names canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}: the Number table covers both number-range and number-grammar rows; no Theme member (theme settings are rejected by the corpus validator, BC-6.02.003 EC-007)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-03, A2-25) — class register is seven with the OD-178 Text class (composite-shape, pill-label, runtime glyph-rule, empty-text; own table TestD4EX3_Text, exact reason strings in the taxonomy vocabulary); BC-2.01.003's two homeless legs carried here: TestTheme_DefaultGolden (SL:127-134 golden table) and TestTheme_SGREscapeFree (quick property over accepted values) — legs, not a D4-EX-3 class table; FirstErrorRegistryOrder expects a PINED literal instead of the function under test, so a consistently wrong order can no longer pass", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-08, A2-03: seven-class count propagated (Proof Method table, feasibility); TestTheme_SGREscapeFree captures the quick.Check error, generates accepted-grammar values, builds expected bytes by append)", "1.6 2026-11-19T18:00:00Z: pass-7 fix (A2-09) — theme-REJECTION leg added (BC-2.01.003 EC-002/EC-003 and the canonical cyan vector): TestTheme_RejectionLines pins the exact one-line config-error bytes (reason 'not an SGR parameter list', value escaped) for malformed SGR values and ESC-bearing values, closing the route to no VP test; the theme legs remain BC-2.01.003 legs, not a D4-EX-3 class table"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,7 +55,13 @@ for each of these entries are inside the class tables. BC-2.01.003's two legs li
 here: the default-theme-bytes golden (table test) and the ESC-free-SGR property
 (testing/quick over accepted values) — neither is a D4-EX-3 class table (the parity
 corpus validator rejects theme settings, pass-4 D22; that validator governs the
-corpus, not in-tree unit tables). `hylo config validate` exits 1
+corpus, not in-tree unit tables). The theme-REJECTION line is pinned here too
+(A2-09): `TestTheme_RejectionLines` pins the exact one-line E-CFG-001 bytes for
+BC-2.01.003 EC-002 (escaped ESC value `$'\e[31m'`) and EC-003 (present-but-empty),
+reason `not an SGR parameter list`, exit 0, no cache writes — the canonical cyan
+vector's surface, which otherwise routes to no VP test and is uncovered by Tier A
+(the corpus validator rejects theme settings before a case can run).
+`hylo config validate` exits 1
 for the same errors.
 
 ## Source Contract
@@ -79,8 +85,9 @@ for the same errors.
   exact expected bytes; plus a registry-order property test (first-error selection is
   order-stable under permutation of invalid variables, against a PINED expected line);
   plus a no-cache-writes assert
-  (empty temp dir after a config-error run); plus BC-2.01.003's two legs — the
-  default-theme-bytes golden table and the ESC-free-SGR quick property.
+  (empty temp dir after a config-error run); plus BC-2.01.003's three legs — the
+  default-theme-bytes golden table, the ESC-free-SGR quick property, and the
+  theme-rejection line table (A2-09).
 - **Honesty:** testable-only; class closure is a ruling (OD-178 adds the Text class by
   owner decision), enumerated exhaustively because the registry domain is closed.
 
@@ -109,6 +116,15 @@ func TestConfigError_BackendsCardinalityReason(t *testing.T) { runClassTable(t, 
 
 func TestTheme_DefaultGolden(t *testing.T) { // BC-2.01.003 leg, carried here (ADV-P5-A2-03)
     runClassTable(t, themeDefaultBytesRows) // SL:127-134 literals, golden table
+}
+
+func TestTheme_RejectionLines(t *testing.T) { // A2-09: BC-2.01.003 EC-002/EC-003 — the
+    // theme-rejection surface: exact one-line E-CFG-001 bytes for a malformed SGR
+    // value (escaped ESC) and a present-but-empty value, reason
+    // 'not an SGR parameter list', exit 0, no cache writes. The corpus validator
+    // rejects theme settings, so Tier A cannot cover this line — pinning it here
+    // is the only positive coverage the surface has.
+    runClassTable(t, themeRejectionRows)
 }
 
 func TestTheme_SGREscapeFree(t *testing.T) { // BC-2.01.003 leg: any ACCEPTED SGR value

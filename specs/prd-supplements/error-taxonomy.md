@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.10"
+version: "1.11"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T06:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "4093cad"
+input-hash: "fbe1339"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
@@ -16,6 +16,7 @@ modified:
   - "1.8 2026-11-18: pass-5 residual sweep — glyph Text reason string matched byte for byte to the class contract vocabulary (expected exactly 1 code point and 1 display column); no behavioral change"
   - "1.9 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19/SC-20) — history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - "1.10 2026-11-19T06:00:00Z: pass-6 remediation — closed exclusion set extended to twelve ids (OD-181 metrics transport beyond plain http); `control character` reason extended to the Text class for non-theme free-text keys and List entries; new List-entry violation reason string; TestD4EX3_Text is a Go table test only, not a parity exclusion entry (beside the Theme note); E-REN-002 gains the CP-N03 carrier cites; CP-O10 history-bearer trigger narrowed to the SL:255 division only; no behavioral change (ADV-P6-A14/D14/C2-13; OD-181)"
+  - "1.11 2026-11-19T12:00:00Z: pass-7 remediation — glyph reason strings corrected to the OD-184 code-point counts (`expected exactly 1 code point`; sparkline `expected exactly 8 code points`) with the numeric-range reason precedence defined by type (A13/A16/D03, orchestrator call 6); descending `cost.percentiles` pair gets its own ascending-pair reason; CP-T09 minted (Windows MSVC localtime domain OSError on a naive transcript timestamp; CP-T08 retired), register 47 → 48 paths, T family 7 → 8 (call 8/B03); E-REN-002 carrier list completed (CP-N03 owner set BC-1.04.001/.004/.005, A14; CP-O01..O05 and CP-S owners, B11); E-NET-001 gains the KEEP_DEAD dead rung (C2-13); no behavioral change"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -43,12 +44,12 @@ modified:
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05 and CP-O10/O11, and the Surface 3 subagent family CP-A01..A05 (the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.04.001, BC-1.04.005 (CP-N03 carriers; pass-6 C2-13), BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.01.008, BC-1.02.001, BC-1.02.006, BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
 | E-VAL-001 | VAL | broken | 1 | plain reason lines (no SGR), one per error — BC-2.03.001 |
-| E-NET-001 | NET | degraded | 0 | freshness ladder down to the stale suffix — BC-1.04.001/.004 |
+| E-NET-001 | NET | degraded | 0 | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (marker word from `statusline.pill.label_local`, OD-189) — BC-1.04.001/.004, BC-1.04.002 (PC4 dead rung; BC-1.04.020 step 5; pass-7 C2-13) |
 | E-FS-001 | FS | degraded | 0 | never-raise caches; failed replace persists nothing — BC-1.06.001/.002 |
 | E-HAR-001 | HAR | broken | non-zero | harness FAIL naming the reason (canary, missing table test, glob, id outside closed set) — BC-6.01.003, BC-6.03.004 |
 
@@ -80,7 +81,10 @@ checked before E-CFG-001.
 | `non-ASCII digit` | number-grammar | BC-2.02.003 |
 | `not a number` / `not an integer` | number-grammar | BC-2.02.003 |
 | `not finite` / `negative` / `must be > 0` / `out of range` | number-range | BC-2.02.002/.003 |
-| `ascending pair violated (k_from <= m_from)` | number-range (cross-key pair check, fired at `m_from`'s validation; pass-6 A19) | BC-2.01.004 |
+| `ascending pair violated (k_from <= m_from)` | number-range (cross-key pair check, fired at `m_from`'s validation; pass-6 A19) | BC-2.01.004 pair rule |
+| `ascending pair violated (p75 <= p95)` | number-range (cross-key pair check for `statusline.cost.percentiles`, fired at the second member `p95`'s validation, same fire-at rule as the `m_from` check; pass-7 A13/D02, call 6 — cost.percentiles' OWN reason, the k_from string is not reused) | BC-2.01.004 pair rule (widget owner BC-1.05.005) |
+| `expected exactly 1 code point` | Text (glyph family and `statusline.subagent.glyphs.*` runtime values; the enforced rule is the OD-184 code-point count measured in legacy's render width — there is NO display-column check under OD-184; pass-7 A16/call 6) | BC-2.01.005, BC-2.01.004 |
+| `expected exactly 8 code points` | Text (sole member `statusline.glyphs.sparkline`, the U+2581..U+2588 ramp; OD-02/OD-184; pass-7 A16/call 6) | BC-2.01.005, BC-2.01.004 |
 | `not a boolean (true\|false\|1\|0\|yes\|no)` | boolean | BC-2.01.005 |
 | `unknown value (<v1>\|<v2>\|...)` | enum | BC-2.02.004 |
 | `scheme must be http or https` / `not a URL` / `missing host` | URL | BC-2.02.005 |
@@ -90,9 +94,30 @@ checked before E-CFG-001.
 | `expected JSON <shape>` (`<shape>` = e.g. `array of 2 numbers`, `object {cc,other} of integers`) | Text (composite shape; OD-178) | BC-2.01.005 |
 | `expected non-empty control-free text of display width 1..16` | Text (pill labels; OD-178) | BC-2.01.005 |
 | `expected non-empty control-free text` | Text (generic non-empty Text keys: `window_age.process_name`, `subagent.tokens.suffix`, `labels.input`, ...; OD-178) | BC-2.01.005 |
-| `expected exactly 1 code point and 1 display column` | Text (glyph family and `statusline.subagent.glyphs.*` runtime values; OD-178) | BC-2.01.005, BC-2.01.004 |
 | `empty path` / `home directory unknown` | path (BC-2.01.005 grammar; no dedicated class contract) | BC-2.01.005 |
 | `exactly one backend entry until P6` | backends (BC-2.01.002 cardinality rule; no dedicated class contract) | BC-2.01.002 |
+
+Numeric-range reason precedence by type (pass-7 D03/call 6; the four strings above are the
+entire number-range vocabulary — no new string exists): the BC-2.02.002 check order is the
+precedence, and the first applicable string wins. **Seconds keys** (BC-2.02.002 checks 1-3):
+NaN/±Inf → `not finite`; value < 0 → `negative` (except the `git.ttl_s` exception, which
+skips the check); value beyond the Duration ceiling or the `git.ttl_s` mirrored floor →
+`out of range`. **Float keys** (BC-2.02.003 PC-5 registry-range check; the BC-2.02.002 order is the
+precedence): non-finite parse →
+`not finite`; value < 0 against a range whose floor is 0 or higher (`>= 0` or `> 0`) →
+`negative`; breach of any other registered bound (below a positive minimum, above a
+maximum) → `out of range`; value == 0 against a `> 0` range → `must be > 0`
+(the last two swap only in which bound the value misses — a negative never reaches the
+`must be > 0` check).
+**Int keys** (BC-2.02.003 PC-5): the number-grammar class already rejects non-integer
+parses (`not a number` / `not an integer`), so an Int never fires `not finite`; a value
+below a registered `>= 0` floor → `negative`; every other registered-bound breach
+(inclusive-exclusive bounds, e.g. `kv.cells = 0` against `1..100`) → `out of range`.
+**Composite keys** (members checked member by member in declared order; the first failing
+member produces the line): each member fires its own type's string — a non-finite member →
+`not finite`, a member outside its per-member bound → `out of range` (or `must be > 0` for
+an exclusive-positive member bound, e.g. a `scale` member at 0); the pair checks above are
+the only cross-key number-range cases.
 
 Reconciliation with the closed register: the seven closed classes (OD-114 four + OD-134 +
 OD-140 + Text by OD-178) are the classes with dedicated class contracts and D4-EX-3
@@ -231,9 +256,11 @@ owner-decisions-log-2026-11-14.md:144): foreign-form cached values are out of by
 scope under the named exclusion id **OD-160**; vectors relying on hand-edited/foreign
 caches are Go table tests, **not byte-parity** (on caches Go authored itself these shapes
 are unreachable — the Go writer emits legacy's exact format). The family is catalogued
-below in the same register shape as the other surfaces. **It lies outside the 47-path
+below in the same register shape as the other surfaces. **It lies outside the 48-path
 crash register**, which counts the X/S/T/N/O/A families only (CP-X01..X04, CP-S01..S17,
-CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4 + 17 + 7 + 3 + 11 + 5 = 47); the
+CP-T01..T07 + T09, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4 + 17 + 8 + 3 + 11 + 5 = 48;
+the T family counts 8 live ids — **CP-T08 is a RETIRED id** (withdrawn; the id is never
+reused, per append-only numbering — pass-7 call 8/B03); the
 C register is a separate, ninth register. **CP-C06 and CP-C07 are reserved**: minted by
 the OD-160 closed-set label "CP-C01..C10" but not cited by any live BC or VP.
 
@@ -261,7 +288,11 @@ widget fallback (Surface 2 transcript triggers resolve to the D4-EX-2 skip disci
 CP-O06..O08 and to the legacy no-write save for CP-O09 — BC-1.03.006 PC5 — the save-time
 difference being the `temp-file` exclusion, not a cache-byte divergence; pass-5 A21);
 the per-trigger disposition lives in the owning BC (CP-S01..S17 in BC-1.02.x /
-BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-N01/N02 in BC-1.04.x, CP-N03 — the metrics-borne
+BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-T09 — the Windows MSVC localtime domain OSError
+on a naive transcript timestamp (CP-T08 retired; every MSVC probe t, u1, u1 − 86400, u2
+is domain-checked, so a naive wall time on or before 1970-01-01 and from year 3001
+degrades the whole line) — in BC-5.04.001/ARCH-06, listed by BC-1.01.009 step 2 and
+BC-1.01.001 PC3 (pass-7 call 8/B03), CP-N01/N02 in BC-1.04.x, CP-N03 — the metrics-borne
 degrade: a numeric `__name__` key precedes every `vllm:` key in dict insertion order and
 `k.startswith` raises AttributeError, SL:717 — in BC-1.04.x per the pass-4 design call 17,
 CP-O01..O11 per the OD-156

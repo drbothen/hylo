@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.15"
+version: "1.18"
 status: draft
 producer: architect
-timestamp: 2026-11-19T16:00:00Z
+timestamp: 2026-11-19T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f8b1b0b"
+input-hash: "608935e"
 traces_to: prd.md
 source_bc: BC-6.03.004
-bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.05.005, BC-1.05.006, BC-1.06.001]
+bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.06.001, BC-1.02.017]
 module: internal/parity
 proof_method: mutation-test (fail-closed catalogue)
 feasibility: feasible
@@ -35,6 +35,9 @@ modified:
   - "1.13 2026-11-19T12:00:00Z: pass-6 fixes (OD-181, A2-10, A2-22, C06: closed set becomes TWELVE ids with OD-181 (metrics transport beyond plain http) and its closure row; LoadExclusions resolves from the module root; the D4-EX-1 family glob respelled to the concrete member per delegation; history reordered ascending; the D4-EX-2 rider attribution names the CP-O06..O08 vector carriers)"
   - "1.14 2026-11-19T14:00:00Z: pass-6 residual sweep — bcs: gains BC-1.03.006/.007/.010, whose owned CP-O06..O08 vector rows state they ride this closure check (reciprocity preferred over exception-listing, SC-13/SC-14 convention; ADV-P6-C06 reciprocal)"
   - "1.15 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-21) — bcs: gains BC-1.06.001, whose PC-1 note states the exclusion entry and its riding table test are validated by this closure check; Source Contract names the row; the dipping 1.4 stamp re-dated ascending (SC-27); no closed-set membership or test-name change"
+  - "1.16 2026-11-19T18:00:00Z: pass-7 fixes (A2-02/A2-03/A2-04 + C2-03/C05 reciprocity, orchestrator call 10) — rider attributions copied EXACTLY from the BC-6.03.004 register: OD-159 rider respelled to BC-1.03.001 PC-3 (directional test), OD-160 riders respelled to BC-1.02.017 EC-010 and BC-1.01.008 EC-011 (directional tests; BC-1.05.004 keeps the dedicated test), OD-30 gains BC-1.05.009, temp-file returns to the register's single riding test TestCacheStore_TempFile_CleanupOnFailedReplace (BC-1.06.002's OD-110 test remains that contract's own product test, not a second rider); cp-x03's OD-145 provisional name settled here as TestCPX03_WriteFailureExit0; closure check additionally verifies a rider test exists for EVERY closed id independent of entries (OD-181; TestD4EX3_Text) and guards a non-empty mutant catalogue; bcs: gains BC-1.04.001 (OD-181 rider carrier) and BC-1.04.002 (OD-160-tagged EC-008 citation carrier), map rows reciprocated in VP-INDEX"
+  - "1.17 2026-11-19T19:00:00Z: pass-7 residual remediation — OD-159 register-rider citation corrected to its real home BC-1.02.004 TestGitTextReads_OD159_StrictUTF8 in the map row and mutant-catalogue note (the formerly cited BC-1.03.001 PC-3 is the stat-race postcondition and never mentions OD-159; BC-6.03.004 register corrected to match); cp-x03 provisional-note sync recorded as done; no behavioural change"
+  - "1.18 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — bcs: gains BC-1.02.017, whose Inv 3 names this VP's concrete OD-160 rider test TestWindowAge_D4EX1_Windows_AncestorFound (ADV-P7-B15; reciprocity preferred over exception-listing, SC-13/SC-14 convention); no closed-set membership or test-name change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,35 +68,55 @@ not convert to float — hylo's record guard skips the record where legacy persi
 raw int — and nothing else. OD-181's scope (2026-11-18) is metrics transport beyond
 plain http: non-http(s) redirect targets (hylo serves no sample) and TLS trust-store
 differences for https (hylo uses the OS trust store); parity cases use plain http
-only, and table tests pin hylo's transport behaviour (BC-1.04.001).
+only, and table tests pin hylo's transport behaviour (BC-1.04.001). The closure
+check is rider-complete: besides walking the entries, it verifies that EVERY
+closed-set id's canonical rider test exists in its declared package — whether or
+not any parity case currently carries that id — so deleting
+`TestMetricsClient_OD181_TransportTable` (OD-181, whose parity cases are plain
+http only) or `TestD4EX3_Text` (D4-EX-3's Go-table-test-only member, which backs
+no parity entry) reds the check. The mutation leg guards a NON-EMPTY mutant
+catalogue: an empty catalogue fails the leg instead of passing while checking
+nothing.
 
 ## Source Contract
 
 - **Primary BC:** BC-6.03.004 — Exclusion-list machinery: per-case entries, expected
   files, table tests, no globs.
 - **Partial coverage:** BC-6.03.003 (temp-file carve-out from cache comparison only),
-  and the exclusion-riding contracts — one named table test per closed-set id:
-  BC-3.02.001 (D4-EX-1, `TestWindowAge_D4EX1_Windows_AncestorFound`), BC-1.03.018/.019/.020
-  (D4-EX-2, concrete member `TestMixCache_OD32_WrongShapeTables` in VP-013; the
-  CP-O06..O08 vector rows of that table live in BC-1.03.006/.007/.010 — C06, delivered
-  by the same VP-013 table), BC-2.02.001..006 (D4-EX-3,
-  `TestD4EX3_{Boolean,Enum,URL,Number,Text}` — Text added by OD-178 (2026-11-18); no Theme
-  member: theme settings are rejected by the corpus validator, owner design call 13),
-  BC-3.02.002 (OD-76, `TestWindowStart_OD76_NativeProbeDiffTable`), BC-1.06.002 (temp-file, distinct
-  case: `TestCacheStore_OD110_TempCleanup`), BC-1.06.001 (temp-file-parity carrier; its
-  PC-1 note states the exclusion entry and its riding table test are validated by this
-  closure check — SC-21 reciprocity, same citation class as BC-1.04.003/BC-1.05.005),
-  BC-1.05.006 (OD-30,
-  `TestCostHistory_OD30_NumericSidStringKey`), BC-1.01.001 (cp-x03,
-  `TestCPX03_WriteFailureExit0`, cf. VP-003), BC-1.02.004 (OD-159 — Go reads files as
-  UTF-8 on all OSes; the defining contract for the deviation,
-  `TestGitTextReads_OD159_StrictUTF8`), BC-1.05.004 (OD-160 foreign-cache shapes,
-  `TestForeignCacheShape_OD160_Vectors`; OD-166 record guard,
-  `TestCostHistory_OD166_RecordGuard`, defined in VP-020), BC-1.04.003 and
-  BC-1.05.005 (OD-160 tagged on their EC-008/EC-009 and EC-010/EC-011
-  foreign-cache/history crash-shape error columns; their Verification Properties
-  tables cite this closure check — ADV-P5-C2-17; no riding test of their own
-  beyond BC-1.05.004's), BC-1.03.015 (OD-161, `TestTranscriptPath_OD161_IntMeansNoTranscript`).
+  and the exclusion-riding contracts — rider attributions COPIED EXACTLY from the
+  BC-6.03.004 register (Preconditions 3; authoritative per orchestrator call 10):
+  BC-3.02.001 (D4-EX-1; register family `TestWindowAge_D4EX1_Windows*` — the concrete
+  member is fixed here per that contract's delegation:
+  `TestWindowAge_D4EX1_Windows_AncestorFound`), BC-1.03.018/.019/.020 (D4-EX-2; 21
+  BC-SL-099 rows + BC-SL-100/103 rows; concrete member `TestMixCache_OD32_WrongShapeTables`
+  in VP-013, whose CP-O06..O08 vector rows live in BC-1.03.006/.007/.010), BC-2.02.001..006
+  (D4-EX-3, `TestD4EX3_{Number,Boolean,URL,Enum,Text}` + `config validate`; no Theme
+  member — theme settings are rejected by the corpus validator; by the same
+  no-legacy-equivalent rule `TestD4EX3_Text` is a GO TABLE TEST ONLY backing no parity
+  entry, ADV-P6-D14), BC-1.05.006 and BC-1.05.009 (OD-30,
+  `TestCostHistory_OD30_NumericSidStringKey`), BC-3.02.002 (OD-76,
+  `TestWindowStart_OD76_NativeProbeDiffTable`), BC-6.03.003 (temp-file,
+  `TestCacheStore_TempFile_CleanupOnFailedReplace` — the register's ONE riding test;
+  BC-1.06.002's `TestCacheStore_OD110_TempCleanup` remains that contract's own OD-110
+  product test and its citation of this check, not a second rider), BC-1.01.001 EC-005
+  (cp-x03, dedicated table test; the OD-145 provisional name is settled here, in VP-003
+  and BC-1.01.001's VP row as `TestCPX03_WriteFailureExit0` — the register's "name
+  provisional" note synced pass-7 residual), the stories owning the file-reading verbs
+  (OD-159; register rider: BC-1.02.004 riding table test
+  `TestGitTextReads_OD159_StrictUTF8` — the deviation's defining UTF-8-read contract;
+  pass-7 residual correction — the formerly cited BC-1.03.001 PC-3 is the stat-race
+  postcondition and never mentions OD-159), the
+  stories owning the cache-store verbs (OD-160; register riders: BC-1.02.017 EC-010 and
+  BC-1.01.008 EC-011 directional tests; dedicated test `TestForeignCacheShape_OD160_Vectors`
+  in BC-1.05.004), the stories owning the stdin path-field verbs (OD-161; register
+  rider: BC-1.03.015 PC-3 directional test, `TestTranscriptPath_OD161_IntMeansNoTranscript`),
+  BC-1.05.004 (OD-166, `TestCostHistory_OD166_RecordGuard`, defined in VP-020), and
+  BC-1.04.001 (OD-181, dedicated table tests → `TestMetricsClient_OD181_TransportTable`,
+  defined in VP-030). Citation carriers (their Verification Properties tables cite this
+  closure check; no riding test of their own): BC-1.04.003 and BC-1.05.005 (OD-160-tagged
+  foreign-cache/history crash-shape error columns, ADV-P5-C2-17), BC-1.04.002 (OD-160 tag
+  on EC-008), and BC-1.06.001 (temp-file-parity carrier; its PC-1 note states the
+  exclusion entry and its riding table test are validated by this closure check — SC-21).
 - **Invariant verified:** DI-012 (no blanket exclusions; every exclusion carries its
   own table tests); OD-105/OD-110; AD-09 (machinery fails closed).
 
@@ -113,13 +136,14 @@ only, and table tests pin hylo's transport behaviour (BC-1.04.001).
   empirical (parsed-structure assertions over mutants), not a theorem-prover artifact.
   The oracle is the finite mutant structure itself: membership in the closed twelve-id
   set, case-id non-emptiness and uniqueness, and one-table-test
-  correspondence per entry — no live oracle call exists or is needed.
+  correspondence per entry plus rider completeness for every closed id (entries or
+  none) — no live oracle call exists or is needed.
 
 ## Proof Method
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Closure test over the committed file | `go test ./internal/parity -run TestParityExclusions_ClosedSet` | yes — finite parsed structure | every entry, happy path |
+| Closure test over the committed file | `go test ./internal/parity -run TestParityExclusions_ClosedSet` | yes — finite parsed structure | every entry + every closed id's rider test |
 | Mutation property test | `go test ./internal/parity -run TestParityExclusions_MutationFailClosed` | yes — finite mutant catalogue | every violation mode driven through the production checker |
 
 ## Proof Harness Skeleton
@@ -149,11 +173,25 @@ func TestParityExclusions_ClosedSet(t *testing.T) {
     if len(seen) == 0 { // POL-11 (A2-06): an empty/mis-pathed load must not pass green
         t.Fatal("zero exclusion entries loaded — mis-pathed corpus passes nothing")
     }
-    t.Logf("%d exclusion entries validated", len(seen))
+    // A2-04 (call 10): rider existence for EVERY closed id, independent of the
+    // entries — the register's (id → package, table_test) mapping from
+    // BC-6.03.004 Preconditions 3. Deleting a riding test reds the check even
+    // with zero entries for that id (OD-181's TestMetricsClient_OD181_
+    // TransportTable; D4-EX-3's TestD4EX3_Text, which backs no parity entry).
+    for id, rider := range RiderRegister() { // from the BC-6.03.004 register
+        if !TableTestExistsIn(rider.Package, rider.Test) {
+            t.Fatalf("closed id %s: rider test %s missing from %s", id, rider.Test, rider.Package)
+        }
+    }
+    t.Logf("%d exclusion entries validated, %d rider tests present", len(seen), len(RiderRegister()))
 }
 
 func TestParityExclusions_MutationFailClosed(t *testing.T) { // A2-09
-    for _, m := range MutateExclusionsFile(validExclusionsFixture()) {
+    mutants := MutateExclusionsFile(validExclusionsFixture())
+    if len(mutants) == 0 { // A2-04: an empty catalogue checks nothing — fail, not pass
+        t.Fatal("empty mutant catalogue — mutation leg validates nothing")
+    }
+    for _, m := range mutants {
         // m is a mutated exclusion file; the production checker (not a
         // test-local copy) must reject it with the matching named reason.
         err := ProductionExclusionChecker(m.File) // same path Tier A uses
@@ -171,27 +209,37 @@ func TestParityExclusions_MutationFailClosed(t *testing.T) { // A2-09
 
 `TestParityExclusions_ClosedSet` and `TestParityExclusions_MutationFailClosed`
 (ARCH-07). Riding table tests named by ruling (one canonical concrete name per
-closed-set entry, A2-14; names as fixed by the rider BCs and the BC-6.03.004 register —
-where a register spells a family abbreviation (`*`), the concrete member is fixed
-here or in the defining VP):
+closed-set id, A2-14; names COPIED from the BC-6.03.004 register — authoritative
+per orchestrator call 10 — which spells a family abbreviation (`*`) for D4-EX-1
+and delegates a provisional name (OD-145) for cp-x03; the concrete members are
+fixed here or in the defining VP):
 `TestWindowAge_D4EX1_Windows_AncestorFound` (BC-3.02.001 — the concrete member of
-the formerly abbreviated family, fixed here per that contract's delegation; the fake
-`ProcStarter` returns a start so `⌂` can show, EC-008; the BC-body glob respelling is
-owed there), `TestMixCache_OD32_WrongShapeTables`
+the register's `TestWindowAge_D4EX1_Windows*` family, fixed here per that
+contract's delegation; the fake `ProcStarter` returns a start so `⌂` can show,
+EC-008; the BC-body glob respelling is owed there), `TestMixCache_OD32_WrongShapeTables`
 (BC-1.03.018/019/020; defined in VP-013), `TestD4EX3_{Number,Boolean,URL,Enum,Text}`
 (BC-2.02.001..006 + the OD-178 Text class member; the pass-4 no-Theme-member note
 stands for theme settings, which the corpus validator rejects),
 `TestWindowStart_OD76_NativeProbeDiffTable` (BC-3.02.002 — the concrete member of
 the formerly abbreviated family, fixed here per that contract's delegation;
 ADV-P5-A2-17),
-`TestCostHistory_OD30_NumericSidStringKey` (BC-1.05.006);
-temp-file carries two ENTRIES, each with its own concrete test (BC-6.03.003's
-`TestCacheStore_TempFile_CleanupOnFailedReplace` and BC-1.06.002's
-`TestCacheStore_OD110_TempCleanup` — one canonical concrete name per ENTRY; the id
-admits distinct cases, ADV-P5-A2-17),
+`TestCostHistory_OD30_NumericSidStringKey` (register contracts BC-1.05.006 and
+BC-1.05.009);
+temp-file carries the register's ONE riding test, BC-6.03.003's
+`TestCacheStore_TempFile_CleanupOnFailedReplace` (BC-1.06.002's
+`TestCacheStore_OD110_TempCleanup` remains that contract's own OD-110 product
+test and its citation of this check, not a second rider — register copied
+exactly, A2-03),
 `TestCPX03_WriteFailureExit0`
-(BC-1.01.001; defined in VP-003), `TestGitTextReads_OD159_StrictUTF8` (BC-1.02.004),
-`TestForeignCacheShape_OD160_Vectors` (BC-1.05.004),
+(BC-1.01.001 EC-005; defined in VP-003 — the OD-145 provisional name settled
+here, in VP-003 and the BC's VP row; the register and EC-005 "provisional"
+notes synced pass-7 residual), `TestGitTextReads_OD159_StrictUTF8` (BC-1.02.004, the
+defining UTF-8-read contract and the register's OD-159 rider — pass-7 residual
+correction; the formerly cited BC-1.03.001 PC-3 is the stat-race postcondition
+and never mentions OD-159),
+`TestForeignCacheShape_OD160_Vectors` (BC-1.05.004, dedicated test; the
+register's OD-160 riders are BC-1.02.017 EC-010 and BC-1.01.008 EC-011's
+directional tests),
 `TestCostHistory_OD166_RecordGuard` (BC-1.05.004; defined in VP-020),
 `TestTranscriptPath_OD161_IntMeansNoTranscript` (BC-1.03.015),
 `TestMetricsClient_OD181_TransportTable` (BC-1.04.001; defined in VP-030 — the plain-http

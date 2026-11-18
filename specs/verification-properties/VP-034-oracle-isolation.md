@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.01.001.md, behavioral-contracts/ss-06/BC-6.01.002.md, behavioral-contracts/ss-06/BC-6.01.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "ec43647"
+input-hash: "ef0d8ec"
 traces_to: prd.md
 source_bc: BC-6.01.001
 bcs: [BC-6.01.001, BC-6.01.002, BC-6.01.003]
@@ -19,7 +19,8 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — per-OS child env: Windows TEMP/TMP + PYTHONUTF8/PYTHONIOENCODING pins; no literal temp paths (A2-17)", "1.3 2026-11-18T09:02:00Z: ADV-P3 fixes (A2-04) — Windows child env additionally pins USERPROFILE (and HOMEDRIVE/HOMEPATH) to the parity roots so ntpath.expanduser resolves caches inside the sandbox (CPython 3.8+ ntpath.expanduser reads USERPROFILE, ignores HOME), and preserves SYSTEMROOT (socket initialization); catalog note added: BC-1.01.004 → VP-034 is a stale pairing (A2-13)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-07, A02, D02) — child env asserted as the EXACT BC-6.01.002 allowlisted key set against a seeded forbidden parent; every PYTHON* variable except PYTHONPATH absent (PYTHONUTF8/PYTHONIOENCODING pins removed — stdio encoding comes from the shim UTF-8 reconfigure); TZ pinned to the case zone (UTC in parity, OD-177); Windows SYSTEMROOT looked up case-insensitively; new TestFrozenClock_Float64EndToEnd asserts the frozen instant is a float64 end to end — never round-tripped through time.Time nanoseconds (plan call 7, D02) on an ulp-spanning instant grid", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-06, OD-183: per-OS allowlists so the exact-set assert cannot red a correct windows-2025 run; the OD-183 Windows row PYTHONIOENCODING=utf-8 (stdio only, PYTHONUTF8 still forbidden) with the changes-stdio-only table-test pin)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — per-OS child env: Windows TEMP/TMP + PYTHONUTF8/PYTHONIOENCODING pins; no literal temp paths (A2-17)", "1.3 2026-11-18T09:02:00Z: ADV-P3 fixes (A2-04) — Windows child env additionally pins USERPROFILE (and HOMEDRIVE/HOMEPATH) to the parity roots so ntpath.expanduser resolves caches inside the sandbox (CPython 3.8+ ntpath.expanduser reads USERPROFILE, ignores HOME), and preserves SYSTEMROOT (socket initialization); catalog note added: BC-1.01.004 → VP-034 is a stale pairing (A2-13)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-07, A02, D02) — child env asserted as the EXACT BC-6.01.002 allowlisted key set against a seeded forbidden parent; every PYTHON* variable except PYTHONPATH absent (PYTHONUTF8/PYTHONIOENCODING pins removed — stdio encoding comes from the shim UTF-8 reconfigure); TZ pinned to the case zone (UTC in parity, OD-177); Windows SYSTEMROOT looked up case-insensitively; new TestFrozenClock_Float64EndToEnd asserts the frozen instant is a float64 end to end — never round-tripped through time.Time nanoseconds (plan call 7, D02) on an ulp-spanning instant grid", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-06, OD-183: per-OS allowlists so the exact-set assert cannot red a correct windows-2025 run; the OD-183 Windows row PYTHONIOENCODING=utf-8 (stdio only, PYTHONUTF8 still forbidden) with the changes-stdio-only table-test pin)",
+ "1.6 2026-11-19T18:00:00Z: pass-7 fixes (D05/A01 call 2, A2-19/OD-190) — the per-OS key sets are copied VERBATIM from BC-6.01.002 PC-1's authoritative consolidation: Windows oracle gains HOME/TMPDIR/LANG (were omitted), HOMEDRIVE/HOMEPATH withdrawn (NOT constructed keys on any OS — the v1.3 expanduser triple), the POSIX and Windows GO-binary allowlists added (XDG_CACHE_HOME, LOCALAPPDATA, HYLO_PATHS_CACHE_DIR, HYLO_BACKENDS_0_MODEL_PREFIXES; no PATH ever), conditional PATH/COLUMNS/setting keys named; OD-190 LF normalization named beside PYTHONIOENCODING=utf-8 (UTF-8 + LF on every OS), not hidden in the shim"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,20 +39,32 @@ The parity oracle runs under explicit isolation: the interpreter is the absolute
 CPython 3.11.x path from `HYLO_PARITY_PYTHON`, never PATH discovery (OD-104, OD-108);
 invocation uses `-s`, never `-I`/`-E` (`-I` would drop the sitecustomize clock shim,
 OD-109); the child environment is constructed from scratch as the EXACT allowlisted
-key set of BC-6.01.002 — asserted as exact set equality against a parent env seeded
+key sets of BC-6.01.002 PC-1 — AUTHORITATIVE, copied VERBATIM (pass-7 D05, call 2;
+conditional keys in parentheses):
+the POSIX oracle child carries exactly `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
+`PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES` (+ the `DGX_SL_*` keys the case
+sets, + `COLUMNS` when declared, + `PATH` only when the case declares a
+subprocess-fake table); the Windows oracle child is that set plus `TMP`, `TEMP`,
+`SYSTEMROOT` and `PYTHONIOENCODING=utf-8` (OD-183), same conditionals — so `HOME`,
+`USERPROFILE`, `TMPDIR` and `LANG` are present on BOTH OSes, and `HOMEDRIVE`/
+`HOMEPATH` are NOT constructed keys on any OS (v1.3's expanduser profile triple is
+withdrawn: `ntpath.expanduser` reads USERPROFILE first, and the BC does not allow the
+extra keys); the POSIX Go-binary child carries exactly `HOME`, `USERPROFILE`, `TMPDIR`,
+`XDG_CACHE_HOME`, `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`,
+`HYLO_TEST_NOW`, `HYLO_BACKENDS_0_MODEL_PREFIXES` (+ the `HYLO_*` setting keys the
+case sets, + `COLUMNS` when declared; no `PATH` ever — the built binary starts by
+absolute path), and the Windows Go child adds `TMP`, `TEMP`, `SYSTEMROOT` — asserted as
+exact set equality against a parent env seeded
 with every forbidden variable — no `*_proxy` variables, every `PYTHON*` variable
 ABSENT except `PYTHONPATH` and — on Windows only (OD-183) — exactly one extra
 variable, `PYTHONIOENCODING=utf-8` (stdio encoding only; `PYTHONUTF8` stays
 FORBIDDEN; POSIX pins `LANG=en_US.UTF-8` instead), no inherited GP-1..GP-6
-variables, and per-OS temp/locale pins: on POSIX, fixed
-HOME/USERPROFILE, TMPDIR and `LANG=en_US.UTF-8` (strict UTF-8 parity locale); on
-Windows, `TEMP` and `TMP` (which
-CPython reads instead of TMPDIR) pinned to the parity roots, `USERPROFILE` (and
-`HOMEDRIVE`/`HOMEPATH`) pinned to the parity profile roots so
-`ntpath.expanduser` — which since CPython 3.8 reads USERPROFILE and ignores HOME —
-resolves caches inside the sandbox, `SYSTEMROOT` preserved (Windows socket
-initialization needs it; looked up CASE-INSENSITIVELY, because Windows env keys
-often spell `SystemRoot`); `TZ` pinned to the case zone — UTC in parity (OD-177);
+variables; `SYSTEMROOT` is preserved and looked up CASE-INSENSITIVELY, because
+Windows env keys often spell `SystemRoot`; `TZ` pinned to the case zone — UTC in
+parity (OD-177); by OD-190 the Windows oracle's LF normalization is NAMED beside the
+builder variable, never hidden in the shim: hylo writes UTF-8 + LF line endings on
+every OS (OD-190 extends OD-183) — the encoding from `PYTHONIOENCODING=utf-8`, the
+LF-only newlines from the shim's `newline="\n"` reconfigure;
 a table test pins that `PYTHONIOENCODING=utf-8` changes stdio encoding ONLY
 (files stay OD-159 strict UTF-8 reads), per the BC-6.01.002/BC-1.01.008 wording; and the
 canary test fails the harness if the shim did not load (BC-6.01.003), so a silently
@@ -92,17 +105,31 @@ not restore a BC-1.01.004 → VP-034 pairing.
 
 *Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
-var oracleAllowlistPosix = []string{ // BC-6.01.002 canonical vector, Linux oracle env
+var oracleAllowlistPosix = []string{ // BC-6.01.002 PC-1, verbatim (pass-7 D05)
     "HOME", "USERPROFILE", "TMPDIR", "LANG", "TZ", "PYTHONPATH",
-    "HYLO_TEST_NOW", "LOCAL_MODEL_PREFIXES"} // + COLUMNS when declared, + case settings
+    "HYLO_TEST_NOW", "LOCAL_MODEL_PREFIXES"} // + DGX_SL_* keys the case sets,
+                                             // + COLUMNS when declared,
+                                             // + PATH iff a fake table is declared
 
-var oracleAllowlistWindows = []string{ // A2-06: the Windows child env this VP itself
-    // mandates (TEMP/TMP/HOMEDRIVE/HOMEPATH/SYSTEMROOT, no TMPDIR/LANG) can never
-    // equal the POSIX set — a correct implementation went red on windows-2025.
-    // OD-183 adds exactly one extra variable, PYTHONIOENCODING=utf-8.
-    "TEMP", "TMP", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "SYSTEMROOT", "TZ",
-    "PYTHONPATH", "PYTHONIOENCODING",
-    "HYLO_TEST_NOW", "LOCAL_MODEL_PREFIXES"} // + COLUMNS when declared, + case settings
+var oracleAllowlistWindows = []string{ // BC-6.01.002 PC-1, verbatim: the POSIX set
+    // plus TMP/TEMP/SYSTEMROOT and OD-183's single extra variable — HOME, TMPDIR
+    // and LANG INCLUDED (D05: they were omitted), HOMEDRIVE/HOMEPATH withdrawn
+    // (NOT constructed keys on any OS).
+    "HOME", "USERPROFILE", "TMPDIR", "LANG", "TZ", "PYTHONPATH",
+    "HYLO_TEST_NOW", "LOCAL_MODEL_PREFIXES",
+    "TEMP", "TMP", "SYSTEMROOT", "PYTHONIOENCODING"} // same conditionals as POSIX
+
+var goAllowlistPosix = []string{ // BC-6.01.002 PC-1, verbatim: the GO-binary child
+    "HOME", "USERPROFILE", "TMPDIR", "XDG_CACHE_HOME", "LOCALAPPDATA",
+    "HYLO_PATHS_CACHE_DIR", "LANG", "TZ", "HYLO_TEST_NOW",
+    "HYLO_BACKENDS_0_MODEL_PREFIXES"} // + HYLO_* setting keys the case sets,
+                                      // + COLUMNS when declared; no PATH ever
+
+var goAllowlistWindows = []string{ // the POSIX Go set plus the Windows triple
+    "HOME", "USERPROFILE", "TMPDIR", "XDG_CACHE_HOME", "LOCALAPPDATA",
+    "HYLO_PATHS_CACHE_DIR", "LANG", "TZ", "HYLO_TEST_NOW",
+    "HYLO_BACKENDS_0_MODEL_PREFIXES",
+    "TEMP", "TMP", "SYSTEMROOT"} // + HYLO_* conditionals as above
 
 func TestOracleEnv_FromScratch(t *testing.T) {
     // A2-07: the sweep is not enough — the allowlist is asserted as an EXACT set
@@ -128,14 +155,22 @@ func TestOracleEnv_FromScratch(t *testing.T) {
     if env["TZ"] != "UTC" { // OD-177 parity pin: both sides see the case zone
         t.Fatal("TZ not pinned to the case zone (UTC in parity)")
     }
+    // Both OSes (BC-6.01.002 PC-1: HOME+USERPROFILE on BOTH, always the case-temp
+    // value; D05):
+    if env["HOME"] != home || env["USERPROFILE"] != home {
+        t.Fatal("HOME/USERPROFILE not the fixed parity value")
+    }
+    if env["TMPDIR"] != tmp { t.Fatal("TMPDIR not the fixed parity value") }
+    if env["LANG"] != "en_US.UTF-8" { t.Fatal("locale not pinned (strict UTF-8)") }
     if runtime.GOOS == "windows" {
         if env["TEMP"] != tmp || env["TMP"] != tmp { // CPython on Windows reads TEMP/TMP
             t.Fatal("Windows TEMP/TMP not pinned to the parity root")
         }
-        vol := filepath.VolumeName(home) // A2-04: pin the profile triple so
-        homePath := strings.TrimPrefix(home, vol) // ntpath.expanduser stays in the sandbox
-        if env["USERPROFILE"] != home || env["HOMEDRIVE"] != vol || env["HOMEPATH"] != homePath {
-            t.Fatal("Windows profile pins (USERPROFILE/HOMEDRIVE/HOMEPATH) not the parity values")
+        if _, ok := env["HOMEDRIVE"]; ok { // D05: NOT constructed keys on any OS
+            t.Fatal("HOMEDRIVE constructed — withdrawn from the allowlist")
+        }
+        if _, ok := env["HOMEPATH"]; ok {
+            t.Fatal("HOMEPATH constructed — withdrawn from the allowlist")
         }
         if envLookupCI(env, "SYSTEMROOT") == "" { // CASE-INSENSITIVE lookup: Windows
             t.Fatal("SYSTEMROOT not preserved in the child env") // keys often spell SystemRoot
@@ -143,12 +178,6 @@ func TestOracleEnv_FromScratch(t *testing.T) {
         if env["PYTHONIOENCODING"] != "utf-8" { // OD-183: exactly one extra Windows
             t.Fatal("Windows PYTHONIOENCODING not pinned to utf-8") // variable, stdio only
         }
-    } else {
-        if env["HOME"] != home || env["USERPROFILE"] != home {
-            t.Fatal("HOME/USERPROFILE not the fixed parity value")
-        }
-        if env["TMPDIR"] != tmp { t.Fatal("TMPDIR not the fixed parity value") }
-        if env["LANG"] != "en_US.UTF-8" { t.Fatal("locale not pinned (strict UTF-8)") }
     }
     if !argsInclude(runnerArgs, "-s") || argsInclude(runnerArgs, "-I") || argsInclude(runnerArgs, "-E") {
         t.Fatal("wrong interpreter flags (-s required; -I and -E banned, OD-109)")

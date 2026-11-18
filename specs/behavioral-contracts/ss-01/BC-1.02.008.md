@@ -7,7 +7,7 @@ producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "acaa0ec"
+input-hash: "6ebdaf1"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:477-479)"
@@ -93,7 +93,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For finite hr, text equals CPython `f"{min(max(hr,0.0),1.0)*100:.0f}%"` | property test vs CPython goldens (sweep 0..1 step 0.0005) |
+| VP-028 | For finite hr, text equals CPython `f"{min(max(hr,0.0),1.0)*100:.0f}%"` | property test vs CPython goldens (sweep 0..1 step 0.0005) — a bounded golden sweep on an authored fixed grid, staying on VP-028 per the VP-041 scope split (VP-041 takes generator-based for-all legs only) |
 | VP-028 | Segment absent iff hr is not a number | table test |
 
 ## Traceability

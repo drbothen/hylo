@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "data-files"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-19T04:00:00Z
+timestamp: 2026-11-19T07:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "e1dae94"
+input-hash: "2665978"
 ---
 
 # ARCH-04 — Data files: cache dir, atomic writes, reserved ledger
@@ -60,8 +60,9 @@ tests):
 - **Options considered:** (1) replica leaks temps like legacy; (2) Go cleans up temps.
 - **Option 2.** `os.CreateTemp(dir, base+".")`, chmod 0600, write, `os.Rename`; Go
   removes the temp on failure; on Windows sharing violations the INITIAL rename attempt
-  plus `renameRetryLimit = 2` retries — three attempts in total, the one consistently
-  stated count (VP-018's fails = limit+1 = 3; pass-6 A09, ruling OD-186) — sleeping
+  plus `statusline.cache.rename_retry_limit` retries — total attempts = 1 + limit
+  (three at the default; OD-188, pass-7 A19/OD-188 propagation: the retry COUNT shapes
+  whether a Windows write persists, so it is config, D15) — sleeping
   `statusline.cache.rename_retry_delay_ms` between attempts (registry key, Int,
   default 10, range 1..1000, rationale code J — judgment call; D15: the timing value
   moves out of the code literal into the registry, OD-186).
@@ -70,8 +71,11 @@ tests):
   WIDENING the ruled `temp-file` exclusion's scope BY RULING (OD-186: temp names and
   cleanup AND the Windows sharing-violation rename-retry outcome), excluded only from
   the cache-file comparison (BC-6.03.003).
-  Retry constants (Policy 16): `renameRetryLimit = 2` is exactly what VP-018 pins
-  (`renameRetryLimit`, derived: the initial attempt plus two retries cover the
+  Retry constants (Policy 16): `statusline.cache.rename_retry_limit` is a REGISTRY KEY
+  (OD-188: Int, default 2, range 0..10, rationale code J — judgment call, beside
+  `statusline.cache.rename_retry_delay_ms`; total attempts = 1 + limit, so three at
+  the default — the count VP-018 pins at the default spelling). The default-2
+  rationale (derived): the initial attempt plus two retries cover the
   transient sharing violation a
   live antivirus/indexer hold leaves on the just-written temp — more retries cannot
   shrink that window further on a sub-second refresh, RK-3);

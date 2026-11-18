@@ -1,14 +1,16 @@
 ---
 document_type: assumption-register
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T06:00:00Z
 phase: 1a
 inputs: [prd.md]
-input-hash: "4093cad"
+input-hash: "fbe1339"
 traces_to: prd.md
+modified:
+  - "1.3.2 2026-11-19T12:00:00Z: pass-7 remediation — ASM-007 validation vehicle moved up to before Phase 2 S1.07 story writing per OD-192 (owner capture into git-ignored captures/); ASSUMP-107-1 precondition cites corrected (BC-1.07.001 PC-2, BC-1.07.002 PC-1; pass-7 A22/C13)"
 ---
 
 # Assumptions Register: hylo P1
@@ -26,12 +28,12 @@ traces_to: prd.md
 | ASM-004 | The p95 <= 25 ms render-latency target binds on the owner's Mac (darwin/arm64) only; CI legs report timings without gating (OD-117). | validated | Timing methodology review (BC-6.04.002); OD-117 ruling scope check; VP-036 measurement plan. | MEDIUM | BC-6.04.002, NFR-001, VP-036 |
 | ASM-005 | Windows edge cases (BC-1.06.001 EC-008, BC-1.06.002 EC-003/EC-005) and the sitecustomize shim on CPython 3.11 (observed on 3.9.6) are marked "not executed" and pinned on the windows-2025 CI leg / harness canary. | open (disclosed) | Deferred to the windows-2025 CI leg and harness canary; re-check at first three-OS CI run (VP-037). | HIGH | BC-1.06.001/.002, BC-6.01.003, VP-037 |
 | ASM-006 | OD-56 replaces the per-socket timeout with a total fetch deadline; output-identical on the corpus. | validated | Corpus replay equivalence check against the OD-56 ruling (BC-1.04.001). | MEDIUM | BC-1.04.001 |
-| ASM-007 | The `--subagent` / custom agent-panel surface is portable in P1 behind a config off switch (OD-155, superseding OD-14); compatibility with the Claude Code 2.1.326 `subagentStatusLine` stdin payload (vs the 2.1.322 contract legacy parsed) is assumed (ASSUMP-107-1, BC-1.07.001/.002 PC-2). | open (disclosed) | Compatibility to be verified by a capture before Phase 3 (ASSUMP-107-1); argv surface and agent-panel row behavior per owner ruling OD-155 (2026-11-17). | MEDIUM | BC-1.07.001..008, BC-4.01.002 |
+| ASM-007 | The `--subagent` / custom agent-panel surface is portable in P1 behind a config off switch (OD-155, superseding OD-14); compatibility with the Claude Code 2.1.326 `subagentStatusLine` stdin payload (vs the 2.1.322 contract legacy parsed) is assumed (ASSUMP-107-1, BC-1.07.001 PC-2, BC-1.07.002 PC-1). | open (disclosed) | Compatibility to be validated by an owner capture into git-ignored `captures/` BEFORE Phase 2 writes the S1.07 stories; the rest of Phase 2 is not blocked (OD-192, pass-7 A22); argv surface and agent-panel row behavior per owner ruling OD-155 (2026-11-17). | MEDIUM | BC-1.07.001..008, BC-4.01.002 |
 
 ## Gate Notes
 
 - HIGH-impact ASMs: ASM-001, ASM-002, ASM-005. The unvalidated ASMs are ASM-005 and
-  ASM-007; their validation vehicles (windows-2025 CI leg / harness canary; a stdin
-  capture before Phase 3) are disclosed, matching the audit's "deferred to Phase 3 by
-  disclosure" disposition.
+  ASM-007; their validation vehicles (windows-2025 CI leg / harness canary; an owner
+  capture into git-ignored `captures/` before Phase 2 writes the S1.07 stories, OD-192)
+  are disclosed, matching the audit's "deferred by disclosure" disposition.
 - Story-level `assumption_validations` traces are a Phase 2 artifact (no stories exist).

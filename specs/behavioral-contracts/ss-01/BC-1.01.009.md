@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.8"
+version: "1.3.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a99539e"
+input-hash: "6005118"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -27,6 +27,7 @@ modified:
   - "1.3.6 pass-5 residual sweep (ADV-P5-B14/A09/A2-19): history re-dated ascending (the pass-4 stamps predated pass-3's); the CP-O10/O11 bearer split added to steps 7c/7d and footnote 2; VP-022 row added to Verification Properties; 2026-11-18T06:25:00Z"
   - "1.3.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17) — EC-005 row respelled to the OD-178 canon (five canonical tests incl. TestD4EX3_Text; register closed at seven); no behavioral change"
   - "1.3.8 pass-6 remediation (ADV-P6-B04, orchestrator call 11): PC2 names the history-borne CP-O10/O11 raise as a second within-step exception (record_cost write of step 7c persists; reachable via a Python-written history, VP-019 swap — not foreign-shaped); VP-008 row aligned; 2026-11-19T04:00:00Z"
+  - "1.3.9 pass-7 remediation (ADV-P7-B02/B03/B08/B14): PC2 mix-cache bearer removed — `cost_thresholds` reads only `COST_HIST` (SL:245), no mix-cache value reaches SL:255; step-2 degrade cell gains the Windows MSVC localtime-domain OSError (CP-T09, orchestrator call 8); CP-S14/S16 footnote marker retired (they are degrading crash paths, not the OD-156 overflow family); EC-001 qualifies the mix-cache write (only when a transcript exists and has grown, SL:1009-1011/1039-1040); no behavioral change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +60,7 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
    |---|------|--------|-------|--------------|
    | 0 | config resolved | import, SL:73-100 | none | D4-EX-3 line, before any write |
    | 1 | stdin decode | SL:1201-1206 | none | no (`{}` on failure) |
-   | 2 | transcript parse | SL:1213 | mix cache at the end (SL:1150) | wrong-shape lines skip (D4-EX-2); OD-156 overflow: CP-O06..O08 skip the offending line whole, in-flight turn dropped (OD-167), CP-O09 reproduces legacy's no-write save; CP-S14/S16² |
+   | 2 | transcript parse | SL:1213 | mix cache at the end (SL:1150) | wrong-shape lines skip (D4-EX-2); OD-156 overflow: CP-O06..O08 skip the offending line whole, in-flight turn dropped (OD-167), CP-O09 reproduces legacy's no-write save; CP-S14/S16; Windows MSVC localtime-domain OSError on a naive transcript timestamp (CP-T09 — `_iso_ts` catches only ValueError, SL:984, so the OSError escapes and degrades the whole line, `ErrLocaltimeDomain`; ARCH-06) |
    | 3 | `effective_rl` | SL:1216 | session cache (`rl`, `rl_ts`) when stdin carries a non-empty dict (SL:307-308) | no catalogued vector; foreign-cache CP-C01/C02 only (OD-160)¹ |
    | 4 | metrics sample, when rows >= 2 | SL:1217-1218 | session cache (fetch result or `up: false`) | no catalogued vector; foreign-cache CP-C03/C04 only (OD-160)¹ |
    | 5 | row-2 render, only under the width rule | SL:1224-1227 | none | CP-N01/N02/N03 |
@@ -90,7 +91,8 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
    the out-of-scope foreign-cache classes¹ this holds at step granularity with one within-step exception: a CP-C10
    fault in `cost_thresholds` happens after step 7c's own record_cost write. The same within-step exception holds
    for the **history-borne** CP-O10/O11 degrade — reachable without any foreign cache shape, through a
-   Python-written cost history (VP-019 swap) or the mix cache: the raise in `cost_thresholds` at SL:255 happens
+   Python-written cost history (VP-019 swap; `cost_thresholds` reads only `COST_HIST`, SL:245, and `record_cost`
+   takes `usd`/`api_ms` from stdin, SL:601-607 — no mix-cache value can reach SL:255): the raise in `cost_thresholds` at SL:255 happens
    after step 7c's own record_cost write (SL:606-607), so the cost-history write of step 7c persists although the
    degrade is raised inside step 7c (BC-1.05.005 EC-011). Separately, the ruled OD-166 write
    divergence applies within step 7c before any degrade: an unconvertible cost value is not recorded, so step 7c
@@ -110,7 +112,7 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Row-2 crash (CP-N01, KV NaN) | mix cache and session cache written; no `proc_start`, no git cache, no cost-history write |
+| EC-001 | Row-2 crash (CP-N01, KV NaN) | session cache written; the step-2 mix cache too — but only when a transcript path exists and the file has grown since the cached offset (SL:1009-1011, 1039-1040); no `proc_start`, no git cache, no cost-history write |
 | EC-002 | Thermometer crash (CP-S06, `used_percentage` NaN) | git cache written; cost history **not** written |
 | EC-003 | Lone surrogate at output (CP-S17) | every write of the refresh done, then degraded line |
 | EC-004 | Wrong-shape transcript line (legacy CP-T01..T07 degrade at step 2 and stay sticky) | Go does **not** degrade at step 2 — approved deviation **D4-EX-2** (BC-1.03.018, legacy BC-SL-098). Excluded from the parity diff by the OD-105 exclusion entry `D4-EX-2`, covered by the 21 table rows of BC-1.03.019 plus BC-1.03.020/021 rows |

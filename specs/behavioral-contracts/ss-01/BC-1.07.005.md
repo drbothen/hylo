@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.5"
+version: "1.1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "5c0f944"
+input-hash: "48601a8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_SUB_GLYPH + render_subagent_rows (SL:845-846, 893-896, 921-922)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 matrix leg", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: running glyph corrected to U+00BB with SL:845-846/921-922 cites (ADV-P3-C02); goldens re-derived ensure_ascii-escaped (ADV-P3-C01); glyph/color pairs sourced from statusline.subagent.* config keys, no Go map literal (ADV-P3-C05); str() rendering of non-string chain/status values specified (ADV-P3-C14)", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: PC3 suffix gate tied to the legacy `if st and st != \"running\"` truthy gate with a present-falsy-status edge case (ADV-P4-C06); unknown-status fallback named statusline.subagent.glyphs.unknown, independent of glyphs.killed (ADV-P4-C07, design call 4)", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C14) — EC-006 rewrote: the wire carries ensure_ascii \\uXXXX escapes, not verbatim UTF-8 (BC-1.07.004 PC3)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 matrix leg", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: running glyph corrected to U+00BB with SL:845-846/921-922 cites (ADV-P3-C02); goldens re-derived ensure_ascii-escaped (ADV-P3-C01); glyph/color pairs sourced from statusline.subagent.* config keys, no Go map literal (ADV-P3-C05); str() rendering of non-string chain/status values specified (ADV-P3-C14)", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: PC3 suffix gate tied to the legacy `if st and st != \"running\"` truthy gate with a present-falsy-status edge case (ADV-P4-C06); unknown-status fallback named statusline.subagent.glyphs.unknown, independent of glyphs.killed (ADV-P4-C07, design call 4)", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C14) — EC-006 rewrote: the wire carries ensure_ascii \\uXXXX escapes, not verbatim UTF-8 (BC-1.07.004 PC3)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.6 2026-11-19T18:00:00Z: pass-7 remediation (ADV-P7-C11/C14) — the name fallback is the config key statusline.subagent.name_fallback (Text, default ?, OD-189), respelled in Description, PC2, EC-004 and the Refactoring Notes (ADV-P7-C11, P20); invariant 3's prose pseudo-escape replaced with the source glyph (ADV-P7-C14)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,7 +36,7 @@ Each row opens with `<col><glyph> <name><RESET>`. The glyph/color pair is looked
 the status map (running U+00BB yellow `\e[33m`; completed U+2714 green `\e[32m`; failed U+2718 red
 `\e[31m`; killed U+25CD grey `\e[90m`); any other status falls back to U+25CD grey. The display name
 is the first non-falsy value of `name → label → description → agentType` (empty strings fall through),
-else `?`. Rows with a non-running status append a grey status-text suffix.
+else the configured name fallback (default `?`). Rows with a non-running status append a grey status-text suffix.
 
 ## Preconditions
 
@@ -52,7 +52,9 @@ else `?`. Rows with a non-running status append a grey status-text suffix.
    `statusline.theme.grey` (default `90`); it is an independent key and does NOT follow
    `glyphs.killed`.
 2. Display name = first non-falsy of `name`, `label`, `description`, `agentType`; none present → the
-   literal `?`. An empty-string `name` with a `label` present shows the label.
+   configured name-fallback text `statusline.subagent.name_fallback` (Text, default `?` — OD-189,
+   ADV-P7-C11: display text is a config key like its lane-pill counterpart `statusline.pill.label_unknown`,
+   not a format constant). An empty-string `name` with a `label` present shows the label.
 3. `status` present, truthy, and not `"running"` → grey suffix ` <status>` (e.g. `completed`, `failed`,
    `killed`, `paused`) — the legacy gate is `if st and st != "running"` (SL:921); a present but falsy
    status (`""`, `0`, `False`, `null`) adds NO suffix (Inv3); status `"running"` → no suffix.
@@ -71,7 +73,7 @@ else `?`. Rows with a non-running status append a grey status-text suffix.
    legacy defaults are exactly these bytes (ADV-P3-C05 ruling; registered by the architect in the
    BC-2.01.004 registry) — no Go map literal owns them (D15).
 2. The name chain is `or`-based: `""` does not terminate it; `0`/`False`/missing do not either.
-3. Missing status behaves as unknown (\u25cd grey) AND as a settled row for the suffix rule only if the
+3. Missing status behaves as unknown (◍ grey) AND as a settled row for the suffix rule only if the
    status key exists and is truthy — a missing status adds no suffix.
 
 ## Edge Cases
@@ -81,7 +83,7 @@ else `?`. Rows with a non-running status append a grey status-text suffix.
 | EC-001 | `status` missing entirely | U+25CD grey glyph, no status suffix |
 | EC-002 | `status = "paused"` (not in map) | U+25CD grey, suffix ` paused` grey |
 | EC-003 | `name = ""` with `label = "lab"` | shows `lab` (or-chain falls through empty string) |
-| EC-004 | All name fields missing | literal `?` after the glyph |
+| EC-004 | All name fields missing | name-fallback text after the glyph (`statusline.subagent.name_fallback`, default `?` — OD-189) |
 | EC-005 | `failed` row (U+2718 red) with all name fields | U+2718 red + `?` + grey ` failed` trail |
 | EC-006 | Unicode names (accented letters, emoji, CJK) | rendered on the wire as their `ensure_ascii` `\uXXXX` escapes inside the JSON string — "verbatim" applies only to the decoded row content before dumping; no byte-for-byte UTF-8 passthrough (BC-1.07.004 PC3; ADV-P6-C14) |
 | EC-007 | Truthy non-string chain value (`name=True` / `1.0` / `['x']` / `{'a': 1}`) | displayed as the `str()` literal (`True`, `1.0`, `['x']`, `{'a': 1}`) — PC5 |
@@ -179,4 +181,5 @@ fallback drawn from its own key `statusline.subagent.glyphs.unknown` (default `�
 by `statusline.theme.grey` — an independent key that does not follow `glyphs.killed` (ADV-P4-C07).
 Keys are the exact four lowercase statuses — do not
 lowercase/space-normalize input (parity). Chain and suffix values render through the `pyfmt.Str`
-convention (Python `str()` semantics).
+convention (Python `str()` semantics). The name fallback comes from resolved config
+`statusline.subagent.name_fallback` (Text, default `?`, OD-189) — not a Go literal (ADV-P7-C11).

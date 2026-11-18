@@ -2,7 +2,7 @@
 artifact_type: bc-index
 document_type: bc-index
 level: L3
-version: "0.2.8"
+version: "0.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T14:00:00Z
@@ -12,7 +12,7 @@ origin: greenfield
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.8"
+modified: "0.2.9"
 extracted_from: "behavioral-contracts/ss-01..ss-06 frontmatter and H1 headings (generated; do not hand-edit rows)"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -22,7 +22,7 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "fde676f"
+input-hash: "c5a28b3"
 traces_to: ../prd.md
 
 ---
@@ -66,11 +66,11 @@ traces_to: ../prd.md
 |---|---|---|---|---|---|---|---|
 | BC-1.01.001 | Guard prints the 29-byte degraded line and exits 0 | S1.01 | BC-SL-001 | byte-exact | H | draft | [BC-1.01.001](ss-01/BC-1.01.001.md) |
 | BC-1.01.002 | Non-JSON or non-object stdin decodes to an empty object | S1.01 | BC-SL-002 | byte-exact | H | draft | [BC-1.01.002](ss-01/BC-1.01.002.md) |
-| BC-1.01.003 | Rows join with LF; row 2 shown only when width permits | S1.01 | BC-SL-003 | byte-exact | H | draft | [BC-1.01.003](ss-01/BC-1.01.003.md) |
+| BC-1.01.003 | Rows join with LF; width hides row 2 only when rows == 2 | S1.01 | BC-SL-003 | byte-exact | H | draft | [BC-1.01.003](ss-01/BC-1.01.003.md) |
 | BC-1.01.004 | Visible width counts code points after stripping SGR | S1.01 | BC-SL-004 | byte-exact | H | draft | [BC-1.01.004](ss-01/BC-1.01.004.md) |
 | BC-1.01.005 | COLUMNS parses with the Python int grammar, else 0 | S1.01 | BC-SL-005 | byte-exact | H | draft | [BC-1.01.005](ss-01/BC-1.01.005.md) |
 | BC-1.01.006 | trim_to_fit double-resets; single reset on the recycle row | S1.01 | BC-SL-054 | byte-exact | H | draft | [BC-1.01.006](ss-01/BC-1.01.006.md) |
-| BC-1.01.007 | Negative COLUMNS disables trim and hides row 2 | S1.01 | BC-SL-055 | byte-exact | H | draft | [BC-1.01.007](ss-01/BC-1.01.007.md) |
+| BC-1.01.007 | Negative COLUMNS disables trim and hides row 2 only when rows == 2 | S1.01 | BC-SL-055 | byte-exact | H | draft | [BC-1.01.007](ss-01/BC-1.01.007.md) |
 | BC-1.01.008 | Strict UTF-8 stdio; invalid stdin UTF-8 renders from {} | S1.01 | BC-SL-076 | byte-exact | H | draft | [BC-1.01.008](ss-01/BC-1.01.008.md) |
 | BC-1.01.009 | Side effects run in legacy order; a degrade keeps earlier writes | S1.01 | BC-SL-077 | byte-exact | M | draft | [BC-1.01.009](ss-01/BC-1.01.009.md) |
 | BC-1.01.010 | Trim breakpoint matrix across widths | S1.01 | BC-SL-090 | byte-exact | H | draft | [BC-1.01.010](ss-01/BC-1.01.010.md) |
@@ -211,7 +211,7 @@ traces_to: ../prd.md
 | BC ID | Title | Subsystem / section | Legacy | Parity class | Conf | Status | File |
 |---|---|---|---|---|---|---|---|
 | BC-2.02.001 | D4-EX-3 config-error line: exact format, exit 0, stderr detail, no cache writes | S2.02 | BC-SL-087 | D4-EX-3 | H | draft | [BC-2.02.001](ss-02/BC-2.02.001.md) |
-| BC-2.02.002 | Number-range class: non-finite/negative durations are config errors; TTL 0 stays valid | S2.02 | new | D4-EX-3 | — | draft | [BC-2.02.002](ss-02/BC-2.02.002.md) |
+| BC-2.02.002 | Number-range class: non-finite/negative durations are config errors, except the git.ttl_s negative exception; TTL 0 stays valid | S2.02 | new | D4-EX-3 | — | draft | [BC-2.02.002](ss-02/BC-2.02.002.md) |
 | BC-2.02.003 | Number-grammar class: underscore and Unicode-digit numerals are config errors | S2.02 | new | D4-EX-3 | — | draft | [BC-2.02.003](ss-02/BC-2.02.003.md) |
 | BC-2.02.004 | Enum class: unknown sparkline trace value is a config error | S2.02 | new | D4-EX-3 | — | draft | [BC-2.02.004](ss-02/BC-2.02.004.md) |
 | BC-2.02.005 | URL class: non-http(s) metrics URL is a config error | S2.02 | new | D4-EX-3 | — | draft | [BC-2.02.005](ss-02/BC-2.02.005.md) |

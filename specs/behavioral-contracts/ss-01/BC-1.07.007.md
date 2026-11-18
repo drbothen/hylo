@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.6"
+version: "1.0.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "429be0d"
+input-hash: "1b04441"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_tokens + token/elapsed branches (SL:909-921, 876-885)"
@@ -19,7 +19,7 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C07/C03) — clock base is the injected Env.Now() float seconds with the time.time()*1000 float-product rule (call 7); UnixMilli guidance removed; theme keys named for the token/clock colours", "1.0.5 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the CP-A04/A05 legs ride the never-blank ladder); no behavioral change", "1.0.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C07/C03) — clock base is the injected Env.Now() float seconds with the time.time()*1000 float-product rule (call 7); UnixMilli guidance removed; theme keys named for the token/clock colours", "1.0.5 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the CP-A04/A05 legs ride the never-blank ladder); no behavioral change", "1.0.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.0.7 2026-11-19T18:30:00Z: pass-7 remediation (ADV-P7-C04/C14) — EC-010/EC-011 added and oracle-pinned: tokenCount Infinity/1e400 renders infM tok (Python float-repr spelling, not Go's +Inf); startTime Infinity clamps to 00:00; PC1's misplaced <suffix> clause reattached to the token-bit sentence (ADV-P7-C14)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,8 +52,10 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 ## Postconditions
 
 1. Token bit: only when `tokenCount` is int/float/bool with value > 0; bytes
-   `\e[36m<fmt><suffix>\e[0m` — the `36` is the shared theme colour key `statusline.theme.cyan` (OD-113); the settled-row status suffix and the elapsed clock use `statusline.theme.grey` (default `90`) where `<suffix>` is the configured `statusline.subagent.tokens.suffix`
-   (Text, default ` tok`) and fmt = `f"{n:.0f}"` (n < k_from), `f"{n/1e3:.1f}k"` (n < m_from),
+   `\e[36m<fmt><suffix>\e[0m`, where `<suffix>` is the configured
+   `statusline.subagent.tokens.suffix` (Text, default ` tok`) and the `36` is the shared theme
+   colour key `statusline.theme.cyan` (OD-113); the settled-row status suffix and the elapsed
+   clock use `statusline.theme.grey` (default `90`); fmt = `f"{n:.0f}"` (n < k_from), `f"{n/1e3:.1f}k"` (n < m_from),
    `f"{n/1e6:.2f}M"` (n >= m_from) after `float(n)` — `k_from`/`m_from` (defaults 1000/1e6) are display
    thresholds only (the PC branch points); the 1e3/1e6 divisors are format constants that do NOT
    follow the thresholds (Inv5); the threshold compares the float value first, then the
@@ -102,6 +104,8 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 | EC-007 | startTime exactly 0 | No clock (gate is `> 0`) |
 | EC-008 | `tokenCount = 2**1024 - 2**970` (huge int) | OverflowError at `float(n)` → exactly the degraded line, exit 0 (CP-A04) |
 | EC-009 | `startTime = 2**1024 - 2**970`, running | OverflowError at `now_ms - start` → exactly the degraded line, exit 0 (CP-A05) |
+| EC-010 | `tokenCount` = `Infinity` (or `1e400`) — the stdin decode yields float `inf`, which passes the numeric `> 0` gate; `_fmt_tokens` divides and formats `f"{inf/1e6:.2f}M"` → `infM` (ADV-P7-C04, oracle-pinned 2026-11-18) | renders `\e[36minfM tok\e[0m` — legacy's Python float-repr spelling; a naive Go port prints `+Inf` (fmt/strconv) and would break byte parity, so hylo renders `infM` |
+| EC-011 | `startTime` = `Infinity`, running — `start > 0` passes; `secs = max(now_ms - inf, 0)/1000 = 0` | renders `\e[90m00:00\e[0m` (clamp floor; ADV-P7-C04, oracle-pinned 2026-11-18) |
 
 ## Canonical Test Vectors
 
@@ -115,11 +119,15 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 | `tokenCount = 2**1024 - 2**970`, running, `startTime=<now-125000>` | exactly `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 (CP-A04) | error |
 | `tokenCount = 2**1024 - 2**970 - 1`, running (largest convertible int) | renders; `float` value is the IEEE-754 maximum; tok bit present, no degrade | edge-case |
 | `startTime = 2**1024 - 2**970`, running | exactly `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 (CP-A05) | error |
+| `tokenCount=Infinity`, completed (stdin token `Infinity` or `1e400` — both decode to float `inf`) | one line, content `"\u001b[32m✔ n\u001b[0m · \u001b[36minfM tok\u001b[0m · \u001b[90mcompleted\u001b[0m"` (ADV-P7-C04, oracle 2026-11-18: `inf`/`+Inf` never spelled Go-style) | edge-case |
+| `startTime=Infinity`, running | content opens `\e[33m` + U+00BB + ` n`, then `\e[90m00:00\e[0m` (oracle 2026-11-18) | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`): every cell above reproduced, including the
 999.5 → `1000` and True → `1` quirks and the `02:05` split at 125 s; the overflow threshold confirmed
 empirically — `float(2**1024 - 2**970)` raises OverflowError, `float(2**1024 - 2**970 - 1)` converts
-(CP-A04/A05, adv-p3).
+(CP-A04/A05, adv-p3). The Infinity rows (EC-010/EC-011) were re-pinned 2026-11-18 through
+`render_subagent_rows` under `/opt/homebrew/anaconda3/bin/python3 -I` 3.11.7 with an isolated HOME
+(ADV-P7-C04) — `infM tok` and the `00:00` clamp reproduced byte-for-byte.
 
 ## Verification Properties
 

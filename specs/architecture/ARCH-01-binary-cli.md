@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-19T07:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "65dee4f"
+input-hash: "ce592c4"
 
 ---
 
@@ -23,7 +23,12 @@ input-hash: "65dee4f"
 
 ```go
 // main.go — the only os.Exit site
-func main() { os.Exit(run(os.Args[1:], envOS{}, os.Stdin, os.Stdout, os.Stderr)) }
+func main() { os.Exit(run(os.Args[1:], platform.NewEnvVars(), os.Stdin, os.Stdout, os.Stderr)) }
+// platform.NewEnvVars() is the platform-provided, GOOS-selected EnvVars implementation
+// (ARCH-05 matcher flavors; NT case-insensitive matching on Windows). main is the ONLY
+// site that enumerates the real process environment; every other component receives the
+// seam. The earlier local envOS{} wiring conflicted with the platform-provided
+// implementation (pass-7 A03, orchestrator call 4).
 
 // EnvVars is the injected environment seam (AD-10, amended pass 2): enumeration
 // included, so the unknown-HYLO_* sweep (BC-2.01.001 PC-6) and the

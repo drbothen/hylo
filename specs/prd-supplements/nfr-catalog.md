@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-nfr-catalog
 level: L3
-version: "1.6"
+version: "1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T06:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "4093cad"
+input-hash: "fbe1339"
 traces_to: prd.md, domain-spec/L2-INDEX.md
 ---
 
@@ -23,7 +23,11 @@ traces_to: prd.md, domain-spec/L2-INDEX.md
 |----|----------|-------------|--------|------------------|----------|-------------|
 | NFR-001 | Performance | Steady-state render latency on the owner's Mac (darwin/arm64), synthetic fixture corpus, metrics HTTP wait excluded | p95 <= 25 ms (OD-117). Legacy baseline measured 2026-11-15: median 84.5 ms, p90 101 ms; ~25 ms interpreter start removed by the port | owner-Mac timing gate (schedule and sampling in the binding note, ADV-P2-A16): per case 1 warm-up + 20 timed runs, sorted, nearest-rank p95 = 19th sample; p95 computed per case, gate binds per case, no pooling; fake-VM handling time subtracted; gate fails only with `HYLO_TIMING_GATE=1`; the >512 KB timing-fixture exemption is
 conditional (OD-187): it applies only when that fixture misses the 25 ms target, and its
-use is reported | P0 | porting-decision latency tension |
+use is reported. The exempt fixture is identified by a validated case flag
+`timing_exempt: large-transcript` (exactly one case, transcript exceeding 512 KB), the
+gate still fails if that fixture's p95 exceeds 100 ms (OD-191, judgment call: 4x the
+target, well under the refresh interval), and the job prints one report line when the
+exemption is used (pass-7 A02/call 3) | P0 | porting-decision latency tension |
 | NFR-002 | Reliability | Never-blank, exit-0 rendering under every fault in the main render: stdin faults, transcript faults, metrics faults, cache faults, config errors, unknown flags. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, and config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | 100% of CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11, CP-A01..A05 triggers produce >= 1 stdout byte and exit 0 | fault-injection table tests per owning BC | P0 | DI-008 |
 | NFR-003 | Correctness (parity) | Byte parity vs the CPython oracle: stdout bytes + exit code per step; named caches byte-for-byte. Interpreter pin is dual (ADV-P3-A19): vector and oracle facts are pinned on CPython 3.11.7 locally; CI installs 3.11.x (setup-python resolves the latest patch, OD-104/OD-185). Harness self-check (OD-185): at start the harness re-measures the JSON depth boundaries and `unicodedata.unidata_version` against the resolved oracle and fails closed on any mismatch, printing the resolved version; golden metadata records the resolved patch | 0 unexplained diffs; every explained diff on the named exclusion list with its own table test | parity harness (BC-6.03.002) + Tier C differential fuzz (BC-6.04.003) | P0 | D4 exit criterion |
 | NFR-004 | Portability | Three-OS support (D5): macOS, Linux, Windows; OS-specific code confined to `internal/platform` | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix leg per OS | P0 | D5 |

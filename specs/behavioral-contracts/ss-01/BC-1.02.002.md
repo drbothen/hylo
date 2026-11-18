@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r6.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "c6b7230"
+input-hash: "b25b2b8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:442, 453)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2 pass-6 remediation (ADV-P6-B01, call 10): for-all label-fallback row re-anchored from VP-028 to VP-041 (VP-028 keeps the oracle/golden legs); 2026-11-19T04:00:00Z"]
+modified: ["1.2 pass-6 remediation (ADV-P6-B01): for-all label-fallback row re-anchored from VP-028 to VP-041 (VP-028 keeps the oracle/golden legs); 2026-11-19T04:00:00Z", "1.3 pass-7 remediation (OD-189 sweep): Inv 3 pins the model-label '?' as a named format constant distinct from the ruled fallback keys (pill.label_unknown OD-173; subagent.name_fallback OD-189); no behavioral change; 2026-11-19T07:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,6 +58,11 @@ Notation: `\e` is the byte 0x1B.
 
 1. The label never decides the lane; it is presentation only.
 2. The label segment is always present, so row 1 always has at least two elements.
+3. The `"?"` fallback of PC1 is a **named format constant** of this widget, not config (D15
+   rationale: it is a display-format constant of the output, parity-bound at one byte; why not
+   config = no ruling mints a key for this site). It is distinct from the ruled config fallbacks
+   at other sites: `statusline.pill.label_unknown` (OD-173, lane pill) and
+   `statusline.subagent.name_fallback` (OD-189, agent panel).
 
 ## Edge Cases
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T16:00:00Z
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "57be01d"
+input-hash: "d85fae5"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:load_cache/save_cache (SL:190-206)"
@@ -28,7 +28,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C15/C16) — PC1 states the read-encoding pin: legacy opens caches with the locale encoding, hylo reads UTF-8 per named deviation OD-159 (OD-183 covers stdio only), divergence reachable only via foreign non-ASCII caches (OD-160), VP-012 closure; parity_class relabeled from byte-exact to temp-file, matching sibling BC-1.06.002 (the contract carries the OD-163 own-temp-cleanup divergence)", "1.2.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-24) — EC-009 respelled to the OD-186 single attempt count: three attempts total (initial attempt plus two retries), matching ARCH-04, VP-018, BC-6.03.003 and BC-2.01.004; no behavioral change"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C15/C16) — PC1 states the read-encoding pin: legacy opens caches with the locale encoding, hylo reads UTF-8 per named deviation OD-159 (OD-183 covers stdio only), divergence reachable only via foreign non-ASCII caches (OD-160), VP-012 closure; parity_class relabeled from byte-exact to temp-file, matching sibling BC-1.06.002 (the contract carries the OD-163 own-temp-cleanup divergence)", "1.2.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-24) — EC-009 respelled to the OD-186 single attempt count: three attempts total (initial attempt plus two retries), matching ARCH-04, VP-018, BC-6.03.003 and BC-2.01.004; no behavioral change", "1.2.8 2026-11-19T17:30:00Z: pass-7 remediation — EC-009 attempt count respelled to the OD-188 config key statusline.cache.rename_retry_limit (1 + limit attempts, default 2 → three, range 0..10, beside rename_retry_delay_ms); PC2 and the happy-path vector qualify mode 0600 POSIX-only with the Windows 0666/0444 expectation (ADV-P7-C09); VP-012 closure row and anchor added (SC-21 reciprocity, ADV-P7-C05); EC-011 respelled to reproduce legacy per orchestrator call 1: POSIX surrogateescape equivalence (U+DCxx → raw byte 0xx), other lone surrogates fail the name encode, Windows keeps lone surrogates as UTF-16 units (pass-6 call 16), no WTF-8 exclusion (ADV-P7-C01)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,7 +77,10 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
    entry and its riding table test are validated by the VP-012 closure check.
 2. **Save** (SL:198-206): create the cache directory if missing (`os.makedirs(...,
    exist_ok=True)`); create a temp file **in the cache directory** (not the target's
-   directory) named `basename(target) + "." + <random>`, mode 0600; write
+   directory) named `basename(target) + "." + <random>`, mode 0600 on POSIX (on Windows
+   Go maps the perm bits onto the read-only attribute and `Stat` reports 0666 — or 0444
+   when the file is read-only — so the mode assertion is POSIX-leg-only, ADV-P7-C09);
+   write
    `json.dump(data)` bytes (BC-1.05.009 format rules); rename the temp over the target
    (`os.replace`). Any exception at any step is swallowed; the render continues.
    **On any failure after the temp was created — a mid-write `json.dump` error (e.g.
@@ -114,15 +117,15 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 | EC-006 | cache dir path is a regular file | save fails silently; nothing persisted |
 | EC-007 | sid contains `/` | BC-1.06.002 |
 | EC-008 | Windows, sid with a character invalid in file names (`:` `*` `?` `"` `<` `>` `\|`) | save fails silently, nothing persists (same class as BC-1.06.002); expected from Win32 file-name rules, **not executed** (pin on the windows-2025 CI leg); kept as-is per OD-03 ("revisit only if Windows complains; real ids are UUIDs") |
-| EC-009 | Windows sharing violation on rename | three attempts total (initial attempt plus two retries, OD-186 single count), then swallow (design IM-17) |
+| EC-009 | Windows sharing violation on rename | 1 + `statusline.cache.rename_retry_limit` attempts (OD-188: Int, default 2, range 0..10, judgment call, registered beside `statusline.cache.rename_retry_delay_ms` — three attempts at the default), sleeping `statusline.cache.rename_retry_delay_ms` between attempts, then swallow (design IM-17; count-statement origin OD-186) |
 | EC-010 | Mid-write dump failure (accumulator int above the 4,300-digit conversion limit, BC-1.03.006 EC-009) | no write — the target keeps its previous bytes (reproduced from legacy, oracle-verified); legacy leaves a partial temp behind, hylo removes its own temp (OD-163); difference confined to the cache-dir listing (OD-110 class), stdout identical |
-| EC-011 | Sid with lone surrogates in the session-cache name (ADV-P3-C21): Python encodes file names with the filesystem encoding's `surrogateescape` handler — U+DC80..U+DCFF become the single raw bytes 0x80..0xFF; any other lone surrogate raises `UnicodeEncodeError`, which the bare `except Exception` swallows (no session cache, and a load of such a name returns `{}`) | legacy: the cache is named under the raw-byte form (U+DC80..DCFF) or not written (other surrogates). hylo: the sid is carried as UTF-8/WTF-8 — a lone surrogate encodes as its 3-byte WTF-8 sequence, so the file name differs byte-for-byte from legacy's raw-byte form; difference confined to synthetic ids (OD-03: real ids are UUIDs) |
+| EC-011 | Sid with lone surrogates in the session-cache name (ADV-P3-C21; ruled by pass-7 call 1 — reproduce legacy, no exclusion). Python encodes the file name at the OS boundary with the filesystem encoding's `surrogateescape` handler: U+DC80..U+DCFF become the single raw bytes 0x80..0xFF (measured: `os.fsencode('\udc80')` → `b'\x80'`), any other lone surrogate raises `UnicodeEncodeError` before the syscall. Sites (oracle-measured, CPython 3.11.7, isolated HOME): `load_cache` — bare `except Exception` swallows → `{}` (both classes; a U+DCxx name may additionally fail with a filesystem OS error such as APFS Errno 92, same `{}`); `save_cache` — the raise surfaces in `mkstemp`/`os.replace` and the bare except swallows → silent no-op (no temp, no target); the mix cache never sees this (its regex maps any surrogate to `_`, SL:1017) | legacy: the cache is named under the raw-byte form (U+DC80..DCFF — byte-for-byte parity on byte-permissible filesystems) or not written at all (other surrogates, and raw-byte names on name-normalizing filesystems). hylo (POSIX): file names are bytes — each U+DCxx surrogate contributes the single raw byte 0xx (surrogateescape equivalence), any other lone surrogate fails the name encode → load `{}` / save no-op, byte-for-byte with legacy. hylo (Windows): the sid keeps lone surrogates as UTF-16 code units in the name (pass-6 call 16) |
 
 ## Canonical Test Vectors
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| save `{"z": 1, "a": [1.0, inf]}` to `t.json` | file bytes `{"z": 1, "a": [1.0, Infinity]}`, mode 0600, no temp left | happy-path |
+| save `{"z": 1, "a": [1.0, inf]}` to `t.json` | file bytes `{"z": 1, "a": [1.0, Infinity]}`, mode 0600 (POSIX legs; on Windows `Stat` reports 0666/0444 — ADV-P7-C09), no temp left | happy-path |
 | load of a missing file | `{}` | edge-case |
 | stdin `session_id: 777` | session cache `statusline-777.json` | edge-case |
 | load of bytes `{"a":\xff}` | `{}` | error |
@@ -134,6 +137,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 | — (no VP yet) | Load returns `{}` for every input the CPython oracle rejects, and the oracle's value otherwise | fuzz (differential) — the ledger-read-scope VP was mis-anchored here and re-anchored to BC-1.04.001 (ADV-P2-C05) |
 | VP-018, VP-001 (no dedicated store-fault VP yet) | Save never panics or returns an error to the caller under injected FS faults | Go property test (testing/quick) (fault-injecting store) |
 | VP-019 (positive leg) | Loads of the four oracle-written legacy-compatible caches yield the identical ordered `pyfmt.Value` (the "oracle's value" half of row 1) | golden byte comparison (four-cache swap) |
+| VP-012 (closure) | Every ruled temp-file divergence is a named exclusion entry (id `temp-file`) in exclusions.json — one concrete table test per rider, no globs; this BC rides as the temp-file-parity carrier (PC1's OD-159 entry and its riding table test are validated by the closure check, SC-21 reciprocity, ADV-P7-C05) | repository test over exclusions.json |
 
 ## Traceability
 
@@ -165,7 +169,8 @@ S-N.MM — cache store (filled by story-writer)
 
 ## VP Anchors (Recommended)
 
-- VP-018, VP-001 — never-raise save legs; VP-019 — oracle-writes/Go-reads leg; no VP yet for the load-differential
+- VP-018, VP-001 — never-raise save legs; VP-019 — oracle-writes/Go-reads leg; VP-012 — exclusion-set closure
+  (temp-file-parity carrier, SC-21 reciprocity, ADV-P7-C05); no VP yet for the load-differential
   fuzz (VP-022 was mis-anchored: it verifies ledger read scope, not cache load/save — ADV-P2-C05)
 
 

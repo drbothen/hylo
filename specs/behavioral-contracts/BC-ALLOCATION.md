@@ -2,7 +2,7 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.2.8"
+version: "0.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T14:00:00Z
@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.8"
+modified: "0.2.9"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "7fca1d0"
+input-hash: "c844d6b"
 traces_to: ../prd.md
 ---
 
@@ -102,11 +102,11 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 |---|---|---|---|---|---|---|
 | BC-1.01.001 | Guard prints the 29-byte degraded line and exits 0 | BC-SL-001 | byte-exact | SL:1238-1245 | H | A |
 | BC-1.01.002 | Non-JSON or non-object stdin decodes to an empty object | BC-SL-002 | byte-exact | SL:1201-1206 | H | A |
-| BC-1.01.003 | Rows join with LF; row 2 shown only when width permits | BC-SL-003 | byte-exact | SL:1224-1234 | H | A |
+| BC-1.01.003 | Rows join with LF; width hides row 2 only when rows == 2 | BC-SL-003 | byte-exact | SL:1224-1234 | H | A |
 | BC-1.01.004 | Visible width counts code points after stripping SGR | BC-SL-004 | byte-exact | SL:151-153 | H | A |
 | BC-1.01.005 | COLUMNS parses with the Python int grammar, else 0 | BC-SL-005 | byte-exact | SL:1185-1190 | H | A |
 | BC-1.01.006 | trim_to_fit double-resets; single reset on the recycle row | BC-SL-054 | byte-exact | SL:1193-1197 | H | A |
-| BC-1.01.007 | Negative COLUMNS disables trim and hides row 2 | BC-SL-055 | byte-exact | SL:1188-1190 | H | A |
+| BC-1.01.007 | Negative COLUMNS disables trim and hides row 2 only when rows == 2 | BC-SL-055 | byte-exact | SL:1188-1190 | H | A |
 | BC-1.01.008 | Strict UTF-8 stdio; invalid stdin UTF-8 renders from {} | BC-SL-076 | byte-exact | SL:1201-1206, 1234 | H | A |
 | BC-1.01.009 | Side effects run in legacy order; a degrade keeps earlier writes | BC-SL-077 | byte-exact | SL:1200-1235 | M | A |
 | BC-1.01.010 | Trim breakpoint matrix across widths | BC-SL-090 | byte-exact | SL:1193-1197 | H | A |
@@ -247,7 +247,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
 |---|---|---|---|---|---|---|
 | BC-2.02.001 | D4-EX-3 config-error line: exact format, exit 0, stderr detail, no cache writes | BC-SL-087 | D4-EX-3 | OD-102, OD-114; SL:73-100 | H | F |
-| BC-2.02.002 | Number-range class: non-finite/negative durations are config errors; TTL 0 stays valid | new | D4-EX-3 | OD-114 (T10) | — | F |
+| BC-2.02.002 | Number-range class: non-finite/negative durations are config errors, except the git.ttl_s negative exception; TTL 0 stays valid | new | D4-EX-3 | OD-114 (T10) | — | F |
 | BC-2.02.003 | Number-grammar class: underscore and Unicode-digit numerals are config errors | new | D4-EX-3 | OD-114 (T10) | — | F |
 | BC-2.02.004 | Enum class: unknown sparkline trace value is a config error | new | D4-EX-3 | OD-114 (T10) | — | F |
 | BC-2.02.005 | URL class: non-http(s) metrics URL is a config error | new | D4-EX-3 | OD-114 (T10) | — | F |

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:45:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "4fdb25e"
+input-hash: "80ba575"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_sessions/percentiles ranges; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (foreign-history overflow EC-011) + ADV-P3-C2-02 (OD-160 on EC-010) + ADV-P3-C2-07 (percentile ordering rule)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-10 (EC-011 extended to the exact-int api_ms leg; crash ids CP-O10/CP-O11 named) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and ADV-P5-C2-20 (stale architect-carry note removed) and design call 16 (rate_min_api_ms values Int > 0)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_sessions/percentiles ranges; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (foreign-history overflow EC-011) + ADV-P3-C2-02 (OD-160 on EC-010) + ADV-P3-C2-07 (percentile ordering rule)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-10 (EC-011 extended to the exact-int api_ms leg; crash ids CP-O10/CP-O11 named) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and ADV-P5-C2-20 (stale architect-carry note removed) and design call 16 (rate_min_api_ms values Int > 0)", "1.3.3 2026-11-18: pass-7 remediation ADV-P7-C2-10 (EC-011 overflow threshold corrected to >= 2**1024 − 2**970, matching BC-1.05.004 PC1 / BC-1.05.007 PC6)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,7 +106,7 @@ qualifying sessions exist (cold start).
 | EC-008 | entry usd `Infinity` | counted; sorts last |
 | EC-009 | entry usd `NaN` (only writable by the backfill tool, BC-BF-012, or by hand) | Ruled OD-138: pin legacy byte-for-byte; the expected bytes come from the CPython 3.11 oracle (frozen clock, temp HOME, synthetic history; oracle run 2026-11-15). For the 10-session cc history [`sess-00`=NaN, `sess-01..09` = 90.0…10.0] (file order) with `ts = now - 3600`, `api_ms = 400000`, `src = cc`, `now = 1794615009.0`: sorted order `[NaN, 10, …, 90]` and thresholds `((60.0, 80.0), (540.0, 720.0))`. For file order [`10.0 … 90.0`, NaN]: sorted `[10, …, 90, NaN]` and thresholds `((70.0, 90.0), (630.0, 810.0))`. The outcome is deterministic per exact file order (Python `sorted` stability); Go must reproduce it per order, table-tested over both pinned histories |
 | EC-010 | corrupt shapes (top level, `sessions` or entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10: out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule) |
-| EC-011 | foreign history holds an exact-int `usd` **or an exact-int `api_ms`** >= 2**1024 recorded by legacy `record_cost` (SL:234-237 stores `api_ms` unrounded) or by hand | any later refresh on the lane whose qualifying entry passes its API-time gate raises OverflowError at `usd / (api / 3.6e6)` (SL:255 — the int→float coercion of the giant exact int; no try in `cost_thresholds`) → degraded line on **every** qualifying refresh for up to the 30 d window (ADV-P3-C2-01). Crash ids: the `usd` leg is **CP-O10**, the `api_ms` leg **CP-O11** (taxonomy bearer note: the history-borne raise happens at the SL:255 division, not at SL:616/623; ADV-P5-C2-10). Foreign-history class (exclusion id **OD-160**): hylo's writer never writes it (OD-166, BC-1.05.004), so this is a Go table test, not a parity obligation |
+| EC-011 | foreign history holds an exact-int `usd` **or an exact-int `api_ms`** >= 2**1024 − 2**970 (the smallest magnitude Python's int→float coercion raises at — the same threshold BC-1.05.004 PC1 and BC-1.05.007 PC6 pin; ADV-P7-C2-10) recorded by legacy `record_cost` (SL:234-237 stores `api_ms` unrounded) or by hand | any later refresh on the lane whose qualifying entry passes its API-time gate raises OverflowError at `usd / (api / 3.6e6)` (SL:255 — the int→float coercion of the giant exact int; no try in `cost_thresholds`) → degraded line on **every** qualifying refresh for up to the 30 d window (ADV-P3-C2-01). Crash ids: the `usd` leg is **CP-O10**, the `api_ms` leg **CP-O11** (taxonomy bearer note: the history-borne raise happens at the SL:255 division, not at SL:616/623; ADV-P5-C2-10). Foreign-history class (exclusion id **OD-160**): hylo's writer never writes it (OD-166, BC-1.05.004), so this is a Go table test, not a parity obligation |
 
 ## Canonical Test Vectors
 

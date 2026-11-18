@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.8"
+version: "1.3.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a99539e"
+input-hash: "6005118"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -26,6 +26,7 @@ modified:
   - "1.3.6 pass-5 residual sweep (ADV-P5-B14): EC-007's subagent crash-range corrected to CP-A01..A05; history re-dated ascending (the pass-4 stamps predated pass-3's); no behavioral change; 2026-11-18T06:25:00Z"
   - "1.3.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17 sibling sweep) — EC-004 register row respelled to the OD-178 canon (five canonical tests incl. TestD4EX3_Text; register closed at seven) and history labels version-prefixed ascending; no behavioral change"
   - "1.3.8 pass-6 remediation (ADV-P6-B11): PC3 guarded-site list now names the subagent crash family CP-A01..A05 (matching PC1's --subagent coverage and EC-007); no behavioral change; 2026-11-19T04:00:00Z"
+  - "1.3.9 pass-7 remediation (ADV-P7-B03/B04/B09): PC3 guarded-site list gains the Windows MSVC localtime-domain OSError (CP-T09, ErrLocaltimeDomain — `_iso_ts` catches only ValueError, SL:984) per orchestrator call 8, and the CP-N03 anchor is corrected to BC-1.04.004/.005 (ADV-P7-B04; ARCH-03/error-taxonomy owners); EC-005 names the canonical test TestCPX03_WriteFailureExit0 (ADV-P7-B09); input-hash refreshed; no behavioral change; 2026-11-19T07:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,7 +57,9 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
    OD-168 — the PRD/DI-008 carve-out for the agent-panel mode.
 3. During the refresh a fault occurs at any guarded site: a crash-path site CP-S01..S17 (stdin type confusion,
    lone surrogate at output), CP-N01/N02/N03 (row-2 NaN paths and the metrics-borne numeric-`__name__` degrade,
-   BC-1.04.014/015), the OD-156 overflow sites routed to E-REN-002 through this guard (CP-O01..O05 at the row-1
+   BC-1.04.004/.005 per ARCH-03), the Windows MSVC localtime-domain OSError on a naive transcript timestamp
+   (**CP-T09** — `_iso_ts` catches only ValueError, SL:984, so the OSError escapes and degrades the line;
+   `ErrLocaltimeDomain`, ARCH-06), the OD-156 overflow sites routed to E-REN-002 through this guard (CP-O01..O05 at the row-1
    render sites, CP-O10/O11 in the cost segment — the transcript family CP-O06..O08 and CP-O09 resolve to the
    D4-EX-2 skip / no-write-save disciplines instead, not this guard; error-taxonomy E-REN-002), the subagent
    render family CP-A01..A05 (EC-007; BC-1.07.008), or any unexpected Go panic.
@@ -91,7 +94,7 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
 | EC-002 | Fault at the final print: a rendered str holds a lone surrogate (CP-S17) | Degraded line after every cache write of the refresh (BC-1.01.008) |
 | EC-003 | Go panic not mapped to any CP site (programming error) | `recover()` backstop prints the same 29 bytes, exit 0; the parity diff still flags the run on every input where legacy renders normally (legacy would not degrade). On an input matching a mapped degrade — the CP-S/CP-N/E-REN-002 families, e.g. a CP-O overflow input — both sides emit the 29-byte line and the stdout diff agrees; the closed, mutation-tested site register (VP-012) is what keeps such a panic from hiding |
 | EC-004 | Legacy import-time env crash (CP-X01/X02: unparseable TTL/ROWS -> empty stdout, exit 1) | Not reachable in Go: invalid settings are config errors, approved deviation **D4-EX-3** (OD-102, OD-114) rendered by BC-2.02.001; excluded from the parity diff via the OD-105 exclusion entry `D4-EX-3` with dedicated tests `TestD4EX3_{Number,Boolean,URL,Enum,Text}` — one per class with its own dedicated grammar (number-range, boolean, URL, enum, text); the number-grammar (BC-2.02.003) and theme/SGR (BC-2.01.003) classes are pinned by their class contracts, and the register is closed at seven (OD-114 + OD-134 + OD-140 + OD-178) |
-| EC-005 | Writing the degraded line itself fails (stdout closed / EPIPE; legacy CP-X03 exits 1 with no stdout) | Ruled OD-136: Go swallows the write error and still returns exit 0 (DI-008). This is the named exclusion `cp-x03` in the OD-105/OD-110 closed set, with its own dedicated table test (name provisional — architect (OD-145)). Not observable by Claude Code (the consumer is gone); out of parity comparison (P3r1 §B marks CP-X03 not parity-relevant) |
+| EC-005 | Writing the degraded line itself fails (stdout closed / EPIPE; legacy CP-X03 exits 1 with no stdout) | Ruled OD-136: Go swallows the write error and still returns exit 0 (DI-008). This is the named exclusion `cp-x03` in the OD-105/OD-110 closed set, with its own dedicated table test `TestCPX03_WriteFailureExit0` (canonical name per the VP-012 row and VP-003; resolves the OD-145 provisional naming). Not observable by Claude Code (the consumer is gone); out of parity comparison (P3r1 §B marks CP-X03 not parity-relevant) |
 | EC-006 | SIGINT/SIGTERM (legacy CP-X04) | Out of scope; no output contract |
 | EC-007 | argv contains `--subagent` | This contract covers it: OD-155 (superseding OD-14 (a)) ports the subagent panel in P1; legacy guards `main_subagent` identically (SL:1238-1243), so a fault in the subagent render ends in the same 29 bytes, exit 0 (BC-1.07.008, CP-A01..A05). An *unknown* flag is the separate BC-4.01.002 line (OD-112) |
 
