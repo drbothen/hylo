@@ -1,14 +1,14 @@
 ---
 document_type: module-criticality
 level: ops
-version: "1.9"
+version: "1.10"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T18:30:00Z
+timestamp: 2026-11-21T00:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "109a0cc"
+input-hash: "a97d27b"
 traces_to: prd.md
 ---
 
@@ -72,7 +72,10 @@ rulings OD-155..OD-165 are settled constraints for this schedule.
 > VP counts regenerated from `verification-properties/VP-INDEX.md` (Catalog Module
 > column; regenerated 2026-11-18, pass-5 A05 — includes VP-038..VP-041: VP-039 subagent
 > elapsed clock, VP-040 frame/width property legs, VP-041 row-1 property legs split from
-> VP-028 in pass-4, all `internal/statusline`). VPs listing several modules count in each: VP-005 (statusline,
+> VP-028 in pass-4, all `internal/statusline`). Derivation note (pass-10 A13): VP-038 is
+> counted under Status Line via its declared source BC-1.03.004 — the VP-INDEX Module
+> cell lists only its primary home `internal/pyfmt (str.go)`, so that one count is not a
+> pure Catalog-column regroup. VPs listing several modules count in each: VP-005 (statusline,
 > pyfmt), VP-014 (platform, statusline), VP-018 (statusline cache.go, cost), VP-019
 > (parity swap, statusline cache.go), VP-021 (statusline cost.go, cost), VP-016 (config,
 > cmd/hylo), VP-001/-003 (statusline guard, cmd/hylo), VP-038 (pyfmt str.go; statusline

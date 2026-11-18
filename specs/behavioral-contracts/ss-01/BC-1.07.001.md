@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.8"
+version: "1.0.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
@@ -28,6 +28,7 @@ modified:
   - "1.0.6 2026-11-19T19:30:00Z: pass-7 remediation (ADV-P7-C06) — stale BC-4.01.002 cross-references refreshed: its EC-004 no longer carries the superseded \"positional data\" reading (aligned v1.1.3), so EC-003 and Related BCs now state the agreement"
   - "1.0.7 2026-11-20T12:00:00Z: pass-8 residual sweep — VP table and VP Anchors gain VP-004 (A2-07): VP-004's closed exit-surface statement verifies the subagent entry leg (exit 0; stdout zero or more LF-terminated NDJSON lines, zero bytes legal; OD-168 config-error case) whose wire grammar this contract's Pre-1/Inv 2/vector row 1 pin; VP-004 bcs: already carries this BC (agent 3)"
   - "1.0.8 2026-11-20T12:30:00Z: pass-8 residual sweep (OD-192) — ASSUMP-107-1 capture deadline respelled: the capture lands before Phase 2 writes the S1.07 stories, not before Phase 3"
+  - "1.0.9 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-A2-01, my BC row; orchestrator call 9) — the VP-004 row states the full legal output set: zero or more LF-terminated NDJSON lines OR, on a catalogued renderer fault (CP-A01..A05, BC-1.07.008), exactly the 29-byte degraded line (DI-008 carve-out); a fuzzed stdin reaching a renderer fault legally prints non-JSON bytes"
 
 deprecated: null
 deprecated_by: null
@@ -107,7 +108,7 @@ SL:1240-1241 (`"--subagent" in sys.argv[1:]`); routing order from SL:1239-1244.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-002 | Dispatcher fuzz (argv vectors incl. the BC-1.07.001 routing rows) asserts exact-member `--subagent` at any index routes to the subagent renderer before flag handling and every non-matching form falls to the main path — realizing the exactly-one-renderer invariant observationally over the fuzzed argv space | fuzz (`go test -fuzz`, NUL-decoded argv) |
-| VP-004 | Closed verb-scoped exit surface, subagent entry leg: for all argv/env/stdin with `args[0]=="statusline"`, the `--subagent` entry exits 0 with stdout zero or more LF-terminated NDJSON lines, zero bytes legal (config error = zero stdout bytes per OD-168) — the exit/wire-grammar surface this contract's Pre-1, Inv 2 and vector row 1 pin (pass-8 A2-07) | for-all fuzz (`FuzzStatuslineExitSurface`, `go test -fuzz`, `cmd/hylo`) |
+| VP-004 | Closed verb-scoped exit surface, subagent entry leg: for all argv/env/stdin with `args[0]=="statusline"`, the `--subagent` entry exits 0 with stdout zero or more LF-terminated NDJSON lines, zero bytes legal (config error = zero stdout bytes per OD-168), or — on a catalogued renderer fault (CP-A01..A05, BC-1.07.008) — exactly the 29-byte degraded line (DI-008 carve-out; pass-10 A2-01: fuzzed stdin can reach a renderer fault, e.g. an exact int `tokenCount` ≥ 2**1024 overflows `float()` in `_fmt_tokens`, which catches only TypeError/ValueError) — the exit/wire-grammar surface this contract's Pre-1, Inv 2 and vector row 1 pin (pass-8 A2-07) | for-all fuzz (`FuzzStatuslineExitSurface`, `go test -fuzz`, `cmd/hylo`) |
 
 ## Traceability
 

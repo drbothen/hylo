@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.1"
+version: "1.5.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "eaa745b"
+input-hash: "aba3e47"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:510-522, 531-532)"
@@ -23,6 +23,7 @@ modified:
   - "1.4 pass-5 remediation (ADV-P5-B05): EC-010 scoped to huge positive resets_at; new EC-011 pins the huge-negative behavior — window passed at SL:506 (exact int/float compare), hidden at SL:513-514, no degrade (oracle-verified); CTV row added; 2026-11-18T05:42:56Z"
   - "1.5 pass-6 remediation (ADV-P6-B02 + B10 + B16): EC-011 and its CTV row re-vectored from −10³⁰⁰ to −OV (the negated EC-010 boundary — discriminates a float64-at-decode port; −10³⁰⁰ converted cleanly); the OV CTV row now states a numeric used_percentage so the shown window reaches SL:515; history labels version-prefixed; 2026-11-19T04:00:00Z"
   - "1.5.1 pass-8 remediation (ADV-P8-B10): EC-011's hiding mechanism cited precisely — SL:510 widget drop for the canonical 5h-absent vector, SL:513-514 per-window continue when the other window is reported; outcome unchanged; 2026-11-19T08:00:00Z"
+  - "1.5.2 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O02 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -118,6 +119,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; `rate_limits` shown,
 |--------|----------|-------------|
 | VP-028 | Colour equals the oracle over a grid pct ∈ {0..100 step 0.5} × rem/length ∈ {0.0001..1.2 step 0.01} for both windows | table test vs CPython goldens |
 | VP-028 | Windows joined by exactly two spaces, 5h before 7d | table test |
+| VP-028, VP-001 | The CP-O02 overflow degrade (EC-010: `resets_at` at or beyond the int→float threshold, positive side) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 

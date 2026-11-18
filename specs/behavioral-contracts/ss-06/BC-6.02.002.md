@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "2997e8e"
+input-hash: "520a653"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-19T00:12:00Z (1.2.4) ADV-P5 remediation D02+D03 — step `now` parsed once to float64 (Python float()) and never round-tripped through time.Time ns; stdin.bin path rewrites splice JSON-escaped paths only inside JSON string values (BC-6.02.003 PC-1 rule)"
   - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
   - "1.2.6 2026-11-20T18:30:00Z: ADV-P9 remediation D12 (orchestrator call 8) — new Pre-3 cache-seeding rule: a replay starts fresh and the harness seeds a fixed synthetic proc_start exactly as corpus cases do under BC-6.02.003 PC-6; a replay never consults the machine's real process tree (real captures have a truthy session_id and no proc_start, so the OD-107 real-input criterion is met by stdin/clock/transcript bytes)"
+  - "1.2.7 2026-11-21T06:00:00Z: ADV-P10 remediation D04 (orchestrator call 4) — Pre-3 seeding generalized to the EVERY-SID rule: the harness seeds a fixed synthetic proc_start for every session_id that any step's stdin of the capture uses (a step may change the sid mid-sequence, e.g. /clear), and the case-load validator rejects a capture whose step introduces a sid it cannot seed; EC-005 aligned; no replay ever consults the real process tree"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,13 +95,18 @@ are compared after every step (BC-6.03.002).
    byte-parity-on-real-inputs criterion. If a capture ever requires more than a
    substring splice (paths split by JSON escapes), the case is a harness build error,
    not a silent rewrite.
-3. **Cache seeding (ADV-P9-D12, orchestrator call 8).** A replay's cache directories
+3. **Cache seeding (ADV-P9-D12, orchestrator call 8; every-sid rule ADV-P10-D04,
+   orchestrator call 4).** A replay's cache directories
    start FRESH, and the harness seeds a fixed synthetic `proc_start` (in
    `statusline-<sid>.json`) in the fresh cache dir exactly as corpus cases do under
    BC-6.02.003 PC-6's hermeticity rule: real captures carry a truthy `session_id` and
    no `proc_start`, so an unseeded replay would be rejected at case load — or run
    against the machine's real process tree, which a replay NEVER consults. The
-   OD-107 real-input criterion is met by the stdin, clock and transcript bytes; the
+   seeding covers EVERY session id the capture uses: the harness seeds a fixed
+   synthetic `proc_start` for every `session_id` that any step's stdin of the capture
+   uses (a step's stdin may change the sid mid-sequence, e.g. `/clear`), and the
+   case-load validator rejects a capture whose step introduces a sid it cannot seed.
+   The OD-107 real-input criterion is met by the stdin, clock and transcript bytes; the
    process tree is synthetic by construction, identically on both sides.
 
 ## Postconditions
@@ -149,7 +155,7 @@ are compared after every step (BC-6.03.002).
 | EC-002 | Two consecutive steps with the same `now` | Both run. The git TTL (5 s) and metrics TTL see zero elapsed time, as in a real debounced burst |
 | EC-003 | `transcript_bytes` splits a line mid-way (snapshot taken during an append) | Allowed. Both sides see the same partial last line. Long-line completion behavior is then compared, which is the realistic case |
 | EC-004 | Snapshot has no `transcript_path` | Step runs. Both sides take the no-transcript path |
-| EC-005 | Snapshot `session_id` changes mid-sequence (`/clear`) | Step runs. New session cache names appear on both sides and are compared by file name |
+| EC-005 | Snapshot `session_id` changes mid-sequence (`/clear`) | Step runs. The new sid's `proc_start` was seeded like the base sid (Pre-3 every-sid rule, ADV-P10-D04); new session cache names appear on both sides and are compared by file name |
 | EC-006 | Captured `columns` differs per step (terminal resized) | `COLUMNS` set per step for both sides |
 
 ## Canonical Test Vectors

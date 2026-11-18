@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.0"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T20:00:00Z
@@ -30,6 +30,7 @@ modified:
   - "1.1.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C04) — EC-009's legacy contrast corrected from the end-to-end closed-stdout oracle (exit 120 via shutdown-flush BrokenPipeError + stderr Exception-ignored message; guard not entered for buffered row sets; no in-process degraded print) — hylo's ruled OD-172 behavior unchanged"
   - "1.1.9 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
   - "1.2.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02) — frontmatter modified list repaired to block style (lost closing quote restored); no behavioral change"
+  - "1.2.1 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C11, ADV-P10-C12) — Legacy-contract row states the register has been 49 paths since pass-9 CP-O12 (was stale at 48); PC6 wording fixed so the 29 degraded bytes include the LF the hex listing already shows"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,8 +71,9 @@ after a complete render, no partial row output precedes the line.
    the helper's except list covers only TypeError/ValueError → degraded line, exit 0.
 5. CP-A05 — a task's `startTime` a huge int (running row, passes the isinstance/(>0) gate):
    OverflowError at `now_ms - start` (SL:919) → degraded line, exit 0.
-6. stdout is exactly the 29 degraded bytes + LF (hex `1b 5b 39 30 6d` + `statusline degraded` +
-   `1b 5b 30 6d 0a`); no partial rows, no JSON. Exit code 0.
+6. stdout is exactly the 29 degraded bytes, LF included (hex `1b 5b 39 30 6d` +
+   `statusline degraded` + `1b 5b 30 6d 0a` — the trailing `0a` is that LF); no partial rows, no JSON.
+   Exit code 0.
 7. Diagnostics to stderr only (never compared for parity, design §5.3).
 
 ## Invariants
@@ -130,7 +132,7 @@ are the SL:127-133 defaults (GREY `\e[90m`, RESET `\e[0m`) as pinned in BC-1.01.
 | Architecture Module | `internal/statusline` guard (`guard.go`, design §2.2) shared with BC-1.01.001 |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py: guard (SL:1242-1245); CP sites SL:891, 894, 906, 878, 919 |
-| Legacy contract | BC-SL-097 (CP-A01..A03 enumerated P3r1 §A7; CP-A04..A05 adv-p3, OD-156 + new ids; crash register 47 at ADV-P6-C07, 48 since pass-7 CP-T09) |
+| Legacy contract | BC-SL-097 (CP-A01..A03 enumerated P3r1 §A7; CP-A04..A05 adv-p3, OD-156 + new ids; crash register 47 at ADV-P6-C07, 48 since pass-7 CP-T09, 49 since pass-9 CP-O12) |
 | Decisions | OD-155 (restores CP-A family to scope), OD-156 ("like O2": catalogued crash paths reproduce the 29-byte line), OD-136 (EPIPE), OD-172 (cp-x03 extends to row writes: stop and exit 0, no degraded attempt — ADV-P4-C13), D4 |
 
 ## Related BCs (Recommended)

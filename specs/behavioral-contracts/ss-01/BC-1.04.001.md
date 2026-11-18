@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.10"
+version: "1.3.11"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "465db67"
+input-hash: "6cae513"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-18 (v1.3.8) pass-8 remediation ADV-P8-C2-02 (followed-3xx body drained under the PC1 framing ladder before the next hop; a drain failure raises IncompleteRead and gives no sample with one fewer wire request), ADV-P8-C2-03 (chunked = the exact equality tr_enc.lower() == \"chunked\"; trailing-space and list values fall to Content-Length/EOF), ADV-P8-C2-13 (_MAXHEADERS = 100, the 65536-byte header-line limit, and the interim 1xx skip pinned), ADV-P8-C2-10 (ARCH-03 line anchors re-verified on disk: 187/270), ADV-P8-A2-17 (stale Transport{Proxy: nil} residue dropped from PC2)"
   - "2026-11-18 (v1.3.9) pass-8 residual — Refactoring Notes seam respelled to the ARCH-03 TEST SEAM ruling: raw net.Listener fake in tests, not httptest"
   - "2026-11-18 (v1.3.10) pass-9 remediation ADV-P9-C2-01 (interim skip = status 100 only; 101/102/103 final → HTTPError → no sample even with a 200 behind them; EC-025), ADV-P9-C2-02 (urlsplit sanitization before scheme guard and quote: leading C0/space stripped, TAB/CR/LF deleted anywhere, scheme lowercased; oracle: /a<TAB>b → /ab, <VT>/foo → /foo, HTTP:// hop followed), ADV-P9-C2-07 (Host = URL netloc as written, percent-unquoted, port only when written), ADV-P9-C2-06 (ARCH-03 citations as section anchors, line labels dropped)"
+  - "2026-11-18 (v1.3.11) pass-10 remediation ADV-P10-C2-01 (the two guard-first passages reordered: loop-key normalization and the normative Go step list now put the urlsplit sanitization BEFORE the scheme guard, matching the scheme-guard paragraph and the stdlib parse-sanitize-guard order; the normative Go rule respelled to the minimal net.Conn HTTP/1.1 client driving the hops itself — no http.Client/CheckRedirect in the path, the pass-5 recipe noted as superseded), ADV-P10-C2-08 (PC1 one INITIAL GET plus the Inv 1 hops — a loop re-keys A, so a literal single-request assertion fails), ADV-P10-C2-11 (VP-001 row added for the metrics-borne CP-N03 leg, EC-013)"
 
 deprecated: null
 deprecated_by: null
@@ -60,10 +61,13 @@ is byte 0x1B.
 
 ## Postconditions
 
-1. Exactly one HTTP GET is issued to
+1. One INITIAL HTTP GET is issued to
    `<url>/api/v1/query?query=<QUERY percent-encoded as Python quote(QUERY, safe='')>`
    (space as `%20`, never `+`; the encoded prefix is
-   `%7B__name__%3D~%22vllm%3Anum_requests_running%7C...`). Transport: hylo's metrics
+   `%7B__name__%3D~%22vllm%3Anum_requests_running%7C...`) — plus the redirect hops
+   Inv 1 allows: a followed redirect issues a further GET, potentially to the same
+   URL again (an A→B→A loop re-keys A while its visit count holds), so a literal
+   single-request assertion fails on loops (ADV-P10-C2-08). Transport: hylo's metrics
    client is a MINIMAL HTTP/1.1 client over a `net.Conn`: an `http` URL dials plain TCP;
    an `https` URL upgrades the SAME `net.Conn` through `crypto/tls` with SNI, ALPN
    `http/1.1` only, and the OS trust store (system roots on Linux) — it is the PARITY
@@ -188,13 +192,16 @@ is byte 0x1B.
    certificate trusted by only one store yields a sample on one side and no sample on
    the other; table tests pin hylo's behaviour (OS store), parity cases plain http.
    Target normalization (ADV-P4-C2-07; completed ADV-P5-C2-02): the
-   loop-detection key is the target AFTER the raw-header scheme check, the `urlsplit`
+   loop-detection key is the target AFTER the `urlsplit`
    sanitization (leading C0 controls and spaces stripped, `\t`/`\r`/`\n` deleted
    anywhere in the target, scheme lowercased — an inner TAB vanishes: `Location: /a␉b`
    keys and targets `/ab`, NOT `/a%09b` as the former chain spelled it; a leading
    `\x0b`, which compat32 rule (a) above keeps, is stripped: `Location: \x0b/foo`
    targets `/foo`; oracle-measured through urllib on CPython 3.11.7, 2026-11-18, local
-   listener, ADV-P9-C2-02), the empty-path fix
+   listener, ADV-P9-C2-02), then the scheme guard on the SANITIZED
+   scheme (the sanitization-before-guard order of the scheme-guard paragraph above; the
+   former "raw-header scheme check first" spelling is corrected, ADV-P10-C2-01), the
+   empty-path fix
    (netloc with no path → `/`), the `urlunparse` round trip (an empty query or empty
    params component is dropped, so `/x?` and `/x` are ONE key; an EMPTY fragment is
    dropped too — `urlunsplit` adds `#` only when the fragment is non-empty — so `/x#`
@@ -223,25 +230,31 @@ is byte 0x1B.
    (len = 10); a Go `CheckRedirect` that counts hops refuses chains urllib follows
    (sample vs no sample). The caps 4/10 are CPython stdlib class constants emulated for
    parity — named constants in hylo with a "why not config" comment, not config keys
-   (P16). Normative Go rule (pass-5 call 14, ADV-P5-C2-01/02): hylo does NOT ride
-   `http.Client`'s automatic redirect machinery. The client's `CheckRedirect` returns
-   `http.ErrUseLastResponse` unconditionally, so every 3xx response comes back to hylo
-   unelevated, and hylo drives the hops itself in a loop it controls: pick the target
-   (`location` then `uri`; a present-but-empty value resolves as
+   (P16). Normative Go rule (pass-6 call 4 and pass-7 call 9, superseding the pass-5
+   `http.Client`/`CheckRedirect` recipe of ADV-P5-C2-01/02; stale recipe text replaced
+   ADV-P10-C2-01): hylo's minimal HTTP/1.1 client over a `net.Conn` (PC1) has NO
+   redirect machinery to ride or disable — there is no `http.Client` and no
+   `CheckRedirect` in the fetch path (historical note: pass-5 prescribed riding
+   `http.Client` with a `CheckRedirect` that returns `http.ErrUseLastResponse`
+   unconditionally; superseded in pass-6 by the minimal client, which parses every
+   response, 3xx included, itself). Hylo drives the hops itself in a loop it controls:
+   pick the raw target (`location` then `uri`; a present-but-empty value resolves as
    `urljoin(<URL of the request that received this 3xx>, "")` — hop 1: the original URL
-   (query included); hop ≥ 2: the current hop's URL), apply the scheme
-   guard, normalize (`urlsplit` sanitization — leading C0 controls and spaces
-   stripped, `\t`/`\r`/`\n` deleted anywhere, scheme lowercased, ADV-P9-C2-02 — then
-   empty-path fix → `urlunparse` →
+   (query included); hop ≥ 2: the current hop's URL), sanitize it FIRST (`urlsplit`
+   sanitization — leading C0 controls and
+   spaces stripped, `\t`/`\r`/`\n` deleted anywhere, scheme lowercased, ADV-P9-C2-02),
+   then apply the scheme guard to the SANITIZED scheme, finish normalization (empty-path
+   fix → `urlunparse` →
    `quote(..., "iso-8859-1", safe=string.punctuation)` → `urljoin`), then consult the
    `redirect_dict` emulation — refuse (no sample, and never parse the refused 3xx body)
    iff `count[normalized] >= 4 || len(count) >= 10`, otherwise `count[normalized]++` and
    issue the next GET (its request target drops the fragment; only the loop key keeps
    it). Only this structure reproduces the empty-`Location` self-redirect,
-   the urllib-normalized key and the non-http(s)-target no-sample guard: `CheckRedirect`
-   alone sees none of them (Go skips it on an empty `Location` and cannot rewrite the
-   target). Hylo must reproduce every refusal mode the
-   way urllib does — the fetch fails to "no sample" (outer `except Exception`, SL:186) —
+   the urllib-normalized key and the non-http(s)-target no-sample guard — redirect
+   machinery sees none of them (an `http.Client`'s `CheckRedirect` is skipped on an
+   empty `Location` and cannot rewrite the target). Hylo must reproduce every refusal
+   mode the way urllib does — the fetch fails to "no sample" (outer
+   `except Exception`, SL:186) —
    and must never parse the refused 3xx body.
 2. Proxy environment variables are ignored for this request (legacy `ProxyHandler({})`,
    SL:168): hylo's PC1 minimal client has NO proxy machinery at all — there is no
@@ -362,6 +375,7 @@ is byte 0x1B.
 | VP-030 | The function never panics or returns an error to the caller | fuzz |
 | VP-030 | Request URL bytes equal legacy's for the default query | manual (golden) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-181` (metrics transport beyond plain http: non-http(s) redirect targets give no sample; https TLS trust-store differences) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-181` entry and its riding table test `TestMetricsClient_OD181_TransportTable` (defined in VP-030), and the mutation test fails closed if that entry is dropped (ADV-P7-C2-03) | property test (VP-012, go test) |
+| VP-001 | The promised output set holds on the metrics-borne CP-N03 degrade leg (EC-013): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -395,6 +409,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — fetch differential equivalence; VP-022 (partial) — network-edge read scope only
+- VP-001 — never-blank/exit-0 ladder; the metrics-borne CP-N03 leg (EC-013) rides it (ADV-P10-C2-11)
 
 ---
 

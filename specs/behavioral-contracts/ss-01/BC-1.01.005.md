@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a99539e"
+input-hash: "8885139"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,7 @@ modified:
   - "1.2.2 2026-11-18T04:00:00Z: pass-3 remediation (ADV-P3-B03): VP anchor names VP-040 P4 instead of VP-027"
   - "1.3.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-3 stamp re-dated ascending; no behavioral change"
   - "1.3.4 pass-6 remediation (ADV-P6-B16): history labels reconciled \u2014 the sync-check entry no longer cites a nonexistent preceding 1.3.1; no behavioral change; 2026-11-19T04:00:00Z"
+  - "1.3.5 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B04): PC4's clamp claim withdrawn \u2014 clamping a negative overflow to math.MinInt64 is not output-equivalent when narrow_cols is itself MinInt64 (Python -10**30 >= -2**63 is False, clamped Go MinInt64 >= MinInt64 is True); the row-2 comparison must be made on the exact sign-preserving big-int value"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,7 +55,12 @@ protocol input, not a hylo setting: it has no `HYLO_*` key and is not validated 
    promotion). A positive value too large for int64 must behave as "no trim, row 2 shown" (identical output to a
    huge Python int, P3r1 §A1). A negative value beyond int64 range (up to 4,300 digits) must stay **negative**
    (row 2 hidden, BC-1.01.007); mapping int64 overflow to 0 would show row 2 and diverge, so the Go parser must
-   keep the sign (clamping to `math.MinInt64` is output-equivalent).
+   keep the sign. The row-2 comparison `cols >= narrow_cols` (BC-1.01.003) must be made on the **exact big-int
+   value** (sign-preserving): clamping a negative overflow to `math.MinInt64` is **not** output-equivalent —
+   when `narrow_cols` is itself `MinInt64` (the "any Int" range admits it), Python evaluates
+   `-10**30 >= -2**63` as False (row 2 hidden) while the clamped Go comparison `MinInt64 >= MinInt64` is True
+   (row 2 shown). Either compare in big-int space or carry the overflow sign bit; do not clamp (pass-10
+   ADV-P10-B04).
 
 ## Invariants
 

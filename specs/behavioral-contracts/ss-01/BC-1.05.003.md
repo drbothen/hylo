@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r6.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "a614197"
+input-hash: "9d4220c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:626-636)"
@@ -30,6 +30,7 @@ modified:
   - "1.3 2026-11-17: pass-4 residual sweep — key renamed to statusline.cost.display_floor_usd (OD-174)"
   - "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the pick named as the config key statusline.glyphs.cost_pick with default ⛏, OD-189 sibling treatment)"
   - "1.3.2 2026-11-18: pass-9 orchestrator call 4/B03 (CP-O12 co-owner EC-011 added — cost-pick equivalence overflow at SL:633; owner EC in BC-1.02.029) and DI-008 lifted into the L2 row"
+  - "1.3.3 2026-11-18: pass-10 remediation ADV-P10-C2-12 (PC-3 — the MTok divisor 1e6 carries the unit-constant note, P20 sibling of BC-1.05.002's 3.6e6 note) + ADV-P10-C2-11 (VP-001 row added for the EC-011 CP-O12 overflow degrade leg; VP Anchors entry)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,7 +74,9 @@ equivalent, unless that is below half a cent.
    where `glyphs.cost_pick` = `statusline.glyphs.cost_pick` (Text, default `⛏` U+26CF,
    KD-002, BC-2.01.004 PC-6; the ⛏ literals in the vectors are the default spelling,
    ADV-P8-C2-01).
-3. `basis_ok` → `eq = tot * dgx_mtok / 1e6` (left-to-right double arithmetic, SL:633);
+3. `basis_ok` → `eq = tot * dgx_mtok / 1e6` (left-to-right double arithmetic, SL:633;
+   the MTok divisor 1e6 is a unit constant — named constant, not config, the P20 sibling
+   of BC-1.05.002's 3.6e6 note, ADV-P10-C2-12);
    if `eq >= display_floor_usd` append `\e[90m ` + glyphs.cost_pick + F(eq, 2) + `\e[0m`
    (SL:634-635); else append nothing (not `n/a`).
 4. The text is appended after `$` and any `$/h`, inside the same segment, with no
@@ -123,6 +126,7 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 |--------|----------|-------------|
 | VP-021 | `⛏` text present ⇒ cost segment present and lane is local | Go property test (testing/quick) |
 | VP-021 | Bytes equal legacy on the five P3r6 §1.1 rows and the P3r7 12-value fixture | manual (table test) |
+| VP-001 | The promised output set holds on the EC-011 CP-O12 overflow degrade leg: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -155,6 +159,7 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `⛏` gating
+- VP-001 — never-blank/exit-0 ladder; the EC-011 CP-O12 overflow leg rides it (ADV-P10-C2-11)
 
 
 #### Source Evidence

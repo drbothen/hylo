@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T22:00:00Z
+timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-04-data-files.md, architecture/ARCH-09-reserved-boundaries.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "a0cd016"
+input-hash: "83958c1"
 traces_to: prd.md
 source_bc: BC-1.04.001
 bcs: [BC-1.04.001, BC-1.01.009]
@@ -19,7 +19,8 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)", "1.4 2026-11-18T14:40:00Z: ADV-P4 fixes — the AST/imports lint leg gets a tracked owner (the ARCH-08 cicd-setup story that wires the lint job) and a POL-11 positive-coverage assertion (one planted ledger-opening mutant flagged + zero flags on the real tree, asserted in CI) (A2-17); BC-1.01.009 added to bcs: to match the body's partial-coverage claim, enumerated as a prose-only exception in VP-INDEX (A2-11); runStatusline call shape unified (A2-22)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-17) — the dangling '(see Propagation note)' pointer removed (the file has no such section; the lint-wiring lag is owned by the ARCH-08 cicd-setup story, named directly); the allowed path set's 'metrics caches' noun corrected — no metrics cache exists, the sample lives in the session cache (ENT-14)", "1.6 2026-11-19T22:00:00Z: pass-8 fixes (ADV-P8-A2-14: DI-007 disposition respelled to OD-125's settled wording, 'adopted for now with a revisit flag', replacing 'permanent rule'; ADV-P8-A2-17: the primary-BC anchor note's stale '`Proxy: nil` transport' residue corrected to BC-1.04.001 PC1's minimal HTTP/1.1 client over a raw net.Conn, no http.Transport)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)", "1.4 2026-11-18T14:40:00Z: ADV-P4 fixes — the AST/imports lint leg gets a tracked owner (the ARCH-08 cicd-setup story that wires the lint job) and a POL-11 positive-coverage assertion (one planted ledger-opening mutant flagged + zero flags on the real tree, asserted in CI) (A2-17); BC-1.01.009 added to bcs: to match the body's partial-coverage claim, enumerated as a prose-only exception in VP-INDEX (A2-11); runStatusline call shape unified (A2-22)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-17) — the dangling '(see Propagation note)' pointer removed (the file has no such section; the lint-wiring lag is owned by the ARCH-08 cicd-setup story, named directly); the allowed path set's 'metrics caches' noun corrected — no metrics cache exists, the sample lives in the session cache (ENT-14)", "1.6 2026-11-19T22:00:00Z: pass-8 fixes (ADV-P8-A2-14: DI-007 disposition respelled to OD-125's settled wording, 'adopted for now with a revisit flag', replacing 'permanent rule'; ADV-P8-A2-17: the primary-BC anchor note's stale '`Proxy: nil` transport' residue corrected to BC-1.04.001 PC1's minimal HTTP/1.1 client over a raw net.Conn, no http.Transport)",
+  "1.7 2026-11-21T12:00:00Z: pass-10 fix (ADV-P10-A2-09) — the absence claim qualified: no opened path matches the D7 ledger language EXCEPT the transcript path stdin itself designates (legacy opens whatever path stdin's transcript_path names, SL:1009-1042); DI-007's intent stated — the status line initiates no ledger access of its own; the recording-test bullet and the sketch's isLedgerLanguage check carry the same exemption | input-hash refreshed to 83958c1 (hook-flagged drift)"]
 
 deprecated: null
 deprecated_by: null
@@ -50,7 +51,11 @@ the fault table belongs to the allowed statusline path set (transcript, session 
 — which hold the metrics sample, ENT-14, there being no metrics cache — mix/git
 caches, cost history, git-widget `.git`/`HEAD` reads up the ancestor
 walk, Linux `/proc` probe reads) and that no opened path matches the D7 ledger
-language. The wrapper does not see a direct `os.Open` inside the package — that
+language except the transcript path stdin itself designates — legacy opens whatever
+path stdin's `transcript_path` names (SL:1009-1042), so a stdin that names the ledger
+file is lawful and DI-007's intent is that the status line INITIATES no ledger access
+of its own, not that stdin cannot designate a ledger-shaped path. The wrapper does
+not see a direct `os.Open` inside the package — that
 residual is covered by the compile-time AST/imports lint (leg (c) below), so the
 combination, not the wrapper alone, is the enforcement claim. The REVISIT
 flag (OD-125) applies: at P7's ledger redesign, allowing ledger-backed widgets would
@@ -84,7 +89,7 @@ this label, not a fetch-parity property.
 - **Method:** static analysis + code review: (a) runtime — a recording-filesystem
   `Env.Files` wrapper records every path opened **through the seam** during a full
   render over the fault table and asserts membership in the allowed statusline path
-  set and zero matches for the ledger file name (fails on any extra seam-routed open;
+  set and zero ledger-file-name matches outside the stdin-designated transcript (fails on any extra seam-routed open;
   direct `os.Open` visibility is leg (c)'s job — A2-12); (b) compile-time —
   the `Env` struct admits no ledger member (naming-only reflection check over field
   names, not a type theorem); (c) a compile-time AST/imports
@@ -120,7 +125,8 @@ func TestEnvScope_AllowedPathSet(t *testing.T) {
                 // git widget's .git / gitdir-HEAD reads up the ancestor walk (SL:369-389)
                 t.Fatalf("render opened %q: outside the allowed path set (DI-007)", p)
             }
-            if isLedgerLanguage(p) { // D7 ledger file-name language
+            if isLedgerLanguage(p) && !p.isStdinDesignated { // D7 ledger file-name language;
+                // exempt: the transcript path STDIN designates (SL:1009-1042)
                 t.Fatalf("render opened ledger-looking path %q (DI-007 leak)", p)
             }
         }

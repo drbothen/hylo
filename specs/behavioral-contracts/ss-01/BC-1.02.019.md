@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.2"
+version: "1.4.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "b8b756c"
+input-hash: "130c545"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,7 @@ modified:
   - "1.3 pass-4 remediation (ADV-P4-B03): for-all grid-equality and blue-channel legs re-anchored to VP-041 (B01: this BC's default-only Inv 3 stands; the contradicting registry row is the architect's fix); 2026-11-18T03:00:00Z"
   - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.4.2 pass-7 remediation (ADV-P7-B12): history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
+  - "1.4.3 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -110,7 +111,7 @@ Pinned 2026-11-15 by calling the legacy `heat` under CPython 3.11 (oracle, OD-10
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; BC-COMPONENT-MAP: internal/statusline/context.go (heat HSV; arm64) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:heat (SL:144-148) and legacy/dgx_statusline.py:truecolor (SL:140-141) |
 | Legacy contract | BC-SL-056 (deep pass-3 round 1, new) |
 | Config keys | `statusline.theme.heat` (T-030) |
@@ -124,11 +125,11 @@ Pinned 2026-11-15 by calling the legacy `heat` under CPython 3.11 (oracle, OD-10
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/context.go (heat HSV; arm64) (FMA no-fuse convention) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#context` — internal/statusline/context.go (heat HSV; arm64) (FMA no-fuse convention) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

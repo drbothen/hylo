@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:00:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
-input-hash: "8315059"
+input-hash: "18a498b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy CACHE_DIR at legacy/dgx_statusline.py SL:78)"
@@ -25,6 +25,7 @@ modified:
   - "2026-11-19T04:05:00Z (1.2.4) ADV-P6 remediation D21+D26 — PC-6 accuracy: the UTC-on-unparseable verdict is a ruled hylo verdict (libc itself honors POSIX TZ strings; TZ=Local reaches Go's LoadLocation special case, a documented OS-dependent quirk); LocalZone's error result pinned (non-nil only on the TZ-unset path when OS resolution fails); EC table row order fixed (EC-010 row moved before EC-011/012, ids unchanged)"
   - "2026-11-19T17:00:00Z (1.2.5): ADV-P7 remediation D12 + orchestrator call 4 — Pre-2 home source routed through the seam: HomeDir(env EnvVars) (HOME on Unix, USERPROFILE on Windows); no platform function reads the real process environment (Inv 3); signatures canonized as CacheDir(env EnvVars) and LocalZone(env EnvVars)"
   - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D01+D08+D16 — PC-1/PC-2 directory resolvers canonized with full signatures and error results (ConfigDir/StateDir/CacheDir all (env EnvVars) (string, error)); Inv 1 names the PC-11 rename-retry keys as the no-legacy-analog default exceptions; TZ-unset canonical leg oracle qualified (runner-relative: assert non-nil zone + nil error, never a parity oracle)"
+  - "2026-11-21T06:00:00Z (1.3.1): ADV-P10 remediation D03+D10 (orchestrator call 3) — PC-3 states the pass-9 A11 absoluteness rule for paths.cache_dir (relative value = config error `not an absolute path`, BC-2.01.005 PC-3; filepath.IsAbs semantics per OS); PC-1 states the relative-base rule: a relative HOME (Unix) or relative LOCALAPPDATA/APPDATA (Windows) is treated as unset, falling to the next source, then to the existing 'cannot be determined' error (new EC-013)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,8 +65,18 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
      (separate subdirectories, OD-144; amending the PLAN §6 "cache and state under
      `%LOCALAPPDATA%\hylo`" shared-dir reading); `ConfigDir(env EnvVars) (string, error)` = `%APPDATA%\hylo`.
    - `XDG_*` variables are ignored on Windows.
+   - Base-directory kind discipline (ADV-P10-D10, orchestrator call 3): a RELATIVE `HOME`
+     (macOS/Linux) or relative `LOCALAPPDATA`/`APPDATA` (Windows) is treated as UNSET —
+     the same cwd-splitting hazard OD-144 rejects for relative `XDG_*` and ADV-P9-A11
+     rejects for `paths.cache_dir` — falling to the next source in this PC's order, then
+     to the existing "cannot be determined" error (EC-004, EC-013); a base directory is
+     never joined into a cwd-relative path.
 3. **Status-line cache directory** used by the cache store = the value of `paths.cache_dir` when set (after `~`
-   expansion, OD-61), otherwise `CacheDir(env EnvVars)`. The legacy literal `~/.cache/dgx-llm` is never used as a default and
+   expansion, OD-61), otherwise `CacheDir(env EnvVars)`. When set, the value must be
+   ABSOLUTE — `filepath.IsAbs` semantics computed in `internal/platform` per OS (Windows:
+   drive + root or UNC; `\foo` and `C:foo` are relative); a relative value is a config
+   error (`not an absolute path`, BC-2.01.005 PC-3) and never resolves to a cwd-relative
+   directory (ADV-P10-D03, orchestrator call 3). The legacy literal `~/.cache/dgx-llm` is never used as a default and
    never read (OD-101, OD-05).
 4. Paths are returned joined with the OS separator (`/` on Unix, `\` on Windows), with no trailing separator.
 5. No directory is created and no file is touched by these functions.
@@ -128,6 +139,7 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 | EC-010 | windows-2025 leg, naive local-time parity cases | executed with no skip — the harness pins `TZ=UTC` for both binaries, so the cases are OS-neutral (OD-171; VP-026's `posix-only` tag removed) |
 | EC-011 | `TZ=` (set but empty) | UTC (ruled verdict, OD-177; Go `LoadLocation("")` agrees) |
 | EC-012 | `TZ=:Europe/Paris` (leading colon) | the colon is stripped, Paris loads (libc file-reference form; judgment call, PC 6) |
+| EC-013 | Relative base directory: Unix `HOME=rel`, or Windows `LOCALAPPDATA=rel` / `APPDATA=rel` | Treated as UNSET (base-directory kind discipline, PC-1/PC-2; ADV-P10-D10): the resolution falls to the next source in the PC's order, then to the existing "unavailable"/"cannot be determined" error — the path is never joined into a cwd-relative directory |
 
 ## Canonical Test Vectors
 

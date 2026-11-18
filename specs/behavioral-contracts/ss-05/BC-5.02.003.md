@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.10"
+version: "1.2.12"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-21T13:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
 input-hash: "307012c"
@@ -28,7 +28,9 @@ modified:
   - "2026-11-19T14:00:00Z (1.2.7) pass-6 residual sweep (call 5) — PC-1 rider: the one-line rule governs the stdin/transcript/cache line-splitting sites; the metrics reply body is decoded whole (ModeBytes, may be multi-line) at 992 accepted / 993 rejected (BC-1.04.001 PC3, VP-006)"
   - "2026-11-19T21:00:00Z (1.2.8): ADV-P8 remediation D03 — Pre-1 corrected: stdin (json.load(sys.stdin), SL:930/1202) and the cache loaders (json.load(fh)) read the WHOLE input; only the transcript is line-split; the metrics reply stays the named whole-input fetch site"
   - "2026-11-20T18:30:00Z (1.2.9): ADV-P9 remediation D13+D03 (orchestrator calls 15+1) — Pre-1 anchors swapped (SL:1202 is main()'s load, SL:930 the subagent path's); PC-7 encoder reconciliation respelled: the mix cache is the measured Save≠Load exception (Save 994 / Load 991, depth unit = total nesting of the saved document, top-level object = 1) with the measured next-refresh re-read loop; the equality claim is scoped to the equal-budget caches (session, git, cost-history)"
-  - "2026-11-18T16:52:00Z (1.2.10): pass-9 residual sweep (call 13) — the Decisions 'both current sites measure 993/994' cell marked as a historical design-quote ('Validation log'), superseded by the five measured sites (prd §8)"
+  - "2026-11-20T19:00:00Z (1.2.10): pass-9 residual sweep (call 13) — the Decisions 'both current sites measure 993/994' cell marked as a historical design-quote ('Validation log'), superseded by the five measured sites (prd §8); stamp re-spun ascending after the 1.2.9 entry (sync-check practice SC-11/SC-19; no behavioral change)"
+  - "2026-11-21T06:00:00Z (1.2.11): ADV-P10 remediation C07 (orchestrator call 11) — PC-7 names BC-1.03.021 by ID as the owner of the mix-cache re-read loop (was 'the owning transcript/cache BC')"
+  - "2026-11-21T13:00:00Z (1.2.12): sync-check SC-36 — PC-7's same-size qualifier scoped: the constantly sized rewrite holds only while the transcript fits in one 524,288-byte read step; above one step the saved cache alternates between two states with period 2 (measurement owned by BC-1.03.021 PC5/EC-004, ADV-P10-C08)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -116,7 +118,10 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
    at total depth 993 with a deep `message.id` saves a mix cache of document depth 993, and on the NEXT
    refresh the load fails, legacy treats the cache as absent, re-reads the transcript from offset 0 and
    rewrites the cache — every refresh while that line remains (file rewritten, same size, no temp leak,
-   exit 0). hylo reproduces this (the re-read loop is pinned in the owning transcript/cache BC). For the
+   exit 0 — the same-size qualifier holds only while the transcript fits in one 524,288-byte read step;
+   above one step the saved cache alternates between two states with period 2, measured details owned
+   by BC-1.03.021 PC5/EC-004). hylo reproduces this (the re-read loop is pinned in BC-1.03.021 PC5/EC-004, the owning
+   transcript/cache BC — ADV-P10-C07, orchestrator call 11). For the
    equal-budget caches the reconciliation stands: at equal chain depth Save EQUALS Load (session
    991/991, git/cost 990/990), so `Decode(Save(x))` never rejects what `Save` produced for THEM; a deeper
    stack never has the larger budget and a shallower stack never has the smaller one. The other real

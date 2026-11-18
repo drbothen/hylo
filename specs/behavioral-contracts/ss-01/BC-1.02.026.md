@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6005118"
+input-hash: "8885139"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "1.1 pass-3 remediation (ADV-P3-B11): degraded-line SGR constant credited to OD-113 (BC-2.02.001 inv 2), not OD-162; 2026-11-18T02:00:00Z"
   - "1.1.2 pass-7 remediation (ADV-P7-B12): history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
+  - "1.2.3 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -107,7 +108,7 @@ Pinned 2026-11-15 with the legacy `render_lane` / `_fmt_lines` under CPython 3.1
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (CP-S11 degrade) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_fmt_lines (SL:849-860; crash at SL:853) called from legacy/dgx_statusline.py:render_lane (SL:534-537) |
 | Legacy contract | BC-SL-063 (deep pass-3 round 1, new; crash path CP-S11) |
 | Config keys | — (none: the degraded line's grey/reset is a built-in named constant, independent of `statusline.theme.*`, OD-113; cf. BC-1.01.001 Inv 4) |
@@ -122,11 +123,11 @@ Pinned 2026-11-15 with the legacy `render_lane` / `_fmt_lines` under CPython 3.1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (CP-S11 degrade) (degraded ladder) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#session` — internal/statusline/session.go (CP-S11 degrade) (degraded ladder) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

@@ -419,3 +419,60 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   paths — or are scrubbed by a committed, reviewed script.
 
 **Closes:** recorded as a Drift Item in STATE.md (fixture-placeholder allowlist)
+
+## L-PG-38 [process-gap] — Sync checks verify required presence in every mandated file
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-10 burst, ADV-P10-A07) The pass-9 sync
+  check verified a required reason string only where it was already carried and passed
+  the check, although the string was missing from two files that mandate it; a spot
+  check is not a presence check.
+- **Remedy:** A sync check asserts REQUIRED PRESENCE of every mandated string in every
+  file whose spec mandates it — enumerate the mandated files from the mandating spec,
+  then assert the string in each, on disk, by script.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-39 [process-gap] — Residue noticed during verification is routed immediately
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-10 burst, ADV-P10-C2-01) While verifying
+  a broken-down agent's partial edit, the orchestrator noticed a stale redirect-order
+  line, did not route it, and the residue survived into the next pass as a filed
+  finding.
+- **Remedy:** Every anomaly observed while verifying — however small — is recorded and
+  routed to a fix owner in the same burst; verification notes are finding intake, not
+  commentary.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-40 [process-gap] — Report briefs forbid quoting flagged or private strings
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-10 burst) The pass-9 sync report quoted
+  private terms and a synthetic email address verbatim; the repo pre-push hygiene hook
+  blocked the push until the quoted strings were rewritten as descriptions.
+- **Remedy:** Validator and sync-check report briefs instruct: describe flagged or
+  private strings, never quote them; the orchestrator scans every report against the
+  hook patterns before staging.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-41 [process-gap] — BC pointers cite id plus PC/EC/Invariant/row, never line numbers
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-10 burst, ADV-P10-C02) Line-number
+  pointers into BC files drifted as remediation bursts churned the contracts — the
+  same failure mode already codified for ARCH docs (L-PG-35), now confirmed for BCs.
+- **Remedy:** Cite a BC by its id plus a stable locator — PC/EC number, invariant id,
+  or table row; line numbers are recreated from a numbered read at dispatch time,
+  never stored in specs.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-42 [process-gap] — Bracket the boundary on both sides before pinning a constant
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-10 burst) A single-sample probe
+  (4096-byte prefetch) was trusted as the governing constant; bracketing probes showed
+  the text chunk the git pointer moves is 8192 bytes, independent of st_blksize.
+- **Remedy:** A measurement that pins a constant brackets the boundary on both sides
+  and reports the bracket, not one sample; the orchestrator re-runs any probe that
+  mints a new constant value.
+
+**Closes:** recorded as a Drift Item in STATE.md

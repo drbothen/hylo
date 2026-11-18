@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-11-20T08:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.009.md, prd-supplements/nfr-catalog.md]
-input-hash: "52ca529"
+input-hash: "5bef3cf"
 traces_to: prd.md
 source_bc: BC-1.01.009
 bcs: [BC-1.01.009]
@@ -19,7 +19,8 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fix — removed the BC-1.06.002 partial-coverage claim (A2-04); that property is VP-018's, and this VP's fakes do not exercise the slash-sid fault site", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (B01 sibling) — OrderTable scope widened past the CP-S/CP-N triggers: the O-site rows join the sequence table (CP-O06..O08 skip-and-turn-drop per OD-167, CP-O09, the OD-166 record skip at 7c, CP-O10/O11 conversion degrades at 7d), matching the corrected ARCH-03 step table and the error taxonomy", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-13: unused err declaration removed)", "1.5 2026-11-20T08:00:00Z: pass-8 fix (A2-03) — the property statement now carries the BC-1.01.009 PC2 norms the sketch alone held: the step-7c within-step exception (CP-C10 and HISTORY-BORNE CP-O10/O11 raise in cost_thresholds AFTER the 7c record_cost write, which persists; stdin-borne legs at 7d), the OD-166 write divergence inside 7c (unconvertible value not recorded), and the OD-167 step-2 skip rows as non-degrades; the sketch's blanket '7d' label for history-borne O10/O11 corrected to 7c; title gains the exceptions qualifier"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fix — removed the BC-1.06.002 partial-coverage claim (A2-04); that property is VP-018's, and this VP's fakes do not exercise the slash-sid fault site", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (B01 sibling) — OrderTable scope widened past the CP-S/CP-N triggers: the O-site rows join the sequence table (CP-O06..O08 skip-and-turn-drop per OD-167, CP-O09, the OD-166 record skip at 7c, CP-O10/O11 conversion degrades at 7d), matching the corrected ARCH-03 step table and the error taxonomy", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-13: unused err declaration removed)", "1.5 2026-11-20T08:00:00Z: pass-8 fix (A2-03) — the property statement now carries the BC-1.01.009 PC2 norms the sketch alone held: the step-7c within-step exception (CP-C10 and HISTORY-BORNE CP-O10/O11 raise in cost_thresholds AFTER the 7c record_cost write, which persists; stdin-borne legs at 7d), the OD-166 write divergence inside 7c (unconvertible value not recorded), and the OD-167 step-2 skip rows as non-degrades; the sketch's blanket '7d' label for history-borne O10/O11 corrected to 7c; title gains the exceptions qualifier",
+ "1.6 2026-11-20T10:00:00Z: pass-10 residual (ADV-P10-B05 sync) — CP-C10's within-step order made site-dependent per the qualified BC-1.01.009 PC2: the cost_thresholds site faults after the 7c record_cost write (the write persists, as before) while the record_cost throttle-check site (own entry src:\"cc\" with a non-numeric ts, SL:232) raises before save_cache (SL:237) and writes nothing; property statement (a) and the sketch comment state both sites"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,10 +38,14 @@ removal_reason: null
 `Render` executes the ARCH-03 effect-step script (steps 0-8) in exactly legacy's order:
 a crash or typed degrade at step k leaves all writes of steps 1..k-1 persisted and
 performs none of steps k..8, with the ruled exceptions of BC-1.01.009 PC2, stated here
-because they bound the promise: (a) the step-7c within-step exception — a CP-C10 fault
-or a HISTORY-BORNE CP-O10/O11 degrade raises in `cost_thresholds` AFTER step 7c's own
-record_cost write (SL:255 vs SL:606-607), so the cost-history write of step 7c
-persists although the degrade is raised inside step 7c (BC-1.05.005 EC-011); the
+because they bound the promise: (a) the step-7c within-step exception — SITE-DEPENDENT
+for CP-C10 (pass-10 ADV-P10-B05): a CP-C10 fault at the `cost_thresholds` site raises
+AFTER step 7c's own record_cost write (SL:255 vs SL:606-607), so the cost-history write
+of step 7c persists although the degrade is raised inside step 7c (BC-1.05.005 EC-011),
+while a CP-C10 fault at the `record_cost` throttle-check site (the session's own history
+entry holds `src:"cc"` with a non-numeric `ts`; `now - e.get("ts", 0)` raises at SL:232)
+precedes `save_cache` (SL:237) and WRITES NOTHING; a HISTORY-BORNE CP-O10/O11 degrade
+likewise raises in `cost_thresholds` after the 7c write; the
 STDIN-BORNE conversion legs (SL:616 / SL:622-623) degrade at step 7d; (b) the OD-166
 write divergence inside step 7c: an unconvertible cost value is not recorded, so step
 7c writes NOTHING where legacy wrote, before any later degrade's write-set; (c) the
@@ -85,7 +90,10 @@ func TestEffectOrder_LegacySequence(t *testing.T) {
         // + the O-site rows: CP-O06..O08 SKIP the line write and DROP the in-flight
         // turn (OD-167) — the recording env asserts the skip+drop sequence, not a
         // degrade; CP-O09 the extended-D4-EX-2 no-write row; OD-166 the 7c record
-        // skip; CP-O10/O11 the conversion degrades — HISTORY-borne at 7c per PC2
+        // skip; CP-C10 SITE-DEPENDENT per PC2 (ADV-P10-B05): the cost_thresholds
+        // site keeps its step's cost-history write, the record_cost throttle-check
+        // site (SL:232) raises before save_cache and writes nothing;
+        // CP-O10/O11 the conversion degrades — HISTORY-borne at 7c per PC2
         // (the 7c record_cost write persists, BC-1.05.005 EC-011), STDIN-borne at
         // 7d (BC-1.01.009). Sibling of
         // ADV-P5-B01: the step table outdates these sites no longer.

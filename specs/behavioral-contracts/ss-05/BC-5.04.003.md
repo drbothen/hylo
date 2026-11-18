@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "83039fe"
+input-hash: "14065a4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python time.time() value discipline at the ten legacy clock reads, P3r1 §A0, DET-01..08)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-18T23:58:00Z (1.2.5) ADV-P5 remediation D02+D19 — frozen clock never round-trips through time.Time nanoseconds (the parsed float64 IS time.time(); ~17% of fractional values drift otherwise; owner call 7); TimeFloat applies to the real clock only; range bound fixed to the asymmetric epoch-seconds span [-62135596800, 253402300799] (D19)"
   - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D21 — PC-1 states the _PyTime_AsSecondsDouble whole-second branch and pins the divergence: float64(ns)/1e9 differs from it only for |ns| >= 2^62 on the real-clock path (frozen HYLO_TEST_NOW never routes through ns); the truncated spelling is ruled"
   - "2026-11-20T18:30:00Z (1.2.7): ADV-P9 remediation D16 — the unverified in-formula description of the C internal (whole-second branch spelling) withdrawn per the pass-9 measurement gate; only the measurable consequence is pinned (agreement below |ns| >= 2^62, divergence confined to |ns| >= 2^62, real-clock path only); the pass-8 D21 ruling stands"
+  - "2026-11-21T06:00:00Z (1.2.8): ADV-P10 remediation D11 — PC-1 notation fixed to the canonical signature: TimeFloat(t time.Time) = float64(t.UnixNano()) / 1e9 (was TimeFloat(ns), which read as a raw-ns argument)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,7 +72,7 @@ value is that float64 itself, never a `time.Time` — see precondition 2 and PC 
 
 ## Postconditions
 
-1. `TimeFloat(ns) = float64(ns) / 1e9` — the Python `time.time()` value, correct
+1. `TimeFloat(t time.Time) = float64(t.UnixNano()) / 1e9` — the Python `time.time()` value, correct
    to the ns-derived float64 (≥ 1 ns granularity below the second is lost to float64, the
    same as Python). This spec does not pin the internal form of CPython's
    `_PyTime_AsSecondsDouble` (a C internal this burst could not verify from source;

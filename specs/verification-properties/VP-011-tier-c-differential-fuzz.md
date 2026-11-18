@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "186ec77"
+input-hash: "d5b90bb"
 traces_to: prd.md
 source_bc: BC-6.04.003
 bcs: [BC-6.04.003]
@@ -96,7 +96,7 @@ func TestParityTierC_DiffFuzz(t *testing.T) {
     compared := 0 // A2-11 (P11): count compared cases; a run of only continues is red
     for run := 0; run < budgetRuns(); run++ {
         cs := gen.Next()
-        if !inTierCDomain(cs) { // BC-6.04.003:65-67: seeded proc_start, no numeric sids;
+        if !inTierCDomain(cs) { // BC-6.04.003 Pre-3: proc_start always seeded, numeric sids out (OD-30);
             // per closed-set id, the ruled classes are OUT OF THE GENERATOR GRAMMAR
             // by construction (od-160 shapes, OD-166 magnitudes, ...), each constraint
             // table-tested in that id's rider table (plan call 17) — no runtime

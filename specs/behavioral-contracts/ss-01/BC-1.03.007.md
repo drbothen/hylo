@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "389f30f"
+input-hash: "75de44d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094; REBUILD_EXCESS SL:968-972)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)", "1.2.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C10) — EC-007 names the OD-167 in-flight-turn drop; timestamped CP-O07 turn-drop vector added (`lr` observable: hylo null vs plain-deletion [50.0, true], oracle-run 2026-11-18); DI-012 lifted to the traceability row (sibling convention, ADV-P5-C10)", "1.2.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O07 D4-EX-2 legs (VP-013 register, VP-012 closure)", "1.2.5 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C07) — the CP-O07 turn-drop leg seed made self-consistent: it is the CP-O07 seed with ids [\"x\"] in place of [] (the variant that the A_x dedup and the expected ids require), not the \"same seed cache\""]
+modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)", "1.2.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C10) — EC-007 names the OD-167 in-flight-turn drop; timestamped CP-O07 turn-drop vector added (`lr` observable: hylo null vs plain-deletion [50.0, true], oracle-run 2026-11-18); DI-012 lifted to the traceability row (sibling convention, ADV-P5-C10)", "1.2.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O07 D4-EX-2 legs (VP-013 register, VP-012 closure)", "1.2.5 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C07) — the CP-O07 turn-drop leg seed made self-consistent: it is the CP-O07 seed with ids ['x'] in place of [] (the variant that the A_x dedup and the expected ids require), not the 'same seed cache'", "1.2.6 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C01; orchestrator call 13) — the CP-O07 canonical vector is the transcript-reachable mirror sequence (huge exact int `pp` vs float `prompt`; D4-EX-2; legacy oracle-run 2026-11-18): three timed lines input_tokens 10^309, -10^309, 1.5 leave `tin` 0 (exact int) so SL:1108 passes and SL:1117 raises converting `pp`; the hand-edited int-`tin`/float-`pp` seed legs are foreign-cache states re-registered under OD-160 (Go table tests, not byte-parity)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +75,7 @@ is never a rebuild because `pp` is null.
 | EC-004 | Prompt shrank (growth clamped to 0), write 20,001 | rebuild |
 | EC-005 | Duplicate-id line with a large write | ignored (not counted) |
 | EC-006 | After `compact_boundary`, a 50,000 write | not a rebuild (`pp` null) |
-| EC-007 | Overflow at the rebuild check (CP-O07, ADV-P3-C03): a parse state carrying an int `tin` with a float `pp` (legal stored form, postcondition 6) meets a huge exact int write — \|value\| ≥ 2^1024 − 2^970 — in `_w − max(0, prompt − pp)`; a legacy-written cache always couples a float `pp` with a float `tin`, so its next huge-int line raises earlier at SL:1108 | Python raises `OverflowError` at SL:1117 (oracle-verified 2026-11-18: seed `tin` int 0, `pp` 5.0, one line with `cache_creation_input_tokens` 10^309); legacy degrades sticky; hylo skips the line and drops the in-flight turn (D4-EX-2 extension, rulings OD-156 + OD-167; this BC owns the SL:1117 site), `rb` and `pp` unchanged (BC-1.03.018) |
+| EC-007 | Overflow at the rebuild check (CP-O07, ADV-P3-C03; this BC owns the SL:1117 site). Two legs meet CPython's int→double bound \|value\| ≥ 2^1024 − 2^970 in `_w − max(0, prompt − pp)`: (a) **mirror leg, transcript-reachable** — a huge exact int `pp` meets a float `prompt` (ADV-P4-C08); the state is authored by the three-line transcript of the canonical vector below, no hand-edited cache; (b) a parse state carrying an int `tin` with a float `pp` meets a huge exact int `_w` — a legal stored form (postcondition 6), but no legacy or hylo writer pairs an int `tin` with a float `pp` (a legacy-written cache couples float `pp` with float `tin`), so (b)'s seed is a hand-edited foreign-cache state | Python raises `OverflowError` at SL:1117 (both legs oracle-verified 2026-11-18); legacy degrades sticky; hylo skips the line and drops the in-flight turn (D4-EX-2 extension, rulings OD-156 + OD-167), `rb` and `pp` unchanged (BC-1.03.018). Registration split (ADV-P10-C01, orchestrator call 13): (a) rides D4-EX-2; (b) rides OD-160 (Go table test, not byte-parity) |
 
 ## Canonical Test Vectors
 
@@ -95,15 +95,18 @@ u0 = `{"input_tokens": 1000, "cache_read_input_tokens": 100000}`, u1 = `{"cache_
 
 Pass-3 r1 pinned an equivalent 5-call scenario (`rb` 2, tin 501,502); the vectors above are an independent re-pin.
 
-CP-O07 vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18): seed cache exactly `{"size": 0, "res": 0, "conv": 0,
+CP-O07 canonical vector (transcript-reachable mirror leg; ADV-P10-C01; orchestrator call 13; legacy oracle-run 2026-11-18): no seed cache — the parser state is authored by the transcript itself. Three timed assistant lines (TZ=UTC, compact json.dumps, LF-terminated, contents "", ids a/b/c): usage 1 = `{"input_tokens": 10^309}`, usage 2 = `{"input_tokens": -10^309}` (the int-only window: oracle-verified saved state after line 2 — `tin` 0 (exact int), `c_in` 0, `pp` −10^309 (exact int), `rb` 0, `ids` ["a","b"], `lr` null, `cur` open for "b" with t0 null), usage 3 = `{"input_tokens": 1.5}` (float; 972 bytes total with LF).
+
+CP-O07 foreign-seed vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18) — **FOREIGN-CACHE STATE (OD-160, ADV-P10-C01)**: the hand-edited seed pairs an int `tin` with a float `pp`, which no legacy or hylo writer produces; Go table test, not byte-parity. Seed cache exactly `{"size": 0, "res": 0, "conv": 0,
 "think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 5.0, "ids": [], "lr": null,
 "lu": null, "cur": null}`; transcript is the single line `{"type": "assistant", "message": {"content": "", "id": "y",
 "usage": {"cache_creation_input_tokens": 10^309}}}` (415 bytes with LF).
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
+| the three lines above, no cache | legacy: `OverflowError` at SL:1117 ("int too large to convert to float", traceback-pinned 2026-11-18), degraded line — exit 0, stdout exactly the 29 bytes `1b5b39306d` + `statusline degraded` + `1b5b306d0a` (LF included), no mix cache ever authored (cache dir stays ABSENT); the identical degrade repeats on every refresh (sticky by replay; oracle-run 3 refreshes); hylo (D4-EX-2 + OD-167): line 3 skipped whole, in-flight turn "b" dropped — cache exactly `{"size": 972, "res": 0, "conv": 0, "think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": -10^309, "ids": ["a", "b"], "lr": null, "lu": 1794650402.0, "cur": null} | error |
 | seed + the line above | legacy: `OverflowError` at SL:1117, degraded line, exit 0, cache keeps its seed bytes; hylo (D4-EX-2): cache exactly `{"size": 415, "res": 0, "conv": 0, "think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 5.0, "ids": [], "lr": null, "lu": null, "cur": null}` | error |
-| CP-O07 turn-drop leg (timestamped; ADV-P5-C01/C02): seed cache = the CP-O07 seed above with `ids` `["x"]` in place of `[]` (float `pp` 5.0 and int `tin` unchanged — the `["x"]` variant is what A_x's dedup and the expected `'ids': ['x']` below require; ADV-P7-C07) plus four timed lines (TZ=UTC, compact `json.dumps`, LF-terminated): `U_a` ts 10:00:00Z (92 B), `A_x` id `x` usage `{'input_tokens': 5, 'output_tokens': 100}` ts 10:00:02Z (163 B — mid `x` is in the seed's `ids`, so the usage is **deduplicated**: `pp` stays 5.0 while the turn machine still opens the turn), `A_y` id `y` usage `{'cache_creation_input_tokens': 10^309}` ts 10:00:04Z (467 B — SL:1108 is int-only and overflow-free; the rebuild check `prompt − pp` = `10^309 − 5.0` raises), `U_b` ts 10:00:06Z (92 B). Legacy on the full window: `OverflowError` at SL:1117, degraded, seed bytes kept (oracle-run 2026-11-18). Plain-deletion oracle: legacy on `U_a, A_x, U_b` + seed = `{'size': 347, ..., 'lr': [50.0, true], 'lu': 1794650406.0, 'cur': null}` (oracle-run). hylo (OD-167): `A_y` skipped and the open turn discarded — cache exactly `{'size': 814, 'res': 0, 'conv': 5, 'think': 0, 'tin': 0, 'tout': 0, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 5.0, 'ids': ['x'], 'lr': null, 'lu': 1794650406.0, 'cur': null}` (`'size'` 814 = 347 + 467 deleted bytes; `'lr'` null is the ruled drop observable; `'pp'` stays the float 5.0) | error |
+| CP-O07 turn-drop leg (timestamped; ADV-P5-C01/C02): seed cache = the CP-O07 seed above with `ids` `["x"]` in place of `[]` (float `pp` 5.0 and int `tin` unchanged — the `["x"]` variant is what A_x's dedup and the expected `'ids': ['x']` below require; ADV-P7-C07) plus four timed lines (TZ=UTC, compact `json.dumps`, LF-terminated): `U_a` ts 10:00:00Z (92 B), `A_x` id `x` usage `{'input_tokens': 5, 'output_tokens': 100}` ts 10:00:02Z (163 B — mid `x` is in the seed's `ids`, so the usage is **deduplicated**: `pp` stays 5.0 while the turn machine still opens the turn), `A_y` id `y` usage `{'cache_creation_input_tokens': 10^309}` ts 10:00:04Z (467 B — SL:1108 is int-only and overflow-free; the rebuild check `prompt − pp` = `10^309 − 5.0` raises), `U_b` ts 10:00:06Z (92 B). | Legacy on the full window: `OverflowError` at SL:1117, degraded, seed bytes kept (oracle-run 2026-11-18). Plain-deletion oracle: legacy on `U_a, A_x, U_b` + seed = `{'size': 347, ..., 'lr': [50.0, true], 'lu': 1794650406.0, 'cur': null}` (oracle-run). hylo (OD-167): `A_y` skipped and the open turn discarded — cache exactly `{'size': 814, 'res': 0, 'conv': 5, 'think': 0, 'tin': 0, 'tout': 0, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 5.0, 'ids': ['x'], 'lr': null, 'lu': 1794650406.0, 'cur': null}` (`'size'` 814 = 347 + 467 deleted bytes; `'lr'` null is the ruled drop observable; `'pp'` stays the float 5.0) | error |
 
 ## Verification Properties
 
@@ -111,15 +114,15 @@ CP-O07 vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18): seed cache e
 |--------|----------|-------------|
 | VP-029 | `rb` increments iff `pp ≠ null ∧ _w − max(0, prompt − pp) > X` | Go property test (testing/quick) |
 | VP-029 | `pp` after a counted call equals that call's prompt | Go property test (testing/quick) |
-| VP-013 | The CP-O07 vector leg this contract owns is a D4-EX-2 wrong-shape leg: the overflow skip leaves no partial mutation and (OD-167) drops the in-flight turn (register VP-013; ADV-P6-C06) | Go property/table test over the owned vector |
-| VP-012 | The CP-O07 exclusion entry this contract owns rides the D4-EX-2 closure check (BC-1.03.018 PC5 names this contract's vector rows among the dedicated tests) | repository test over `exclusions.json` |
+| VP-013 | The CP-O07 vector legs this contract owns realize the D4-EX-2 skip with no partial mutation and (OD-167) the in-flight-turn drop; the canonical leg is the transcript-reachable mirror vector, the hand-edited-seed legs ride OD-160 as Go table tests (register VP-013; ADV-P6-C06, ADV-P10-C01) | Go property/table test over the owned vectors |
+| VP-012 | The CP-O07 exclusion entry this contract owns rides the D4-EX-2 closure check (BC-1.03.018 PC5 names this contract's vector rows among the dedicated tests); the foreign-seed legs ride the OD-160 closure as Go table tests (ADV-P10-C01) | repository test over `exclusions.json` |
 
 ## Traceability
 
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-007; DI-012 (the CP-O07 D4-EX-2 skip and the OD-167 turn-drop are named, tested deviations) |
+| L2 Domain Invariants | DI-007; DI-012 (the CP-O07 D4-EX-2 skip and the OD-167 turn-drop are named, tested deviations); the hand-edited int-`tin`/float-`pp` seed legs are OD-160 foreign-cache vectors (ADV-P10-C01) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094); constant SL:968-972 |
 | Legacy contract | BC-SL-036 (base; pinned pass-3 r1) |
 | Threshold | T-056 → `statusline.transcript.rebuild_excess` = 20000 (measured) |
@@ -144,7 +147,7 @@ S-TBD — transcript parser
 ## VP Anchors (Recommended)
 
 - VP-029 — rebuild predicate
-- VP-013 — the owned CP-O07 D4-EX-2 leg (no partial mutation, OD-167 drop)
+- VP-013 — the owned CP-O07 D4-EX-2 leg (no partial mutation, OD-167 drop; canonical = the transcript-reachable mirror vector, ADV-P10-C01)
 - VP-012 — closure cover for the owned D4-EX-2 exclusion entry
 
 ---

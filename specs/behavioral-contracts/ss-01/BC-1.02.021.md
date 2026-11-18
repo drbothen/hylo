@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a99539e"
+input-hash: "8885139"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "1.3 pass-4 remediation (ADV-P4-B03): Str-vs-str fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.5 pass-6 remediation (ADV-P6-B16): history label version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
+  - "1.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -117,7 +118,7 @@ the deep pass-3 round 1 finding (crash at print, BC-1.01.008).
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/lane.go`; `pyfmt.Str` in `internal/pyfmt` json file; BC-COMPONENT-MAP: internal/statusline/lane.go (str() of non-str) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:442 selection, SL:453 rendering) |
 | Legacy contract | BC-SL-058 (deep pass-3 round 1, new) |
 | Config keys | `statusline.theme.*` (OD-113) |
@@ -132,11 +133,11 @@ the deep pass-3 round 1 finding (crash at print, BC-1.01.008).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/lane.go (str() of non-str) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#lane` — internal/statusline/lane.go (str() of non-str) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

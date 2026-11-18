@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:30:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "740c387"
+input-hash: "5d9a826"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -34,6 +34,7 @@ modified:
   - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09+D13+D18+D21+OD-188+OD-189 — PC-1 NumberList may declare a fixed length (scale = array of 4 numbers, D09); PC-9 validation-width scope tightened to the pill-label bound only (D21); PC-6 lane row cites SL:906-907 for the subagent tag (D18); PC-8 states the two registry ascending-pair checks with both reason strings (D02); PC-11 adds statusline.cache.rename_retry_limit (Int, default 2, range 0..10, J; attempts = 1 + limit) and retargets the PRODUCT consumer to BC-1.06.001 (D13, OD-188); PC-12 mints statusline.labels.vllm_down / lmcache_down / statusline.subagent.name_fallback (Text, OD-189; dead-backend word reuses pill.label_local)"
   - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation D08 — PC-3(f) names the PC-11 Windows rename-retry keys (statusline.cache.rename_retry_delay_ms, _limit) as golden-default exceptions beside the two PC-4 exceptions: they have no legacy analog (legacy save_cache SL:198-206 never retries); PC-4 lists them"
   - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D05+D08 (orchestrator calls 9+14) — PC-8's pair checks respelled: the cost.percentiles ascending-pair check is INTRA-key (fires at that key's validation, error names the whole key with its full JSON value, following error-taxonomy) beside the cross-KEY subagent.tokens pair; the display-width bullet states the Text-class `invalid UTF-8` pre-check (width and code-point counts only ever consulted on valid UTF-8; minted in BC-2.02.001 pass-9 D08)"
+  - "2026-11-21T06:00:00Z (1.3.4): ADV-P10 remediation D06 (orchestrator call 6) — the cross-KEY subagent.tokens pair rule states the default-layer value spelling: when the named value comes from the default layer, <value> is the default's env spelling per the interface-definitions Default column (e.g. m_from's 1000000) and [from <ENVNAME>] is omitted (BC-2.02.001 PC-3/PC-6)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -193,7 +194,10 @@ incomplete, whose default fails its own validation, or whose env name collides.
    yields its OWN string `ascending pair violated (p75 <= p95)` (pass-7 D02). The
    `subagent.tokens` check is CROSS-KEY: it fires after both keys' single-key range
    checks pass, at the SECOND key's validation (pass-6 A19), naming that key with its
-   own value. The `cost.percentiles` check is INTRA-KEY (ADV-P9-D05, following
+   own value — the default's env spelling per the interface-definitions Default column
+   (e.g. `1000000` for the `m_from` Float default) when that value comes from the
+   default layer, `[from <ENVNAME>]` omitted (BC-2.02.001 PC-3/PC-6; ADV-P10-D06,
+   orchestrator call 6). The `cost.percentiles` check is INTRA-KEY (ADV-P9-D05, following
    error-taxonomy): one composite key, both members inside its single JSON value; it
    fires at that key's validation after both members pass their single-member range
    checks, `p95` second under the same fire-at-second rule, and the error names the

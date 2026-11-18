@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a99539e"
+input-hash: "8885139"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,7 @@ modified:
   - "1.4 pass-4 remediation (ADV-P4-B05/B03): EC-006 and its vector row tagged OD-160 (hand-edited-cache shape); _hm fuzz leg re-anchored to VP-041; 2026-11-18T03:00:00Z"
   - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-18/SC-20) — the ARCH-06 line pointer replaced with the stable #pyfmt-num fragment anchor; pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.5 pass-6 remediation (ADV-P6-B09): the stale line-pointer cross-reference into error-taxonomy.md (the 'superseded int64 sketch') removed; the supersession now cites the taxonomy's own stale-in-both-directions declaration; 2026-11-19T04:00:00Z"
+  - "1.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -104,7 +105,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008, DI-012 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (CP-S12/S13 degrade) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane `_hm` (SL:545-548; crash at SL:546 via SL:549 for CP-S12 and SL:553 for CP-S13), timer block SL:534-563 |
 | Legacy contract | BC-SL-064 (deep pass-3 round 1, new; crash paths CP-S12, CP-S13) |
 | Config keys | `statusline.timer.{min_ms, api_min_ms}` (T-038, T-039) |
@@ -120,11 +121,11 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (CP-S12/S13 degrade) (degraded ladder) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#session` — internal/statusline/session.go (CP-S12/S13 degrade) (degraded ladder) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 
@@ -160,7 +161,7 @@ S-N.MM — filled by story-writer
 
 Resolved by OD-137: the two duration-format sites (`_hm` here and the window-age form,
 BC-1.02.028) keep byte-exact arbitrary-precision behavior using `math/big`. Design note on
-IM-07 (superseding definition per architecture/ARCH-06-pyfmt.md#pyfmt-num, BC-5.01.003:57
+IM-07 (superseding definition per architecture/ARCH-06-pyfmt.md#pyfmt-num, BC-5.01.003 PC-3
 and BC-1.02.026 PC2; the former "superseded int64 sketch" line reference into
 error-taxonomy.md was retired pass-6 ADV-P6-B09 — the sketch is gone and the taxonomy's
 own register declares the cross-reference stale in both directions, see its Surface-1

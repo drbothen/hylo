@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:30:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "6ce3655"
+input-hash: "f8d0d71"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-19T17:30:00Z (1.3.0): ADV-P7 remediation D02+D03 (orchestrator call 6) - canonical vocabulary completed: the pass-6 strings (ascending pair violated (k_from <= m_from); expected non-empty control-free text in every entry) homed byte for byte; cost.percentiles gets its OWN ascending-pair reason (p75 <= p95); glyph reasons corrected per OD-184 to expected exactly 1 code point / expected exactly 8 code points (sparkline); control character maps to the Text class for non-theme free text and List entries; NEW normative section 'Numeric-range failures by type' pins the Int/Float/composite reason mapping with the BC-2.02.002 precedence"
   - "2026-11-19T21:00:00Z (1.3.1): ADV-P8 remediation D04+D05+D17 + A2-07 BC rows - `control character` row example corrected (the reroute-all entry range supersedes: a reroute entry yields `expected non-empty control-free text in every entry` per BC-2.01.004 PC-9, so the List-entry example is a model_prefixes item); Text-class minting list drops BC-2.02.003 (number-grammar only); `expected ...` count five -> six; PC-6 [from] tie-break pinned for Windows case twins (byte-exact supplied-name comparison, winner's spelling printed) and index != 0 P1-field values ruled validated per class (per-key error precedes the structural cardinality error); VP-table for-all env-map legs annotated as carried by VP-016 (pass-8 call 12)"
   - "2026-11-20T18:30:00Z (1.3.2): ADV-P9 remediation D20+D06+D05+D08 (orchestrator calls 15+14+9+14) — repeated word 'indexed indexed-entry' fixed; PC-6 [from] provenance respelled (a per-key backends error names the variable that carried the rejected value; the lowest-extra-index tie-break applies to the structural cardinality error); the p75<=p95 pair restated INTRA-key on the one composite key cost.percentiles (error names the whole key with its full JSON value, following error-taxonomy); Text-class reason `invalid UTF-8` minted (Text, glyph, label or separator value not valid UTF-8; Windows WTF-8 lone surrogate), mirrored byte for byte in error-taxonomy"
+  - "2026-11-21T06:00:00Z (1.3.3): ADV-P10 remediation D06+A07 (orchestrator calls 6+17) — PC-3 gains the default-layer <value> rule: when no variable supplied the failing value, <value> is the default's env spelling per the interface-definitions Default column (e.g. m_from's 1000000, not 1000000.0/1e+06) and PC-6 omits [from <ENVNAME>]; ascending-pair CTV text pins the example; the path-grammar reason `not an absolute path` (minted pass-9 A11) added to the exact-strings table"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,7 +80,14 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
    truncation, no quoting): each byte 0x00-0x1F, the byte 0x7F, and each byte that is not
    part of a valid UTF-8 sequence is written as `\x` + two lowercase hex digits. A
    backslash in the input is written verbatim. Valid non-ASCII UTF-8 (e.g. `٤`) is written
-   verbatim. This guarantees the output is exactly one line.
+   verbatim. This guarantees the output is exactly one line. When the failing value came
+   from the DEFAULTS layer (no variable supplied it — e.g. the cross-key ascending-pair
+   check naming `statusline.subagent.tokens.m_from` when only
+   `HYLO_STATUSLINE_SUBAGENT_TOKENS_K_FROM` is exported), `<value>` is the default's env
+   spelling exactly as the interface-definitions Default column carries it (`1000000` for
+   the `m_from` Float default; pass-6 A13 binding spellings) — not `1000000.0`, not
+   `1e+06` — and PC-6 omits `[from <ENVNAME>]` (ADV-P10-D06, orchestrator call 6), so the
+   stdout bytes stay pinned.
 4. `<reason>` is one entry of the reason vocabulary below, byte-exact.
 5. **Exit status is 0** (DI-008: never blank, never non-zero).
 6. **stderr** receives one line per error, in registry order:
@@ -129,6 +137,7 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; on Windows a WTF-8 value with a lone surrogate; minted pass-9 D08 / orchestrator call 14, mirrored byte for byte in error-taxonomy) | BC-2.02.001 (this table), BC-2.01.005, BC-2.01.003 (separator) |
 | `empty path` | path | BC-2.01.005 |
+| `not an absolute path` | path | BC-2.01.005 (PC-3: a relative `paths.cache_dir` value; minted pass-9 A11 at BC-2.01.005, synced here per ADV-P10-A07) |
 | `home directory unknown` | path | BC-2.01.005 |
 | `expected JSON <shape>` | text (composite shape) | BC-2.01.005 (PC 5; `<shape>` spells the key's declared shape, e.g. `array of 2 numbers`) |
 | `expected non-empty control-free text of display width 1..16` | text | BC-2.01.005 (PC 6, pill-label keys) |
@@ -191,7 +200,8 @@ BC-2.01.005 PC-5). The ASCENDING-PAIR checks differ in shape (ADV-P9-D05, follow
 error-taxonomy): the `statusline.subagent.tokens` pair is CROSS-KEY — it fires after both
 keys' single-key checks pass, at the second key's validation (pass-6 A19); a descending
 pair → `ascending pair violated (k_from <= m_from)`, and the error names the SECOND key
-(`statusline.subagent.tokens.m_from`) with its own value. The `statusline.cost.percentiles`
+(`statusline.subagent.tokens.m_from`) with its own value — the default's env spelling
+`1000000` when `m_from` was not exported (PC-3 default-layer rule, ADV-P10-D06). The `statusline.cost.percentiles`
 pair is INTRA-KEY — one composite key, both members inside its single JSON value; the
 check fires at that key's validation after both members pass their single-member range
 checks, `p95` second under the same fire-at-second rule; a descending pair →

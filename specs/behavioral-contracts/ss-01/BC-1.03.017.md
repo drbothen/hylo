@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.3 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C04) — Inv 1 and the VP-029 row restricted to transcripts with no W-lines: under D4-EX-2 the CP-T04/CP-T05 skip predicates read seen_ids, so pre-seeding changes which lines skip (counter-example: a timed user line with wrong-shape usage is skipped with seed ids [] and processed with seed ids [B)]"]
+modified: ["1.3 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C04) — Inv 1 and the VP-029 row restricted to transcripts with no W-lines: under D4-EX-2 the CP-T04/CP-T05 skip predicates read seen_ids, so pre-seeding changes which lines skip (counter-example: a timed user line with wrong-shape usage is skipped with seed ids [] and processed with seed ids [B)]", "1.3.1 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C02) — Inv 1 cites the CP-T04/CP-T05 rows of BC-1.03.018 PC3 by row id, not by drifted line numbers"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,7 +51,7 @@ opening line's `usage.output_tokens`, even though that usage is not counted agai
 
 ## Invariants
 
-1. In transcripts with no W-lines, `seen_ids` membership never influences `cur`, `lr` or `lu`. Unrestricted, the claim fails under D4-EX-2: the CP-T04/CP-T05 skip predicates read `seen_ids` (BC-1.03.018:95-96), so pre-seeding changes which lines are skipped.
+1. In transcripts with no W-lines, `seen_ids` membership never influences `cur`, `lr` or `lu`. Unrestricted, the claim fails under D4-EX-2: the CP-T04/CP-T05 skip predicates read `seen_ids` (BC-1.03.018 PC3, CP-T04/CP-T05 rows), so pre-seeding changes which lines are skipped.
 2. Dedup never depends on turn state.
 
 ## Edge Cases

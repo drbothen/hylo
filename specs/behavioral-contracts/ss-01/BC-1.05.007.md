@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T12:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "0fc6561"
+input-hash: "1e9a89d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-636)"
@@ -23,7 +23,13 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O10/CP-O11 overflow crash paths; ruling OD-156; OD-166 record guard cross-ref)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-19 (H1 enriched with the ⛏ format per bc_h1_is_title_source_of_truth)", "1.3.3 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the stdin-borne CP-O10/O11 legs ride the never-blank ladder); no behavioral change", "1.3.4 2026-11-18: pass-6 remediation ADV-P6-C2-10 (DI-008 lifted into the L2 invariants row — the CP-O10/O11 legs degrade to the 29-byte line, exit 0)"]
+modified:
+  - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)"
+  - "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O10/CP-O11 overflow crash paths; ruling OD-156; OD-166 record guard cross-ref)"
+  - "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-19 (H1 enriched with the ⛏ format per bc_h1_is_title_source_of_truth)"
+  - "1.3.3 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the stdin-borne CP-O10/O11 legs ride the never-blank ladder); no behavioral change"
+  - "1.3.4 2026-11-18: pass-6 remediation ADV-P6-C2-10 (DI-008 lifted into the L2 invariants row — the CP-O10/O11 legs degrade to the 29-byte line, exit 0)"
+  - "1.3.5 2026-11-18: pass-10 remediation ADV-P10-C2-12 sibling sweep (PC2's 3.6e6 ms-per-hour factor carries the unit-constant note, BC-1.05.002 Pre 4)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,7 +60,9 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 
 1. `$` text = `"$" + F(usd, 2)` (SL:616). A bool `true` formats as `1.00`; an int
    formats as its float value.
-2. `$/h` text = `" $" + F(r, 1) + "/h"` with `r = usd / (api_ms / 3.6e6)` (SL:623, 625).
+2. `$/h` text = `" $" + F(r, 1) + "/h"` with `r = usd / (api_ms / 3.6e6)` (SL:623, 625;
+   the ms-per-hour factor 3.6e6 is a unit constant — named constant, not config, the
+   BC-1.05.002 Pre 4 note; ADV-P10-C2-12 sibling sweep).
 3. `⛏` text = `" ⛏" + F(eq, 2)` (SL:635).
 4. Non-finite: `+inf` → `inf` (so `$inf`, `$inf/h`, `⛏inf`). NaN never reaches `$`
    (the `usd > 0` guard is false for NaN). A NaN `api_ms` alone fails the

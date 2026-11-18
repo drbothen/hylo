@@ -1,13 +1,13 @@
 ---
 document_type: risk-register
 level: L3
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-20T18:00:00Z
+timestamp: 2026-11-21T00:30:00Z
 phase: 1b
 inputs: [architecture-feasibility-report.md, prd.md, prd-supplements/nfr-catalog.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "bc2291e"
+input-hash: "00d82a0"
 traces_to: prd.md
 ---
 
@@ -26,7 +26,7 @@ traces_to: prd.md
 | R-001 | Python/Go cache-swap byte divergence across the four caches | Correctness (parity) | open | HIGH | Byte-exact writers over ordered `pyfmt.Value`; Tier B goldens + four-cache swap tier (VP-019); failed-replace semantics pinned by the AD-03 decision — the in-memory overlay OPTION was rejected there as having the wrong persistence semantics (ARCH-03 options 1/2; pure widgets + one ordered-effect orchestrator chosen; pass-9 A09) | NFR-003 | ARCH-04 / AD-08 (byte-exact writers, atomic write + Windows retry + temp cleanup); swap tier exercised in ARCH-07 |
 | R-002 | p95 <= 25 ms render-latency miss on the owner's Mac | Performance | open | MEDIUM | Legacy baseline measured (median 84.5 ms, 2026-11-15); hot-path allocation discipline; per-OS timing report; gate binds only where OD-117 says | NFR-001 | ARCH-08 timing gate (binds only with `HYLO_TIMING_GATE=1`); VP-036 |
 | R-003 | Windows-only edge cases marked "not executed" (BC-1.06.001 EC-008, BC-1.06.002 EC-003/EC-005; sitecustomize shim) | Portability | open (disclosed) | MEDIUM | Pinned on the windows-2025 CI leg and the harness canary (ASM-005); disclosed, not hidden | NFR-004 | ARCH-08 3-OS CI matrix (AD-11); VP-037 |
-| R-004 | Fake-pass parity: harness weaker than refereed | Verification integrity | open | HIGH | AD-09 fail-closed machinery, canary (BC-6.01.003), exclusion-closure property test (VP-012). P1 restatement (pass-6 A17/call 13; OD-158; corrected pass-7 A09, orchestrator call 12; gate scope per OD-193; propagated to this register pass-9 A08, mirroring ARCH-08's restatement): throughout P1 the mitigation is the differential harness itself — Tier A cache-swap corpus WITH its runtime census (the job fails unless it prints `timing: N cases timed > 0` with `N >= 1` and `N` equals the corpus case census — timing 1 of N cases must not pass), Tier C differential fuzz, one clean Tier C nightly run as the P1 exit condition (OD-149) — plus the >= 95% line-coverage gate over the gated packages (S1/S5 per OD-193) and the fail-closed integrity machinery; the mutation kill-rate >= 95% tier is a Phase 6 gate, not a P1 gate, so no P1 claim rests on kill rate | n.a. | ARCH-07 / AD-09 |
+| R-004 | Fake-pass parity: harness weaker than refereed | Verification integrity | open | HIGH | AD-09 fail-closed machinery, canary (BC-6.01.003), exclusion-closure property test (VP-012). P1 restatement (pass-6 A17/call 13; OD-158; corrected pass-7 A09, orchestrator call 12; gate scope per OD-193; propagated to this register pass-9 A08, mirroring ARCH-08's restatement): throughout P1 the mitigation is the differential harness itself — Tier A cache-swap corpus WITH its runtime census (the job fails unless its census line `parity: N cases compared, M exclusions validated, K caches swapped` prints `N >= 1` with `N` equal to the committed corpus-case manifest — checking a subset of the corpus, or only the timing job's nonzero line, must not pass; pass-10 A08, census line per ARCH-08, manifest comparison per call 15), Tier C differential fuzz, one clean Tier C nightly run as the P1 exit condition (OD-149) — plus the >= 95% line-coverage gate over the gated packages (S1/S5 per OD-193) and the fail-closed integrity machinery; the mutation kill-rate >= 95% tier is a Phase 6 gate, not a P1 gate, so no P1 claim rests on kill rate | n.a. | ARCH-07 / AD-09 |
 | R-005 | Purity-annotation drift across BC files | Documentation consistency | closed (remediated) | LOW | Per-BC Purity Classification sections annotated during Pass 3 — 154/154 on disk (recount per pass-4 A19; re-verified 2026-11-17, CA-07; count includes the eight OD-155 subagent contracts and BC-5.01.007); module-level boundary carried in the ARCH-00 purity table | n.a. | ARCH-00 purity table |
 | R-006 | RK-5: HYLO_TEST_NOW stderr warning leaking outside the harness | Operational (determinism) | closed (spec decision) | LOW | Env seam set: HYLO_TEST_NOW is a harness hook, not a setting (AD-10); reserved names are never warned as unknown keys (BC-2.01.001 postcondition 6) | n.a. | ARCH-03 / AD-10 |
 | R-007 | RK-6: inert key `statusline.window_age.ps_timeout_s` confusing the config surface | Operational (config surface) | closed (owner ruling) | LOW | Key removed from the registry by OD-147 (owner, 2026-11-16); setting it now draws only the unknown-setting stderr warning, is ignored, and never changes the output or exit status (BC-2.01.001 PC-6, VP-015) — there is no unknown-key config-error class | n.a. | ARCH-02 key registry (OD-147) |

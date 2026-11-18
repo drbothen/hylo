@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.2"
+version: "1.4.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "b2312ac"
+input-hash: "ab38ca7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
@@ -23,6 +23,7 @@ modified:
   - "1.4 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"
   - "1.4.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the ramp named as the config key statusline.glyphs.sparkline with its 8-glyph default, OD-189 sibling treatment)"
   - "1.4.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names statusline.sparkline.points and PC5/PC6 name the statusline.sparkline.colors members beside their default literals)"
+  - "1.4.3 2026-11-18: pass-10 remediation ADV-P10-C2-06 (PC3 names the registered key statusline.sparkline.scale beside its fixed-top-k 1.0 literal, Pre 2 — the literal spells the default)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +68,9 @@ yield an empty string. Notation: `\e` is byte 0x1B.
    normalized (`_norm_pt`), the triple `(t, p.get(key), p.get("p"))`, kept only when the
    value is not None.
 2. If `len(pts) < 2` → `""`.
-3. `top` = 1.0 when key is `k`; else `Max(Max(vals), floor)` (Python `max` semantics).
+3. `top` = the `statusline.sparkline.scale` fixed top for `k` (default 1.0, Pre 2 — the
+   literal spells the default) when key is `k`; else `Max(Max(vals), floor)` (Python
+   `max` semantics).
 4. `idx(v) = Int(Min(Max(v, 0.0) / top * 7, 7) + 0.5)` (half-up, BC-5.01.003).
 5. For each trail point `i` in `pts[:-1]`: if `p` truthy → RGB of the
    `statusline.sparkline.colors` member `amber` (default [220,170,60]); else

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T18:40:00Z
@@ -24,6 +24,7 @@ modified:
   - "1.2.2 2026-11-19T14:00:00Z: pass-6 residual sweep (ADV-P6-A2-07) — Decisions row states both amended OD-32 conditions (numeric cur.t0 AND non-numeric cur.out, BC-1.03.020)"
   - "1.2.3 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C02) — the verbatim round-trip bounded by the mix-save encoder boundary (EC-004 added, oracle end-to-end 2026-11-18: transcript-borne worst case payload doc 993 saves cleanly — the 993 decode edge binds below the save boundary, so no reachable save failure, no temp leak, no per-refresh repeat); PC5 and the VP-029 row state the bound"
   - "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (orchestrator call 1) — the verbatim round-trip claim narrowed to the measured asymmetry: mix-cache save budget 994 against load budget 991, so a saved document of depth 992..994 fails reload, is treated as absent, and is re-read from offset 0 and rewritten every refresh (PC5, EC-004, VP-029 row; session/git/cost keep equality; depth unit stated once: total nesting of the saved document, top-level object = 1)"
+  - "1.3.1 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C08; orchestrator call 11) — PC5 and EC-004 qualified by the pass-10 measurement: constant size and totals hold only while the transcript fits in one 524,288-byte read step; above it the shallow step-1 and deep full-parse states alternate with period 2 (608,960-B transcript measured: size field cycles 524,202 <-> 608,960, on-disk 2,544 <-> 4,520 B, shallow state re-saved byte-identical, file rewritten every refresh, exit 0)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,9 +62,18 @@ it. This is a normal, crash-free state: `finish` returns early on `t0 == null` b
    the legacy frame shape, ADV-P8-C02). Depths are the total nesting of the saved document (top-level object =
    1). The round trip is ASYMMETRIC for the mix cache — the measured exception to the equal-budget law
    (BC-5.02.006): a saved cache of document depth 992..994 fails to RELOAD at the 991 load budget; legacy then
-   treats the cache as absent ({}), re-reads the transcript from offset 0 and rewrites the same cache every
-   refresh while the deep payload persists (file rewritten, same size, no temp leak, exit 0;
-   orchestrator-measured pass-9). hylo reproduces this. (Session, git and cost-history caches keep
+   treats the cache as absent ({}), re-reads the transcript from offset 0 and rewrites the cache every refresh
+   while the deep payload persists (file rewritten every refresh, no temp leak, exit 0;
+   orchestrator-measured pass-9). The pass-9 constant-size phrasing holds only while the transcript fits in one
+   524,288-byte read step (pass-10 measurement, ADV-P10-C08): above it, each reload failure resets the offset to
+   0 and the parser advances one step per refresh, so the saved cache ALTERNATES between the shallow step-1
+   state and the deep full-parse state — measured (CPython 3.11.7, isolated temp HOME/cwd; 608,960-B transcript =
+   4,000 152-B filler assistant lines plus a last line whose 990-deep nested `message.id` lands at saved doc
+   depth 993; simulated first step cut at byte 524,202): refresh 1 saves the shallow state (on-disk 2,544 B,
+   size field 524,202), refresh 2 parses step 2 and saves the deep state (on-disk 4,520 B, size field 608,960),
+   refresh 3's reload of the deep cache raises RecursionError, resets and re-saves the shallow state
+   byte-identical to refresh 1 (sha-verified), and the two states alternate with period 2, the file rewritten
+   every refresh, exit 0, normal render. hylo reproduces the same cycle. (Session, git and cost-history caches keep
    Save budget = Load budget.)
 
 ## Invariants
@@ -78,7 +88,7 @@ it. This is a normal, crash-free state: `finish` returns early on `t0 == null` b
 | EC-001 | Continuation line of the same id, no closer | `t1` updated, `out` still `"abc"` |
 | EC-002 | Then a timed system line | `cur` null, `lr` unchanged (null), no crash |
 | EC-003 | Applying the original (unamended) OD-32 rule here | would give `"out": 900` after a continuation — **wrong** (diverges from legacy); prohibited |
-| EC-004 | Deeply nested `message.id` (timed assistant line without usage; line doc depth 992–993, list- or dict-nested) rides `cur.id` verbatim into the mix-cache payload | end-to-end oracle 2026-11-18 (CPython 3.11.7, isolated temp HOME/cwd): the payload SAVES cleanly — the mcache holds the nested id, exit 0, no RecursionError, no leaked temp. Pass-9 adds the next-refresh leg (orchestrator-measured): the saved depth-992..994 cache FAILS to reload at the 991 load budget, is treated as absent, and is re-read from offset 0 and rewritten EVERY refresh while the deep payload persists (file rewritten, same size, no temp leak, exit 0) — not a refresh-2 no-op. The mix-save encoder boundary sits above the 993 decode ceiling (frame-shape replica: payload doc 994 saves / 995 fails), so a transcript-borne value cannot trip the save budget (ADV-P8-C02 save side; pass-9 load side, BC-1.03.021 PC5) |
+| EC-004 | Deeply nested `message.id` (timed assistant line without usage; line doc depth 992–993, list- or dict-nested) rides `cur.id` verbatim into the mix-cache payload | end-to-end oracle 2026-11-18 (CPython 3.11.7, isolated temp HOME/cwd): the payload SAVES cleanly — the mcache holds the nested id, exit 0, no RecursionError, no leaked temp. Pass-9 adds the next-refresh leg (orchestrator-measured): the saved depth-992..994 cache FAILS to reload at the 991 load budget, is treated as absent, and is re-read from offset 0 and rewritten every refresh while the deep payload persists (file rewritten every refresh, no temp leak, exit 0 — not a refresh-2 no-op); the constant-size qualifier holds only while the transcript fits in one 524,288-byte read step — above it the shallow step-1 and deep full-parse states alternate with period 2 (ADV-P10-C08; BC-1.03.021 PC5) The mix-save encoder boundary sits above the 993 decode ceiling (frame-shape replica: payload doc 994 saves / 995 fails), so a transcript-borne value cannot trip the save budget (ADV-P8-C02 save side; pass-9 load side, BC-1.03.021 PC5) |
 
 ## Canonical Test Vectors
 

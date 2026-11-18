@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:55:00Z
+timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.02.001.md, behavioral-contracts/ss-01/BC-1.02.007.md, behavioral-contracts/ss-01/BC-1.02.013.md, behavioral-contracts/ss-01/BC-1.02.020.md, behavioral-contracts/ss-01/BC-1.02.030.md, behavioral-contracts/ss-01/BC-1.07.006.md, prd-supplements/test-vectors.md]
-input-hash: "98bc1cc"
+input-hash: "75f2974"
 traces_to: prd.md
 source_bc: BC-1.02.001
 bcs: [BC-1.02.001, BC-1.02.002, BC-1.02.003, BC-1.02.004, BC-1.02.005, BC-1.02.006, BC-1.02.007, BC-1.02.008, BC-1.02.009, BC-1.02.010, BC-1.02.011, BC-1.02.012, BC-1.02.013, BC-1.02.014, BC-1.02.015, BC-1.02.016, BC-1.02.017, BC-1.02.018, BC-1.02.019, BC-1.02.020, BC-1.02.021, BC-1.02.022, BC-1.02.023, BC-1.02.024, BC-1.02.025, BC-1.02.026, BC-1.02.027, BC-1.02.028, BC-1.02.029, BC-1.02.030, BC-1.07.006]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T05:30:00Z: subagent lane-pill startswith leg added — BC-1.07.006 rides the shared prefix rule (adv-p2 sync SC-07)", "1.2 2026-11-18T09:15:00Z: ADV-P3 fix (A2-23) — invariant-verified claim recast per OD-158: mutation kill rate is a Phase 6 objective, non-gating in P1", "1.3 2026-11-18T14:55:00Z: ADV-P4 fixes — B02: the empty-prefix-list row corrected per BC-1.02.001 PC3/EC-001 — the MAIN lane pill is NEVER omitted; an empty prefix list renders the unknown pill `\e[100;37;1m ◨ ? \e[0m` with defaults); only in the subagent model segment (BC-1.07.006, legacy SL:905-907) does the tag disappear; B03: the for-all/quantified legs (testing/quick, fuzz-vs-oracle, lint, fake-filesystem syscalls) split out to the new VP-041 — this VP keeps the bounded golden tables; frontmatter proof_method synced to golden", "1.4 2026-11-18: ADV-P4 pass-4 fix — project-label fact aligned with the BC-1.02.003 fallback chain, basename(normpath(project_dir | current_dir | cwd))"]
+modified: ["1.1 2026-11-18T05:30:00Z: subagent lane-pill startswith leg added — BC-1.07.006 rides the shared prefix rule (adv-p2 sync SC-07)", "1.2 2026-11-18T09:15:00Z: ADV-P3 fix (A2-23) — invariant-verified claim recast per OD-158: mutation kill rate is a Phase 6 objective, non-gating in P1", "1.3 2026-11-18T14:55:00Z: ADV-P4 fixes — B02: the empty-prefix-list row corrected per BC-1.02.001 PC3/EC-001 — the MAIN lane pill is NEVER omitted; an empty prefix list renders the unknown pill `\e[100;37;1m ◨ ? \e[0m` with defaults); only in the subagent model segment (BC-1.07.006, legacy SL:905-907) does the tag disappear; B03: the for-all/quantified legs (testing/quick, fuzz-vs-oracle, lint, fake-filesystem syscalls) split out to the new VP-041 — this VP keeps the bounded golden tables; frontmatter proof_method synced to golden", "1.4 2026-11-18: ADV-P4 pass-4 fix — project-label fact aligned with the BC-1.02.003 fallback chain, basename(normpath(project_dir | current_dir | cwd))", "1.5 2026-11-21T12:00:00Z: pass-10 fix (ADV-P10-A2-03) — the subagent model segment does NOT drop its tag on a prefix miss: a miss renders the cloud pill (same hit/miss pair as the main pill), the tag disappears only when the prefix list is empty (BC-1.07.006 PC2/PC4, Inv 2, EC-005, legacy SL:902-907)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,7 +38,9 @@ Every row-1 widget behaves per the oracle-pinned tables: lane-pill prefix match
 (case-sensitive startswith, first matching entry wins; an empty prefix list renders
 the UNKNOWN pill `\e[100;37;1m ◨ ? \e[0m` with defaults — the main pill is never
 omitted, BC-1.02.001 PC3/EC-001, legacy SL:446-449; only the subagent model segment
-drops its tag when no prefix matches, BC-1.07.006, legacy SL:905-907); model
+ever drops its tag, and only when the prefix list is EMPTY — a prefix MISS renders
+the cloud pill `◨ANTH`, the same hit/miss pair the main pill has (BC-1.07.006 PC2/PC4,
+Inv 2, EC-005, legacy SL:902-907)); model
 label display_name→id→"?"; project basename(normpath(project_dir | current_dir | cwd) or normpath(proj_dir)) — the root fallback legacy keeps at SL:460 so a root project keeps "/" instead of vanishing (ADV-P5-A2-33);
 branch walk and 5 s TTL
 cache; context thermometer including the /0K, /1000K, NaN quirks; composition

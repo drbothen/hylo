@@ -2,10 +2,10 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.20"
+version: "1.22"
 status: draft
 producer: architect
-timestamp: 2026-11-21T00:00:00Z
+timestamp: 2026-11-21T14:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
 input-hash: "e954932"
@@ -32,6 +32,8 @@ modified:
   - "1.18 2026-11-19T22:00:00Z: pass-8 first sync (agent 4) — VP-024 bcs: gains BC-1.05.009 (ADV-P8-C2-07, orchestrator call 12: VP-024 is the owning home of the pyfmt.Dumps differential-fuzz leg that BC-1.05.009's VP-table routes; the reciprocal BC-body VP-table row is owed by the ss-01 contract, ADV-P8-C2-07 BC-row owner) and the BC-1.05.009 map row gains VP-024 (+1 directed edge over the recorded 261 → 262 attributable to agent 4, one transient forward-only edge enumerated below); A2-06 label fix, the TestWindowAge_D4EX1_Windows_AncestorFound mis-label 'the OD-160 rider test' respelled 'the D4-EX-1 rider test' (history entries above re-dated in place, current prose below); FINAL UNION RE-MACHINE-CHECK DEFERRED to the pass-8 residual sweep: agent 3's VP-001..020 bcs: deltas are already on disk (VP-004, VP-012, VP-013 at burst time) and await its report before the next index sync"
   - "1.19 2026-11-20T12:00:00Z: pass-8 residual sweep — agent 3's bcs: deltas synced: VP-004 bcs: gains BC-1.07.001 (subagent NDJSON exit-surface leg; the reciprocal BC-body VP-table row delivered in BC-1.07.001 v1.0.7 this burst), VP-012 bcs: gains BC-1.03.002/.005/.014/.016 and VP-013 bcs: gains BC-1.03.014/.016 (reciprocal BC-body VP-table rows verified on disk, ADV-P8-C03); the five map rows gain the ids; the 1.18 transient forward-only edge VP-024 in BC-1.05.009 is resolved (BC-1.05.009 v1.3.3 delivered the VP-024 row); final union re-machine-check 2026-11-20T12:00:00Z scripted over all 41 VP files x 154 BC bodies: 269 directed bcs: edges, 0 forward-only, reverse-only residue exactly the standing 3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions"
   - "1.20 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A2 sync) — the BC-1.05.009 coverage-map row gains VP-012 (VP-012 bcs: gained it in agent 3's pass-8 delta; the row had lagged); union re-machine-check scripted over all 41 VP files x 154 BC bodies: 270 directed bcs: edges, 0 forward-only, reverse-only residue exactly the standing 3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions (two additional raw hits — VP-001 in BC-1.01.002, VP-003 in BC-6.03.004 — are modified:-history mentions, not live citations)"
+  - "1.21 2026-11-21T12:00:00Z: pass-10 sync (agent 4) — ADV-P10-A2-04: the VP-008 catalog Name cell gains the qualifier 'with the ruled PC2 exceptions' (VP-008 v1.5, pass-8 A2-03, added it to the file title; the index had lagged). Agent 3's pass-10 VP-001 bcs: delta landed on disk mid-burst and is synced: VP-001 gains eleven co-owner BCs (BC-1.02.006/.011/.012/.014/.017/.029, BC-1.04.001/.004/.005, BC-1.05.002/.003; ADV-P10-C2-11/B03), the eleven coverage-map rows gain VP-001, and the scripted recount reads 281 directed bcs: edges, 0 forward-only. Agent 4's own pass-10 edits (VP-028 statement, VP-022 statement, VP-030 generator) change no bcs: frontmatter. The count-propagation hook's stale-count citations are historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative), not live counts — live counts agree at 41 VPs / 154 BCs (STATE.md last_amended line; SC-32 precedent: history entries are provenance, not rewritten)"
+  - "1.22 2026-11-21T14:00:00Z: pass-10 residual sweep (product-owner) — VP-001 bcs: gains the two C2-11 reciprocity co-owners BC-1.02.025 (the CP-O04 owner, EC-010) and BC-1.05.005 (the history-borne CP-O10/O11 raise in cost_thresholds, EC-011), both BC-body VP-001 rows + VP Anchors verified on disk in the same burst; the two coverage-map rows gain VP-001; the scripted recount over all 41 VP files reads 283 directed bcs: edges, 0 forward-only, reverse-only residue exactly the standing 3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions; the count-propagation hook's VP/BC count citations remain historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative — SC-32 precedent), live counts agree at 41 VPs / 154 BCs"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -79,7 +81,7 @@ modified:
 | VP-005 | VP-005-stdin-decode-totality.md | stdio codec totality — stdin decode yields a render state; stdout is valid UTF-8 | safety | property/fuzz | internal/statusline (input.go, guard.go), internal/pyfmt | BC-1.01.002 | ARCH-03/ARCH-06 |
 | VP-006 | VP-006-json-depth-budgets.md | Per-call-site JSON recursion depth budgets hold exactly | invariant | property/fuzz | internal/pyfmt (json.go) | BC-5.02.003 | ARCH-06 |
 | VP-007 | VP-007-render-determinism-seams.md | Render is deterministic under injected seams | invariant | property/fuzz | internal/statusline (Render, Env) | BC-5.04.003 | ARCH-03 |
-| VP-008 | VP-008-effect-order-preservation.md | Effect order is exactly legacy's; a crash at step k keeps writes 1..k-1 | invariant | unit/table | internal/statusline (Render orchestrator) | BC-1.01.009 | ARCH-03 |
+| VP-008 | VP-008-effect-order-preservation.md | Effect order is exactly legacy's; a crash at step k keeps writes 1..k-1 with the ruled PC2 exceptions | invariant | unit/table | internal/statusline (Render orchestrator) | BC-1.01.009 | ARCH-03 |
 | VP-009 | VP-009-tier-a-live-parity.md | Tier A live differential parity — zero unexplained diffs over corpus and captures | invariant | parity | internal/parity | BC-6.03.002 | ARCH-07 |
 | VP-010 | VP-010-tier-b-committed-goldens.md | Tier B committed goldens — Python-written, Go matches on every OS | invariant | golden | internal/parity | BC-6.03.001 | ARCH-07 |
 | VP-011 | VP-011-tier-c-differential-fuzz.md | Tier C differential fuzz hunts hidden divergence paths | safety | property/fuzz | internal/parity | BC-6.04.003 | ARCH-07 |
@@ -139,18 +141,18 @@ modified:
 | BC-1.02.003 | VP-028, VP-041 |
 | BC-1.02.004 | VP-012, VP-028, VP-041 |
 | BC-1.02.005 | VP-019, VP-028 |
-| BC-1.02.006 | VP-028, VP-041 |
+| BC-1.02.006 | VP-001, VP-028, VP-041 |
 | BC-1.02.007 | VP-028, VP-041 |
 | BC-1.02.008 | VP-028 |
 | BC-1.02.009 | VP-028, VP-041 |
 | BC-1.02.010 | VP-028, VP-041 |
-| BC-1.02.011 | VP-028 |
-| BC-1.02.012 | VP-028 |
+| BC-1.02.011 | VP-001, VP-028 |
+| BC-1.02.012 | VP-001, VP-028 |
 | BC-1.02.013 | VP-019, VP-028, VP-041 |
-| BC-1.02.014 | VP-028 |
+| BC-1.02.014 | VP-001, VP-028 |
 | BC-1.02.015 | VP-028, VP-041 |
 | BC-1.02.016 | VP-028, VP-041 |
-| BC-1.02.017 | VP-012, VP-028 |
+| BC-1.02.017 | VP-001, VP-012, VP-028 |
 | BC-1.02.018 | VP-028, VP-041 |
 | BC-1.02.019 | VP-028, VP-041 |
 | BC-1.02.020 | VP-001, VP-028 |
@@ -158,11 +160,11 @@ modified:
 | BC-1.02.022 | VP-028, VP-041 |
 | BC-1.02.023 | VP-028, VP-041 |
 | BC-1.02.024 | VP-028 |
-| BC-1.02.025 | VP-028, VP-041 |
+| BC-1.02.025 | VP-001, VP-028, VP-041 |
 | BC-1.02.026 | VP-001, VP-028 |
 | BC-1.02.027 | VP-001, VP-028, VP-041 |
 | BC-1.02.028 | VP-028, VP-041 |
-| BC-1.02.029 | VP-028 |
+| BC-1.02.029 | VP-001, VP-028 |
 | BC-1.02.030 | VP-019, VP-028 |
 
 ### S1.03 (21)
@@ -195,11 +197,11 @@ modified:
 
 | BC | VPs |
 |---|---|
-| BC-1.04.001 | VP-012, VP-022, VP-030 |
+| BC-1.04.001 | VP-001, VP-012, VP-022, VP-030 |
 | BC-1.04.002 | VP-012, VP-030 |
 | BC-1.04.003 | VP-012, VP-030, VP-031 |
-| BC-1.04.004 | VP-030 |
-| BC-1.04.005 | VP-030 |
+| BC-1.04.004 | VP-001, VP-030 |
+| BC-1.04.005 | VP-001, VP-030 |
 | BC-1.04.006 | VP-030 |
 | BC-1.04.007 | VP-030 |
 | BC-1.04.008 | VP-030 |
@@ -222,10 +224,10 @@ modified:
 | BC | VPs |
 |---|---|
 | BC-1.05.001 | VP-021 |
-| BC-1.05.002 | VP-021 |
-| BC-1.05.003 | VP-021 |
+| BC-1.05.002 | VP-001, VP-021 |
+| BC-1.05.003 | VP-001, VP-021 |
 | BC-1.05.004 | VP-001, VP-012, VP-020 |
-| BC-1.05.005 | VP-012, VP-021 |
+| BC-1.05.005 | VP-001, VP-012, VP-021 |
 | BC-1.05.006 | VP-012, VP-020 |
 | BC-1.05.007 | VP-001, VP-021 |
 | BC-1.05.008 | VP-021 |
@@ -336,12 +338,17 @@ bodies' Verification Properties / VP Anchors sections; re-machine-checked
 2026-11-20T12:00:00Z after the pass-8 residual sweep: 269 directed VP→BC `bcs:`
 edges, 0 forward-only. Pass-9 residual sweep re-machine-check 2026-11-18T16:52:00Z,
 scripted over all 41 VP files × 154 BC bodies: 270 directed VP→BC `bcs:` edges,
-0 forward-only; the BC-1.05.009 map row gains VP-012 (VP-012 `bcs:` gained it in
-agent 3's pass-8 delta; the row had lagged — ADV-P9-A2 sync), and the reverse-only
-residue re-classifies to exactly the standing 3 design references + 3 removal-note
-citations + 2 VP-041 scope-split contrast mentions (the two additional raw hits,
-VP-001 in BC-1.01.002 and VP-003 in BC-6.03.004, live in `modified:` history lines,
-not live citations). Pass-8 second sync (residual sweep): agent 3's `bcs:` deltas
+0 forward-only. Pass-10 agent-4 sync 2026-11-21T12:00:00Z: agent 3's VP-001 `bcs:`
+delta landed on disk mid-burst and is synced — VP-001 gains eleven co-owner BCs
+(BC-1.02.006/.011/.012/.014/.017/.029, BC-1.04.001/.004/.005, BC-1.05.002/.003;
+ADV-P10-C2-11/B03), the eleven map rows gain VP-001, and the scripted recount over
+all 41 VP files reads 281 directed VP→BC `bcs:` edges, 0 forward-only. Pass-10 residual
+sweep 2026-11-21T14:00:00Z, scripted over all 41 VP files × 154 BC bodies: VP-001 gains
+the two reciprocity co-owners BC-1.02.025 (the CP-O04 owner, EC-010) and BC-1.05.005
+(the history-borne CP-O10/O11 raise in `cost_thresholds`, EC-011; ADV-P10-C2-11
+residual), the two map rows gain VP-001, and the recount reads 283 directed VP→BC
+`bcs:` edges, 0 forward-only — residue exactly the standing 3 design references +
+3 removal-note citations + 2 VP-041 scope-split contrast mentions; Pass-8 second sync (residual sweep): agent 3's `bcs:` deltas
 reported and synced — VP-004 gains BC-1.07.001 (subagent NDJSON exit-surface leg of
 the for-all fuzz; the reciprocal BC-body VP-table row delivered in BC-1.07.001
 v1.0.7), VP-012 gains BC-1.03.002/.005/.014/.016 and VP-013 gains

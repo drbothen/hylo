@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:00:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "769473c"
+input-hash: "44c4e78"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.6): sync-check adv-p5 closure (SC-19/SC-20) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - "2026-11-19T03:25:00Z (1.2.7): ADV-P6 remediation OD-186 — temp-file scope widened by ruling to cover the Windows sharing-violation rename-retry outcome (a successful retry persists a cache write legacy would not); retry delay becomes the config key statusline.cache.rename_retry_delay_ms (registered in BC-2.01.004 PC-11); attempt count stated as three attempts total (initial attempt + two retries), matching VP-018 and ARCH-04"
   - "2026-11-19T17:00:00Z (1.2.8): ADV-P7 remediation OD-188 - rename retry count becomes CONFIG: statusline.cache.rename_retry_limit (Int, default 2, range 0..10, judgment call, registered in BC-2.01.004 PC-11) bounds the retries; attempt count = 1 + limit (three at the default), stated once across BC-2.01.004 PC-11, VP-018 and ARCH-04"
+  - "2026-11-21T06:00:00Z (1.2.9): ADV-P10 remediation D07 (orchestrator call 7) — the example corpus id flattened to the ARCH-07 grammar's flat cases/<case-id>/ form: cache/sid-slash-temp → cache-003 (PC-3 example entry and CTV row; example spelling only, no schema change)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -104,8 +105,8 @@ difference rides the same named deviation.
 3. **Named exclusion entry.** `internal/statusline/testdata/parity/exclusions.json`
    contains exactly one entry with id `temp-file` per case that triggers a failed
    replace, for example
-   `{"id": "temp-file", "case": "cache/sid-slash-temp", "expected_output_file":
-   "cache/sid-slash-temp/expected.json", "package": "internal/statusline",
+   `{"id": "temp-file", "case": "cache-003", "expected_output_file":
+   "cache-003/expected.json", "package": "internal/statusline",
    "scope": "go-cache-listing", "table_test":
    "TestCacheStore_TempFile_CleanupOnFailedReplace"}` — the full six-key schema of
    BC-6.03.004 (ADV-P5-D20: the former four-key example would fail the missing-key
@@ -147,7 +148,7 @@ difference rides the same named deviation.
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | Normal case, no failed replace | No temp names on either side; filter removes nothing | happy-path |
-| `cache/sid-slash-temp`: sid `../x`, one step | Oracle dir contains `x.json.<8 chars>`; Go dir contains none; stdout and exit equal; the Go listing matches the expected file; `TestCacheStore_TempFile_CleanupOnFailedReplace` passes | edge-case |
+| `cache-003`: sid `../x`, one step | Oracle dir contains `x.json.<8 chars>`; Go dir contains none; stdout and exit equal; the Go listing matches the expected file; `TestCacheStore_TempFile_CleanupOnFailedReplace` passes | edge-case |
 | Go store modified to skip cleanup | `TestCacheStore_TempFile_CleanupOnFailedReplace` FAIL; harness FAIL `go left temp x.json.<n>` | error |
 
 ## Verification Properties

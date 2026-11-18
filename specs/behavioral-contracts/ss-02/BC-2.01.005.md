@@ -1,17 +1,17 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.1"
+version: "1.4.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:30:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "a9124a4"
+input-hash: "1c6f92f"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09 (orchestrator call 5) — PC-7 env names canonized under EnvName (HYLO_STATUSLINE_LIMITS_WINDOWS, HYLO_STATUSLINE_UNITS_LINES=k, HYLO_STATUSLINE_UNITS_TOKENS=M, HYLO_STATUSLINE_UNITS_CONTEXT=K) with registry Defaults single-valued (= the accepted spelling), legacy derivations and a stated reason why the letters differ; PC-6 glyph reasons corrected per OD-184 to expected exactly 1 code point / expected exactly 8 code points (sparkline); PC-5 scale attributed to NumberList with a registry-declared fixed length of 4"
   - "2026-11-19T21:00:00Z (1.4.0): ADV-P8 remediation D04+D05+D07+D15 — H1/Description/Pre-1 broadened to cover PC-5/PC-6/PC-7 (P7); PC-2 item wording corrected: List items get the PC-6 control-free check (a control byte in an item is the Text-class `control character` error, OD-178/pass-6 A14) with key-specific entry ranges superseding; PC-5 type enumeration completed with FloatQuad (the 1.3.1 changelog's 'NumberList' wording for scale is superseded — the registry type is FloatQuad, fixed length 4) and an overflowing JSON member classified: a literal such as `1e400` parses to ±Inf, passes the strict-JSON shape check and fails the member-wise range check with `not finite` (BC-2.02.001 precedence check 1); PC-6 gains the control-character rule and now mints five reason strings"
   - "2026-11-20T18:30:00Z (1.4.1): ADV-P9 remediation A11+D18+D08+D07 (orchestrator calls 13+15+14+14) — PC-3: paths.cache_dir MUST resolve absolute (relative value = config error `not an absolute path`, path-grammar family, OD-144 rationale) and a set-but-empty HOME/USERPROFILE is home-unknown (BC-2.03.002 PC-4 consistent); PC-6 mints the Text-class `invalid UTF-8` pre-check (six reason strings); PC-7 states the Text-class-checks-first order for default-only Text/List keys with exact bytes"
+  - "2026-11-21T06:00:00Z (1.4.2): ADV-P10 remediation D08 — three legacy citations corrected against legacy/dgx_statusline.py: fade formula SL:683 → SL:682 (SL:683 is the RGB scaling), _fmt_lines whole-thousands `184k` SL:860 → SL:859 (SL:860 is `return str(n)`), token millions `88.0M` SL:871 → SL:870 (the .1f}M spelling; SL:871 is the k branch)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -125,7 +126,7 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    - `object {trail,fade,amber,head}` (RGBTriplesFloat;
      `statusline.sparkline.colors`: trail/amber/head each an array of 3 integers, fade
      an array of 2 numbers `[base, span]`, the trail fade factor
-     `base + span·i/max(n-2, 1)` (pass-5 A03 corrected against legacy SL:683
+     `base + span·i/max(n-2, 1)` (pass-5 A03 corrected against legacy SL:682
      `fade = 0.55 + 0.45 * i / max(len(pts) - 2, 1)`: the two numbers are a base and a
      span, not a range); legacy default trail `[70,170,190]`, fade `[0.55,0.45]`,
      amber `[220,170,60]`, head `[140,235,255]`, SL:682-690). This object spelling
@@ -208,9 +209,9 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    slash spelling `0.22/0.85/0.80` is NOT the grammar and is a shape error);
    `HYLO_STATUSLINE_LIMITS_WINDOWS` = `5h,7d` (comma list; registry Default `5h,7d`);
    `HYLO_STATUSLINE_UNITS_LINES` = `k` (registry Default `k` — legacy `_fmt_lines`
-   spells whole thousands lowercase `184k`, SL:860);
+   spells whole thousands lowercase `184k`, SL:859);
    `HYLO_STATUSLINE_UNITS_TOKENS` = `M` (registry Default `M` — the token segment's
-   millions denamination `88.0M`, SL:871/882, the binding spelling of pass-6 call 8
+   millions denamination `88.0M`, SL:870/882, the binding spelling of pass-6 call 8
    reaffirmed by pass-7 call 5);
    `HYLO_STATUSLINE_UNITS_CONTEXT` = `K` (registry Default `K` — legacy `fmt_ctx`
    spells the sub-million denominator uppercase `/967K`, SL:436-437). WHY THE LETTERS

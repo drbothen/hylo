@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T08:30:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "bfdb440"
+input-hash: "51c2f1a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-19T08:30:00Z (1.2.4): ADV-P7 remediation D05 (orchestrator call 2) + call 4 + OD-190 - this file is AUTHORITATIVE for the per-OS child-env allowlists: PC-1 consolidates the four exact key sets (POSIX/Windows × oracle/Go) with the conditional PATH/COLUMNS/setting keys, HOMEDRIVE/HOMEPATH explicitly not constructed, HOME+USERPROFILE on both OSes; PC-2 drops statusline.Env(Getenv,Home) for the platform.EnvVars seam with HomeDir(env)/LocalZone(env)/CacheDir(env) signatures; PC-4 names the OD-190 LF normalization (UTF-8 + LF on every OS) beside PYTHONIOENCODING=utf-8. ARCH-07 and VP-034 copy these sets verbatim"
   - "2026-11-19T21:00:00Z (1.2.5): ADV-P8 remediation D13+D10 — in-process Go path env lookups respelled EnvVars.Lookup(name) (string, bool) per ARCH-01; the conditional fake-PATH bullet states it has no P1 consumer (OD-76 D1-D4 vectors are Go table tests; machinery kept for the validator rejection rule and later phases)"
   - "2026-11-20T18:30:00Z (1.2.6): ADV-P9 remediation D10 — PC-4's parenthetical no longer claims the Windows env differs from POSIX by that key alone: the delta is PYTHONIOENCODING plus TMP, TEMP and SYSTEMROOT (the PC-1 Windows delta), and the table test asserts the exact per-OS key sets"
+  - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D01 (orchestrator call 1) — the fake metrics URL is an UNCONDITIONAL member of every exact key set: the harness always injects the run-time fake URL as DGX_SL_VM_URL (oracle) and HYLO_BACKENDS_0_METRICS_URL (Go), because the fake's port is only known at run time and a case cannot declare it; when the case itself sets backends[0].metrics_url the case value wins; PC-1 key sets, PC-2 and the CTVs copy that"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,7 +88,11 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
      ADV-P1-D23): `DGX_SL_VM_URL`, `DGX_SL_TTL`,
      `DGX_SL_ROWS`, `DGX_SL_SPARK`, `DGX_SL_GIT`, `DGX_SL_TRACE`, `LOCAL_MODEL_PREFIXES`.
      Only keys the case sets are included, except `LOCAL_MODEL_PREFIXES`, which is always
-     set explicitly (OD-111; BC-6.02.003).
+     set explicitly (OD-111; BC-6.02.003), and except `DGX_SL_VM_URL`, which the harness
+     ALWAYS sets to the injected fake metrics URL (ADV-P10-D01, orchestrator call 1: the
+     fake's port is only known at run time, so a case cannot declare it; when the case
+     itself sets `backends[0].metrics_url`, the case value wins on the Go side and
+     supersedes the injection).
    - On Windows only, `SYSTEMROOT` with the runner's value. CPython cannot start without
      it, and Go's `os/exec` adds it on Windows when it is missing.
    - `PATH=<case>/bin`, ONLY when the case declares a subprocess-fake table (the fake
@@ -104,16 +109,20 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
      VP-034 copy these sets verbatim).** With no fake table and no declared `COLUMNS`,
      the constructed key sets are exactly:
      - POSIX oracle child: `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
-       `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES` (+ the `DGX_SL_*` keys
+       `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES`, `DGX_SL_VM_URL` (= the
+       injected fake metrics URL; ADV-P10-D01) (+ the OTHER `DGX_SL_*` keys
        the case sets, + `COLUMNS` when declared, + `PATH` when a fake table is
        declared).
      - Windows oracle child: the POSIX set, plus `TMP`, `TEMP`, `SYSTEMROOT` and
        `PYTHONIOENCODING=utf-8` (OD-183; the same conditional additions apply: + the
-       `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when a fake
+       OTHER `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when a fake
        table is declared).
      - POSIX Go child: `HOME`, `USERPROFILE`, `TMPDIR`, `XDG_CACHE_HOME`,
        `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`, `HYLO_TEST_NOW`,
-       `HYLO_BACKENDS_0_MODEL_PREFIXES` (+ the `HYLO_*` setting keys the case sets, +
+       `HYLO_BACKENDS_0_MODEL_PREFIXES`, `HYLO_BACKENDS_0_METRICS_URL` (= the injected
+       fake metrics URL, the same URL as the oracle's `DGX_SL_VM_URL`, unless the case
+       itself sets `backends[0].metrics_url` — the case value wins; ADV-P10-D01)
+       (+ the `HYLO_*` setting keys the case sets, +
        `COLUMNS` when declared; no `PATH` ever — the built binary is started by
        absolute path).
      - Windows Go child: the POSIX Go set, plus `TMP`, `TEMP`, `SYSTEMROOT` (the same
@@ -132,6 +141,10 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    - `LANG=en_US.UTF-8`, `TZ=<case zone>` and `HYLO_TEST_NOW`.
    - `COLUMNS` when declared.
    - The HYLO_* spelling of the case settings (S2 key registry).
+   - `HYLO_BACKENDS_0_METRICS_URL` = the injected fake metrics URL — the same URL as the
+     oracle's `DGX_SL_VM_URL` (BC-6.02.003 PC-5) — an unconditional member (ADV-P10-D01,
+     orchestrator call 1); when the case itself sets `backends[0].metrics_url`, the case
+     value wins.
    - On Windows, `SYSTEMROOT`.
    The in-process Go path receives the same values through the `platform.EnvVars`
    seam (BC-2.01.001 PC-6, orchestrator call 9 pass-5: `EnvVars` everywhere): env
@@ -206,8 +219,8 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Parent env `{HTTPS_PROXY, no_proxy, PYTHONUTF8, GODEBUG, SSL_CERT_FILE, HYLO_X, DGX_SL_TTL, HOME=/real}`; case `TZ=UTC`, no COLUMNS, settings `{}` (Linux) | Oracle env keys exactly `{HOME, USERPROFILE, TMPDIR, LANG, TZ, PYTHONPATH, HYLO_TEST_NOW, LOCAL_MODEL_PREFIXES}`, with `HOME` under the case temp tree | happy-path |
-| Same parent env; Go binary child (Linux) | Keys exactly `{HOME, USERPROFILE, TMPDIR, XDG_CACHE_HOME, LOCALAPPDATA, <paths.cache_dir env>, LANG, TZ, HYLO_TEST_NOW, <backends[0].model_prefixes env>}` | happy-path |
+| Parent env `{HTTPS_PROXY, no_proxy, PYTHONUTF8, GODEBUG, SSL_CERT_FILE, HYLO_X, DGX_SL_TTL, HOME=/real}`; case `TZ=UTC`, no COLUMNS, settings `{}` (Linux) | Oracle env keys exactly `{HOME, USERPROFILE, TMPDIR, LANG, TZ, PYTHONPATH, HYLO_TEST_NOW, LOCAL_MODEL_PREFIXES, DGX_SL_VM_URL=<fake metrics URL>}`, with `HOME` under the case temp tree | happy-path |
+| Same parent env; Go binary child (Linux) | Keys exactly `{HOME, USERPROFILE, TMPDIR, XDG_CACHE_HOME, LOCALAPPDATA, <paths.cache_dir env>, LANG, TZ, HYLO_TEST_NOW, <backends[0].model_prefixes env>, <backends[0].metrics_url env>=<fake metrics URL>}` | happy-path |
 | Same inputs on Windows | As above plus `TMP`, `TEMP`, `SYSTEMROOT` and, on the oracle child only, `PYTHONIOENCODING=utf-8` (OD-183) | edge-case |
 | Env builder modified to copy `os.Environ()` | Env-builder unit test fails, listing the leaked keys | error |
 

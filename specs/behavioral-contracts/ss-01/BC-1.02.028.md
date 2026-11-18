@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "7e9aa61"
+input-hash: "df5fc95"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "1.2 pass-4 remediation (ADV-P4-B05/B03): EC-005/EC-006 and the -Infinity vector row tagged OD-160 (hand-edited-cache shapes); win_ms fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.3 pass-5 remediation (ADV-P5-B07): DI-012 cited alongside DI-008 (the OD-160-tagged hand-edited-cache shapes); parity row acknowledges the OD-160 ride instead of \"no exclusion entry\"; 2026-11-18T05:42:56Z"
   - "1.4 pass-6 remediation (ADV-P6-B08): the timer and window-age glyphs are named as the registry keys statusline.glyphs.timer / window_age instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
+  - "1.5 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -105,7 +106,7 @@ round 1.
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008, DI-012 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (window-age duration; big via OD-137) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:560-561, inside SL:554-563; `_hm` SL:545-548) |
 | Legacy contract | BC-SL-081 (deep pass-3 round 1, new) |
 | Config keys | none (T-041 is a named constant); glyphs via `statusline.glyphs.timer` (⏱) and `statusline.glyphs.window_age` (⌂) |
@@ -120,11 +121,11 @@ round 1.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (window-age duration; big via OD-137) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#session` — internal/statusline/session.go (window-age duration; big via OD-137) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

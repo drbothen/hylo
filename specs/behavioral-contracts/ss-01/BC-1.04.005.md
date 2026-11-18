@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "5f0276f"
+input-hash: "8e821c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:serving_state (SL:705-722)"
@@ -18,7 +18,11 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on EC-007)", "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (down-label words sourced to new Text keys statusline.labels.vllm_down / statusline.labels.lmcache_down with legacy byte defaults, per OD-189)", "2026-11-18 (v1.2.3) pass-8 remediation ADV-P8-C2-01 (the dot named as the config key statusline.glyphs.telemetry_dot, default ◉ U+25C9, beside the hard-coded literal in PC4 — OD-189 sibling treatment)"]
+modified:
+  - "2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on EC-007)"
+  - "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (down-label words sourced to new Text keys statusline.labels.vllm_down / statusline.labels.lmcache_down with legacy byte defaults, per OD-189)"
+  - "2026-11-18 (v1.2.3) pass-8 remediation ADV-P8-C2-01 (the dot named as the config key statusline.glyphs.telemetry_dot, default ◉ U+25C9, beside the hard-coded literal in PC4 — OD-189 sibling treatment)"
+  - "2026-11-18 (v1.2.4) pass-10 remediation ADV-P10-C2-11 (VP-001 row added to Verification Properties for the metrics-borne CP-N03 leg, EC-007; VP Anchors entry)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -90,6 +94,7 @@ byte 0x1B.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Six-case table (review #13) reproduces legacy bytes in fresh and stale modes | manual (table) |
+| VP-001 | The promised output set holds on the metrics-borne CP-N03 degrade leg (EC-007): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -119,6 +124,7 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — health table
+- VP-001 — never-blank/exit-0 ladder; the metrics-borne CP-N03 leg (EC-007) rides it (ADV-P10-C2-11)
 
 ---
 

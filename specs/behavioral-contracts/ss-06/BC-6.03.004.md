@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:00:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "2997e8e"
+input-hash: "520a653"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -37,6 +37,7 @@ modified:
   - "2026-11-19T19:00:00Z (1.3.1): pass-7 residual remediation — cp-x03's dedicated table test named TestCPX03_WriteFailureExit0 (OD-145 provisional name settled; ADV-P7-B09; VP-003, VP-012 and BC-1.01.001 EC-005 agree); OD-159 rider citation corrected from BC-1.03.001 PC-3 (the stat-race postcondition, which never mentions OD-159) to its real home BC-1.02.004 TestGitTextReads_OD159_StrictUTF8, the closure-validated riding test (VP-012's OD-159 row corrected to match); no behavioral change"
   - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation A2-05+D14 — OD-160 register riders corrected to the on-disk-verified anchors BC-1.02.017 EC-004..006 and BC-1.01.008 PC3 (the former EC-010/EC-011 pointed at the CP-O05 overflow row and a nonexistent row); PC-3 float-accepted enumeration respelled as the union of the float-accepted values in the BC-2.02.002/003 exclusion case lists AND edge cases (1e400 is BC-2.02.002 EC-004, not a named case)"
   - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D01 (orchestrator call 7) — rider-test closure pinned: NO exclusions.json entry exists for OD-76 or D4-EX-1 (no corpus case can exercise either id); register rows and a post-table note respelled; EC-006's example respelled to an OD-30 + D4-EX-2 pair (the former OD-76 repeated-DST corpus case is impossible under the UTC-only corpus)"
+  - "2026-11-21T06:00:00Z (1.3.4): ADV-P10 remediation D07 (orchestrator call 7) — example corpus ids flattened to the ARCH-07 grammar's flat cases/<case-id>/ form with <family>-<nnn>[-<variant>] ids: config/ttl-nan → cfgerr-001, cache/sid-slash-temp → cache-003, transcript/cp-t01 → cpt01-001, EC-001's glob respelled cpt01-* (EC and CTV examples only; no schema change)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -160,7 +161,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    `float()`/`int()`, so legacy renders and writes its caches for every one of them)
    parse at SL:74/75: legacy renders normally and writes its caches
    (corrected per value, ADV-P5-D04 / owner call 12; the BC's own canonical
-   `config/ttl-nan` case previously pinned a crash real legacy does not perform). For
+   `cfgerr-001` case previously pinned a crash real legacy does not perform). For
    those values the standard two-legged asymmetry applies, and the enumeration here is
    the union of the float-accepted values in the BC-2.02.002 and BC-2.02.003 exclusion
    case lists AND edge cases — BC-2.02.002's `1e400` is its EC-004 edge case, not a
@@ -199,7 +200,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Entry `{"id": "D4-EX-2", "case": "transcript/cp-t*", "expected_output_file": "...", "package": "...", "scope": "...", "table_test": "..."}` | Run FAIL: glob in `case` (no blanket exclusions) |
+| EC-001 | Entry `{"id": "D4-EX-2", "case": "cpt01-*", "expected_output_file": "...", "package": "...", "scope": "...", "table_test": "..."}` | Run FAIL: glob in `case` (no blanket exclusions) |
 | EC-002 | Entry with `id: "OD-99"` | Run FAIL: id not in the closed set |
 | EC-003 | Entry whose `table_test` names a deleted test | Run FAIL: table test missing |
 | EC-004 | Excluded case where Go output now equals the oracle | Passes against its expected file only if the expected file also equals that output. Otherwise FAIL; the entry must be revisited, never silently ignored |
@@ -210,10 +211,10 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Entry `{"id": "D4-EX-3", "case": "config/ttl-nan", "expected_output_file": "config/ttl-nan/expected.json", "package": "internal/statusline", "scope": "stdout", "table_test": "TestD4EX3_Number"}`; Go prints the expected config-error line; test passes | Report `D4-EX-3 config/ttl-nan TestD4EX3_Number ok` | happy-path |
-| Entry for `temp-file` on `cache/sid-slash-temp` | Cache-listing scope only; stdout still compared to the oracle and equal | edge-case |
+| Entry `{"id": "D4-EX-3", "case": "cfgerr-001", "expected_output_file": "cfgerr-001/expected.json", "package": "internal/statusline", "scope": "stdout", "table_test": "TestD4EX3_Number"}`; Go prints the expected config-error line; test passes | Report `D4-EX-3 cfgerr-001 TestD4EX3_Number ok` | happy-path |
+| Entry for `temp-file` on `cache-003` | Cache-listing scope only; stdout still compared to the oracle and equal | edge-case |
 | Entry with `"case": "transcript/*"` | Run FAIL before any case: `exclusion[3]: glob not allowed in case` | error |
-| Entry whose table test fails | Run FAIL: `parity: exclusion D4-EX-2/transcript/cp-t01: table test TestTranscript_D4EX2_T01 failed` | error |
+| Entry whose table test fails | Run FAIL: `parity: exclusion D4-EX-2/cpt01-001: table test TestTranscript_D4EX2_T01 failed` | error |
 
 ## Verification Properties
 

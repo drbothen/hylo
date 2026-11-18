@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5"
+version: "1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "8176847"
+input-hash: "df5fc95"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,8 @@ modified:
   - "1.2 pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted; 2026-11-17T12:00:00Z"
   - "1.4 pass-6 remediation (ADV-P6-B08 + B16): the pick glyph is named as the registry key statusline.glyphs.cost_pick instead of the wildcard statusline.glyphs.* (Config keys row); history label version-prefixed; 2026-11-19T04:00:00Z"
   - "1.5 pass-9 remediation (ADV-P9-B03, orchestrator call 4): the legacy exact-int overflow leg registered as CP-O12 — PC1 qualifies float64 to converting tot values and states the SL:633 OverflowError degrade; EC-009 + a CP-O12 canonical vector minted (oracle-checked 2026-11-18 through the real entry point, isolated HOME and cwd); Related BCs gains the bearer kin BC-1.02.025; crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
+  - "1.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O12 overflow degrade (EC-009) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "1.7 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -127,6 +129,7 @@ measured on the same oracle: `float(2**1024 − 2**970 − 1)` converts, `float(
 |--------|----------|-------------|
 | VP-028 | With a valid basis, `⛏` present iff `(tot*mtok)/1e6 >= 0.005` | generated table vs oracle |
 | VP-028 | Below threshold never renders `n/a` | table test |
+| VP-028, VP-001 | The CP-O12 overflow degrade (EC-009: exact-int `tot` at or above the int→float bound enters `tot * mtok`, SL:633) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 
@@ -135,7 +138,7 @@ measured on the same oracle: `float(2**1024 − 2**970 − 1)` converts, `float(
 | L2 Capability | CAP-011 (owned-hardware cost), CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/cost.go`; BC-COMPONENT-MAP: internal/statusline/cost.go (pick eq 0.005) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:633-635, inside the ⛏ block SL:626-636) |
 | Legacy contract | BC-SL-083 (deep pass-3 round 1, new) |
 | Config keys | `statusline.cost.display_floor_usd` (T-044, renamed from `cost.basis_min_shown_usd` by OD-174), `statusline.cost.basis_min_mtok_month`, `backends[0].model_prefixes` (OD-123), `statusline.glyphs.cost_pick` (⛏) |
@@ -151,11 +154,11 @@ measured on the same oracle: `float(2**1024 − 2**970 − 1)` converts, `float(
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/cost.go (pick eq 0.005) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#cost` — internal/statusline/cost.go (pick eq 0.005) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

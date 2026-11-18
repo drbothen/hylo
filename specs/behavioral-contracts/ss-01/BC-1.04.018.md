@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "81a6f43"
+input-hash: "ab38ca7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:773-781)"
@@ -18,7 +18,10 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.sess_rate with default », OD-189 sibling treatment) + ADV-P8-C2-08 (testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)"]
+modified:
+  - "1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.sess_rate with default », OD-189 sibling treatment) + ADV-P8-C2-08 (testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)"
+  - "1.2.2 2026-11-18: pass-10 remediation ADV-P10-C2-09 (PC-1 qualifier — an exact-int lr[0] of magnitude >= 2**1024 - 2**970 raises OverflowError at the f{x:.0f} render format → degraded line, tagged OD-160; VP-030 quick-leg generator restricted accordingly; oracle-verified CPython 3.11.7)"
+  - "1.2.3 2026-11-18: pass-10 remediation ADV-P10-C2-09 residual (VP-030 row respelled to the narrowed generator — lr[0] generated as bool or float-range number only; the OD-160 exact-giant-int cache shape excluded as a VP-001 degrade site, not a presence/dimming case)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,7 +48,13 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
 ## Postconditions
 
 1. Segment exists iff `sess_rate` is a list or tuple, non-empty, and `sess_rate[0]` is a
-   number (bool, int or float; NaN and ±Inf included).
+   number (bool, int or float; NaN and ±Inf included). Qualifier (foreign mix-cache
+   shape, exclusion id **OD-160**, ADV-P10-C2-09): an `lr[0]` that is an exact INT of
+   magnitude >= 2**1024 - 2**970 passes that existence check but raises `OverflowError`
+   at the `f"{x:.0f}"` render format (SL:776-777, "int too large to convert to float";
+   oracle-verified CPython 3.11.7, 2026-11-18) → degraded line. The VP-030 quick leg's
+   `mix[7]` generator stays within floats and format-exact ints, never generating the
+   OD-160 shape.
 2. `dim = len(sess_rate) > 1 and truthy(sess_rate[1])` (Python truthiness: `""`, `0`,
    `False`, `None`, `[]`, `{}` are false; any non-empty string is true).
 3. `mine = "\e[90m" + F(sess_rate[0],0) + "\e[0m"` if dim, else
@@ -89,7 +98,7 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Segment presence and dimming equal legacy for every JSON value shape of `mix[7]` | Go property test (testing/quick) (generated Values; routed to the VP-030 quick leg, pass-8 call 12) |
+| VP-030 | Segment presence and dimming equal legacy for generated `mix[7]` values whose `lr[0]` is a bool or a float-range number (VP-030's quick-leg generator; the OD-160 foreign exact-giant-int `lr[0]` cache shape is excluded from the generator — its `.0f` rendering is a degrade site on VP-001's ladder, not a presence/dimming case — PC-1 qualifier, ADV-P10-C2-09) | Go property test (testing/quick) (generated Values; routed to the VP-030 quick leg, pass-8 call 12) |
 
 ## Traceability
 

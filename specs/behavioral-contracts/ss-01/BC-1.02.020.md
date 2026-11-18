@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.2"
+version: "1.4.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:21:12Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6005118"
+input-hash: "8885139"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,8 @@ modified:
   - "1.3 pass-4 remediation (ADV-P4-B13/B04): repeated modified entry deduplicated; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
   - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.4.2 pass-7 remediation (ADV-P7-B12): history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
+  - "1.4.3 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): the existing VP-001 row extended to cover the CP-O01 overflow degrade (EC-011) — previously only NaN and a non-numeric total; reciprocal VP-001 bcs: sync is the architect's"
+  - "1.4.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -116,7 +118,7 @@ the legacy pass-3 rows).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028 | For integer totals 1..2,000,000 the denominator equals the oracle's | generated table vs oracle |
-| VP-028, VP-001 | NaN percentage and non-numeric truthy total degrade | table test |
+| VP-028, VP-001 | NaN percentage and non-numeric truthy total degrade; the CP-O01 overflow degrade (EC-011: `context_window_size` at or beyond the int→float threshold) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 
@@ -125,7 +127,7 @@ the legacy pass-3 rows).
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; BC-COMPONENT-MAP: internal/statusline/context.go (thermometer quirks) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:fmt_ctx (SL:418-437; crash sites SL:426 CP-S06, SL:435 CP-S07) |
 | Legacy contract | BC-SL-057 (deep pass-3 round 1, new) |
 | Config keys | `statusline.context.{cells, plain_max, red_from}` (T-027, T-028), `statusline.units.context` (T-029), `statusline.theme.*` |
@@ -140,11 +142,11 @@ the legacy pass-3 rows).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/context.go (thermometer quirks) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#context` — internal/statusline/context.go (thermometer quirks) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "83039fe"
+input-hash: "14065a4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces the {:d}-family format spec used at legacy/dgx_statusline.py SL:1172, 525, 527, 548, 561, 829, 831)"
@@ -25,6 +25,7 @@ modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D15+D10+D33: countdown anchor corrected (no :3d in legacy, pads via :02d); SL:920 added; MinInt64 vector added and VP wording fixed"
   - "2026-11-20T18:30:00Z (1.2.3) ADV-P9 remediation D17 — beyond-int64 conversion rule stated for the {pct:>2d} site (SL:1171-1172): round() of a finite float64 is an exact unbounded int formatted in full decimal (verified CPython 3.11.7), no degradation; D's int64 signature is the bounded special case; the only caller degrade remains the preceding TrueDiv overflow (BC-5.01.007 PC-2)"
+  - "2026-11-20T19:00:00Z (1.2.4) ADV-P10-A12 residual — PC-5 names the serving helper: pyfmt's big-integer formatter DBig(n *big.Int, width int, zeroPad bool) string (ARCH-06), applying PC-1's digit/width/padding rules to the exact beyond-int64 {pct:>2d} value; agrees with ARCH-06's num.go row and PC-5 comment"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,7 +74,10 @@ contract per OD-141.
    carries the value in the ordered-`Value` exact-int model (BC-5.02.004) and applies
    PC-1's digit/width rules to the exact integer value — `D`'s int64 signature is the
    bounded special case. The caller's only degrade remains the preceding TrueDiv
-   overflow (BC-5.01.007 PC-2), not the formatting.
+   overflow (BC-5.01.007 PC-2), not the formatting. The serving helper is pyfmt's
+   big-integer formatter `DBig(n *big.Int, width int, zeroPad bool) string` (ARCH-06),
+   which applies PC-1's digit/width/padding rules to the exact value, sharing `D`'s
+   digit-padding code so the int64 and big-int paths cannot drift.
 
 ## Invariants
 

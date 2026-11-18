@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: "L3"
 section: "configuration"
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-19T21:00:00Z
+timestamp: 2026-11-20T22:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "1189db1"
+input-hash: "1142d58"
 
 ---
 
@@ -88,6 +88,17 @@ type Config struct{ Statusline Statusline; Cost Cost; Paths Paths; Backends []Ba
 // settings) come back ordered ahead of the errors; the CALLER (Main, `config
 // validate`) prints them BEFORE any load error on stderr, exit status untouched —
 // "warning first, then load error" (BC-2.01.001 PC-6/Inv-3; pass-6 A08, call 9).
+// LoadOptions is Load's sole injection seam (AD-10): EnvVars carries the
+// environment implementation — platform.EnvVars, `Lookup(name) (string, bool)`
+// plus `Names()` (ARCH-01); the Windows NT case-insensitive `HYLO_*` matcher is
+// a platform IMPLEMENTATION of that same interface, injected here, never a call
+// around it (ADV-P2-A02) — so tests fake env behavior on every OS through this
+// one field. FileLayer is the reserved P4 extension point (DI-010 full order
+// file -> env -> default; OD-107); nil in P1.
+type LoadOptions struct {
+    EnvVars   platform.EnvVars  // the injected environment seam (AD-10, ARCH-01)
+    FileLayer *FileLayerOptions // nil in P1; P4 file layer (OD-107, DI-010)
+}
 func Load(opts LoadOptions) (*Config, []Warning, *ErrorSet) // P1: env -> defaults
 func EnvName(key string) string                  // OD-01, collision-tested
 type Warning struct{ Key, EnvName string } // unknown-setting warning (BC-2.01.001 PC-6)

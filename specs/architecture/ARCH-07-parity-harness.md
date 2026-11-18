@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.14"
+version: "1.15"
 status: draft
 producer: architect
-timestamp: 2026-11-20T12:00:00Z
+timestamp: 2026-11-20T22:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "6337f69"
+input-hash: "16bc583"
 
 ---
 
@@ -71,26 +71,37 @@ input-hash: "6337f69"
   `14.0.0` — identical to the laws' constants.
   invoked with `-s`, never `-I`/`-E` — `-I` would drop the sitecustomize clock shim
   (OD-109). Child environment constructed from scratch — ALLOWLIST construction, never
-  inherit-then-strip (BC-6.01.002:70/:157 authoritative; pass-5 A02 aligns VP-034 and
+  inherit-then-strip (BC-6.01.002 PC-1/PC-2 authoritative; pass-5 A02 aligns VP-034 and
   this section to it). AUTHORITATIVE EXACT KEY SETS (copied verbatim from
   BC-6.01.002 PC-1 "Authoritative exact key sets", pass-7 D05, orchestrator call 2 —
   ARCH-07 and VP-034 copy these sets verbatim; with no fake table and no declared
   `COLUMNS` the constructed key sets are exactly:
   - POSIX oracle child: `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
-    `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES` (+ the `DGX_SL_*` keys
+    `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES`, `DGX_SL_VM_URL`
+    (+ the OTHER `DGX_SL_*` keys
     the case sets, + `COLUMNS` when declared, + `PATH` when a fake table is
     declared).
   - Windows oracle child: the POSIX set, plus `TMP`, `TEMP`, `SYSTEMROOT` and
     `PYTHONIOENCODING=utf-8` (OD-183; the same conditional additions apply: + the
-    `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when a fake
+    other `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when a fake
     table is declared).
   - POSIX Go child: `HOME`, `USERPROFILE`, `TMPDIR`, `XDG_CACHE_HOME`,
     `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`, `HYLO_TEST_NOW`,
-    `HYLO_BACKENDS_0_MODEL_PREFIXES` (+ the `HYLO_*` setting keys the case sets, +
+    `HYLO_BACKENDS_0_MODEL_PREFIXES`, `HYLO_BACKENDS_0_METRICS_URL`
+    (+ the OTHER `HYLO_*` setting keys the case sets, +
     `COLUMNS` when declared; NO `PATH` ever — the built binary is started by
     absolute path).
   - Windows Go child: the POSIX Go set, plus `TMP`, `TEMP`, `SYSTEMROOT` (the same
     conditional additions apply).
+  UNCONDITIONAL METRICS INJECTION (ADV-P10-D01, orchestrator call 1): the two metrics
+  keys are members of the exact key sets whether or not the case names a metrics URL —
+  the raw-listener fake's port is assigned at run time, so a case cannot declare it;
+  the harness ALWAYS injects the fake's URL into BOTH children (`DGX_SL_VM_URL=<fake>`
+  for the oracle, `HYLO_BACKENDS_0_METRICS_URL=<fake>` — the env key of
+  `backends[0].metrics_url` — for hylo; the same raw-listener fake serves both sides,
+  BC-6.02.003) UNLESS the case itself sets the metrics URL, in which case the case
+  value wins. BC-6.01.002's exact key sets and its CTVs copy that (a settings-`{}`
+  CTV still expects the metrics keys present).
   `HOMEDRIVE`/`HOMEPATH` are NOT constructed keys on any OS (home is
   `HOME`+`USERPROFILE`); no key set on any OS includes `PATH` unless the fake-table
   condition holds; `HOME` is present on BOTH OSes (Windows included) and
@@ -176,8 +187,8 @@ input-hash: "6337f69"
 | Cache swap | `TestParityCacheSwap_FourCaches` |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
 | Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` (corpus root; OD-148, matching BC-6.02.001/.003, BC-6.04.003) |
-| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpt09 (the Windows-only CP-T09 MSVC localtime-domain family, pass-8 orchestrator call 2 — cpt08 is retired and not reused), cpn01..cpn03, cpo01..cpo12, cpa01..cpa05. SUBAGENT FAMILY RULE (pass-7 D14): a subagent-family case is identified by the case-id SUFFIX `-sub` on a base case (e.g. `row1-003-sub`), the marker BC-6.01.001/BC-6.02.003/BC-6.03.001 use ("id suffix `-sub`"); the grammar's `subagent` token denotes that suffix family, NOT a `<subagent>-<nnn>` spelling, so the validator's rule is the determinate suffix match |
-| Case contents | `stdin.json.tmpl`, `settings`, `argv` (pass-4 ruling, ADV-P4-A15/D09: the HANDLER-RELATIVE argument list — the elements after the `statusline` verb; default `[]`. In P1 the corpus validator admits only `[]` and `["--subagent"]`; the oracle receives `[python, -s, script]` plus the same list, so the oracle — which has no `statusline` verb — sees exactly the handler arguments. Other argv shapes are covered by Go table tests (BC-4.01.002), never parity. Supersedes the pass-3 "passed to the built `hylo` binary verbatim, default `["statusline"]`" wording and BC-4.01.002:111's "no flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps` (clock step + transcript appends per step, carried INSIDE `case.json` — pass-4 D10 — not as a sibling `steps.jsonl`) |
+| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpt09 (the Windows-only CP-T09 MSVC localtime-domain family, pass-8 orchestrator call 2 — cpt08 is retired and not reused), cpn01..cpn03, cpo01..cpo12, cpa01..cpa05. SUBAGENT FAMILY RULE (restated pass-10 orchestrator call 2, superseding the pass-7 `-sub` suffix spelling): a subagent case is a case of the `subagent` FAMILY — id `subagent-<nnn>[-<variant>]` — and the corpus validator gives argv `["--subagent"]` to exactly that family; there is NO `-sub` suffix rule (BC-6.01.001/BC-6.02.003/BC-6.03.001 state this one family rule) |
+| Case contents | `stdin.json.tmpl`, `settings`, `argv` (pass-4 ruling, ADV-P4-A15/D09: the HANDLER-RELATIVE argument list — the elements after the `statusline` verb; default `[]`. In P1 the corpus validator admits only `[]` and `["--subagent"]`; the oracle receives `[python, -s, script]` plus the same list, so the oracle — which has no `statusline` verb — sees exactly the handler arguments. Other argv shapes are covered by Go table tests (BC-4.01.002), never parity. Supersedes the pass-3 "passed to the built `hylo` binary verbatim, default `["statusline"]`" wording and BC-4.01.002's Parity/exclusion traceability row's "no flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps` (clock step + transcript appends per step, carried INSIDE `case.json` — pass-4 D10 — not as a sibling `steps.jsonl`) |
 | Exclusions file | `internal/statusline/testdata/parity/exclusions.json` (beside the corpus root; OD-148 layout, BC-6.03.003/.004 PC-1); capture replays additionally use a git-ignored `captures/exclusions.json` validated by the same closed-set rule, CI never runs captures (pass-4 D12) |
 | Tier B goldens | `internal/statusline/testdata/goldens/*.golden`, `*.windows.golden` |
 | Clock shim | `internal/statusline/testdata/pyhooks/sitecustomize.py` |

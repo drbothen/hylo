@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.20"
+version: "0.2.21"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T00:00:00Z
+timestamp: 2026-11-21T00:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -24,6 +24,7 @@ modified:
   - "0.2.18 2026-11-20T12:00:00Z: pass-8 residual sweep — §2.01 BC-2.01.005 title row synced to the contract's H1 verbatim (bc_h1_is_title_source_of_truth)"
   - "0.2.19 2026-11-20T18:00:00Z: pass-9 remediation — NFR-002 trigger list and §5 E-REN-002 gain the cost-pick equivalence overflow CP-O12 with its carrier cites (call 4/B03); E-NET-001 dead rung states it follows `statusline.theme.red` and `statusline.glyphs.degraded` (A14); §8 per-call-site recursion budget names all five measured sites including the metrics reply 992/993 (A10)"
   - "0.2.20 2026-11-21T00:00:00Z: pass-9 residual sweep — §2.06 BC-6.04.002 title row synced to the contract's H1 verbatim (large-transcript exemption: 100 ms ceiling; bc_h1_is_title_source_of_truth)"
+  - "0.2.21 2026-11-21T00:30:00Z: pass-10 remediation — §4 NFR-006 target adds the nightly/manual `factory-artifacts` scan job from `main` (the ref carries no `.github/`, so a push trigger can never fire) with the local pre-push hook as the push-time guard, matching nfr-catalog NFR-006 (A03/call 16); E-NET-001 dead-rung cite corrected from BC-1.04.004 PC3 to BC-1.04.004 Precondition 3 (C2-10)"
 supplements:
   - prd-supplements/interface-definitions.md
   - prd-supplements/error-taxonomy.md
@@ -491,7 +492,7 @@ the supplement.
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
 | NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20). The tunable cap keys (`transcript.read_cap_bytes`, `transcript.dedup_memory`, `sparkline.history_cap`) carry judgment-call config-VALIDATION upper bounds (67108864 / 65536 / 1000; supplement) — config range bounds, not new runtime caps (pass-5 A13) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
-| NFR-006 | Repo hygiene (public repo) | synthetic-only committed fixtures; gitleaks + pattern scan clean on CI | CI leg + TestCorpusHygiene | BC-6.02.001, BC-6.04.001 |
+| NFR-006 | Repo hygiene (public repo) | synthetic-only committed fixtures; gitleaks + pattern scan clean on CI; the pattern scan additionally runs nightly and on manual dispatch from `main` over the checked-out `factory-artifacts` ref (no push trigger there — the ref carries no `.github/`; pass-10 A03/call 16), the local pre-push hook staying the push-time guard | CI leg + scheduled/manual `factory-artifacts` scan + pre-push hook + TestCorpusHygiene | BC-6.02.001, BC-6.04.001 |
 
 ## 5. Error Taxonomy
 
@@ -508,7 +509,7 @@ the supplement.
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
 | E-VAL-001 | `config validate` on invalid config | plain reason lines (no SGR) on stdout | 1 | BC-2.03.001 |
-| E-NET-001 | Metrics unreachable / 500 / garbage | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (the red parameter is the `statusline.theme.red` value — default `31`, byte-equal to legacy — and the glyph is `statusline.glyphs.degraded`, default U+25CC: the rung follows the config keys, BC-1.04.004 PC3, pass-9 A14; marker word from `statusline.pill.label_local`, OD-189); render never fails | 0 | BC-1.04.001/.004, BC-1.04.002 |
+| E-NET-001 | Metrics unreachable / 500 / garbage | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (the red parameter is the `statusline.theme.red` value — default `31`, byte-equal to legacy — and the glyph is `statusline.glyphs.degraded`, default U+25CC: the rung follows the config keys, BC-1.04.004 Precondition 3, pass-9 A14; marker word from `statusline.pill.label_local`, OD-189); render never fails | 0 | BC-1.04.001/.004, BC-1.04.002 |
 | E-FS-001 | Cache load/save faults | never-raise; render continues from defaults; failed replace persists nothing | 0 | BC-1.06.001/.002 |
 | E-HAR-001 | Harness integrity (canary, missing table test, glob entry, id outside closed set) | harness run FAILs with a named reason | non-zero (harness only) | BC-6.01.003, BC-6.03.004 |
 

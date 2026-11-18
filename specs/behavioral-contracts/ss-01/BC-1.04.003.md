@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.6"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
@@ -26,6 +26,7 @@ modified:
   - "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-008/EC-009 degrades ride the never-blank ladder) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, VP-031 de-cited; pass-8 call 12)"
   - "1.3.5 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC2/PC3 name the registered keys statusline.sparkline.max_age_s and statusline.sparkline.min_gap_s beside their default literals)"
   - "1.3.6 2026-11-18: pass-9 residual sweep (call 9, ADV-P9-A2-04 disk sync) — the VP-030 quick-leg row names the registered keys (statusline.sparkline.history_cap, statusline.sparkline.max_age_s) instead of the 32/90 literals, states the pruning invariant on the success path only, and adds the failure-path verbatim re-save (SL:327, SL:353-355; Inv 2), matching VP-030's statement"
+  - "1.3.7 2026-11-18: pass-10 remediation ADV-P10-C2-02 (EC-010 added — a dict point whose t is a huge exact JSON integer, magnitude >= 2**1024 - 2**970, raises OverflowError at the SL:336 age filter → errDegraded; OD-160 class; oracle-verified CPython 3.11.7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -110,6 +111,7 @@ at the last 32 points.
 | EC-007 | 40 points within 90 s, then one appended | 41 returned, 32 saved |
 | EC-008 | Point is a string or number | normalized to `{}`, `t` default 0 → dropped unless `now < 90`; a `{}` point raises KeyError at the gap check ONLY when it is the newest kept point — `hist[-1]` is `{}` makes `hist[-1]["t"]` raise (SL:337) → degraded line (ADV-P4-C2-15); a kept `{}` followed by a newer kept point (e.g. `[{}, {"t": now-1}]`) prunes without raising (ADV-P5-C2-09). String/number points are foreign-cache shapes (hylo's and legacy's writers always write dicts): out of byte-parity scope, P3 r2 ruling (b), foreign-cache class carries exclusion id **OD-160**, as EC-009 |
 | EC-009 | Point is `[[0]]`-shaped (list of length 1) | IndexError → degraded (CP-C05, foreign cache; out of byte-parity scope, P3 r2 ruling (b); foreign-cache class carries named exclusion id **OD-160**) |
+| EC-010 | Dict point whose `"t"` is a huge exact JSON integer (magnitude >= 2**1024 - 2**970, i.e. a 309..4300-digit literal; both signs) | the SL:336 age-filter subtraction `now - t` raises OverflowError ("int too large to convert to float"; oracle-verified CPython 3.11.7, 2026-11-18; `_norm_pt` passes the dict through unchanged, so the intact int reaches the filter) → out of `get_sample` → errDegraded (BC-1.04.002 Inv 1); smaller magnitudes convert and 4301+ digits fail the parse earlier in the never-raise loader (BC-1.06.001); foreign-cache shape, exclusion id **OD-160** (ADV-P10-C2-02) |
 
 ## Canonical Test Vectors
 

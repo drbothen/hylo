@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:45:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "cbe06a0"
+input-hash: "3e229e8"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -28,6 +28,7 @@ modified:
   - "2026-11-19T04:45:00Z (1.2.4): ADV-P6 remediation D20 — PC-5 tension resolved: the no-validation claim is scoped to HYLO_* CONFIG-VALUE settings; the two path overrides the command consumes (HYLO_CONFIG, HYLO_PATHS_CACHE_DIR) keep their full path grammar including the empty-path error (PC-3/EC-011 stand)"
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - the --config=<path> equals spelling parses as the separated form; a bare --config is a flag error on the golden usage surface, exit 2 (BC-4.01.001 PC-3 cross-referenced)"
   - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D01 — the three directory resolvers carry the env seam everywhere in this file: ConfigDir(env EnvVars), CacheDir(env EnvVars), StateDir(env EnvVars), matching BC-3.01.001 and ARCH-05"
+  - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D03 (orchestrator call 3) — the pass-9 A11 absoluteness rule propagated to its sibling: a RELATIVE HYLO_PATHS_CACHE_DIR reports the same config error as the status line's grammar (not an absolute path; cache: (unavailable), stderr detail, exit 1 — new EC-012); absoluteness is filepath.IsAbs semantics computed in internal/platform per OS (Windows: drive + root or UNC); HYLO_CONFIG is reserved for P4 and printed as given, no absoluteness check (PC-3/PC-5 scope note)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,7 +80,16 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
    - `state:` the hylo state DIRECTORY (`StateDir(env EnvVars)`, BC-3.01.001) — on Windows
      `%LOCALAPPDATA%\hylo\state` (OD-144).
 3. Override paths (a)/(b) get `~` expansion (OD-61, BC-2.01.005) and are otherwise printed
-   as given (not made absolute, not cleaned). Overrides are applied wherever they exist:
+   as given (not made absolute, not cleaned). Absoluteness scope (ADV-P10-D03,
+   orchestrator call 3): only `statusline.paths.cache_dir` (`HYLO_PATHS_CACHE_DIR`) must
+   be ABSOLUTE — a relative value is a config error, reported exactly as the status
+   line's grammar reports it (`not an absolute path`, BC-2.01.005 PC-3; the pass-4
+   call-16 empty-path disposition in the same shape): `cache: (unavailable)`, stderr
+   `hylo: config path: cannot determine cache directory (not an absolute path)\n`, exit 1.
+   Absoluteness is `filepath.IsAbs` semantics computed in `internal/platform` per OS
+   (Windows: drive + root or UNC; `\foo` and `C:foo` are relative). `HYLO_CONFIG` is
+   reserved for P4 and is printed as given — no absoluteness check applies to it (EC-006
+   stands). Overrides are applied wherever they exist:
    `config:` (a)/(b) and `cache:` (`HYLO_PATHS_CACHE_DIR`); the state directory has no
    override in P1 (OD-165). Edge discipline (ADV-P3-D36, amended ADV-P4-D20): an override
    that is set but EMPTY splits by label — `HYLO_CONFIG=` counts as not present (the
@@ -106,7 +116,9 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
    not affect this command (the resolved config is never loaded here). The exceptions are
    the two path overrides this command itself consumes and expands: `HYLO_CONFIG` and
    `HYLO_PATHS_CACHE_DIR`, whose path grammar (including the empty-path error, PC-3/EC-011)
-   applies in full (ADV-P6-D20 resolves the PC-3/PC-5 tension).
+   applies in full (ADV-P6-D20 resolves the PC-3/PC-5 tension); the absoluteness
+   requirement applies ONLY to `HYLO_PATHS_CACHE_DIR` — `HYLO_CONFIG` is reserved for P4
+   and printed as given, with no absoluteness check (PC-3; ADV-P10-D03c).
 6. Any other argument or flag: usage on stderr (BC-4.01.001 golden), exit 2.
 
 ## Invariants
@@ -130,6 +142,7 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 | EC-009 | `HYLO_STATUSLINE_ROWS=x` set | paths printed normally, exit 0 |
 | EC-010 | Windows, `LOCALAPPDATA` unset, `APPDATA` set | `config:` resolves; `cache: (unavailable)` and `state: (unavailable)`; stderr detail twice; exit 1 |
 | EC-011 | `HYLO_PATHS_CACHE_DIR=` (present, empty) | `cache: (unavailable)`; stderr `hylo: config path: cannot determine cache directory (empty path)`; exit 1 — same `empty path` error as the status line (ADV-P4-D20) |
+| EC-012 | `HYLO_PATHS_CACHE_DIR=rel` (present, relative) | `cache: (unavailable)`; stderr `hylo: config path: cannot determine cache directory (not an absolute path)`; exit 1 — same `not an absolute path` config error as the status line (BC-2.01.005 PC-3; ADV-P10-D03) |
 
 ## Canonical Test Vectors
 

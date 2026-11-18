@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.6.3"
+version: "1.6.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "c324f8c"
+input-hash: "2b4b237"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -26,6 +26,7 @@ modified:
   - "1.6.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.6.2 pass-6 remediation (ADV-P6-B01 call 10 + OD-184 wording): for-all thermometer rows re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); glyph length respelled to the OD-184 canon; 2026-11-19T04:00:00Z"
   - "1.6.3 pass-8 remediation (ADV-P8-B09): VP-041 width-formula row states the `%` term explicitly — 10 + 1 + len(number text) + 1 + len(denominator text) (PC7); VP-041 P-o sync is the architect's; no behavioral change; 2026-11-19T08:00:00Z"
+  - "1.6.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O01 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -147,6 +148,7 @@ prefixes listed in Postcondition 4; `E` = `\e[90m▱`.
 | VP-041 | `filled == min(floor(pct/10 + 0.5), 10)` for all finite pct in [0,100] | property test (for-all leg; VP-028 delivers the oracle legs) |
 | VP-041 | Visible width of the segment = 10 (bar) + 1 (space) + len(number text) + 1 (the `%` of PC7) + len(denominator text), for all inputs | property test with `visible()` (BC-1.01.004) — for-all leg |
 | VP-028 | Bytes equal the oracle across a pct sweep 0..100 step 0.1 × totals {0, 500, 501, 200000, 999999, 1e6, 1048576} | table test against CPython goldens — golden leg |
+| VP-028, VP-001 | The CP-O01 overflow degrade (EC-010: `context_window_size` at or beyond the int→float threshold) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 

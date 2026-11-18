@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.14"
+version: "1.15"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T06:00:00Z
+timestamp: 2026-11-21T00:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "982366b"
+input-hash: "a97d27b"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
@@ -20,6 +20,7 @@ modified:
   - "1.12 2026-11-19T22:00:00Z: pass-8 remediation — `ascending pair violated (p75 <= p95)` restated as an INTRA-key member-pair check on the one composite key `statusline.cost.percentiles`: the D4-EX-3 line names the whole key with its full JSON env value, no per-member spelling (A11); the only-cross-key sentence rescoped to one cross-KEY case (subagent.tokens) plus one intra-key composite case (A11); no behavioral change"
   - "1.13 2026-11-20T12:00:00Z: pass-8 residual sweep — the `control character` Text example no longer cites a `statusline.lane.reroute_all_prefixes` entry (a control byte there yields the OD-179 List-entry reason of BC-2.01.004 PC-9, not this reason); examples are now `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; CP-O08 site cell records that SL:996 is unreachable at CP-O08 magnitudes (BC-1.03.010 EC-009)"
   - "1.14 2026-11-20T18:00:00Z: pass-9 remediation — CP-O12 minted (cost-pick equivalence: exact-int sum of two sub-bound tokens overflows at tot * dgx_mtok, SL:626/633; Surface 1 render-time degrade like CP-O04; owner BC-1.02.029, co-owner BC-1.05.003), register 48 → 49 paths (O family 11 → 12), E-REN-002 family list and carrier set completed (call 4/B03); Text-class reason `invalid UTF-8` mirrored byte for byte from BC-2.02.001 (D08); E-NET-001 dead rung states it follows `statusline.theme.red` and `statusline.glyphs.degraded` (A14); no behavioral change"
+  - "1.15 2026-11-21T00:30:00Z: pass-10 remediation — path-grammar reason `not an absolute path` (minted pass-9 A11, BC-2.01.005 PC-3) added to the reason table and the E-CFG-001 reconciliation sentence (A07); numeric-range vocabulary sentence fixed to the six strings above (A14); stale minting-source-of-record note removed from `invalid UTF-8` (A15); CP-O08 owner set corrected to BC-1.03.010 (EC-009) and BC-1.03.018 (PC3) (C06); CP-A01..A03 site cells cite the raise sites SL:891/894/906, matching the CP-A04/A05 rows and BC-1.07.008 (C09); CP-C10 within-step order claim qualified — the current session's own src-cc entry faults at the SL:232 throttle check before save_cache (B05); CP-S disposition anchor names the BC-1.03.x outliers CP-S14 (BC-1.03.013 PC3) and CP-S16 (BC-1.03.015 PC5) (C10); no behavioral change"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -52,7 +53,7 @@ modified:
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
 | E-VAL-001 | VAL | broken | 1 | plain reason lines (no SGR), one per error — BC-2.03.001 |
-| E-NET-001 | NET | degraded | 0 | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (the red parameter is the `statusline.theme.red` value — default `31`, byte-equal to legacy — and the glyph is `statusline.glyphs.degraded`, default U+25CC: the rung follows the config keys, unlike the theme-independent grey of E-REN-001, because it renders only in a successfully configured render; BC-1.04.004 PC3, pass-9 A14; marker word from `statusline.pill.label_local`, OD-189) — BC-1.04.001/.004, BC-1.04.002 (PC4 dead rung; BC-1.04.020 step 5; pass-7 C2-13) |
+| E-NET-001 | NET | degraded | 0 | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (the red parameter is the `statusline.theme.red` value — default `31`, byte-equal to legacy — and the glyph is `statusline.glyphs.degraded`, default U+25CC: the rung follows the config keys, unlike the theme-independent grey of E-REN-001, because it renders only in a successfully configured render; BC-1.04.004 Precondition 3, pass-9 A14; marker word from `statusline.pill.label_local`, OD-189) — BC-1.04.001/.004, BC-1.04.002 (PC4 dead rung; BC-1.04.020 step 5; pass-7 C2-13) |
 | E-FS-001 | FS | degraded | 0 | never-raise caches; failed replace persists nothing — BC-1.06.001/.002 |
 | E-HAR-001 | HAR | broken | non-zero | harness FAIL naming the reason (canary, missing table test, glob, id outside closed set) — BC-6.01.003, BC-6.03.004 |
 
@@ -92,17 +93,18 @@ checked before E-CFG-001.
 | `unknown value (<v1>\|<v2>\|...)` | enum | BC-2.02.004 |
 | `scheme must be http or https` / `not a URL` / `missing host` | URL | BC-2.02.005 |
 | `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) / Text (OD-178: control bytes in non-theme free-text keys and List entries — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; a control byte in a `statusline.lane.reroute_all_prefixes` entry instead yields the OD-179 List-entry reason of BC-2.01.004 PC-9; pass-6 A14) | BC-2.02.005, BC-2.01.003, BC-2.01.005 |
-| `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; on Windows a WTF-8 value with a lone surrogate; minted in BC-2.02.001 pass-9 D08 and mirrored here byte for byte — agent 8's BC-2.02.001 amendment had not landed on disk when this mirror was written, so the mirror is the minting source of record for the string) | BC-2.02.001, BC-2.01.005 |
+| `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; on Windows a WTF-8 value with a lone surrogate; minted in BC-2.02.001 pass-9 D08 and mirrored here byte for byte) | BC-2.02.001, BC-2.01.005 |
 | `expected non-empty control-free text in every entry` | Text (List-entry violations, e.g. `statusline.lane.reroute_all_prefixes` empty or control-byte entry; OD-179 range + OD-178 class; pass-6 A14) | BC-2.01.004 |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `expected JSON <shape>` (`<shape>` = e.g. `array of 2 numbers`, `object {cc,other} of integers`) | Text (composite shape; OD-178) | BC-2.01.005 |
 | `expected non-empty control-free text of display width 1..16` | Text (pill labels; OD-178) | BC-2.01.005 |
 | `expected non-empty control-free text` | Text (generic non-empty Text keys: `window_age.process_name`, `subagent.tokens.suffix`, `labels.input`, ...; OD-178) | BC-2.01.005 |
-| `empty path` / `home directory unknown` | path (BC-2.01.005 grammar; no dedicated class contract) | BC-2.01.005 |
+| `empty path` / `home directory unknown` / `not an absolute path` | path (BC-2.01.005 grammar; no dedicated class contract; `not an absolute path` minted pass-9 A11 — BC-2.01.005 PC-3, a relative `paths.cache_dir`; pass-10 A07) | BC-2.01.005 |
 | `exactly one backend entry until P6` | backends (BC-2.01.002 cardinality rule; no dedicated class contract) | BC-2.01.002 |
 
-Numeric-range reason precedence by type (pass-7 D03/call 6; the four strings above are the
-entire number-range vocabulary — no new string exists): the BC-2.02.002 check order is the
+Numeric-range reason precedence by type (pass-7 D03/call 6; the number-range vocabulary is
+exactly the six strings above — the four single-key strings plus the two ascending-pair
+reasons — no new string exists): the BC-2.02.002 check order is the
 precedence, and the first applicable string wins. **Seconds keys** (BC-2.02.002 checks 1-3):
 NaN/±Inf → `not finite`; value < 0 → `negative` (except the `git.ttl_s` exception, which
 skips the check); value beyond the Duration ceiling or the `git.ttl_s` mirrored floor →
@@ -136,7 +138,7 @@ no legacy analog, so `TestD4EX3_Text` is a Go table test only, not a parity corp
 (pass-6 call 1). The theme class keeps its dedicated class
 contract BC-2.01.003. The vocabulary above also contains reasons raised under the same
 E-CFG-001 surface by other contracts: the path-grammar reasons (`empty path`,
-`home directory unknown`) come from BC-2.01.005 and the backends-cardinality reason from
+`home directory unknown`, `not an absolute path`) come from BC-2.01.005 and the backends-cardinality reason from
 BC-2.01.002 — each maps to its raising contract, not to an eighth class;
 `control character` maps to the URL class when raised by BC-2.02.005 and to the theme
 class when raised by BC-2.01.003, and to the Text class when raised for a non-theme
@@ -210,7 +212,7 @@ behavior.
 |-----------|------------------|--------------|---------|
 | CP-O06 | usage accumulation (SL:1108-1112, widened per BC-1.03.018; ADV-P4-C08) | BC-1.03.006 | `_i + _w`, a cached float `tin`, or the `c_*`/`tout` updates at SL:1109-1112 meet a 310+-digit `cache_creation_input_tokens` |
 | CP-O07 | rebuild-excess check (SL:1117, `_w - max(0, prompt - pp) > REBUILD_EXCESS`) | BC-1.03.007 | `prompt - pp` with a huge exact int and a float operand on either side: a float `pp` meeting a huge int `prompt`, or the mirror case — a huge-int `pp` meeting a float `prompt` (ADV-P3-C03: this is the rebuild predicate, not the turn machine; mirror case added ADV-P4-C08) |
-| CP-O08 | turn machine (SL:994/996; SL:996 unreachable at CP-O08 magnitudes; BC-1.03.010 EC-009) | BC-1.03.010, BC-1.03.016 | `TURN_STALE * out` or `out / span` with a huge exact int `out` |
+| CP-O08 | turn machine (SL:994/996; SL:996 unreachable at CP-O08 magnitudes; BC-1.03.010 EC-009) | BC-1.03.010 (EC-009), BC-1.03.018 (PC3) | `TURN_STALE * out` or `out / span` with a huge exact int `out` |
 
 **Surface 2 consequence — reachable in hylo (ADV-P3-C09; not moot):** two 4,300-digit
 ints add without ever meeting a float, so no CP-O06..O08 skip fires and the accumulated
@@ -233,9 +235,9 @@ and a huge exact int raises uncaught OverflowError at the two conversions below 
 
 | Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
 |-----------|------------------|--------------|---------|
-| CP-A01 | subagent renderer (SL:1242-1245) | BC-1.07.008 | `tasks` truthy and not iterable (number, `true`) — TypeError at the `for task in tasks` step |
-| CP-A02 | subagent renderer (SL:1242-1245) | BC-1.07.008 | a task's `status` unhashable (list/object) — TypeError at `_SUB_GLYPH.get(status, ...)` |
-| CP-A03 | subagent renderer (SL:1242-1245) | BC-1.07.008, BC-1.07.006 | a task's `model` truthy and not a str while the configured prefix list is consulted — AttributeError at `startswith` |
+| CP-A01 | subagent renderer task loop (SL:891) | BC-1.07.008 | `tasks` truthy and not iterable (number, `true`) — TypeError at the `for task in tasks` step |
+| CP-A02 | subagent glyph lookup (SL:894) | BC-1.07.008 | a task's `status` unhashable (list/object) — TypeError at `_SUB_GLYPH.get(status, ...)` |
+| CP-A03 | subagent prefix consult (SL:906) | BC-1.07.008, BC-1.07.006 | a task's `model` truthy and not a str while the configured prefix list is consulted — AttributeError at `startswith` |
 | CP-A04 | subagent token segment `_fmt_tokens` (SL:878) | BC-1.07.007 | a huge exact int `tokenCount` passes the `isinstance`/`> 0` gate and raises OverflowError at `float(n)`; the helper catches only TypeError/ValueError, so the render degrades |
 | CP-A05 | subagent elapsed clock (SL:919) | BC-1.07.007 | a huge exact int `startTime` raises OverflowError at `now_ms - start` |
 
@@ -282,7 +284,7 @@ the OD-160 closed-set label "CP-C01..C10" but not cited by any live BC or VP.
 | CP-C07 | — | reserved | not cited by any live BC/VP; reserved within the foreign-cache family (OD-160) |
 | CP-C08 | badge/model/project, git segment (SL:441-462, 411) | BC-1.02.005, BC-1.01.009 | git cache foreign forms: cached `ts` a string (`"x"`) — TypeError; top-level JSON array (`[1,2]`) — AttributeError |
 | CP-C09 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | corrupt cost history: top level not an object, or `sessions`/an entry not an object |
-| CP-C10 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | cost-history entry `ts` non-numeric; within-step order exception: the record_cost write lands first, then the fault (BC-1.01.009) |
+| CP-C10 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | cost-history entry `ts` non-numeric; within-step order exception: when the faulting entry is only consulted in the `cost_thresholds` scan (SL:246), the record_cost write lands first, then the fault (BC-1.01.009). Counter-case (pass-10 B05): the CURRENT session's own history entry with `src` `cc` and a non-numeric `ts` faults in record_cost's own throttle check (`now - e.get("ts", 0)`, SL:232) before save_cache (SL:237) — nothing is written that step |
 
 Family-level citations: BC-1.06.001 EC-001 (the cache loader) and BC-1.04.002 EC-008
 (retention path) cite CP-C01..C10 as a class; VP-001 and VP-020 exercise CP-C09/C10 by
@@ -295,7 +297,8 @@ widget fallback (Surface 2 transcript triggers resolve to the D4-EX-2 skip disci
 CP-O06..O08 and to the legacy no-write save for CP-O09 — BC-1.03.006 PC5 — the save-time
 difference being the `temp-file` exclusion, not a cache-byte divergence; pass-5 A21);
 the per-trigger disposition lives in the owning BC (CP-S01..S17 in BC-1.02.x /
-BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-T09 — the Windows MSVC localtime domain OSError
+BC-1.01.x — except CP-S14 in BC-1.03.013 PC3 and CP-S16 in BC-1.03.015 PC5,
+CP-T01..T07 in BC-1.03.x, CP-T09 — the Windows MSVC localtime domain OSError
 on a naive transcript timestamp (CP-T08 retired; every MSVC probe t, u1, u1 − 86400, u2
 is domain-checked, so a naive wall time on or before 1970-01-01 and from year 3001
 degrades the whole line) — in BC-5.04.001/ARCH-06, listed by BC-1.01.009 step 2 and

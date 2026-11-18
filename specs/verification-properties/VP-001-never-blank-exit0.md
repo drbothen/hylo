@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "2.1"
+version: "2.3"
 status: draft
 producer: architect
 timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-00-overview.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.001.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, prd-supplements/error-taxonomy.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5ef3274"
+input-hash: "2eac551"
 traces_to: prd.md
 source_bc: BC-1.01.001
-bcs: [BC-1.01.001, BC-1.02.020, BC-1.02.026, BC-1.02.027, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.05.004, BC-1.05.007, BC-1.06.001, BC-1.07.007, BC-1.07.008]
+bcs: [BC-1.01.001, BC-1.02.006, BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026, BC-1.02.027, BC-1.02.029, BC-1.04.001, BC-1.04.004, BC-1.04.005, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.05.002, BC-1.05.003, BC-1.05.004, BC-1.05.005, BC-1.05.007, BC-1.06.001, BC-1.07.007, BC-1.07.008]
 module: internal/statusline (guard), cmd/hylo
 proof_method: manual
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)", "1.3 2026-11-18T09:05:00Z: ADV-P3 fixes (A2-07) — FaultInjectionTable comment names the CP-A01..A03 subagent fault rows; fuzz leg asserts the promised output-set membership ({render, 29-byte line, subagent JSON lines, zero bytes}) instead of only exit-0/non-blank, with OD-168 placing a subagent config error at zero bytes", "1.4 2026-11-18T14:05:00Z: ADV-P4 fixes — catalogue closed over the pass-3 register: CP-O10/O11 (cost-history borne, BC-1.05.007), CP-A04/A05 (BC-1.07.007) and CP-N03 (metrics-borne degrade, SL:717) added (A2-03); the never-degraded claim limited to the parse path with a coded parseFault condition — subagent renderer faults (CP-A01..A05) are EXPECTED to end in the line (A2-02); frontmatter proof_method/feasibility line unmerged (A2-12); OD-167 turn-drop and OD-166 record-guard legs cross-referenced to VP-029/VP-020", "1.5 2026-11-18T23:30:00Z: pass-4 sync SC-05 — BC-1.01.002 dropped from bcs: and from Partial coverage: that contract deliberately removed VP-001 from its VP Anchors in the pass-4 burst (ADV-P4-B11 + A2-16 sibling sweep; its invalid-stdin-renders-from-{} seam is VP-005's property, whose source BC it is); VP-INDEX catalog/map reconciled in the same burst", "1.6 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-10, A2-11) — the subagent renderer regime of assertPromisedOutputSet now asserts positively: the degraded line and row output never mix (DI-008), and isJSONObject is specified as Python-semantics decode (ARCH-06 ModeBytes: NaN/Infinity tokens) so byte classification cannot false-fail; BC-1.07.007 and BC-1.05.007 added to bcs: and Partial coverage (their CP-A04/A05 and CP-O10/O11 legs are this ladder's — reciprocal BC-body rows are the BC owners' fixes, ADV-P5-A2-11/C15)", "1.7 2026-11-19T00:20:00Z: pass-5 sweep C — the headline catalogue enumeration is closed over CP-A01..A05 (the --subagent renderer faults, BC-1.07.008/.007), which the opening list had left to the second sentence; Source Contract CP-A rows unchanged", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-01, A2-21) — assertPromisedOutputSet returns at the end of the subagent regime (the main-entry check no longer runs on subagent stdout; legal zero bytes and NDJSON rows cannot false-red); the ladder guards an empty FaultInjectionTable (P11); every fenced sketch labelled non-normative (OD-182)", "1.9 2026-11-19T18:00:00Z: pass-7 fix (A2-13) — the renderer regime states where zero tasks fall: zero tasks are a legal ZERO-BYTE output (BC-1.07.004 PC6), the renderer branch's legal set is {degraded line, NDJSON rows, zero bytes on empty task list}, and the sketch returns on len(stdout)==0 before the isNDJSONRows membership check instead of assuming isNDJSONRows(\"\")", "2.0 2026-11-20T08:00:00Z: pass-8 fixes (A2-01, A2-02) — the ruled-consequence sentence corrected: CP-O06..O08 skip the offending line and the refresh RENDERS NORMALLY (OD-156/OD-167, BC-1.03.018) — no whole-refresh degrade; the OD-166 record guard stated precisely (value not recorded, file unchanged; refresh outcome per BC-1.05.004 EC-010/EC-011 — stdin-borne usd and positive-huge api_ms degrade via CP-O10/O11, negative-huge api_ms renders normally); the closed trigger catalogue and the cpt test families gain the Windows-only CP-T09 / cpt09 leg (BC-1.01.001 PC3, error-taxonomy; T08 retired)", "2.1 2026-11-20T12:00:00Z: pass-9 fixes (A2-06, orchestrator call 4) — the closed trigger catalogue, the harness comment and the cpo test families gain CP-O12 / cpo12 (cost-pick equivalence overflow: tin and tout each below the int→float overflow bound but their exact-int sum tot at or above it enters tot * dgx_mtok — SL:626, SL:633 — on the local lane with a valid basis → OverflowError → degraded line, BC-1.02.029); the subagent parse-path oracle narrowed from 'rows or zero bytes' to EXACTLY ZERO stdout bytes (main_subagent absorbs undecodable/non-object stdin to {} → zero rows, SL:928-936; BC-1.07.003, DI-008) — 'rows or zero bytes' blessed a port rendering rows from non-object stdin"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)", "1.3 2026-11-18T09:05:00Z: ADV-P3 fixes (A2-07) — FaultInjectionTable comment names the CP-A01..A03 subagent fault rows; fuzz leg asserts the promised output-set membership ({render, 29-byte line, subagent JSON lines, zero bytes}) instead of only exit-0/non-blank, with OD-168 placing a subagent config error at zero bytes", "1.4 2026-11-18T14:05:00Z: ADV-P4 fixes — catalogue closed over the pass-3 register: CP-O10/O11 (cost-history borne, BC-1.05.007), CP-A04/A05 (BC-1.07.007) and CP-N03 (metrics-borne degrade, SL:717) added (A2-03); the never-degraded claim limited to the parse path with a coded parseFault condition — subagent renderer faults (CP-A01..A05) are EXPECTED to end in the line (A2-02); frontmatter proof_method/feasibility line unmerged (A2-12); OD-167 turn-drop and OD-166 record-guard legs cross-referenced to VP-029/VP-020", "1.5 2026-11-18T23:30:00Z: pass-4 sync SC-05 — BC-1.01.002 dropped from bcs: and from Partial coverage: that contract deliberately removed VP-001 from its VP Anchors in the pass-4 burst (ADV-P4-B11 + A2-16 sibling sweep; its invalid-stdin-renders-from-{} seam is VP-005's property, whose source BC it is); VP-INDEX catalog/map reconciled in the same burst", "1.6 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-10, A2-11) — the subagent renderer regime of assertPromisedOutputSet now asserts positively: the degraded line and row output never mix (DI-008), and isJSONObject is specified as Python-semantics decode (ARCH-06 ModeBytes: NaN/Infinity tokens) so byte classification cannot false-fail; BC-1.07.007 and BC-1.05.007 added to bcs: and Partial coverage (their CP-A04/A05 and CP-O10/O11 legs are this ladder's — reciprocal BC-body rows are the BC owners' fixes, ADV-P5-A2-11/C15)", "1.7 2026-11-19T00:20:00Z: pass-5 sweep C — the headline catalogue enumeration is closed over CP-A01..A05 (the --subagent renderer faults, BC-1.07.008/.007), which the opening list had left to the second sentence; Source Contract CP-A rows unchanged", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-01, A2-21) — assertPromisedOutputSet returns at the end of the subagent regime (the main-entry check no longer runs on subagent stdout; legal zero bytes and NDJSON rows cannot false-red); the ladder guards an empty FaultInjectionTable (P11); every fenced sketch labelled non-normative (OD-182)", "1.9 2026-11-19T18:00:00Z: pass-7 fix (A2-13) — the renderer regime states where zero tasks fall: zero tasks are a legal ZERO-BYTE output (BC-1.07.004 PC6), the renderer branch's legal set is {degraded line, NDJSON rows, zero bytes on empty task list}, and the sketch returns on len(stdout)==0 before the isNDJSONRows membership check instead of assuming isNDJSONRows(\"\")", "2.0 2026-11-20T08:00:00Z: pass-8 fixes (A2-01, A2-02) — the ruled-consequence sentence corrected: CP-O06..O08 skip the offending line and the refresh RENDERS NORMALLY (OD-156/OD-167, BC-1.03.018) — no whole-refresh degrade; the OD-166 record guard stated precisely (value not recorded, file unchanged; refresh outcome per BC-1.05.004 EC-010/EC-011 — stdin-borne usd and positive-huge api_ms degrade via CP-O10/O11, negative-huge api_ms renders normally); the closed trigger catalogue and the cpt test families gain the Windows-only CP-T09 / cpt09 leg (BC-1.01.001 PC3, error-taxonomy; T08 retired)", "2.1 2026-11-20T12:00:00Z: pass-9 fixes (A2-06, orchestrator call 4) — the closed trigger catalogue, the harness comment and the cpo test families gain CP-O12 / cpo12 (cost-pick equivalence overflow: tin and tout each below the int→float overflow bound but their exact-int sum tot at or above it enters tot * dgx_mtok — SL:626, SL:633 — on the local lane with a valid basis → OverflowError → degraded line, BC-1.02.029); the subagent parse-path oracle narrowed from 'rows or zero bytes' to EXACTLY ZERO stdout bytes (main_subagent absorbs undecodable/non-object stdin to {} → zero rows, SL:928-936; BC-1.07.003, DI-008) — 'rows or zero bytes' blessed a port rendering rows from non-object stdin", "2.2 2026-11-18T17:50:00Z: pass-10 fixes (A2-02, A2-08, B03, C2-05, C2-11) — the never-blank claim scoped to the MAIN entry (the --subagent parse-path faults legally print exactly zero bytes) and the crash register's CP-X01..X04 disposal stated (replaced by D4-EX-3, the cp-x03 exclusion, signals out of scope) (A2-08); the fuzz classifier isJSONObject specified as pyfmt.Decode ModeText semantics with the subagent stdin site's 993 depth budget — legacy reads json.load(sys.stdin) in text mode (SL:930): BOM, UTF-16/32 and depth-994 stdin decode to {} → zero bytes; ModeBytes would admit all three into the renderer regime (A2-02, orchestrator call 10); CP-O10/O11 bearer anchors corrected — stdin-borne conversion sites at the render step (BC-1.05.007, EC-011/EC-012), history-borne raise in cost_thresholds (BC-1.05.005 EC-011, SL:255), replacing the cost-history-borne/EC-009-EC-010 mis-anchor (C2-05); bcs: gains the verified degrade-row owners BC-1.02.006/.011/.012/.014/.017/.029, BC-1.04.001/.004/.005 and BC-1.05.002/.003, named with their EC rows in the Source Contract (B03/C2-11; VP-INDEX map synced by the index owner)", "2.3 2026-11-18T18:40:00Z: pass-10 residual sweep (C2-11 reciprocity) — bcs: gains BC-1.02.025 (the CP-O04 owner, EC-010) and BC-1.05.005 (the history-borne CP-O10/O11 raise in cost_thresholds, EC-011), each degrade vector verified on disk in its BC; the Source Contract partial-coverage sentence names both; VP-INDEX map and recount synced by the index owner in the same burst"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -39,15 +39,23 @@ degrades), CP-T01..T07 plus the Windows-only CP-T09 (transcript faults; CP-T08 r
 error-taxonomy), CP-N01..N03 (NaN/inf crash paths; N03 the
 metrics-borne degrade — a numeric `__name__` key sorts ahead of every `vllm:` key and
 `k.startswith` raises AttributeError, SL:717), CP-O01..O12 (overflow paths, OD-156;
-O10/O11 the cost-history-borne conversion sites, BC-1.05.007; O12 the cost-pick
+O10/O11 the unconvertible-cost conversion sites — stdin-borne at the render step
+(BC-1.05.007, EC-011/EC-012) and history-borne in `cost_thresholds` (BC-1.05.005
+EC-011, SL:255); O12 the cost-pick
 equivalence overflow — an exact-int `tin`+`tout` sum `tot` (SL:626) at or above the
 int→float overflow bound entering `tot * dgx_mtok` (SL:633) on the local lane with a
 valid basis → OverflowError → degraded line, BC-1.02.029), CP-A01..A05 (the
 `--subagent` renderer faults — A01..A03 the renderer shape faults, BC-1.07.008;
 A04/A05 the `_fmt_tokens`/elapsed-clock OverflowErrors, BC-1.07.007), and untyped panics — one
 refresh of
-`hylo statusline` produces at least one stdout byte and terminates with exit code 0. No
-fault class exists that yields blank output or a non-zero statusline exit. Degraded
+`hylo statusline` produces at least one stdout byte and terminates with exit code 0. On
+the MAIN entry, no fault class exists that yields blank output or a non-zero statusline
+exit (A2-08: the claim is scoped to the main entry — the `--subagent` entry's
+parse-path faults legally print exactly zero bytes, below). The taxonomy's
+import/exit-time triggers CP-X01..X04 are disposed outside this surface by the crash
+register itself: CP-X01/X02 are replaced by D4-EX-3 (BC-2.02.001), CP-X03 is the named
+exclusion `cp-x03` (BC-1.01.001 EC-005, OD-136) and CP-X04 (signals) is out of scope.
+Degraded
 rows emit exactly the 29-byte line `\e[90mstatusline degraded\e[0m\n`. The same ladder
 holds for the `--subagent` entry: faults inside the subagent renderer (CP-A01..A05,
 BC-1.07.008 — A01..A03 the renderer shape faults, A04/A05 the `_fmt_tokens`/elapsed
@@ -80,7 +88,15 @@ of them remain covered by this ladder.
   never-blank/exit-0 per DI-008), BC-1.07.008 (CP-A01..A03 subagent-mode faults reach
   the same guard: 29-byte line, exit 0, no partial rows), BC-1.07.007 (CP-A04/A05 the
   `_fmt_tokens`/elapsed-clock OverflowErrors ride the same ladder), BC-1.05.007
-  (CP-O10/O11 the cost-history-borne conversion sites at the render step, EC-009/EC-010).
+  (CP-O10/O11 the stdin-borne conversion sites at the render step, EC-011/EC-012; the
+  history-borne raise at the `cost_thresholds` division is BC-1.05.005 EC-011, SL:255).
+  The remaining CP-O/CP-N03 degrade-row owners ride this ladder reciprocally (pass-10
+  B03/C2-11, each vector verified in its BC): BC-1.02.006 EC-010 (CP-O01), BC-1.02.011
+  EC-010 and BC-1.02.012 EC-012 (CP-O02), BC-1.02.014 EC-013 (CP-O03), BC-1.02.017
+  EC-010 (CP-O05), BC-1.02.025 EC-010 (CP-O04 owner), BC-1.02.029 EC-009 (CP-O12
+  owner), BC-1.04.001 EC-013 / BC-1.04.004 / BC-1.04.005 EC-007 (CP-N03), BC-1.05.002
+  EC-009 (CP-O11 co-owner), BC-1.05.003 EC-011 (CP-O12 co-owner) and BC-1.05.005 EC-011
+  (the history-borne CP-O10/O11 raise in `cost_thresholds`).
 - **Invariant verified:** DI-008 (rendering never fails; degraded ladder ends in
   one-line output, exit 0). NFR-002 (100% of CP-* triggers, fault-injection table).
 
@@ -141,9 +157,14 @@ func FuzzDegradedLadder(f *testing.F) { // BC-1.01.001 any-stdin leg; CI-seeded,
         if !subagent && len(stdout) == 0 { t.Fatal("blank stdout on main entry") }
         // A2-02: the parse/render distinction is computable at the harness — a JSON
         // object reaches the renderer (CP-A fault regime); anything else is parse-borne.
-        // A2-10: isJSONObject decodes with pyfmt.Decode ModeBytes semantics (Python
-        // json: NaN/Infinity bare tokens accepted, ARCH-06) — an encoding/json-based
-        // classifier would misclassify NaN-token inputs and false-fail correct renders.
+        // A2-02 (pass-10): isJSONObject classifies with pyfmt.Decode ModeText semantics
+        // and the subagent stdin site's 993 depth budget (VP-006 :48) — legacy reads
+        // json.load(sys.stdin) in TEXT mode (SL:930). NaN/Infinity bare tokens are
+        // accepted (both modes, ARCH-06) and reach the renderer, but a UTF-8 BOM,
+        // a UTF-16/32 payload (ModeBytes detections, invalid under ModeText) or
+        // depth-994 nesting fails the decode → {} → parse path → zero bytes, exactly
+        // as legacy; a ModeBytes classifier would wrongly admit all three into the
+        // renderer regime (undoing the pass-9 A2-06 tightening for those inputs).
         parseFault := subagent && !isJSONObject(stdin)
         assertPromisedOutputSet(t, "fuzz", subagent, parseFault, stdout) // membership, not just non-blank
     })

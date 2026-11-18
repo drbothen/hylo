@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "9343374"
+input-hash: "df5fc95"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -25,6 +25,8 @@ modified:
   - "1.3.2 pass-6 remediation (ADV-P6-B08): the house glyph is named as the registry key statusline.glyphs.window_age instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
   - "1.3.3 pass-7 remediation (ADV-P7-B15): Inv 3 spells the concrete exclusion test name TestWindowAge_D4EX1_Windows_AncestorFound (VP-012) instead of the wildcard; no behavioral change; 2026-11-19T07:00:00Z"
   - "1.3.4 pass-8 remediation (ADV-P8-B11): EC-007 gains the inline OD-160 hand-edited-cache tag its siblings EC-004..006 and BC-1.02.028 EC-005 already carry (Inv 3 covers it); no behavioral change; 2026-11-19T08:00:00Z"
+  - "1.3.5 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O05 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "1.3.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -116,6 +118,7 @@ confirmed by golden A (deep pass-3 round 2).
 |--------|----------|-------------|
 | VP-028 | Suffix present iff `win_start` numeric, timer shown and `(now-win_start)*1000 - dur >= 300000` evaluated without FMA | table test on arm64 + 300k sampled boundary cases vs oracle |
 | VP-028 | Suffix position is after the API-time suffix | table test |
+| VP-028, VP-001 | The CP-O05 overflow degrade (EC-010: `win_ms - dur` at or beyond the int→float threshold, numeric `win_start`) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 
@@ -124,7 +127,7 @@ confirmed by golden A (deep pass-3 round 2).
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008, DI-012 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (⌂ gate) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:554-563; gate SL:557-559, append SL:562) |
 | Legacy contract | BC-SL-022 (pass-3 r1; refined deep pass-3 round 1) |
 | Config keys | `statusline.window_age.min_margin_ms` (T-040), `statusline.glyphs.window_age` (`⌂`), `statusline.theme.*` (OD-113) |
@@ -140,11 +143,11 @@ confirmed by golden A (deep pass-3 round 2).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (⌂ gate) (row-1 session widgets; FMA no-fuse convention) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#session` — internal/statusline/session.go (⌂ gate) (row-1 session widgets; FMA no-fuse convention) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

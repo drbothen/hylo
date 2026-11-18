@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
 timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.01.001.md, behavioral-contracts/ss-06/BC-6.01.002.md, behavioral-contracts/ss-06/BC-6.01.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "ef0d8ec"
+input-hash: "f0c2344"
 traces_to: prd.md
 source_bc: BC-6.01.001
 bcs: [BC-6.01.001, BC-6.01.002, BC-6.01.003]
@@ -20,7 +20,8 @@ proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
 modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — per-OS child env: Windows TEMP/TMP + PYTHONUTF8/PYTHONIOENCODING pins; no literal temp paths (A2-17)", "1.3 2026-11-18T09:02:00Z: ADV-P3 fixes (A2-04) — Windows child env additionally pins USERPROFILE (and HOMEDRIVE/HOMEPATH) to the parity roots so ntpath.expanduser resolves caches inside the sandbox (CPython 3.8+ ntpath.expanduser reads USERPROFILE, ignores HOME), and preserves SYSTEMROOT (socket initialization); catalog note added: BC-1.01.004 → VP-034 is a stale pairing (A2-13)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-07, A02, D02) — child env asserted as the EXACT BC-6.01.002 allowlisted key set against a seeded forbidden parent; every PYTHON* variable except PYTHONPATH absent (PYTHONUTF8/PYTHONIOENCODING pins removed — stdio encoding comes from the shim UTF-8 reconfigure); TZ pinned to the case zone (UTC in parity, OD-177); Windows SYSTEMROOT looked up case-insensitively; new TestFrozenClock_Float64EndToEnd asserts the frozen instant is a float64 end to end — never round-tripped through time.Time nanoseconds (plan call 7, D02) on an ulp-spanning instant grid", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-06, OD-183: per-OS allowlists so the exact-set assert cannot red a correct windows-2025 run; the OD-183 Windows row PYTHONIOENCODING=utf-8 (stdio only, PYTHONUTF8 still forbidden) with the changes-stdio-only table-test pin)",
- "1.6 2026-11-19T18:00:00Z: pass-7 fixes (D05/A01 call 2, A2-19/OD-190) — the per-OS key sets are copied VERBATIM from BC-6.01.002 PC-1's authoritative consolidation: Windows oracle gains HOME/TMPDIR/LANG (were omitted), HOMEDRIVE/HOMEPATH withdrawn (NOT constructed keys on any OS — the v1.3 expanduser triple), the POSIX and Windows GO-binary allowlists added (XDG_CACHE_HOME, LOCALAPPDATA, HYLO_PATHS_CACHE_DIR, HYLO_BACKENDS_0_MODEL_PREFIXES; no PATH ever), conditional PATH/COLUMNS/setting keys named; OD-190 LF normalization named beside PYTHONIOENCODING=utf-8 (UTF-8 + LF on every OS), not hidden in the shim"]
+ "1.6 2026-11-19T18:00:00Z: pass-7 fixes (D05/A01 call 2, A2-19/OD-190) — the per-OS key sets are copied VERBATIM from BC-6.01.002 PC-1's authoritative consolidation: Windows oracle gains HOME/TMPDIR/LANG (were omitted), HOMEDRIVE/HOMEPATH withdrawn (NOT constructed keys on any OS — the v1.3 expanduser triple), the POSIX and Windows GO-binary allowlists added (XDG_CACHE_HOME, LOCALAPPDATA, HYLO_PATHS_CACHE_DIR, HYLO_BACKENDS_0_MODEL_PREFIXES; no PATH ever), conditional PATH/COLUMNS/setting keys named; OD-190 LF normalization named beside PYTHONIOENCODING=utf-8 (UTF-8 + LF on every OS), not hidden in the shim",
+ "1.7 2026-11-19T20:00:00Z: pass-10 residual (ADV-P10-D01 sync) — the copied exact key sets gain the unconditional injected-metrics keys, verbatim from BC-6.01.002 PC-1: DGX_SL_VM_URL (= the injected fake metrics URL) in the POSIX/Windows oracle allowlists and HYLO_BACKENDS_0_METRICS_URL (= the same injected URL, unless the case itself sets backends[0].metrics_url — the case value wins) in the POSIX/Windows Go allowlists, property statement and skeleton alike; '+ the DGX_SL_* keys' respelled '+ the OTHER DGX_SL_* keys'"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,8 +43,9 @@ OD-109); the child environment is constructed from scratch as the EXACT allowlis
 key sets of BC-6.01.002 PC-1 — AUTHORITATIVE, copied VERBATIM (pass-7 D05, call 2;
 conditional keys in parentheses):
 the POSIX oracle child carries exactly `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
-`PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES` (+ the `DGX_SL_*` keys the case
-sets, + `COLUMNS` when declared, + `PATH` only when the case declares a
+`PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES`, `DGX_SL_VM_URL` (= the injected
+fake metrics URL; ADV-P10-D01) (+ the OTHER `DGX_SL_*` keys the case sets, +
+`COLUMNS` when declared, + `PATH` only when the case declares a
 subprocess-fake table); the Windows oracle child is that set plus `TMP`, `TEMP`,
 `SYSTEMROOT` and `PYTHONIOENCODING=utf-8` (OD-183), same conditionals — so `HOME`,
 `USERPROFILE`, `TMPDIR` and `LANG` are present on BOTH OSes, and `HOMEDRIVE`/
@@ -51,7 +53,10 @@ subprocess-fake table); the Windows oracle child is that set plus `TMP`, `TEMP`,
 withdrawn: `ntpath.expanduser` reads USERPROFILE first, and the BC does not allow the
 extra keys); the POSIX Go-binary child carries exactly `HOME`, `USERPROFILE`, `TMPDIR`,
 `XDG_CACHE_HOME`, `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`,
-`HYLO_TEST_NOW`, `HYLO_BACKENDS_0_MODEL_PREFIXES` (+ the `HYLO_*` setting keys the
+`HYLO_TEST_NOW`, `HYLO_BACKENDS_0_MODEL_PREFIXES`, `HYLO_BACKENDS_0_METRICS_URL` (=
+the injected fake metrics URL, the same URL as the oracle's `DGX_SL_VM_URL`, unless
+the case itself sets `backends[0].metrics_url` — the case value wins; ADV-P10-D01)
+(+ the `HYLO_*` setting keys the
 case sets, + `COLUMNS` when declared; no `PATH` ever — the built binary starts by
 absolute path), and the Windows Go child adds `TMP`, `TEMP`, `SYSTEMROOT` — asserted as
 exact set equality against a parent env seeded
@@ -105,11 +110,13 @@ not restore a BC-1.01.004 → VP-034 pairing.
 
 *Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
-var oracleAllowlistPosix = []string{ // BC-6.01.002 PC-1, verbatim (pass-7 D05)
+var oracleAllowlistPosix = []string{ // BC-6.01.002 PC-1, verbatim (pass-7 D05, ADV-P10-D01)
     "HOME", "USERPROFILE", "TMPDIR", "LANG", "TZ", "PYTHONPATH",
-    "HYLO_TEST_NOW", "LOCAL_MODEL_PREFIXES"} // + DGX_SL_* keys the case sets,
-                                             // + COLUMNS when declared,
-                                             // + PATH iff a fake table is declared
+    "HYLO_TEST_NOW", "LOCAL_MODEL_PREFIXES",
+    "DGX_SL_VM_URL"} // = the injected fake metrics URL (harness-injected,
+                     // ADV-P10-D01); + the OTHER DGX_SL_* keys the case sets,
+                     // + COLUMNS when declared,
+                     // + PATH iff a fake table is declared
 
 var oracleAllowlistWindows = []string{ // BC-6.01.002 PC-1, verbatim: the POSIX set
     // plus TMP/TEMP/SYSTEMROOT and OD-183's single extra variable — HOME, TMPDIR
@@ -117,18 +124,24 @@ var oracleAllowlistWindows = []string{ // BC-6.01.002 PC-1, verbatim: the POSIX 
     // (NOT constructed keys on any OS).
     "HOME", "USERPROFILE", "TMPDIR", "LANG", "TZ", "PYTHONPATH",
     "HYLO_TEST_NOW", "LOCAL_MODEL_PREFIXES",
+    "DGX_SL_VM_URL",
     "TEMP", "TMP", "SYSTEMROOT", "PYTHONIOENCODING"} // same conditionals as POSIX
 
 var goAllowlistPosix = []string{ // BC-6.01.002 PC-1, verbatim: the GO-binary child
     "HOME", "USERPROFILE", "TMPDIR", "XDG_CACHE_HOME", "LOCALAPPDATA",
     "HYLO_PATHS_CACHE_DIR", "LANG", "TZ", "HYLO_TEST_NOW",
-    "HYLO_BACKENDS_0_MODEL_PREFIXES"} // + HYLO_* setting keys the case sets,
-                                      // + COLUMNS when declared; no PATH ever
+    "HYLO_BACKENDS_0_MODEL_PREFIXES",
+    "HYLO_BACKENDS_0_METRICS_URL"} // = the injected fake metrics URL (the same URL as
+                                   // the oracle's DGX_SL_VM_URL unless the case itself
+                                   // sets backends[0].metrics_url — the case wins);
+                                   // + HYLO_* setting keys the case sets,
+                                   // + COLUMNS when declared; no PATH ever
 
 var goAllowlistWindows = []string{ // the POSIX Go set plus the Windows triple
     "HOME", "USERPROFILE", "TMPDIR", "XDG_CACHE_HOME", "LOCALAPPDATA",
     "HYLO_PATHS_CACHE_DIR", "LANG", "TZ", "HYLO_TEST_NOW",
     "HYLO_BACKENDS_0_MODEL_PREFIXES",
+    "HYLO_BACKENDS_0_METRICS_URL",
     "TEMP", "TMP", "SYSTEMROOT"} // + HYLO_* conditionals as above
 
 func TestOracleEnv_FromScratch(t *testing.T) {

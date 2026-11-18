@@ -9,7 +9,7 @@ timestamp: 2026-11-18T18:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "2c694cb"
+input-hash: "d8c2892"
 
 ---
 
@@ -94,8 +94,8 @@ OD-112: adapt or hand-roll the scan).
 - **Decision:** option 2. Exit 0: all statusline runs (happy, degraded, config-error,
   unknown-flag), `version`, `config path` when all three directories resolve, `config
   validate` when valid. Exit 1: `config validate` on invalid config (E-VAL-001, plain
-  reasons, no SGR) and `config path` when a directory cannot be determined (BC-2.03.002:85,
-  :91, EC-008/010/011 — the verb's contract is three printed paths, so an unresolvable
+  reasons, no SGR) and `config path` when a directory cannot be determined (BC-2.03.002
+  PC-3, EC-008/010/011 — the verb's contract is three printed paths, so an unresolvable
   directory is a failure, not a degradation; pass-5 A01). Exit 2: usage
   errors on non-statusline verbs (E-CLI-002, golden text `cmd/hylo/testdata/usage.golden`).
   Non-zero harness exits never occur inside `hylo` (E-HAR-001 is the harness process).

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T12:00:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "4396cf7"
+input-hash: "49edce2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:617-625)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-18 (v1.3.3) pass-5 design call 16 (ADV-P5-C2-08 BC-side: burn_min_api_ms range restricted to Int > 0 with the ZeroDivisionError rationale)"
   - "2026-11-18 (v1.3.4) pass-6 remediation ADV-P6-C2-01 (canonical vector +inf/(0.0,0.0) corrected to RED — SL:624 tests r >= p95 first) + ADV-P6-C2-10 (DI-008 lifted) + ADV-P6-C2-15 (EC-009 row reordered after EC-008, ascending)"
   - "2026-11-18 (v1.3.5) pass-9 remediation ADV-P9-C2-03 cross-reference: the OD-166 record-guard citation now points at BC-1.05.004 PC4 (skip moved to the write step)"
+  - "2026-11-18 (v1.3.6) pass-10 remediation ADV-P10-C2-11 (VP-001 row added to Verification Properties for the EC-009 CP-O11 overflow degrade leg; VP Anchors entry)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -123,6 +124,7 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 |--------|----------|-------------|
 | VP-021 | `$/h` present iff `api_ms` numeric and ≥ burn_min_api_ms | Go property test (testing/quick) |
 | VP-021 | `r` bit-identical to Python for the BC-1.05.008 goldens | manual (golden table test) |
+| VP-001 | The promised output set holds on the stdin-borne CP-O11 overflow degrade leg (EC-009): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -155,6 +157,7 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `$/h` presence and colour rule
+- VP-001 — never-blank/exit-0 ladder; the EC-009 CP-O11 overflow leg rides it (ADV-P10-C2-11)
 
 
 #### Source Evidence

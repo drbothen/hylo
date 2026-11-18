@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T08:30:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b360e38"
+input-hash: "a5a36c9"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D09 — case.json argv minted as the HANDLER-RELATIVE list (after the verb), default [], P1 validator admits [] and [\"--subagent\"] only (design call 9); PC-5/VP-034 aligned"
   - "2026-11-19T03:00:00Z (1.2.3): ADV-P6 remediation D16/OD-185 — PC-4 extended: resolved oracle patch recorded AND measured constants self-checked before the first case (committed probe measures decode/dumps/dump boundaries 994/994/995 and unicodedata.unidata_version 14.0.0; fail closed printing the resolved version); the 3.11.x floating pin stands (OD-185 withdraws the pass-5 exact-3.11.7 call)"
   - "2026-11-19T08:30:00Z (1.2.4): ADV-P7 remediation D04 (orchestrator call 7) — PC-4 self-check probe redefined as the ONE end-to-end definition: the probe drives the real oracle (case argv, temp HOME/cwd) and asserts the laws' own constants at the pinned sites — stdin decode 993 accepted/994 rejected, session-cache save (json.dump, s=4) 991 writes/992 skips, subagent wire (json.dumps, s=3) 991 renders — replacing the inconsistent helper-scope triple (994/994/995); values measured this burst (CPython 3.11.7, unidata_version 14.0.0); VP-006 and ARCH-07 to copy"
+  - "2026-11-21T06:00:00Z (1.2.5): ADV-P10 remediation D02 (orchestrator call 2) — PC-5 states the one subagent-family rule: an id of the form subagent-<nnn>[-<variant>] is the only shape that receives argv [\"--subagent\"]; the erroneous 'older -sub shorthand' notation removed (there is no -sub suffix rule)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -107,8 +108,9 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
    **handler-relative argv** — the `argv` field of `case.json`, which lists arguments AFTER
    the `statusline` verb and defaults to `[]` (orchestrator design call 9, ADV-P4-D09; the
    P1 corpus validator admits only `[]` and `["--subagent"]`, the latter for the
-   `subagent` case-id family of ARCH-07's grammar `<family>-<nnn>[-<variant>]` (the
-   older "-sub" shorthand denotes the same family, pass-7 D14) per OD-155 which
+   `subagent` case-id family of ARCH-07's grammar — an id of the form
+   `subagent-<nnn>[-<variant>]`, the only shape that receives that argv (ADV-P10-D02,
+   orchestrator call 2; there is no `-sub` suffix rule) — per OD-155 which
    supersedes OD-14, exercising the `main_subagent` path, SL:1240,
    exactly as the Go side does). No other interpreter flags, no `-X` options; the oracle
    never receives the verb itself, and any other argv shape is Go-table-test territory

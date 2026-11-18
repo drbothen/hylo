@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-nfr-catalog
 level: L3
-version: "1.9"
+version: "1.10"
 status: draft
 producer: product-owner
-timestamp: 2026-11-20T18:00:00Z
+timestamp: 2026-11-21T00:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "982366b"
+input-hash: "dc978f6"
 traces_to: prd.md, domain-spec/L2-INDEX.md
 ---
 
@@ -26,7 +26,7 @@ traces_to: prd.md, domain-spec/L2-INDEX.md
 | NFR-003 | Correctness (parity) | Byte parity vs the CPython oracle: stdout bytes + exit code per step; named caches byte-for-byte. Interpreter pin is dual (ADV-P3-A19): vector and oracle facts are pinned on CPython 3.11.7 locally; CI installs 3.11.x (setup-python resolves the latest patch, OD-104/OD-185). Harness self-check (OD-185): at start the harness re-measures the JSON depth boundaries and `unicodedata.unidata_version` against the resolved oracle and fails closed on any mismatch, printing the resolved version; golden metadata records the resolved patch | 0 unexplained diffs; every explained diff on the named exclusion list with its own table test | parity harness (BC-6.03.002) + Tier C differential fuzz (BC-6.04.003) | P0 | D4 exit criterion |
 | NFR-004 | Portability | Three-OS support (D5): macOS, Linux, Windows; OS-specific code confined to `internal/platform` | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix leg per OS | P0 | D5 |
 | NFR-005 | Resource bounds | Bounded per-refresh state, legacy caps only — the list is exhaustive: 256-id usage dedup (legacy `ids[-256:]`, SL:1153), 32-point metric histories (legacy `hist[-32:]`, SL:350), 512 KB transcript read step (legacy `_READ_CAP = 524288`, SL:952), 90 s history age cap (legacy `SPARK_MAX_AGE = 90.0`, SL:83; BC-1.04.003). No cap outside this list exists in legacy; none may be invented (P13, ADV-P2-A20). Scope note (pass-5 A13/call 16): the tunable keys `transcript.read_cap_bytes` / `transcript.dedup_memory` / `sparkline.history_cap` additionally carry judgment-call config-VALIDATION upper bounds (67108864 / 65536 / 1000 — interface-definitions.md); these are config range bounds, not new runtime caps, and do not contradict the legacy-cap list | table-verified caps identical to legacy; config-range bounds per the registry | table tests | P1 | legacy equivalence |
-| NFR-006 | Security/hygiene | Public-repo hygiene: synthetic committed fixtures only; real inputs only from git-ignored captures/; secret scan clean | gitleaks + category pattern scan clean on every push and CI leg | CI leg + `TestCorpusHygiene` | P0 | policy 21 |
+| NFR-006 | Security/hygiene | Public-repo hygiene: synthetic committed fixtures only; real inputs only from git-ignored captures/; secret scan clean | gitleaks + category pattern scan clean on every CI leg; the category pattern scan additionally runs nightly and on manual dispatch from `main` against the checked-out `factory-artifacts` ref (a push trigger there is impossible — the ref carries no `.github/`; pass-10 A03/call 16); the local pre-push hook stays the push-time guard | CI leg + scheduled/manual `factory-artifacts` scan job + local pre-push hook + `TestCorpusHygiene` | P0 | policy 21 |
 
 ## NFR Categories
 
@@ -61,8 +61,10 @@ measured on 2026-11-15.
 locally on the owner's Mac — not a CI job. After the Tier A parity harness is green on
 the full corpus, the owner runs the timing gate with `HYLO_TIMING_GATE=1` on the owner's
 Mac (darwin/arm64) over the same synthetic corpus; the P1 exit record cites that run. No
-CI job sets `HYLO_TIMING_GATE=1`; OD-158's test-coverage gate (line coverage
->= 95% for S1/S5) is the only additional P1 exit gate.
+CI job sets `HYLO_TIMING_GATE=1`. The other P1 exit conditions are two (pass-10 A09):
+OD-149's one clean nightly Tier C differential-fuzz run on all three OSes (30 minutes per
+OS, `HYLO_PARITY_FUZZSECONDS=1800`) and OD-158's test-coverage gate (line coverage
+>= 95% for S1/S5).
 
 **Sampling (defined):** per corpus case, 1 discarded warm-up + 20 timed runs; samples
 sorted per case; nearest-rank p95 = 19th of the 20 sorted samples (with 5 samples the

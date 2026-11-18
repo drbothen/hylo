@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.10"
+version: "1.11"
 status: draft
 producer: architect
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-20T22:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "1c12089"
+input-hash: "604b20b"
 
 ---
 
@@ -102,7 +102,10 @@ flowchart LR
   in-process and a subset as the built binary — ARCH-07 — so the earlier blanket
   "drives the built binary as a subprocess" premise is superseded) — hence parity runs
   do NOT count toward statusline coverage (gate scope per OD-193). The job checks each
-  gated package that EXISTS and prints `coverage: G of 3 gated packages present`; it
+  gated package that EXISTS and prints `coverage: G of 3 gated packages present`;
+  `G` is compared with the COMMITTED package manifest — a manifest package missing
+  from the profile (renamed or moved) fails the job, and `G == 0` is allowed only
+  while no `internal/` Go package exists (skeleton era; ADV-P10-A06); it
   enforces **line coverage
   >= 95 %** per package for S1 — `internal/statusline` and `internal/cost` — and
   S5 — `internal/pyfmt` (OD-158 stands unchanged per OD-193). `internal/cost` IS gated:
@@ -128,16 +131,27 @@ flowchart LR
 - **Public-repo hygiene (policy 21, NFR-006):** committed fixtures synthetic-only;
   real inputs replayed from git-ignored `captures/`; gitleaks with
   `--log-opts="--all"` plus the category pattern scan; `TestCorpusHygiene` in-tree.
+  The factory-artifacts branch is scanned by a scheduled (nightly) and manually
+  dispatchable job running ON `main` that checks out the `factory-artifacts` ref and
+  runs the category pattern scan over that checked-out tree — a push trigger on that
+  branch can never fire (GitHub runs push workflows from the pushed commit's workflow
+  files; factory-artifacts has no `.github/`), and the local pre-push hook stays the
+  push-time guard (ADV-P10-A03, orchestrator call 16).
 - **Positive coverage (ADV-P1-A09, process gap — implementation lands on main later with
   owner approval):** every regression-detector job must print a runtime-computed
   positive-coverage line and must treat "checked nothing" as failure, never as a pass:
   - Tier A: `parity: N cases compared, M exclusions validated, K caches swapped` — job
-    fails if `N == 0` or if `N` differs from the number of case directories found (same
-    runtime census the exclusions check applies to `M`; a partially lost corpus must not
-    pass — ADV-P2-A15), or if `K == 0` while any compared case declares swap seeds — the
+    fails if `N == 0`, if `N` differs from the COMMITTED expected case count (a committed
+    manifest of the corpus, ADV-P10-A04) or if `N` differs from the number of case
+    directories found (same runtime census the exclusions check applies to `M`; a deleted
+    case directory shrinks the runtime count and the runtime census equally, so the
+    committed manifest is what catches a partially lost corpus — ADV-P2-A15), or if
+    `K == 0` while any compared case declares swap seeds — the
     four-cache swap tier (BC-6.02.004, VP-019, R-001 mitigation) must be unable to check
     nothing and pass (pass-6 A10, call 13).
-  - Tier B: `tier-b: N goldens compared` — fails if `N == 0` OR if `N` differs from
+  - Tier B: `tier-b: N goldens compared` — fails if `N == 0`, if `N` differs from the
+    COMMITTED expected golden count for the host OS (a committed manifest,
+    ADV-P10-A04), or if `N` differs from
     the number of committed golden files found by the same runtime census
     (pass-5 A19: a partially lost golden set must not pass — the Tier A
     case-directory census discipline applied to Tier B). The census counts ONLY the
@@ -161,26 +175,33 @@ flowchart LR
   - Pattern scan: `hygiene: K files scanned, H hits` — fails if `K == 0` (scan ran over
     nothing) AND if `H > 0` (a found hit is a failure, pass-3 A18), so the scan cannot
     pass while flagging hygiene terms.
-  - Gitleaks (secret scan; ADV-P9-A05): `gitleaks: N commits scanned` — fails if
-    `N == 0`; a shallow or narrowed `--log-opts` would scan nothing and still exit 0,
-    so the positive-coverage line computes the commit count at runtime across main +
+  - Gitleaks (secret scan; ADV-P9-A05; positive comparison ADV-P10-A05): `gitleaks: N
+    commits scanned` — fails if `N == 0` AND if `N` differs from
+    `git rev-list --count` over both refs; a shallow or narrowed `--log-opts` still
+    covers at least one commit and exits 0, so the zero-check alone cannot detect it —
+    the scanned count is COMPARED with the fetched commit count across main +
     factory-artifacts (fetch-depth 0).
   - Coverage gate (pass-5 A16; fail scope per pass-8 orchestrator call 1; presence scope
-    per ADV-P9-A04): `coverage: G of 3 gated packages present; min line coverage
+    per ADV-P9-A04; manifest census ADV-P10-A04/A06): `coverage: G of 3 gated packages
+    present; min line coverage
     M% >= 95` — checks each gated package that EXISTS — `internal/statusline`,
-    `internal/cost`, `internal/pyfmt` — and fails if one exists and reports
-    `[no statements]` (a package trivially "passing" coverage by having no statements
-    is a failure, not a pass) or `M < 95`; the job runs on every PR and is never gated
+    `internal/cost`, `internal/pyfmt` — against the COMMITTED package manifest and
+    fails if a manifest package is missing from the profile (renamed or moved), if one
+    exists and reports `[no statements]` (a package trivially "passing" coverage by
+    having no statements is a failure, not a pass), or if `M < 95`; `G == 0` is allowed
+    only while no `internal/` Go package exists (skeleton era); the job runs on every PR
+    and is never gated
     on `internal/parity` existing (ADV-P9-A04); `internal/parity`'s figure is reported for
     information and does not bind (OD-193).
   - Generated-table staleness (pass-5 A16): `generate: N generated paths checked,
     D regenerated` — fails if `N == 0` (a tree with zero `go:generate` directives
     checks nothing and must not pass) and if `D > 0`.
-  - Timing report (pass-3 A16/D39): the timing job executes the in-tree timing test
+  - Timing report (pass-3 A16/D39; manifest ADV-P10-A04): the timing job executes the in-tree timing test
     (`go test ./internal/parity -run '^TestTiming$' -count=1`, `par/timing.go`) and
     prints `timing: N cases timed > 0` — fails if `N == 0` (an activated job reporting
-    on zero cases must not pass) AND if `N` differs from the corpus case census (the
-    same runtime census Tier A applies to the case directories — timing 1 of N cases
+    on zero cases must not pass), AND if `N` differs from the COMMITTED expected case
+    count (the same manifest discipline Tier A applies — ADV-P10-A04) or from the
+    corpus case census (timing 1 of N cases
     must not pass; pass-7 A20).
   A skipped required check must never stand in for a pass: probe-gated placeholder jobs
   are added to branch protection's required set only when they can execute (Phase 3),

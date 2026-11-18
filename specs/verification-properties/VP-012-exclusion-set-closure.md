@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.20"
+version: "1.21"
 status: draft
 producer: architect
 timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f7e5c59"
+input-hash: "045bcba"
 traces_to: prd.md
 source_bc: BC-6.03.004
 bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017]
@@ -40,6 +40,7 @@ modified:
   - "1.18 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — bcs: gains BC-1.02.017, whose Inv 3 names this VP's concrete D4-EX-1 rider test TestWindowAge_D4EX1_Windows_AncestorFound (ADV-P7-B15; reciprocity preferred over exception-listing, SC-13/SC-14 convention); no closed-set membership or test-name change"
   - "1.19 2026-11-20T08:00:00Z: pass-8 fixes (A2-05, A2-06, C03) — OD-160 register riders corrected to BC-1.02.017 EC-004..006 (hand-edited proc_start shapes) and BC-1.01.008 PC3 (cached-branch lone surrogate), in both the Source Contract and the Named Tests note (EC-010 is the CP-O05 overflow; BC-1.01.008 has no EC-011); TestWindowAge_D4EX1_Windows_AncestorFound labelled the D4-EX-1 rider, never an OD-160 rider (1.18 entry label corrected in place); D4-EX-2 attribution gains the hylo-only vector carriers BC-1.03.014 and BC-1.03.016; OD-160 citation carriers gain BC-1.03.002 (EC-008/009) and BC-1.03.005 (PC5); bcs: gains those four contracts"
   - "1.20 2026-11-20T12:00:00Z: pass-9 fix (C2-04) — bcs: gains BC-1.05.009 (second OD-30 register contract beside BC-1.05.006; its body register row and Named Tests entry already named it — the frontmatter map row was the missing reciprocity); VP-INDEX coverage map synced in the same burst by the index owner; the 1.19 entry's lost closing quote restored (call 5 YAML repair)"
+  - "1.21 2026-11-18T17:50:00Z: pass-10 fixes (A2-06, A2-10) — scope review stated honestly as a MANUAL obligation: the closure check verifies id membership, uniqueness, test existence and expected-file match, not that each entry's case lies inside its id's declared scope (OD-166 'and nothing else' / OD-181 transport are predicated by the rulings and BC bodies, not by an oracle; no structure mutant can attach a valid id to an out-of-scope case) — property statement and Honesty bullet state it (A2-06); the rider-existence leg additionally asserts RiderRegister()'s keys equal the twelve-element closed set (length + per-id presence — a register missing an id would silently skip that id's check) (A2-10)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,8 +71,18 @@ not convert to float — hylo's record guard skips the record where legacy persi
 raw int — and nothing else. OD-181's scope (2026-11-18) is metrics transport beyond
 plain http: non-http(s) redirect targets (hylo serves no sample) and TLS trust-store
 differences for https (hylo uses the OS trust store); parity cases use plain http
-only, and table tests pin hylo's transport behaviour (BC-1.04.001). The closure
-check is rider-complete: besides walking the entries, it verifies that EVERY
+only, and table tests pin hylo's transport behaviour (BC-1.04.001). Scope
+review is the complement of membership and is MANUAL (pass-10 A2-06): the closure
+check verifies id membership, case-id uniqueness, test existence and the
+expected-file match — not that each entry's case lies inside its id's declared
+scope. OD-166's "and nothing else" and OD-181's transport scope are predicated by
+the rulings and the BC bodies, not by an oracle; no mutant can attach a valid id to
+an out-of-scope case, because scope is a predicate over the case's semantics, not
+its parsed structure — a valid id on an out-of-scope case passes the machinery and
+is caught only by review against the OD-169/OD-181 declarations. The closure
+check is rider-complete (against a register whose keys are asserted equal to the
+twelve-element closed set — A2-10: a register missing an id would silently skip
+that id's existence check): besides walking the entries, it verifies that EVERY
 closed-set id's canonical rider test exists in its declared package — whether or
 not any parity case currently carries that id — so deleting
 `TestMetricsClient_OD181_TransportTable` (OD-181, whose parity cases are plain
@@ -147,7 +158,11 @@ nothing.
   The oracle is the finite mutant structure itself: membership in the closed twelve-id
   set, case-id non-emptiness and uniqueness, and one-table-test
   correspondence per entry plus rider completeness for every closed id (entries or
-  none) — no live oracle call exists or is needed.
+  none) — no live oracle call exists or is needed. What the machinery does NOT
+  encode is per-id scope (pass-10 A2-06): no mutant attaches a valid id to an
+  out-of-scope case, and none can — scope is a predicate over the case's semantics,
+  not its parsed structure; scope review is therefore a manual obligation against
+  the OD-169/OD-181 declarations, stated here rather than claimed.
 
 ## Proof Method
 
@@ -188,6 +203,17 @@ func TestParityExclusions_ClosedSet(t *testing.T) {
     // BC-6.03.004 Preconditions 3. Deleting a riding test reds the check even
     // with zero entries for that id (OD-181's TestMetricsClient_OD181_
     // TransportTable; D4-EX-3's TestD4EX3_Text, which backs no parity entry).
+    // pass-10 A2-10: rider EXISTENCE for every closed id presupposes that the
+    // register itself covers the closed set — a register missing an id would
+    // silently skip that id's existence check. Assert the keys equal the ids.
+    if reg := RiderRegister(); len(reg) != len(ids) {
+        t.Fatalf("rider register has %d keys, want %d (the closed set)", len(reg), len(ids))
+    }
+    for id := range ids {
+        if _, ok := RiderRegister()[id]; !ok {
+            t.Fatalf("rider register missing closed id %s", id)
+        }
+    }
     for id, rider := range RiderRegister() { // from the BC-6.03.004 register
         if !TableTestExistsIn(rider.Package, rider.Test) {
             t.Fatalf("closed id %s: rider test %s missing from %s", id, rider.Test, rider.Package)

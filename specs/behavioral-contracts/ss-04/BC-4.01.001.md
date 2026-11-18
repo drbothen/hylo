@@ -1,17 +1,17 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.4"
+version: "1.1.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T17:45:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - docs/RESUME.md
-input-hash: "44eb202"
+input-hash: "d65f5ac"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy entry point legacy/dgx_statusline.py SL:1238-1245 is the statusline-only analogue)"
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout", "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - PC-3 notes config path's flag ownership (--config[=]<value>; a bare --config is a flag error, exit 2, this contract's golden usage surface)", "1.1.4 2026-11-19T21:00:00Z: ADV-P8 remediation D12+A2-07 — Pre-1/PC-1 signatures per ARCH-01: run(os.Args[1:], env, stdin, stdout, stderr) with the platform.EnvVars seam; runStatusline(env, stdin, stdout, stderr) takes no arg slice (the unknown-flag scan runs in run); VP-004 row names the for-all leg VP-004 carries per pass-8 call 12"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout", "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - PC-3 notes config path's flag ownership (--config[=]<value>; a bare --config is a flag error, exit 2, this contract's golden usage surface)", "1.1.4 2026-11-19T21:00:00Z: ADV-P8 remediation D12+A2-07 — Pre-1/PC-1 signatures per ARCH-01: run(os.Args[1:], env, stdin, stdout, stderr) with the platform.EnvVars seam; runStatusline(env, stdin, stdout, stderr) takes no arg slice (the unknown-flag scan runs in run); VP-004 row names the for-all leg VP-004 carries per pass-8 call 12", "1.1.5 2026-11-21T06:00:00Z: ADV-P10 remediation A2-01 (orchestrator call 9) — the VP-004 row states the full legal subagent output set: zero or more NDJSON lines OR, on a catalogued renderer fault (CP-A01..A05), the 29-byte degraded line (BC-1.07.008, DI-008 carve-out)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,7 +106,7 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0; MAIN-mode argv (no `--subagent`): stdout ends with `\n` and is non-empty; SUBAGENT-mode argv: stdout is zero or more LF-terminated NDJSON lines, zero bytes allowed (BC-1.07.001). VP-004 carries this for-all leg — argv/env/stdin fuzz incl. the subagent NDJSON check — per pass-8 call 12 (A2-07) | fuzz (`go test -fuzz`) |
+| VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0; MAIN-mode argv (no `--subagent`): stdout ends with `\n` and is non-empty; SUBAGENT-mode argv: stdout is EITHER zero or more LF-terminated NDJSON lines (zero bytes allowed) OR — on a catalogued renderer fault (CP-A01..A05) — the 29-byte degraded line `\e[90mstatusline degraded\e[0m\n` (BC-1.07.001, BC-1.07.008; DI-008 carve-out). VP-004 carries this for-all leg — argv/env/stdin fuzz incl. the subagent NDJSON check — per pass-8 call 12 (A2-07); output set per ADV-P10-A2-01, orchestrator call 9 | fuzz (`go test -fuzz`) |
 | VP-002 | Partial coverage: the flag-less/positional branch of the same dispatcher fuzz asserts exit 0 with a normal (non-empty, LF-terminated) render for positional-only argv | fuzz (`go test -fuzz`) |
 
 ## Traceability

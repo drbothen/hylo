@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.11"
+version: "1.3.12"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "1803249"
+input-hash: "8885139"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -30,6 +30,7 @@ modified:
   - "1.3.9 pass-7 remediation (ADV-P7-B02/B03/B08/B14): PC2 mix-cache bearer removed — `cost_thresholds` reads only `COST_HIST` (SL:245), no mix-cache value reaches SL:255; step-2 degrade cell gains the Windows MSVC localtime-domain OSError (CP-T09, orchestrator call 8); CP-S14/S16 footnote marker retired (they are degrading crash paths, not the OD-156 overflow family); EC-001 qualifies the mix-cache write (only when a transcript exists and has grown, SL:1009-1011/1039-1040); no behavioral change; 2026-11-19T07:00:00Z"
   - "1.3.10 pass-8 remediation (ADV-P8-B06/B07/B11): step 7c distinguishes the foreign-cache fault order — CP-C09 raises inside record_cost BEFORE its write (SL:229/230 ahead of SL:237, nothing written), CP-C10 after it (error-taxonomy rows 277-278); EC-001's mix-cache write condition made exact — at least one complete new line readable, shrunk file resets and re-reads, unchanged or no-complete-line returns without saving (SL:1035-1040, 1055-1057); VP-022 added to VP Anchors (was only in the VP table); 2026-11-19T08:00:00Z"
   - "1.3.11 pass-9 remediation (ADV-P9-B07 + orchestrator call 4): step 4 Write cell admits the fresh-verdict no-write leg (a cached verdict with fetch_ts > now − TTL returns at SL:325 and writes nothing); step 7d and overflow footnote ² register the transcript-borne cost-pick equivalence overflow CP-O12 (tin/tout each below the int→float bound, their exact-int sum at or above it enters tot * dgx_mtok at SL:633 — owner BC-1.02.029 EC-009), crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
+  - "1.3.12 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B05): CP-C10's within-step order made site-dependent — the cost_thresholds site faults after the record_cost write as before, but the record_cost throttle-check site (own entry src:\"cc\" with a non-numeric ts, SL:232) raises before save_cache (SL:237) and writes nothing; step 7c cell, footnote 1, PC2 and the VP-008 row qualified accordingly"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -69,15 +70,17 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
    | 6 | window start, only with a truthy `session_id` | SL:1229 | may write `proc_start` | no catalogued vector; foreign-cache CP-C01 only (non-dict cache at SL:273-275, outside its try) (OD-160)¹ |
    | 7a | badge, model, project; git segment | SL:441-462, 411 | git cache | CP-S01..S04 (S04 before the git write); foreign-cache CP-C08 (string `ts` / array cache — BC-1.02.005 EC-009/EC-010) (OD-160)¹ |
    | 7b | thermometer, composition, cache hit, limits, lines, timer, window age, tokens | SL:463-600 | none | CP-S05..S13; OD-156 overflow CP-O01..O05² (E-REN-002) |
-   | 7c | `record_cost`, then `cost_thresholds` | SL:606-607 | cost history | CP-S15 (before the write); unconvertible `usd`/`api_ms` is **not recorded** (OD-166)²; the **history-borne** CP-O10/O11 degrade raises here, in `cost_thresholds` at SL:255 (owner BC-1.05.005 EC-011 — a huge exact int already recorded in the history, not at the render sites); foreign-cache CP-C09 faults **before** the record_cost write — `h.setdefault`/`s.get` raise inside `record_cost` (SL:229/SL:230) ahead of `save_cache` (SL:237), so nothing is written — while CP-C10 faults **after** the write, in `cost_thresholds` (OD-160)¹ |
+   | 7c | `record_cost`, then `cost_thresholds` | SL:606-607 | cost history | CP-S15 (before the write); unconvertible `usd`/`api_ms` is **not recorded** (OD-166)²; the **history-borne** CP-O10/O11 degrade raises here, in `cost_thresholds` at SL:255 (owner BC-1.05.005 EC-011 — a huge exact int already recorded in the history, not at the render sites); foreign-cache CP-C09 faults **before** the record_cost write — `h.setdefault`/`s.get` raise inside `record_cost` (SL:229/SL:230) ahead of `save_cache` (SL:237), so nothing is written; CP-C10 splits by raise site (pass-10 ADV-P10-B05): the `cost_thresholds` site faults **after** the write, but the `record_cost` throttle-check site (the session's own history entry holds `src:"cc"` with a non-numeric `ts`; `now - e.get("ts", 0)` raises at SL:232) faults **before** `save_cache` (SL:237), so nothing is written (OD-160)¹ |
    | 7d | `$`, `$/h`, ⛏ | SL:608-636 | none | **stdin-borne** CP-O10/O11² (E-REN-002: a huge exact int `usd`/`api_ms` from the current stdin meets float conversion at SL:616 / SL:622-623); **transcript-borne** CP-O12² (ADV-P9-B03: `tin`/`tout` each below the int→float conversion threshold but their exact-int sum `tot` (SL:626) at or above it enters the pick-equivalence multiply `tot * dgx_mtok` at SL:633 on the local lane with a valid basis — owner BC-1.02.029 EC-009) |
    | 8 | trim, surrogate check, single stdout write | SL:1232-1234 | stdout | CP-S17 (after every write) |
 
    ¹ Foreign-cache shapes CP-C01..C10 (BC-1.06.001 EC-001) are out of parity scope under exclusion id **OD-160**
    (owner ruling Q-b, P3r2 ruling b): on caches Go authored itself these vectors are unreachable (the Go writer
    emits legacy's exact format), and Go's behavior on foreign cache shapes is the named deviation OD-160, not a
-   byte-parity obligation. Within step 7c the within-step order still holds for CP-C10: record_cost writes first, then
-   cost_thresholds faults (SL:606-607).
+   byte-parity obligation. Within step 7c the within-step order for CP-C10 is site-dependent (pass-10
+   ADV-P10-B05): at the `cost_thresholds` site record_cost writes first, then cost_thresholds faults
+   (SL:606-607); at the `record_cost` throttle-check site (own entry `src:"cc"` with a non-numeric `ts`,
+   SL:232) the raise precedes `save_cache` (SL:237) and nothing is written.
    ² Numeric-overflow family (OD-156): CP-O01..O05, CP-O10/O11 and CP-O12 resolve to E-REN-002 — the 29-byte line, exit 0,
    earlier writes kept (BC-1.01.001); CP-O06..O08 resolve to the D4-EX-2 skip discipline (no sticky state, in-flight
    turn dropped, OD-167); CP-O09 reproduces legacy's no-write save (BC-1.03.006 PC5). Under **OD-166** a cost value
@@ -90,8 +93,10 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
    legs (SL:616 / SL:622-623) only.
 
 2. A degrade at step k leaves the writes of steps 1..k-1 exactly as written and performs none of steps k..8. (For
-   the out-of-scope foreign-cache classes¹ this holds at step granularity with one within-step exception: a CP-C10
-   fault in `cost_thresholds` happens after step 7c's own record_cost write. The same within-step exception holds
+   the out-of-scope foreign-cache classes¹ this holds at step granularity with one site-dependent within-step
+   exception: a CP-C10 fault in `cost_thresholds` happens after step 7c's own record_cost write, while a CP-C10
+   fault at the `record_cost` throttle-check (own entry `src:"cc"`, non-numeric `ts`, SL:232) precedes
+   `save_cache` and writes nothing (pass-10 ADV-P10-B05). The after-the-write exception also holds
    for the **history-borne** CP-O10/O11 degrade — reachable without any foreign cache shape, through a
    Python-written cost history (VP-019 swap; `cost_thresholds` reads only `COST_HIST`, SL:245, and `record_cost`
    takes `usd`/`api_ms` from stdin, SL:601-607 — no mix-cache value can reach SL:255): the raise in `cost_thresholds` at SL:255 happens
@@ -138,7 +143,7 @@ Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-008 | For every CP site k, the set of files written equals the writes of steps < k (within-step exceptions per PC2: CP-C10 and history-borne CP-O10/O11 in step 7c write their own step's cost history before the raise) | table test over CP-S/CP-N triggers (multi-step harness, design §5.3) |
+| VP-008 | For every CP site k, the set of files written equals the writes of steps < k (site-dependent within-step exceptions per PC2: a CP-C10 raise at the `cost_thresholds` site and the history-borne CP-O10/O11 degrade in step 7c write their own step's cost history before the raise; a CP-C10 raise at the `record_cost` throttle-check, SL:232, precedes the write and writes nothing) | table test over CP-S/CP-N triggers (multi-step harness, design §5.3) |
 | VP-009 | Per-step cache bytes match legacy across the corpus | Tier A differential |
 | VP-022 | The status line's read scope contains no ledger access (DI-007): every `Env.Files`-routed open during a full render belongs to the allowed statusline path set | recording-filesystem wrapper test (seam scope per VP-022 §Property Statement) |
 

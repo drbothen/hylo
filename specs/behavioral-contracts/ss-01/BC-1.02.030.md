@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, owner-decisions-log-2026-11-14.md]
-input-hash: "9f5cdd9"
+input-hash: "0b9d170"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -25,6 +25,7 @@ modified:
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.3.2 pass-7 remediation (ADV-P7-B06/B12): reroute-all control and markers respelled to the OD-179 config key `statusline.lane.reroute_all_prefixes` (PC3, EC-007, EC-010, Config-keys row); history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
   - "1.3.3 pass-8 remediation (ADV-P8-B01, orchestrator call 5): reroute-all trigger restated in the membership form of BC-1.02.009 PC1 — any configured model prefix, trailing `*` stripped, member of `statusline.lane.reroute_all_prefixes` (PC3, EC-007, EC-010); EC-010 states the default-`model_prefixes=claude-sonnet` degrade (oracle 2026-11-17); Config-keys row lists `backends[0].model_prefixes` beside the marker key; 2026-11-19T08:00:00Z"
+  - "1.3.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -138,7 +139,7 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008, DI-012 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/limits.go`; BC-COMPONENT-MAP: internal/statusline/limits.go (effective_rl, sticky CP-S09) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:effective_rl (SL:298-312); call site legacy/dgx_statusline.py:main (SL:1216); crash site legacy/dgx_statusline.py:render_lane (SL:502-503) |
 | Legacy contract | BC-SL-093 (deep pass-3 round 2 §A3) |
 | Config keys | `statusline.limits.keep_s` (T-010), `paths.cache_dir` (OD-101), `backends[0].model_prefixes` (OD-111/OD-123; the trigger list whose members are tested), `statusline.lane.reroute_all_prefixes` (OD-179; the reroute-all membership set, BC-1.02.009 PC1) |
@@ -154,11 +155,11 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/limits.go (effective_rl, sticky CP-S09) (session cache, side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#limits` — internal/statusline/limits.go (effective_rl, sticky CP-S09) (session cache, side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

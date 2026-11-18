@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "8e3ff51"
+input-hash: "48d9a5b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -27,6 +27,7 @@ modified:
   - "1.3.3 pass-6 residual sweep (orchestrator call 16): EC-014 resolved with no exclusion — internal/platform encodes WTF-8 path values to UTF-16 itself, keeping lone surrogates as single 16-bit units (no U+FFFD substitution), Windows table test (ARCH-05); deviation-ruling note removed; 2026-11-19T14:00:00Z"
   - "1.3.4 pass-7 remediation (ADV-P7-B07): the cwd read is stated, not hidden — abspath resolves a relative input directory against cwd (reachable via BC-1.02.003 EC-004) and the empty-string fallback reads it too; both route through Env.Cwd / platform.Abs, and the Purity row drops the 'unreachable fallback' wording; no behavioral change; 2026-11-19T07:00:00Z"
   - "1.3.5 pass-9 remediation (ADV-P9-B04/B05, orchestrator call 12; one measurement each on the pinned oracle): PC2.3 pins the chunk-scoped strict decode of the pointer read — readline() decodes a whole buffered chunk (io.DEFAULT_BUFFER_SIZE 8192), so an invalid byte after the first LF still fails the read (end-to-end: no ancestor fallback, the walk stops) — and PC3 partitions the error kinds: isdir/isfile catch (OSError, ValueError) and return False (probes: embedded NUL ValueError, mode-000 PermissionError errno 13), so stat-level errors only make the level count as not-a-directory and the walk continues upward; only open/read failures reach the SL:394 handler; vectors 11-12 added; 2026-11-19T16:00:00Z"
+  - "1.3.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B02/B06, orchestrator call 12): PC2.3 chunk boundary re-pinned to the orchestrator measurement — the text reader decodes the first 8192 bytes in one chunk (invalid byte at offset < 8192 fails, at >= 8192 the first line reads), independent of st_blksize (4096 on the measuring filesystem); the 4096-byte-prefetch note removed; boundary probes at offsets 8191/8192 stated; PC2.2/PC2.4 and PC3 state the stat semantics (isdir/isfile follow symlinks, unlike PC1's purely lexical abspath) so a port cannot pick lstat-only or DirEntry-type checks and diverge on a symlinked .git or HEAD"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,17 +88,23 @@ error occurs (stat-level errors only skip a level — PC3). It never invokes the
    2. If `dotgit` is a directory → `gitdir = dotgit`.
    3. Else if `dotgit` is a regular file → read its first line in text mode (universal
       newlines: `\n`, `\r\n` and a lone `\r` all end the line), strip Python whitespace;
+      **Stat semantics (pass-10 ADV-P10-B06):** `os.path.isdir`/`isfile` follow symlinks (stat, not
+      lstat — a symlinked `.git` or a symlinked `HEAD` is statted through, and a symlink pointing at a
+      directory makes the level qualify as a repo directory; SL:377, 379, 384). Only PC1's `abspath` is
+      purely lexical; the level checks are not. Go must reproduce this with stat-following-symlink
+      semantics (or `os.Lstat` + follow-on-stat), never lstat-only or `DirEntry`-type checks.
       if it starts with `gitdir:` → `gitdir = normpath(join(d, rest.strip()))` (an
       absolute `rest` replaces `d`, as `os.path.join` does).
 
-      **Chunk-scoped decode (pass-9 ADV-P9-B04, oracle-verified 2026-11-18):** the pointer read is
-      `open(dotgit).readline()` (SL:380-381), which decodes a whole buffered chunk — `io.DEFAULT_BUFFER_SIZE`
-      = 8192 — not a line-scoped validation: a raw invalid byte after the first LF still fails the read with
-      `UnicodeDecodeError` when it falls inside the decoded chunk (probe: 95-byte pointer file, clean ASCII
-      first line, raw `\xff` at offset 14 → raise; end-to-end through the real entry point: pointer
-      `gitdir: ../gd\n` + raw `\xff` → `""` immediately, no ancestor fallback despite a qualifying ancestor
-      repo), while an invalid byte beyond the decoded chunk (probe: offset 9015; 4096-byte prefetch observed)
-      did not fail the first read. Go must reproduce the chunk-scoped strict decode, not a
+      **Chunk-scoped decode (pass-9 ADV-P9-B04, oracle-verified 2026-11-18; chunk boundary orchestrator-measured
+      pass-10 ADV-P10-B02, CPython 3.11.7):** the pointer read is `open(dotgit).readline()` (SL:380-381), which
+      decodes the first 8192 bytes (`io.DEFAULT_BUFFER_SIZE`) in one chunk — independent of `st_blksize` (4096 on
+      the measuring filesystem) — not a line-scoped validation: an invalid byte at file offset < 8192 fails
+      `readline()` with `UnicodeDecodeError`; at offset >= 8192 the first line reads (boundary probes: raw `\xff`
+      at offset 8191 → raise; at offset 8192 → first line reads; corroborating probes: offset 14 in a 95-byte
+      pointer file → raise; offset 9015 → first line reads; end-to-end through the real entry point: pointer
+      `gitdir: ../gd\n` + raw `\xff` inside the first chunk → `""` immediately, no ancestor fallback despite a
+      qualifying ancestor repo). Go must reproduce the chunk-scoped strict decode with the 8192-byte chunk, not a
       validate-only-the-first-line read.
    4. If `gitdir` is set and `join(gitdir, "HEAD")` is a regular file → read it whole in
       text mode, strip Python whitespace into `ref`, and **return**:
@@ -110,7 +117,8 @@ error occurs (stat-level errors only skip a level — PC3). It never invokes the
    component — `PermissionError` errno 13 — both return `False`), so EACCES on a parent component,
    `ENAMETOOLONG`, `ENOTDIR` and embedded NULs only make the level count as not-a-directory and the walk
    **continues upward** (end-to-end: start under a mode-000 directory above a repo → the repo's branch,
-   not `""`); this is the general rule behind the PC2 lone-surrogate pin. Only `open`/read failures —
+   not `""`); this is the general rule behind the PC2 lone-surrogate pin; the checks are stat semantics
+   that follow symlinks (PC2.2). Only `open`/read failures —
    including the PC2.3 chunk-decode error — reach the outer handler (SL:394) and return `""` immediately
    (the walk does **not** continue upward).
 

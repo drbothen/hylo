@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.7"
+version: "1.3.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "ea5b57b"
+input-hash: "73d2913"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -27,6 +27,7 @@ modified:
   - "1.3.5 2026-11-18: pass-6 remediation ADV-P6-C2-09 (Invariant 1 now actually names the KeyError site alongside the IndexError site \u2014 the v1.3.3 changelog claim was ahead of the invariant text) + ADV-P6-C2-15 (SC-19 entry redated 2026-11-19 \u2192 2026-11-18; timestamp aligned)"
   - "1.3.6 2026-11-18: pass-7 remediation ADV-P7-C2-06 (Invariant 1 crash sites corrected and completed: the IndexError is _norm_pt SL:655 for any short list point via the SL:335 comprehension, hist[-1] is always a dict post-normalization, and the TypeError sites SL:324/325/336 are named) + ADV-P7-C2-03 (VP-012 closure row for OD-160/EC-008)"
   - "1.3.7 2026-11-18: pass-8 remediation ADV-P8-C2-04 (Invariant 1 crash-site list completed for good — five TypeError sites: the SL:356 fetch-failure ts subtraction and the SL:335 non-iterable-hist comprehension added to the three previously named; the SL:324 non-object consult fault noted)"
+  - "1.3.8 2026-11-18: pass-10 remediation ADV-P10-C2-02 (Invariant 1 names the OverflowError class on the three subtraction sites SL:325/336/356 — an exact JSON integer of magnitude >= 2**1024 - 2**970 passes c.get/p.get and the exact SL:324 comparison but raises at float - <huge int>; oracle-verified CPython 3.11.7; same OD-160 class)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -88,7 +89,17 @@ it is younger than KEEP_DEAD.
    in the SL:336 age filter `now - p.get("t", 0)`; and `ts` in the SL:356
    `now - c.get("ts", 0)` age subtraction on the FETCH-FAILURE path (a JSON `null` or
    string `ts`; the SL:325 site covers only the cached path — ADV-P8-C2-04) (all
-   foreign-cache shapes, exclusion id OD-160). A cache whose top level is not an object
+   foreign-cache shapes, exclusion id OD-160). The THREE subtraction sites among them
+   (SL:325 cached path, SL:336 age filter, SL:356 fetch-failure age) ALSO raise
+   `OverflowError` when the JSON scalar is an exact INTEGER of magnitude
+   >= 2**1024 - 2**970, the smallest integer that fails float conversion (oracle-verified
+   CPython 3.11.7, 2026-11-18: `float - <that int>` raises OverflowError, "int too large
+   to convert to float", both signs; the int-vs-float SL:324 comparison is exact and does
+   NOT raise; only 309..4300-digit literals are in play — smaller magnitudes convert, and
+   4301+ digits raise ValueError at the json parse earlier, which the never-raise loader
+   swallows to `{}`, BC-1.06.001). The Go side must degrade on those integer-shape faults
+   exactly as on the TypeError shapes (same OD-160 class; ADV-P10-C2-02). A cache whose
+   top level is not an object
    faults earlier still, at the SL:324 `c.get` consult (AttributeError, the CP-C01
    class, BC-1.06.001 EC-001/EC-008). Cache write errors are swallowed.
 2. KEEP_DEAD is applied **only** on the fetch path (pinned quirk: inside a TTL window

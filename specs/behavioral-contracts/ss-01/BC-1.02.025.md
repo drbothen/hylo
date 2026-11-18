@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.1"
+version: "1.5.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r5.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "853ca2d"
+input-hash: "2cfa3f9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,8 @@ modified:
   - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.5 pass-6 remediation (ADV-P6-B03 + B16): EC-010 bearer relabeled — CP-O04 is not stdin-borne; the huge int arrives via an integer-only transcript accumulation (CP-O06 skip never fires) or the mix cache; history labels version-prefixed; 2026-11-19T04:00:00Z"
   - "1.5.1 pass-8 remediation (ADV-P8-B05, orchestrator call 10): Inv 3 registered range respelled to the interface-definitions canon — units.tokens = {`M`} (the `k` divisor is a registered render semantic, not an accepted value); no behavioral change; 2026-11-19T08:00:00Z"
+  - "1.5.2 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
+  - "1.5.3 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-C2-11 reciprocity): Verification Properties gains the VP-001 ladder row for the CP-O04 overflow degrade (EC-010) — 29-byte line, exit 0; VP Anchors gains VP-001; VP-001 bcs: synced in the same burst (residual sweep)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -128,6 +130,7 @@ pass-3 rounds 1 and 5.
 |--------|----------|-------------|
 | VP-041 | For all float64 inputs, Go output equals CPython output | fuzz vs oracle (VP-028 retains the bounded golden tables) |
 | VP-028 | Overflow behavior per Inv 1: `?` on TypeError/ValueError; beyond-float64 integers raise OverflowError → guard line | table test (fuzz leg rides VP-041) |
+| VP-028, VP-001 | The CP-O04 overflow degrade (EC-010: a JSON integer at or beyond the int→float threshold) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 
@@ -136,7 +139,7 @@ pass-3 rounds 1 and 5.
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/tokens.go`; BC-COMPONENT-MAP: internal/statusline/tokens.go (no unit promotion) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_fmt_tok_c (SL:863-873) |
 | Legacy contract | BC-SL-062 (deep pass-3 round 1, new; confirmed round 5) |
 | Config keys | `statusline.units.tokens` (T-042) |
@@ -150,15 +153,15 @@ pass-3 rounds 1 and 5.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/tokens.go (no unit promotion) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/tokens.go (no unit promotion) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-041 — float64 fuzz equality; VP-028 — golden token-format vectors
+- VP-041 — float64 fuzz equality; VP-028 — golden token-format vectors; VP-001 — the CP-O04 overflow degrade (EC-010) rides the never-blank ladder, 29-byte line, exit 0 (ADV-P10-C2-11)
 
 ---
 

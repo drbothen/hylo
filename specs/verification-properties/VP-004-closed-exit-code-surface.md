@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.001.md, behavioral-contracts/ss-02/BC-2.03.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, prd-supplements/error-taxonomy.md]
-input-hash: "87e5ec6"
+input-hash: "53ed4e9"
 traces_to: prd.md
 source_bc: BC-4.01.001
 bcs: [BC-4.01.001, BC-4.01.003, BC-2.03.001, BC-2.03.002, BC-1.07.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-20T08:00:00Z: pass-8 fixes (A2-15, A2-07) — the usage-error norm names bare `hylo` (EC-004) and an unknown verb (EC-005, e.g. `hylo status`) exit 2 beside the non-statusline verbs (BC-4.01.001 PC-4), and the legal statusline states include BOTH entries (subagent: zero or more LF-terminated NDJSON lines, zero bytes allowed, config error = zero stdout bytes per OD-168, BC-1.07.001); the BC-4.01.001 for-all row gained a matching property leg: fuzz over all argv/env/stdin with args[0]==\"statusline\" (FuzzStatuslineExitSurface), method and Proof Method table updated; bcs: gains BC-1.07.001 (subagent NDJSON wire grammar of the subagent leg)", "1.3 2026-11-20T12:00:00Z: pass-9 fixes (A2-12, A2-20) — the MAIN fuzz leg's generator domain excludes `--subagent` (a `--subagent` anywhere in argv routes the run to the subagent renderer, whose legal zero-byte output false-failed the MAIN non-empty check; legacy routes on `--subagent` anywhere in argv, SL:1240-1241); the fuzz sketch derives argv/env from byte blobs — Go fuzzing supports only primitive parameter types, not []string or map[string]string (A2-20)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-20T08:00:00Z: pass-8 fixes (A2-15, A2-07) — the usage-error norm names bare `hylo` (EC-004) and an unknown verb (EC-005, e.g. `hylo status`) exit 2 beside the non-statusline verbs (BC-4.01.001 PC-4), and the legal statusline states include BOTH entries (subagent: zero or more LF-terminated NDJSON lines, zero bytes allowed, config error = zero stdout bytes per OD-168, BC-1.07.001); the BC-4.01.001 for-all row gained a matching property leg: fuzz over all argv/env/stdin with args[0]==\"statusline\" (FuzzStatuslineExitSurface), method and Proof Method table updated; bcs: gains BC-1.07.001 (subagent NDJSON wire grammar of the subagent leg)", "1.3 2026-11-20T12:00:00Z: pass-9 fixes (A2-12, A2-20) — the MAIN fuzz leg's generator domain excludes `--subagent` (a `--subagent` anywhere in argv routes the run to the subagent renderer, whose legal zero-byte output false-failed the MAIN non-empty check; legacy routes on `--subagent` anywhere in argv, SL:1240-1241); the fuzz sketch derives argv/env from byte blobs — Go fuzzing supports only primitive parameter types, not []string or map[string]string (A2-20)", "1.4 2026-11-18T17:50:00Z: pass-10 fix (A2-01, orchestrator call 9) — the `--subagent` entry's legal output set stated exactly (DI-008 carve-out): zero or more NDJSON lines OR, on a catalogued renderer fault (CP-A01..A05), the 29-byte non-JSON degraded line; zero bytes allowed (empty task list, unparseable/non-object stdin, OD-168 config error) — the former NDJSON-only oracle falsely failed a correct port whose fuzzed stdin drove a tokenCount ≥ 2**1024 OverflowError into the guard (SL:876-880 → SL:1243-1244); property statement, method bullet and sketch's SUBAGENT check aligned"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,8 +37,11 @@ removal_reason: null
 The exit code of `hylo` is a total function over the closed verb-scoped table: 0 for
 every `statusline` run in EITHER entry (happy, degraded, config-error, unknown-flag —
 main entry; the `--subagent` entry with its own legal states: zero or more
-LF-terminated NDJSON lines, zero bytes allowed, a config error emitting zero stdout
-bytes with the diagnostic on stderr per OD-168, BC-1.07.001 wire grammar) and
+LF-terminated NDJSON lines, zero bytes allowed (empty task list BC-1.07.004 PC6,
+unparseable/non-object stdin BC-1.07.003, a config error emitting zero stdout
+bytes with the diagnostic on stderr per OD-168), a catalogued renderer fault
+(CP-A01..A05) ending in the shared 29-byte non-JSON degraded line (DI-008 carve-out,
+BC-1.07.008); BC-1.07.001 wire grammar) and
 `version`;
 `config path` exits 0 with the three path lines, or 1 when a requested directory is
 unavailable (stderr detail per unavailable line, BC-2.03.002 EC-008/EC-010);
@@ -54,7 +57,12 @@ anywhere in argv routes the whole run to the subagent renderer, legacy SL:1240-1
 whose legal zero-byte output would false-fail the MAIN non-empty check) —
 all env and all stdin, the exit is 0: MAIN-mode stdout is non-empty and LF-terminated;
 SUBAGENT-mode stdout
-is zero or more LF-terminated NDJSON lines, zero bytes allowed.
+is zero or more LF-terminated NDJSON lines, zero bytes allowed, or — on a catalogued
+renderer fault (CP-A01..A05) — exactly the 29-byte non-JSON degraded line (DI-008
+carve-out, BC-1.07.008; A2-01: fuzzed stdin reaches that state when a task's
+`tokenCount` is an exact int ≥ 2**1024 — `_fmt_tokens` catches only
+TypeError/ValueError, SL:876-880, so the guard prints the line, SL:1243-1244 — and a
+correct port therefore fails the former NDJSON-only fuzz).
 
 ## Source Contract
 
@@ -76,7 +84,9 @@ is zero or more LF-terminated NDJSON lines, zero bytes allowed.
   env / stdin shapes with `args[0]=="statusline"`: exit 0 always, MAIN-mode stdout
   non-empty LF-terminated (generator excludes `--subagent`, A2-12), SUBAGENT-mode
   stdout zero or more LF-terminated NDJSON
-  lines with zero bytes legal (BC-1.07.001; the subagent NDJSON check of the BC row).
+  lines with zero bytes legal, or exactly the 29-byte degraded line on a catalogued
+  renderer fault (CP-A01..A05, DI-008/BC-1.07.008; BC-1.07.001; the subagent output
+  check of the BC row).
 - **Honesty:** testable-only. The table is the proof object; exhaustiveness follows
   from the dispatcher being a closed switch (statically checkable, ARCH-01).
 
@@ -127,8 +137,11 @@ func FuzzStatuslineExitSurface(f *testing.F) { // BC-4.01.001 for-all row (A2-07
         subArgs := append([]string{"statusline", "--subagent"}, args...)
         subStdout, _, subExit := runStatusline(subArgs, env, stdin)
         if subExit != 0 { t.Fatalf("SUBAGENT: exit = %d, want 0", subExit) }
-        if len(subStdout) > 0 && !isNDJSONRows(subStdout) { // zero bytes legal; wire grammar BC-1.07.001
-            t.Fatal("SUBAGENT: stdout is not zero or more LF-terminated NDJSON lines")
+        // A2-01: zero bytes legal; a catalogued renderer fault ends in the 29-byte
+        // degraded line (CP-A01..A05, DI-008/BC-1.07.008); otherwise the wire
+        // grammar BC-1.07.001.
+        if len(subStdout) > 0 && subStdout != degradedLine && !isNDJSONRows(subStdout) {
+            t.Fatal("SUBAGENT: stdout outside the legal output set")
         }
     })
 }

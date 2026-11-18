@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.3"
+version: "1.5.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "c324f8c"
+input-hash: "2b4b237"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -25,6 +25,7 @@ modified:
   - "1.5.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.5.2 pass-6 remediation (ADV-P6-B08): the lines arrows are named as the registry keys statusline.glyphs.lines_up / lines_down instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
   - "1.5.3 pass-8 remediation (ADV-P8-B05, orchestrator call 10): Inv 3 registered range respelled to the interface-definitions canon — units.lines = {`k`} (the `M` divisor is a registered render semantic, not an accepted value); no behavioral change; 2026-11-19T08:00:00Z"
+  - "1.5.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O03 overflow degrade (EC-013) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -134,6 +135,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 |--------|----------|-------------|
 | VP-028 | fmt equals CPython `_fmt_lines` for ints in [-1e7, 1e8] sampled around thresholds and ties | property test vs CPython goldens — a bounded golden sweep on an authored fixed sampling grid, staying on VP-028 per the VP-041 scope split (VP-041 takes generator-based for-all legs only) |
 | VP-028 | fmt of strings equals CPython for the BC-5.01.002 grammar corpus | table test |
+| VP-028, VP-001 | The CP-O03 overflow degrade (EC-013 positive side: `n / 1e6` at or beyond the int→float threshold) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 

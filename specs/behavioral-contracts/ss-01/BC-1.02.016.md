@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.1"
+version: "1.4.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "24a159a"
+input-hash: "c204ca3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "1.2 pass-4 remediation (ADV-P4-B03): for-all suffix-presence leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.4 pass-6 remediation (ADV-P6-B16): history label version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
   - "1.4.1 pass-8 remediation (ADV-P8-B08): new Inv 4 pins the suffix's `·` byte as a named format constant, not config (D15), distinct from statusline.theme.separator; no behavioral change; 2026-11-19T08:00:00Z"
+  - "1.4.2 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -115,7 +116,7 @@ All expected values pinned 2026-11-15 by running the legacy `render_lane` under 
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (degraded ladder for `+Infinity`) |
 | Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (API-time suffix) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:550-553, inside the timer block SL:539-563) |
 | Legacy contract | BC-SL-021 (pass-3 r1 table; refined in deep pass-3 round 1: `api >= 60000`, `+inf` → CP-S13) |
 | Config keys | `statusline.timer.api_min_ms` (T-039), `statusline.theme.*` (OD-113) |
@@ -130,11 +131,11 @@ All expected values pinned 2026-11-15 by running the legacy `render_lane` under 
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/session.go (API-time suffix) (status line row-1 session widgets) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#session` — internal/statusline/session.go (API-time suffix) (status line row-1 session widgets) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "a7014d0"
+input-hash: "c144bfc"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython int()/float() of str used at legacy/dgx_statusline.py SL:1188, 178, 853, 866)"
@@ -18,7 +18,7 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18: ADV-P4 remediation D14+D31 — character classes (Nd, whitespace, printable) pinned to hylo's generated Unicode 14.0.0 tables from CPython 3.11.7 unicodedata under go generate, oracle version constant + CI staleness test (OD-170); \\x85 vs U+0085 escape ambiguity resolved in EC-003 and the notation note"]
+modified: ["1.2.1 2026-11-18: ADV-P4 remediation D14+D31 — character classes (Nd, whitespace, printable) pinned to hylo's generated Unicode 14.0.0 tables from CPython 3.11.7 unicodedata under go generate, oracle version constant + CI staleness test (OD-170); \\x85 vs U+0085 escape ambiguity resolved in EC-003 and the notation note", "1.2.2 2026-11-18: pass-10 remediation ADV-P10-B04 sibling sweep — the withdrawn clamp equivalence replaced with the BC-1.01.005 PC-4 rule: the row-2 comparison cols >= narrow_cols is made on the exact sign-preserving value; clamping to math.MinInt64 is NOT output-equivalent, the counter-case being narrow_cols = MinInt64"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,8 +60,10 @@ Unicode-digit numerals there are config errors (D4-EX-3, BC-2.02.003).
 3. **ParseInt grammar.** `[+-]? digit (_? digit)*`: at most one sign, single underscores only between digits, no
    prefix (`0x10` rejected), no `.`/exponent (`4.0` rejected), leading zeros allowed (`007` → 7). Result is exact:
    int64 when it fits, else big integer; the sign and magnitude survive any accepted length — at the `COLUMNS` call
-   site (SL:1188) an overflowing negative stays negative, so row 2 stays hidden (BC-1.01.005 PC-4; clamping to
-   `math.MinInt64` is output-equivalent there), and only the over-4,300-digit `ErrValue` path maps to 0 (EC-006).
+   site (SL:1188) an overflowing negative stays negative, so row 2 stays hidden (BC-1.01.005 PC-4: the row-2
+   comparison `cols >= narrow_cols` is made on the exact sign-preserving value — clamping to `math.MinInt64` is
+   NOT output-equivalent, the counter-case being `narrow_cols = MinInt64`), and only the over-4,300-digit
+   `ErrValue` path maps to 0 (EC-006).
 4. **4,300-digit limit (PR-10).** ParseInt fails with `ErrValue` when the number of digits (sign, underscores and
    whitespace excluded; leading zeros included) exceeds 4,300. Exactly 4,300 digits is accepted.
 5. **ParseFloat grammar.** Python float syntax: `[+-]?` then a decimal with optional fraction and exponent

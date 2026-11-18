@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "2d53a4a"
+input-hash: "9c12e47"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -33,6 +33,8 @@ modified:
   - "1.3.3 2026-11-18: pass-7 remediation ADV-P7-C2-10 (EC-011 overflow threshold corrected to >= 2**1024 − 2**970, matching BC-1.05.004 PC4 / BC-1.05.007 PC6)"
   - "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-011 CP-O10/CP-O11 degrades ride the never-blank ladder)"
   - "1.3.5 2026-11-18: pass-9 remediation ADV-P9-C2-03 cross-reference: the EC-011 threshold citation now points at BC-1.05.004 PC4 (skip moved to the write step)"
+  - "1.3.6 2026-11-18: pass-10 remediation ADV-P10-C2-06 (PC4 names the registered key statusline.cost.percentiles beside its (0.75, 0.95) literals, Pre 3 — the literals spell the default) + ADV-P10-C2-12 sibling sweep (PC3's 3.6e6 ms-per-hour factor carries the unit-constant note, BC-1.05.002 Pre 4)"
+  - "1.3.7 2026-11-18: pass-10 remediation ADV-P10-C2-11 reciprocity (VP-001 row added to Verification Properties for the history-borne CP-O10/CP-O11 overflow degrade legs, EC-011; VP Anchors entry; VP-001 bcs: synced in the same burst, residual sweep)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,10 +86,13 @@ qualifying sessions exist (cold start).
 3. Append `usd` to the dollar list (SL:251). If `e.api_ms` is a number and `api_ms >=
    need`, with `need = rate_min_api_ms.cc` when `e.src == "cc"` and `.other` for every
    other src (including absent), append `usd / (api_ms / 3.6e6)` to the rate list
-   (SL:252-255).
+   (SL:252-255; the ms-per-hour factor 3.6e6 is a unit constant — named constant, not
+   config, the BC-1.05.002 Pre 4 note; ADV-P10-C2-12 sibling sweep).
 4. Each list independently: `n < min_sessions` → None; else sort ascending and return
-   `(v[int(0.75 * (n - 1))], v[int(0.95 * (n - 1))])` with the index computed as a
-   float64 product truncated toward zero, exactly as Python does (SL:257-261).
+   `(v[int(lo * (n - 1))], v[int(hi * (n - 1))])` with `(lo, hi)` from
+   `statusline.cost.percentiles` (default (0.75, 0.95), Pre 3 — the literals in the
+   legacy line spell the default), the index computed as a float64 product truncated
+   toward zero, exactly as Python does (SL:257-261).
 5. Return `(usd_pair | None, rate_pair | None)` (SL:262).
 
 ## Invariants
@@ -132,6 +137,7 @@ qualifying sessions exist (cold start).
 | VP-021 | p75 ≤ p95 whenever a pair is returned (finite inputs) — guaranteed by the ascending-config rule (ADV-P3-C2-07) | Go property test (testing/quick) |
 | VP-021 | Go index equals `int(q*(n-1))` computed by CPython for n in 1..10,000 | manual (generated table) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-010/EC-011 foreign-history crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped (ADV-P5-C2-17) | property test (VP-012, go test) |
+| VP-001 | The promised output set holds on the history-borne CP-O10/CP-O11 overflow degrade legs (EC-011): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -164,6 +170,7 @@ S-N.MM — cost history (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — percentile index equivalence
+- VP-001 — never-blank/exit-0 ladder; the history-borne EC-011 CP-O10/CP-O11 legs ride it (ADV-P10-C2-11)
 
 
 #### Source Evidence

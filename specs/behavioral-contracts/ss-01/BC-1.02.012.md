@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.1"
+version: "1.5.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f9f5fe0"
+input-hash: "42cc87e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:523-530)"
@@ -23,6 +23,7 @@ modified:
   - "1.4 pass-5 remediation (ADV-P5-B05): EC-012 scoped to huge positive resets_at; new EC-013 pins the huge-negative behavior — window hidden at SL:513-514 before the SL:515 subtraction, no countdown, no degrade (oracle-verified, BC-1.02.011 EC-011); 2026-11-18T05:42:56Z"
   - "1.5 pass-6 remediation (ADV-P6-B02 + B16): EC-013 re-vectored from −10³⁰⁰ to −OV (negated EC-012 boundary, discriminating); history labels version-prefixed; 2026-11-19T04:00:00Z"
   - "1.5.1 pass-8 remediation (ADV-P8-B08/B10): new Inv 4 pins the `->` countdown prefix as a named format constant, not config (D15); EC-013's hiding mechanism cited precisely — SL:510 widget drop for the canonical 5h-absent vector, SL:513-514 per-window continue when the other window is reported; 2026-11-19T08:00:00Z"
+  - "1.5.2 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O02 overflow degrade (EC-012) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -121,6 +122,7 @@ colour is GREY `\e[90m`; segment = `\e[90m7d10%\e[0m` + countdown.
 |--------|----------|-------------|
 | VP-028 | `cd` equals the oracle for rem sampled densely around every unit boundary (k·60, k·3600, k·86400 ± 1e-6, ± 1 ulp) up to 1.15·7d | table test vs CPython goldens |
 | VP-028 | Gate `0 < rem <= 1.15·length` matches the oracle at both ends for both windows | table test |
+| VP-028, VP-001 | The CP-O02 overflow degrade (EC-012: `resets_at` at or beyond the int→float threshold, positive side) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "e8682ae"
+input-hash: "500ea15"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "1.3 pass-4 remediation (ADV-P4-B15/B03): the two-character in label is the Text key statusline.labels.input, not a glyphs member (OD-02); for-all bracket-rule leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.4 pass-5 remediation (ADV-P5-B04): glyphs named per key with the orchestrator-call-2 renames — statusline.glyphs.reroute → cache_read (U+27F3, SL:594), statusline.glyphs.stale → cache_rebuild (U+21BB, SL:598-599); not shipped, no alias; 2026-11-18T05:42:56Z"
   - "1.5 pass-6 remediation (OD-184 wording + B16): Inv 2 glyph length respelled to the OD-184 canon (exactly 1 code point, measured in legacy's render width); history labels version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
+  - "1.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -121,7 +122,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-007 (transcript, not ledger), DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/tokens.go`; BC-COMPONENT-MAP: internal/statusline/tokens.go (_fmt_tok_c) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:565-600) and legacy/dgx_statusline.py:_fmt_tok_c (SL:863-873) |
 | Legacy contract | BC-SL-024 (pass-3 r1; refined deep pass-3 round 1) |
 | Config keys | `statusline.units.tokens` (T-042), `statusline.glyphs.tokens_up` / `write` / `cache_read` / `tokens_down` / `cache_rebuild` (↑ ✍ ⟳ ↓ ↻), `statusline.labels.input` (default `in`), `statusline.theme.*` (OD-113) |
@@ -135,11 +136,11 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/tokens.go (_fmt_tok_c) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#interfaces-design-doc-22-reused-as-the-contract` — internal/statusline/tokens.go (_fmt_tok_c) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 

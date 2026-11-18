@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.12"
+version: "1.2.13"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T22:00:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "7753a58"
+input-hash: "42fd3b9"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,10 +33,11 @@ modified:
   - '2026-11-19T00:10:00Z (1.2.6) ADV-P5 remediation D03+D21 — placeholder substitution only inside JSON string values with JSON-escaped path insertion (Windows \U/\t round-trip table test); Bool settings mapped by parsed value through the BC-2.01.005 grammar (operator strings, not JSON literals); outside-grammar Bool verbatim only in D4-EX-3 cases'
   - "2026-11-19T02:00:00Z (1.2.7): sync-check adv-p5 closure (SC-15) — 1.2.6 entry requoted single-quoted (the Windows path-escape spelling is not a YAML double-quoted-scalar escape); no behavioral change"
   - "2026-11-19T03:20:00Z (1.2.8): ADV-P6 remediation D05 / orchestrator call 3 — PC-8 gains the OD-76 disposition: the difference-table rows (America/Chicago repeated-DST hour, identical-row epochs) close the exclusion as Go table tests, never parity corpus cases; the corpus validator keeps rejecting non-UTC tz, so the corpus stays UTC-only"
-  - "2026-11-19T17:00:00Z (1.2.9): ADV-P7 remediation D14+D17 - subagent cases identified by the ARCH-07 `subagent` case-id family (the -sub shorthand noted as the same family), not a bare id suffix; stale 'architect to align ARCH-07' note closed (ARCH-07:135 already aligned); provenance SL:92 corrected to SL:89 (SL:92 is a comment); PC-8 LocalZone legs gain `empty` (five legs, BC-3.01.001 PC-6)"
+  - "2026-11-19T17:00:00Z (1.2.9): ADV-P7 remediation D14+D17 - subagent cases identified by the ARCH-07 `subagent` case-id family, not a bare id suffix; stale 'architect to align ARCH-07' note closed (ARCH-07:135 already aligned); provenance SL:92 corrected to SL:89 (SL:92 is a comment); PC-8 LocalZone legs gain `empty` (five legs, BC-3.01.001 PC-6)"
   - "2026-11-19T21:00:00Z (1.2.10): ADV-P8 remediation D10 — PC-8 OD-76 closure widened: no D1-D4 corpus case at all (corpus UTC-only), matching BC-3.02.002 and orchestrator call 16"
   - "2026-11-20T12:30:00Z (1.2.11): pass-8 residual (C2-05 seam) - the metrics fake respelled: one fake VictoriaMetrics server per case is a raw net.Listener fake (DTU-3), not httptest, whose server canonicalises headers into a map and trims values; serving both sides unchanged"
   - "2026-11-20T18:30:00Z (1.2.12): ADV-P9 remediation D01+D12 (orchestrator calls 7+8) — PC-8 tail: exclusions.json carries NO OD-76 entry at all (rider-test closure); PC-6/PC-8 binding to the capture-replay seeding rule of BC-6.02.002 stated"
+  - "2026-11-21T06:00:00Z (1.2.13): ADV-P10 remediation D01+D02+D04 (orchestrator calls 1, 2, 4) — PC-5 gains the run-time injection rule (DGX_SL_VM_URL / HYLO_BACKENDS_0_METRICS_URL always injected, case value wins on the Go side); PC-4 states the one subagent-family rule (id of the form subagent-<nnn>[-<variant>], argv [\"--subagent\"] for exactly that family; the erroneous '-sub shorthand' notation removed here and from the 1.2.9 entry); PC-6/PC-7 gain the every-sid seeding rule (fixed synthetic proc_start for EVERY session id any step's stdin uses; validator rejects a case whose step introduces an unseedable sid; no replay ever consults the real process tree)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,9 +94,12 @@ directory.
    (`hylo statusline <argv...>`) and for the oracle (`[python, -s, <script>] +
    <argv>`; BC-6.01.001 PC-5). Default `[]` (a plain `hylo statusline`). The P1 corpus
    validator admits only `[]` and `["--subagent"]` (orchestrator design call 9,
-   ADV-P4-D09); subagent-family cases — the `subagent` family of the ARCH-07 case-id
-   grammar `<family>-<nnn>[-<variant>]` (the older "-sub" shorthand denotes the same
-   family; pass-7 D14) — carry `["--subagent"]`, exercising the `main_subagent` path
+   ADV-P4-D09); subagent-family cases — a case of the `subagent` family of the ARCH-07
+   case-id grammar, i.e. an id of the form `subagent-<nnn>[-<variant>]` — carry
+   `["--subagent"]`: the validator gives argv `["--subagent"]` to exactly that family
+   and to no other id shape (ADV-P10-D02, orchestrator call 2 — there is no `-sub`
+   suffix rule; the former "-sub shorthand" notation was erroneous and is removed),
+   exercising the `main_subagent` path
    (SL:1240) on both sides identically. Every other argv shape is Go-table-test
    territory (BC-4.01.002), never
    parity. The verb itself is never part of `argv` (ARCH-07's "full binary argv,
@@ -142,22 +146,35 @@ directory.
    serves both sides:
    - legacy reaches it through `DGX_SL_VM_URL`;
    - Go reaches it through `backends[0].metrics_url`;
+   - **Run-time injection (ADV-P10-D01, orchestrator call 1).** The fake's port is only
+     known at run time, so a case cannot declare it: the harness ALWAYS injects the fake
+     server's URL into BOTH children — `DGX_SL_VM_URL=<fake>` for the oracle and
+     `HYLO_BACKENDS_0_METRICS_URL=<same fake>` for Go (unconditional members of
+     BC-6.01.002's exact key sets) — unless the case itself sets the metrics URL, in
+     which case the case value wins on the Go side;
    - the handler checks that the request path is `/api/v1/query`.
 6. **Seeds.**
    - `seed/` files are copied byte for byte into the legacy cache dir
      (`<case-home>/.cache/dgx-llm/`) and into the Go cache dir (`<case>/hylo-cache/`)
      under the same file names.
    - A seeded `proc_start` in `statusline-<sid>.json` makes both sides skip the process
-     probe (SL:273-275). Hermeticity rule (ADV-P2-D12 disposition): the harness REJECTS
-     a case that has an unseeded `proc_start` together with a truthy `session_id` unless
-     the case declares the fake process table (BC-3.02.002) — without a seed, legacy's
-     `ps` subprocess falls back to `os.defpath` (SL:280) and runs the runner's real
-     `ps`, and Go's native probe reads the runner's real process tree, so the case would
-     be machine-dependent.
+     probe (SL:273-275). Hermeticity rule (ADV-P2-D12 disposition; every-sid rule
+     ADV-P10-D04, orchestrator call 4): the harness REJECTS a case that has an unseeded
+     `proc_start` together with a truthy `session_id` unless the case declares the fake
+     process table (BC-3.02.002) — without a seed, legacy's `ps` subprocess falls back
+     to `os.defpath` (SL:280) and runs the runner's real `ps`, and Go's native probe
+     reads the runner's real process tree, so the case would be machine-dependent. The
+     seeding covers EVERY session id a case or capture uses: the harness seeds a fixed
+     synthetic `proc_start` for every `session_id` that any step's stdin of the case or
+     capture uses (a step's replacement stdin template may change the sid mid-sequence,
+     e.g. `/clear`), and the case-load validator rejects a case whose step introduces a
+     sid it cannot seed. NO replay ever consults the real process tree.
 7. **Steps.** When `steps` is absent, the case is a single refresh at `now`. Otherwise
    each step may set `dt` (seconds added to the previous instant) or an absolute
    `now`, `append` (generator lines appended to the transcript), `stdin` (a replacement
-   template) and `columns`. Steps run through the same runner as captured sessions
+   template) and `columns`. A step's replacement `stdin` template may introduce a NEW
+   `session_id`; that sid is seeded exactly like the case's base sid (PC-6 every-sid
+   rule, ADV-P10-D04). Steps run through the same runner as captured sessions
    (BC-6.02.002).
 8. **Time zone.** The harness pins `TZ=UTC` for BOTH binaries on every leg (OD-171,
    ADV-P4-D21); the case schema keeps `tz?` for a later phase, but the P1 corpus
@@ -207,7 +224,7 @@ directory.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| `case.json` `{now: 1794615009, settings: {"backends[0].model_prefixes": "claude-sonnet"}, metrics: "canned"}` + `stdin.json.tmpl` with `{{.Transcript}}` | Legacy env has `LOCAL_MODEL_PREFIXES=claude-sonnet` and `DGX_SL_VM_URL=<fake>`; Go env has the HYLO_* forms; identical rendered stdin | happy-path |
+| `case.json` `{now: 1794615009, settings: {"backends[0].model_prefixes": "claude-sonnet"}, metrics: "canned"}` + `stdin.json.tmpl` with `{{.Transcript}}` | Legacy env has `LOCAL_MODEL_PREFIXES=claude-sonnet` and `DGX_SL_VM_URL=<fake>`; Go env has the HYLO_* forms, including `HYLO_BACKENDS_0_METRICS_URL=<same fake>`; identical rendered stdin | happy-path |
 | `steps: [{dt: 2}, {dt: 18, append: <2 assistant lines>}]` | Three refreshes at `now`, `now+2`, `now+20`; compared after each | edge-case |
 | `settings: {"statusline.telemetry.ttl_s": "4_0"}` with no exclusion entry | FAIL: `parity: case <name>: statusline.telemetry.ttl_s=4_0 outside Go domain without D4-EX-3 exclusion` (key name per the S2 registry, BC-2.01.004) | error |
 

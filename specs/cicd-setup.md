@@ -1,14 +1,14 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.10"
+version: "1.11"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-20T22:00:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
-input-hash: "154d97a"
+input-hash: "8034c36"
 
 ---
 
@@ -55,7 +55,7 @@ Triggers: `pull_request`, `push` to `main`, `workflow_dispatch`, and `schedule`
 | `parity tier A (live corpus)` | 3 OSes | 45 min | placeholder; skipped until `internal/parity` exists. Once activated this is the SINGLE authoritative Tier A run (pass-6 A12, call 13) with its own 45-minute timeout — the plain test step never also runs the corpus |
 | `parity tier B (committed goldens)` | 3 OSes | 30 min | placeholder; no Python needed (goldens committed; Windows included) |
 | `parity tier C (nightly differential fuzz)` | 3 OSes | 60 min | schedule-only; `HYLO_PARITY_FUZZSECONDS=1800` = 30 min/OS (OD-149); non-gating |
-| `coverage (gate)` | ubuntu-24.04 | 30 min | OWN JOB (pass-7 A07, orchestrator call 12 — required checks bind to check-runs/jobs, and a step of the 3-OS `test` matrix job emits no `coverage` check-run); RUNS ON EVERY PR — never probe-gated on `internal/parity` (ADV-P9-A04: parity is built LAST, so a parity-keyed gate would leave S1/S5 code merging while a required check is skipped, and GitHub counts a skip as success): runs `go test -count=1 -coverpkg=./internal/... -coverprofile=cover.out ./internal/...`, prints `coverage: G of 3 gated packages present`, checks each gated package that EXISTS and enforces OD-158's **>= 95 % line coverage** for S1 — `internal/statusline`, `internal/cost` — and S5 — `internal/pyfmt` (OD-193). Timeout 30 min = the test job's, the floor for the same selection plus `-coverpkg` instrumentation (ADV-P9-A15). Tier A is excluded because Tier A needs the Python oracle, which the coverage job does not install (ADV-P9-A07 — Tier A runs every case in-process and a subset as the built binary, ARCH-07), so parity runs do NOT count toward statusline coverage (gate scope per OD-193). `internal/parity` (S6) coverage is profiled and REPORTED, not gated (OD-193 withdraws pass-7 call 12's addition of the referee to the gate). It is the `coverage` required check in branch protection |
+| `coverage (gate)` | ubuntu-24.04 | 30 min | OWN JOB (pass-7 A07, orchestrator call 12 — required checks bind to check-runs/jobs, and a step of the 3-OS `test` matrix job emits no `coverage` check-run); RUNS ON EVERY PR — never probe-gated on `internal/parity` (ADV-P9-A04: parity is built LAST, so a parity-keyed gate would leave S1/S5 code merging while a required check is skipped, and GitHub counts a skip as success): runs `go test -count=1 -coverpkg=./internal/... -coverprofile=cover.out ./internal/...`, prints `coverage: G of 3 gated packages present`, checks each gated package that EXISTS against the COMMITTED package manifest — a manifest package missing from the profile (renamed or moved) fails the job, and `G == 0` is allowed only while no `internal/` Go package exists (ADV-P10-A06) — and enforces OD-158's **>= 95 % line coverage** for S1 — `internal/statusline`, `internal/cost` — and S5 — `internal/pyfmt` (OD-193). Timeout 30 min = the test job's, the floor for the same selection plus `-coverpkg` instrumentation (ADV-P9-A15). Tier A is excluded because Tier A needs the Python oracle, which the coverage job does not install (ADV-P9-A07 — Tier A runs every case in-process and a subset as the built binary, ARCH-07), so parity runs do NOT count toward statusline coverage (gate scope per OD-193). `internal/parity` (S6) coverage is profiled and REPORTED, not gated (OD-193 withdraws pass-7 call 12's addition of the referee to the gate). It is the `coverage` required check in branch protection |
 | `timing report (non-gating)` | 3 OSes | 15 min | runs `go test ./internal/parity -run '^TestTiming$' -count=1` once `internal/parity` exists (pass-3 D39 wiring; upload the report as a workflow artifact); `HYLO_TIMING_GATE` intentionally unset (OD-117: gate binds only where the owner opts in). Positive coverage (pass-3 A16; census added pass-7 A20): the job fails unless it prints `timing: N cases timed > 0` with `N >= 1` AND `N` equals the corpus case census — timing 1 of N cases must not pass |
 
 Harness-placeholder semantics: job-level `if` reads `needs.probe.outputs.*`
@@ -77,15 +77,15 @@ fail when it checked nothing. Per job, the required line is:
 
 | Job | Positive-coverage line | Fail condition |
 |---|---|---|
-| `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0` or `N` ≠ case-directory census (partially lost corpus must not pass, ADV-P2-A15), or `K == 0` while any compared case declares swap seeds (pass-6 A10, call 13 — the swap tier must not check nothing and pass) |
-| `parity tier B` | `tier-b: N goldens compared` | `N == 0` OR `N` ≠ HOST-OS golden census — `*.golden` on POSIX legs, `*.windows.golden` on the Windows leg (pass-7 A18; the same native-set discipline as `-update`, pass-5 D29). Partially lost golden set must not pass, pass-5 A19 |
+| `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0`, `N` ≠ the COMMITTED expected case count (manifest, ADV-P10-A04) or `N` ≠ case-directory census — a deleted case directory shrinks the runtime count and the runtime census equally, so the committed manifest is what catches a partially lost corpus (ADV-P2-A15) — or `K == 0` while any compared case declares swap seeds (pass-6 A10, call 13 — the swap tier must not check nothing and pass) |
+| `parity tier B` | `tier-b: N goldens compared` | `N == 0`, `N` ≠ the COMMITTED expected golden count for the host OS (manifest, ADV-P10-A04) OR `N` ≠ HOST-OS golden census — `*.golden` on POSIX legs, `*.windows.golden` on the Windows leg (pass-7 A18; the same native-set discipline as `-update`, pass-5 D29). Partially lost golden set must not pass, pass-5 A19 |
 | `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); a scheduled run comparing `N == 0` inputs or spawning `M == 0` oracles FAILS (pass-6 A10, call 13); PR-side `t.Skip` is fine only because the job is non-gating |
 | exclusion machinery / canary | `exclusions: M entries validated against the closed set` | `M` ≠ file entry count, or the file is missing |
 | `lint` / `test` / `govulncheck` | `go: K files scanned` + `go test: N tests run, S skipped` (test jobs) | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` or `N == 0` fails; an all-skip suite is reported via `S` and investigated, not accepted (ADV-P2-A15) |
-| gitleaks (secret scan) | `gitleaks: N commits scanned` | `N == 0` — a shallow or narrowed `--log-opts` would scan nothing and still exit 0, so the commit count is computed at runtime across main + factory-artifacts (ADV-P9-A05) |
+| gitleaks (secret scan) | `gitleaks: N commits scanned` | `N == 0` or `N` ≠ `git rev-list --count` over both refs — a shallow or narrowed `--log-opts` still covers at least 1 commit, so the scanned count is COMPARED with the fetched commit count across main + factory-artifacts, not merely checked against zero (ADV-P9-A05, ADV-P10-A05) |
 | category pattern scan | `hygiene: K files scanned, H hits` | `K == 0` (scan ran over nothing) or `H > 0` (any flagged hit fails the job — pass-3 A18: "found hits" is a failure, never an accepted pass) |
-| `timing report` (pass-3 A16/D39; census added pass-7 A20) | `timing: N cases timed > 0` | `N == 0` (an activated timing job reporting on zero cases must not pass) or `N` ≠ corpus case census (timing 1 of N cases must not pass) |
-| `coverage` gate (pass-5 A16; job + scope pass-7 A07; fail scope pass-8 call 1) | `coverage: P packages profiled, min line coverage M% >= 95` (profile produced with `-coverpkg=./internal/...`) | a gated package — `internal/statusline`, `internal/cost`, `internal/pyfmt` — absent from the profile or `[no statements]` (trivial pass), or `M < 95`; `internal/parity`'s figure is reported for information and does not bind (OD-193) |
+| `timing report` (pass-3 A16/D39; census added pass-7 A20; manifest ADV-P10-A04) | `timing: N cases timed > 0` | `N == 0` (an activated timing job reporting on zero cases must not pass), `N` ≠ the COMMITTED expected case count (manifest) or `N` ≠ corpus case census (timing 1 of N cases must not pass) |
+| `coverage` gate (pass-5 A16; job + scope pass-7 A07; fail scope pass-8 call 1; manifest census ADV-P10-A04/A06) | `coverage: G of 3 gated packages present; min line coverage M% >= 95` (profile produced with `-coverpkg=./internal/...`) | `G` is compared with the COMMITTED package manifest as well as with zero: a gated package — `internal/statusline`, `internal/cost`, `internal/pyfmt` — that is in the manifest but absent from the profile (renamed or moved) fails the job, as does an existing gated package reporting `[no statements]` (trivial pass) or `M < 95`; `G == 0` is allowed only while no `internal/` Go package exists (skeleton era); `internal/parity`'s figure is reported for information and does not bind (OD-193) |
 | generated-table staleness (pass-5 A16) | `generate: N generated paths checked, D regenerated` | `N == 0` (zero `go:generate` directives checks nothing) or `D > 0` |
 
 Additionally: a skipped required check must not count as a pass — the parity/timing
@@ -132,21 +132,34 @@ Each lag carries its own "change required before" deadline.
    lags:** the committed job is an `echo` gated on the statusline probe with the
    stale 5-sample wording. **Change required before Phase 3 activates the timing
    job.**
-3. **Hygiene scan (ADV-P4-A14).** REQUIRED: the category pattern scan implements ALL
+3. **Hygiene scan (ADV-P4-A14; factory-artifacts leg redesigned ADV-P10-A03, orchestrator
+   call 16).** REQUIRED: the category pattern scan implements ALL
    categories above (adding hostnames, usernames, session links, UUIDs and the
    product-name rule to the landed three), prints `hygiene: K files scanned, H hits`
-   and fails on `K == 0` or `H > 0`; and the scan runs on every push (NFR-006),
-   including pushes to the public `factory-artifacts` branch — the landed trigger set
-   (`pull_request`, `push` to `main` only) never pattern-scans that branch.
+   and fails on `K == 0` or `H > 0`; the scan runs in ci.yml on every PR and every
+   `push` to `main`, and the public `factory-artifacts` branch is scanned by a
+   dedicated SCHEDULED (nightly, riding ci.yml's existing schedule trigger) and
+   MANUALLY DISPATCHABLE (workflow_dispatch) job that runs ON `main` — where the
+   workflow files live — checks out the `factory-artifacts` ref, and runs the category
+   pattern scan over that checked-out tree. A push trigger added on the
+   factory-artifacts branch can never fire (GitHub runs push workflows from the
+   workflow files in the pushed commit, and factory-artifacts carries no `.github/`),
+   and a `git grep` pass inside an ordinary ci.yml checkout never reads
+   factory-artifacts content — the checked-out-ref job is the only CI-side way to scan
+   the branch's committed tree. The local pre-push hook stays the PUSH-TIME guard for
+   factory-artifacts (NFR-006's every-push guarantee); the nightly/manual job is CI's
+   independent verification of what the branch actually contains.
    **Landed ci.yml lags:** only IPs, home paths and emails are scanned, a fixed
-   "clean" message prints with no count, and the branch trigger is missing.
+   "clean" message prints with no count, and the factory-artifacts checkout job does
+   not exist.
    **Change required before the next factory-artifacts push (NFR-006).**
 4. **Coverage gate (ADV-P4-A13; restructured pass-7 A07/A09, orchestrator call 12; gate
    scope per OD-193, pass-8 orchestrator call 1; every-PR scope and Tier A rationale per
    ADV-P9-A04/A07).** REQUIRED: coverage is its OWN JOB on
    ubuntu-24.04 — the `coverage` required check-run — which applies the SAME Tier A
    exclusion as the plain test step (so it installs NO interpreter and keeps its
-   10-minute timeout), produces the
+   30-minute timeout — ADV-P9-A15: at least the test job's 30 minutes, the floor for
+   the same selection plus `-coverpkg` instrumentation), produces the
    per-package profile (`go test -count=1 -coverpkg=./internal/...`), prints
    `coverage: G of 3 gated packages present`, checks each gated package that EXISTS and
    enforces OD-158's

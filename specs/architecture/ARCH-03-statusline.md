@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.12"
+version: "1.13"
 status: draft
 producer: architect
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-20T22:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "2cc46d5"
+input-hash: "d3cf6d2"
 
 ---
 
@@ -191,8 +191,14 @@ type CacheStore interface {
     // 993 with a deep message.id saves a mix cache of document depth 993; on the
     // next refresh the load fails, legacy treats the cache as absent, re-reads the
     // transcript from offset 0 and rewrites the cache — every refresh while that
-    // line remains (file rewritten, same size, no temp leak, exit 0); hylo
-    // reproduces this; the owning cache BC (BC-5.02.003) pins the re-read loop.
+    // line remains (file rewritten, no temp leak, exit 0); hylo
+    // reproduces this. OWNER OF THE RE-READ LOOP: BC-1.03.021 (PC5/EC-004) —
+    // ARCH-06 and BC-5.02.003 cite it by ID, never as owner themselves
+    // (ADV-P10-A10/C07). The rewrite is constant-size ONLY while the transcript
+    // fits in one read step (524,288 B): above that the re-read from 0 parses one
+    // step, saves a shallow cache, then advances step by step until the deep line
+    // is saved again, so `size` and totals CYCLE rather than staying constant
+    // (ADV-P10-C08; BC-1.03.021 pins the measured loop).
     // Session, git and cost-history keep equality. The real
     // exposure is the stdin side: a rate_limits value nested 991..992 decodes
     // (stdin bound 993) yet breaches the session Save budget 991 — legacy skips
@@ -223,9 +229,11 @@ type MetricsClient interface {
     // pass-7 C2-02, orchestrator call 9).
     // INTERIM 1xx (orchestrator call 10, pass-9, orchestrator-verified in the
     // CPython 3.11.7 source): only status 100 is skipped (`if status !=
-    // CONTINUE`); a 101/102/103 response is FINAL — legacy gets NO sample. A
-    // client built to skip any 1xx samples after `103 Early Hints` and diverges
-    // (BC-1.04.001 EC-024).
+    // CONTINUE`, BC-1.04.001 EC-024); a 101/102/103 response is FINAL — legacy
+    // gets NO sample. A client built to skip any 1xx samples obtains a sample
+    // where legacy gets none after `103 Early Hints` and diverges (BC-1.04.001
+    // EC-025 — the 101/102/103-is-final rows; corrected ADV-P10-C2-03, which
+    // had cited EC-024, the header-limits and 100-Continue-skip row).
     // REDIRECT SANITIZATION ORDER (orchestrator call 10, pass-9,
     // orchestrator-verified): urlsplit's own sanitization runs BEFORE the scheme
     // guard and quoting — it strips all leading C0 controls and spaces, deletes
@@ -260,10 +268,14 @@ type MetricsClient interface {
     // safe=string.punctuation), then urljoin (verified in CPython 3.11.7 source).
     // Hop rules are urllib's visited-set/max_repeats/max_redirections limits — 37 is
     // the worst-case chain length, NOT a hop budget (pass-6 C2-03, call 4;
-    // BC-1.04.001). Schemes outside http/https give NO sample as the D4-EX-3 URL
-    // class (BC-2.02.005; dedicated test `TestD4EX3_URL`) — NOT the OD-181
-    // exclusion, whose scope is redirect targets and TLS trust only (orchestrator
-    // call 13, pass-8; parity cases use plain http only).
+    // BC-1.04.001). The client only ever sees http/https URLs, and the two
+    // non-http(s) classes must not be conflated (corrected ADV-P10-C2-04): a
+    // CONFIGURED non-http(s) metrics URL never reaches the client — it is the
+    // D4-EX-3 config-error line at LOAD, exit 0 (BC-2.02.005; dedicated test
+    // `TestD4EX3_URL`), not a sample miss — while a non-http(s) REDIRECT target
+    // is the OD-181 exclusion (BC-1.04.001; the HTTPS paragraph above), whose
+    // scope is redirect targets and TLS trust only (orchestrator call 13,
+    // pass-8; parity cases use plain http only).
     // UserInfo (pass-5 C2-03 ruling OD-180): a metrics URL with userinfo reproduces
     // legacy — NO sample (urllib puts u:p@host into HTTPConnection's host, DNS fails,
     // the dead rung); no exclusion id.

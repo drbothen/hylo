@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T13:05:00Z
+timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - CLAUDE.md
-input-hash: "b5ddad6"
+input-hash: "10d76ac"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-18T00:00:00Z (1.2.2): ADV-P4 remediation D08 - setup-python reordered BEFORE go test (Tier A cannot skip under CI=true; aligns with ARCH-08)"
   - "2026-11-18T12:00:00Z (1.2.3): pass-4 sync-check SC-08 — converted the mixed flow/block modified history to uniform block style (the mix broke YAML parsing); no behavioral change"
   - "2026-11-19T03:35:00Z (1.2.4): ADV-P6 remediation D16/OD-185 — PC-3.3 gains the Tier A oracle self-check: the harness measures the resolved oracle's JSON depth boundaries and unicodedata.unidata_version at start and fails closed on mismatch (constants measured on 3.11.7; OD-185), printing the resolved patch; setup-python keeps installing floating 3.11.x"
+  - "2026-11-21T06:00:00Z (1.2.5): ADV-P10 remediation D09 (orchestrator call 8) — the floor leg installs exactly go-version: 1.26.0 (the go.mod floor), not 1.26.x: with the toolchain line a floating 1.26.x could resolve to the same patch as the default legs, leaving the floor never tested"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,8 +65,10 @@ gitleaks scans the full history. The workflow is gating: any red leg blocks the 
    Floating labels (`ubuntu-latest`, `macos-latest`, `windows-latest`) are never used,
    because they move to new images without a code change.
 2. **Go versions.** Each OS leg uses `actions/setup-go` with `go-version-file: go.mod`.
-   One additional leg on `ubuntu-24.04` uses `go-version: 1.26.x`, the floor declared
-   by `go.mod`.
+   One additional leg on `ubuntu-24.04` uses `go-version: 1.26.0` — exactly the `go 1.26.0`
+   floor `go.mod` declares, NOT `1.26.x` (which would install the newest 1.26 patch and,
+   with the `toolchain` line of Pre-2, could resolve to the same patch as the default
+   legs, leaving the floor never tested — ADV-P10-D09, orchestrator call 8).
 3. **Steps per leg, in order:**
    1. `gofmt -l .`, which must print nothing;
    2. `go vet ./...`;

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a99539e"
+input-hash: "8885139"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "1.2 pass-4 remediation (ADV-P4-B03): float64-table and never-degrade for-all legs re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.4 pass-6 remediation (ADV-P6-B08 + B16): the cache-hit glyph is named as the registry key statusline.glyphs.cache_hit instead of the wildcard statusline.glyphs.* (Config keys row), the sibling fix ADV-P5-B03 already applied to BC-1.02.008; history label version-prefixed; 2026-11-19T04:00:00Z"
+  - "1.5 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -105,7 +106,7 @@ from this run (not listed in the legacy pass-3 rows).
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/context.go`; BC-COMPONENT-MAP: internal/statusline/context.go (cache-hit NaN/inf) — ARCH-03) |
-| Stories | S-N.MM (filled by story-writer) |
+| Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:477-479) |
 | Legacy contract | BC-SL-060 (deep pass-3 round 1, new) |
 | Config keys | `statusline.glyphs.cache_hit` (`♻`), `statusline.theme.*` (OD-113) |
@@ -119,11 +120,11 @@ from this run (not listed in the legacy pass-3 rows).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — internal/statusline/context.go (cache-hit NaN/inf) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#context` — internal/statusline/context.go (cache-hit NaN/inf) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
-S-N.MM — filled by story-writer
+TBD — filled by story-writer
 
 ## VP Anchors (Recommended)
 
