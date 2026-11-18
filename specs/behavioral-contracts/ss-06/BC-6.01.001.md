@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "899610c"
+input-hash: "f1d024f"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-21T07:00:00Z (1.2.6): ADV-P11 remediation A07 (orchestrator call 8) + B08 (call 15) — new PC-7 defines the oracle-dependent test set by ONE named mechanism, the build tag oracle (//go:build oracle) on every test needing the Python oracle (Tier A corpus, shim canary, four-cache swap, any other); plain test step, coverage and release exclude exactly that set; PC-4's self-check probe adds the normpath NUL-retention probe (posixpath.normpath('a\\0b') and ntpath.normpath('a\\0b') both keep the NUL, returning 'a\\x00b', orchestrator-measured CPython 3.11.7), grounding BC-1.02.022"
   - "2026-11-21T09:00:00Z (1.2.7): pass-11 residual (orchestrator call, binding) — PC-7 respelled from the minted `oracle` build tag to the single ORACLE_TESTS -run/-skip pattern of the ARCH-07 OD-145 table (plain test/coverage/release pass `-skip $ORACLE_TESTS`; the dedicated Tier A job runs `-run $ORACLE_TESTS`; a new oracle-dependent test extends the pattern); no member change — the same three named tests"
   - "2026-11-22T00:00:00Z (1.2.8): ADV-P12 remediation A08 BC half (orchestrator call 6) — PC-7's ORACLE_TESTS membership completed: TestParityTierC_DiffFuzz (drives both sides) and TestTiming (reports the CPython oracle median, BC-6.04.002 PC-2) join the three pass-11 members, pattern constant now five alternates; the Tier A job, the timing job and the nightly fuzz job each install Python and -run their own member(s); plain test/coverage/release keep -skip over the whole pattern"
+  - "2026-11-23T00:00:00Z (1.2.9): ADV-P13 remediation D01 (orchestrator call 2) — PC-3's version-probe regex is matched after the ONE open CRLF→LF conversion of BC-6.03.002 PC-1 on the Windows legs (the conversion is defined once for every comparison of the ORACLE's stdout there, not scoped to the case comparator), so the `\\n$` anchor holds on every leg"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +76,10 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
 3. **Version check.** Before the first oracle case of a run, the harness runs
    `<value> -s -c "import sys,platform; print(platform.python_implementation(), *sys.version_info[:3])"`
    under the child environment of BC-6.01.002. Stdout must match
-   `^CPython 3 11 [0-9]+\n$`. Anything else, including a non-zero exit, fails the run with
+   `^CPython 3 11 [0-9]+\n$` — on the Windows legs after the ONE open CRLF→LF
+   conversion of BC-6.03.002 PC-1, which is defined once for every comparison of the
+   ORACLE's stdout there (pass-13 orchestrator call 2), so the `\n$` anchor holds on
+   every leg. Anything else, including a non-zero exit, fails the run with
    the observed string in the message.
 4. **Resolved patch recorded, measured constants self-checked (OD-185; pass-7 D04).**
    The patch number from step 3 (e.g. `3.11.7`) is written into the Tier B golden

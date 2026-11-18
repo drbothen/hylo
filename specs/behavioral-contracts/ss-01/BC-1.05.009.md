@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.4.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b306da0"
+input-hash: "ed878a8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-18 (v1.3.2) pass-5 remediation ADV-P5-C2-06 (Decisions-row riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)"
   - "2026-11-18 (v1.3.3) pass-8 remediation ADV-P8-C2-07 (Dumps-differential fuzz row rerouted to VP-024, the pyfmt JSON-equivalence VP whose bcs gains BC-1.05.009, per pass-8 call 12; cache-swap row keeps VP-020/VP-019)"
   - "2026-11-18 (v1.3.4) pass-9 remediation ADV-P9-C2-04 (VP-012 closure rows for OD-30 and OD-166 in the VP table + VP Anchors line) and cross-references updated to BC-1.05.004 PC4 (OD-166 skip moved to the write step, ADV-P9-C2-03)"
+  - "2026-11-21T12:15:00Z (v1.4.0) pass-13 sync closure — Owning component line and Purity Classification I/O cell respelled to the ARCH-03 declared cost API (§Interfaces, 'package internal/cost — DECLARED API'): internal/cost is pure core with no I/O; internal/statusline loads and saves the cost-history file through its CacheStore (sync-check adv-p13 finding 1, call-7 residual); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -180,10 +181,10 @@ S-N.MM — cost history (filled by story-writer)
 
 | Property | Assessment |
 |----------|-----------|
-| **I/O operations** | writes via the injected `Store` seam |
+| **I/O operations** | none in hylo — the legacy function writes the history file; per ARCH-03's declared cost API (§Interfaces, 'package internal/cost — DECLARED API') the in-place mutation of the loaded ordered value and its `pyfmt.Dumps` encoding are pure, and `internal/statusline` loads and saves the file through its `CacheStore` |
 | **Global state access** | none |
 | **Deterministic** | yes (given samples and a store fake) |
 | **Thread safety** | Safe for concurrent use (store injected) |
 | **Overall classification** | boundary |
 
-Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (exact write format) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.
+Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (exact write format) - ARCH-03); per ARCH-03's declared cost API ('package internal/cost — DECLARED API' in the §Interfaces section, ADV-P13-A02 / orchestrator call 7), the package is pure core with no I/O — `Record` mutates the loaded ordered value in place and `pyfmt.Dumps` emits the bytes, and `internal/statusline` loads and saves the cost-history file through its `CacheStore`.

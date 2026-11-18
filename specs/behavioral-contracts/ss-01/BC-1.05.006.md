@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.4.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "1c8a549"
+input-hash: "9875ccc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,13 @@ parity_class: "OD-30"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)", "1.3.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.4 2026-11-18: pass-5 remediation ADV-P5-C2-05 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD30_NumericSidStringKey)", "1.3.5 2026-11-18: pass-8 remediation ADV-P8-C2-14 (Invariant 2 casing caveat: sid true's history key is JSON \"true\" but the session-cache file name is Python str()'s statusline-True.json — same file only on case-insensitive filesystems) + ADV-P8-C2-07 (row-2 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"]
+modified:
+  - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)"
+  - "1.3.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json"
+  - "1.3.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
+  - "1.3.4 2026-11-18: pass-5 remediation ADV-P5-C2-05 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD30_NumericSidStringKey)"
+  - "1.3.5 2026-11-18: pass-8 remediation ADV-P8-C2-14 (Invariant 2 casing caveat: sid true's history key is JSON \"true\" but the session-cache file name is Python str()'s statusline-True.json — same file only on case-insensitive filesystems) + ADV-P8-C2-07 (row-2 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"
+  - "2026-11-21T12:00:00Z (v1.4.0) pass-13 sync closure — Owning component line and Purity Classification I/O cell respelled to the ARCH-03 declared cost API (§Interfaces, 'package internal/cost — DECLARED API'): internal/cost is pure core with no I/O; internal/statusline loads and saves the cost-history file through its CacheStore (sync-check adv-p13 finding 1, call-7 residual); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -179,10 +185,10 @@ S-N.MM — cost history (filled by story-writer)
 
 | Property | Assessment |
 |----------|-----------|
-| **I/O operations** | writes via the injected `Store` seam |
+| **I/O operations** | none in hylo — the legacy functions write and read the history file; per ARCH-03's declared cost API (§Interfaces, 'package internal/cost — DECLARED API') the fold into the loaded history and the scan over it are pure, and `internal/statusline` loads and saves the file through its `CacheStore` |
 | **Global state access** | none |
 | **Deterministic** | yes (given samples and a store fake) |
 | **Thread safety** | Safe for concurrent use (store injected) |
 | **Overall classification** | boundary |
 
-Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (numeric sid, OD-30) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.
+Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (numeric sid, OD-30) - ARCH-03); per ARCH-03's declared cost API ('package internal/cost — DECLARED API' in the §Interfaces section, ADV-P13-A02 / orchestrator call 7), the package is pure core with no I/O — `Record` folds this session's entry into the loaded history under the string-form key and `ForLane` scans it, and `internal/statusline` loads and saves the cost-history file through its `CacheStore`.

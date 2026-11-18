@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -14,7 +14,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "e847e97"
+input-hash: "aeb7053"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,8 @@ modified:
   - "2026-11-21T07:00:00Z (1.2.5): ADV-P11 remediation D09 (orchestrator call 16) — PC-4 gains the positive-coverage clause per ARCH-08 (K == 0 fails): the hygiene test fails unless it scanned K > 0 files in total, so renamed or emptied scan roots cannot pass the gate silently"
   - "2026-11-21T09:00:00Z (1.2.6): pass-11 residual — PC-4 tail and the Related BCs line state the two-ref CI scan: `--log-opts=\"main factory-artifacts\"` with the scanned-commit count compared against `git rev-list --count main factory-artifacts` (ARCH-08 hygiene bullet; BC-6.04.001)"
   - "2026-11-22T00:00:00Z (1.2.7): ADV-P12 remediation A02 sibling propagation (orchestrator call 1) — PC-4 tail and the Related BCs line follow BC-6.04.001 PC-4 to the FULL-HISTORY scan `--log-opts=\"--all\"` with the count compared against `git rev-list --count --all` (supersedes the two-ref scan of 1.2.6)"
+  - "2026-11-23T00:00:00Z (1.2.8): ADV-P13 remediation D15 — PC-3b defines the captures exclusion file's RESOLUTION ROOT: `case` and `expected_output_file` in captures/exclusions.json resolve relative to captures/ (the captures root playing the role the committed corpus root plays for the committed file), so BC-6.03.004's case-existence and expected-file checks are defined for capture cases"
+  - "2026-11-24T19:00:00Z (v1.2.9): pass-13 residual (orchestrator residual sweep) - PC-4's hygiene-scan tree list becomes runtime discovery of every testdata/ directory plus the cmd/hylo fixture dir, walked-tree count compared against the runtime census, matching VP-035 v1.6; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -83,10 +85,21 @@ together form the P1 success criterion (OD-107).
    suite's closed set is unaffected. This makes the local "0 unexplained diffs on real
    inputs" criterion reachable: real sessions that diverge through D4-EX-2-, OD-76- or
    OD-159-class mechanisms are admissible only as named entries in that file.
+   Resolution root (pass-13 D15): in the captures file, `case` and
+   `expected_output_file` resolve relative to the CAPTURES ROOT (`captures/`) — the
+   captures root plays the role the committed corpus root plays for the committed
+   file — so BC-6.03.004's load-time case-existence and expected-file checks are
+   defined for capture cases (`captures/<entry.case>/` and
+   `captures/<entry.expected_output_file>`); `package`, `scope`, `table_test` and the
+   closed id registry are identical, and the committed file's checks are unchanged.
 4. **Hygiene gate on committed fixtures.** A test (`TestCorpusHygiene`) scans every
-   file under every committed `testdata/` directory — `internal/statusline/testdata/`
-   (including `parity/`), `internal/pyfmt/testdata/`, `internal/config/testdata/`,
-   `cmd/hylo/testdata/` — and fails on any match of:
+   file under every committed `testdata/` directory, DISCOVERED at runtime by walking
+   for `testdata/` directories rather than read from a hard-coded list — every landed
+   package's tree (`internal/statusline/testdata/` including `parity/`,
+   `internal/pyfmt/testdata/`, `internal/config/testdata/`, and the platform, cost and
+   parity fixture trees on landing) plus the `cmd/hylo/testdata/` fixture dir, with the
+   walked tree count compared against the runtime census (VP-035 v1.6) — and fails on
+   any match of:
    - IPv4 addresses outside the RFC 5737 documentation ranges (`192.0.2.0/24`,
      `198.51.100.0/24`, `203.0.113.0/24`) and outside loopback `127.0.0.0/8`;
      RFC 1918 addresses always fail;

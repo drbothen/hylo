@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c144bfc"
+input-hash: "9e29fea"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython int()/float() of str used at legacy/dgx_statusline.py SL:1188, 178, 853, 866)"
@@ -18,7 +18,7 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18: ADV-P4 remediation D14+D31 — character classes (Nd, whitespace, printable) pinned to hylo's generated Unicode 14.0.0 tables from CPython 3.11.7 unicodedata under go generate, oracle version constant + CI staleness test (OD-170); \\x85 vs U+0085 escape ambiguity resolved in EC-003 and the notation note", "1.2.2 2026-11-18: pass-10 remediation ADV-P10-B04 sibling sweep — the withdrawn clamp equivalence replaced with the BC-1.01.005 PC-4 rule: the row-2 comparison cols >= narrow_cols is made on the exact sign-preserving value; clamping to math.MinInt64 is NOT output-equivalent, the counter-case being narrow_cols = MinInt64"]
+modified: ["1.2.1 2026-11-18: ADV-P4 remediation D14+D31 — character classes (Nd, whitespace, printable) pinned to hylo's generated Unicode 14.0.0 tables from CPython 3.11.7 unicodedata under go generate, oracle version constant + CI staleness test (OD-170); \\x85 vs U+0085 escape ambiguity resolved in EC-003 and the notation note", "1.2.2 2026-11-18: pass-10 remediation ADV-P10-B04 sibling sweep — the withdrawn clamp equivalence replaced with the BC-1.01.005 PC-4 rule: the row-2 comparison cols >= narrow_cols is made on the exact sign-preserving value; clamping to math.MinInt64 is NOT output-equivalent, the counter-case being narrow_cols = MinInt64", "1.2.3 2026-11-23T00:00:00Z: ADV-P13 remediation D08 — Description respelled: hylo's own settings parse numbers with these SAME pyfmt parsers narrowed by the two D4-EX-3 rejects (underscore, non-ASCII Nd digits; BC-2.02.003 PC-1/PC-2), never strconv — surrounding whitespace like \" 4 \" stays valid (BC-2.02.002 EC-007); the former 'settings do not use this grammar' sentence was a mislabel that invited a strconv implementation"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,8 +34,12 @@ removal_reason: null
 `pyfmt.ParseInt(s) (Num, error)` and `pyfmt.ParseFloat(s) (float64, error)` accept exactly the strings that CPython
 3.11 `int(s)` and `float(s)` accept, with the same values. The status line parses protocol inputs with them:
 `COLUMNS` (SL:1188), metrics-store sample strings (SL:178) and stdin values coerced in `_fmt_lines`/`_fmt_tok_c`
-(SL:853, 866). Hylo's own settings do **not** use this grammar: they are typed config values, and underscore or
-Unicode-digit numerals there are config errors (D4-EX-3, BC-2.02.003).
+(SL:853, 866). Hylo's own settings parse numbers with THESE SAME PARSERS, narrowed — never `strconv`: a
+`Seconds`/`Float`/`Int` setting goes through `pyfmt.ParseFloat`/`pyfmt.ParseInt` (BC-2.02.003 PC-3/PC-4), so
+Python-grammar forms such as surrounding whitespace stay valid (`" 4 "` → 4, BC-2.02.002 EC-007); the D4-EX-3
+narrowings are the only rejects — underscore (U+005F) anywhere and any non-ASCII Nd digit are config errors
+there (BC-2.02.003 PC-1/PC-2). An implementation that substitutes `strconv` mis-rejects `" 4 "` and mis-accepts
+the strconv extras (pass-13 D08).
 
 ## Preconditions
 

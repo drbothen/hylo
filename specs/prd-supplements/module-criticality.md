@@ -1,10 +1,10 @@
 ---
 document_type: module-criticality
 level: ops
-version: "1.11"
+version: "1.12"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T03:00:00Z
+timestamp: 2026-11-24T14:20:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
@@ -38,8 +38,10 @@ for the module-critical modules (S1 Status Line, S5 Pyfmt) is **>= 95% per packa
 measured as Go **statement coverage** — Go's `go test -cover` counts statements, not
 lines (metric name corrected pass-11 A03/call 6) — and computed from the merged
 `-coverpkg=./internal/...` profile, so a package's figure counts its statements executed
-by ANY test binary in the run: Tier B golden tests and the parity-machinery tests do
-count toward S1/S5 coverage; only the Tier A oracle-differential runs are excluded.
+by ANY test binary in the run: exactly the FIVE `ORACLE_TESTS` members are
+excluded from the gate figure (pass-12 call 6; ARCH-07), including the parity-machinery
+test `TestParityCacheSwap_FourCaches`; every other test under `./internal/...` counts
+(A07, orchestrator call 11).
 Gate scope is settled
 by OD-193 (owner 2026-11-18): S1 (`internal/statusline`, `internal/cost`) and S5
 (`internal/pyfmt`) only — `internal/parity` (S6) coverage is reported, not gated; the

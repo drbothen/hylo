@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "2fda8ad"
+input-hash: "3e16723"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D04 (orchestrator call 4) — Pre-3 seeding generalized to the EVERY-SID rule: the harness seeds a fixed synthetic proc_start for every session_id that any step's stdin of the capture uses (a step may change the sid mid-sequence, e.g. /clear), and the case-load validator rejects a capture whose step introduces a sid it cannot seed; EC-005 aligned; no replay ever consults the real process tree"
   - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation D16 + D01 (orchestrator calls 2, 16) — Pre-2's capture path rewrite gains workspace.current_dir (legacy's fallback chain ws.get(project_dir) or ws.get(current_dir) or cwd, SL:452), closing the real-.git hermeticity hole; the splice is pinned to the JSON-ESCAPED form so uniformly backslash-escaped Windows paths are the normal contiguous case, and the build-error branch is reserved for a genuinely non-contiguous occurrence; Pre-3 cites the declared-fake-table admission branch (BC-6.02.003 PC-6) for a capture sid whose target stays unseeded"
   - "2026-11-22T00:00:00Z (1.2.9): ADV-P12 remediation D02 (orchestrator call 2) — Pre-3's admission branch respelled: the capture declares the conditional fake PATH (EMPTY bin directory; the oracle's ps subprocess raises FileNotFoundError; the Go child runs at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0, zero probes), so no fake ps serves either side (pass-12 call 2 supersedes pass-11 call 2); history stamps 1.2.7/1.2.8 normalized to the date-leading form (POLICY 14 leg 3)"
+  - "2026-11-23T00:00:00Z (1.3.0): ADV-P13 remediation D07 — Pre-2 spells the LOCATOR DECODE RULES: the harness reads stdin.bin with a Python-lexer-compatible BYTE SCANNER (never a document-tree parse, so Pre-1's never-parses promise holds) that recognizes CPython json string escapes (lone WTF-8 \\uD800..\\uDFFF escapes included), scans past NaN/Infinity tokens and arbitrarily large integer literals as opaque atoms, tolerates duplicate keys (every occurrence scanned; no last-wins tree) and non-object or truncated top levels, and yields path strings only as complete string values plus every distinct session_id value; only a genuinely non-contiguous path occurrence is a build error"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -105,6 +106,23 @@ are compared after every step (BC-6.03.002).
    logical path present partly literal and partly escaped) requires more than a
    substring splice, and THAT is the harness build error — a plain backslash-escaped
    Windows capture is never one.
+   **Locator decode rules (pass-13 D07).** Reading a snapshot to locate paths and
+   session ids is a Python-lexer-compatible BYTE SCANNER, never a document-tree parse
+   (Pre-1's "never parses" promise holds — no deserialization, no validation of the
+   whole document, nothing is built):
+   (a) string literals are lexed with CPython `json` escape rules (\\uXXXX, including
+   paired and lone \\uD800..\\uDFFF escapes, per the BC-5.02.003 WTF-8 decoder); a
+   path is trusted ONLY where the scanner yields it as a COMPLETE string value's
+   contents — never as a key and never as a substring;
+   (b) duplicate keys are all scanned — every occurrence is spliced; no last-wins
+   tree is built;
+   (c) `NaN`/`Infinity`/`-Infinity` tokens and arbitrarily large integer literals are
+   skipped as opaque atoms (they cannot terminate a scan);
+   (d) a non-object or truncated top level is scanned as far as it lexes, and strings
+   found there are still located — the representability promise of Pre-1 (any captured
+   bytes are replayable) survives a snapshot that only a full parser would reject.
+   The same scanner yields every distinct `session_id` value for Pre-3's seeding rule
+   (every occurrence; there is no last-wins collapse).
 3. **Cache seeding (ADV-P9-D12, orchestrator call 8; every-sid rule ADV-P10-D04,
    orchestrator call 4).** A replay's cache directories
    start FRESH, and the harness seeds a fixed synthetic `proc_start` (in

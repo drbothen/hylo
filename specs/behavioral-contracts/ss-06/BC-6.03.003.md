@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.11"
+version: "1.2.12"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "da18d0f"
+input-hash: "6ea6cca"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"
@@ -36,6 +36,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.2.9): ADV-P10 remediation D07 (orchestrator call 7) — the example corpus id flattened to the ARCH-07 grammar's flat cases/<case-id>/ form: cache/sid-slash-temp → cache-003 (PC-3 example entry and CTV row; example spelling only, no schema change)"
   - "2026-11-21T07:00:00Z (1.2.10): ADV-P11 remediation D01 (orchestrator call 2) — the canonical temp-file case cache-003 DECLARES a subprocess-fake table (fake ps on the conditional fake PATH for the oracle, a ProcStarter fake for Go), so it needs no proc_start seed and never consults the real process tree — the fake-PATH machinery's first P1 consumer; its session-cache target stays intentionally UNSEEDED (seeding statusline-../x.json would mkdir statusline-.., os.replace would succeed and no temp would leak); Pre-2, PC-3 note and the cache-003 CTV row state it"
   - "2026-11-22T00:00:00Z (1.2.11): ADV-P12 remediation D02/D13 (orchestrator call 2, superseding pass-11 call 2) — NO fake process table: cache-003 declares the conditional fake PATH with an EMPTY bin directory (oracle ps subprocess raises FileNotFoundError at SL:280-281, caught SL:293-294, claude_window_start returns None, legacy never reaches the SL:286-288 extra save — the leak count stays 'up to two'); the Go child gets HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 (zero probes); Pre-2 hermeticity, PC-3 note and the CTV row respelled"
+  - "2026-11-24T19:30:00Z (1.2.12): pass-13 residual (orchestrator call 15 rider) - the temp-file passage's statusline.cache.rename_retry_delay_ms range respelled 1..100 (limit 0..10; limit x delay at most 1000 ms per Save, labeled judgment call), matching BC-2.01.004 PC-11, interface-definitions and ARCH-04; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,9 +62,11 @@ handles the difference in two parts:
 
 It is never a blanket exclusion. By ruling (OD-186) the `temp-file` scope is widened to
 cover the Windows sharing-violation rename-retry outcome: Go retries the rename —
-`statusline.cache.rename_retry_delay_ms` (Int, default 10, range 1..1000, judgment
+`statusline.cache.rename_retry_delay_ms` (Int, default 10, range 1..100, judgment
 call) between attempts and `statusline.cache.rename_retry_limit` (Int, default 2,
-range 0..10, judgment call; OD-188) limiting the retries — so the attempt count is
+range 0..10, judgment call; OD-188) limiting the retries — jointly bounded so that
+limit × delay is at most 1000 ms per Save (labeled judgment call; pass-13 call 15) —
+so the attempt count is
 1 + limit (three attempts at the default limit 2: the initial attempt plus two
 retries, the one number BC-2.01.004 PC-11, VP-018 and ARCH-04 state) — so a retry
 that ultimately succeeds persists a cache write legacy would not. That byte

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.18"
+version: "1.20"
 status: draft
 producer: architect
-timestamp: 2026-11-21T18:00:00Z
+timestamp: 2026-11-24T16:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "7e0e51e"
+input-hash: "b97e850"
 
 ---
 
@@ -78,8 +78,8 @@ input-hash: "7e0e51e"
   inherit-then-strip (BC-6.01.002 PC-1/PC-2 authoritative; pass-5 A02 aligns VP-034 and
   this section to it). AUTHORITATIVE EXACT KEY SETS (copied verbatim from
   BC-6.01.002 PC-1 "Authoritative exact key sets", pass-7 D05, orchestrator call 2 —
-  ARCH-07 and VP-034 copy these sets verbatim; with no fake table and no declared
-  `COLUMNS` the constructed key sets are exactly:
+  ARCH-07 and VP-034 copy these sets verbatim; with no conditional fake-`PATH`
+  declaration and no declared `COLUMNS` the constructed key sets are exactly:
   - POSIX oracle child: `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
     `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES`, `DGX_SL_VM_URL`
     (+ the OTHER `DGX_SL_*` keys
@@ -93,7 +93,10 @@ input-hash: "7e0e51e"
     `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`, `HYLO_TEST_NOW`,
     `HYLO_BACKENDS_0_MODEL_PREFIXES`, `HYLO_BACKENDS_0_METRICS_URL`
     (+ the OTHER `HYLO_*` setting keys the case sets, +
-    `COLUMNS` when declared; NO `PATH` ever — the built binary is started by
+    `COLUMNS` when declared, +
+    `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0` exactly when the case declares the
+    empty-bin fake-`PATH` condition — the trigger's twin member, cache-003 only,
+    orchestrator call 4; NO `PATH` ever — the built binary is started by
     absolute path).
   - Windows Go child: the POSIX Go set, plus `TMP`, `TEMP`, `SYSTEMROOT` (the same
     conditional additions apply).
@@ -134,9 +137,10 @@ input-hash: "7e0e51e"
   open CRLF→LF conversion of the ORACLE's stdout on the Windows legs, BEFORE the byte
   comparison (hylo's bytes are NEVER converted — hylo writes LF itself — and the shim
   does NO newline reconfigure). Conditional `PATH`: `PATH=<case>/bin`,
-  ONLY when the case declares the fake-`PATH` condition — a subprocess-fake table
-  (the fake `ps` of BC-3.02.002) or the `cache-003` EMPTY-bin declaration (pass-12
-  call 2, below); the value is the harness constant, never the runner's `PATH`; cases
+  ONLY when the case declares the fake-`PATH` condition — and that condition has
+  ONE trigger: the `cache-003` EMPTY-bin declaration (orchestrator call 4,
+  pass-13, ADV-P13-D04 — there is no subprocess-fake table in any parity case,
+  pass-12 call 2); the value is the harness constant, never the runner's `PATH`; cases
   without the condition get no `PATH` key (ADV-P1-D05 resolution) — with no `PATH`
   key, CPython's
   subprocess fallback searches `os.defpath` (`/bin:/usr/bin`, SL:280), which is why

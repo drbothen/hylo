@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.13"
+version: "1.14"
 status: draft
 producer: architect
-timestamp: 2026-11-21T18:00:00Z
+timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -31,11 +31,13 @@ input-hash: "8cd1924"
   "`toolchain` line" is THIS remedy — the approved-in-spec posture, not a statement
   that the landed go.mod already carries it (ADV-P11-D03 reconciliation); the floor
   leg's exact `go-version: 1.26.0` pin (ADV-P10-D09) tests the oldest patch with or
-  without the line. ORDERING (ADV-P9-A06):
-  the `toolchain` line MUST land BEFORE govulncheck becomes a required PR check
-  (Hardening posture below) — govulncheck reports stdlib advisories against the Go
+  without the line. ORDERING (ADV-P9-A06, amended by orchestrator call 6 pass-13:
+  ACTIVATION IS SAME-CHANGE — govulncheck runs and reports as its own job on every
+  change from the start, and it becomes a required check in the SAME change that
+  adds go.mod's `toolchain` line — never promoted onto a no-patch toolchain):
+  govulncheck reports stdlib advisories against the Go
   version actually used (crypto/tls and net are reachable through the metrics client),
-  so promoting the required check onto a no-patch 1.26.0 toolchain either goes
+  so activating the required check on a no-patch 1.26.0 toolchain either goes
   permanently red or ships binaries carrying known stdlib vulnerabilities; go.mod
   changes only when the owner asks. `CGO_ENABLED=0`,
   one static binary per OS. Version stamping via `-ldflags "-X main.version=..."` from
@@ -49,13 +51,15 @@ input-hash: "8cd1924"
 
 ```mermaid
 flowchart LR
-    PR["pull_request / push"] --> L["lint JOB (ubuntu-24.04): gofmt -l . + govulncheck<br/>(each ONCE, in the ubuntu lint job — pass-12 call 5)"]
+    PR["pull_request / push"] --> L["lint JOB (ubuntu-24.04): gofmt -l . — ONCE, required<br/>(lint runs gofmt ONLY; pass-13 call 6)"]
+    PR --> GV["govulncheck JOB (ubuntu-24.04): its OWN job — runs and reports on EVERY change;<br/>becomes a required check in the SAME change that adds go.mod's toolchain line<br/>(pass-13 call 6, ADV-P13-A03)"] --> GVR["required check-run `govulncheck (required)`"]
     L --> M{"test matrix — FOUR required legs (pass-12 call 5):<br/>ubuntu-24.04 / macos-15 (arm64) / windows-2025<br/>(Go from go.mod's toolchain line)<br/>+ ubuntu FLOOR leg, go-version: 1.26.0 (ADV-P10-D09)"}
     M -->|"vet + staticcheck run on EVERY OS leg<br/>(per-OS build tags, P18); the plain test legs<br/>install NO interpreter (pass-12 call 5)"| T["go test -race (Linux/macOS) -count=1 ./...<br/>— oracle-dependent tests EXCLUDED via -skip $ORACLE_TESTS (pass-6 A12;<br/>FIVE members, ARCH-07)"]
-    T --> TB["Tier B goldens (no Python: committed)"]
+    T --> TB["Tier B goldens (no Python: committed) — the plain test legs ONLY, they own<br/>the tier-b census (no separate Tier B job; pass-13 call 5)"]
     TB --> HL["gitleaks detect --log-opts=--all after checkout with fetch-depth: 0<br/>(rev set corrected pass-12 call 1) + category pattern scan"]
-    HL --> J["report timing per leg, non-gating (OD-117)"]
-    PYA["dedicated tier A JOB (ubuntu leg; placeholder until Phase 3):<br/>setup-python 3.11.x (floating latest patch, OD-104/OD-185; harness self-checks measured<br/>constants, fail closed on drift) -> absolute path -> HYLO_PARITY_PYTHON (pass-5 A04:<br/>interpreter precedes go generate) -> OD-170 staleness check: go generate ./... +<br/>git diff --exit-code (moves INTO this job, pass-12 call 5 — the plain test legs install<br/>no interpreter) -> -run $ORACLE_TESTS, the ONE authoritative run (pass-6 A12);<br/>prints the resolved CPython patch (pass-12 call 5)"]
+    HL --> DONE["plain-leg chain ends here — NO timing report on the plain legs<br/>(the plain legs skip TestTiming; only the timing job reports, pass-13 call 5)"]
+    PYA["dedicated tier A JOB (THREE OS legs: ubuntu-24.04 / macos-15 / windows-2025;<br/>placeholder until Phase 3): EVERY leg installs setup-python 3.11.x (floating latest<br/>patch, OD-104/OD-185; harness self-checks measured constants, fail closed on drift)<br/>-> absolute path -> HYLO_PARITY_PYTHON (pass-5 A04: interpreter precedes go generate)<br/>-> EVERY leg prints the resolved CPython patch (pass-13 call 5, ADV-P13-A04); the<br/>ubuntu leg ADDITIONALLY runs the OD-170 staleness check: go generate ./... +<br/>git diff --exit-code (moves INTO this job, pass-12 call 5 — the plain test legs install<br/>no interpreter) -> -run $ORACLE_TESTS, the ONE authoritative run (pass-6 A12);<br/>timeout derived from corpus size (pass-13 call 18)"]
+    TIMING["timing JOB (THREE OS legs): EVERY leg installs setup-python (CPython 3.11.x) and<br/>prints the resolved patch; -runs TestTiming — the per-OS timing report comes from<br/>THIS job, non-gating (OD-117; pass-13 call 5, ADV-P13-A16); timeout derived from<br/>corpus size (pass-13 call 18)"]
     COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07; runs on EVERY PR — never probe-gated<br/>on internal/parity, ADV-P9-A04):<br/>go test -coverpkg=./internal/... over IN-PROCESS tests; oracle-dependent tests excluded<br/>via the ORACLE_TESTS pattern (ARCH-07, ADV-P11-A07);<br/>checks each gated package that EXISTS — prints `coverage: G of 3 gated packages present`;<br/>>= 95 percent statement coverage (Go's figure; the OD-158 gate name "line coverage"<br/>denotes it, ADV-P11-A03), S1/S5 packages (OD-158)"] --> REQ["required check-run `coverage`"]
     Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz JOB — installs Python and -runs its ORACLE_TESTS member<br/>(pass-12 call 6; resolved patch printed), non-gating"]
 ```
@@ -64,7 +68,9 @@ flowchart LR
   Tier B golden metadata (RK-4). Ordering (pass-3 D22 as superseded pass-7 A08; diagram
   corrected pass-4 D08 and again pass-5 A04): GitHub Actions always sets
   `CI=true`. RULED (pass-6 A12, orchestrator call 13): the dedicated
-  `parity tier A (live corpus)` job (45-minute budget) is the ONE authoritative Tier A
+  `parity tier A (live corpus)` job (timeout derived from corpus size — see the
+  formula beside this section's Tier A bullets, pass-13 call 18) is the ONE
+  authoritative Tier A
   run — the plain `go test` step EXCLUDES the ORACLE_TESTS selector (defined below), so
   the corpus never
   executes under the test job's tighter 30-minute cap: one run, one timeout. The
@@ -75,11 +81,15 @@ flowchart LR
   the dedicated Tier A job (whose ubuntu leg ALSO runs the OD-170 staleness step,
   which moves out of the plain test leg), the timing job, and nightly Tier C — and
   each of those three prints the resolved CPython patch (BC-6.04.001 PC-6 / BC-6.04.002
-  PC-2). Legs without a Python consumer — all FOUR plain test legs (ubuntu, macos-15,
+  PC-2). OS SCOPE (orchestrator call 5, pass-13, ADV-P13-A04): the dedicated Tier A job
+  and the timing job each run on ALL THREE OSes, and every leg of each installs
+  setup-python (CPython 3.11) and prints the resolved patch — so live parity meets the
+  Windows oracle child env (ARCH-07) and the arm64 FMA sites on every change. Legs
+  without a Python consumer — all FOUR plain test legs (ubuntu, macos-15,
   windows-2025, and the ubuntu go-version 1.26.0 floor leg), the coverage job and the
   release job — install no interpreter. `go vet` and `staticcheck` run on every OS leg
-  (per-OS build tags, P18); `gofmt -l` and `govulncheck` run once, in the ubuntu lint
-  job.
+  (per-OS build tags, P18); `gofmt -l` runs once in the ubuntu lint job; govulncheck
+  runs in its own job (pass-13 call 6).
   Pin: setup-python installs **3.11.x** (python-version: '3.11', the latest patch —
   OD-104 stands; the pass-5 exact-3.11.7 pin is WITHDRAWN by OD-185, pass-6 A02).
   Because the measured constants (JSON depth limits, Unicode 14.0 tables) were taken on
@@ -161,10 +171,10 @@ flowchart LR
   `go tool cover -func` over the single merged profile. The
   mutation kill-rate targets stay Phase 6 targets (OD-158) — this gate is statement
   coverage only. Designed behaviour; see cicd-setup.md for the landed-ci.yml lag note.
-- **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report — per corpus
-  case, 1 discarded warm-up + **20 timed runs**, samples sorted per case, nearest-rank
+- **Timing (NFR-001, BC-6.04.002):** the timing job's legs each print the per-OS report — per corpus
+  case, 1 discarded warm-up + **20 timed runs**, samples sorted per (case, step), nearest-rank
   p95 = **19th of the 20 sorted samples** (per nfr-catalog.md; with 5 samples the
-  statistic degenerates to the maximum), p95 computed **per case** and binding per case,
+  statistic degenerates to the maximum), p95 computed **per (case, step)** and binding per (case, step),
   no pooling; fake-VM handling time subtracted. SAMPLING UNIT (pass-12 call 4,
   superseding ADV-P11-A11's whole-sequence model; follows NFR-001 "render latency" and
   BC-6.04.002 PC-1 "never pooled across cases or steps"): ONE timed sample = ONE
@@ -173,13 +183,22 @@ flowchart LR
   per (case, step); the nearest-rank p95 is computed AND GATED per (case, step). No
   summing over steps. Between the 21 runs the case temp tree is RE-LAID from the committed
   seeds (seed caches, transcript base, clock base) — no cache or seed state carries
-  across runs, so all 20 samples measure the same workload; within a run, later
+  across runs, so all 20 samples measure the same workload (cold-start replay from
+  committed seeds; the pass-12 call-4 unit, orchestrator call 10 pass-13); within a run, later
   refreshes see earlier refreshes' cache writes, which is the production shape legacy
   exhibits too. The p95 <= 25 ms
   gate fails the build only with `HYLO_TIMING_GATE=1` (binds on the owner's Mac target).
+  TIMEOUT DERIVATION (orchestrator call 18, pass-13, ADV-P13-A13): the timing job's
+  timeout-minutes is derived from corpus size —
+  headroom × (N_cases × S_steps × 21 × T_ceiling) + oracle-spawn overhead, where
+  T_ceiling is the measured per-run ceiling on the slowest leg and the headroom factor
+  is a committed named constant written BESIDE the formula in the workflow, sized so the
+  job cannot be killed before its positive-coverage line prints (D15: a named constant
+  with its rationale, not a magic number). 
   CONDITIONAL EXEMPTION (OD-187 + OD-191, pass-7 A02, orchestrator call 3): the >512 KB
   fixture is exempt from the 25 ms p95 target, but the gate FAILS if its p95 exceeds
-  100 ms (judgment call: 4x the target, well under the refresh interval). The exempt
+  100.0 ms — fails when p95 > 100.0 ms; exactly 100.0 ms passes at the 0.1 ms report
+  resolution, equivalently the brief's "at most 100 ms" (judgment call: 4x the target, well under the refresh interval). The exempt
   fixture is identified by the validated case flag `timing_exempt: large-transcript` —
   exactly one case, and its transcript must exceed 512 KB (the corpus validator checks
   both) — and the report prints one line whenever the exemption is used.
@@ -211,8 +230,17 @@ flowchart LR
     committed manifest is what catches a partially lost corpus — ADV-P2-A15), or if
     `K == 0` while any compared case declares swap seeds — the
     four-cache swap tier (BC-6.02.004, VP-019, R-001 mitigation) must be unable to check
-    nothing and pass (pass-6 A10, call 13).
-  - Tier B: `tier-b: N goldens compared` — fails if `N == 0`, if `N` differs from the
+    nothing and pass (pass-6 A10, call 13). TIMEOUT DERIVATION (orchestrator call 18,
+    pass-13, ADV-P13-A13): the Tier A job's timeout-minutes is derived from corpus
+    size — headroom × (N_cases × S_steps × R_runs × T_ceiling) + oracle-spawn overhead,
+    where T_ceiling is the measured per-run ceiling on the slowest OS leg, R_runs the
+    replays per (case, step), and the headroom factor is a committed named constant
+    written BESIDE the formula in the workflow (D15: a named constant with its
+    rationale, not a magic number) — sized so the job cannot die before its
+    positive-coverage census line prints.
+  - Tier B: `tier-b: N goldens compared` — printed by the plain test legs, which OWN
+    the census (no separate Tier B job exists; orchestrator call 5, pass-13,
+    ADV-P13-A14) — fails if `N == 0`, if `N` differs from the
     COMMITTED expected golden count for the host OS (a committed manifest,
     ADV-P10-A04), or if `N` differs from
     the number of committed golden files found by the same runtime census
@@ -305,13 +333,18 @@ flowchart LR
   the in-tree part (corpus hygiene test, timing report printer) is table-tested; gitleaks
   cleanliness is a push-gate, not a proof.
 
-- **Hardening posture (P19, pass-4 A17):** the lint job runs a staticcheck-class
-  analysis (`honnef.co/go/tools/cmd/staticcheck`, version-pinned, same empty-module
-  guard) beside gofmt and vet, and govulncheck is promoted from the informational
-  weekly sweep to a required PR check in ci.yml (distinct check-run name, e.g.
-  `govulncheck (required)`, alongside the weekly `govulncheck` in security.yml).
-  Sequencing (ADV-P9-A06): this promotion lands AFTER the go.mod `toolchain go1.26.x`
-  line (Build section) — never before it.
+- **Hardening posture (P19, pass-4 A17; restructured by orchestrator call 6, pass-13,
+  ADV-P13-A03):** govulncheck is ITS OWN JOB in ci.yml — it runs and reports on every
+  change (pull_request and push), and it becomes a required check in the SAME change
+  that adds go.mod's `toolchain` line (activation-is-same-change, Build section's
+  ORDERING rule; never promoted onto a no-patch 1.26.0 toolchain). The lint job runs
+  `gofmt -l` ONLY and is required (`lint (gofmt)` check-run); `go vet` and
+  version-pinned `staticcheck` run on every OS test leg (per-OS build tags, P18), the
+  pass-12 call-5 placement — the earlier "beside gofmt and vet" lint-job spelling is
+  superseded. The branch-protection required list names EXACTLY the check-run contexts
+  the jobs emit — one required context per emitted context, none omitted, none
+  invented (the retired separate `govulncheck (required)` context that no job emitted
+  is replaced by the dedicated job's own context, same name, now actually emitted).
   Workflow edits land on main with the owner's approval (spec-only here).
 
 ## Mapping

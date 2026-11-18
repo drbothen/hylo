@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md]
 input-hash: "78dfe5a"
@@ -23,6 +23,7 @@ modified:
   - "1.3.1 2026-11-18: pass-5 remediation ADV-P5-C2-12 (idle-gate running and last operands pinned as EC-006/EC-007; host-share surface cross-linked to BC-1.04.007 EC-010/EC-011; VP row field set scoped)"
   - "1.3.2 2026-11-18: pass-9 remediation ADV-P9-C2-08 (VP row cites Precondition 1 instead of PC1 — PC1 is the queue postcondition only)"
   - "1.3.3 2026-11-18: pass-11 OD-194 sibling sweep (PC6 added — the label bytes in PC1-PC5 are the default spellings of the statusline.labels.* keys named in the forming contracts BC-1.04.006/008/010)"
+  - "1.3.4 2026-11-18: pass-13 remediation ADV-P13-C2-06 (the VP row's each-field-x-class promise made true: the preempt-rate field pinned as EC-008 in all three classes, the remaining unpinned +Inf/-Inf cells as EC-009..EC-013, plus two byte vector rows; every new expectation oracle-verified CPython 3.11.7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -90,6 +91,12 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 | EC-005 | GPU watts +Inf, no wall | `\e[97m⚡infW\e[0m` |
 | EC-006 | running +Inf / -Inf / NaN at the idle gate | `(running or 0) < 1` is false for +Inf and NaN (NaN < 1 false), true for -Inf (marker gate passes only via this operand; SL:825) — combined with a > 5 min old `last` the ☾ idle marker plots; with a finite in-window `last` it does not (ADV-P5-C2-12) |
 | EC-007 | `last` +Inf / -Inf / NaN | +Inf: `last > 0` true but `now - inf` << IDLE_AFTER → no idle marker; -Inf: `last > 0` false → no marker; NaN: truthy but `NaN > 0` false → no marker (SL:824-825; ADV-P5-C2-12) |
+| EC-008 | preempt rate +Inf / NaN / -Inf (q = 0) | +Inf: busy (`inf > 0`) → yellow `r0·q0`; NaN and -Inf: comparison false → green `r0·q0` (SL:740; ADV-P13-C2-06) |
+| EC-009 | waiting +Inf / -Inf; running +Inf / -Inf | yellow `qinf` (`inf > 0` busy) / green `q-inf`; green `rinf` / `r-inf` (idle preempt, `.0f` spellings `inf`/`-inf`, SL:741) (ADV-P13-C2-06) |
+| EC-010 | box rate +Inf / -Inf | `▣inft/s` / `▣-inft/s` (SL:783; ADV-P13-C2-06) |
+| EC-011 | TTFT -Inf; TTFT sample count n -Inf / +Inf | grey `◔-infs` (`-inf >= 10` false → `.1f`; `-inf > 8` false, SL:795-799); n -Inf → "max" rule (`-inf < 20` true), n +Inf → normal rule (`inf < 20` false) (SL:796; ADV-P13-C2-06) |
+| EC-012 | GPU watts -Inf; temperature -Inf | `\e[97m⚡-infW\e[0m`; ` -inf°` (shown: `-Inf is not None`; SL:813, 816) (ADV-P13-C2-06) |
+| EC-013 | wall -Inf / +Inf; tariff -Inf / +Inf (partner finite) | wall -Inf: white `-infW` (`-inf > 1520` false) and ` -inf¢/h`; wall +Inf: red `infW`; tariff -Inf → ` -inf¢/h`, +Inf → ` inf¢/h` (SL:812, 818; ADV-P13-C2-06) |
 
 ## Canonical Test Vectors
 
@@ -100,12 +107,14 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 | running NaN, waiting NaN | `\e[32mrnan·qnan\e[0m` | edge-case |
 | TTFT +Inf | `\e[33m◔infs\e[0m` | edge-case |
 | w, wall, t, rate all NaN | `\e[97m⚡nanW\e[0m\e[90m·\e[0m\e[97mnanW\e[0m\e[90m nan°\e[0m\e[90m nan¢/h\e[0m` | error |
+| running 0, waiting 0, preempt +Inf | `\e[33mr0·q0\e[0m` | edge-case |
+| TTFT -Inf, n 30 | `\e[90m◔-infs\e[0m` | edge-case |
 
 ## Verification Properties
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030, VP-001 | For each field × {NaN, +Inf, -Inf} — fields = the Precondition 1 list plus the KV host share (BC-1.04.007 EC-010/EC-011) and the idle-gate `running`/`last` operands (EC-006/EC-007) — Go bytes equal legacy bytes and no error is returned; each surface has a pinned row | manual (table) |
+| VP-030, VP-001 | For each field × {NaN, +Inf, -Inf} — fields = the Precondition 1 list plus the KV host share (BC-1.04.007 EC-010/EC-011) and the idle-gate `running`/`last` operands (EC-006/EC-007) — Go bytes equal legacy bytes and no error is returned; each surface has a pinned row (preempt rate EC-008; the remaining ±Inf cells EC-009..EC-013, ADV-P13-C2-06) | manual (table) |
 
 ## Traceability
 

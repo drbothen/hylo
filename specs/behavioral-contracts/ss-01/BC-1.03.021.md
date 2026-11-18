@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4529a98"
+input-hash: "19605e7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_finish_turn, _mix_counts (SL:988-996, 1073-1079, 1150-1153)"
@@ -25,6 +25,7 @@ modified:
   - "1.2.3 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C02) — the verbatim round-trip bounded by the mix-save encoder boundary (EC-004 added, oracle end-to-end 2026-11-18: transcript-borne worst case payload doc 993 saves cleanly — the 993 decode edge binds below the save boundary, so no reachable save failure, no temp leak, no per-refresh repeat); PC5 and the VP-029 row state the bound"
   - "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (orchestrator call 1) — the verbatim round-trip claim narrowed to the measured asymmetry: mix-cache save budget 994 against load budget 991, so a saved document of depth 992..994 fails reload, is treated as absent, and is re-read from offset 0 and rewritten every refresh (PC5, EC-004, VP-029 row; session/git/cost keep equality; depth unit stated once: total nesting of the saved document, top-level object = 1)"
   - "1.3.1 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C08; orchestrator call 11) — PC5 and EC-004 qualified by the pass-10 measurement: constant size and totals hold only while the transcript fits in one 524,288-byte read step; above it the shallow step-1 and deep full-parse states alternate with period 2 (608,960-B transcript measured: size field cycles 524,202 <-> 608,960, on-disk 2,544 <-> 4,520 B, shallow state re-saved byte-identical, file rewritten every refresh, exit 0)"
+  - "1.3.2 2026-11-24T12:00:00Z: pass-13 remediation (ADV-P13-C04; orchestrator call 12) — PC5 closing parenthesis rewritten from the measured session-cache leg: session cache saves cleanly at every stdin-reachable depth (decode edge 993; one deeper degrades the parse to an empty dict, exit 0) but reloads only while the saved document nests at most 991 levels, so saved depths 992..993 are treated as absent on the following refresh; measured with the legacy oracle in an isolated temporary HOME and cwd (CPython 3.11.7, DGX_SL_ROWS=1, TZ=UTC, empty cache); the unmeasured equal-budget claim for session is gone, git and cost-history keep the former sentence"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,8 +74,15 @@ it. This is a normal, crash-free state: `finish` returns early on `t0 == null` b
    size field 524,202), refresh 2 parses step 2 and saves the deep state (on-disk 4,520 B, size field 608,960),
    refresh 3's reload of the deep cache raises RecursionError, resets and re-saves the shallow state
    byte-identical to refresh 1 (sha-verified), and the two states alternate with period 2, the file rewritten
-   every refresh, exit 0, normal render. hylo reproduces the same cycle. (Session, git and cost-history caches keep
-   Save budget = Load budget.)
+   every refresh, exit 0, normal render. hylo reproduces the same cycle. (Session-cache budgets, measured
+   2026-11-18 with the legacy oracle (CPython 3.11.7, isolated temporary HOME and cwd, DGX_SL_ROWS=1,
+   TZ=UTC, empty cache): stdin whose `rate_limits` value carries the whole stdin document to depth 993 —
+   the deepest depth the stdin parse accepts (a document one level deeper degrades the stdin parse to an
+   empty dict, exit 0) — SAVES the session cache cleanly, and the next refresh FAILS to reload it: the
+   cache reloads only while the saved document nests at most 991 levels (a saved depth-991 document
+   reloads; saved depths 992..993 do not), so a stdin at the decode edge writes a cache that is treated
+   as absent on the following refresh and the plan state is lost, re-failing into the same shape every
+   refresh while the deep stdin persists. Git and cost-history caches keep Save budget = Load budget.)
 
 ## Invariants
 

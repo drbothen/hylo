@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "637b4b1"
+input-hash: "1fd0773"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.2.4): ADV-P8 remediation D19 (orchestrator call 17) — timing_exempt size condition pinned in bytes: 512 KB = more than 524,288 bytes (512 KiB, the read_cap_bytes default); report shorthand unchanged"
   - "2026-11-20T18:30:00Z (1.2.5): ADV-P9 remediation D19 (P7) — H1 enriched with the PC-3 large-transcript exemption (100 ms ceiling): 'Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling)'; BC-INDEX and BC-ALLOCATION title columns synced; prd.md's row is out of this burst's file set"
   - "2026-11-22T00:00:00Z (1.2.6): ADV-P12 remediation A07 (orchestrator call 4) + A08 BC half (call 6) — PC-1 states the TIMING UNIT: one timed sample = ONE invocation of hylo (one render); a multi-step case is replayed from its committed seeds 1 warm-up + 20 times, each step timed on its own, giving a 20-sample series per (case, step); p95 computed and gated per (case, step); no summing over steps; PC-2 percentiles, PC-3 gate, EC-005 and the VP-036 row respelled per (case, step); Pre-3: TestTiming is an ORACLE_TESTS member — the plain steps skip it and the dedicated timing job installs CPython 3.11, -runs it, and prints the resolved patch (BC-6.04.001 PC-3/PC-6); history stamps 1.2.2/1.2.3 normalized to the date-leading form (POLICY 14 leg 3; no behavioral change)"
+  - "2026-11-23T00:00:00Z (1.2.7): ADV-P13 remediation D10 (orchestrator call 10) — the VP-036 gate row states the pass-12 call-4 unit (per (case, step), cold-start replay from committed seeds) and the large-transcript exemption's 100.0 ms ceiling (fails when p95 > 100.0 ms; the brief says at most 100 ms); no steady-state or binds-per-case wording existed in the body"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -165,7 +166,7 @@ removes.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-036 | Nearest-rank p95 is computed correctly over each (case, step)'s OWN 20 samples (per case and step, never pooled or summed; ADV-P4-D23, pass-12 call 4) | table test on the percentile helper |
-| VP-036 | The gate fails iff `HYLO_TIMING_GATE=1` and ANY case's p95 > 25.0 ms | table test |
+| VP-036 | The gate fails iff `HYLO_TIMING_GATE=1` and ANY (case, step)'s p95 > 25.0 ms — each p95 that pair's OWN 20-sample nearest-rank estimate, replayed cold from the committed seeds (pass-12 call 4 unit) — except the single `timing_exempt: large-transcript` case, which is exempt from the 25 ms target only when it misses it and then fails the gate exactly when its p95 > 100.0 ms (OD-191; pass-13 orchestrator call 10) | table test |
 
 ## Traceability
 

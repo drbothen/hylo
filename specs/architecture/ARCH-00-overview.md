@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "overview"
-version: "1.9"
+version: "1.10"
 status: draft
 producer: architect
-timestamp: 2026-11-21T18:00:00Z
+timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, product-brief.md, domain-spec/invariants.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "921ca9c"
+input-hash: "b457141"
 
 ---
 
@@ -46,7 +46,11 @@ input-hash: "921ca9c"
    legacy's exact side-effect order (BC-1.01.009) by one orchestrator.
 4. **Never blank / exit 0** — any panic or typed degrade prints the 29-byte grey line and
    returns 0 (DI-008, NFR-002); config errors and unknown flags are themselves one-line
-   outputs. Non-zero exits exist only in validate/usage/harness contexts.
+   outputs. Non-zero exits exist only in validate/usage/harness contexts, plus the ONE
+   catalogued exception: `hylo config path` exits 1 when a directory cannot be
+   determined — the sole non-zero exit outside those contexts, carried in
+   error-taxonomy.md's closed exit table (CLI/config family; ADV-P13-A01 remediation,
+   orchestrator call 8).
 5. **Stdlib first** — the only runtime dependency in P1 is `golang.org/x/sys` (process
    probes); the YAML library arrives with the P4 file layer (OD-107).
 
@@ -57,7 +61,7 @@ graph TD
     cmd["cmd/hylo<br/>(dispatch, run modes)"] --> sl["internal/statusline<br/>(frame, widgets, parser, store)"]
     cmd --> cfg["internal/config<br/>(registry, grammars, Load)"]
     cmd --> plat["internal/platform<br/>(paths, probes; build tags)"]
-    sl --> cost["internal/cost<br/>(cost history read/record)"]
+    sl --> cost["internal/cost<br/>(cost history record/thresholds, pure)"]
     sl --> cfg
     sl --> plat
     cfg --> plat
@@ -81,7 +85,7 @@ purity classification (file detail in the per-section maps):
 | `internal/pyfmt` | **pure core** | none — bytes/values in, values out; clock never read |
 | `internal/config` | **boundary** | pure registry/grammars; `Load` reads env once at startup and delegates path-default resolution, `~` expansion and the Windows case-insensitive env lookup to `internal/platform` (ADV-P1-A16/D21) |
 | `internal/statusline` | **mixed (core-dominant)** | pure widgets + effect script (AD-03); I/O only via `Env` seams |
-| `internal/cost` | **boundary** | pure percentile math; writes via injected `Store` |
+| `internal/cost` | **pure core** | none — pure functions over caller-passed values (the loaded cost history, the current session's numbers, `now`) that return the new history and the thresholds; `internal/statusline` loads and saves the cost-history file through its `CacheStore` (declared API in ARCH-03 §Interfaces; ADV-P13-A02 remediation, orchestrator call 7) |
 | `internal/platform` | **infrastructure** | syscalls, `/proc`, `sysctl`, Win32; build-tag confined |
 | `cmd/hylo` | **effectful shell** | `os.Args`/`os.Std*`, `os.Exit`; no logic |
 | `internal/parity` | **infrastructure** | spawns interpreters/builds; test-only, never shipped in render path |

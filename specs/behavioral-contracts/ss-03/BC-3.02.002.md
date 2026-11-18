@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "57d2ef2"
+input-hash: "dc66427"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -26,6 +26,8 @@ modified:
   - "2026-11-20T18:30:00Z (1.3.1): ADV-P9 remediation D01+D02 (orchestrator call 7) — rider-test closure respelled: exclusions.json carries NO OD-76 entry (no corpus case exercises the id); PC preamble states the I1-I6 rows run in the same dedicated Go table tests against the pinned legacy column (no parity vehicle); Inv 2 and the VP row restated"
   - "2026-11-21T07:00:00Z (1.3.2): ADV-P11 remediation D01 sibling (orchestrator call 2) — the fake-PATH machinery's status updated from 'no P1 consumer' to its FIRST P1 consumer: the canonical temp-file case cache-003 declares the subprocess-fake table (fake ps on the conditional fake PATH, Go ProcStarter fake); the OD-76 D1-D4 vectors remain Go table tests only"
   - "2026-11-22T00:00:00Z (1.3.3): ADV-P12 remediation D02 sibling (orchestrator call 2, superseding pass-11 call 2) — Pre-3's cache-003 note respelled: NO fake process table and NO fake ps in any parity case — cache-003 declares the conditional fake PATH with an EMPTY bin directory (oracle ps subprocess raises FileNotFoundError; Go child at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0, zero probes); the fake ps of this contract's table exists only in the Go table tests"
+  - "2026-11-23T00:00:00Z (1.3.4): ADV-P13 remediation D03/D04 sibling propagation (call 4's rule) — PC-3's opener no longer says 'for parity tests the legacy side runs with a fake ps': the difference table is GO-TABLE-TEST territory, its legacy column verified with a fake ps and its Go column with a fake ProcStarter; in parity no fake ps serves either side (matching the PC's own pass-12 tail and BC-6.01.002)"
+  - "1.3.5 2026-11-18: pass-13 residual (orchestrator residual sweep): Precondition 2 states the bound as the config key statusline.window_age.max_depth (default 6) instead of the bare literal 6; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,11 +50,14 @@ named exclusion entry for "OD-76 + the native process probe on macOS/Linux"); D4
 
 1. OS is macOS or Linux; stdin `session_id` truthy; the session cache has no numeric `proc_start` (otherwise
    BC-3.02.001 postcondition 1 applies identically on both sides).
-2. An ancestor within 6 levels is the client process.
-3. For parity tests the legacy side runs with a fake `ps` on the harness-constructed
-   `PATH` — the constant `<case>/bin`, admitted by BC-6.01.002's conditional `PATH` bullet —
-   and the Go side with a fake
+2. An ancestor within `statusline.window_age.max_depth` levels (default 6) is the client process.
+3. This difference table is GO-TABLE-TEST territory, never a parity case: its legacy
+   column was VERIFIED with a fake `ps` on a harness-constructed
+   `PATH` — the constant `<case>/bin`, the machinery of BC-6.01.002's conditional `PATH` bullet —
+   and its Go column with a fake
    `ProcStarter` describing the same process (same pid chain, same true start instant).
+   In parity no fake `ps` serves either side (the tail of this PC; pass-12 call 2,
+   respelled pass-13 D03/D04 propagation).
    These cases run UNSEEDED (no cached `proc_start`) by design; BC-3.02.001 Invariant 4
    applies to ordinary render-parity cases, not to this difference table
    (ADV-P1-D05 resolution). Updated pass-12 call 2 (superseding pass-11 call 2): the canonical

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - CLAUDE.md
-input-hash: "0733b38"
+input-hash: "fe153e7"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-21T07:00:00Z (1.2.6): ADV-P11 remediation D03 (H1 sync after the ADV-P10-D09 pin) + D04 (orchestrator call 16) + A07 (call 8) — H1/Description/CTV/VP-row now say the Go 1.26.0 FLOOR leg (the body pinned exactly 1.26.0 in 1.2.5; index titles synced); PC-3 gains the lint-job steps ARCH-08 runs (pinned staticcheck, govulncheck as a required check); PC-3's test step references BC-6.01.001 PC-7's oracle build tag for the plain/oracle test-step split"
   - "2026-11-21T09:00:00Z (1.2.7): pass-11 residual — PC-3 step 6 respelled to the ORACLE_TESTS -run/-skip pattern (BC-6.01.001 PC-7; ARCH-07 OD-145 binding), removing the minted `oracle` build tag; PC-3 item 4 and the Description state the two-ref scan `--log-opts=\"main factory-artifacts\"` with the scanned-commit count compared against `git rev-list --count main factory-artifacts` (ARCH-08 hygiene bullet); EC-004 respelled 'old commit of either ref'; the VP-table row says the gitleaks two-ref scan step"
   - "2026-11-22T00:00:00Z (1.2.8): ADV-P12 remediation A02/D04/D16 (orchestrator call 1) + A06 (call 5) + D15 — PC-4 and the Description respelled to the FULL-HISTORY scan `--log-opts=\"--all\"` after checkout with fetch-depth: 0 (--all includes HEAD, so a PR run scans the PR head and every fetched ref; scanned-commit count asserted equal to `git rev-list --count --all`; matches the CLAUDE.md pre-push command; supersedes the two-ref scan of 1.2.7); EC-004 and the VP-table row follow; PC-3 restructured per call 5: gofmt -l and govulncheck run ONCE in the ubuntu lint job, go vet and staticcheck on every OS leg, setup-python ONLY in the ORACLE_TESTS jobs (Tier A, timing, nightly fuzz; each -runs its own member(s) and prints the resolved CPython patch, PC-6), plain legs install none; D15: the Tier B goldens / exclusion-table / corpus-hygiene sentence now attaches to the plain -skip step; Source row: Go 1.26.0 floor leg (D16)"
+  - "2026-11-23T00:00:00Z (1.2.9): ADV-P13 remediation D06 (orchestrator call 5) + call 6 — Description respelled: Tier B runs in the plain test legs ONLY (no separate Tier B job; the plain legs own the tier-b census), and the Tier A job and the timing job EACH run on all three OSes with setup-python (CPython 3.11) on every leg of each, printing the resolved patch (PC-3 step 4, PC-6); PC-3 step 5 restructured per call 6: the lint job runs gofmt -l only and is required, govulncheck is its OWN job that runs and reports on every change and becomes a required check with the go.mod toolchain line (ARCH-08 ordering rule); EC-001 and EC-005 follow (Tier A job matrix named; gofmt fails in the lint job, not at step 1); CTV row tightened"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,9 +53,13 @@ operating system images, plus one extra Linux leg on the Go 1.26.0 floor:
 - macos-15 (arm64), which detects floating-point contraction (FMA) mismatches;
 - windows-2025.
 
-On all three OSes the plain test legs install no interpreter; the parity tiers A and B
-run in the jobs that execute an `ORACLE_TESTS` member, each of which installs a
-CPython 3.11 oracle by setup-python and passes it by absolute path (PC-3). The race
+On all three OSes the plain test legs install no interpreter; Tier B runs in those
+plain legs only — no separate Tier B job — and the plain legs own the
+`tier-b: N goldens compared` census (PC-3 step 3). Tier A runs in the dedicated
+ORACLE_TESTS jobs: the Tier A job and the timing job EACH run on all three OSes, and
+every leg of each installs the CPython 3.11 oracle by setup-python, prints the
+resolved patch and passes it by absolute path (PC-3 step 4, PC-6; pass-13
+orchestrator call 5). The race
 detector runs on Linux and macOS. gitleaks scans the full history — every fetched ref
 plus HEAD — with `--log-opts="--all"` (ARCH-08 hygiene bullet; pass-12 call 1), so a
 pull request's own commits are scanned before merge. The workflow is gating: any red leg blocks the change.
@@ -88,8 +93,11 @@ pull request's own commits are scanned before merge. The workflow is gating: any
       table tests (BC-6.03.004) and the corpus hygiene test (BC-6.02.001). Linux and
       macOS add `-race`; Windows runs without it.
    4. The ORACLE_TESTS jobs are separate from the plain legs: the dedicated Tier A
-      job, the timing job (BC-6.04.002) and the nightly fuzz job each install
-      CPython 3.11 by `actions/setup-python` BEFORE their `go test` and each runs its
+      job and the timing job (BC-6.04.002) EACH run on all three OSes
+      (ubuntu-24.04 / macos-15 / windows-2025; pass-13 orchestrator call 5), and the
+      nightly fuzz job runs its own member(s) nightly; every Tier A and timing leg
+      installs CPython 3.11 by `actions/setup-python` BEFORE its `go test` and prints
+      the resolved patch, and each runs its
       own member(s) with `-run`. In the Tier A job the interpreter's reported absolute
       path is exported as `HYLO_PARITY_PYTHON` (OD-108), with `CI=true`, so Tier A
       cannot skip (BC-6.01.001 PC-6) — setup-python must precede
@@ -99,9 +107,13 @@ pull request's own commits are scanned before merge. The workflow is gating: any
       boundaries and `unicodedata.unidata_version` (constants measured on 3.11.7,
         floating 3.11.x install) and fails closed on any mismatch, printing the
       resolved version (BC-6.01.001 PC-4).
-   5. `gofmt -l .` (which must print nothing) and `govulncheck ./...` run ONCE, in the
-      ubuntu lint job — not per leg (ARCH-08; pass-12 call 5). `govulncheck` is a
-      required check (a finding blocks the change like any red leg).
+   5. `gofmt -l .` (which must print nothing) runs ONCE, in the ubuntu lint job — not
+      per leg — and the lint job is required (ARCH-08; pass-13 orchestrator call 6).
+      `govulncheck ./...` is its OWN job, separate from lint: it runs and reports on
+      every change, and it becomes a required check in the same change that adds
+      go.mod's `toolchain` line (the ARCH-08 ordering rule; a finding blocks the
+      change like any red leg). The branch-protection list names exactly the contexts
+      the jobs emit (architect's list in cicd-setup).
 4. **gitleaks.** One job checks out with `fetch-depth: 0` and runs a pinned,
    checksum-verified gitleaks binary over the full history —
    `--log-opts="--all"` (ARCH-08 hygiene bullet; pass-12 call 1): `--all` includes
@@ -116,7 +128,9 @@ pull request's own commits are scanned before merge. The workflow is gating: any
    `continue-on-error`.
 6. **Python patch recorded.** Each job that installs an interpreter (the ORACLE_TESTS
    jobs of PC-3 step 4) prints the resolved CPython patch version
-   from the BC-6.01.001 probe, so a patch drift is visible in the logs (RK-4); the
+   from the BC-6.01.001 probe, so a patch drift is visible in the logs (RK-4) — every
+   leg of the Tier A job and the timing job included (all three OSes each; pass-13
+   orchestrator call 5); the
    plain test legs install no interpreter and print none (pass-12 call 5).
 
 ## Invariants
@@ -131,11 +145,11 @@ pull request's own commits are scanned before merge. The workflow is gating: any
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | A float expression in Go is fused (FMA) on arm64 and shifts a heat colour | macos-15 leg fails Tier A/B; the Linux amd64 legs may pass. The arm64 leg is the gate (PR-15) |
+| EC-001 | A float expression in Go is fused (FMA) on arm64 and shifts a heat colour | macos-15 plain leg fails Tier B and the macos-15 leg of the Tier A job fails Tier A (the Tier A job runs on all three OSes, PC-3 step 4); the Linux amd64 legs may pass. The arm64 legs are the gate (PR-15) |
 | EC-002 | Windows leg with `-race` | Not run; Windows runs plain `go test` |
 | EC-003 | setup-python yields 3.11.x where x differs from the golden metadata | Tier B still compares against committed (Python-written) goldens; the patch is printed; a resulting diff fails the leg and is reviewed (RK-4) |
 | EC-004 | gitleaks finds a secret in an old commit reachable from any fetched ref or the PR head | Workflow fails (the `--all` scan covers every fetched ref plus HEAD) |
-| EC-005 | `gofmt -l .` lists a file | Leg fails at step 1 |
+| EC-005 | `gofmt -l .` lists a file | The ubuntu lint job fails (PC-3 step 5; gofmt runs there, not at step 1) |
 
 ## Canonical Test Vectors
 
@@ -143,7 +157,7 @@ pull request's own commits are scanned before merge. The workflow is gating: any
 |-------|----------------|----------|
 | PR with a passing change | 4 test legs (3 OS + Go 1.26.0 floor) green, gitleaks green → workflow green | happy-path |
 | Change that breaks a golden only on Windows (e.g. root-path label) | windows-2025 leg red → workflow red | edge-case |
-| Workflow edited to use `HYLO_PARITY_PYTHON=python` | Tier A fails on every leg (BC-6.01.001 absolute-path rule) | error |
+| Workflow edited to use `HYLO_PARITY_PYTHON=python` | Tier A fails on every leg of the Tier A job — all three OSes (BC-6.01.001 absolute-path rule) | error |
 
 ## Verification Properties
 

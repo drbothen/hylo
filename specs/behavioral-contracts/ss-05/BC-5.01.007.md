@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.5"
+version: "1.0.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "83039fe"
+input-hash: "41dc855"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython mixed int/float coercion behind legacy/dgx_statusline.py arithmetic: SL:435, 599, 882-885, 919)"
@@ -28,6 +28,7 @@ modified:
   - "2026-11-19T03:50:00Z (1.0.3) ADV-P6 remediation D09+D18 — NumCmp error return specified: total, nil on every path (PC 3), so Max/Min NaN folds cannot error (PC 4); TrueDiv EC-005 rationale corrected — int/int operands are never converted (float(10**310) itself raises; the overflow is a quotient-range error, measured under CPython 3.11.7)"
   - "2026-11-19T17:00:00Z (1.0.4): ADV-P7 remediation D19 — the concrete NaN parity case names the gate correctly: the gate is isinstance(api,(int,float)) and api >= need at SL:254; the api/3.6e6 division at SL:255 only follows the gate inside the appended branch"
   - "2026-11-20T18:30:00Z (1.0.5): ADV-P9 remediation D15 — PC-1's gate list corrected: _fmt_lines calls int(n) (SL:853, its own '?' guard, not this gate); its float crossing is the mixed division n / 1e6 at SL:857 (EC-011 reshaped accordingly; verified against legacy source)"
+  - "2026-11-23T00:00:00Z (1.0.6): ADV-P13 remediation D14 — Inv 3 grounded in a derivable test: int/int strict relations are decided EXACTLY in the integer domain (cross-product a*d vs c*b, no float64 intermediate), with the observable consequence pinned as a table test on adjacent-large-magnitude pairs (NumLT(2**53+1, 2**53) is TRUE where a float64 conversion compares them equal); the former text demanded cross-multiplication with no Num kind rational and no test derivable"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -135,10 +136,14 @@ OD-141. ADV-P3-D08 disposition.
    `NumCmp` derivation (D15 named-helper discipline, mirroring BC-5.01.003 Invariant 1; ADV-P5-D09).
 2. `ErrOverflow` from `NumToF`/mixed `TrueDiv` maps to CPython `OverflowError` at each site's catch list;
    sites that do not catch it degrade (OD-156 catalogued crash paths, BC-1.03.018).
-3. Comparison helpers never allocate the full quotient (PC 2): int/int strict relations are decided by
-   cross-multiplication in the integer domain (`a/b` vs `c/d` compared as `a·d` vs `c·b`, denominators kept
-   positive), so no rational quotient is materialized; only the `NumCmp` verdict `-1/0/1` (equal-or-unordered
-   → `0`, PC 3) is observable (ADV-P4-D16 rewrite of the unparsable prior wording).
+3. Comparison helpers never allocate the full quotient (PC 2): int/int strict relations are decided EXACTLY
+   in the integer domain — `a·d` vs `c·b` with denominators kept positive (equivalently the exact `x−y` sign
+   for same-kind int pairs) — and no float64 quotient or intermediate conversion is materialized. The verdict
+   is the exact mathematical relation even where a float64 round trip cannot distinguish operands:
+   `NumLT(2**53+1, 2**53)` is TRUE, though converting either to float64 compares them equal; a table test
+   pins such adjacent-large-magnitude pairs (ADV-P4-D16 rewrite; test-grounded pass-13 D14, so the property
+   is derivable, not decorative). Only the `NumCmp` verdict `-1/0/1` (equal-or-unordered
+   → `0`, PC 3) is observable.
 
 ## Edge Cases
 

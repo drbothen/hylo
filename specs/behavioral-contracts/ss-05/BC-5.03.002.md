@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "a8776a1"
+input-hash: "9e29fea"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces str.strip/rstrip/rsplit and bytes.splitlines used in legacy/dgx_statusline.py)"
@@ -24,6 +24,7 @@ modified:
   - '2026-11-18T23:50:00Z (1.2.3) ADV-P5 D26 — EC-002 notation: NEL spelled as the \u0085 code-point escape, disambiguated from the BC-5.01.002 raw-byte \xNN convention'
   - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — 1.2.3 entry requoted single-quoted (the raw-byte escape spellings are not YAML double-quoted-scalar escapes); no behavioral change"
   - "2026-11-22T00:00:00Z (1.2.5): ADV-P12 remediation D06 sibling (orchestrator call 9) - PC-1 ties the Strip primitive to the consumer order: strip FIRST, then control-byte/emptiness validation on the stripped item (BC-2.01.005 PC-2)"
+  - "2026-11-23T00:00:00Z (1.2.6): ADV-P13 remediation D12 — Inv 2's Uses-served list gains its omitted sibling: the subagent lane-tag prefix strip at SL:902-903 (OD-155, BC-1.07.006), completing the list BC-2.01.001/002 already cite both sites of"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -68,7 +69,10 @@ signature row (`RSplit1(s, sep string) []string`) is reconciled.
 
 1. `strings.TrimSpace` (Go's `unicode.IsSpace` set includes U+0085/U+00A0 but its exact set must not be relied on),
    `bufio.Scanner` lines and `strings.Split(s, "\n")` are never used in place of these helpers.
-2. Uses served: `p.strip()` on model prefixes (SL:444-445), `p.rstrip("*")` (SL:487), `row.rsplit(SEP, 1)` in
+2. Uses served: `p.strip()` on model prefixes (SL:444-445), the subagent lane-tag
+   prefix strip (SL:902-903, the OD-155 subagent lane tag, BC-1.07.006's sibling site
+   cited by BC-2.01.001/002),
+   `p.rstrip("*")` (SL:487), `row.rsplit(SEP, 1)` in
    `trim_to_fit` (SL:1196), `blob[:cut].splitlines()` (SL:1059).
 
 ## Edge Cases

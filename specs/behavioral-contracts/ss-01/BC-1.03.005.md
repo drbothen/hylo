@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4529a98"
+input-hash: "19605e7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1029-1034, 1096-1103, 1153)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02/C13) — dedup_memory range bounded to Int 1..65536 (upper bound labeled judgment call J, pass-5 A13/call 16, registry); PC5 qualifies duplicates-can-not-occur to caches hylo authored and carries foreign duplicate/non-list `ids` shapes as OD-160 table tests", "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row for the PC5 foreign-`ids` legs (VP-012) mirroring sibling BC-1.03.015", "1.2.5 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C04, ADV-P10-C05) — the VP-029/031 duplicates row qualified to caches hylo authors (a foreign cached ids carried or list()-split per PC5 re-writes duplicates; SL:1033, 1153); the PC5 OD-160 foreign-ids legs lifted to the traceability DI row (sibling convention)"]
+modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02/C13) — dedup_memory range bounded to Int 1..65536 (upper bound labeled judgment call J, pass-5 A13/call 16, registry); PC5 qualifies duplicates-can-not-occur to caches hylo authored and carries foreign duplicate/non-list `ids` shapes as OD-160 table tests", "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row for the PC5 foreign-`ids` legs (VP-012) mirroring sibling BC-1.03.015", "1.2.5 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C04, ADV-P10-C05) — the VP-029/031 duplicates row qualified to caches hylo authors (a foreign cached ids carried or list()-split per PC5 re-writes duplicates; SL:1033, 1153); the PC5 OD-160 foreign-ids legs lifted to the traceability DI row (sibling convention)", "1.2.6 2026-11-24T12:00:00Z: pass-13 remediation (ADV-P13-C07) - the CP-O09 trigger now has the required canonical vector (error-taxonomy: edge case + canonical vector per owning BC): CTV gains the parse leg (both 4,300-digit usages counted exactly, at-limit sum stored) measured end-to-end with the legacy oracle in an isolated temp HOME/cwd", "1.2.7 2026-11-24T13:00:00Z: pass-13 sync closure - the CP-O09 parse-leg setup seeds the session cache statusline-probe.json with the leading proc_start key (900.0) per the corpus admission rule (BC-3.02.001 Inv 4), mirroring BC-1.02.029 v1.8; expected output gains the measured session-cache outcome (byte-unchanged from the seed, consult short-circuit SL:273-275); stdout, byte counts and mix-cache contents re-verified against the legacy oracle with the seed present (CPython 3.11.7, isolated temp HOME/cwd, -I); no outcome field changed"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -111,6 +111,7 @@ serialized with Python `json.dumps` defaults, one per line. `u` = `{"input_token
 | refresh 1: `msg_A` + ids `o000`..`o255` (each `{"input_tokens":1}`); refresh 2: `msg_A` | refresh 1: `tin` 257, stored ids = `o000`..`o255` (256); refresh 2: `tin` 258 | edge-case |
 | as above with `o000`..`o254` | refresh 2: `tin` stays 256 | edge-case |
 | one refresh: `msg_A`, `o000`..`o299`, `msg_A` | `tin` 301 | edge-case |
+| CP-O09 parse leg, co-owner with BC-1.03.006 PC5/EC-009 (operands 10^4299 each, 4,300 digits; ADV-P13-C07): transcript = two lines x, y, each {"type": "assistant", "message": {"content": "", "id": "x or y", "usage": {"input_tokens": 10^4299}}} + LF (8,780 B total); setup: TZ=UTC, DGX_SL_ROWS=1, temp cwd, cache dir seeded with the session cache statusline-probe.json = {"proc_start": 900.0} (the leading proc_start key is the corpus admission rule, BC-3.02.001 Inv 4 — a truthy session_id against an empty cache is rejected at case load), legacy interpreter CPython 3.11.7 at the default recursion limit, stdin {"session_id": "probe", "transcript_path": <path>, "model": {"id": "claude-sonnet-5-5", "display_name": "Sonnet 5.5"}} | measured end-to-end 2026-11-18 (isolated temp HOME/cwd, interpreter -I, seed present): the mix cache IS written with "tin": 2*10^4299 (the exact 4,300-digit sum: both usages counted, no float operand, no skip) and "size": 8780; stdout is the 29-byte grey degraded line (hex 1b5b39306d + "statusline degraded" + 1b5b306d + 0a) because the at-limit total cannot render either; the session cache stays byte-unchanged from the seed (the seeded numeric proc_start returns at the consult short-circuit, SL:273-275 — no probe, no rewrite); exit 0 | error |
 
 ## Verification Properties
 

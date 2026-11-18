@@ -1,14 +1,14 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.13"
+version: "1.14"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-21T18:00:00Z
+timestamp: 2026-11-23T10:00:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
-input-hash: "162dc77"
+input-hash: "0658099"
 
 ---
 
@@ -48,15 +48,15 @@ Triggers: `pull_request`, `push` to `main`, `workflow_dispatch`, and `schedule`
 
 | Job | Matrix | Timeout | What it does |
 |---|---|---|---|
-| `lint (gofmt + govulncheck)` | ubuntu-24.04 | 10 min | `gofmt -l .` fails on any unformatted file; `govulncheck ./...` beside it — each runs ONCE, in this ubuntu job (pass-12 call 5; check-run name updated from the staticcheck-era spelling). `go vet` and version-pinned `staticcheck` run on EVERY OS test leg instead (per-OS build tags, P18) |
+| `lint (gofmt)` | ubuntu-24.04 | 10 min | `gofmt -l .` fails on any unformatted file — the lint job runs gofmt ONLY (orchestrator call 6, pass-13, ADV-P13-A03). `go vet` and version-pinned `staticcheck` run on EVERY OS test leg (per-OS build tags, P18; pass-12 call 5 placement) |
+| `govulncheck (required)` | ubuntu-24.04 | 10 min | ITS OWN JOB (orchestrator call 6, pass-13, ADV-P13-A03): `govulncheck ./...` via the pinned `go run`, empty-module guard, runs and reports on EVERY change (pull_request and push). Becomes a required check in the SAME change that adds go.mod's `toolchain` line — activation-is-same-change, never promoted onto a no-patch 1.26.0 toolchain (amends ADV-P9-A06's before-ordering; ARCH-08 Build ORDERING rule). Distinct from security.yml's weekly `govulncheck (weekly)` |
 | `test (ubuntu-24.04)` / `(macos-15)` / `(windows-2025)` / `(ubuntu-24.04-floor)` | 3 OSes + ubuntu floor (BC-6.04.001; pass-12 call 5) | 30 min | FOUR required legs: the three OS legs (Go from go.mod's `toolchain` line) plus an ubuntu floor leg pinned `go-version: 1.26.0` (ADV-P10-D09). NO leg installs an interpreter (pass-12 call 5: setup-python is installed ONLY in jobs that -run an ORACLE_TESTS member). Each leg: `go vet ./...` + version-pinned `staticcheck` (per-OS build tags, P18), then `go test -race -count=1 ./...` (`-race` on Linux/macOS only, per ARCH-08; CGO_ENABLED=1 on the -race legs, VP-037). The plain test step EXCLUDES the ORACLE_TESTS selector (ARCH-07's named pattern — `^(TestParityTierA_Corpus\|TestParityCanary_ShimLoaded\|TestParityCacheSwap_FourCaches\|TestParityTierC_DiffFuzz\|TestTiming)$` — ADV-P11-A07, five members per pass-12 call 6) on every leg (pass-6 A12, call 13: the dedicated tier A job is the one authoritative run — one run, one timeout) |
 | `gitleaks (full history)` | ubuntu-24.04 | 10 min | `gitleaks detect --source . --log-opts="--all"` after checkout with `fetch-depth: 0` (rev set corrected pass-12 call 1: the scan covers the PR head and every fetched ref) — the scanned rev set EQUALS `git rev-list --count --all` by construction — **plus** the category pattern scan |
 | `locate harness packages` (probe) | ubuntu-24.04 | 5 min | emits `parity`/`statusline` outputs gating the placeholder jobs |
-| `parity tier A (live corpus)` | 3 OSes (ubuntu leg carries setup-python + the OD-170 staleness step, pass-12 call 5) | 45 min | placeholder; skipped until `internal/parity` exists. Once activated this is the SINGLE authoritative Tier A run (pass-6 A12, call 13) with its own 45-minute timeout — the plain test step never also runs the corpus. Its ubuntu leg installs Python, prints the resolved CPython patch, and runs the OD-170 staleness check (`go generate ./...` + `git diff --exit-code`) before the corpus `-run` |
-| `parity tier B (committed goldens)` | 3 OSes | 30 min | placeholder; no Python needed (goldens committed; Windows included) |
+| `parity tier A (live corpus)` | 3 OSes — EVERY leg installs setup-python (CPython 3.11) and prints the resolved patch (orchestrator call 5, pass-13, ADV-P13-A04); the ubuntu leg additionally carries the OD-170 staleness step (pass-12 call 5) | timeout derived from corpus size (call 18, ADV-P13-A13: headroom × (N_cases × S_steps × R_runs × T_ceiling) + oracle-spawn overhead, named constants beside the formula in the workflow) | placeholder; skipped until `internal/parity` exists. Once activated this is the SINGLE authoritative Tier A run (pass-6 A12, call 13) — the plain test step never also runs the corpus. Every leg installs Python and prints the resolved CPython patch; the ubuntu leg additionally runs the OD-170 staleness check (`go generate ./...` + `git diff --exit-code`) before the corpus `-run` |
+| `timing report (non-gating)` | 3 OSes — EVERY leg installs setup-python (CPython 3.11) and prints the resolved patch (orchestrator call 5, pass-13) | timeout derived from corpus size (call 18, ADV-P13-A13: headroom × (N_cases × S_steps × 21 × T_ceiling) + oracle-spawn overhead, named constants beside the formula in the workflow) | INSTALLS PYTHON ON EVERY LEG (it -runs the ORACLE_TESTS member `TestTiming`, pass-12 call 5; resolved CPython patch printed — the report must include the CPython oracle median, BC-6.04.002 PC-2); runs `go test ./internal/parity -run '^TestTiming$' -count=1` once `internal/parity` exists (pass-3 D39 wiring; upload the report as a workflow artifact); `HYLO_TIMING_GATE` intentionally unset (OD-117: gate binds only where the owner opts in). Positive coverage (pass-3 A16; census added pass-7 A20): the job fails unless it prints `timing: N cases timed > 0` with `N >= 1` AND `N` equals the corpus case census — timing 1 of N cases must not pass |
 | `parity tier C (nightly differential fuzz)` | 3 OSes | 60 min | schedule-only; installs Python and -runs its ORACLE_TESTS member `TestParityTierC_DiffFuzz` (resolved CPython patch printed, pass-12 call 5); `HYLO_PARITY_FUZZSECONDS=1800` = 30 min/OS (OD-149); non-gating |
 | `coverage (gate)` | ubuntu-24.04 | 30 min | OWN JOB (pass-7 A07, orchestrator call 12 — required checks bind to check-runs/jobs, and a step of the 3-OS `test` matrix job emits no `coverage` check-run); RUNS ON EVERY PR — never probe-gated on `internal/parity` (ADV-P9-A04: parity is built LAST, so a parity-keyed gate would leave S1/S5 code merging while a required check is skipped, and GitHub counts a skip as success): runs `go test -count=1 -coverpkg=./internal/... -coverprofile=cover.out ./internal/...`, prints `coverage: G of 3 gated packages present`, checks each gated package that EXISTS against the COMMITTED package manifest — a manifest package missing from the profile (renamed or moved) fails the job, and `G == 0` is allowed while NONE of the three gated packages exists: the committed manifest lists the gated packages present in the repo and grows as each lands, so `internal/platform` or other non-gated `internal/` packages never bind (the approved build order lands `internal/platform` first and `internal/config` third, BEFORE any gated package — early PRs legitimately sit at `G == 0`; ADV-P11-A02) — and enforces OD-158's **>= 95 % statement coverage** (Go's figure; the OD-158 gate name "line coverage" denotes it, ADV-P11-A03; per-package figure derived from the merged `-coverpkg` profile per ARCH-08) for S1 — `internal/statusline`, `internal/cost` — and S5 — `internal/pyfmt` (OD-193). Timeout 30 min = the test job's, the floor for the same selection plus `-coverpkg` instrumentation (ADV-P9-A15). Oracle-dependent tests (the ORACLE_TESTS pattern, ARCH-07) are excluded because they need the Python oracle, which the coverage job does not install (ADV-P9-A07 — Tier A runs every case in-process and a subset as the built binary, ARCH-07), so Tier A runs do NOT count toward statusline coverage (gate scope per OD-193) while Tier B golden tests and harness-machinery tests run in-process under `./internal/...` and DO credit `internal/statusline` (ADV-P11-A03). `internal/parity` (S6) coverage is profiled and REPORTED, not gated (OD-193 withdraws pass-7 call 12's addition of the referee to the gate). It is the `coverage` required check in branch protection |
-| `timing report (non-gating)` | 3 OSes | 15 min | INSTALLS PYTHON (it -runs the ORACLE_TESTS member `TestTiming`, pass-12 call 5; resolved CPython patch printed — the report must include the CPython oracle median, BC-6.04.002 PC-2); runs `go test ./internal/parity -run '^TestTiming$' -count=1` once `internal/parity` exists (pass-3 D39 wiring; upload the report as a workflow artifact); `HYLO_TIMING_GATE` intentionally unset (OD-117: gate binds only where the owner opts in). Positive coverage (pass-3 A16; census added pass-7 A20): the job fails unless it prints `timing: N cases timed > 0` with `N >= 1` AND `N` equals the corpus case census — timing 1 of N cases must not pass |
 
 Harness-placeholder semantics: job-level `if` reads `needs.probe.outputs.*`
 (hashFiles() is not allowed in job-level `if` — actionlint-enforced); a skipped
@@ -78,7 +78,7 @@ fail when it checked nothing. Per job, the required line is:
 | Job | Positive-coverage line | Fail condition |
 |---|---|---|
 | `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0`, `N` ≠ the COMMITTED expected case count (manifest, ADV-P10-A04) or `N` ≠ case-directory census — a deleted case directory shrinks the runtime count and the runtime census equally, so the committed manifest is what catches a partially lost corpus (ADV-P2-A15) — or `K == 0` while any compared case declares swap seeds (pass-6 A10, call 13 — the swap tier must not check nothing and pass) |
-| `parity tier B` | `tier-b: N goldens compared` | `N == 0`, `N` ≠ the COMMITTED expected golden count for the host OS (manifest, ADV-P10-A04) OR `N` ≠ HOST-OS golden census — `*.golden` on POSIX legs, `*.windows.golden` on the Windows leg (pass-7 A18; the same native-set discipline as `-update`, pass-5 D29). Partially lost golden set must not pass, pass-5 A19 |
+| plain test legs (Tier B step) | `tier-b: N goldens compared` | `N == 0`, `N` ≠ the COMMITTED expected golden count for the host OS (manifest, ADV-P10-A04) OR `N` ≠ HOST-OS golden census — `*.golden` on POSIX legs, `*.windows.golden` on the Windows leg (pass-7 A18; the same native-set discipline as `-update`, pass-5 D29). The plain test legs OWN this census — no separate Tier B job exists (orchestrator call 5, pass-13, ADV-P13-A14). Partially lost golden set must not pass, pass-5 A19 |
 | `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); a scheduled run comparing `N == 0` inputs or spawning `M == 0` oracles FAILS (pass-6 A10, call 13); PR-side `t.Skip` is fine only because the job is non-gating |
 | exclusion machinery / canary | `exclusions: M entries validated against the closed set` | `M` ≠ file entry count, or the file is missing |
 | `lint` / `test` / `govulncheck` | `go: K files scanned` + `go test: N tests run, S skipped` (test jobs) | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` or `N == 0` fails; an all-skip suite is reported via `S` and investigated, not accepted (ADV-P2-A15) |
@@ -101,6 +101,11 @@ POSIX/Windows home paths, and personal emails; GitHub no-reply identities and
 `example` domains are exempt. Categories added pass-3 (A17, closing the gap to the
 CLAUDE.md hygiene set): personal/infra hostnames, usernames, session links and
 UUIDs (Claude-session links included), and "Claude" in product/binary/logo names.
+USERNAMES EXEMPTION (orchestrator call 13, pass-13, ADV-P13-A17): the usernames
+category covers the private terms file and home-path usernames ONLY — the public
+GitHub owner segment of the D1 module path is public by D1 and is not a finding, so
+go.mod and every import path carrying it are exempt from that category by rule, not
+by silent exclusion.
 Regexes verified against positive and negative
 fixtures before landing.
 
@@ -184,13 +189,16 @@ Each lag carries its own "change required before" deadline.
    Kill-rate targets stay Phase 6 (OD-158).
    **Landed ci.yml lags:** no coverage job, no profile producer, no threshold check.
    **Change required before the P1 exit record is written (Phase 5 gate).**
-5. **Hardening posture (ADV-P4-A17).** REQUIRED: govulncheck promoted to a required
-   PR check in ci.yml (`govulncheck (required)`, distinct from security.yml's weekly
-   `govulncheck`), and the lint job gains a version-pinned staticcheck-class analysis
-   (`honnef.co/go/tools/cmd/staticcheck`) beside gofmt and vet, both with the
-   empty-module guard. ORDERING (ADV-P9-A06): the go.mod `toolchain go1.26.x` line
-   (ARCH-08 Build section) MUST land before this check becomes required — govulncheck
-   reports stdlib advisories against the Go version actually used. **Landed ci.yml
+5. **Hardening posture (ADV-P4-A17; restructured by orchestrator call 6, pass-13,
+   ADV-P13-A03).** REQUIRED: govulncheck is ITS OWN ci.yml JOB (check-run
+   `govulncheck (required)`, distinct from security.yml's weekly `govulncheck
+   (weekly)`) — it runs and reports on EVERY change (pull_request and push), and it
+   becomes a required check in the SAME change that adds go.mod's `toolchain` line
+   (activation-is-same-change, amending ADV-P9-A06's before-ordering; ARCH-08 Build
+   ORDERING rule) — never promoted onto a no-patch 1.26.0 toolchain, with the
+   empty-module guard. The lint job runs `gofmt -l` ONLY (check-run `lint (gofmt)`);
+   staticcheck and vet stay on every OS test leg (pass-12 call 5 placement — the
+   "beside gofmt and vet" lint-job spelling is superseded). **Landed ci.yml
    lags:** govulncheck runs only in the
    informational security.yml; lint is gofmt + vet. **Change lands on main with the
    owner's approval (workflow edits are owner-committed); before Phase 4.**
@@ -226,6 +234,13 @@ Each lag carries its own "change required before" deadline.
    `release.yml` is withdrawn. **Landed release.yml lags:** the committed job runs
    `go test ./...` with no Tier A exclusion. **Change required before the first
    release tag cut after Tier A integration (Phase 3).**
+8. **Tier B job retirement (orchestrator call 5, pass-13, ADV-P13-A14).** REQUIRED:
+   Tier B runs in the plain test legs ONLY — no separate `parity tier B` job exists;
+   the plain legs own the `tier-b: N goldens compared` census (the Windows test leg
+   covers the `*.windows.golden` native set). The landed placeholder job is removed
+   at Phase-3 activation, when the in-process Tier B step in each plain test leg
+   takes over. **Landed ci.yml lags:** a standalone `parity tier B` placeholder job
+   exists. **Change required before the pyfmt generators land (Phase 3).**
 
 ## Release (`release.yml`)
 
@@ -305,11 +320,12 @@ behavior of the `-race` split is asserted from ARCH-08's design, not yet observe
 ## Branch protection — to apply AFTER the first green run (owner action, OD-150)
 
 `required_status_checks.contexts` (exact check-run names as the workflows emit them;
-updated pass-6 A11, call 13; the list gains the ubuntu floor test leg and the
-gofmt+govulncheck lint spelling per pass-12 call 5):
+updated pass-6 A11, call 13; the lint spelling and the govulncheck emitting job
+updated per pass-13 call 6; the list names EXACTLY the contexts the jobs emit — none
+invented, none omitted):
 
 ```
-lint (gofmt + govulncheck)
+lint (gofmt)
 test (ubuntu-24.04)
 test (macos-15)
 test (windows-2025)
@@ -319,7 +335,7 @@ govulncheck (required)
 gitleaks (full history)
 ```
 
-With: `strict: true` (require branches up to date), 0 approving reviews, `enforce_admins: false` (**admin bypass**, per OD-150), no restrictions. Disambiguation (pass-6 A11, call 13; corrected pass-7 A07, orchestrator call 12): the coverage gate is its OWN JOB on ubuntu-24.04 whose check-run is named `coverage` — required checks bind to check-runs (jobs), and a step of the 3-OS `test` matrix job emits no `coverage` check-run, so the earlier "required STEP of the test job" reading would have blocked forever or been removed. The parity/timing placeholders should be added to required checks only after Phase 3 makes them run. `security.yml` also produces PR check runs (`govulncheck`, `gitleaks (weekly)`) but they are informational and NOT in the required set.
+With: `strict: true` (require branches up to date), 0 approving reviews, `enforce_admins: false` (**admin bypass**, per OD-150), no restrictions. Disambiguation (pass-6 A11, call 13; corrected pass-7 A07, orchestrator call 12): the coverage gate is its OWN JOB on ubuntu-24.04 whose check-run is named `coverage` — required checks bind to check-runs (jobs), and a step of the 3-OS `test` matrix job emits no `coverage` check-run, so the earlier "required STEP of the test job" reading would have blocked forever or been removed. `govulncheck (required)` is likewise emitted by its own dedicated ci.yml job (pass-13 call 6). The parity/timing placeholders should be added to required checks only after Phase 3 makes them run. `security.yml` also produces PR check runs (`govulncheck (weekly)`, `gitleaks (weekly)`) but they are informational and NOT in the required set.
 
 ## Deferred to Phase 3 (deliberately not done here)
 

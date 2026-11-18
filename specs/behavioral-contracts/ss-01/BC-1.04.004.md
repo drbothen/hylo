@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
 input-hash: "7bee76c"
@@ -23,7 +23,9 @@ modified:
   - "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (dead-marker word sourced to statusline.pill.label_local per OD-189, glyph named glyphs.degraded) + ADV-P7-C2-14 BC side (CP-N03 canonical vector row added; the sole-key AttributeError raise type oracle-verified)"
   - "2026-11-18 (v1.2.3) pass-10 remediation ADV-P10-C2-11 (VP-001 row added to Verification Properties for the metrics-borne CP-N03 sole-key degrade leg; VP Anchors entry)"
   - "2026-11-18 (v1.2.4) pass-11 OD-194 consumer (PC2 names statusline.labels.old beside its default; the (~/s/) scaffolding around the word carries the named-format-constant note)"
+  - "2026-11-18 (v1.2.7) pass-13 residual (orchestrator residual sweep, CP-C register alignment): Invariant 3 cites crash id CP-C24 (the OD-160 exact-giant-int lr[0] OverflowError, minted by error-taxonomy 1.20); no behavioral change"
   - "2026-11-18 (v1.2.5) pass-12 remediation ADV-P12-C2-06 (Invariant 3's dict-sample failure list completed: the OD-160 exact-giant-int lr[0] OverflowError at the SL:778-779 .0f render format, BC-1.04.018 PC-1, and the foreign cached-sample value shapes, e.g. a string vllm:num_requests_running ValueError at the SL:741 .0f format, BC-1.04.006's segment; both oracle-verified CPython 3.11.7)"
+  - "2026-11-18 (v1.2.6) pass-13 remediation ADV-P13-C2-01 (sibling lift: L2 row carries DI-012 beside DI-008; VP-012 OD-160 exclusion-closure row added; the VP-001 row extended beyond CP-N03 to the Inv 3 OD-160 foreign cached-sample value legs, with VP Anchors entries; Inv 3's segment pointer names the new sibling edge cases BC-1.04.006 EC-007/EC-008, BC-1.04.011 EC-008/EC-009, BC-1.04.012 EC-006)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,12 +79,15 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
    metrics-borne degrade, crash id **CP-N03**);
    after the session-cache write it returns as string `"5"` and no longer degrades; the
    OD-160 exact-giant-int `lr[0]` OverflowError at the `f"{x:.0f}"` render format
-   (SL:778-779 inside `render_telemetry_fields`, BC-1.04.018 PC-1; both signs —
+   (SL:778-779 inside `render_telemetry_fields`, BC-1.04.018 PC-1, crash id **CP-C24**; both signs —
    oracle-verified CPython 3.11.7); and the foreign cached-sample VALUE shapes (OD-160,
    BC-1.04.002 EC-008): a sample value whose render site formats a non-number — e.g. a
    string `vllm:num_requests_running` reaches the `r{r:.0f}·q{q:.0f}` format and raises
    ValueError (SL:741, "Unknown format code 'f' for object of type 'str'",
-   oracle-verified CPython 3.11.7; segment contract BC-1.04.006) (ADV-P12-C2-06).
+   oracle-verified CPython 3.11.7; segment contract BC-1.04.006 EC-007); equivalent
+   unguarded render sites in the sibling segment contracts are pinned in their own
+   edge cases: BC-1.04.006 EC-007/EC-008, BC-1.04.011 EC-008/EC-009, BC-1.04.012
+   EC-006 (ADV-P12-C2-06).
 
 ## Edge Cases
 
@@ -114,7 +119,8 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Rung selection is a total function of `(truthy(sample), up, age > fresh_s, age > 0)` matching legacy | Go property test (testing/quick) |
-| VP-001 | The promised output set holds on the metrics-borne CP-N03 sole-key degrade leg (invariant 3 / canonical vector row): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-001 | The promised output set holds on the metrics-borne CP-N03 sole-key degrade leg (invariant 3 / canonical vector row) and on the OD-160 foreign cached-sample value legs (invariant 3: the exact-giant-int lr[0] OverflowError, the string running ValueError, and the equivalent sibling sites pinned in BC-1.04.006/011/012's edge cases): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P13-C2-01) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (invariant 3 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P13-C2-01) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -123,7 +129,7 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 | Source | legacy/dgx_statusline.py:render_telemetry (SL:693-702); STALE_OK (SL:79) |
 | Legacy contract | BC-SL-043 (P3 base; r1 refined half-even suffix) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 (Inv 3's foreign cached-sample value shapes under the OD-160 named-deviation rule) |
 | Decisions | OD-55 (health-dot doc fix: "green while the latest fetch succeeded; yellow from the first failed fetch"), OD-57 E-0, OD-113 |
 | Architecture Module | `internal/statusline/row2.go` |
 | Stories | TBD |
@@ -145,7 +151,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — ladder totality
-- VP-001 — never-blank/exit-0 ladder; the metrics-borne CP-N03 sole-key leg rides it (ADV-P10-C2-11)
+- VP-001 — never-blank/exit-0 ladder; the metrics-borne CP-N03 sole-key leg rides it (ADV-P10-C2-11); the OD-160 foreign cached-sample value legs ride it too (ADV-P13-C2-01)
+- VP-012 — OD-160 exclusion-closure citation (Inv 3; ADV-P13-C2-01)
 
 ---
 

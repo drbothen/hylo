@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -21,6 +21,7 @@ introduced: v0.1.0
 modified:
   - "1.3 2026-11-18: pass-11 remediation ADV-P11-C2-04 (cached-path sparkline crash sites EC-008..EC-010 added — dict/number/null hist TypeError at the SL:664 slice, short-list-point IndexError at SL:655 via SL:664, plotted giant exact int OverflowError at SL:674, non-numeric plotted value TypeError at SL:671/674, OD-160 class; DI-012 lifted into the L2 row; timestamp raised above the new modified entry)"
   - "1.3.1 2026-11-18: pass-12 remediation ADV-P12-C2-01 (EC-010 giant-int bound signed positive — value >= 2**1024 - 2**970; a negative giant renders the lowest glyph per BC-1.04.009 EC-012, oracle-verified) + ADV-P12-C2-02 (VP-012 exclusion-closure row) + ADV-P12-C2-05 (Pre 1/EC-006/EC-008 plotted window generalized to statusline.sparkline.points, default 12)"
+  - "1.3.2 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-008 cites CP-C20 and EC-010 cites CP-C21/CP-C22/CP-C23 beside the legacy sites, minted by error-taxonomy 1.20; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,9 +74,9 @@ paths. Notation: `\e` is byte 0x1B.
 | EC-005 | Same NaN history but row stale | no sparkline call → no crash |
 | EC-006 | NaN point older than the last `statusline.sparkline.points` points (default 12) | not plotted → no crash |
 | EC-007 | Sparkline disabled | main passes `[]` → no crash |
-| EC-008 | Cached path, stored `hist` a JSON dict, number or null (foreign cache, exclusion id **OD-160**) | `hist[-N:]` (`N` = `statusline.sparkline.points`, default 12) raises TypeError (a dict slice is unhashable in CPython 3.11; SL:664) → errDegraded, same top-level-guard disposition as PC1 (not the CP-N02 `int()` site itself) |
+| EC-008 | Cached path, stored `hist` a JSON dict, number or null (foreign cache, exclusion id **OD-160**) | `hist[-N:]` (`N` = `statusline.sparkline.points`, default 12) raises TypeError (a dict slice is unhashable in CPython 3.11; SL:664; CP-C20) → errDegraded, same top-level-guard disposition as PC1 (not the CP-N02 `int()` site itself) |
 | EC-009 | Cached path, a stored point a list shorter than 2 elements | IndexError inside `_norm_pt` (SL:655 via SL:664) → errDegraded (same class; on the cached path the sparkline's own normalization at SL:664 is the first — BC-1.04.002 PC1 returns `hist` raw) |
-| EC-010 | A plotted point's value a giant exact int (value >= 2**1024 - 2**970, positive only — a NEGATIVE giant does not raise: `max(v, 0.0)` returns the float `0.0` and the cell draws the lowest glyph, BC-1.04.009 EC-012, ADV-P12-C2-01) or a non-numeric scalar (foreign cache, **OD-160**) | OverflowError (SL:674) / TypeError (SL:671/SL:674) → errDegraded (same class) |
+| EC-010 | A plotted point's value a giant exact int (value >= 2**1024 - 2**970, positive only — a NEGATIVE giant does not raise: `max(v, 0.0)` returns the float `0.0` and the cell draws the lowest glyph, BC-1.04.009 EC-012, ADV-P12-C2-01) or a non-numeric scalar (foreign cache, **OD-160**) | OverflowError (SL:674, CP-C22) / TypeError (SL:671, CP-C21; SL:674, CP-C23) → errDegraded (same class) |
 
 ## Canonical Test Vectors
 

@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.18"
+version: "1.19"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T14:10:00Z
+timestamp: 2026-11-24T14:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "6807344"
+input-hash: "85adb2b"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
@@ -23,6 +23,8 @@ modified:
   - "1.15 2026-11-21T00:30:00Z: pass-10 remediation — path-grammar reason `not an absolute path` (minted pass-9 A11, BC-2.01.005 PC-3) added to the reason table and the E-CFG-001 reconciliation sentence (A07); numeric-range vocabulary sentence fixed to the six strings above (A14); stale minting-source-of-record note removed from `invalid UTF-8` (A15); CP-O08 owner set corrected to BC-1.03.010 (EC-009) and BC-1.03.018 (PC3) (C06); CP-A01..A03 site cells cite the raise sites SL:891/894/906, matching the CP-A04/A05 rows and BC-1.07.008 (C09); CP-C10 within-step order claim qualified — the current session's own src-cc entry faults at the SL:232 throttle check before save_cache (B05); CP-S disposition anchor names the BC-1.03.x outliers CP-S14 (BC-1.03.013 PC3) and CP-S16 (BC-1.03.015 PC5) (C10); no behavioral change"
   - "1.16 2026-11-21T03:00:00Z: pass-11 remediation — new CP-S table defines the six range-only stdin type-confusion ids with (id, site, owner BC/EC): CP-S02 (SL:446, BC-1.02.001 EC-007), CP-S03 (SL:452, BC-1.02.003 EC-006), CP-S04 (SL:405/460, BC-1.02.003 EC-006), CP-S05 (SL:419, BC-1.02.006 EC-008), CP-S08 (SL:477, BC-1.02.008 EC-006), CP-S10 (SL:535, BC-1.02.014 EC-010) (B01/call 14; the owning ECs gain the id names in the same burst); E-REN-002 carrier list gains BC-1.02.003 and BC-1.02.008 (B07); no behavioral change"
   - "1.17 2026-11-21T14:10:00Z: pass-12 remediation — E-REN-002 carrier set restated as DERIVED (every owner BC of a degrade-disposition register row, walked against each owner BC's EC text; 36 carriers; hand-maintenance discontinued) (A01/call 11); foreign-cache family allocates the formerly reserved CP-C06 (mix-cache non-numeric cached tin, SL:586, BC-1.02.018 EC-009) and CP-C07 (non-numeric cached count bucket at sum(counts[:3]), SL:1181, BC-1.02.007) with OD-160 tags (B01/call 12); no behavioral change"
+  - "1.19 2026-11-24T14:00:00Z: pass-13 remediation - the foreign-cache family is renamed THE CP-C FAMILY (OD-160) and extended CP-C11..C27: seventeen rows minted, one per distinct legacy site and fault that the owning BCs name and the register lacked (session-cache sample consult faults SL:324/325/335/336/337/356 with their giant-int OverflowError legs; sparkline slice and plotted-value faults SL:664/671/674; mix-cache giant lr[0] SL:778-779; mix-cache load-frame faults SL:1019/1033), each with the nearest existing row's disposition - typed 29-byte degrade, Go table test, not byte-parity (C2-03/C05, orchestrator call 1; the residual sweep adds the ids to the owning BCs); E-CLI-003 minted for the hylo config path directory-undetermined exit 1 (A01, orchestrator call 8); CP-C07 trigger cell corrected to the composition byte-count buckets (B07); CP-O10 owner list gains BC-1.05.001 (EC-009 stdin bearer; C2-04); E-NET-001 dead rung states the closing reset follows statusline.theme.reset (A18); crash-path coverage paragraph states the CP-T01..T07 disposition (A15); no behavioral change"
+  - "1.20 2026-11-24T18:00:00Z: pass-13 residual sweep - the CP-C family extended CP-C28..C32: five rows minted, one per distinct legacy site and fault, for the foreign cached-sample value edge cases the pass-13 BC additions name that the register lacked (capacity chip SL:741 string-running ValueError and SL:740 string-waiting TypeError; power chip SL:813 string-watts ValueError and SL:812 string-wall TypeError; idle gate SL:825 string-last TypeError), each copying the pass-13 rows' disposition; CP-C25/CP-C27 owner cells aligned to the citing ECs (EC-010/EC-011 - EC-007 keeps only CP-C26, its string-size leg); outro sentence updated; no behavioral change"
   - "1.18 2026-11-23T14:00:00Z: pass-12 residual sweep — the invalid-UTF-8 minting row mirrors BC-2.02.001 1.3.4: the reason is reachable from POSIX byte values only, on Windows platform.EnvVars substitutes U+FFFD (call 8); CP-A04/A05 triggers bounded to 309..4300-digit decimal literals (call 15); no behavioral change"
 ---
 
@@ -32,7 +34,8 @@ modified:
 > Referenced by: implementer, test-writer.
 > Principle (DI-008): the user-visible render never fails and never exits non-zero.
 > Errors are observable as (a) the degraded ladder or (b) one-line grey notices; non-zero
-> exits exist only in validate/usage contexts and inside the parity harness.
+> exits exist only in validate/usage/config-path contexts and inside the parity harness
+> (E-CLI-003).
 
 ## Error Categories
 
@@ -51,14 +54,15 @@ modified:
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade). Carrier set DEFINED as every owner BC of a degrade-disposition row in this register (X/S/T/N/O/A rows whose disposition is the typed 29-byte degrade; the hand-maintained list is discontinued — pass-12 A01/call 11); the derived set, walked against each owner BC's EC text (36 carriers): BC-1.01.001 (CP-S01; BC-1.01.002 EC-008 delegates: "degrades via BC-1.01.001"), BC-1.01.008 (CP-S17), BC-1.02.001 (CP-S02), BC-1.02.003 (CP-S03/S04), BC-1.02.006 (CP-S05/S06/S07, CP-O01), BC-1.02.008 (CP-S08), BC-1.02.010 (CP-S09), BC-1.02.011 (CP-O02), BC-1.02.012 (CP-O02), BC-1.02.013 (CP-S09), BC-1.02.014 (CP-S10/S11, CP-O03), BC-1.02.015 (CP-S12), BC-1.02.016 (CP-S13), BC-1.02.017 (CP-O05), BC-1.02.020 (CP-S06/S07, CP-O01), BC-1.02.025 (CP-O04), BC-1.02.026 (CP-S11), BC-1.02.027 (CP-S12/S13), BC-1.02.029 (CP-O12 owner), BC-1.02.030 (CP-S09 sticky sequence), BC-1.03.013 (CP-S14), BC-1.03.015 (CP-S16), BC-1.04.001/.004/.005 (CP-N03), BC-1.04.014 (CP-N02), BC-1.04.015 (CP-N01), BC-1.05.002 (CP-O11 co-owner), BC-1.05.003 (CP-O12 co-owner), BC-1.05.004 (CP-S15), BC-1.05.005 (CP-O10/O11 history bearer), BC-1.05.007 (CP-O10/O11 stdin bearer), BC-1.07.006 (CP-A03), BC-1.07.007 (CP-A04/A05), BC-1.07.008 (CP-A01/A02/A03), BC-5.04.001 (CP-T09) |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade). Carrier set DEFINED as every owner BC of a degrade-disposition row in this register (X/S/T/N/O/A rows whose disposition is the typed 29-byte degrade; the hand-maintained list is discontinued — pass-12 A01/call 11); the derived set, walked against each owner BC's EC text (37 carriers): BC-1.01.001 (CP-S01; BC-1.01.002 EC-008 delegates: "degrades via BC-1.01.001"), BC-1.01.008 (CP-S17), BC-1.02.001 (CP-S02), BC-1.02.003 (CP-S03/S04), BC-1.02.006 (CP-S05/S06/S07, CP-O01), BC-1.02.008 (CP-S08), BC-1.02.010 (CP-S09), BC-1.02.011 (CP-O02), BC-1.02.012 (CP-O02), BC-1.02.013 (CP-S09), BC-1.02.014 (CP-S10/S11, CP-O03), BC-1.02.015 (CP-S12), BC-1.02.016 (CP-S13), BC-1.02.017 (CP-O05), BC-1.02.020 (CP-S06/S07, CP-O01), BC-1.02.025 (CP-O04), BC-1.02.026 (CP-S11), BC-1.02.027 (CP-S12/S13), BC-1.02.029 (CP-O12 owner), BC-1.02.030 (CP-S09 sticky sequence), BC-1.03.013 (CP-S14), BC-1.03.015 (CP-S16), BC-1.04.001/.004/.005 (CP-N03), BC-1.04.014 (CP-N02), BC-1.04.015 (CP-N01), BC-1.05.001 (EC-009 stdin-borne CP-O10 leg), BC-1.05.002 (CP-O11 co-owner), BC-1.05.003 (CP-O12 co-owner), BC-1.05.004 (CP-S15), BC-1.05.005 (CP-O10/O11 history bearer), BC-1.05.007 (CP-O10/O11 stdin bearer), BC-1.07.006 (CP-A03), BC-1.07.007 (CP-A04/A05), BC-1.07.008 (CP-A01/A02/A03), BC-5.04.001 (CP-T09) |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
 | E-VAL-001 | VAL | broken | 1 | plain reason lines (no SGR), one per error — BC-2.03.001 |
-| E-NET-001 | NET | degraded | 0 | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (the red parameter is the `statusline.theme.red` value — default `31`, byte-equal to legacy — and the glyph is `statusline.glyphs.degraded`, default U+25CC: the rung follows the config keys, unlike the theme-independent grey of E-REN-001, because it renders only in a successfully configured render; BC-1.04.004 Precondition 3, pass-9 A14; marker word from `statusline.pill.label_local`, OD-189) — BC-1.04.001/.004, BC-1.04.002 (PC4 dead rung; BC-1.04.020 step 5; pass-7 C2-13) |
+| E-NET-001 | NET | degraded | 0 | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (the red parameter is the `statusline.theme.red` value — default `31`, byte-equal to legacy — and the glyph is `statusline.glyphs.degraded`, default U+25CC, and the closing reset is the `statusline.theme.reset` value, default `0`, byte-equal to legacy's constant: the rung follows the config keys, unlike the theme-independent grey of E-REN-001, because it renders only in a successfully configured render; BC-1.04.004 Precondition 3, pass-9 A14; marker word from `statusline.pill.label_local`, OD-189; closing-reset cite A18) — BC-1.04.001/.004, BC-1.04.002 (PC4 dead rung; BC-1.04.020 step 5; pass-7 C2-13) |
 | E-FS-001 | FS | degraded | 0 | never-raise caches; failed replace persists nothing — BC-1.06.001/.002 |
 | E-HAR-001 | HAR | broken | non-zero | harness FAIL naming the reason (canary, missing table test, glob, id outside closed set) — BC-6.01.003, BC-6.03.004 |
+| E-CLI-003 | CLI | broken | 1 | `hylo config path` when a directory cannot be determined: the affected label(s) print `(unavailable)` on stdout, one stderr detail line per unresolved directory, exit 1 (BC-2.03.002 EC-008/EC-010/EC-011/EC-012; pass-5 A01) — the one non-zero exit outside validate/usage/harness (A01, orchestrator call 8) |
 
 ## D4-EX-3 config-error line (E-CFG-001) in detail
 
@@ -175,7 +179,7 @@ degrading the whole render (ADV-P2-B01/C01 evidence).
 | CP-O03 | lines segment (SL:857) | BC-1.02.014 | huge int enters `n / 1e6` in `_fmt_lines` |
 | CP-O04 | token segment (SL:866) | BC-1.02.025 | huge int enters `float(n)` in `_fmt_tok_c` |
 | CP-O05 | window-age suffix (SL:558-559) | BC-1.02.017 | huge `total_duration_ms` enters `win_ms − dur` |
-| CP-O10 | cost segment (SL:616, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.005 (EC-011, history bearer) | huge exact int `usd` — stdin-borne it enters `f"{usd:.2f}"` at the render site (SL:616); history-borne it raises at the `usd / (api / 3.6e6)` division in `cost_thresholds` (SL:255) only — the percentile math never raises (int-to-float comparisons and `sorted` cannot overflow; pass-6 C2-13) — NOT at SL:616 (pass-5 C2-10) |
+| CP-O10 | cost segment (SL:616, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.001 (EC-009 stdin bearer), BC-1.05.005 (EC-011, history bearer) | huge exact int `usd` — stdin-borne it enters `f"{usd:.2f}"` at the render site (SL:616); history-borne it raises at the `usd / (api / 3.6e6)` division in `cost_thresholds` (SL:255) only — the percentile math never raises (int-to-float comparisons and `sorted` cannot overflow; pass-6 C2-13) — NOT at SL:616 (pass-5 C2-10) |
 | CP-O11 | $/h burn-rate division (SL:622-623, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.005 (EC-011, history bearer), BC-1.05.002 (EC-009, co-owner) | huge exact int `api_ms` — stdin-borne it enters `api_ms / 3.6e6` (SL:622-623); history-borne it raises at the `api / 3.6e6` division in `cost_thresholds` (SL:255) — including a huge positive recorded `api_ms` with a small `usd` (pass-5 C2-10) |
 | CP-O12 | cost-pick equivalence (SL:626, SL:633) | BC-1.02.029 (owner), BC-1.05.003 (co-owner, the `⛏` value) | `tin` and `tout` each below the int→float overflow bound but their exact-int sum `tot` (SL:626) at or above it enters `tot * dgx_mtok` (SL:633) on the local lane with a valid basis → OverflowError → degraded line (render-time degrade, like CP-O04; pass-9 B03/call 4) |
 
@@ -261,7 +265,7 @@ extended D4-EX-2 id — the transcript extension still does. The pass-6 ruling O
 redirect targets (hylo: no sample) and https TLS trust-store differences (hylo: OS trust
 store); parity metrics cases use plain http only, and Go table tests pin hylo's behaviour.
 
-## Foreign-cache crash family CP-C01..C10 (named exclusion OD-160)
+## The CP-C family - foreign-cache crash triggers (named exclusion OD-160)
 
 The foreign-cache family was minted by owner ruling **OD-160** (ruling Q-b,
 owner-decisions-log-2026-11-14.md:144): foreign-form cached values are out of byte-parity
@@ -274,9 +278,15 @@ CP-T01..T07 + T09, CP-N01..N03, CP-O01..O12, CP-A01..A05 = 4 + 17 + 8 + 3 + 12 +
 the T family counts 8 live ids — **CP-T08 is a RETIRED id** (withdrawn; the id is never
 reused, per append-only numbering — pass-7 call 8/B03); the
 C register is a separate, ninth register. **CP-C06 and CP-C07 were reserved** ids within
-the OD-160 closed-set label "CP-C01..C10" and are ALLOCATED by pass-12 B01/call 12 to the
-two uncatalogued foreign-cache crash triggers below; no reserved C ids remain, and the
-append-only range stays 01..10.
+the former OD-160 closed-set label "CP-C01..C10" and are ALLOCATED by pass-12 B01/call 12
+to two then-uncatalogued foreign-cache crash triggers below. **The label "CP-C01..C10" no
+longer enumerates the family**: pass-13 C2-03/orchestrator call 1 ruled the family OPEN
+(OD-160 names the CLASS - every hand-edited cache shape is under OD-160 - and the old
+label was the register at ruling time, not a membership cap), and the register extended to
+the open range CP-C11..C27 by call 1 and to CP-C28..C32 by the pass-13 residual sweep
+(five foreign cached-sample value faults in the serving-state and idle chips), one row per
+distinct legacy site and fault named by the owning
+BCs; cite the family as **the CP-C family (OD-160)**.
 
 | Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
 |-----------|------------------|--------------|---------|
@@ -286,14 +296,39 @@ append-only range stays 01..10.
 | CP-C04 | metrics sample, rows >= 2 (SL:1217-1218) | BC-1.01.009 | wrong-shape `up` flag (`up: false` bearer) restored from the session cache |
 | CP-C05 | sparkline history shaping (BC-1.04.003 EC-009) | BC-1.04.003 | a history Point is `[[0]]`-shaped (list of length 1) — IndexError |
 | CP-C06 | mix-cache `tin` consult (SL:586) | BC-1.02.018 (EC-009) | hand-edited/foreign mix cache holds a non-numeric `tin`: the SL:1039-1040 early return hands back the cached value and the render format raises (OD-160 vector — a non-numeric `tin` cannot reach SL:586 from a transcript, because `tin += _i + _w + _r` raises TypeError back at step 2 when a usage field is a string or list, SL:1108; pass-12 B01/call 12); Go table test, not byte-parity |
-| CP-C07 | composition tail `sum(counts[:3])` (SL:1181) | BC-1.02.007 | hand-edited/foreign mix cache holds a non-numeric per-model count bucket — the sum raises TypeError (uncatalogued sibling of the CP-C06 shape; OD-160 vector, Go table test, not byte-parity; pass-12 B01/call 12) |
+| CP-C07 | composition tail `sum(counts[:3])` (SL:1181) | BC-1.02.007 | hand-edited/foreign mix cache holds a non-numeric composition BYTE-COUNT bucket — one of `res`/`conv`/`think` (assigned at SL:1163-1167), not a per-model count (B07) — and the sum raises TypeError (catalogued by pass-12 B01/call 12; OD-160 vector, Go table test, not byte-parity) |
 | CP-C08 | badge/model/project, git segment (SL:441-462, 411) | BC-1.02.005, BC-1.01.009 | git cache foreign forms: cached `ts` a string (`"x"`) — TypeError; top-level JSON array (`[1,2]`) — AttributeError |
 | CP-C09 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | corrupt cost history: top level not an object, or `sessions`/an entry not an object |
 | CP-C10 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | cost-history entry `ts` non-numeric; within-step order exception: when the faulting entry is only consulted in the `cost_thresholds` scan (SL:246), the record_cost write lands first, then the fault (BC-1.01.009). Counter-case (pass-10 B05): the CURRENT session's own history entry with `src` `cc` and a non-numeric `ts` faults in record_cost's own throttle check (`now - e.get("ts", 0)`, SL:232) before save_cache (SL:237) — nothing is written that step |
+| CP-C11 | `get_sample` cached consult (SL:324) | BC-1.04.002 (Invariant 1) | session cache holds a non-numeric `fetch_ts` — TypeError at the `>` TTL comparison. Pass-13 mint (C2-03/call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C12 | `get_sample` cached return (SL:325) | BC-1.04.002 (Invariant 1) | cached `ts` a string or JSON null — TypeError at the `now - ts` subtraction (cached path; the SL:356 site covers the fetch-failure path). Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C13 | `get_sample` cached return (SL:325) | BC-1.04.002 (Invariant 1) | cached `ts` an exact integer of magnitude >= 2**1024 - 2**970 — OverflowError at the same subtraction (int-vs-float SL:324 comparison does not raise). Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C14 | `get_sample` history normalization (SL:335) | BC-1.04.002 (Invariant 1) | stored `hist` a JSON null or number, not iterable — TypeError at the comprehension. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C15 | `get_sample` age filter (SL:336) | BC-1.04.002 (Invariant 1) | a dict point whose `t` is a non-numeric scalar (string) — TypeError at the `now - t` filter subtraction. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C16 | `get_sample` age filter (SL:336) | BC-1.04.002 (Invariant 1), BC-1.04.003 (EC-010) | a dict point whose `t` is an exact integer of magnitude >= 2**1024 - 2**970 (309..4300-digit literal; both signs) — OverflowError at the filter subtraction. Pass-13 mint (BC-1.04.003 EC-010 already pins the outcome); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C17 | `get_sample` gap check (SL:337) | BC-1.04.003 (EC-008), BC-1.04.002 (Invariant 1) | the newest kept point is a dict without `"t"` — KeyError at `hist[-1]["t"]` (a `{}` followed by a newer kept point prunes without raising). Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C18 | `get_sample` fetch-failure age (SL:356) | BC-1.04.002 (Invariant 1) | cached `ts` a string or JSON null on the FETCH-FAILURE path — TypeError at the `now - ts` age subtraction (distinct site from the SL:325 cached path). Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C19 | `get_sample` fetch-failure age (SL:356) | BC-1.04.002 (Invariant 1) | cached `ts` an exact integer of magnitude >= 2**1024 - 2**970 on the fetch-failure path — OverflowError at the same subtraction. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C20 | sparkline plotted window (SL:664) | BC-1.04.014 (EC-008), BC-1.04.009 (EC-011) | cached-path `hist` a dict, number or null — TypeError at the `hist[-N:]` slice (a dict slice is unhashable in CPython 3.11). Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C21 | sparkline scale pick (SL:671) | BC-1.04.009 (EC-011), BC-1.04.014 (EC-010) | a plotted point's value a non-numeric scalar — TypeError in the `max(max(vals), ...)` scale computation. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C22 | sparkline cell index (SL:674) | BC-1.04.009 (EC-011), BC-1.04.014 (EC-010) | a plotted point's value an exact integer of magnitude >= 2**1024 - 2**970, positive only (a negative giant takes the `max(v, 0.0)` float path, BC-1.04.009 EC-012) — OverflowError at the `max(v, 0.0) / top` division. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C23 | sparkline cell index (SL:674) | BC-1.04.009 (EC-011), BC-1.04.014 (EC-010) | a plotted point's value a non-numeric scalar — TypeError at the same division. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C24 | last-turn rate render (SL:778-779) | BC-1.04.018 (PC-1), BC-1.04.004 (Invariant 3) | mix-cache `lr[0]` an exact integer of magnitude >= 2**1024 - 2**970 (passes the SL:776 isinstance guard) — OverflowError at the `f"{x:.0f}"` render format; the exact analogue of CP-C06's `tin`. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C25 | mix-cache load frame (SL:1019) | BC-1.03.002 (EC-010) | hand-edited mix cache whose top level is not an object (e.g. `[]`): the never-raise loader returns it and the `c.get` consults raise AttributeError. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C26 | mix-cache load frame (SL:1033) | BC-1.03.002 (EC-007) | cached `size` a string — TypeError at the `size < off` comparison (`==` is False cleanly; a JSON bool is NOT in this class, BC-1.03.002 EC-007). Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C27 | mix-cache load frame (SL:1033) | BC-1.03.002 (EC-011) | cached `ids` a non-iterable (number) — TypeError at `list(...)`. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C28 | capacity chip running count render (SL:741) | BC-1.04.006 (EC-007) | foreign session cache restores a metrics sample whose `vllm:num_requests_running` is a string — ValueError at the `r{r:.0f}·q{q:.0f}` render format ("Unknown format code 'f' for object of type 'str'", oracle-verified CPython 3.11.7). Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C29 | capacity chip busy comparison (SL:740) | BC-1.04.006 (EC-008) | foreign session cache restores a metrics sample whose `vllm:num_requests_waiting` is a string — TypeError at the `q > 0` busy comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C30 | power chip watts render (SL:813) | BC-1.04.011 (EC-008) | foreign session cache restores a metrics sample whose `DCGM_FI_DEV_POWER_USAGE` is a string — ValueError at the `⚡{w:.0f}W` render format. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C31 | power chip wall colour comparison (SL:812) | BC-1.04.011 (EC-009) | foreign session cache restores a metrics sample whose `dgx_power:est_wall_watts` is a non-empty (truthy) string — TypeError at the `wall > 1520` colour comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C32 | idle-recency gate comparison (SL:825) | BC-1.04.012 (EC-006) | foreign session cache restores a metrics sample whose `dgx_llm_last_dgx_request_timestamp_seconds` is a non-empty (truthy) string — TypeError at the `last > 0` gate comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
 
 Family-level citations: BC-1.06.001 EC-001 (the cache loader) and BC-1.04.002 EC-008
-(retention path) cite CP-C01..C10 as a class; VP-001 and VP-020 exercise CP-C09/C10 by
-fault injection (out of parity scope; never-blank/exit-0 per DI-008).
+(retention path) cite the CP-C family (OD-160) as a class; VP-001 and VP-020 exercise
+CP-C09/C10 by fault injection (out of parity scope; never-blank/exit-0 per DI-008). The
+pass-13 rows CP-C11..C27 are named in their owning BC edge cases (the pass-13 residual
+sweep, this pass); the same sweep minted CP-C28..C32 for the five serving-state/idle
+foreign cached-sample value faults and named them beside the legacy sites (call 1).
 
 ## CP-S stdin type-confusion ids that were defined only as ranges (pass-11 B01)
 
@@ -322,7 +357,9 @@ this table adds only the six that lacked a spec-side definition.
 ## Crash-path register coverage
 
 Every CP-S/CP-T/CP-N/CP-O/CP-A trigger resolves to E-REN-001 or E-REN-002 or a stated
-widget fallback (Surface 2 transcript triggers resolve to the D4-EX-2 skip discipline for
+widget fallback or a stated skip/no-write discipline — the transcript-opening
+type-confusions CP-T01..T07 resolve to the D4-EX-2 opening-line skip (OD-21,
+BC-1.03.018; A15) (Surface 2 transcript triggers resolve to the D4-EX-2 skip discipline for
 CP-O06..O08 and to the legacy no-write save for CP-O09 — BC-1.03.006 PC5 — the save-time
 difference being the `temp-file` exclusion, not a cache-byte divergence; pass-5 A21);
 the per-trigger disposition lives in the owning BC (CP-S01..S17 in BC-1.02.x /
@@ -338,7 +375,7 @@ CP-O01..O12 per the OD-156
 register above, CP-A01..A05 per the Surface 3 register). The import/exit-time triggers
 CP-X01/X02 are replaced by D4-EX-3 (BC-2.02.001) and CP-X03 is the named exclusion
 `cp-x03` (BC-1.01.001 EC-005, OD-136); CP-X04 (signals) is out of scope. The
-foreign-cache family CP-C01..C10 (register above) is governed by its named exclusion
+foreign-cache family — the CP-C family (OD-160), register above — is governed by its named exclusion
 OD-160 — the Python-side observable stays the standard degrade/guard ladder and the
 Go-side obligation is Go table tests, never byte-parity — so its disposition is the
 exclusion itself, not a register gap. A trigger whose

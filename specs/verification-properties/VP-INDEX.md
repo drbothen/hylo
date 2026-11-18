@@ -2,13 +2,13 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.25"
+version: "1.27"
 status: draft
 producer: architect
-timestamp: 2026-11-22T00:00:00Z
+timestamp: 2026-11-24T16:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
-input-hash: "991f44c"
+input-hash: "14f830a"
 traces_to: ../architecture/ARCH-INDEX.md
 lifecycle_status: active
 introduced: "1.0"
@@ -37,6 +37,8 @@ modified:
   - "1.23 2026-11-21T15:00:00Z: pass-11 residual sweep (product-owner) — VP-001 bcs: and VP-012 bcs: gain BC-1.04.018 (that contract's VP-table rows route its OD-160 legs to both: the never-blank OverflowError degrade leg to VP-001's fault-injection ladder and the OD-160 closure citation to VP-012; ADV-P11-C2-02 reciprocity), the two Source Contract sections name the rows, and the BC-1.04.018 coverage-map row gains VP-001, VP-012; scripted recount over all 41 VP files reads 285 directed bcs: edges, 0 forward-only, standing residue unchanged. (Stamp 15:00Z, not the sweep's 09:00Z default, solely to keep this file's modified[] ascending after the 1.22 14:00Z entry — SC-27 precedent.)"
   - "1.24 2026-11-21T23:30:00Z: pass-12 agent-4 end-sync — VP-039 title synced to the bit-exact H1 (A2-12); agent 3's pass-12 bcs: deltas synced from all 41 VP files (C2-02): VP-001 gains BC-1.04.009, VP-012 gains BC-1.04.009 and BC-1.04.014, the two map rows gain the ids; scripted recount 288 directed VP→BC bcs: edges, 154/154 BCs, the burst's one TRANSIENT forward-only edge (VP-012 in BC-1.04.014) RESOLVED on end-of-burst re-check"
   - "1.25 2026-11-22T00:00:00Z: pass-12 residual (item 1) — VP-001 bcs: gains BC-1.05.001 (that contract's VP-table row routes its stdin-borne CP-O10 overflow leg, PC5 + EC-009, to the never-blank ladder; ADV-P12-C2-07), the Source Contract partial-coverage sentence in VP-001 names the leg, the BC-1.05.001 coverage-map row gains VP-001 appended, and the scripted recount over all 41 VP files reads 289 directed VP→BC bcs: edges, 0 forward-only, standing residue unchanged"
+  - "1.26 2026-11-22T03:00:00Z: pass-13 agent-4 end-sync — end-of-burst scripted recount re-reading all 41 VP bcs: lists against the coverage map (yaml-parsed frontmatter, 154 map rows): 289 directed VP→BC bcs: edges, 0 forward-only, 0 reverse-only among live citations, no unknown VP ids in map cells — disk state equals the 1.25 stamp, so no coverage-map row changes this pass; agent 4's own pass-13 statement edits (VP-033 depth bound + zero-probe leg, VP-035 tree discovery + runtime-composed canaries, VP-036 per-(case, step) unit) change no bcs: frontmatter; the orchestrator-named agent-3/BC-agent deltas (VP-012 gaining BC-1.04.004, VP-014 gaining BC-1.02.017) were NOT yet on disk at re-read time — if they land post-burst, the next residual sweep syncs the corresponding map rows and recounts; the count-propagation hook's '153'-class citations are historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative — SC-32 precedent), live counts agree at 41 VPs / 154 BCs / 289 edges"
+  - "1.27 2026-11-24T16:00:00Z: pass-13 residual sweep (architect) — the pass-13 bcs: deltas synced from all 41 VP files: VP-012 gains BC-1.04.004, BC-1.04.006, BC-1.04.011 and BC-1.04.012 (OD-160-tagged foreign cached-sample value shapes; ADV-P13-C2-01), VP-001 gains BC-1.04.006, BC-1.04.011 and BC-1.04.012 (the never-blank ladder legs of the same shapes), and agent 3's pass-13 delta VP-014 gains BC-1.02.017 (A2-04, landed mid-burst); the five coverage-map rows gain the ids. Scripted recount over all 41 VP files (yaml-parsed bcs: frontmatter): 297 directed VP→BC bcs: edges. Reciprocity both directions at VP-table level: no mismatches. ONE TRANSIENT forward-only edge: VP-014 in BC-1.02.017 — the reciprocal VP-table row is owed by the ss-01 contract owner (VP-014 v1.6 discloses the carriage); three body-text method credits outside VP tables enumerated for routing, not table mismatches: VP-008 in BC-1.01.001 EC-003 (new this pass, ADV-P13-B01/B03) and the pre-existing VP-009/VP-011 credit in BC-6.01.002's LF-normalization passage"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -155,7 +157,7 @@ modified:
 | BC-1.02.014 | VP-001, VP-028 |
 | BC-1.02.015 | VP-028, VP-041 |
 | BC-1.02.016 | VP-028, VP-041 |
-| BC-1.02.017 | VP-001, VP-012, VP-028 |
+| BC-1.02.017 | VP-001, VP-012, VP-028, VP-014 |
 | BC-1.02.018 | VP-028, VP-041 |
 | BC-1.02.019 | VP-028, VP-041 |
 | BC-1.02.020 | VP-001, VP-028 |
@@ -203,15 +205,15 @@ modified:
 | BC-1.04.001 | VP-001, VP-012, VP-022, VP-030 |
 | BC-1.04.002 | VP-012, VP-030 |
 | BC-1.04.003 | VP-012, VP-030, VP-031 |
-| BC-1.04.004 | VP-001, VP-030 |
+| BC-1.04.004 | VP-001, VP-030, VP-012 |
 | BC-1.04.005 | VP-001, VP-030 |
-| BC-1.04.006 | VP-030 |
+| BC-1.04.006 | VP-030, VP-001, VP-012 |
 | BC-1.04.007 | VP-030 |
 | BC-1.04.008 | VP-030 |
 | BC-1.04.009 | VP-030, VP-001, VP-012 |
 | BC-1.04.010 | VP-030 |
-| BC-1.04.011 | VP-030 |
-| BC-1.04.012 | VP-030 |
+| BC-1.04.011 | VP-030, VP-001, VP-012 |
+| BC-1.04.012 | VP-030, VP-001, VP-012 |
 | BC-1.04.013 | VP-030 |
 | BC-1.04.014 | VP-001, VP-030, VP-012 |
 | BC-1.04.015 | VP-001, VP-030 |

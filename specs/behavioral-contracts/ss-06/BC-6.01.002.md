@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "1b38027"
+input-hash: "bec1637"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -35,6 +35,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D01 (orchestrator call 1) — the fake metrics URL is an UNCONDITIONAL member of every exact key set: the harness always injects the run-time fake URL as DGX_SL_VM_URL (oracle) and HYLO_BACKENDS_0_METRICS_URL (Go), because the fake's port is only known at run time and a case cannot declare it; when the case itself sets backends[0].metrics_url the case value wins; PC-1 key sets, PC-2 and the CTVs copy that"
   - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation A2-02 (orchestrator call 1, OD-190 applied literally) + D01 (call 2) + D02 (call 3) — PC-4: the shim does NO newline reconfigure (encoding only); the Windows-leg LF normalization is the COMPARATOR's open conversion of the ORACLE's stdout CRLF to LF before the byte comparison, named beside PYTHONIOENCODING=utf-8; hylo's bytes are never converted; PC-1 consumer note: the canonical temp-file case cache-003 declares a subprocess-fake table and is the fake-PATH machinery's FIRST P1 consumer; PC-1/PC-2: a case metrics URL wins on BOTH sides and is admitted only as a placeholder resolving to the fake server (optionally with a path suffix), one value per key"
   - "2026-11-22T00:00:00Z (1.2.9): ADV-P12 remediation D02 (orchestrator call 2, superseding pass-11 call 2) — NO fake process table: the conditional `PATH=<case>/bin` points at an EMPTY bin directory (legacy's ps subprocess raises FileNotFoundError, caught at SL:293-294, claude_window_start returns None; empty dir = hermetic miss, since a missing PATH key falls back to os.defpath which exists on some runners), and the Go child gets HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 (FindAncestor makes zero probes); 'subprocess-fake table' wording removed from the conditional-PATH bullet, both exact-key-set parentheses and the PATH sentence"
+  - "2026-11-23T00:00:00Z (1.3.0): ADV-P13 remediation D03 (orchestrator call 4) — HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 made a CONDITIONAL member of the hylo child's exact key set, present exactly when the case declares the empty-bin fake PATH (cache-003): the authoritative POSIX/Windows Go key-set bullets state the conditional member, PC-3's forbidden-HYLO_* bullet gains the single builder-injected exception, and the key-set CTV gains the cache-003 row"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,7 +107,9 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
      caught at SL:293-294, so `claude_window_start` returns None (orchestrator-measured
      on CPython 3.11.7, the oracle interpreter, with an empty PATH directory; the same
      holds on Windows, where no `ps` executable exists). The Go child carries no `PATH`
-     and instead gets `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0`, so `FindAncestor` makes
+     and instead gets `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0` — a conditional member
+     of the exact key set below, present exactly when this declaration holds — so
+     `FindAncestor` makes
      zero probes and returns not-found (BC-3.02.001: at most `max_depth` probes). The
      empty directory — not a missing `PATH` key — is what forces the miss HERMETICALLY:
      with no `PATH` key, CPython's subprocess fallback searches `os.defpath`
@@ -139,10 +142,12 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
        itself sets `backends[0].metrics_url` — the case value wins on BOTH sides;
        ADV-P10-D01, pass-11 call 3)
        (+ the `HYLO_*` setting keys the case sets, +
-       `COLUMNS` when declared; no `PATH` ever — the built binary is started by
-       absolute path).
+       `COLUMNS` when declared, and the builder-injected
+       `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0` exactly when the case declares the
+       conditional fake `PATH` — present precisely then, never otherwise; no `PATH`
+       ever — the built binary is started by absolute path).
      - Windows Go child: the POSIX Go set, plus `TMP`, `TEMP`, `SYSTEMROOT` (the same
-       conditional additions apply).
+       conditional additions apply, the builder-injected max-depth key included).
      `HOMEDRIVE`/`HOMEPATH` are NOT constructed keys on any OS (home is
      `HOME`+`USERPROFILE`); no key set on any OS includes `PATH` unless the conditional
      fake-`PATH` declaration holds; `HOME` is present on BOTH OSes (Windows included) and
@@ -180,7 +185,10 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
      `PYTHONIOENCODING=utf-8` (stdio only; `PYTHONUTF8` stays forbidden on every OS;
      the POSIX oracle child carries no `PYTHON*` variable beyond `PYTHONPATH`);
    - `GODEBUG` (GP-2), `ZONEINFO` (GP-1), `SSL_CERT_FILE` and `SSL_CERT_DIR` (GP-4);
-   - every `HYLO_*` key the case does not set;
+   - every `HYLO_*` key the case does not set — with the single builder-injected
+     exception `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0` on the Go child, added exactly
+     when the case declares the conditional fake `PATH` (cache-003; it is not a
+     case-set key, so this bullet is what admits it);
    - `DGX_*` and `LOCAL_MODEL_PREFIXES` in the Go child (OD-05);
    - `PATH` is not inherited. A child that needs one gets a fixed constant documented in
      the harness, not the runner's value.
@@ -241,6 +249,7 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
 | Same parent env; Go binary child (Linux) | Keys exactly `{HOME, USERPROFILE, TMPDIR, XDG_CACHE_HOME, LOCALAPPDATA, <paths.cache_dir env>, LANG, TZ, HYLO_TEST_NOW, <backends[0].model_prefixes env>, <backends[0].metrics_url env>=<fake metrics URL>}` | happy-path |
 | Same inputs on Windows | As above plus `TMP`, `TEMP`, `SYSTEMROOT` and, on the oracle child only, `PYTHONIOENCODING=utf-8` (OD-183) | edge-case |
 | Env builder modified to copy `os.Environ()` | Env-builder unit test fails, listing the leaked keys | error |
+| Case declares the conditional fake `PATH` (cache-003, Linux) | Oracle child keys = the POSIX oracle set + `PATH`; Go child keys = the POSIX Go set + `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0`, and no `PATH` on the Go child | edge-case |
 
 ## Verification Properties
 

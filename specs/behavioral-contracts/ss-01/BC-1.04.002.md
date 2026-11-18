@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.9"
+version: "1.3.11"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
 input-hash: "a86ee16"
@@ -29,6 +29,8 @@ modified:
   - "1.3.7 2026-11-18: pass-8 remediation ADV-P8-C2-04 (Invariant 1 crash-site list completed for good — five TypeError sites: the SL:356 fetch-failure ts subtraction and the SL:335 non-iterable-hist comprehension added to the three previously named; the SL:324 non-object consult fault noted)"
   - "1.3.8 2026-11-18: pass-10 remediation ADV-P10-C2-02 (Invariant 1 names the OverflowError class on the three subtraction sites SL:325/336/356 — an exact JSON integer of magnitude >= 2**1024 - 2**970 passes c.get/p.get and the exact SL:324 comparison but raises at float - <huge int>; oracle-verified CPython 3.11.7; same OD-160 class)"
   - "1.3.9 2026-11-18: pass-12 remediation ADV-P12-C2-08 (the 9999 cached-path sentinel and the 0 fallbacks carry the P20 named-constant / why-not-config note, PC1) + ADV-P12-C2-05 (PC3's saved slice generalized to hist[-cap:] under statusline.sparkline.history_cap, default 32, matching BC-1.04.003 PC5)"
+  - "1.3.10 2026-11-18: pass-13 remediation ADV-P13-C2-08 (TTL-0 claim scoped — with a stored fetch_ts later than now, a backward clock step BC-1.04.021 EC-003 treats as reachable, SL:324's strict > takes the cached path even at TTL 0; Pre 3 and EC-006 amended)"
+  - "1.3.11 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): Invariant 1's typed-site list cites the register ids CP-C11..CP-C19 beside the legacy sites; EC-008's row cites the CP-C family (OD-160) instead of the exhausted CP-C01..C10 range; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,8 +58,11 @@ it is younger than KEEP_DEAD.
    `keep_dead` = `statusline.telemetry.keep_dead_s` (default 300, T-004, judgment
    "5 min of last-known telemetry before giving up", OD-57 E-A). Non-finite or negative
    TTL is a config error — approved deviation D4-EX-3 (BC-2.02.002; OD-105 exclusion
-   entry `D4-EX-3`, dedicated test `TestD4EX3_Number`); TTL 0 is valid
-   (always fetch).
+   entry `D4-EX-3`, dedicated test `TestD4EX3_Number`); TTL 0 is a valid config value
+   (OD-114) and fetches on every refresh while the stored `fetch_ts` is not later than
+   `now` — a `fetch_ts` later than `now` (backward clock step, BC-1.04.021 EC-003)
+   takes the cached path even at TTL 0, SL:324's strict `>` becoming
+   `fetch_ts > now` (EC-006, ADV-P13-C2-08).
 
 ## Postconditions
 
@@ -90,14 +95,18 @@ it is younger than KEEP_DEAD.
    raise IndexError. The typed sites are: IndexError at SL:655 inside `_norm_pt` (called
    from the SL:335 comprehension) for ANY history point that is a list shorter than 2 —
    anywhere in the list, not only the newest (BC-1.04.003 EC-009); KeyError at SL:337
-   when the newest kept point is a dict without `"t"` (BC-1.04.003 EC-008); and FIVE
-   TypeError sites for non-numeric scalars — `fetch_ts` compared `>` a float at SL:324;
-   `ts` in the SL:325 `now - c.get("ts", 9999)` subtraction (cached path); `hist` not
+   when the newest kept point is a dict without `"t"` (BC-1.04.003 EC-008; CP-C17); and FIVE
+   TypeError sites for non-numeric scalars — `fetch_ts` compared `>` a float at SL:324
+   (CP-C11); `ts` in the SL:325 `now - c.get("ts", 9999)` subtraction (cached path;
+   CP-C12, OverflowError leg CP-C13); `hist` not
    iterable at the SL:335 comprehension (`for p in c.get("hist", [])` raises
-   `TypeError` when the stored `hist` is a JSON `null` or a number — ADV-P8-C2-04); `t`
-   in the SL:336 age filter `now - p.get("t", 0)`; and `ts` in the SL:356
+   `TypeError` when the stored `hist` is a JSON `null` or a number — ADV-P8-C2-04;
+   CP-C14); `t`
+   in the SL:336 age filter `now - p.get("t", 0)` (CP-C15, OverflowError leg CP-C16);
+   and `ts` in the SL:356
    `now - c.get("ts", 0)` age subtraction on the FETCH-FAILURE path (a JSON `null` or
-   string `ts`; the SL:325 site covers only the cached path — ADV-P8-C2-04) (all
+   string `ts`; the SL:325 site covers only the cached path — ADV-P8-C2-04; CP-C18,
+   OverflowError leg CP-C19) (all
    foreign-cache shapes, exclusion id OD-160). The THREE subtraction sites among them
    (SL:325 cached path, SL:336 age filter, SL:356 fetch-failure age) ALSO raise
    `OverflowError` when the JSON scalar is an exact INTEGER of magnitude
@@ -125,9 +134,9 @@ it is younger than KEEP_DEAD.
 | EC-003 | Cached path 2 s after EC-002 | `(sample, 302.0, false, hist)` → stale row with `(~302s old)` |
 | EC-004 | First-ever failed fetch, empty file | file becomes `{"fetch_ts": 1000.0, "up": false}`; returns `(none, 1000.0, false, [])` (age `now - 0`) |
 | EC-005 | Cached path with no `ts` (after EC-004) | age `now - 9999` (the PC1 parity sentinel, P20 note); sample none → `◌ DGX ?` |
-| EC-006 | TTL 0 | every refresh fetches |
+| EC-006 | TTL 0 | every refresh fetches while stored `fetch_ts <= now`; a stored `fetch_ts` later than `now` (backward clock step) takes the cached path (`fetch_ts > now - 0`; ADV-P13-C2-08) |
 | EC-007 | Stored sample holds `NaN` | written as JSON `NaN`, read back by the Go loader (must accept `NaN`/`Infinity` tokens) |
-| EC-008 | Foreign/corrupt cache shapes (CP-C01..C10) | out of byte-parity scope (P3 r2 ruling (b)); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); Go writer never produces them |
+| EC-008 | Foreign/corrupt cache shapes — the CP-C family (OD-160) | out of byte-parity scope (P3 r2 ruling (b)); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); Go writer never produces them |
 
 ## Canonical Test Vectors
 

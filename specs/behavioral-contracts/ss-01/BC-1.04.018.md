@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "ab38ca7"
+input-hash: "7bee76c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:773-781)"
@@ -23,6 +23,7 @@ modified:
   - "1.2.2 2026-11-18: pass-10 remediation ADV-P10-C2-09 (PC-1 qualifier — an exact-int lr[0] of magnitude >= 2**1024 - 2**970 raises OverflowError at the f{x:.0f} render format → degraded line, tagged OD-160; VP-030 quick-leg generator restricted accordingly; oracle-verified CPython 3.11.7)"
   - "1.2.3 2026-11-18: pass-10 remediation ADV-P10-C2-09 residual (VP-030 row respelled to the narrowed generator — lr[0] generated as bool or float-range number only; the OD-160 exact-giant-int cache shape excluded as a VP-001 degrade site, not a presence/dimming case)"
   - "1.2.4 2026-11-18: pass-11 remediation ADV-P11-C2-02 (sibling lift: L2 row carries DI-008 and DI-012 beside DI-007; VP-012 closure row for OD-160 and VP-001 never-blank row added, with VP Anchors entries) + ADV-P11-C2-08 (format crash site SL:776-777 → SL:778-779 — 776 is the isinstance guard, 777 sets dim) + OD-194 consumer (PC4 names statusline.labels.tps beside its default)"
+  - "1.2.5 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): PC-1 cites crash id CP-C24 beside the SL:778-779 site, minted by error-taxonomy 1.20; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,7 +54,7 @@ list or tuple whose first element is a number. Notation: `\e` is byte 0x1B.
    shape, exclusion id **OD-160**, ADV-P10-C2-09): an `lr[0]` that is an exact INT of
    magnitude >= 2**1024 - 2**970 passes that existence check but raises `OverflowError`
    at the `f"{x:.0f}"` render format (SL:778-779 — 776 is the isinstance guard and 777
-   sets `dim`; "int too large to convert to float";
+   sets `dim`; crash id **CP-C24**; "int too large to convert to float";
    oracle-verified CPython 3.11.7, 2026-11-18) → degraded line. The VP-030 quick leg's
    `mix[7]` generator stays within floats and format-exact ints, never generating the
    OD-160 shape.

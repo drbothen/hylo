@@ -1,14 +1,14 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.14"
+version: "1.15"
 status: approved
 producer: architect
-timestamp: 2026-11-21T20:00:00Z
-modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change", "1.13 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A09) — both 'AD-03 overlay decision' cells respelled per R-001: the AD-03 decision — the in-memory overlay option was rejected (AD-03 rejected the overlay option; the old cells misdescribed it as an overlay decision)", "1.14 2026-11-21T20:00:00Z: pass-12 fix (A2-13) — prd_version re-pinned 0.1 → 0.2.22 (tracks prd.md) and the settled-rulings range widened OD-115..OD-149 → OD-115..OD-194 with the re-pin disclosed in the intro"]
+timestamp: 2026-11-24T16:00:00Z
+modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change", "1.13 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A09) — both 'AD-03 overlay decision' cells respelled per R-001: the AD-03 decision — the in-memory overlay option was rejected (AD-03 rejected the overlay option; the old cells misdescribed it as an overlay decision)", "1.14 2026-11-21T20:00:00Z: pass-12 fix (A2-13) — prd_version re-pinned 0.1 → 0.2.22 (tracks prd.md) and the settled-rulings range widened OD-115..OD-149 → OD-115..OD-194 with the re-pin disclosed in the intro", "1.15 2026-11-24T16:00:00Z: pass-13 residual (item 6) — the S1 Subsystem-to-Module Mapping row classifies `internal/cost` as pure core (no I/O; `internal/statusline` loads and saves the cost-history file through its `CacheStore`), per orchestrator call 7 / ADV-P13-A02 and the amended ARCH-00 package table"]
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "9532395"
+input-hash: "e11a89d"
 traces_to: prd.md
 prd_version: "0.2.22"
 
@@ -79,7 +79,7 @@ does not move a subsystem boundary and stays inside S1's CRITICAL scope.
 
 | L2 Subsystem | Proposed Modules | Pure/Effectful | Notes |
 |-------------|-----------------|---------------|-------|
-| S1 | `internal/statusline`, `internal/cost` | mixed (core-dominant) / boundary | Pure widgets + ordered effect script via `Env` seams (AD-03); cost inherits S1's CRITICAL tier — the >= 95 % kill rate is a Phase 6 target, tracked and reported by the formal-verifier, NOT a P1 gate (OD-158; pass-4 A2-21) |
+| S1 | `internal/statusline`, `internal/cost` | mixed (core-dominant) / pure core | Pure widgets + ordered effect script via `Env` seams (AD-03); `internal/cost` is PURE CORE — no I/O of any kind, pure functions over caller-passed values (the loaded cost history, the current session's numbers, `now`) returning the new history and the thresholds, while `internal/statusline` loads and saves the cost-history file through its `CacheStore` (ADV-P13-A02, orchestrator call 7; ARCH-00 package table, ARCH-03 §Interfaces declared API); cost inherits S1's CRITICAL tier — the >= 95 % kill rate is a Phase 6 target, tracked and reported by the formal-verifier, NOT a P1 gate (OD-158; pass-4 A2-21) |
 | S2 | `internal/config` | boundary | Pure registry/grammars; env read once at `Load` |
 | S3 | `internal/platform` | infrastructure | Syscalls, `/proc`, `sysctl`, Win32; build tags |
 | S4 | `cmd/hylo` | effectful shell | `os.Args`/`os.Std*`/`os.Exit`; no logic |

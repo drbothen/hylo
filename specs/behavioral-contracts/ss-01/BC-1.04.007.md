@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
 input-hash: "8e821c7"
@@ -24,6 +24,7 @@ modified:
   - "1.3.2 2026-11-18: pass-8 remediation ADV-P8-C2-01 (PC5 names the config keys statusline.glyphs.cell_on / cell_off / host beside their default literals — OD-189 sibling treatment)"
   - "1.3.3 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC4/PC5 name the registered keys statusline.kv.host_yellow_pct and statusline.kv.host_shown_pct beside their default literals)"
   - "1.3.4 2026-11-18: pass-11 remediation — OD-194 consumer (PC5 names statusline.labels.kv and statusline.labels.host beside their defaults; %-unit scaffolding carries the named-format-constant note) + ADV-P11-C2-08 (THRESHOLDS §8b comment site SL:790 → SL:789)"
+  - "1.3.5 2026-11-18: pass-13 remediation ADV-P13-C2-07 (signed zero pinned: kv -0.0 — the PC3 clamp keeps -0.0 because Python max returns the first equal operand, ceil gives 0 cells and .0f prints -0; EC-012 + vector row, oracle-verified CPython 3.11.7) + ADV-P13-C2-05 (the PC1/PC3 fraction-to-percent factor 100 named as a unit constant — named constant, not config, the ADV-P10-C2-12 pattern)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,7 +62,12 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 2. Segment exists only if `kv_raw` is a number (`isinstance(int, float)`, bool included).
 3. `kv = Min(Max(kv_raw * 100, 0.0), 100.0)` with Python argument-order NaN semantics
    (BC-5.01.003); with `C = statusline.kv.cells` (default 4), `n = Min(Ceil(kv / (100 / C)), C)` —
-   the default `C = 4` is the legacy `/25`, `4` cell math.
+   the default `C = 4` is the legacy `/25`, `4` cell math. The fraction-to-percent
+   factor 100 (PC1's `hs_raw * 100`, PC3's `kv_raw * 100`) is a unit constant — named
+   constant, not config: unit conversion, the ADV-P10-C2-12 pattern (ADV-P13-C2-05).
+   The clamp preserves signed zero: `Max(-0.0, 0.0)` returns the first equal operand,
+   so kv_raw `-0.0` stays `-0.0` and EC-012's `-0` text is pinned (oracle-verified
+   CPython 3.11.7, ADV-P13-C2-07).
 4. `warn = host_share is not none and host_share > statusline.kv.host_yellow_pct` (default 5).
 5. Segment = `("\e[33m" if warn else "\e[36m") + labels.kv + glyphs.cell_on*n + glyphs.cell_off*(C-n) + " " + F(kv,0) + "%\e[0m"`,
    where `labels.kv` = `statusline.labels.kv` (Text, default `KV`, SL:761, OD-194) and
@@ -97,6 +103,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 | EC-009 | kv absent or a string | no segment |
 | EC-010 | host +Inf | warn and suffix both fire (`inf > 5`, `inf > 0.5`): yellow ` ↺host inf%` (ADV-P5-C2-12) |
 | EC-011 | host -Inf | no warn (`-inf > 5` false), no suffix (`-inf > 0.5` false): cyan, no suffix (ADV-P5-C2-12) |
+| EC-012 | kv -0.0 (signed zero) | clamp keeps `-0.0` (`Max` returns the first equal operand), `ceil` gives 0 cells, `.0f` prints `-0`: cyan `KV▱▱▱▱ -0%` (oracle-verified CPython 3.11.7; a port that normalises signed zero in the clamp prints `0%` — ADV-P13-C2-07) |
 
 ## Canonical Test Vectors
 
@@ -105,6 +112,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 | kv 0.92, host absent | `\e[36mKV▰▰▰▰ 92%\e[0m` | happy-path |
 | kv 0.92, host 0.00501 | `\e[36mKV▰▰▰▰ 92%\e[0m \e[2m↺host 1%\e[0m` | edge-case |
 | kv 0.92, host 0.0500001 | `\e[33mKV▰▰▰▰ 92%\e[0m \e[2m↺host 5%\e[0m` | edge-case |
+| kv -0.0 | `\e[36mKV▱▱▱▱ -0%\e[0m` | edge-case |
 | kv NaN | degraded line (CP-N01, BC-1.04.015) | error |
 
 ## Verification Properties

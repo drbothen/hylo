@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.16"
+version: "1.17"
 status: draft
 producer: architect
-timestamp: 2026-11-21T18:00:00Z
+timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "739b0bc"
+input-hash: "a7238b7"
 
 ---
 
@@ -77,13 +77,13 @@ follows because every cache write sits inside `Render`'s step script.
 | 0 | config resolved by `Main` (precondition; D4-EX-3 before any write) | `config.Load` (in `Main`) | config-error line |
 | 1 | stdin decode (`pyfmt.Decode`, ModeText) | stdin | no — invalid => `{}` (BC-1.01.002/.008) |
 | 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-O09 no-write save (the int-to-string breach at the save reproduces legacy's no-write, BC-1.01.009 step 2 — pass-12 B06); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010); Windows: a naive timestamp on/before 1970-01-01 or from year ≥ 3001 makes MSVC `localtime_s` raise OSError out of `_iso_ts` (which catches only ValueError) and DEGRADES the whole line (CP-T09; BC-5.04.001 v1.2.3, owner call 8; pass-6 C01 — Windows test vectors derived from the pre-call-8 BCs assert the wrong outcome) |
-| 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no |
-| 4 | get_sample when ROWS >= 2: fetch, then session-cache write | `Metrics`, `Cache`, `Now` | no |
-| 5 | row-2 render (width rule) | pure | CP-N01/N02/N03 |
-| 6 | window start (may write `proc_start`) | `Proc`, `Cache` | no |
-| 7a | lane badge/model/project; git segment (git-cache write) | `Files`, `Cache`, `Cwd` | CP-S01..S04 |
+| 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no catalogued vector; foreign-cache CP-C01/C02 only (the CP-C family, OD-160 — BC-1.01.009 step table) |
+| 4 | get_sample when ROWS >= 2: fetch, then session-cache write | `Metrics`, `Cache`, `Now` | no catalogued vector; foreign-cache CP-C03/C04 (the CP-C family, OD-160): a wrong-shape restored sample or `up` bearer raises out of `get_sample` → `errDegraded` (BC-1.04.002 Inv 1; column corrected ADV-P13-C2-02) |
+| 5 | row-2 render (width rule) | pure | CP-N01/N02/N03; OD-160 cached-path render degrades borne by the row-2 widgets — freshness ladder (BC-1.04.004 Inv 3), sparkline cached-hist shapes (BC-1.04.009 EC-011, BC-1.04.014 EC-008..010), mine format (BC-1.04.018 PC-1) — each → `errDegraded` (column corrected ADV-P13-C2-02) |
+| 6 | window start (may write `proc_start`) | `Proc`, `Cache` | no catalogued vector; foreign-cache CP-C01 only (non-dict cache consulted outside its try) (OD-160) |
+| 7a | lane badge/model/project; git segment (git-cache write) | `Files`, `Cache`, `Cwd` | CP-S01..S04; foreign-cache CP-C08 (BC-1.02.005 EC-009/EC-010) (OD-160) |
 | 7b | thermometer/composition/cache-hit/limits/lines/timer/⌂/tokens | pure | CP-S05..S13; stdin/metrics-borne OD-156 overflow CP-O01..O05 (E-REN-002) — column widened pass-12 B06 to match BC-1.01.009 step 7b and BC-1.01.001's guarded-site list |
-| 7c | record_cost (write), then cost_thresholds | `internal/cost` via `Cache` | CP-S15; unconvertible `usd`/`api_ms` is not recorded (OD-166) — Go skips the record where legacy persisted the raw int, the ruled write-divergence exclusion `OD-166`; history-borne CP-O10/O11 raise HERE in `cost_thresholds` (SL:255; site correction per pass-4 B14, propagated pass-5 A09), owner BC-1.05.005 EC-011 — the bearer (the cost-history cache persisted the value earlier) is unchanged |
+| 7c | record_cost (write), then cost_thresholds | `Cache` (load/save in `statusline`) + `internal/cost` (pure; declared API below, ADV-P13-A02) | CP-S15; unconvertible `usd`/`api_ms` is not recorded (OD-166) — Go skips the record where legacy persisted the raw int, the ruled write-divergence exclusion `OD-166`; history-borne CP-O10/O11 raise HERE in `cost_thresholds` (SL:255; site correction per pass-4 B14, propagated pass-5 A09), owner BC-1.05.005 EC-011 — the bearer (the cost-history cache persisted the value earlier) is unchanged; foreign-cache CP-C09/C10 (the CP-C family, OD-160) per BC-1.01.009's step-7c cell |
 | 7d | $, $/h, ⛏ (pure) | pure | CP-O10/O11/O12 (E-REN-002) — O10/O11 disposition only: the history-borne raise sits in step 7c, so the SL:616/623 render sites are unreachable for history-borne values (pass-4 B14); CP-O12 (pass-9 call 4) raises HERE at render on the local lane (SL:633, owner BC-1.02.029, co-owner BC-1.05.003) |
 | 8 | trim, surrogate check, single stdout write | stdout | CP-S17 after all writes |
 
@@ -99,7 +99,12 @@ error-taxonomy.md's crash-path register — the per-id rows there carry (id, leg
 owner BC/EC) for every id, including the six crash paths whose owning ECs name them:
 CP-S02, CP-S03, CP-S04, CP-S05, CP-S08 and CP-S10 (pass-11 orchestrator call 14,
 ADV-P11-B01) — while the normative disposition per id lives in the owning BC. ARCH-03
-cites that register as the definition site of record. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 + CP-T09
+cites that register as the definition site of record. The OD-160 foreign-cache crash
+class is DEFINED in error-taxonomy.md's separate C register — referred to by the phrase
+"the CP-C family (OD-160)", never as a closed id range (the register is extensible;
+pass-13 orchestrator call 1), and the script's step cells above name every step whose
+owning table cell bears a C-family id, mirroring BC-1.01.009's step table
+(ADV-P13-C2-02). Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 + CP-T09
 (transcript machine — a family of EIGHT; CP-T08 is a RETIRED id, append-only
 numbering; CP-T09 = the Windows MSVC localtime-domain OSError on a naive transcript
 timestamp, owner call 8 pass-7 D06/B03), CP-N01..N03 (row-2 telemetry; pass-4 C2-12), **CP-O01..O12** (OD-156 numeric-overflow family:
@@ -331,6 +336,81 @@ type FileSystem interface {
     ReadFrom(name string, off int64, max int) ([]byte, error) // transcript window
     ReadFile(name string) ([]byte, error)                     // .git, HEAD — path-unrestricted by type: DI-007's ledger-read prevention is VP-022's static analysis, not the type system (ADV-P9-A13, ARCH-09 rule 3)
 }
+
+// ---------- package internal/cost — DECLARED API (ADV-P13-A02 remediation,
+// orchestrator call 7) ----------
+//
+// PURITY BOUNDARY (normative): internal/cost does NO I/O of any kind — no files,
+// no clock reads, no env, no network. It exposes PURE FUNCTIONS over values passed
+// in (the loaded cost history, the current session's numbers, now) that return the
+// new history and the thresholds; internal/statusline loads and saves the
+// cost-history file through its CacheStore (budget row above: 990/990, the
+// per-file depth constant lives with THAT cache file, not in this package).
+// Step 7c therefore reads: load via CacheStore -> RecordCost -> Save via
+// CacheStore -> (re)load via CacheStore -> CostThresholds, in legacy's exact
+// side-effect order (BC-1.05.004 Description: the record runs before the
+// percentile read; BC-1.05.005 PC-2: the percentile scan loads with the
+// BC-1.06.001 load).
+//
+// Anchor justification: these declarations are the home the cost BCs
+// (BC-1.05.004/.005/.006/.009, all CRITICAL-gated) target; until this block no
+// section declared cost's API (ADV-P13-A02).
+package cost
+
+// SessionCost carries the current session's numbers exactly as decoded
+// (BC-1.05.004 PC-1): Sid is the RAW stdin session_id (NOT the nosession
+// fallback; numeric sids per BC-1.05.006/OD-30), Lane is the client-view lane
+// ("dgx" | "anth" | None), USD is total_cost_usd, APIMs is
+// total_api_duration_ms. Ordered plain values, not cache structs (AD-08: no
+// cache struct exists anywhere).
+type SessionCost struct {
+    Sid   pyfmt.Value
+    Lane  pyfmt.Value
+    USD   pyfmt.Value
+    APIMs pyfmt.Value
+}
+
+// CostConfig spells the config inputs (D15 registry keys, BC-1.05.005 PC-3):
+// WindowS (statusline.cost.window_s), MinUSD (statusline.cost.min_usd),
+// MinSessions (statusline.cost.min_sessions), RateMinAPIMs
+// (statusline.cost.rate_min_api_ms, the cc/other map), Percentiles
+// (statusline.cost.percentiles, the ascending pair).
+type CostConfig struct {
+    WindowS      pyfmt.Value
+    MinUSD       pyfmt.Value
+    MinSessions  pyfmt.Value
+    RateMinAPIMs pyfmt.Value
+    Percentiles  pyfmt.Value
+}
+
+// RecordCost appends this session's cc-tagged entry to the LOADED history and
+// returns the NEW history plus whether the throttle appended it. Pure; the
+// returned Value is byte-ready for pyfmt.Dumps (BC-1.05.009 exact write format).
+// Dispositions:
+//   - guard (falsy Sid, Lane not exactly "dgx"/"anth", non-numeric USD) ->
+//     (history unchanged, false, nil) (BC-1.05.004 PC-1);
+//   - throttle (stored entry src "cc" and now - ts < record_throttle_s, strict)
+//     -> (history unchanged, false, nil) (BC-1.05.004 PC-3);
+//   - OD-166 write-step convertibility skip (either numeric field unconvertible)
+//     -> (history unchanged, false, nil) — the caller persists nothing (step 7c;
+//     BC-1.05.004 PC-4);
+//   - corrupt-history shapes (top level / sessions / an entry not an object;
+//     entry ts non-numeric) -> err wrapping errDegraded: CP-C09, and CP-C10 at
+//     the record_cost throttle-check site, where the raise precedes save_cache
+//     and NOTHING is written (the CP-C family, OD-160; BC-1.05.004 owners).
+func RecordCost(history pyfmt.Value, sess SessionCost, now float64) (pyfmt.Value, bool, error)
+
+// CostThresholds scans the LOADED history and returns the two percentile pairs,
+// each (p75, p95) by floor-index selection or nil when fewer than MinSessions
+// entries qualify (cold start), excluding the current session's own entries
+// (self-exclusion by Sid, BC-1.05.005 Inv 3), entries outside WindowS (strict
+// bound: an entry exactly 30 d old counts, BC-1.05.005 PC-1) and usd < MinUSD.
+// Pure function of (history, lane, sid, now, config) — BC-1.05.005 Inv 1. The
+// usd / (api_ms / 3.6e6) exact-int division (SL:255) lives HERE; its int->float
+// overflow legs CP-O10/O11 return err wrapping errDegraded and surface in step
+// 7c (owner BC-1.05.005 EC-011); CP-C10's cost_thresholds site faults after the
+// record_cost write (BC-1.01.009 step 7c).
+func CostThresholds(history pyfmt.Value, sess SessionCost, now float64, cfg CostConfig) (usdPair, ratePair *[2]float64, err error)
 ```
 
 A `recover()` backstop in `Main` maps any panic to `degradedLine` (mirrors

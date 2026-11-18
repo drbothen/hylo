@@ -1,15 +1,16 @@
 ---
 document_type: prd-supplement-interface-definitions
 level: L3
-version: "1.19"
+version: "1.20"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T14:30:00Z
+timestamp: 2026-11-24T14:10:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
 input-hash: "6807344"
 modified:
+  - "1.20 2026-11-24T14:10:00Z: pass-13 remediation - both --subagent selection cells drop the false 'before any config processing' wording: the subagent path resolves config itself (OD-168; pass-12 A10) - the renderer is selected before the statusline flag scan (pass-3 A01), config after (A06); rename-retry registry ranges re-justified: delay ceiling 1000 -> 100 so that limit x delay is at most 1000 ms per Save, rationale a labeled judgment call, superseding the 'inside the refresh budget' arithmetic (A10, orchestrator call 15); no behavioral change"
   - "1.11 2026-11-19T02:00:00Z: pass-5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] → [base, span] and law restated as base + span·i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
   - "1.12 2026-11-19T06:00:00Z: pass-6 remediation — glyph width rule restated in legacy's render width (code points; OD-184); `statusline.cache.rename_retry_delay_ms` registered (OD-186); default-only keys given exact env spellings (A13); Text-class reason strings for List-entry violations and non-theme control bytes (A14); subagent token ascending-pair check fire-at and D4-EX-3 naming rule (A19); rationale codes aligned to the owning BCs (B07); stale glyphs-never-named sentence fixed (B15); metrics_url row notes the OD-181 plain-http parity scope"
   - "1.13 2026-11-19T12:00:00Z: pass-7 remediation — unit-selector defaults resolved to their single accepted spellings with the legacy-letter rationale (A04/A05/D01, orchestrator call 5); `git.ttl_s` mirrored floor pinned in the Seconds-class note and the row (A06); `statusline.telemetry.timeout_s` validation ceiling labeled (A21); `Float quad` type named for `sparkline.scale` (D09); `statusline.cache.rename_retry_limit` registered (OD-188); dead-backend labels `statusline.labels.vllm_down`/`lmcache_down` and `statusline.subagent.name_fallback` registered (OD-189); registry back-references completed for `units.tokens`/`limits.windows`/`timer.min_ms` (B10) and the S1.07 consumers (C10)"
@@ -45,8 +46,9 @@ hylo config path [--config <path>]  # print config, cache and state paths, one p
   `--subagent` is a ported P1 flag (OD-155, superseding OD-14): the exact argv element,
   matched ANYWHERE in the statusline argument slice — at any index, including after a
   bare `--` (pass-3 A01: `hylo statusline -- --subagent` routes to the panel) — selects
-  the subagent panel renderer before any flag scan or config processing, gated by
-  `statusline.subagent.enabled` (default true; BC-1.07.001..008). On the subagent path
+  the subagent panel renderer before the statusline flag scan, gated by
+  `statusline.subagent.enabled` (default true; BC-1.07.001..008); the subagent path then
+  resolves config itself (OD-168; pass-12 A10 — "before any config processing" is false). On the subagent path
   config IS resolved (OD-168): a config error there emits ZERO bytes on stdout and all
   reason lines (the full list, registry order) on stderr, exit 0 (pass-3 A02; singular
   "error line" wording corrected pass-5 A08; entry point and owner per ARCH-01
@@ -220,8 +222,8 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `backends[0].model_prefixes` | List | `claude-sonnet` | comma list; startswith match | OWNER (OD-111/123) | BC-2.01.002, BC-1.02.001, BC-1.07.006, BC-1.07.008 |
 | `statusline.lane.reroute_all_prefixes` | List | `claude,claude-` (legacy display form `["claude", "claude-"]`; Default re-spelled to the env spelling pass-11 A09/call 4) | comma list; every entry non-empty, no control bytes (OD-179, pass-5 B09: the reroute-all markers become config, sourcing the hard-coded "named constant" in BC-1.02.009); entry violation reason `expected non-empty control-free text in every entry`, Text class (OD-178; pass-6 A14) | OWNER (OD-179) | BC-1.02.009 |
 | `paths.cache_dir` | Path | per-OS hylo cache dir | ABSOLUTE path required (env `HYLO_PATHS_CACHE_DIR`; `~` expansion per OD-61): a relative value resolves against the per-project cwd and splits caches and cost history, so it is a config error with reason `not an absolute path` (path-grammar family — BC-2.01.005 grammar, riding E-CFG-001 without a dedicated class per the Reason-Vocabulary note in BC-2.02.006; exact string minted pass-9 A11/call 13, mirrored in error-taxonomy) — closing the P20/OD-162 range gap of the former "not the legacy literal (exception)" cell; still not the legacy literal (exception, OD-101) | OWNER (OD-101) | BC-3.01.001 |
-| `statusline.cache.rename_retry_delay_ms` | Int | 10 | `1..1000` — both bounds labeled judgment call (J): long enough to clear a Windows sharing violation, short enough to stay inside the refresh budget (OD-186, pass-6 A09: the retry delay was a timing value outside the registry) | J (OD-186) | BC-1.06.001 |
-| `statusline.cache.rename_retry_limit` | Int | 2 | `0..10` — both bounds labeled judgment call (J); TOTAL attempts = 1 + limit (limit 0 = the initial replace only, no retry). Beside its sibling `rename_retry_delay_ms`; supersedes the `renameRetryLimit = 2` code constant (OD-188, pass-7 A19/A2-07: the knob decides whether a Windows cache write persists, which is parity-visible via the `temp-file` exclusion, so the "no parity-visible behavior" reason for keeping it a constant no longer holds) | J (OD-188) | BC-1.06.001 |
+| `statusline.cache.rename_retry_delay_ms` | Int | 10 | `1..100` — both bounds labeled judgment call (J): long enough to clear a Windows sharing violation, and set WITH `rename_retry_limit`'s 0..10 ceiling so that limit x delay is at most 1000 ms per Save (labeled judgment call, ADV-P13-A10 / orchestrator call 15 — supersedes the former "inside the refresh budget" arithmetic, which the 10 x 1000 ms product contradicted; OD-186, pass-6 A09: the retry delay was a timing value outside the registry) | J (OD-186) | BC-1.06.001 |
+| `statusline.cache.rename_retry_limit` | Int | 2 | `0..10` — both bounds labeled judgment call (J); TOTAL attempts = 1 + limit (limit 0 = the initial replace only, no retry); the 10 ceiling jointly bounds limit x delay at 1000 ms per Save (ADV-P13-A10 / orchestrator call 15). Beside its sibling `rename_retry_delay_ms`; supersedes the `renameRetryLimit = 2` code constant (OD-188, pass-7 A19/A2-07: the knob decides whether a Windows cache write persists, which is parity-visible via the `temp-file` exclusion, so the "no parity-visible behavior" reason for keeping it a constant no longer holds) | J (OD-188) | BC-1.06.001 |
 | `statusline.theme.reset` | SGR | `0` | SGR parameter list (non-list = config error, BC-2.01.003) | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.dim` | SGR | `2` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
 | `statusline.theme.bold` | SGR | `1` | SGR parameter list | DOC (OD-113) | BC-2.01.003 |
@@ -481,7 +483,7 @@ comma-list encoding for list values in env is OD-74.
 | `HYLO_*` env | built-in default | env overrides default; file layer absent in P1 (OD-107) | BC-2.01.001 |
 | first unknown flag | later unknown flags | first is rendered; all go to stderr | BC-4.01.002 |
 | first config error | later config errors | first in registry order is rendered; all to stderr | BC-2.02.001 |
-| `--subagent` (anywhere in argv, incl. after a bare `--`) | unknown flag | `--subagent` wins: the renderer is selected before any flag scan or config processing (pass-3 A01) | BC-1.07.001, BC-4.01.002 |
+| `--subagent` (anywhere in argv, incl. after a bare `--`) | unknown flag | `--subagent` wins: the renderer is selected before the statusline flag scan (pass-3 A01); the subagent path resolves config itself (OD-168, pass-12 A10) | BC-1.07.001, BC-4.01.002 |
 | `--subagent` | config error | zero stdout bytes; ALL reason lines (the full list) on stderr, exit 0 | OD-168, BC-1.07.002 |
 | `--subagent` | `statusline.subagent.enabled=false` | panel gated off by the off switch (BC-1.07.002 contracts the outcome) | BC-1.07.002 |
 | `--subagent` | stdin render | subagent-mode config error vs row rendering: zero-byte and NDJSON row outputs are both legitimate stdout outcomes | BC-1.07.002/.003/.004 |

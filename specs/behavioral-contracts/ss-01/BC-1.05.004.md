@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T16:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "afdb881"
+input-hash: "265543f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -35,6 +35,7 @@ modified:
   - "2026-11-18 (v1.2.7) sync-check adv-p6 closure (SC-25) — the OD-166 postcondition parenthetical extends to the TWELVE-id closed set with OD-181; the ordinal (11th id) is unchanged; no behavioral change"
   - "2026-11-18 (v1.2.8) pass-8 remediation ADV-P8-C2-07 (row-1 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"
   - "2026-11-18 (v1.2.9) pass-9 remediation ADV-P9-C2-03 (OD-166 convertibility skip moved out of the PC1 guard to the write step, PC4 — after the history load and the sessions.get(sid) lookup, so CP-S15 at SL:230 still fires first; OD-166 scope unchanged) + ADV-P9-C2-05 (DI-008 lifted into the L2 row)"
+  - "2026-11-21T11:00:00Z (v1.3.0) pass-13 sync closure — Owning component line and Purity Classification I/O cell respelled to the ARCH-03 declared cost API (§Interfaces, 'package internal/cost — DECLARED API'): internal/cost is pure core with no I/O; internal/statusline loads and saves the cost-history file through its CacheStore, step-7c order kept (sync-check adv-p13 finding 1, call-7 residual); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -203,10 +204,10 @@ S-N.MM — cost history (filled by story-writer)
 
 | Property | Assessment |
 |----------|-----------|
-| **I/O operations** | writes via the injected `Store` seam |
+| **I/O operations** | none in hylo — the legacy function writes the history file; per ARCH-03's declared cost API (§Interfaces, 'package internal/cost — DECLARED API') the fold into the loaded history is pure, and `internal/statusline` loads and saves the file through its `CacheStore` |
 | **Global state access** | none |
 | **Deterministic** | yes (given samples and a store fake) |
 | **Thread safety** | Safe for concurrent use (store injected) |
 | **Overall classification** | boundary |
 
-Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (throttled write) - ARCH-03); the ARCH-00 package table classifies the package boundary - pure percentile math; writes go through the injected `Store` seam.
+Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (throttled write) - ARCH-03); per ARCH-03's declared cost API ('package internal/cost — DECLARED API' in the §Interfaces section, ADV-P13-A02 / orchestrator call 7), the package is pure core with no I/O — `RecordCost` folds this session's entry into the loaded history and returns it, and `internal/statusline` loads and saves the cost-history file through its `CacheStore`, legacy's exact step-7c order (the record before the percentile read) kept.

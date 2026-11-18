@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "data-files"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T21:00:00Z
+timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "3cc0087"
+input-hash: "7e0e51e"
 ---
 
 # ARCH-04 — Data files: cache dir, atomic writes, reserved ledger
@@ -67,8 +67,9 @@ tests):
   (three at the default; OD-188, pass-7 A19/OD-188 propagation: the retry COUNT shapes
   whether a Windows write persists, so it is config, D15) — sleeping
   `statusline.cache.rename_retry_delay_ms` between attempts (registry key, Int,
-  default 10, range 1..1000, rationale code J — judgment call; D15: the timing value
-  moves out of the code literal into the registry, OD-186).
+  default 10, range 1..100 — the upper bounds are PAIRED so that limit × delay is
+  at most 1000 ms per Save; orchestrator call 15, pass-13, ADV-P13-A10; D15: the
+  timing value moves out of the code literal into the registry, OD-186).
 - **Rationale:** stdout parity is unaffected; the Windows retry can PERSIST a cache
   write legacy (no retry, IM-17) would not — that byte divergence is covered by
   WIDENING the ruled `temp-file` exclusion's scope BY RULING (OD-186: temp names and
@@ -83,8 +84,12 @@ tests):
   live antivirus/indexer hold leaves on the just-written temp — more retries cannot
   shrink that window further on a sub-second refresh, RK-3);
   `statusline.cache.rename_retry_delay_ms` default 10 ms
-  is a labeled judgment call (J, RK-3 carries no timing data): far below the 25 ms p95
-  render budget, above scheduler noise, outlasting typical transient holds.
+  is a labeled judgment call (J, RK-3 carries no timing data): above scheduler noise,
+  outlasting typical transient holds, and at the worst case (limit 10 × delay 100 ms)
+  at most 1000 ms of sleeping per Save — a labeled judgment call, NOT a
+  refresh-budget derivation (the earlier "short enough to stay inside the refresh
+  budget" framing was arithmetically false at the old 10,000 ms worst-case product;
+  ADV-P13-A10, orchestrator call 15).
 - **Verification feasibility:** fault-injection table tests (failed rename, closed dir,
   sid containing `/` — nothing persists, BC-1.06.002); **testable-only**, deliberately
   so, and covered by a named exclusion with its own table test.

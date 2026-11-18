@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:45:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md]
 input-hash: "f3f53df"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-09 (table pinned to C = 4; general-C math is BC-1.04.007 PC3)", "1.2.2 2026-11-18: pass-8 remediation ADV-P8-C2-01 (PC2 names the table's cell glyphs as the keys statusline.glyphs.cell_on / cell_off with their defaults, OD-189 sibling treatment)"]
+modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-09 (table pinned to C = 4; general-C math is BC-1.04.007 PC3)", "1.2.2 2026-11-18: pass-8 remediation ADV-P8-C2-01 (PC2 names the table's cell glyphs as the keys statusline.glyphs.cell_on / cell_off with their defaults, OD-189 sibling treatment)", "1.2.3 2026-11-18: pass-13 remediation ADV-P13-C2-07 (signed-zero cell row pinned: kv -0.0 clamps to -0.0, 0 cells, .0f prints -0; EC-007 + vector row, oracle-verified CPython 3.11.7)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,6 +73,7 @@ paths. Notation: `\e` is byte 0x1B.
 | EC-004 | kv -Inf | `KV▱▱▱▱ 0%` |
 | EC-005 | kv 0.29 (`28.999999999999996`) | 2 cells, `29%` |
 | EC-006 | host share NaN with finite kv | cyan, no suffix (no crash) |
+| EC-007 | kv -0.0 (signed zero) | clamp keeps `-0.0`, `ceil` gives 0 cells, `.0f` prints `-0`: cyan `KV▱▱▱▱ -0%` (oracle-verified CPython 3.11.7; ADV-P13-C2-07) |
 
 ## Canonical Test Vectors
 
@@ -80,6 +81,7 @@ Cyan prefix `\e[36m`, suffix `\e[0m` unless noted.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
+| kv -0.0 | `KV▱▱▱▱ -0%` | edge-case |
 | 0.0 / 0.0001 / 0.25 / 0.2500001 / 0.29 | `KV▱▱▱▱ 0%` / `KV▰▱▱▱ 0%` / `KV▰▱▱▱ 25%` / `KV▰▰▱▱ 25%` / `KV▰▰▱▱ 29%` | happy-path |
 | 0.51 / 0.75 / 0.76 / 1.2 | `KV▰▰▰▱ 51%` / `KV▰▰▰▱ 75%` / `KV▰▰▰▰ 76%` / `KV▰▰▰▰ 100%` | edge-case |
 | kv 0.5, host NaN | `\e[36mKV▰▰▱▱ 50%\e[0m` | edge-case |

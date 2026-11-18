@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
-input-hash: "18a498b"
+input-hash: "620ca23"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy CACHE_DIR at legacy/dgx_statusline.py SL:78)"
@@ -26,6 +26,7 @@ modified:
   - "2026-11-19T17:00:00Z (1.2.5): ADV-P7 remediation D12 + orchestrator call 4 — Pre-2 home source routed through the seam: HomeDir(env EnvVars) (HOME on Unix, USERPROFILE on Windows); no platform function reads the real process environment (Inv 3); signatures canonized as CacheDir(env EnvVars) and LocalZone(env EnvVars)"
   - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D01+D08+D16 — PC-1/PC-2 directory resolvers canonized with full signatures and error results (ConfigDir/StateDir/CacheDir all (env EnvVars) (string, error)); Inv 1 names the PC-11 rename-retry keys as the no-legacy-analog default exceptions; TZ-unset canonical leg oracle qualified (runner-relative: assert non-nil zone + nil error, never a parity oracle)"
   - "2026-11-21T06:00:00Z (1.3.1): ADV-P10 remediation D03+D10 (orchestrator call 3) — PC-3 states the pass-9 A11 absoluteness rule for paths.cache_dir (relative value = config error `not an absolute path`, BC-2.01.005 PC-3; filepath.IsAbs semantics per OS); PC-1 states the relative-base rule: a relative HOME (Unix) or relative LOCALAPPDATA/APPDATA (Windows) is treated as unset, falling to the next source, then to the existing 'cannot be determined' error (new EC-013)"
+  - "2026-11-23T00:00:00Z (1.3.2): ADV-P13 remediation D05 — Inv 2 and the VP-032 row carve out the two OD-144 Windows subdirectory results (CacheDir ends in cache, StateDir ends in state), so the last-component-is-hylo universal no longer fails a property test on windows-2025; PC-2 and the CTVs already stated the subdirectories"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -120,7 +121,10 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
    (`statusline.cache.rename_retry_delay_ms`, `statusline.cache.rename_retry_limit`),
    which have no legacy analog (legacy `save_cache` SL:198-206 never retries; pass-8 D08)
    (ADV-P3-D17 alignment).
-2. The last path component is always the literal `hylo` (product name; a format constant, not config).
+2. The last path component is the literal `hylo` (product name; a format constant, not
+   config), with TWO OD-144 exceptions on Windows: the Windows CacheDir ends in
+   `cache` (`%LOCALAPPDATA%\hylo\cache`) and the Windows StateDir ends in `state`
+   (`%LOCALAPPDATA%\hylo\state`). No result contains a `dgx-llm` component.
 3. The result depends only on the environment passed in (the function takes an env lookup, so tests inject it).
 
 ## Edge Cases
@@ -159,7 +163,7 @@ Synthetic environments only (no real home paths).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-032 | For every env map, the result ends in the component `hylo` and contains no `dgx-llm` component | Go property test (testing/quick) |
+| VP-032 | For every env map, the result ends in the component `hylo` — except the two OD-144 Windows subdirectory results, whose last component is `cache` (CacheDir) or `state` (StateDir) — and no result contains a `dgx-llm` component | Go property test (testing/quick) |
 | VP-032 | The functions perform no filesystem writes | manual (code review) + unit test on a read-only temp root |
 
 ## Traceability

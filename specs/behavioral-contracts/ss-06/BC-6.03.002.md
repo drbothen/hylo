@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "fc9529b"
+input-hash: "3e16723"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -27,6 +27,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D06: PC-3 waiver for scope-stdout exclusion entries cross-referenced"
   - "2026-11-19T17:00:00Z (1.2.2): ADV-P7 remediation D24 - PC-2 exit-code rule gains the pinned crash-leg exception: a closed id's pinned non-zero ORACLE exit (cp-x03, D4-EX-3 Number grammar-failure leg: exit 1) is the expectation, and equality with it is still required"
   - "2026-11-21T07:00:00Z (1.2.3): ADV-P11 remediation A2-02 (orchestrator call 1, OD-190 applied literally) — PC-1 states the ONE open normalization: on the Windows legs the comparator converts the ORACLE's stdout CRLF to LF openly, BEFORE the byte comparison; hylo's bytes are never converted (hylo writes LF itself); apart from that conversion no normalization (no trimming, no SGR stripping, no Unicode normalization); EC-006 rewritten to the same disposition (the shim performs no newline reconfigure)"
+  - "2026-11-23T00:00:00Z (1.2.4): ADV-P13 remediation D01 (orchestrator call 2) — PC-1 generalized: the open CRLF→LF conversion is THE definition for EVERY comparison of the ORACLE's stdout on the Windows legs (this per-step case comparator, the version probe of BC-6.01.001 PC-3, the clock-shim canary of BC-6.01.003 PC-4, and any other), each of which applies the same conversion before its comparison; BC-6.01.001 and BC-6.01.003 cite it"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +68,12 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
 1. **stdout.** `bytes.Equal(oracleStdout, goStdout)` must hold, after ONE open
    normalization on the Windows legs: the comparator converts the ORACLE's stdout CRLF
    to LF openly, BEFORE the byte comparison (orchestrator call 1, OD-190 applied
-   literally). Hylo's bytes are never converted — hylo writes LF itself. Apart from
+   literally). This conversion is THE definition for EVERY comparison of the ORACLE's
+   stdout on the Windows legs — this per-step case comparator, the version probe of
+   BC-6.01.001 PC-3, the clock-shim canary of BC-6.01.003 PC-4, and any other
+   oracle-stdout comparison — each of which applies the same open CRLF→LF conversion
+   before its comparison (pass-13 orchestrator call 2). Hylo's bytes are never
+   converted — hylo writes LF itself. Apart from
    that single open conversion, no normalization is applied: no trimming, no SGR
    stripping, no Unicode normalization.
 2. **Exit code.** The oracle exit code must equal the Go exit code. Both are expected

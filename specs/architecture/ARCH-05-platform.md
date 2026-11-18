@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "platform"
-version: "1.11"
+version: "1.12"
 status: draft
 producer: architect
-timestamp: 2026-11-22T06:00:00Z
+timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -89,8 +89,9 @@ this section and BC-1.03.015 remapped (BC-COMPONENT-MAP).
   per-OS tables for depth/stop/name rules with fake PIDs; parity flows through **seeded
   `proc_start` cases** (probe not exercised in parity, exercising instead table tests
   plus the D4-EX-1 Windows fake-probe test `TestWindowAge_D4EX1_Windows_AncestorFound` (settled name, VP-012 v1.13; pass-7 A2-05)).
-- **x/sys usage:** `golang.org/x/sys/unix` only (`SysctlKinfoProc`); `golang.org/x/sys/windows`
-  for Toolhelp32/GetProcessTimes — the sole runtime dependency budget in P1 (AD-02).
+- **x/sys usage:** `golang.org/x/sys/unix` for the POSIX probes (`SysctlKinfoProc`);
+  `golang.org/x/sys/windows` for Toolhelp32/GetProcessTimes — together the sole
+  runtime dependency budget in P1 (AD-02).
 
 ### Decision: zone resolution through `internal/platform` (OD-171, pass-4)
 

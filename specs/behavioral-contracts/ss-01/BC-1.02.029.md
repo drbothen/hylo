@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.7"
+version: "1.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "df5fc95"
+input-hash: "fbbf0f3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,11 +19,12 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2 pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted; 2026-11-17T12:00:00Z"
-  - "1.4 pass-6 remediation (ADV-P6-B08 + B16): the pick glyph is named as the registry key statusline.glyphs.cost_pick instead of the wildcard statusline.glyphs.* (Config keys row); history label version-prefixed; 2026-11-19T04:00:00Z"
-  - "1.5 pass-9 remediation (ADV-P9-B03, orchestrator call 4): the legacy exact-int overflow leg registered as CP-O12 — PC1 qualifies float64 to converting tot values and states the SL:633 OverflowError degrade; EC-009 + a CP-O12 canonical vector minted (oracle-checked 2026-11-18 through the real entry point, isolated HOME and cwd); Related BCs gains the bearer kin BC-1.02.025; crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
-  - "1.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O12 overflow degrade (EC-009) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
-  - "1.7 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
+  - "2026-11-17T12:00:00Z (v1.2): pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted"
+  - "2026-11-19T04:00:00Z (v1.4): pass-6 remediation (ADV-P6-B08 + B16): the pick glyph is named as the registry key statusline.glyphs.cost_pick instead of the wildcard statusline.glyphs.* (Config keys row); history label version-prefixed"
+  - "2026-11-18 (v1.5): pass-9 remediation (ADV-P9-B03, orchestrator call 4): the legacy exact-int overflow leg registered as CP-O12 — PC1 qualifies float64 to converting tot values and states the SL:633 OverflowError degrade; EC-009 + a CP-O12 canonical vector minted (oracle-checked  through the real entry point, isolated HOME and cwd); Related BCs gains the bearer kin BC-1.02.025; crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
+  - "2026-11-20T18:00:00Z (v1.6): pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O12 overflow degrade (EC-009) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "2026-11-20T18:00:00Z (v1.7): pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
+  - "2026-11-24T00:00:00Z (v1.8): pass-13 remediation (ADV-P13-B02): the CP-O12 vector's session-cache seed gains the leading proc_start key (900.0) per the corpus admission rule BC-3.02.001 Inv 4 (truthy session_id plus unseeded proc_start is rejected at case load), the setup states rows 2 and the legacy prefix variable, and the outcome respells to the measured regime - the session cache stays byte-unchanged from the seed (the seeded numeric proc_start returns at the consult short-circuit, SL:273-275; no probe, no rewrite), replacing the machine-dependent trailing-key observation and its EC-003-style citation; re-measured 2026-11-24 (CPython 3.11.7, isolated temporary HOME and cwd, control leg renders); history canonicalized date-first (the v1.7 entry was undated); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -108,18 +109,22 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 (`LOCAL_MODEL_PREFIXES=claude-sonnet`, quoted as provenance only).
 
 CP-O12 cost-pick equivalence overflow (pass-9 ADV-P9-B03; oracle-checked 2026-11-18 through the real entry point
-`python3 -I -s legacy/dgx_statusline.py` with an isolated HOME and cwd, CPython 3.11.7): the bearer is the
+`python3 -I -s legacy/dgx_statusline.py` with an isolated HOME and cwd, CPython 3.11.7; re-pinned 2026-11-24 to the
+seeded corpus regime, rows 2, legacy prefix variable `LOCAL_MODEL_PREFIXES=claude-sonnet`): the bearer is the
 integer-only transcript accumulation (kin of CP-O04, BC-1.02.025 EC-010). Seed: stdin `{"session_id":"r4",
 "transcript_path":"<T>","workspace":{"project_dir":"<T>"},"model":{"id":"claude-sonnet-x"},
 "cost":{"total_cost_usd":0.5}}` (local lane, prefixes `claude-sonnet`); session cache `statusline-r4.json` seeded
-`{"fetch_ts": <now>, "ts": <now>, "up": true, "sample": {"dgx_cost:dgx_usd_per_mtok": 2.0,
-"dgx_tokens:rate_mtok_month": 1000000000}}` (valid basis, fresh TTL); transcript one assistant line
+`{"proc_start": 900.0, "fetch_ts": <now>, "ts": <now>, "up": true, "sample": {"dgx_cost:dgx_usd_per_mtok": 2.0,
+"dgx_tokens:rate_mtok_month": 1000000000}}` (valid basis, fresh TTL; the leading `"proc_start"` is the corpus
+admission rule, BC-3.02.001 Inv 4 — a truthy `session_id` with an unseeded `proc_start` is rejected at case load —
+and it short-circuits the window-start consult, so the probe never runs); transcript one assistant line
 `{"type":"assistant","timestamp":"2026-11-18T12:00:00.000Z","message":{"id":"msg_1","usage":
 {"input_tokens": 95·10³⁰⁶, "output_tokens": 95·10³⁰⁶}}}` — each total below the conversion threshold (float()
 succeeds), `tot = 1.9·10³⁰⁸` at or above it (SL:626). Expected: exactly `\e[90mstatusline degraded\e[0m\n` (29
 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`), exit 0; the step-2 mix cache and the step-7c
-cost-history write persist (measured: `statusline-mix-r4.json` and `cost-history.json` present after the run; the
-session cache additionally admitted a machine-dependent trailing `proc_start` key, BC-1.01.001 EC-003-style).
+cost-history write persist (measured: `statusline-mix-r4.json` and `cost-history.json` present after the run), and
+the session cache stays byte-unchanged from the seed (the seeded numeric `proc_start` returns at the consult
+short-circuit, SL:273-275 — no probe, no rewrite).
 Control (same seed, totals 4·10³⁰⁷ each, `tot = 8·10³⁰⁷` below the threshold): full render, no degrade. Boundary
 measured on the same oracle: `float(2**1024 − 2**970 − 1)` converts, `float(2**1024 − 2**970)` raises.
 

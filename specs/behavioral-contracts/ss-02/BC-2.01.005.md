@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.4"
+version: "1.4.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "8bfff5a"
+input-hash: "b80b867"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -34,6 +34,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.4.2): ADV-P10 remediation D08 — three legacy citations corrected against legacy/dgx_statusline.py: fade formula SL:683 → SL:682 (SL:683 is the RGB scaling), _fmt_lines whole-thousands `184k` SL:860 → SL:859 (SL:860 is `return str(n)`), token millions `88.0M` SL:871 → SL:870 (the .1f}M spelling; SL:871 is the k branch)"
   - "2026-11-21T07:00:00Z (1.4.3): ADV-P11 remediation D12 (orchestrator call 16) — PC-6's control-byte rule states the ANY-TEXT verdict: a control byte in an any-text key value (e.g. statusline.telemetry.query) yields the same Text-class reason 'control character' (its only bounds are the control-byte bound and valid UTF-8; the empty string stays in range); sibling A09/D08 respell — PC-5 band defaults to strict-JSON env spellings [80,100] and [70,90]"
   - "2026-11-22T00:00:00Z (1.4.4): ADV-P12 remediation D06 (orchestrator call 9) + D07 (call 10) + D12 — PC-2 List: strip-then-validate order STATED (Python str.strip() FIRST, then control-byte/emptiness checks on the stripped item; legacy-identical; applies to limits.windows and reroute-all entries too); PC-3: the ~-expansion home source is platform.HomeDir(env) — a relative HOME (macOS/Linux) or relative USERPROFILE (Windows) is treated as UNSET (BC-3.01.001 PC-2 kind discipline), yielding 'home directory unknown' (with a relative home, ~/c reports home-unknown, never 'not an absolute path'); PC-3 absoluteness gains the per-OS filepath.IsAbs rule (Windows: \\foo and C:foo are relative), propagated from BC-3.01.001 PC-3 / BC-2.03.002 PC-3"
+  - "2026-11-23T00:00:00Z (1.4.5): ADV-P13 remediation D09 — PC-6 pins the List-item invalid-byte verdict legacy performs: POSIX env values arrive surrogateescape-decoded (byte b = code point U+DC00+b; measured on CPython 3.11.7: raw 0xFF = U+DCFF, Cs, kept by strip), so a List item with invalid POSIX bytes is strip-mapped and ACCEPTED — no invalid-UTF-8 verdict exists for List items and no new reason string enters the BC-2.02.001 vocabulary; 0xFF vector added"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -202,6 +203,26 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      `platform.EnvVars` reads the UTF-16 environment through Go's standard decoding,
      substituting U+FFFD for an unpaired surrogate (BC-2.01.001 PC-6, pass-12 call 8),
      so this reason is reachable from POSIX byte values only.
+   - **List items with invalid POSIX bytes (pass-13 D09).** The `invalid UTF-8` check
+     above covers Text, glyph, label and separator values only. A LIST item whose
+     bytes are not valid UTF-8 has a DIFFERENT, pinned verdict: acceptance. Legacy
+     decodes POSIX environment values with the filesystem encoding plus
+     surrogateescape, so an invalid byte b (0x80..0xFF) arrives as the single code
+     point U+DC00+b — measured on the oracle interpreter (CPython 3.11.7, `python3
+     -I`): the raw byte 0xFF in a POSIX env value decodes to `U+DCFF`, category `Cs`,
+     not whitespace, kept whole by `str.strip()`. The byte-to-code-point rule for a
+     List item is therefore surrogateescape: Go maps each invalid byte to U+DC00+b
+     before `pyfmt.Strip` and the control-free check; U+DC80..U+DCFF are neither
+     control bytes (Cs, not Cc) nor whitespace, so the item passes
+     strip-then-validate and the key is ACCEPTED. No new reason exists: invalid
+     bytes in a List item yield NO Text-class verdict, and the BC-2.02.001 reason
+     vocabulary is unchanged. The decoded-item decision itself (prefix matching for
+     `backends[0].model_prefixes`) is bytewise on Go strings, decision-equivalent to
+     legacy's mapped-string comparison because model names on both sides arrive
+     through the same stdin JSON decode (BC-5.02.003). Pin: with
+     `HYLO_BACKENDS_0_MODEL_PREFIXES` carrying the raw byte 0xFF on POSIX, the item
+     is stripped (no-op), passes the control-free check, and the value is accepted
+     with no config error.
    All six reason strings of this PC ride the Text class (OD-178) on the E-CFG-001
    surface.
 

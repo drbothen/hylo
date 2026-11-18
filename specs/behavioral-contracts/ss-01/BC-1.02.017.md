@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.6"
+version: "1.3.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "df5fc95"
+input-hash: "fbbf0f3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,14 +19,16 @@ confidence: M
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2 pass-3 remediation (ADV-P3-B17): EC-010 states the numeric precondition — the SL:559 OverflowError fires only when win_start is numeric; otherwise the huge exact timer text renders with no degrade; 2026-11-18T02:00:00Z"
-  - "1.3 pass-4 remediation (ADV-P4-B05/B04/B07): Inv 3 self-contradiction removed (rendering carries no exclusion; acquisition and foreign-cache shapes do — OD-160); EC-004..006 and the -Infinity vector tagged OD-160 (hand-edited-cache shapes); EC-010 names CP-O05 with the exact threshold; canonical OV overflow vector added; DI-012 cited; 2026-11-18T03:00:00Z"
-  - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
-  - "1.3.2 pass-6 remediation (ADV-P6-B08): the house glyph is named as the registry key statusline.glyphs.window_age instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
-  - "1.3.3 pass-7 remediation (ADV-P7-B15): Inv 3 spells the concrete exclusion test name TestWindowAge_D4EX1_Windows_AncestorFound (VP-012) instead of the wildcard; no behavioral change; 2026-11-19T07:00:00Z"
-  - "1.3.4 pass-8 remediation (ADV-P8-B11): EC-007 gains the inline OD-160 hand-edited-cache tag its siblings EC-004..006 and BC-1.02.028 EC-005 already carry (Inv 3 covers it); no behavioral change; 2026-11-19T08:00:00Z"
-  - "1.3.5 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O05 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
-  - "1.3.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
+  - "2026-11-18T02:00:00Z (v1.2): pass-3 remediation (ADV-P3-B17): EC-010 states the numeric precondition — the SL:559 OverflowError fires only when win_start is numeric; otherwise the huge exact timer text renders with no degrade"
+  - "2026-11-18T03:00:00Z (v1.3): pass-4 remediation (ADV-P4-B05/B04/B07): Inv 3 self-contradiction removed (rendering carries no exclusion; acquisition and foreign-cache shapes do — OD-160); EC-004..006 and the -Infinity vector tagged OD-160 (hand-edited-cache shapes); EC-010 names CP-O05 with the exact threshold; canonical OV overflow vector added; DI-012 cited"
+  - "2026-11-19T02:00:00Z (v1.3.1): sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "2026-11-19T04:00:00Z (v1.3.2): pass-6 remediation (ADV-P6-B08): the house glyph is named as the registry key statusline.glyphs.window_age instead of the wildcard statusline.glyphs.* (Config keys row)"
+  - "2026-11-19T07:00:00Z (v1.3.3): pass-7 remediation (ADV-P7-B15): Inv 3 spells the concrete exclusion test name TestWindowAge_D4EX1_Windows_AncestorFound (VP-012) instead of the wildcard; no behavioral change"
+  - "2026-11-19T08:00:00Z (v1.3.4): pass-8 remediation (ADV-P8-B11): EC-007 gains the inline OD-160 hand-edited-cache tag its siblings EC-004..006 and BC-1.02.028 EC-005 already carry (Inv 3 covers it); no behavioral change"
+  - "2026-11-20T18:00:00Z (v1.3.5): pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O05 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "2026-11-20T18:00:00Z (v1.3.6): pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
+  - "2026-11-24T00:00:00Z (v1.3.7): pass-13 remediation (ADV-P13-B06): Inv 3's D4-EX-1 closure mechanism respelled to the BC-3.02.001 EC-008 canon (ADV-P9-D01) - an OD-105 named difference with NO exclusions.json entry, closed by the dedicated rider test alone because no Windows gnomo parity case can exist (every corpus case seeds proc_start or is cache-003); history canonicalized date-first; no behavioral change"
+  - "v1.3.8 2026-11-18: pass-13 residual (orchestrator residual sweep): Verification Properties gains the VP-014 row and VP Anchors gains the VP-014 entry (Inv 3's D4-EX-1 rider test, pass-13 A2-04 reciprocity — VP-014 v1.6 gained this contract in bcs:); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,8 +72,10 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
 2. Order inside the timer segment is fixed: `⏱ <elapsed>`, then `·<api>`, then ` ⌂<age>`.
 3. Rendering given a `win_start` value is byte-exact on every OS. The approved deviations for this widget live in
    acquisition, not here: **D4-EX-1** (on Windows legacy has no `ps`, so it never shows `⌂`, while Go's native probe can
-   return a start) is excluded from the parity diff through the OD-105 exclusion-list entry `D4-EX-1` with dedicated
-   tests `TestWindowAge_D4EX1_Windows_AncestorFound` (VP-012 concrete name); the macOS/Linux native-probe differences (true start in the repeated DST hour,
+   return a start) is an OD-105 named difference with **no `exclusions.json` entry** — no Windows ⌂ parity case can
+   exist (every corpus case seeds `proc_start` or is `cache-003`, BC-3.02.001 Inv 4), so the id is closed by the
+   dedicated rider test `TestWindowAge_D4EX1_Windows_AncestorFound` (VP-012 concrete name) alone (BC-3.02.001
+   EC-008, ADV-P9-D01); the macOS/Linux native-probe differences (true start in the repeated DST hour,
    `⌂` where legacy's localized `ps` fails) are the OD-76 entry named by OD-110, with their own table tests
    (BC-3.02.002). The rendering rules of this contract itself carry no exclusion; the foreign-cache shapes
    (EC-004..EC-007's hand-edited `proc_start`; ruling Q-b) carry exclusion id **OD-160**: vectors that rely on a
@@ -119,6 +123,7 @@ confirmed by golden A (deep pass-3 round 2).
 | VP-028 | Suffix present iff `win_start` numeric, timer shown and `(now-win_start)*1000 - dur >= 300000` evaluated without FMA | table test on arm64 + 300k sampled boundary cases vs oracle |
 | VP-028 | Suffix position is after the API-time suffix | table test |
 | VP-028, VP-001 | The CP-O05 overflow degrade (EC-010: `win_ms - dur` at or beyond the int→float threshold, numeric `win_start`) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
+| VP-014 | Inv 3's D4-EX-1 rider: the ruled Windows ⌂ difference is admitted only through the exclusion id `D4-EX-1`, closed by the dedicated fake-probe test `TestWindowAge_D4EX1_Windows_AncestorFound` (VP-012 concrete name); the rider's expected output is this contract's canonical vector table's expected column, and the fake-probe table pins the three walk behaviours the BC-3.02.001 vector table routes to VP-014 jointly with VP-033 (pass-13 A2-04 reciprocity: VP-014 `bcs:` gained this contract; this row is its owner-side fix) | dedicated rider test (fake ProcStarter, per VP-014) |
 
 ## Traceability
 
@@ -152,6 +157,7 @@ TBD — filled by story-writer
 ## VP Anchors (Recommended)
 
 - VP-028 — gate without FMA
+- VP-014 — D4-EX-1 Windows window-age rider (Inv 3)
 
 ---
 

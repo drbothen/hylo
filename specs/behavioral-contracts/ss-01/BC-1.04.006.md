@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "8e821c7"
+input-hash: "ff74134"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:732-741)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-17 (PC3 states the statusline.queue.yellow=false never-yellow branch as an output)", "2026-11-18 (v1.2.2) pass-11 OD-194 consumer (PC3 names statusline.labels.rate and statusline.labels.queue beside their defaults; the · separator carries the named-format-constant note)"]
+modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-17 (PC3 states the statusline.queue.yellow=false never-yellow branch as an output)", "2026-11-18 (v1.2.2) pass-11 OD-194 consumer (PC3 names statusline.labels.rate and statusline.labels.queue beside their defaults; the · separator carries the named-format-constant note)", "2026-11-18 (v1.2.3) pass-13 remediation ADV-P13-C2-01 (foreign cached-sample value edge cases added: EC-007 string running ValueError at the SL:741 .0f render format, EC-008 string waiting TypeError at the SL:740 busy comparison — the sites of BC-1.04.004 invariant 3; OD-160 class; VP-012 closure and VP-001 never-blank rows added; oracle-verified CPython 3.11.7)", "2026-11-18 (v1.2.4) pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-007 cites crash id CP-C28 and EC-008 cites CP-C29, minted by error-taxonomy 1.20 for this contract's foreign cached-sample value legs; no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,6 +73,8 @@ Notation: `\e` is byte 0x1B.
 | EC-004 | running NaN, waiting NaN | green `rnan·qnan` (`nan > 0` false) |
 | EC-005 | running NaN, waiting absent | green `rnan·q0` |
 | EC-006 | running 0.0 | segment shown (`0.0` is not None) |
+| EC-007 | running a string (foreign cached sample, exclusion id **OD-160**) | ValueError at the `r{r:.0f}·q{q:.0f}` render format (SL:741, "Unknown format code 'f' for object of type 'str'", oracle-verified CPython 3.11.7; crash id **CP-C28**) → errDegraded — the site BC-1.04.004 invariant 3 names (ADV-P13-C2-01) |
+| EC-008 | waiting a string (foreign cached sample, **OD-160**) | TypeError at the `q > 0` busy comparison (SL:740, ">" not supported between instances of 'str' and 'int', oracle-verified CPython 3.11.7; crash id **CP-C29**) → errDegraded (ADV-P13-C2-01) |
 
 ## Canonical Test Vectors
 
@@ -88,6 +90,8 @@ Notation: `\e` is byte 0x1B.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Color = yellow iff `q > 0 or preempt > 0` under Python comparison semantics (NaN false) | Go property test (testing/quick) |
+| VP-001 | The promised output set holds on the EC-007/EC-008 foreign cached-sample value degrade legs: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P13-C2-01) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-007/EC-008 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P13-C2-01) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -96,7 +100,7 @@ Notation: `\e` is byte 0x1B.
 | Source | legacy/dgx_statusline.py:render_telemetry_fields (SL:732-741) |
 | Legacy contract | BC-SL-045 (P3 base, review #14) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 (EC-007/EC-008 foreign cached-sample value shapes under the OD-160 named-deviation rule) |
 | Decisions | OD-113 (theme colors) |
 | Architecture Module | `internal/statusline/row2.go` |
 | Stories | TBD |
@@ -117,6 +121,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — queue color rule
+- VP-001 — never-blank/exit-0 ladder; the EC-007/EC-008 degrade legs ride it (ADV-P13-C2-01)
+- VP-012 — OD-160 exclusion-closure citation (EC-007/EC-008; ADV-P13-C2-01)
 
 ---
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.6.5"
+version: "1.6.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "97409c7"
+input-hash: "682e6df"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -19,15 +19,16 @@ confidence: H
 lifecycle_status: active
 introduced: v0.1.0
 modified:
-  - "1.5.1 consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"
-  - "1.5.2 pass-3 remediation (ADV-P3-B07): PC3-PC5 parametrize on cells/plain_max/red_from, so Inv 3 now gives them real ranges (cells int >= 1; plain_max/red_from any finite number); only units.context stays default-only; 2026-11-18T02:00:00Z"
-  - "1.5.3 pass-4 remediation (ADV-P4-B13/B08/B04): duplicate modified keys merged; cells range 1..100 (B09 cap, same as kv.cells); units.context default-only reason cites the fixed M/K divisors; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
-  - "1.6 pass-5 remediation (ADV-P5-B03/B15): thermometer cells named as registry keys statusline.glyphs.cell_on/cell_off (defaults U+25B0/U+25B1, 1 code point/1 column, SL:428); cells above 100 clarified as a number-range config error, never a clamp; 2026-11-18T05:42:56Z"
-  - "1.6.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
-  - "1.6.2 pass-6 remediation (ADV-P6-B01 call 10 + OD-184 wording): for-all thermometer rows re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); glyph length respelled to the OD-184 canon; 2026-11-19T04:00:00Z"
-  - "1.6.3 pass-8 remediation (ADV-P8-B09): VP-041 width-formula row states the `%` term explicitly — 10 + 1 + len(number text) + 1 + len(denominator text) (PC7); VP-041 P-o sync is the architect's; no behavioral change; 2026-11-19T08:00:00Z"
-  - "1.6.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O01 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
-  - "1.6.5 pass-11 remediation (ADV-P11-B01): EC-008 names the taxonomy id CP-S05 with its faithful trigger and raise site (SL:419), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change; 2026-11-21T12:00:00Z"
+  - "2026-11-17T21:21:41Z (v1.5.1): consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01,"
+  - "2026-11-18T02:00:00Z (v1.5.2): pass-3 remediation (ADV-P3-B07): PC3-PC5 parametrize on cells/plain_max/red_from, so Inv 3 now gives them real ranges (cells int >= 1; plain_max/red_from any finite number); only units.context stays default-only"
+  - "2026-11-18T03:00:00Z (v1.5.3): pass-4 remediation (ADV-P4-B13/B08/B04): duplicate modified keys merged; cells range 1..100 (B09 cap, same as kv.cells); units.context default-only reason cites the fixed M/K divisors; canonical OV overflow vector added"
+  - "2026-11-18T05:42:56Z (v1.6): pass-5 remediation (ADV-P5-B03/B15): thermometer cells named as registry keys statusline.glyphs.cell_on/cell_off (defaults U+25B0/U+25B1, 1 code point/1 column, SL:428); cells above 100 clarified as a number-range config error, never a clamp"
+  - "2026-11-19T02:00:00Z (v1.6.1): sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "2026-11-19T04:00:00Z (v1.6.2): pass-6 remediation (ADV-P6-B01 call 10 + OD-184 wording): for-all thermometer rows re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); glyph length respelled to the OD-184 canon"
+  - "2026-11-19T08:00:00Z (v1.6.3): pass-8 remediation (ADV-P8-B09): VP-041 width-formula row states the `%` term explicitly — 10 + 1 + len(number text) + 1 + len(denominator text) (PC7); VP-041 P-o sync is the architect's; no behavioral change"
+  - "2026-11-20T18:00:00Z (v1.6.4): pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O01 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "2026-11-21T12:00:00Z (v1.6.5): pass-11 remediation (ADV-P11-B01): EC-008 names the taxonomy id CP-S05 with its faithful trigger and raise site (SL:419), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change"
+  - "2026-11-24T00:00:00Z (v1.6.6): pass-13 remediation (ADV-P13-B08b): EC-010's parenthetical no longer mislabels the CP-O01 overflow as the CP-S07 family - BC-1.02.020 is credited as the co-owner of the CP-O01 register row; history canonicalized date-first; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -121,7 +122,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-007 | total 999999 | `/1000K` (K branch, half-even on 999.999); quirks `/0K`, `True`, NaN → BC-1.02.020 |
 | EC-008 | `context_window` a truthy non-object (`"x"`) — taxonomy **CP-S05** (`context_window` truthy and not a dict, raise site SL:419) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table) |
 | EC-009 | pct NaN; non-numeric truthy total | crash cases CP-S06 / CP-S07 → guard line (BC-1.02.020) |
-| EC-010 | `context_window_size` above float max (~1.8e308), e.g. 2·10³⁰⁸ | `total >= 1e6` compares exact (no error); CPython converts the int operand to float first, so `total / 1e6` raises OverflowError at SL:435 (taxonomy CP-O01) → guard line (CP-S07 family, BC-1.02.020; stdin-borne render overflow, OD-156) |
+| EC-010 | `context_window_size` above float max (~1.8e308), e.g. 2·10³⁰⁸ | `total >= 1e6` compares exact (no error); CPython converts the int operand to float first, so `total / 1e6` raises OverflowError at SL:435 (taxonomy CP-O01) → guard line (BC-1.02.020 co-owner of the CP-O01 register row; stdin-borne render overflow, OD-156) |
 
 ## Canonical Test Vectors
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.10"
+version: "1.2.11"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -18,7 +18,17 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg", "1.2.3 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B13/B10): vector table merged (blank line removed); ARCH-03 anchor normalized to #statusline-guard", "1.2.4 2026-11-18T12:00:00Z: pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set ids", "1.2.5 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — 1.2.4 entry re-dated ascending (its stamp predated 1.2.3); no behavioral change", "1.2.6 2026-11-19T04:00:00Z: pass-6 remediation (ADV-P6-B06 + OD-183 wording): new EC-007 pins raw encoded-surrogate bytes (ED A0 80) on stdin as invalid UTF-8 -> {} with an oracle-verified vector; PC2 adds the pyfmt code-point-iteration (never plain rune ranges) discipline for WTF-8 values", "1.2.7 2026-11-19T08:00:00Z: pass-8 remediation (ADV-P8-B04): OD-183 propagated — Description states UTF-8 stdio on every OS, the Windows oracle's `PYTHONIOENCODING=utf-8` variable and the stdio-encoding-only table test; new Inv 3; PC2 names the Windows-oracle variables; verification note qualifies the `LANG` pin as POSIX-leg (BC-1.02.004); Decisions row cites OD-183 and OD-190 (LF on every OS)", "1.2.8 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B01): Inv 3 rewritten per the BC-1.01.003 PC5 carve-out — the renderer itself emits no CR; input-derived text stays verbatim, so CR/LF bytes from reachable stdin inside row 1 are parity, not violations", "1.2.9 pass-12 remediation (ADV-P12-B02): Architecture Anchors re-anchored from #statusline-guard (target guard.go) to the input.go family anchor #input; no behavioral change; 2026-11-23T00:00:00Z", "1.2.10 pass-12 residual sweep (orchestrator pass-12 residual call 8): the lone-surrogate display-name vector restates its window-start pin per the corrected cache-003 design (every corpus case seeds proc_start or is cache-003, no probe on either side, no fake process table); no behavioral change; 2026-11-23T14:00:00Z"]
+modified:
+  - "2026-11-17 (1.2.1): VP citation reconciliation — VP-005 stdout leg"
+  - "2026-11-18T02:00:00Z (1.2.3): pass-3 remediation (ADV-P3-B13/B10): vector table merged (blank line removed); ARCH-03 anchor normalized to #statusline-guard"
+  - "2026-11-18T12:00:00Z (1.2.4): pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set ids"
+  - "2026-11-18T12:30:00Z (1.2.5): pass-5 residual sweep (ADV-P5-B14) — 1.2.4 entry re-dated ascending (its stamp predated 1.2.3); no behavioral change"
+  - "2026-11-19T04:00:00Z (1.2.6): pass-6 remediation (ADV-P6-B06 + OD-183 wording): new EC-007 pins raw encoded-surrogate bytes (ED A0 80) on stdin as invalid UTF-8 -> {} with an oracle-verified vector; PC2 adds the pyfmt code-point-iteration (never plain rune ranges) discipline for WTF-8 values"
+  - "2026-11-19T08:00:00Z (1.2.7): pass-8 remediation (ADV-P8-B04): OD-183 propagated — Description states UTF-8 stdio on every OS, the Windows oracle's `PYTHONIOENCODING=utf-8` variable and the stdio-encoding-only table test; new Inv 3; PC2 names the Windows-oracle variables; verification note qualifies the `LANG` pin as POSIX-leg (BC-1.02.004); Decisions row cites OD-183 and OD-190 (LF on every OS)"
+  - "2026-11-20T18:00:00Z (1.2.8): pass-10 remediation (ADV-P10-B01): Inv 3 rewritten per the BC-1.01.003 PC5 carve-out — the renderer itself emits no CR; input-derived text stays verbatim, so CR/LF bytes from reachable stdin inside row 1 are parity, not violations"
+  - "2026-11-23T00:00:00Z (1.2.9): pass-12 remediation (ADV-P12-B02): Architecture Anchors re-anchored from #statusline-guard (target guard.go) to the input.go family anchor #input; no behavioral change"
+  - "2026-11-23T14:00:00Z (1.2.10): pass-12 residual sweep (orchestrator pass-12 residual call 8): the lone-surrogate display-name vector restates its window-start pin per the corrected cache-003 design (every corpus case seeds proc_start or is cache-003, no probe on either side, no fake process table); no behavioral change"
+  - "2026-11-24 (1.2.11): pass-13 remediation (ADV-P13-B01): the lone-surrogate edge-case row states its seed (statusline-s1.json = {\"proc_start\": 900.0}, corpus admission rule BC-3.02.001 Inv 4) instead of a bare empty-cache setup, and the expected cache content respells to the measured append mechanics (seeded proc_start first, then rl/rl_ts, SL:306-308); the row re-measured  (CPython 3.11.7, isolated temporary HOME and cwd); modified list converted from flow to block form with the 1.2.5 bare stamp re-dated faithfully ascending (precedent: pass-5 ADV-P5-B14); no behavioral change; 2026-11-24T00:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,7 +104,8 @@ JSON `\uXXXX` escape) cannot be encoded at output and degrades the refresh (CP-S
 
 ## Canonical Test Vectors
 
-Config: defaults, `HYLO_STATUSLINE_ROWS=1`, git disabled, COLUMNS unset, empty cache.
+Config: defaults, `HYLO_STATUSLINE_ROWS=1`, git disabled, COLUMNS unset, empty cache — except the lone-surrogate
+edge-case row, which seeds `statusline-s1.json` = `{"proc_start": 900.0}` (corpus admission rule, BC-3.02.001 Inv 4).
 
 | Input (stdin bytes) | Expected Output | Category |
 |-------|----------------|----------|
@@ -102,12 +113,16 @@ Config: defaults, `HYLO_STATUSLINE_ROWS=1`, git disabled, COLUMNS unset, empty c
 | `{"model":{"id":"A` `FF` `B"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m\n` (45 bytes) | error |
 | `{"model":{"id":"A` `ED A0 80` `B"}}` (raw encoded-surrogate bytes, EC-007) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m\n` (45 bytes), exit 0 | error |
 | `{"model":{"display_name":"\ud800"}}` | `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 | edge-case |
-| `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` | degraded 29 bytes; `statusline-s1.json` holds exactly the seeded `proc_start` plus `rl`, `rl_ts` (`rl`, `rl_ts` written before the fault; corpus regime, BC-3.02.001 Inv 4: every corpus case seeds `proc_start` or is `cache-003` — no probe on either side — so the cached value short-circuits the window-start consult) | edge-case |
+| `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` | degraded 29 bytes; `statusline-s1.json` holds the seeded `proc_start` first, then exactly `rl` and `rl_ts` — `effective_rl` loads the cache and appends the two keys (SL:306-308), so the seeded key survives; both written before the fault (corpus regime, BC-3.02.001 Inv 4: every corpus case seeds `proc_start` or is `cache-003` — no probe on either side — so the cached value short-circuits the window-start consult) | edge-case |
 | `{"model":{"display_name":["\ud800"]}}` (list -> `repr`) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m['\ud800']\e[0m\n` (the six ASCII characters `\ud800` inside quotes; no degrade) | edge-case |
 | `{"x\ud800":1,"model":{"display_name":"Z"}}` (surrogate in an unrendered key) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mZ\e[0m\n` | edge-case |
 
 All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, a POSIX-leg pin — on Windows the oracle's codec
 is fixed by `PYTHONIOENCODING=utf-8` per OD-183, since `LANG` has no effect there), plus EC-004 (`\udcff` -> degraded).
+Re-measured 2026-11-24 (same interpreter, isolated temporary HOME and cwd): the lone-surrogate edge-case row degrades
+with `statusline-s1.json` holding `proc_start` (900.0) first, then `rl` and `rl_ts`, key order `proc_start`, `rl`,
+`rl_ts` — the seeded key survives the `effective_rl` append. The other rows' caches stay empty (no `session_id`, so
+no window-start consult and no rate-limit write).
 Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...\e[97mA` `FF` `B\e[0m\n`.
 
 ## Verification Properties

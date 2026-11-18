@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "8e821c7"
+input-hash: "ff74134"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:822-834)"
@@ -22,7 +22,9 @@ modified:
   - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/12"
   - "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.idle with default ☾, OD-189 sibling treatment)"
   - "1.3.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names the registered keys statusline.idle.after_s and statusline.idle.running_below beside their default literals)"
+  - "1.3.5 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-006 cites crash id CP-C32, minted by error-taxonomy 1.20 for this contract's foreign cached-sample value leg; no behavioral change"
   - "1.3.3 2026-11-18: pass-11 remediation ADV-P11-C2-09 (version field raised to match the trailing modified entry — it sat behind v1.3.2) + OD-194 consumer (PC4 names statusline.labels.idle beside its default; separating-space scaffolding carries the named-format-constant note)"
+  - "1.3.4 2026-11-18: pass-13 remediation ADV-P13-C2-01 (foreign cached-sample value edge case added: EC-006 string last TypeError at the SL:825 gate comparison; OD-160 class; VP-012 closure and VP-001 never-blank rows added; oracle-verified CPython 3.11.7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,6 +83,7 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
 | EC-003 | running 0.5 | shown (`< 1`) |
 | EC-004 | running NaN | no segment (`nan < 1` false) |
 | EC-005 | running absent or 0.0 | treated as 0 → shown |
+| EC-006 | `last` a non-empty string (foreign cached sample, exclusion id **OD-160**; truthy, so the gate continues) | TypeError at the `last > 0` gate comparison (SL:825, ">" not supported between instances of 'str' and 'int', oracle-verified CPython 3.11.7; crash id **CP-C32**) → errDegraded — the idle sibling of the render sites BC-1.04.004 invariant 3 registers (ADV-P13-C2-01) |
 
 ## Canonical Test Vectors
 
@@ -98,6 +101,8 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Seven-case review #20 table reproduces legacy bytes | manual (table) |
+| VP-001 | The promised output set holds on the EC-006 foreign cached-sample value degrade leg: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P13-C2-01) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-006 foreign cached-sample value shape) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P13-C2-01) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -106,7 +111,7 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
 | Source | legacy/dgx_statusline.py:render_telemetry_fields (SL:822-834); IDLE_AFTER (SL:90-93) |
 | Legacy contract | BC-SL-051 (P3 base; r1 refined, review #20, 7 cases) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007, DI-008 (the EC-006 degrade rides the never-blank ladder), DI-012 (foreign cached-sample value shape EC-006 under the OD-160 named-deviation rule) |
 | Decisions | OD-113; D7 (metric name frozen) |
 | Architecture Module | `internal/statusline/row2.go` |
 | Stories | TBD |
@@ -127,6 +132,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — idle table
+- VP-001 — never-blank/exit-0 ladder; the EC-006 degrade leg rides it (ADV-P13-C2-01)
+- VP-012 — OD-160 exclusion-closure citation (EC-006; ADV-P13-C2-01)
 
 ---
 

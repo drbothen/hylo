@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "d2b884d"
+input-hash: "38f1b2e"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -35,6 +35,7 @@ modified:
   - "2026-11-20T18:30:00Z (1.2.7): ADV-P9 remediation D11 — the stdio canary's claim narrowed to what it can detect (POSIX leg observes but cannot detect a lost shim under the pinned UTF-8 locale; measured: even LC_ALL=C + PYTHONCOERCECLOCALE=0 round-trips U+0664 as UTF-8 on the reference build); PC-5 gains the Windows LF negative control (shim absent, normal builder env, raw bytes must contain CR LF)"
   - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation A2-02 sibling (orchestrator call 1, OD-190 applied literally) — the shim's stdio duty is ENCODING only: sys.stdin/sys.stdout reconfigured to UTF-8 strict, NO newline reconfigure (the former newline=\\n claim withdrawn); Pre-1 cites the comparator's open CRLF→LF conversion (BC-6.03.002 PC-1/EC-006) as the Windows-leg LF disposition, and the canary's \\r\\n-free observation is scoped to the POSIX leg"
   - "2026-11-22T00:00:00Z (1.2.9): ADV-P12 remediation D13 - PC-1's mktime/strptime note respelled: no parity case reaches the parse (a seeded proc_start short-circuits at SL:273-275; cache-003's empty fake PATH raises FileNotFoundError at the ps call SL:280-281, caught SL:293-294, before the parse), dissolving the stale 'which the seeded proc_start bypasses' wording"
+  - "2026-11-23T00:00:00Z (1.3.0): ADV-P13 remediation D02 (orchestrator call 3, applying pass-12 call 7) + D01 (call 2) — PC-4: the stdio leg CHECKS THE UTF-8 ROUND TRIP ONLY (the shim performs no newline reconfigure, so the shim-loaded Windows run also writes CRLF and no newline observation discriminates a lost shim; the CLOCK leg is the gating shim detector); 'discriminates the LF half' removed; PC-5's stdio no-shim negative control WITHDRAWN (a no-shim CRLF observation is not discriminating); PC-4's clock-canary stdout matched after the ONE open CRLF→LF conversion of BC-6.03.002 PC-1"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -124,7 +125,10 @@ oracle case runs, that the shim actually took effect.
    ADV-P5-D02: a fractional instant whose repr changes under a `time.Time` ns round trip —
    `1794615009.4245193` becomes `1794615009.4245195` — so the canary also discriminates the
    frozen-value round-trip the plain `.5` value hid).
-   - Stdout must equal exactly `1794615009.4245193\n`.
+   - Stdout must equal exactly `1794615009.4245193\n` — on the Windows legs matched
+     after the ONE open CRLF→LF conversion of BC-6.03.002 PC-1 (pass-13 orchestrator
+     call 2; the conversion is not scoped to the case comparator), so the bare-LF
+     expectation holds on every leg.
    - On any other output the run fails, not skips, with
      `parity: clock shim not loaded (OD-109 canary): got "<stdout>"`. No oracle case runs.
    - A second canary leg OBSERVES the stdio duty (ADV-P3-D23): the harness feeds the probe
@@ -144,8 +148,14 @@ oracle case runs, that the shim actually took effect.
      reference CPython 3.11.7: even `LC_ALL=C` with `PYTHONCOERCECLOCALE=0` round-trips
      U+0664 as UTF-8 `D9 A4`, so no locale override in the builder alters the default);
      on Windows `PYTHONIOENCODING=utf-8` fixes the encoding half by builder
-     construction, so the Windows leg discriminates the LF half only. The failure leg
-     remains wired on every leg — any byte mismatch fails the run. The probe script is
+     construction. The stdio leg CHECKS THE UTF-8 ROUND TRIP ONLY (pass-13
+     orchestrator call 3, applying pass-12 call 7): the shim performs no newline
+     reconfigure, so the shim-loaded Windows run also writes `\r\n`, and no newline
+     observation discriminates a lost shim — the gating shim detector is the CLOCK
+     leg above, whose stdout is compared after the ONE open CRLF→LF conversion of
+     BC-6.03.002 PC-1 on the Windows legs (pass-13 orchestrator call 2). The failure leg
+     remains wired on every leg — any byte mismatch in the round trip fails the run.
+     The probe script is
      the harness's stdio canary,
      `testdata/clock_shim/stdio_canary.py` — it reads stdin as strict UTF-8 text
      (CPython default), prints the first code point, exits 0 (proposed name, settled by
@@ -154,13 +164,11 @@ oracle case runs, that the shim actually took effect.
      case runs on failure.
 5. **Canary negative control.** A table test runs the same canary probe with `-I`
    instead of `-s`, and separately with `PYTHONPATH` removed. Each must be reported as
-   "shim not loaded". This proves the clock canary can discriminate. STDIO negative
-   control (ADV-P9-D11, orchestrator call 14): a table test runs the stdio canary
-   WITHOUT the shim under the NORMAL Windows builder env (PYTHONIOENCODING=utf-8
-   present) and must observe `\r\n` in the raw stdout bytes — proving the LF half of
-   the check can fail; the encoding half is builder-fixed (OD-183) and the POSIX leg
-   cannot fail by default (narrowing above), so the Windows LF leg is the one
-   shim-discriminating stdio control.
+   "shim not loaded". This proves the clock canary can discriminate — it is the gating
+   shim detector. The former stdio no-shim negative control (ADV-P9-D11) is WITHDRAWN
+   (pass-13 orchestrator call 3, applying pass-12 call 7): with no newline reconfigure
+   anywhere, the shim-loaded Windows run also writes `\r\n`, so a no-shim `\r\n`
+   observation is not discriminating; the stdio leg is a round-trip observation only.
 
 ## Invariants
 

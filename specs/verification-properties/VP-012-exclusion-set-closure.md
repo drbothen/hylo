@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.23"
+version: "1.25"
 status: draft
 producer: architect
-timestamp: 2026-11-21T12:00:00Z
+timestamp: 2026-11-24T16:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "40439d3"
+input-hash: "d1fbd02"
 traces_to: prd.md
 source_bc: BC-6.03.004
-bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017, BC-1.04.018, BC-1.04.009, BC-1.04.014]
+bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017, BC-1.04.018, BC-1.04.009, BC-1.04.014, BC-1.04.004, BC-1.04.006, BC-1.04.011, BC-1.04.012]
 module: internal/parity
 proof_method: mutation-test (fail-closed catalogue)
 feasibility: feasible
@@ -43,6 +43,8 @@ modified:
   - "1.21 2026-11-18T17:50:00Z: pass-10 fixes (A2-06, A2-10) — scope review stated honestly as a MANUAL obligation: the closure check verifies id membership, uniqueness, test existence and expected-file match, not that each entry's case lies inside its id's declared scope (OD-166 'and nothing else' / OD-181 transport are predicated by the rulings and BC bodies, not by an oracle; no structure mutant can attach a valid id to an out-of-scope case) — property statement and Honesty bullet state it (A2-06); the rider-existence leg additionally asserts RiderRegister()'s keys equal the twelve-element closed set (length + per-id presence — a register missing an id would silently skip that id's check) (A2-10)"
   - "1.22 2026-11-21T09:00:00Z: pass-11 residual — bcs: gains BC-1.04.018 (its VP-table row routes the OD-160 exclusion to this closure check, citation carrier only, no riding test of its own; ADV-P11-C2-02), the Source Contract citation-carriers sentence names it; VP-INDEX map and recount synced in the same burst"
   - "1.23 2026-11-21T12:00:00Z: pass-12 fixes (A2-03, C2-02) — the rider register is MULTI-VALUED and the check asserts EVERY registered test (A2-03): a closed id may register several rider tests — D4-EX-3 registers the five TestD4EX3_{Number,Boolean,URL,Enum,Text} class members and OD-160 registers directional tests plus the dedicated test — so deleting four of the five D4-EX-3 class tables reds the check (the former single 'canonical rider test' wording and the id→one-rider skeleton let the deletions pass); skeleton's RiderRegister models id → set of (package, test) pairs, keys still asserted equal to the closed set; bcs: gains BC-1.04.009 and BC-1.04.014 (OD-160-tagged foreign-hist crash shapes on EC-011 and EC-008..EC-010 respectively; citation carriers only, no riding test of their own — the entry is validated by the closure check's existing OD-160 member and TestForeignCacheShape_OD160_Vectors; ADV-P12-C2-02), the Source Contract citation-carriers sentence names both; VP-INDEX map and recount synced in the same burst"
+  - "1.24 2026-11-22T12:00:00Z: pass-13 fix (A2-06) — the rider register's VALUES pinned to their source: the per-id (package, test) pairs are parsed from BC-6.03.004 Preconditions 3, the committed authority, instead of living in a hand-editable Go map — the two-copies class pass 9 fixed in VP-006 (a change that deletes committed rider tables and drops them from a second copy in the same stroke can no longer pass; every such stroke must edit the authoritative register, where the deletion is visible); skeleton's RiderRegister() replaced by ParseBC63004Register over the committed BC text; Method and Honesty bullets state the parsed register; no closed-set membership or test-name change, bcs: unchanged"
+  - "1.25 2026-11-24T16:00:00Z: pass-13 residual (item 1) — bcs: gains BC-1.04.004, BC-1.04.006, BC-1.04.011 and BC-1.04.012 (each contract's pass-13 VP-table row routes its OD-160-tagged foreign cached-sample value shapes to this closure check — citation carriers only, no riding test of their own, the entry validated by the existing OD-160 member and TestForeignCacheShape_OD160_Vectors; ADV-P13-C2-01), the Source Contract citation-carriers sentence names all four; VP-INDEX map and recount synced in the same burst"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,7 +86,10 @@ its parsed structure — a valid id on an out-of-scope case passes the machinery
 is caught only by review against the OD-169/OD-181 declarations. The closure
 check is rider-complete (against a MULTI-VALUED register whose keys are asserted equal to the
 twelve-element closed set — A2-10: a register missing an id would silently skip
-that id's existence check): besides walking the entries, it verifies that EVERY
+that id's existence check; and whose per-id (package, test) values are PARSED from
+BC-6.03.004 Preconditions 3, the committed authority — the register is not a
+second, hand-editable copy, the two-copies class pass 9 fixed in VP-006, pass-13
+A2-06): besides walking the entries, it verifies that EVERY
 registered rider test of every closed-set id exists in its declared package — a
 register entry is a SET of (package, test) pairs and every listed test must exist
 (A2-03: D4-EX-3 registers the five TestD4EX3_{Number,Boolean,URL,Enum,Text} class
@@ -154,6 +159,11 @@ nothing.
   sparkline's own normalize ladder) — citation carriers only, no riding test of
   their own; the entry is validated by the closure check's existing OD-160 member
   and `TestForeignCacheShape_OD160_Vectors` (ADV-P12-C2-02, pass-12 residual).
+  Pass-13 adds four sibling citation carriers in the same class (ADV-P13-C2-01,
+  pass-13 residual): BC-1.04.004 (OD-160 tag on invariant 3's foreign cached-sample
+  value shapes), BC-1.04.006 (EC-007/EC-008), BC-1.04.011 (EC-008/EC-009) and
+  BC-1.04.012 (EC-006) — each Verification Properties table routes the contract's
+  OD-160-tagged foreign cached-sample value shape to this closure check.
 - **Invariant verified:** DI-012 (no blanket exclusions; every exclusion carries its
   own table tests); OD-105/OD-110; AD-09 (machinery fails closed).
 
@@ -168,13 +178,16 @@ nothing.
   the Tier A run uses, not a test-local reimplementation), asserting the run FAILs
   closed with the matching named reason; plus the committed file's closure test as the
   happy-path instance (id membership, uniqueness, expected-file existence and match,
-  one-test-per-entry, no globs).
+  one-test-per-entry, no globs, rider register parsed from BC-6.03.004
+  Preconditions 3 — pass-13 A2-06).
 - **Honesty:** the strongest close-to-proof property in the harness, but still
   empirical (parsed-structure assertions over mutants), not a theorem-prover artifact.
   The oracle is the finite mutant structure itself: membership in the closed twelve-id
   set, case-id non-emptiness and uniqueness, and one-table-test
-  correspondence per entry plus rider completeness for every closed id (entries or
-  none) — no live oracle call exists or is needed. What the machinery does NOT
+  correspondence per entry plus rider completeness for every closed id against the
+  register parsed from BC-6.03.004 Preconditions 3 (pass-13 A2-06: the parsed BC
+  text is the register's oracle, so the completeness leg cannot drift in step with
+  a deletion of the committed tests) — no live oracle call exists or is needed. What the machinery does NOT
   encode is per-id scope (pass-10 A2-06): no mutant attaches a valid id to an
   out-of-scope case, and none can — scope is a predicate over the case's semantics,
   not its parsed structure; scope review is therefore a manual obligation against
@@ -222,15 +235,21 @@ func TestParityExclusions_ClosedSet(t *testing.T) {
     // pass-10 A2-10: rider EXISTENCE for every closed id presupposes that the
     // register itself covers the closed set — a register missing an id would
     // silently skip that id's existence check. Assert the keys equal the ids.
-    if reg := RiderRegister(); len(reg) != len(ids) {
+    // pass-13 A2-06: the register is PARSED from BC-6.03.004 Preconditions 3 —
+    // the committed authority — never maintained as a second, hand-editable Go
+    // copy: a deletion that edits a hand-written map in step with the committed
+    // tables would otherwise pass silently (the two-copies class pass 9 fixed
+    // in VP-006).
+    reg := ParseBC63004Register(Bc63004Markdown()) // id → set of (package, test)
+    if len(reg) != len(ids) {
         t.Fatalf("rider register has %d keys, want %d (the closed set)", len(reg), len(ids))
     }
     for id := range ids {
-        if _, ok := RiderRegister()[id]; !ok {
+        if _, ok := reg[id]; !ok {
             t.Fatalf("rider register missing closed id %s", id)
         }
     }
-    for id, riders := range RiderRegister() { // from the BC-6.03.004 register
+    for id, riders := range reg { // parsed from BC-6.03.004 Preconditions 3
         // A2-03: the register is MULTI-VALUED — an id maps to a SET of (package,
         // test) pairs and EVERY listed test must exist (D4-EX-3 → the five
         // TestD4EX3_{Number,Boolean,URL,Enum,Text} class members; OD-160 → the
@@ -242,7 +261,11 @@ func TestParityExclusions_ClosedSet(t *testing.T) {
             }
         }
     }
-    t.Logf("%d exclusion entries validated, %d rider tests present", len(seen), len(RiderRegister()))
+    totalRiders := 0
+    for _, riders := range reg {
+        totalRiders += len(riders)
+    }
+    t.Logf("%d exclusion entries validated, %d rider tests present", len(seen), totalRiders)
 }
 
 func TestParityExclusions_MutationFailClosed(t *testing.T) { // A2-09

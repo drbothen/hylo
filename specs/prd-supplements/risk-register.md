@@ -1,10 +1,10 @@
 ---
 document_type: risk-register
 level: L3
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-21T14:50:00Z
+timestamp: 2026-11-24T14:25:00Z
 phase: 1b
 inputs: [architecture-feasibility-report.md, prd.md, prd-supplements/nfr-catalog.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
 input-hash: "5f8d8d8"
@@ -31,13 +31,15 @@ traces_to: prd.md
 | R-006 | RK-5: HYLO_TEST_NOW stderr warning leaking outside the harness | Operational (determinism) | closed (spec decision) | LOW | Env seam set: HYLO_TEST_NOW is a harness hook, not a setting (AD-10); reserved names are never warned as unknown keys (BC-2.01.001 postcondition 6) | n.a. | ARCH-03 / AD-10 |
 | R-007 | RK-6: inert key `statusline.window_age.ps_timeout_s` confusing the config surface | Operational (config surface) | closed (owner ruling) | LOW | Key removed from the registry by OD-147 (owner, 2026-11-16); setting it now draws only the unknown-setting stderr warning, is ignored, and never changes the output or exit status (BC-2.01.001 PC-6, VP-015) — there is no unknown-key config-error class | n.a. | ARCH-02 key registry (OD-147) |
 | R-008 | Transcript-borne overflow skip (OD-156, extended D4-EX-2) diverges cache bytes from legacy: on the offending refresh legacy degrades sticky and saves nothing, while hylo skips the line (OD-167: and drops the in-flight turn) and saves the rest | Correctness (parity) | open (accepted by ruling) | MEDIUM | Named exclusion: the D4-EX-2 W-predicate family gains a numeric-overflow predicate with table tests (BC-1.03.018/.019 extension; triggers CP-O06..O08 in error-taxonomy.md — CP-O09 is the save-time no-write case, no divergence, temp-file id; pass-5 A21); Tier A expects the diff and cites the entry | NFR-003 | ARCH-04 cache writers / ARCH-07 exclusion machinery |
+| R-009 | The hand-written HTTP/1.1 + crypto/tls client over net.Conn (ARCH-03 metrics-client family) parses untrusted network bytes — status line, headers, chunked framing, redirects, read-to-EOF bodies; malformed or hostile replies reach a hand-rolled parser, not a hardened stdlib one (ADV-P13-A11, orchestrator call 16) | Security | open (mitigations named) | MEDIUM | Parser limits pinned at legacy's stdlib constants in BC-1.04.001 (http.client `_MAXLINE`=65536 / `_MAXHEADERS`=100; urllib `max_repeats`=4 / `max_redirections` — each request reads at most those); a Go fuzz target on the response parser joins the Phase 6 formal-hardening pipeline | NFR-003 | ARCH-03 metrics client / BC-1.04.001 / Phase 6 hardening |
 
 ## Gate Notes
 
 - HIGH-impact risks: R-001, R-004. Both carry an architecture mitigation (ARCH-04 / AD-08
   and ARCH-07 / AD-09 respectively), matching the audit's 2/2 substance pass
   (consistency-audit-2026-11-17.md §10.3).
-- No security-category risks identified (vacuous pass, audit §10.3).
+- Security-category risks: R-009 (hand-written HTTP/1.1 + TLS client over untrusted
+  bytes; minted pass-13 A11/call 16) — the audit's vacuous pass predates it.
 - Open NFR candidates with no matching NFR: none. R-001 and R-008 link to existing
   NFR-003, R-002 to NFR-001 and R-003 to NFR-004; R-004, R-005, R-006 and R-007 are not
   NFR candidates — their mitigations are verification machinery, documentation, and spec

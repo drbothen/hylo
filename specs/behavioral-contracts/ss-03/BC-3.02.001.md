@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2f2548f"
+input-hash: "0b9280d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,12 +19,13 @@ confidence: M
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "1.2.1 2026-11-17T21:45:00Z: patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "1.2.2 2026-11-18: ADV-P4 remediation D06/D32/D29 — Windows name comparison folds case after case-insensitive .exe strip; PID-reuse guard rejection = non-matching level (walk continues); fake-ps weekday corrected to Fri"
   - "2026-11-19T01:10:00Z (1.2.3) ADV-P5 remediation D22 — chain-poison refinement: after a PID-reuse guard rejection the walk keeps climbing but accepts no match at or above the rejected level (a stranger's claude can no longer produce a wrong home marker); match-before-rejection legs pinned"
   - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D09 (orchestrator call 15) — walk rule realigned to the ARCH-05 binding terminate rule: a PID-reuse guard rejection TERMINATES the walk with result None (no climb to the depth cap, no post-rejection probes); table legs respelled (match before rejection; rejection terminates); supersedes the pass-4 D06 walk-continues wording"
   - "2026-11-20T18:30:00Z (1.3.1): ADV-P9 remediation D02+D01 (orchestrator call 7) — Inv 4 respelled: NO unseeded corpus case exists (pass-8 D10 aligned); the probe is exercised by the dedicated Go table tests with a fake process table, never by parity cases; EC-008 states the D4-EX-1 rider-test closure (NO exclusions.json entry)"
   - "2026-11-22T00:00:00Z (1.3.2): ADV-P12 remediation D01 (orchestrator call 2, superseding pass-11 call 2) — Inv 4 and EC-008 restated: every corpus case either seeds proc_start or is cache-003, which probes on NEITHER side (oracle: empty fake PATH raises FileNotFoundError at the ps call, caught SL:293-294; hylo: HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0, zero probes); the load-time rejection's admission branch is the conditional fake PATH, whose only committed declarer is cache-003; the former 'no P1 corpus case declares the fake process table' universal dissolved"
+  - "2026-11-23T00:00:00Z (1.3.3): ADV-P13 remediation A2-04 BC half — the three probe-mechanics VP rows keep VP-014 (whose amended v1.6 statement pins the three walk behaviours jointly with VP-033, so a routed row no longer outruns the verifying statement) alongside VP-033 and the VP-012 frontmatter-closure citation; a fourth VP-014 row + VP-Anchors entry minted for the ruled ⌂ Windows canonical-table pin itself; reciprocity (VP-014 bcs: gains BC-1.02.017) is the architect's half, done in VP-014 v1.6"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -157,6 +158,7 @@ Legacy behavior behind rows 1-6 verified 2026-11-15 against CPython 3.11.7 runni
 | VP-033, VP-014, VP-012 (frontmatter closure) | A numeric cached `proc_start` short-circuits: zero probe calls, zero writes | unit test with a counting fake |
 | VP-033, VP-014, VP-012 (frontmatter closure) | A stored `proc_start` is always integral-valued and serialized with a `.0` suffix | Go property test (testing/quick) over random starts |
 | VP-033, VP-014, VP-012 (frontmatter closure) | At most `max_depth` probe calls per refresh | Go property test (testing/quick) over random chains |
+| VP-014 | The Windows D4-EX-1 vector row's ruled ⌂ bytes are pinned by this contract's canonical vector table (with BC-1.02.017's), and the rider's expected output is that table's expected column | rider test `TestWindowAge_D4EX1_Windows_AncestorFound` + vector-table parity (VP-014 statement) |
 
 ## Traceability
 
@@ -192,7 +194,8 @@ TBD — window age (design step S7)
 
 ## VP Anchors (Recommended)
 
-- VP-033, VP-014, VP-012 — cache-first short-circuit
+- VP-033, VP-014, VP-012 — cache-first short-circuit, integral `.0` serialization, depth bound (VP-014's amended statement pins the three walk behaviours jointly with VP-033)
+- VP-014 — the ruled ⌂ Windows vector bytes (the D4-EX-1 bound's canonical-table pin)
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T16:00:00Z
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "99e18a1"
+input-hash: "8520520"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:load_cache/save_cache (SL:190-206)"
@@ -28,7 +28,8 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C15/C16) — PC1 states the read-encoding pin: legacy opens caches with the locale encoding, hylo reads UTF-8 per named deviation OD-159 (OD-183 covers stdio only), divergence reachable only via foreign non-ASCII caches (OD-160), VP-012 closure; parity_class relabeled from byte-exact to temp-file, matching sibling BC-1.06.002 (the contract carries the OD-163 own-temp-cleanup divergence)", "1.2.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-24) — EC-009 respelled to the OD-186 single attempt count: three attempts total (initial attempt plus two retries), matching ARCH-04, VP-018, BC-6.03.003 and BC-2.01.004; no behavioral change", "1.2.8 2026-11-19T17:30:00Z: pass-7 remediation — EC-009 attempt count respelled to the OD-188 config key statusline.cache.rename_retry_limit (1 + limit attempts, default 2 → three, range 0..10, beside rename_retry_delay_ms); PC2 and the happy-path vector qualify mode 0600 POSIX-only with the Windows 0666/0444 expectation (ADV-P7-C09); VP-012 closure row and anchor added (SC-21 reciprocity, ADV-P7-C05); EC-011 respelled to reproduce legacy per orchestrator call 1: POSIX surrogateescape equivalence (U+DCxx → raw byte 0xx), other lone surrogates fail the name encode, Windows keeps lone surrogates as UTF-16 units (pass-6 call 16), no WTF-8 exclusion (ADV-P7-C01)", "1.2.9 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C05; orchestrator call 18) — EC-009 states the parity ruling outright: the rename-retry outcome rides the temp-file exclusion as widened by OD-186 (a succeeding retry persists a cache file legacy would not have written — a file-content difference beyond the directory listing)", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C08) — PC4 and the 777 vector state the no-regular-transcript precondition: with a transcript, a non-string sid degrades via CP-S14 (SL:1017) before any session-cache write (BC-1.03.013 EC-007/008)", "1.3.1 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C03; orchestrator call 14) — EC-011 hylo POSIX clause states the surrogateescape range explicitly: only U+DC80..U+DCFF map to raw bytes 0x80..0xFF, any other lone surrogate (U+DC00..U+DC7F, U+DD00..U+DFFF) fails the name encode"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C15/C16) — PC1 states the read-encoding pin: legacy opens caches with the locale encoding, hylo reads UTF-8 per named deviation OD-159 (OD-183 covers stdio only), divergence reachable only via foreign non-ASCII caches (OD-160), VP-012 closure; parity_class relabeled from byte-exact to temp-file, matching sibling BC-1.06.002 (the contract carries the OD-163 own-temp-cleanup divergence)", "1.2.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-24) — EC-009 respelled to the OD-186 single attempt count: three attempts total (initial attempt plus two retries), matching ARCH-04, VP-018, BC-6.03.003 and BC-2.01.004; no behavioral change", "1.2.8 2026-11-19T17:30:00Z: pass-7 remediation — EC-009 attempt count respelled to the OD-188 config key statusline.cache.rename_retry_limit (1 + limit attempts, default 2 → three, range 0..10, beside rename_retry_delay_ms); PC2 and the happy-path vector qualify mode 0600 POSIX-only with the Windows 0666/0444 expectation (ADV-P7-C09); VP-012 closure row and anchor added (SC-21 reciprocity, ADV-P7-C05); EC-011 respelled to reproduce legacy per orchestrator call 1: POSIX surrogateescape equivalence (U+DCxx → raw byte 0xx), other lone surrogates fail the name encode, Windows keeps lone surrogates as UTF-16 units (pass-6 call 16), no WTF-8 exclusion (ADV-P7-C01)", "1.2.9 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C05; orchestrator call 18) — EC-009 states the parity ruling outright: the rename-retry outcome rides the temp-file exclusion as widened by OD-186 (a succeeding retry persists a cache file legacy would not have written — a file-content difference beyond the directory listing)", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C08) — PC4 and the 777 vector state the no-regular-transcript precondition: with a transcript, a non-string sid degrades via CP-S14 (SL:1017) before any session-cache write (BC-1.03.013 EC-007/008)", "1.3.1 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C03; orchestrator call 14) — EC-011 hylo POSIX clause states the surrogateescape range explicitly: only U+DC80..U+DCFF map to raw bytes 0x80..0xFF, any other lone surrogate (U+DC00..U+DC7F, U+DD00..U+DFFF) fails the name encode",
+  "1.3.2 2026-11-24T12:00:00Z: pass-13 remediation (ADV-P13-C01/C02/C03, C05 BC half) — PC-1 states the Windows cache dir as the OD-144 subdirectory %LOCALAPPDATA%\\hylo\\cache (BC-3.01.001 PC-2); new PC-5 carries the BC-3.01.001 EC-004 handoff (unavailable cache dir = load-empty / save-no-op); PC-2 anchors the generic write format to BC-5.02.006 (pyfmt.Dumps) instead of BC-1.05.009, Related BCs gains the BC-5.02.006 bullet; EC-001 cites the CP-C family (OD-160) instead of the exhausted CP-C01..C10 range and names the session-cache consult sites (SL:324-337/356)", "1.3.3 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-001's session-cache site range cites the register ids CP-C11..CP-C19; no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +51,8 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 ## Preconditions
 
 1. Cache directory = `paths.cache_dir`; default per OD-101: `$XDG_CACHE_HOME/hylo` or
-   `~/.cache/hylo` on macOS/Linux, `%LOCALAPPDATA%\hylo` on Windows, built by
+   `~/.cache/hylo` on macOS/Linux, `%LOCALAPPDATA%\hylo\cache` on Windows (the
+   OD-144 subdirectory; BC-3.01.001 PC-2 rejects the shared-dir reading), built by
    `internal/platform` (the one explicit owner exception to "defaults equal legacy";
    legacy used its own fixed directory, SL:78).
 2. Session-cache path = cache dir + separator + `"statusline-" + S + ".json"`, where
@@ -81,7 +83,9 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
    Go maps the perm bits onto the read-only attribute and `Stat` reports 0666 — or 0444
    when the file is read-only — so the mode assertion is POSIX-leg-only, ADV-P7-C09);
    write
-   `json.dump(data)` bytes (BC-1.05.009 format rules); rename the temp over the target
+   `json.dump(data)` bytes (generic writer format: BC-5.02.006 "pyfmt.Dumps:
+   json.dump cache-file bytes"; the cost-history record content specifics stay with
+   BC-1.05.009); rename the temp over the target
    (`os.replace`). Any exception at any step is swallowed; the render continues.
    **On any failure after the temp was created — a mid-write `json.dump` error (e.g.
    BC-1.03.006 EC-009's 4,301-digit accumulator) as much as a failed rename — hylo
@@ -98,6 +102,12 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
    exists: with a transcript, a non-string sid raises CP-S14 at the mix-cache name
    substitution (SL:1017) before the session-cache path is built (SL:1215), the line
    degrades and no session cache is written (BC-1.03.013 EC-007/008).
+5. CacheDir error (the BC-3.01.001 EC-004 handoff, ADV-P13-C02): when the cache
+   directory is unavailable — the OS reports an error for the directory itself (cannot
+   be determined, cannot be created, or the path is occupied by a regular file,
+   EC-006) — load behaves as load-empty (`{}`) and save is a silent no-op; the status
+   line still renders (DI-008). Nothing is persisted and no test-visible error escapes
+   the helper. Fault-injection coverage: the VP-018/VP-001 row below.
 
 ## Invariants
 
@@ -112,7 +122,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | file contains `[1]` | load returns `[1]`; caller-level crash paths for wrong shapes are CP-C01..C10, out of parity scope (P3r2 ruling b) |
+| EC-001 | file contains `[1]` | load returns `[1]`; caller-level crash paths for wrong shapes ride the CP-C family (OD-160) — for the session cache the consult faults sit at SL:324-337/356 (sample-type and KeyError legs; register ids CP-C11..CP-C19) — out of parity scope (P3r2 ruling b); the per-site register lives in error-taxonomy's CP-C surface (BC-1.03.002 EC-007/EC-010/EC-011 for the mix-cache legs) |
 | EC-002 | file `{"a": NaN}` | `{"a": NaN}` |
 | EC-003 | file `{"a":1,"a":2}` | `{"a": 2}` |
 | EC-004 | file starts with a UTF-8 BOM | `{}` |
@@ -152,12 +162,13 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:load_cache (SL:190-195), save_cache (SL:198-206); main session-cache path (SL:1214-1215) |
 | Legacy contract | BC-SL-052 (P3r1 row 91; refined P3 deep r1 row 157) |
-| Decisions | D4, D5 (cross-platform), **OD-03** (raw sid kept), **OD-101** (hylo cache dir from P1), OD-103, OD-110 (temp cleanup is a named, cache-comparison-only exclusion, see BC-1.06.002) |
+| Decisions | D4, D5 (cross-platform), **OD-03** (raw sid kept), **OD-101** (hylo cache dir from P1), **OD-144** (Windows cache/state subdirectories, PC-1), OD-103, OD-110 (temp cleanup is a named, cache-comparison-only exclusion, see BC-1.06.002) |
 
 ## Related BCs (Recommended)
 
 - BC-1.06.002 — related to (sid with `/`, temp handling)
-- BC-1.05.009 — consumed by (cost-history bytes)
+- BC-5.02.006 — depends on (generic writer format: pyfmt.Dumps, json.dump cache-file bytes; ADV-P13-C03)
+- BC-1.05.009 — related to (cost-history record content specifics; not the generic write format)
 - BC-1.03.013 — related to (mix cache sanitizes the sid)
 - BC-6.03.003 — related to (temp names excluded from comparison)
 - BC-5.02.003 / BC-5.02.004 — depends on (JSON decode, ordered Value)

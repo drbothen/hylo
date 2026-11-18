@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "19605e7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1073-1079, 1096-1103)"
@@ -19,7 +19,8 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "1.2.1 2026-11-24T12:00:00Z: pass-13 remediation (ADV-P13-C10) — PC1 loosened to the legacy recording rule: a line of A without a usage object records nothing and does not affect the window (BC-1.03.005 EC-006), so the first COUNTED line supplies A's usage and EC-003 is no longer inconsistent with the precondition"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,8 +41,10 @@ last-turn rate stays.
 
 ## Preconditions
 
-1. Lines of one message id `A` appear in order, each with a usage object; the first was not already seen
-   (BC-1.03.005).
+1. Lines of one message id `A` appear in order; a line of `A` that carries a usage object is recorded at
+   first sight only (the first was not already seen, BC-1.03.005); a line of `A` without a usage object
+   records nothing and does not affect the window (BC-1.03.005 EC-006), so the first COUNTED line
+   supplies `A`'s usage (EC-003 below).
 2. The lines carry valid timestamps when the turn behavior is under test (BC-1.03.010).
 
 ## Postconditions

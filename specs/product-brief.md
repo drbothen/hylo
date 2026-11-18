@@ -1,10 +1,10 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T10:05:25Z
+timestamp: 2026-11-22T02:00:00Z
 phase: 1a
 inputs:
   - CLAUDE.md
@@ -88,7 +88,8 @@ Notes:
   start). CI reports per-OS timing, but the target binds only on the owner's Mac. The one
   exception is stated here and in the spec: the large-transcript fixture — the one corpus
   case whose transcript exceeds 524,288 bytes (512 KiB), however many lines it holds — is
-  exempt from the 25 ms p95 target, but its p95 must stay under 100 ms (OD-191; 4× the
+  exempt from the 25 ms p95 target, but its p95 must be at most 100 ms — the ceiling
+  fails when p95 > 100.0 ms (OD-191; 4× the
   target, well under the refresh interval).
 - Cutover: "0 rollbacks" is a labeled judgment call; PLAN P5 keeps the Python prototype
   runnable for 2 weeks as the rollback path.

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.5"
+version: "1.4.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
 input-hash: "7bee76c"
@@ -26,6 +26,8 @@ modified:
   - "1.4.3 2026-11-18: pass-10 remediation ADV-P10-C2-06 (PC3 names the registered key statusline.sparkline.scale beside its fixed-top-k 1.0 literal, Pre 2 — the literal spells the default)"
   - "1.4.4 2026-11-18: pass-11 remediation ADV-P11-C2-04 (Pre 1 lists the cached-path foreign-hist crash sites — dict/number/null hist TypeError at the SL:664 slice, short-list-point IndexError at SL:655 via SL:664, plotted giant exact int OverflowError at SL:674, non-numeric plotted value TypeError at SL:671/674; EC-011 added; OD-160 class)"
   - "1.4.5 2026-11-18: pass-12 remediation ADV-P12-C2-01 (giant-int OverflowError bound signed positive — value >= 2**1024 - 2**970; EC-012 added: a negative giant renders the lowest glyph, oracle-verified) + ADV-P12-C2-02 (VP-012 exclusion-closure and VP-001 never-blank rows for the OD-160/EC-011 cached-path degrade legs) + ADV-P12-C2-05 (Description and the VP-030 row generalize the plotted window to statusline.sparkline.points, default 12)"
+  - "1.4.6 2026-11-18: pass-13 remediation ADV-P13-C2-09 (Pre 2's hist[-0:] whole-list cite corrected SL:663 → SL:664 — the slice expression's line, the same line Pre 1 and EC-011 cite; no behavioral change)"
+  - "1.4.7 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-011 cites the register ids CP-C20/CP-C21/CP-C22/CP-C23 beside the legacy sites, minted by error-taxonomy 1.20; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,7 +65,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
    `TRACE_KEYS`; unknown values are a config error in Go, BC-2.02.004, D4-EX-3);
    `statusline.sparkline.points` 12 (T-006, judgment "long flats read as blobs";
    OD-162 range: Int 1..100 — 0 is a number-range config error because Python
-   `hist[-0:]` returns the whole list (SL:663), and 1 is valid but always draws ""
+   `hist[-0:]` returns the whole list (SL:664), and 1 is valid but always draws ""
    given PC2's `len(pts) < 2` gate);
    `statusline.sparkline.scale` = fixed top `k` 1.0, floors `v` 1.0 and `f` 0.1, other
    1e-9 (T-045, derived review #17.1; OD-162 range: each value a finite Float > 0,
@@ -117,7 +119,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | EC-008 | `ttft` trace, `f` [0.02, 0.05] (floor 0.1) | `▂▅` |
 | EC-009 | idx at top 7: v/top*7 = 0.49 / 0.5 / 2.5 | glyph 0 / 1 / 3 (half-up) |
 | EC-010 | Legacy `DGX_SL_TRACE=mine` (or any unknown trace) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.004); legacy fell back to `rate`. OD-105 exclusion entry `D4-EX-3`, dedicated test `TestD4EX3_Enum` |
-| EC-011 | Cached-path foreign `hist` shapes (Pre 1; exclusion id **OD-160**): `hist` a dict/number/null; a stored point a list shorter than 2 elements; a plotted point's value a giant exact int (value >= 2**1024 - 2**970, positive only — EC-012) or a non-numeric scalar | TypeError at the `hist[-N:]` slice (SL:664; a dict slice is unhashable in CPython 3.11) / IndexError inside `_norm_pt` (SL:655 via SL:664) / OverflowError (SL:674) / TypeError (SL:671/SL:674) — each → errDegraded, same top-level-guard disposition as BC-1.04.014 (ADV-P11-C2-04) |
+| EC-011 | Cached-path foreign `hist` shapes (Pre 1; exclusion id **OD-160**): `hist` a dict/number/null; a stored point a list shorter than 2 elements; a plotted point's value a giant exact int (value >= 2**1024 - 2**970, positive only — EC-012) or a non-numeric scalar | TypeError at the `hist[-N:]` slice (SL:664; a dict slice is unhashable in CPython 3.11; CP-C20) / IndexError inside `_norm_pt` (SL:655 via SL:664) / OverflowError (SL:674, CP-C22) / TypeError (SL:671, CP-C21; SL:674, CP-C23) — each → errDegraded, same top-level-guard disposition as BC-1.04.014 (ADV-P11-C2-04) |
 | EC-012 | A plotted point's value a NEGATIVE giant exact int (<= -(2**1024 - 2**970); foreign-cache vector family, byte-parity-covered — both sides render) | renders, no crash: `max(v, 0.0)` compares the int to the float exactly and returns the float `0.0` (oracle: `max(-(2**1024), 0.0)` = `0.0`, CPython 3.11.7) and the SL:671 window top ignores the negative too, so `idx` = 0 → the lowest glyph; `v` [-(2**1024), 2] is byte-equal to EC-004's `[-5, 2]` (ADV-P12-C2-01) |
 
 ## Canonical Test Vectors

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "c9f1dd6"
+input-hash: "075706b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -36,6 +36,8 @@ modified:
   - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D05+D08 (orchestrator calls 9+14) — PC-8's pair checks respelled: the cost.percentiles ascending-pair check is INTRA-key (fires at that key's validation, error names the whole key with its full JSON value, following error-taxonomy) beside the cross-KEY subagent.tokens pair; the display-width bullet states the Text-class `invalid UTF-8` pre-check (width and code-point counts only ever consulted on valid UTF-8; minted in BC-2.02.001 pass-9 D08)"
   - "2026-11-21T06:00:00Z (1.3.4): ADV-P10 remediation D06 (orchestrator call 6) — the cross-KEY subagent.tokens pair rule states the default-layer value spelling: when the named value comes from the default layer, <value> is the default's env spelling per the interface-definitions Default column (e.g. m_from's 1000000) and [from <ENVNAME>] is omitted (BC-2.02.001 PC-3/PC-6)"
   - "2026-11-21T07:00:00Z (1.3.5): ADV-P11 remediation OD-194 + A09/D08 (orchestrator calls 4, 16) — new PC-13 registers the nine statusline.labels.* word keys (old, rate, queue, kv, host, tps, max, idle, na; Text; default = the exact legacy WORD; range = the label rule: non-empty, no control bytes, valid UTF-8, display width 1..16 per OD-173) with env names via PC-2; punctuation and unit marks (->, ·, /, [, ], ?, the dead-rung ?, <1%) stay named format constants with why-not-config notes; PC-9's reroute_all_prefixes default respelled to the env spelling claude,claude- (List grammar, call 4)"
+  - "2026-11-23T00:00:00Z (1.3.6): ADV-P13 remediation D13 (pending-intent verified against PC-8/PC-11 on disk) — PC-13's 'exactly these nine members' scoped to the WIDTH-BOUNDED label-word registry: the three further statusline.labels.* keys without the width bound (labels.input PC-8; labels.vllm_down, labels.lmcache_down PC-11) are named in PC-13 so the namespace and the bounded registry no longer read as the same set"
+  - "2026-11-24T19:30:00Z (1.3.7): pass-13 residual (orchestrator call 15 rider) - PC-11's statusline.cache.rename_retry_delay_ms range respelled 1..100 (limit 0..10; limit x delay at most 1000 ms per Save, labeled judgment call), matching BC-6.03.003, interface-definitions and ARCH-04; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -263,9 +265,11 @@ incomplete, whose default fails its own validation, or whose env name collides.
 
 11. **Windows rename-retry keys (OD-186 + OD-188, ADV-P6/P7 remediations):** the
    registry carries
-   `statusline.cache.rename_retry_delay_ms` — `Int (ms)`, default `10`, range `1..1000`
+   `statusline.cache.rename_retry_delay_ms` — `Int (ms)`, default `10`, range `1..100`
    (labeled judgment call: long enough to let a concurrent Windows reader close its
-   handle, far below any perceptible refresh latency; RationaleCode `J`). Millisecond
+   handle, and set WITH `rename_retry_limit`'s 0..10 ceiling so that limit × delay is
+   at most 1000 ms per Save — labeled judgment call, pass-13 call 15; RationaleCode
+   `J`). Millisecond
    delay between rename-retry attempts in the cache Save path after a sharing violation.
    Beside it (OD-188, pass-7): `statusline.cache.rename_retry_limit` — `Int`, default
    `2`, range `0..10` (labeled judgment call; RationaleCode `J`; env
@@ -288,9 +292,16 @@ incomplete, whose default fails its own validation, or whose env name collides.
 
 13. **Displayed-word label keys (OD-194, pass-11):** every word a person reads as a
    label in the rendered line is a `Text` config key under `statusline.labels.*`. The
-   registry carries exactly these nine members, each with the legacy WORD as its
+   registry carries exactly these nine WIDTH-BOUNDED members, each with the legacy
+   WORD as its
    default — the exact word only; surrounding spaces, digits and punctuation stay in
-   the format string (sites in `legacy/dgx_statusline.py`):
+   the format string (sites in `legacy/dgx_statusline.py`). The nine-member claim
+   scopes the width-bounded label-word registry, NOT the whole `statusline.labels.*`
+   namespace: three further `statusline.labels.*` keys sit in the same namespace
+   WITHOUT the width bound, ranged by the general Text class instead (PC-6:
+   non-empty, control-free, valid UTF-8) — `statusline.labels.input` (default `in`,
+   PC-8), `statusline.labels.vllm_down` (default `vLLM down`, PC-11) and
+   `statusline.labels.lmcache_down` (default `LMCache down`, PC-11) (pass-13 D13):
 
    | Key | Default | Legacy site | Inline-literal owner (ADV-P11-C2-03) |
    |-----|---------|-------------|--------------------------------------|

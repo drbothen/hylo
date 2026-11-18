@@ -543,3 +543,40 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   are verified against the intended escape afterward.
 
 **Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-50 [process-gap] — A vector's setup text is part of the vector
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-13 burst) A vector's setup text was not walked with its expected
+  output — pass-13 B01 caught a setup saying "empty cache" while the expected output assumed a seed, and the
+  sync check found two more vectors of the same class.
+- **Remedy:** The setup text (config, seeded files, inputs) is part of the vector and is walked against legacy
+  together with its expected output, field by field, before acceptance.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-51 [process-gap] — A binding call states explicitly which files it applies to
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-13 burst) A fix agent read a binding call that named architecture
+  and BC files as architecture-only and left the BC stale (pass-12 call 7, re-filed as pass-13 D02).
+- **Remedy:** Binding calls say explicitly that they apply to every file they name; an agent that believes a
+  call names files beyond its assigned set lists the hit back instead of narrowing the call's scope.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-52 [process-gap] — Retired phrases are re-grepped over all of specs/ before commit
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-13 burst) The sync check's sibling grep missed two of the four
+  files stating a retired phrase (the `Store` seam) — two copies were respelled, two shipped stale.
+- **Remedy:** The orchestrator re-greps every retired phrase over all of specs/ immediately before commit
+  instead of trusting the checker's sibling list.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-53 [owner-ruling] — Stop rule moved to a severity gate (OD-195)
+
+- **Lesson:** (ruled 2026-11-18) The adversarial loop plateaued at roughly 70 findings per pass (85, 69, 62,
+  73, 72) while behaviour matched legacy everywhere checked — churn without a converging total. The owner
+  moved the stop rule (OD-195): from pass 14 on, Phase 1d stops after 2 consecutive passes with zero
+  CRITICAL/HIGH/MEDIUM findings; every finding of every severity is still fixed each pass (OD-176 unchanged
+  on that point).
+- **Remedy:** Decide whether Phase 1d continues by counting the severity gate, not total finding counts.
