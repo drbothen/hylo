@@ -12,7 +12,7 @@ origin: greenfield
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.10"
+modified: "0.2.11"
 extracted_from: "behavioral-contracts/ss-01..ss-06 frontmatter and H1 headings (generated; do not hand-edit rows)"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -22,7 +22,7 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "0fdce60"
+input-hash: "16fb264"
 traces_to: ../prd.md
 
 ---
@@ -316,7 +316,7 @@ traces_to: ../prd.md
 | BC ID | Title | Subsystem / section | Legacy | Parity class | Conf | Status | File |
 |---|---|---|---|---|---|---|---|
 | BC-6.04.001 | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.x leg; -race; gitleaks | S6.04 | new | n.a. | — | draft | [BC-6.04.001](ss-06/BC-6.04.001.md) |
-| BC-6.04.002 | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target | S6.04 | new | n.a. | — | draft | [BC-6.04.002](ss-06/BC-6.04.002.md) |
+| BC-6.04.002 | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling) | S6.04 | new | n.a. | — | draft | [BC-6.04.002](ss-06/BC-6.04.002.md) |
 | BC-6.04.003 | Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs | S6.04 | new | n.a. | — | draft | [BC-6.04.003](ss-06/BC-6.04.003.md) |
 
 ## Accounting exceptions

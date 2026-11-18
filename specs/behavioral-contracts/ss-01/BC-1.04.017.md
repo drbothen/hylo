@@ -4,10 +4,10 @@ level: L3
 version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "81a6f43"
+input-hash: "b2312ac"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:824-834)"
@@ -18,7 +18,9 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.idle with default ☾, OD-189 sibling treatment)"]
+modified:
+  - "1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.idle with default ☾, OD-189 sibling treatment)"
+  - "1.2.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names the registered key statusline.idle.after_s beside its default literal)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,7 +45,7 @@ second fields. Notation: `\e` is byte 0x1B.
 
 ## Postconditions
 
-1. Shown iff `delta > 300` (strict; 300.0 hidden).
+1. Shown iff `delta > statusline.idle.after_s` (default 300; strict; 300.0 hidden).
 2. `idle_min = int(delta // 60)` (Python float floor division).
 3. Age text:
    - `idle_min >= 1440` → `str(idle_min // 1440) + "d" + D(idle_min % 1440 // 60, 2, zeroPad) + "h"`

@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.19"
+version: "1.20"
 status: draft
 producer: architect
-timestamp: 2026-11-20T08:00:00Z
+timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "e218913"
+input-hash: "f7e5c59"
 traces_to: prd.md
 source_bc: BC-6.03.004
-bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.06.001, BC-1.02.017]
+bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017]
 module: internal/parity
 proof_method: mutation-test (fail-closed catalogue)
 feasibility: feasible
@@ -37,8 +37,9 @@ modified:
   - "1.15 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-21) — bcs: gains BC-1.06.001, whose PC-1 note states the exclusion entry and its riding table test are validated by this closure check; Source Contract names the row; the dipping 1.4 stamp re-dated ascending (SC-27); no closed-set membership or test-name change"
   - "1.16 2026-11-19T18:00:00Z: pass-7 fixes (A2-02/A2-03/A2-04 + C2-03/C05 reciprocity, orchestrator call 10) — rider attributions copied EXACTLY from the BC-6.03.004 register: OD-159 rider respelled to BC-1.03.001 PC-3 (directional test), OD-160 riders respelled to BC-1.02.017 EC-010 and BC-1.01.008 EC-011 (directional tests; BC-1.05.004 keeps the dedicated test), OD-30 gains BC-1.05.009, temp-file returns to the register's single riding test TestCacheStore_TempFile_CleanupOnFailedReplace (BC-1.06.002's OD-110 test remains that contract's own product test, not a second rider); cp-x03's OD-145 provisional name settled here as TestCPX03_WriteFailureExit0; closure check additionally verifies a rider test exists for EVERY closed id independent of entries (OD-181; TestD4EX3_Text) and guards a non-empty mutant catalogue; bcs: gains BC-1.04.001 (OD-181 rider carrier) and BC-1.04.002 (OD-160-tagged EC-008 citation carrier), map rows reciprocated in VP-INDEX"
   - "1.17 2026-11-19T19:00:00Z: pass-7 residual remediation — OD-159 register-rider citation corrected to its real home BC-1.02.004 TestGitTextReads_OD159_StrictUTF8 in the map row and mutant-catalogue note (the formerly cited BC-1.03.001 PC-3 is the stat-race postcondition and never mentions OD-159; BC-6.03.004 register corrected to match); cp-x03 provisional-note sync recorded as done; no behavioural change"
-  - "1.18 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — bcs: gains BC-1.02.017, whose Inv 3 names this VP's concrete D4-EX-1 rider test TestWindowAge_D4EX1_Windows_AncestorFound (ADV-P7-B15; reciprocity preferred over exception-listing, SC-13/SC-14 convention); no closed-set membership or test-name change",
+  - "1.18 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — bcs: gains BC-1.02.017, whose Inv 3 names this VP's concrete D4-EX-1 rider test TestWindowAge_D4EX1_Windows_AncestorFound (ADV-P7-B15; reciprocity preferred over exception-listing, SC-13/SC-14 convention); no closed-set membership or test-name change"
   - "1.19 2026-11-20T08:00:00Z: pass-8 fixes (A2-05, A2-06, C03) — OD-160 register riders corrected to BC-1.02.017 EC-004..006 (hand-edited proc_start shapes) and BC-1.01.008 PC3 (cached-branch lone surrogate), in both the Source Contract and the Named Tests note (EC-010 is the CP-O05 overflow; BC-1.01.008 has no EC-011); TestWindowAge_D4EX1_Windows_AncestorFound labelled the D4-EX-1 rider, never an OD-160 rider (1.18 entry label corrected in place); D4-EX-2 attribution gains the hylo-only vector carriers BC-1.03.014 and BC-1.03.016; OD-160 citation carriers gain BC-1.03.002 (EC-008/009) and BC-1.03.005 (PC5); bcs: gains those four contracts"
+  - "1.20 2026-11-20T12:00:00Z: pass-9 fix (C2-04) — bcs: gains BC-1.05.009 (second OD-30 register contract beside BC-1.05.006; its body register row and Named Tests entry already named it — the frontmatter map row was the missing reciprocity); VP-INDEX coverage map synced in the same burst by the index owner; the 1.19 entry's lost closing quote restored (call 5 YAML repair)"
 deprecated: null
 deprecated_by: null
 replacement: null

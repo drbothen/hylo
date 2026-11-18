@@ -1,14 +1,14 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.12"
+version: "1.13"
 status: approved
 producer: architect
-timestamp: 2026-11-19T16:00:00Z
-modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"]
+timestamp: 2026-11-21T00:00:00Z
+modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change", "1.13 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A09) — both 'AD-03 overlay decision' cells respelled per R-001: the AD-03 decision — the in-memory overlay option was rejected (AD-03 rejected the overlay option; the old cells misdescribed it as an overlay decision)"]
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "928873e"
+input-hash: "7766305"
 traces_to: prd.md
 prd_version: "0.1"
 
@@ -50,7 +50,7 @@ unchanged.)*
 | §4 NFR-001 | BC-6.04.002 | p95 <= 25 ms render on the owner's Mac, metrics wait excluded | Pure hot path, no allocation-heavy idioms; gate binds only with `HYLO_TIMING_GATE=1` | feasible | Measured VP-036; OD-117 binding note honored |
 | §4 NFR-002 | BC-1.01.001 et al. | Never-blank, exit-0 under all CP-* triggers | Guard backstop + typed degrades; write order preserved | feasible | Fault-injection tables VP-001/VP-003 |
 | §1.2 (OD-107) | BC-2.01.001 | P1 config = `HYLO_*` env over built-in defaults only | Registry closed; seven error classes closed (OD-114/134/140; seventh Text class OD-178 — pass-6 A2-08) | feasible | Resolution totality VP-015/VP-016/VP-017 |
-| §8 (ruling b) | BC-1.06.001/.002, BC-6.02.004 | Go is byte-exact cache writer/reader across Python/Go swaps, four caches | Byte-exact writers over ordered `pyfmt.Value`; atomic write + Windows retry (AD-08). BC-1.06.001 rides the `temp-file` class (OD-110) for the OD-163 own-temp-cleanup divergence — payload bytes stay byte-exact | risky | Swap-parity tier VP-019; failed-replace semantics pinned by AD-03 overlay decision |
+| §8 (ruling b) | BC-1.06.001/.002, BC-6.02.004 | Go is byte-exact cache writer/reader across Python/Go swaps, four caches | Byte-exact writers over ordered `pyfmt.Value`; atomic write + Windows retry (AD-08). BC-1.06.001 rides the `temp-file` class (OD-110) for the OD-163 own-temp-cleanup divergence — payload bytes stay byte-exact | risky | Swap-parity tier VP-019; failed-replace semantics pinned by the AD-03 decision — the in-memory overlay option was rejected |
 | §1.6 S3 | BC-3.02.001/.002 | Native per-OS ancestor probe replaces `ps` | Build-tag-confined `internal/platform`; x/sys sole runtime dep (AD-07) | feasible | Probe register VP-033; D4-EX-1 bound VP-014; OQ-3 measurement deferred by design |
 | §2.5 (OD-103) | BC-5.01..5.04 | Python-semantics formatting (half-even, WTF-8, `_mktime`, 4,300-digit grammar) | One sink package `internal/pyfmt`, four files, CPython-generated tables (AD-04) | feasible | Equivalence VPs VP-023..026; `math/big` at the ruled duration-format sites (OD-137,
 extended to the `_fmt_lines` lines/thresholds path by OD-156 — pass-4 A2-15) |
@@ -92,7 +92,7 @@ after OD-155; BC-COMPONENT-MAP is current for all 153)* *(pass-3 sync 2026-11-18
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
-| Python/Go cache-swap byte divergence (four caches) | medium | high | Byte-exact writers over ordered `pyfmt.Value`; Tier B goldens + four-cache swap tier (VP-019); failed-replace semantics pinned by the AD-03 overlay decision |
+| Python/Go cache-swap byte divergence (four caches) | medium | high | Byte-exact writers over ordered `pyfmt.Value`; Tier B goldens + four-cache swap tier (VP-019); failed-replace semantics pinned by the AD-03 decision — the in-memory overlay option was rejected |
 | p95 <= 25 ms miss on the owner's Mac | medium | medium | Legacy baseline measured (median 84.5 ms); hot-path allocation discipline; per-OS timing report; gate binds only where OD-117 says |
 | Windows-only edge cases marked "not executed" (BC-1.06.001 EC-008, BC-1.06.002 EC-003/005; sitecustomize shim) | medium | medium | Pinned on the windows-2025 CI leg and the harness canary (PRD Assumption 5); disclosed, not hidden |
 | Fake-pass parity: harness weaker than refereed | low | high | AD-09 fail-closed machinery, canary (BC-6.01.003), exclusion closure property test (VP-012); HIGH tier, whose kill-rate target is a Phase 6 target per OD-158, not a P1 gate (pass-4 A2-21) |

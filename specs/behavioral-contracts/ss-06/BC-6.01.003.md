@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "08ebff4"
+input-hash: "07f32ce"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.4): sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
   - "2026-11-19T03:15:00Z (1.2.5): ADV-P6 remediation D11 — canonical vector row 1 realigned to PC-4's strengthened canary instant 1794615009.4245193 (exact stdout); the superseded 1794615009.5 value stays only as EC-004's fractional-grammar case"
   - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D24 — stdio canary fixture respelled a non-ASCII code point (U+0664, UTF-8 D9 A4) and the probe script specified (testdata/clock_shim/stdio_canary.py, name per OD-145 delegation)"
+  - "2026-11-20T18:30:00Z (1.2.7): ADV-P9 remediation D11 — the stdio canary's claim narrowed to what it can detect (POSIX leg observes but cannot detect a lost shim under the pinned UTF-8 locale; measured: even LC_ALL=C + PYTHONCOERCECLOCALE=0 round-trips U+0664 as UTF-8 on the reference build); PC-5 gains the Windows LF negative control (shim absent, normal builder env, raw bytes must contain CR LF)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -118,13 +119,23 @@ oracle case runs, that the shim actually took effect.
    - Stdout must equal exactly `1794615009.4245193\n`.
    - On any other output the run fails, not skips, with
      `parity: clock shim not loaded (OD-109 canary): got "<stdout>"`. No oracle case runs.
-   - A second canary leg proves the stdio duty (ADV-P3-D23): the harness feeds the probe
+   - A second canary leg OBSERVES the stdio duty (ADV-P3-D23): the harness feeds the probe
      a non-ASCII CODE POINT — `\u0664` (U+0664 ARABIC-INDIC DIGIT FOUR, UTF-8 `D9 A4`; the
      sibling example of BC-2.02.001 EC-008; pass-8 D24: a lone byte \u2265 0x80 is not valid
      UTF-8, so the fixture is the encoded code point, not a "non-ASCII byte") — through
      stdin and reads stdout as raw bytes; with the shim loaded, a `\r\n`-free,
      UTF-8-strict round trip is observed (the probe prints the decoded code point back,
-     UTF-8-encoded, `newline="\n"`). The probe script is the harness's stdio canary,
+     UTF-8-encoded, `newline="\n"`). Discrimination power is NARROWED per ADV-P9-D11
+     (orchestrator call 14) to the delta between the shim's reconfiguration and the
+     interpreter's defaults under the builder env: on POSIX under the pinned
+     `LANG=en_US.UTF-8` the defaults already produce UTF-8 and LF, so the POSIX leg
+     observes the round trip but cannot detect a lost shim (measured 2026-11-18 on the
+     reference CPython 3.11.7: even `LC_ALL=C` with `PYTHONCOERCECLOCALE=0` round-trips
+     U+0664 as UTF-8 `D9 A4`, so no locale override in the builder alters the default);
+     on Windows `PYTHONIOENCODING=utf-8` fixes the encoding half by builder
+     construction, so the Windows leg discriminates the LF half only. The failure leg
+     remains wired on every leg — any byte mismatch fails the run. The probe script is
+     the harness's stdio canary,
      `testdata/clock_shim/stdio_canary.py` — it reads stdin as strict UTF-8 text
      (CPython default), prints the first code point, exits 0 (proposed name, settled by
      the implementer per the OD-145 delegation). Failure leg message:
@@ -132,7 +143,13 @@ oracle case runs, that the shim actually took effect.
      case runs on failure.
 5. **Canary negative control.** A table test runs the same canary probe with `-I`
    instead of `-s`, and separately with `PYTHONPATH` removed. Each must be reported as
-   "shim not loaded". This proves the canary can discriminate.
+   "shim not loaded". This proves the clock canary can discriminate. STDIO negative
+   control (ADV-P9-D11, orchestrator call 14): a table test runs the stdio canary
+   WITHOUT the shim under the NORMAL Windows builder env (PYTHONIOENCODING=utf-8
+   present) and must observe `\r\n` in the raw stdout bytes — proving the LF half of
+   the check can fail; the encoding half is builder-fixed (OD-183) and the POSIX leg
+   cannot fail by default (narrowing above), so the Windows LF leg is the one
+   shim-discriminating stdio control.
 
 ## Invariants
 

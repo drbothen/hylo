@@ -2,13 +2,13 @@
 document_type: spec-open-questions
 level: L2
 section: "owner-validation-list"
-version: "1.4"
+version: "1.5"
 status: resolved
 producer: business-analyst
-timestamp: 2026-11-18T05:40:00Z
+timestamp: 2026-11-20T15:00:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "2055332"
+input-hash: "87febf5"
 traces_to: L2-INDEX.md
 ---
 
@@ -239,7 +239,10 @@ rule stands from the P6 switch on (SM-05).**
   waits for P7's schema (OD-25).
 - **VALID-06:** N backends in config from the start; P1-P5 instantiate one, P6
   activates the fleet.
-- **VALID-08:** "Status line never reads the ledger" is permanent domain law.
+- **VALID-08:** "Status line never reads the ledger" is permanent domain law. *(Verbatim
+  proposal; disposition per outcome below — adopted as OD-125, "adopted for now with a
+  revisit flag", REVISIT at P7 — not as an unqualified permanent law; pass-9
+  ADV-P9-A2-19 disposition note.)*
 
 ---
 

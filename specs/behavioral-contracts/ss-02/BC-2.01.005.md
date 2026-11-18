@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.0"
+version: "1.4.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:30:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "1fcae87"
+input-hash: "a9124a4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-19T04:20:00Z (1.3.0): ADV-P6 remediation D01+D04+OD-184 — PC-7 default-only spellings minted per orchestrator call 8 (theme.heat env spelling is the strict-JSON array [0.22,0.85,0.80]; comparison on the PARSED value, not bytes; limits.windows 5h,7d; units.lines k; units.tokens M); EC-010/EC-011 realigned (0.5/0.5/0.5 is now the shape error it always was under PC-5); glyph PC-6 wording states the OD-184 code-point enforcement behind the fixed reason string; VP-016 row and VP anchor say seven classes"
   - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09 (orchestrator call 5) — PC-7 env names canonized under EnvName (HYLO_STATUSLINE_LIMITS_WINDOWS, HYLO_STATUSLINE_UNITS_LINES=k, HYLO_STATUSLINE_UNITS_TOKENS=M, HYLO_STATUSLINE_UNITS_CONTEXT=K) with registry Defaults single-valued (= the accepted spelling), legacy derivations and a stated reason why the letters differ; PC-6 glyph reasons corrected per OD-184 to expected exactly 1 code point / expected exactly 8 code points (sparkline); PC-5 scale attributed to NumberList with a registry-declared fixed length of 4"
   - "2026-11-19T21:00:00Z (1.4.0): ADV-P8 remediation D04+D05+D07+D15 — H1/Description/Pre-1 broadened to cover PC-5/PC-6/PC-7 (P7); PC-2 item wording corrected: List items get the PC-6 control-free check (a control byte in an item is the Text-class `control character` error, OD-178/pass-6 A14) with key-specific entry ranges superseding; PC-5 type enumeration completed with FloatQuad (the 1.3.1 changelog's 'NumberList' wording for scale is superseded — the registry type is FloatQuad, fixed length 4) and an overflowing JSON member classified: a literal such as `1e400` parses to ±Inf, passes the strict-JSON shape check and fails the member-wise range check with `not finite` (BC-2.02.001 precedence check 1); PC-6 gains the control-character rule and now mints five reason strings"
+  - "2026-11-20T18:30:00Z (1.4.1): ADV-P9 remediation A11+D18+D08+D07 (orchestrator calls 13+15+14+14) — PC-3: paths.cache_dir MUST resolve absolute (relative value = config error `not an absolute path`, path-grammar family, OD-144 rationale) and a set-but-empty HOME/USERPROFILE is home-unknown (BC-2.03.002 PC-4 consistent); PC-6 mints the Text-class `invalid UTF-8` pre-check (six reason strings); PC-7 states the Text-class-checks-first order for default-only Text/List keys with exact bytes"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -78,7 +79,17 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    for the key's entries. No other item validation in P1.
 3. **Path:** a value equal to `~`, or starting with `~/` (or `~\` on Windows), has that `~`
    replaced by the user home directory (`HOME` on macOS/Linux, `USERPROFILE` on Windows);
-   `~user` forms are left literal; other values are used as given. `""` yields
+   `~user` forms are left literal; other values are used as given. Absoluteness
+   (ADV-P9-A11, orchestrator call 13): the P1 path key `paths.cache_dir` MUST resolve
+   absolute — a RELATIVE value (after `~` expansion) is a config error with the exact
+   reason `not an absolute path` (path-grammar reason family: no dedicated class, riding
+   E-CFG-001 per the Reason-Vocabulary note in BC-2.02.006; a relative value would
+   resolve against Claude Code's per-project cwd and split caches and cost history, the
+   same reason relative `XDG_*` values are rejected, OD-144; the registry row is
+   interface-definitions `paths.cache_dir`). A set-but-empty `HOME`/`USERPROFILE` during
+   `~` expansion is treated as unavailable — it yields
+   `<key>=<value> (home directory unknown)`, consistent with BC-2.03.002 PC-4
+   (ADV-P9-D18). `""` yields
    `<key>= (empty path)`; a needed but unknown home yields
    `<key>=<value> (home directory unknown)`. P1 path key: `paths.cache_dir` (OD-101 default
    from `internal/platform`, BC-3.01.001). The same rule applies to every path value
@@ -160,7 +171,13 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      BC-2.01.004 PC-9), that range's own reason
      (`expected non-empty control-free text in every entry`) supersedes for the key's
      entries.
-   All five reason strings of this PC ride the Text class (OD-178) on the E-CFG-001
+   - **Invalid UTF-8 (pass-9 D08 / orchestrator call 14):** a Text, glyph, label or
+     separator value whose bytes are not valid UTF-8 (on Windows: a WTF-8 value with a
+     lone surrogate) yields the Text-class reason `invalid UTF-8` (BC-2.02.001
+     vocabulary, mirrored byte for byte in error-taxonomy), checked BEFORE the
+     non-empty/control-byte bounds above so no width or code-point count is taken on
+     invalid input.
+   All six reason strings of this PC ride the Text class (OD-178) on the E-CFG-001
    surface.
 
 7. **Default-only keys (ADV-P5-D07 / owner call 3, OD-162; spellings ADV-P6-D01 /
@@ -173,7 +190,18 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    the default: equal → accepted; different → a config error on the E-CFG-001 surface
    riding the number-range class, reason `out of range` (OD-162: the key's valid range
    is its default value only; the number-range class is the OD-162-designated class even
-   for Text/List default-only keys). The default's env spelling — the exact string that
+   for Text/List default-only keys). CHECK ORDER for the Text/List default-only keys
+   (ADV-P9-D07, orchestrator call 14): the Text-class checks run FIRST — for the `units.*`
+   Text keys the empty value (reason `expected non-empty control-free text`) and the
+   control byte (reason `control character`); for the `limits.windows` List key the entry
+   control byte (`control character`; the empty string is the empty list per PC 2) — and
+   only then the default comparison (number-range class, `out of range`). Exact bytes:
+   `HYLO_STATUSLINE_UNITS_LINES=` → `(expected non-empty control-free text)`;
+   `HYLO_STATUSLINE_UNITS_LINES=$'k\tx'` → `(control character)`;
+   `HYLO_STATUSLINE_UNITS_LINES=j` → `(out of range)`;
+   `HYLO_STATUSLINE_LIMITS_WINDOWS=$'5h,\x07d'` → `(control character)`;
+   `HYLO_STATUSLINE_LIMITS_WINDOWS=` → empty list, not the default → `(out of range)`.
+   The default's env spelling — the exact string that
    parses to the default — for each default-only key, with the registry `Default` a
    SINGLE value equal to that spelling (pass-7 D01, orchestrator call 5):
    `HYLO_STATUSLINE_THEME_HEAT` = `[0.22,0.85,0.80]` (strict-JSON FloatTriple; the

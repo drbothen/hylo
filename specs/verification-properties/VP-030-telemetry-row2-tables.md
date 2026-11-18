@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
 timestamp: 2026-11-19T22:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.04.002.md, behavioral-contracts/ss-01/BC-1.04.004.md, behavioral-contracts/ss-01/BC-1.04.009.md, behavioral-contracts/ss-01/BC-1.04.014.md, behavioral-contracts/ss-01/BC-1.04.020.md, prd-supplements/test-vectors.md]
-input-hash: "1356e78"
+input-hash: "515187f"
 traces_to: prd.md
 source_bc: BC-1.04.002
 bcs: [BC-1.04.001, BC-1.04.002, BC-1.04.003, BC-1.04.004, BC-1.04.005, BC-1.04.006, BC-1.04.007, BC-1.04.008, BC-1.04.009, BC-1.04.010, BC-1.04.011, BC-1.04.012, BC-1.04.013, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.04.017, BC-1.04.018, BC-1.04.019, BC-1.04.020, BC-1.04.021]
@@ -26,8 +26,9 @@ modified:
   - "1.4 2026-11-18T14:20:00Z: ADV-P4 fix (A2-05) — quick.Values filler rewritten to the assigning form args[0] = reflect.ValueOf(genRow2State(r))"
   - "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-12, OD-181: quick-leg oracle respelled as harness re-derivation; TestMetricsClient_OD181_TransportTable transport rows (OD-181 rider per VP-012))"
   - "1.6 2026-11-19T18:00:00Z: pass-7 fix (ADV-P7-C2-05) — the transport table's wire fake is a raw net.Listener (or hijacked connection), not httptest: httptest canonicalises header order into a map and writeSubset trims values, so it can neither replay urllib's order nor send a trailing-space Location value"
-  - "1.7 2026-11-19T22:00:00Z: pass-8 fixes (ADV-P8-C2-08: the testing/quick for-all legs now cover the five BCs the pass-8 recount added - BC-1.04.003/008/015/018/019 predicates stated normatively in the Property Statement; ADV-P8-C2-09: the transport table respelled from 'pins hylo\'s plain-http client behaviour' to the minimal HTTP/1.1 client over plain http AND https-through-crypto/tls per BC-1.04.001 PC1, only the parity CORPUS being plain http, OD-181; ADV-P8-A2-19: Named Tests gains TestMetricsClient_OD181_TransportTable)"
+  - "1.7 2026-11-19T22:00:00Z: pass-8 fixes (ADV-P8-C2-08: the testing/quick for-all legs now cover the five BCs the pass-8 recount added - BC-1.04.003/008/015/018/019 predicates stated normatively in the Property Statement; ADV-P8-C2-09: the transport table respelled from 'pins hylo's plain-http client behaviour' to the minimal HTTP/1.1 client over plain http AND https-through-crypto/tls per BC-1.04.001 PC1, only the parity CORPUS being plain http, OD-181; ADV-P8-A2-19: Named Tests gains TestMetricsClient_OD181_TransportTable)"
   - "1.8 2026-11-20T12:30:00Z: pass-8 residual (C2-05 seam): Proof Method and Feasibility tables respelled — every metrics fake in this document is a RAW net.Listener fake, the status/body fault rows included; not httptest, whose server canonicalises headers into a map and trims values"
+  - "1.9 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-04, orchestrator call 3; ADV-P9-A2-05) — the BC-1.04.003 history for-all restated: caps named by their registered keys (statusline.sparkline.history_cap, statusline.sparkline.max_age_s), and the pruning invariant holds on the SUCCESS path only — the fetch-failure path re-saves the stored history verbatim, unpruned (SL:327, SL:353-355; BC-1.04.003 Inv 2); VP-031 de-cited from the quick leg (the BC de-cited it in pass 8; the joint-routing residue corrected) | frontmatter: the line-29 invalid escape (a backslash before a plain apostrophe) repaired to the bare apostrophe (YAML repair, orchestrator call 5); no history entry lost"
 
 deprecated: null
 deprecated_by: null
@@ -52,9 +53,12 @@ whenever ROWS >= 2, and the NaN/+Inf crash paths (CP-N01/N02) with wall-colour
 mismatch quirk. The testing/quick for-all legs cover every row-2 invariant whose BC
 VP-table routes a "Go property test (testing/quick)" row here — BC-1.04.002/003/
 004/006/007/008/009/013/015/017/018/019/021 — including, for the five added on the
-pass-8 recount (ADV-P8-C2-08): saved history length <= 32 with every saved point
-satisfying `now - t < 90` or being the new point (BC-1.04.003, joint with VP-031's
-quick leg); the box segment never ending in a space (BC-1.04.008); degrade-iff-NaN
+pass-8 recount (ADV-P8-C2-08): saved history length <= `statusline.sparkline.history_cap`
+with every saved point
+satisfying `now - t < statusline.sparkline.max_age_s` or being the new point — on the
+SUCCESS path only; the fetch-failure path re-saves the stored history verbatim,
+unpruned (SL:327, SL:353-355; BC-1.04.003 Inv 2) (BC-1.04.003 quick leg; VP-031
+de-cited from this row, pass-9 ADV-P9-A2-05); the box segment never ending in a space (BC-1.04.008); degrade-iff-NaN
 for the KV gauge (BC-1.04.015, finite/±Inf rows table-equal legacy); segment
 presence and dimming equal to legacy for every JSON value shape of `mix[7]`
 (BC-1.04.018); and TTFT text equal to CPython for random doubles in [0, 10^4] and
@@ -80,7 +84,8 @@ all tie points k+0.05 (BC-1.04.019).
   fault rows; PLUS the legs the BC VP-tables route here (C2-08): testing/quick
   for-all legs for the row-2 invariants marked "property proof" in
   BC-1.04.002/003/004/006/007/008/009/013/015/017/018/019/021 (TTL/freshness
-  monotonicity, history cap and point-age order, redirect
+  monotonicity, history cap and point-age order on the success path — the failure
+  path re-saves verbatim, BC-1.04.003 Inv 2 —, redirect
   visited-cap sampling behaviour, cells caps, box-segment trailing space, NaN-iff
   degrade, mix[7] shape presence/dimming, sparkline scale bounds, TTFT
   rounding bands and ties, idle-age ordering, power-format invariants — the quick-leg oracle

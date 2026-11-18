@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.4"
+version: "1.0.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "fec6cca"
+input-hash: "83039fe"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython mixed int/float coercion behind legacy/dgx_statusline.py arithmetic: SL:435, 599, 882-885, 919)"
@@ -27,6 +27,7 @@ modified:
   - "2026-11-18T23:45:00Z (1.0.2) ADV-P5 remediation D09+D27 — relational helpers NumLT/NumLE/NumGT/NumGE/NumEQ/NumNE added (PC 3b: any NaN operand → false except NumNE); NumCmp narrowed to ordered operands; Inv 1 mandates the helpers at every cross-kind comparison site (SL:254 case pinned EC-014); TrueDiv precedence pinned: dividend overflow precedes zero-divisor check (10**400 / 0.0 → OverflowError, EC-013)"
   - "2026-11-19T03:50:00Z (1.0.3) ADV-P6 remediation D09+D18 — NumCmp error return specified: total, nil on every path (PC 3), so Max/Min NaN folds cannot error (PC 4); TrueDiv EC-005 rationale corrected — int/int operands are never converted (float(10**310) itself raises; the overflow is a quotient-range error, measured under CPython 3.11.7)"
   - "2026-11-19T17:00:00Z (1.0.4): ADV-P7 remediation D19 — the concrete NaN parity case names the gate correctly: the gate is isinstance(api,(int,float)) and api >= need at SL:254; the api/3.6e6 division at SL:255 only follows the gate inside the appended branch"
+  - "2026-11-20T18:30:00Z (1.0.5): ADV-P9 remediation D15 — PC-1's gate list corrected: _fmt_lines calls int(n) (SL:853, its own '?' guard, not this gate); its float crossing is the mixed division n / 1e6 at SL:857 (EC-011 reshaped accordingly; verified against legacy source)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,8 +67,12 @@ OD-141. ADV-P3-D08 disposition.
    error). At `|n| >= 2**1024 - 2**970` conversion raises CPython `OverflowError: int too large to convert to
    float` → typed `ErrOverflow` — NOT at `DBL_MAX` and not "when the quotient overflows" (ADV-P3-C07
    threshold, verified: `float(2**1024 - 2**970)` raises, `float(2**1024 - 2**970 - 1) == DBL_MAX`). This is the
-   gate behind every float-operand site: `f"{n:.0f}"` of a huge int (SL:599), `_fmt_tokens(float(n))`
-   (SL:882-885), and `float(n)` in `_fmt_tok_c`/`_fmt_lines` all degrade through it.
+   gate behind every float-operand site: `f"{n:.0f}"` of a huge int (SL:599), `float(n)` in
+   `_fmt_tokens` (SL:878), and `float(n)` in `_fmt_tok_c` (SL:866) all degrade through it —
+   `_fmt_lines` instead calls `int(n)` (SL:853; its TypeError/ValueError guard returns "?" and is
+   that site's own guard, not this gate); the float crossing inside `_fmt_lines` is the mixed
+   division `n / 1e6` at SL:857, where the int operand converts via NumToF first (EC-011;
+   ADV-P9-D15).
 2. **TrueDiv (true division):**
    - int/int: exact rational quotient correctly rounded to the nearest float64 — operands are NOT first
      truncated to float64; the division is computed on the exact rational and rounded once (`10**400 / 10**300`
@@ -149,7 +154,7 @@ OD-141. ADV-P3-D08 disposition.
 | EC-008 | `NumCmp(2**53 + 1, 9007199254740992.0)` | `1` (greater; rounding conversion would say 0) |
 | EC-009 | `Max(9007199254740992.0, 2**53+1)`; `Min(-(2**53)-1, -9007199254740992.0)` | int `9007199254740993`; int `-9007199254740993` |
 | EC-010 | `TrueDiv(1, 0)` (int/int) | `ErrZeroDivision` |
-| EC-011 | mixed division overflow: `_fmt_lines(n / 1e6)` with int `n = 10**310` (SL:857, BC-1.02.014 EC-012) | mixed division converts `n` via `NumToF` first → `ErrOverflow` → the site's catch degrades (legacy `float_div` converts `n` first) |
+| EC-011 | mixed division overflow inside `_fmt_lines`: int `n = 10**310` reaching the `n / 1e6` branch (SL:857, BC-1.02.014 EC-012) | mixed division converts `n` via `NumToF` first → `ErrOverflow` → the site's catch degrades (legacy `float_div` converts `n` first) |
 | EC-012 | `TrueDiv(1.0, 0.0)` and `TrueDiv(1, 0.0)` | `ErrZeroDivision` — a zero float divisor raises exactly like an int zero (CPython `ZeroDivisionError`; ADV-P4-D15) |
 | EC-013 | `TrueDiv(10**400, 0.0)` | `ErrOverflow` first (dividend conversion precedes the zero-divisor check; CPython `OverflowError`, verified `python3 -I`; ADV-P5-D27) |
 | EC-014 | `NumGE(nan, 1)`, `NumGE(nan, 2)`, `NumEQ(nan, nan)`; `NumNE(nan, nan)` | false; false; false; true (any NaN operand → false except `NumNE`; ADV-P5-D09) |

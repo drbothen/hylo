@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.11"
+version: "1.2.12"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T22:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "9aa66bc"
+input-hash: "7753a58"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -36,6 +36,7 @@ modified:
   - "2026-11-19T17:00:00Z (1.2.9): ADV-P7 remediation D14+D17 - subagent cases identified by the ARCH-07 `subagent` case-id family (the -sub shorthand noted as the same family), not a bare id suffix; stale 'architect to align ARCH-07' note closed (ARCH-07:135 already aligned); provenance SL:92 corrected to SL:89 (SL:92 is a comment); PC-8 LocalZone legs gain `empty` (five legs, BC-3.01.001 PC-6)"
   - "2026-11-19T21:00:00Z (1.2.10): ADV-P8 remediation D10 — PC-8 OD-76 closure widened: no D1-D4 corpus case at all (corpus UTC-only), matching BC-3.02.002 and orchestrator call 16"
   - "2026-11-20T12:30:00Z (1.2.11): pass-8 residual (C2-05 seam) - the metrics fake respelled: one fake VictoriaMetrics server per case is a raw net.Listener fake (DTU-3), not httptest, whose server canonicalises headers into a map and trims values; serving both sides unchanged"
+  - "2026-11-20T18:30:00Z (1.2.12): ADV-P9 remediation D01+D12 (orchestrator calls 7+8) — PC-8 tail: exclusions.json carries NO OD-76 entry at all (rider-test closure); PC-6/PC-8 binding to the capture-replay seeding rule of BC-6.02.002 stated"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -174,7 +175,11 @@ directory.
    the repeated DST hour cannot exist in UTC, the corpus validator rejects non-UTC
    `tz` values, so the OD-76 closed-set entry's parity half carries NO D1-D4 case at all
    (widened from "no D1 case" by pass-8 D10 / orchestrator call 16 — D2-D4 work under UTC
-   but never enter the corpus either) and the corpus stays UTC-only.
+   but never enter the corpus either) and the corpus stays UTC-only — ADV-P9-D01 /
+   orchestrator call 7: with no case to name, `exclusions.json` carries no `OD-76` entry
+   at all (PC-1 of BC-6.03.004 requires an entry's `case` to name an existing directory);
+   the id is closed by its rider test alone. Capture replays (BC-6.02.002) follow this
+   PC's seeding rule exactly as corpus cases do (ADV-P9-D12, orchestrator call 8).
 
 ## Invariants
 

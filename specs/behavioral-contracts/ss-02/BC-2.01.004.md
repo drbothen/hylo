@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:30:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "5a0c1e7"
+input-hash: "740c387"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-19T04:15:00Z (1.3.0): ADV-P6 remediation D02+D03+D23+OD-186 — glyph column rule restated per OD-184: every statusline.glyphs.*/subagent.glyphs.* member is exactly 1 code point measured in legacy's render width, sparkline = exactly 8 ordered code points; the EAW validation width no longer applies to glyph members (it keeps the pill-label 1..16 bound), so the W-class watts default ⚡ (U+26A1) is in range; PC-9 scope note with the 中文-measures-4 grounding; reroute-all anchor corrected to SL:487-488 (markers tuple; SL:489 is the rl reset); PC-11 mints statusline.cache.rename_retry_delay_ms (Int, default 10, range 1..1000, J; consumer BC-6.03.003)"
   - "2026-11-19T17:30:00Z (1.3.1): ADV-P7 remediation D01+D02+D09+D13+D18+D21+OD-188+OD-189 — PC-1 NumberList may declare a fixed length (scale = array of 4 numbers, D09); PC-9 validation-width scope tightened to the pill-label bound only (D21); PC-6 lane row cites SL:906-907 for the subagent tag (D18); PC-8 states the two registry ascending-pair checks with both reason strings (D02); PC-11 adds statusline.cache.rename_retry_limit (Int, default 2, range 0..10, J; attempts = 1 + limit) and retargets the PRODUCT consumer to BC-1.06.001 (D13, OD-188); PC-12 mints statusline.labels.vllm_down / lmcache_down / statusline.subagent.name_fallback (Text, OD-189; dead-backend word reuses pill.label_local)"
   - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation D08 — PC-3(f) names the PC-11 Windows rename-retry keys (statusline.cache.rename_retry_delay_ms, _limit) as golden-default exceptions beside the two PC-4 exceptions: they have no legacy analog (legacy save_cache SL:198-206 never retries); PC-4 lists them"
+  - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D05+D08 (orchestrator calls 9+14) — PC-8's pair checks respelled: the cost.percentiles ascending-pair check is INTRA-key (fires at that key's validation, error names the whole key with its full JSON value, following error-taxonomy) beside the cross-KEY subagent.tokens pair; the display-width bullet states the Text-class `invalid UTF-8` pre-check (width and code-point counts only ever consulted on valid UTF-8; minted in BC-2.02.001 pass-9 D08)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -189,9 +190,15 @@ incomplete, whose default fails its own validation, or whose env name collides.
    `statusline.cost.percentiles` member `p75 <= p95` — and carries their violation
    reason strings: a descending `subagent.tokens` pair yields
    `ascending pair violated (k_from <= m_from)`; a descending `cost.percentiles` pair
-   yields its OWN string `ascending pair violated (p75 <= p95)` (pass-7 D02). Each
-   check fires after both keys' single-key range checks pass, at the SECOND key's
-   validation (pass-6 A19), naming that key with its own value.
+   yields its OWN string `ascending pair violated (p75 <= p95)` (pass-7 D02). The
+   `subagent.tokens` check is CROSS-KEY: it fires after both keys' single-key range
+   checks pass, at the SECOND key's validation (pass-6 A19), naming that key with its
+   own value. The `cost.percentiles` check is INTRA-KEY (ADV-P9-D05, following
+   error-taxonomy): one composite key, both members inside its single JSON value; it
+   fires at that key's validation after both members pass their single-member range
+   checks, `p95` second under the same fire-at-second rule, and the error names the
+   WHOLE key `statusline.cost.percentiles` with its full JSON env value — a member has
+   no separate env spelling.
 
 9. **Pass-5 additions (ADV-P5-B03/C03/A18/D14/D15, orchestrator calls 1-2, OD-179):**
    - **Reroute-all key (OD-179):** the reroute-all markers become the List key
@@ -218,7 +225,12 @@ incomplete, whose default fails its own validation, or whose env name collides.
      1..16 bound (OD-173). The general Text ranges of BC-2.01.005 PC-6 state NO display
      width (non-empty, control-free, code-point counts for glyphs) and do not consult
      it; never for glyph-family
-     validation, which counts code points (PC-6). Grounding: under this function
+     validation, which counts code points (PC-6). Invalid UTF-8 (pass-9 D08): a glyph or
+     Text value whose bytes are not valid UTF-8 fails the Text-class `invalid UTF-8` check
+     (BC-2.02.001 vocabulary, minted pass-9 D08) BEFORE any width or code-point counting,
+     so the width function and the OD-184 code-point count are only ever consulted on
+     valid UTF-8 input; POSIX passes raw env bytes and the Windows environment is UTF-16-
+     derived, which is why the check lives in the grammar, not the seam. Grounding: under this function
      `中文` measures 4 (both code points EAW W), and the watts default ⚡ measures 2
      while remaining a valid 1-code-point glyph (ADV-P6-D02, ADV-P6-D17).
    - **PC-3(d) reserved-name list unchanged** (`HYLO_PARITY_FUZZSECONDS` et al.); the

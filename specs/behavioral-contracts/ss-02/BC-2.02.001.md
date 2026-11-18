@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:30:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "56a3705"
+input-hash: "6ce3655"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-19T04:35:00Z (1.2.5) ADV-P6 remediation D12+D13+D14 — PC-6 [from] tie-break restated to ADV-P5-D31 (lexicographically smallest FIELD, no registry order); Refactoring Notes seam restated: Load receives the environment only through platform.EnvVars (call 9), never a raw Go map; class-count paragraph scoped to the parity half (five TestD4EX3 members; theme rejected by the validator; TestD4EX3_Text is a Go table test backing no parity entry; Text reasons minted in BC-2.01.005/2.02.003 with no separate class contract)"
   - "2026-11-19T17:30:00Z (1.3.0): ADV-P7 remediation D02+D03 (orchestrator call 6) - canonical vocabulary completed: the pass-6 strings (ascending pair violated (k_from <= m_from); expected non-empty control-free text in every entry) homed byte for byte; cost.percentiles gets its OWN ascending-pair reason (p75 <= p95); glyph reasons corrected per OD-184 to expected exactly 1 code point / expected exactly 8 code points (sparkline); control character maps to the Text class for non-theme free text and List entries; NEW normative section 'Numeric-range failures by type' pins the Int/Float/composite reason mapping with the BC-2.02.002 precedence"
   - "2026-11-19T21:00:00Z (1.3.1): ADV-P8 remediation D04+D05+D17 + A2-07 BC rows - `control character` row example corrected (the reroute-all entry range supersedes: a reroute entry yields `expected non-empty control-free text in every entry` per BC-2.01.004 PC-9, so the List-entry example is a model_prefixes item); Text-class minting list drops BC-2.02.003 (number-grammar only); `expected ...` count five -> six; PC-6 [from] tie-break pinned for Windows case twins (byte-exact supplied-name comparison, winner's spelling printed) and index != 0 P1-field values ruled validated per class (per-key error precedes the structural cardinality error); VP-table for-all env-map legs annotated as carried by VP-016 (pass-8 call 12)"
+  - "2026-11-20T18:30:00Z (1.3.2): ADV-P9 remediation D20+D06+D05+D08 (orchestrator calls 15+14+9+14) — repeated word 'indexed indexed-entry' fixed; PC-6 [from] provenance respelled (a per-key backends error names the variable that carried the rejected value; the lowest-extra-index tie-break applies to the structural cardinality error); the p75<=p95 pair restated INTRA-key on the one composite key cost.percentiles (error names the whole key with its full JSON value, following error-taxonomy); Text-class reason `invalid UTF-8` minted (Text, glyph, label or separator value not valid UTF-8; Windows WTF-8 lone surrogate), mirrored byte for byte in error-taxonomy"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,10 +85,14 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 6. **stderr** receives one line per error, in registry order:
    `hylo: config error: <key>=<value> (<reason>) [from <ENVNAME>]\n`, where `<ENVNAME>` is
    the `HYLO_*` variable that actually supplied the value: `EnvName(key)` for scalar keys;
-   for array keys the indexed indexed-entry form BC-2.01.002 pins (lowest extra index,
-   tie-broken by the lexicographically smallest `<FIELD>` name byte-exact — non-P1 fields
-   have no registry order, ADV-P5-D31; ADV-P6-D12, e.g. `HYLO_BACKENDS_1_METRICS_URL` — the `EnvName`
-   of the key alone does not fit these entries, ADV-P3-D32); no `[from ...]` suffix when
+   for array keys the indexed-entry form BC-2.01.002 pins: a per-key error on
+   `backends[<i>].<field>` names the `HYLO_BACKENDS_<i>_<FIELD>` variable that CARRIED THE
+   REJECTED VALUE (index then field name; ADV-P9-D06), e.g. `HYLO_BACKENDS_1_METRICS_URL` —
+   the `EnvName` of the key alone does not fit these entries, ADV-P3-D32 — while the
+   lowest-extra-index tie-break (lowest index, then the lexicographically smallest
+   `<FIELD>` name byte-exact — non-P1 fields have no registry order, ADV-P5-D31;
+   ADV-P6-D12) applies to the STRUCTURAL cardinality error, which no single supplied
+   value carries; no `[from ...]` suffix when
    the failing value came from the defaults layer. Windows case twins (pass-8 D17):
    the tie-break compares the `<FIELD>` names BYTE-EXACT AS SUPPLIED — uppercase bytes
    sort below lowercase, so of two entries whose names differ only in case the
@@ -122,6 +127,7 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 | `missing host` | URL | BC-2.02.005 |
 | `control character` | URL / theme / Text | BC-2.02.005 (URL class), BC-2.01.003 (theme class), BC-2.01.005 (TEXT class: a control byte in a non-theme free-text key or List item — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; a `statusline.lane.reroute_all_prefixes` entry instead yields `expected non-empty control-free text in every entry`, BC-2.01.004 PC-9 superseding per pass-8 D04; OD-178, pass-6 A14) |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
+| `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; on Windows a WTF-8 value with a lone surrogate; minted pass-9 D08 / orchestrator call 14, mirrored byte for byte in error-taxonomy) | BC-2.02.001 (this table), BC-2.01.005, BC-2.01.003 (separator) |
 | `empty path` | path | BC-2.01.005 |
 | `home directory unknown` | path | BC-2.01.005 |
 | `expected JSON <shape>` | text (composite shape) | BC-2.01.005 (PC 5; `<shape>` spells the key's declared shape, e.g. `array of 2 numbers`) |
@@ -131,7 +137,7 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 | `expected non-empty control-free text` | text | BC-2.01.005 (PC 6, other Text keys) |
 | `expected non-empty control-free text in every entry` | text (List entries) | BC-2.01.004 (PC-9 reroute-all range, OD-179/OD-178; pass-6 A14 minted, pass-7 D02 homes it here) |
 | `ascending pair violated (k_from <= m_from)` | number-range (cross-key pair check) | BC-2.01.004 pair rule (fires at `statusline.subagent.tokens.m_from`'s validation, after both single-key checks pass; pass-6 A19) |
-| `ascending pair violated (p75 <= p95)` | number-range (cross-key pair check) | BC-2.01.004 pair rule (cost.percentiles' OWN reason, fired at `p95`'s validation under the same rule; pass-7 D02 — the k_from string is not reused) |
+| `ascending pair violated (p75 <= p95)` | number-range (INTRA-key member-pair check on the ONE composite key `statusline.cost.percentiles` — both pair members are members of the key's single JSON value, unlike the cross-KEY `subagent.tokens` pair) | BC-2.01.004 pair rule (cost.percentiles' OWN reason, fired at that key's validation after both members pass their single-member range checks, `p95` second under the same fire-at-second rule as the `m_from` check; pass-7 D02 — the k_from string is not reused; ADV-P9-D05, following error-taxonomy: when it fails, the D4-EX-3 line names the WHOLE key `statusline.cost.percentiles` with its full JSON env value — a member has no separate env spelling) |
 | `exactly one backend entry until P6` | backends | BC-2.01.002 |
 
 Class-count reconciliation (ADV-P1-D33, mirrored from error-taxonomy.md; the seventh class
@@ -147,9 +153,10 @@ numeric/enum/URL/theme/boolean classes (BC-2.02.002..006); the Text class's reas
 minted in BC-2.01.005 and BC-2.01.004 (List entries) with no separate
 BC-2.02.00x contract (OD-178 disposition; pass-8 D05: BC-2.02.003 mints only
 number-grammar reasons).
-The Text class carries the composite-shape, pill-label, glyph, List-entry and empty-text
-errors: the six `expected ...` reasons in the table above (pass-7 D02 split the glyph
-reason in two and added the List-entry reason). The
+The Text class carries the composite-shape, pill-label, glyph, List-entry, empty-text and
+invalid-UTF-8 errors: the six `expected ...` reasons plus `invalid UTF-8` in the table
+above (pass-7 D02 split the glyph
+reason in two and added the List-entry reason; pass-9 D08 minted `invalid UTF-8`). The
 `path` and `backends` columns above are reason categories without dedicated class contracts;
 their reasons map to the raising contracts (BC-2.01.005, BC-2.01.002), and `control
 character` maps to the URL class when raised by BC-2.02.005 and to the theme class when
@@ -180,11 +187,17 @@ and the Float members of composites) all four fire in order:
 For COMPOSITE keys the check is member-wise in declaration order, each member by its
 own type's rule (Float members by the Float rule, Int members by the Int rule), the
 first failing member producing the error naming the key (range after shape,
-BC-2.01.005 PC-5). The cross-key ASCENDING-PAIR checks fire after both keys'
-single-key checks pass, at the second key's validation (pass-6 A19): descending
-`statusline.subagent.tokens` pair → `ascending pair violated (k_from <= m_from)`;
-descending `statusline.cost.percentiles` pair → `ascending pair violated (p75 <=
-p95)`; the error names the SECOND key with its own value. The mapping is total:
+BC-2.01.005 PC-5). The ASCENDING-PAIR checks differ in shape (ADV-P9-D05, following
+error-taxonomy): the `statusline.subagent.tokens` pair is CROSS-KEY — it fires after both
+keys' single-key checks pass, at the second key's validation (pass-6 A19); a descending
+pair → `ascending pair violated (k_from <= m_from)`, and the error names the SECOND key
+(`statusline.subagent.tokens.m_from`) with its own value. The `statusline.cost.percentiles`
+pair is INTRA-KEY — one composite key, both members inside its single JSON value; the
+check fires at that key's validation after both members pass their single-member range
+checks, `p95` second under the same fire-at-second rule; a descending pair →
+`ascending pair violated (p75 <= p95)`, and the error names the WHOLE KEY
+`statusline.cost.percentiles` with its full JSON env value (a member has no separate env
+spelling). The mapping is total:
 every registered numeric-range miss in P1 has exactly one reason string.
 
 8. **Subagent mode (OD-155/OD-168):** when the invocation carries `--subagent` anywhere in

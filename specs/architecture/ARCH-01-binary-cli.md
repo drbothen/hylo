@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T21:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "c45dd57"
+input-hash: "2c694cb"
 
 ---
 
@@ -35,10 +35,11 @@ func main() { os.Exit(run(os.Args[1:], platform.NewEnvVars(), os.Stdin, os.Stdou
 // HYLO_BACKENDS_<i>_* discovery (BC-2.01.002 PC-4/PC-6) run against fakes in tests,
 // and "set but empty" is distinguishable from "unset" (BC-2.01.002 PC-3: empty list
 // value vs default). Never a bare func(string) string.
-type EnvVars interface {
-    Lookup(name string) (value string, ok bool) // ok=false => unset; ok=true + "" => set-but-empty
-    Names() []string                            // full environ listing (os.Environ()-backed in main)
-}
+// DECLARED ONCE as platform.EnvVars in internal/platform (ARCH-05 — single home,
+// ADV-P9-A12); cmd/hylo and internal/statusline consume the type, they do not
+// re-declare it. The platform.NewEnvVars() constructor above is its GOOS-selected
+// implementation (NT case-insensitive matching on Windows).
+type EnvVars = platform.EnvVars // type alias — no second declaration (ADV-P9-A12)
 
 // run dispatches on verb; unknown verb or bad args => usage.golden on stderr, exit 2.
 func run(args []string, env EnvVars, stdin io.Reader, stdout, stderr io.Writer) int

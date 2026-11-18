@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: CP-O08 vector made self-contained (exact line templates, 100/467/160 B) and byte math re-pinned from the oracle — size 727 = 567 + 160 deleted, conv 3, cur null per OD-167 (was 656/conv 5/131 B; ADV-P4-C09)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C05/C02) — EC-009 pins the CP-O08 close-reached shortcuts (t0 null, out <= 0, span <= 0; SL:996 divide unreachable) with three oracle-run non-raising vectors; CP-O08 vector names the PC4(b) oracle explicitly", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C01/C03) — Pre2 and EC-008 gain the Windows MSVC-domain naive-timestamp `ErrLocaltimeDomain` leg (whole line degrades; BC-5.04.001 PC6); PC2 and Inv2 pin Python `==` turn identity (no identity shortcut; NaN id opens a new turn per line) vs dedup's set-membership identity short-circuit, with the full-cache 420 B NaN-id oracle vector; VP table and VP Anchors gain the owned CP-O08 D4-EX-2 legs (VP-013 register, VP-012 closure; ADV-P6-C06)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C03) — NaN-id row respelled: the 420 B file holds under the default json.dumps separators (measured 100 + 160 + 160), not compact separators", "1.2.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C02) — PC2 states the verbatim write-back bound: the 993 decode edge caps input-borne nesting below the mix-save encoder boundary, so holding a raw deeply nested id never trips the save budget (measured end-to-end 2026-11-18; BC-1.03.021 EC-004)"]
+modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: CP-O08 vector made self-contained (exact line templates, 100/467/160 B) and byte math re-pinned from the oracle — size 727 = 567 + 160 deleted, conv 3, cur null per OD-167 (was 656/conv 5/131 B; ADV-P4-C09)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C05/C02) — EC-009 pins the CP-O08 close-reached shortcuts (t0 null, out <= 0, span <= 0; SL:996 divide unreachable) with three oracle-run non-raising vectors; CP-O08 vector names the PC4(b) oracle explicitly", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C01/C03) — Pre2 and EC-008 gain the Windows MSVC-domain naive-timestamp `ErrLocaltimeDomain` leg (whole line degrades; BC-5.04.001 PC6); PC2 and Inv2 pin Python `==` turn identity (no identity shortcut; NaN id opens a new turn per line) vs dedup's set-membership identity short-circuit, with the full-cache 420 B NaN-id oracle vector; VP table and VP Anchors gain the owned CP-O08 D4-EX-2 legs (VP-013 register, VP-012 closure; ADV-P6-C06)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C03) — NaN-id row respelled: the 420 B file holds under the default json.dumps separators (measured 100 + 160 + 160), not compact separators", "1.2.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C02) — PC2 states the verbatim write-back bound: the 993 decode edge caps input-borne nesting below the mix-save encoder boundary, so holding a raw deeply nested id never trips the save budget (measured end-to-end 2026-11-18; BC-1.03.021 EC-004)", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C11, orchestrator call 1) — EC-007 splits the non-numeric-out opener label by usage: CP-T05 deduplicated vs CP-T04 at SL:1112 counted (same skip outcome); PC2 riders the save-budget bound with the measured 992..994-vs-991 load asymmetry and per-refresh rewrite (BC-1.03.021 PC5)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,7 +70,9 @@ segment (BC-1.04.018).
      set membership short-circuits on the shared NaN object (BC-1.03.005 PC5(a)). A raw id of arbitrary nesting is
      held and written back verbatim; the 993 decode edge (BC-1.03.004 EC-009) caps input-borne nesting below the
      mix-save encoder boundary, so the write-back never trips the save budget (measured end-to-end 2026-11-18,
-     ADV-P8-C02; BC-1.03.021 EC-004);
+     ADV-P8-C02; BC-1.03.021 EC-004). The reload side binds tighter — a saved payload of document depth
+     992..994 fails the 991 load budget, is treated as absent, and is rewritten every refresh
+     (orchestrator-measured, pass-9; BC-1.03.021 PC5));
    - else: `lr = finish(cur, lr)`; `cur = {"id": m.id, "t0": lu, "t1": t_line, "out": (m.usage or {}).output_tokens
      or 0}` (key order `id, t0, t1, out`).
 3. **Timed assistant line without a truthy id**: no change.
@@ -106,7 +108,7 @@ segment (BC-1.04.018).
 | EC-004 | User line with `message: {}` | closes the turn (content not a list; row T5) |
 | EC-005 | Out < 200 | rate shown dimmed: `[r, true]` (row T17) |
 | EC-006 | First line `output_tokens` NaN | `[NaN, false]` (row T16) |
-| EC-007 | Opening line with non-numeric `out` and `lu` set | legacy CP-T05 (crash at close); hylo skips the opening line (D4-EX-2, BC-1.03.018) |
+| EC-007 | Opening line with non-numeric `out` and `lu` set | legacy CP-T05 when the line's usage is deduplicated, CP-T04 at SL:1112 when it is counted (BC-1.03.018:95-96) — the skip outcome is the same; hylo skips the opening line either way (D4-EX-2, BC-1.03.018) |
 | EC-008 | Naive timestamp (`2026-11-14T10:00:00`) | interpreted in `Env.Loc` (BC-5.04.001); on Windows, a naive value outside MSVC's domain (on or before 1970-01-01 or year 3001+, ADV-P6-C01) raises `ErrLocaltimeDomain` and the whole line degrades — legacy reproduced (BC-5.04.001 PC6) |
 | EC-009 | Closing a turn whose `out` is a huge int (magnitude ≥ 2^1024 − 2^970, ADV-P3-C07) with a float `span`: legacy raises `OverflowError` at SL:994/996 (oracle-verified). **The close is only reached when `t0` is non-null, `out > 0` and `span > 0`** (SL:991-994): a `t0`-null turn returns at SL:991, `out <= 0` (so a huge **negative** `out` never raises) and `span <= 0` return the previous `lr` before the stale-margin multiply (Python `or` short-circuit), and the SL:996 divide is unreachable for CP-O08 magnitudes because the SL:994 multiply raises first. A magnitude-only predicate would skip closers legacy processes cleanly — the three non-raising closers are pinned as canonical vectors below (ADV-P5-C05) | CP-O08: hylo skips the **closer** line **and drops the in-flight turn** (`cur` → null; `lr`, `lu` unchanged), so later lines parse normally — no sticky state (ruling OD-167; ARCH-03 `#transcript`); legacy instead keeps the bad turn open, so every later closer re-raises and totals freeze (BC-1.03.018) |
 

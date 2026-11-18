@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md, owner-decisions-log-2026-11-14.md]
-input-hash: "64035dd"
+input-hash: "6b99d30"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; ports CPython datetime._mktime behind naive .timestamp() at legacy/dgx_statusline.py SL:983)"
@@ -25,6 +25,7 @@ modified:
   - "2026-11-19T04:50:00Z (1.2.5) ADV-P6 remediation D06 / orchestrator call 2 — signature reconciled to the ARCH-06 canon: LocalToUnix(fields Naive, loc, msvcDomain bool) (int64, error); the distinct ErrLocaltimeDomain sentinel returned when msvcDomain is set and the instant lies outside MSVC localtime_s's domain (caller degrades); pure pyfmt, flag injected"
   - "2026-11-19T17:00:00Z (1.2.6): ADV-P7 remediation D06+D20 (orchestrator call 8) — the Description states the EVERY-PROBE domain check (t, u1, u1-86400, u2; any probe leaving [1970-01-01, year 3001) degrades, so 1970-01-01T00:00:00 itself is in scope); PC-1's 'Otherwise b = t1 - u1' disambiguated as the else-branch of the t1 == t TEST, not of a == b"
   - "2026-11-19T21:00:00Z (1.2.7): ADV-P8 remediation D02 (orchestrator call 8) — Inv 2 realigned with the Description: the Windows MSVC localtime-domain rule lives in PURE PYFMT (ErrLocaltimeDomain, msvcDomain bool; statusline passes platform.IsWindows()), not in internal/platform"
+  - "2026-11-20T18:30:00Z (1.2.8): ADV-P9 remediation D09 — Description states the working domain's lower bound 1970-01-02T00:00 local wall (the fold-0 u1 − 86400 probe sets it, instant before 1970-01-02T00:00:00Z degrades, shifted by the zone offset); boundary example sharpened to 1970-01-01T23:59:59 (probe arithmetic verified, CPython 3.11.7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,8 +47,12 @@ or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; p
 instant ANY of whose conversion probes (`t`, `u1`, `u1 - 86400`, `u2`) leaves MSVC
 `localtime_s`'s domain — which happens for every naive wall time on or before
 1970-01-01 or at or after year 3001 (pass-7 D06, orchestrator call 8: every MSVC call
-is domain-checked, so even the boundary instant 1970-01-01T00:00:00 itself degrades
-via the fold-0 `u1 - 86400` dip) — returns the distinct `ErrLocaltimeDomain` sentinel instead of
+is domain-checked, so even the boundary instant 1970-01-01T23:59:59 itself degrades
+via the fold-0 `u1 - 86400` dip) — and the probe, not MSVC's own floor, sets the
+working domain's lower bound at 1970-01-02T00:00 local wall time: `u1 − 86400` is
+negative for every naive wall time before it (instant before 1970-01-02T00:00:00Z,
+shifted by the zone offset; ADV-P9-D09, probe arithmetic verified under CPython
+3.11.7) — returns the distinct `ErrLocaltimeDomain` sentinel instead of
 `ErrValue` — the caller degrades on it (BC-5.04.001 PC-6).
 
 ## Preconditions

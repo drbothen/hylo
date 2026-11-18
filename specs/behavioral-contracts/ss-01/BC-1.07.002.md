@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.6"
+version: "1.0.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
@@ -19,7 +19,14 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format, "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"]
+modified:
+  - "1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)"
+  - "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)"
+  - "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)"
+  - "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)"
+  - "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
+  - "1.0.7 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02/C05) — frontmatter modified list repaired to block style (lost closing quote restored); enabled=false recast as ruled new behavior (OD-155), not a DI-012 named deviation, in Description, VP-005 row and Traceability — agrees with VP-005"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -33,8 +40,9 @@ removal_reason: null
 ## Description
 
 Owner ruling OD-155 restores the agent-panel rows with a config off switch. The boolean config key
-`statusline.subagent.enabled` defaults to `true`, which reproduces legacy bytes exactly
-(DI-012-compliant named deviation when `false`). Setting it to `false` suppresses the entire subagent
+`statusline.subagent.enabled` defaults to `true`, which reproduces legacy bytes exactly. Setting it
+to `false` is ruled new behavior (OD-155), not a DI-012 parity exclusion — DI-012's exclusion set is
+closed and lists no id for it (VP-005). When `false` it suppresses the entire subagent
 render: Claude Code receives zero JSON lines and renders its own default row bodies (the CC contract
 treats omitted rows as "keep the default body").
 
@@ -96,7 +104,7 @@ half has no legacy counterpart and is pinned by this contract alone (OD-155).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-005 | enabled=false: for every stdin byte string the render is zero JSON lines, exit 0 (DI-012 named deviation, default true = legacy) | fuzz over stdin corpus |
+| VP-005 | enabled=false: for every stdin byte string the render is zero JSON lines, exit 0 (ruled new behavior, not a DI-012 parity exclusion; default true = legacy) | fuzz over stdin corpus |
 | VP-009 | enabled=true: stepwise stdout/exit/cache parity vs the CPython oracle over the committed subagent corpus family rows | manual corpus comparison (Tier A) |
 
 ## Traceability
@@ -104,7 +112,7 @@ half has no legacy counterpart and is pinned by this contract alone (OD-155).
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-012 (named deviation: the off switch itself), DI-007 (no ledger access) |
+| L2 Domain Invariants | DI-007 (no ledger access); DI-012 cited for the pinned-quirk vocabulary only — the off switch is ruled new behavior (OD-155), not a DI-012 parity exclusion (VP-005) |
 | Architecture Module | `internal/config` (key + default + rationale), `internal/statusline` (early-out branch) |
 | Stories | TBD (filled by story-writer) |
 | Source | new contract; OD-155 row in `specs/owner-decisions-log-2026-11-14.md` |

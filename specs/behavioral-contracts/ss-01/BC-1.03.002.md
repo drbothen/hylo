@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: EC-008/009 float+negative cached-size classification (OD-160); dropped uncited DI-012 (ADV-P2-C09/C11)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C13/C18): float cached size classified per path (equality path never seeks), DI-012 cited for the OD-160 legs", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C13) — EC-007 carves JSON bool `size` out of the crash class: Python bool is an int (`size == 1` compare, `seek(true)` = `seek(1)`, oracle-verified 2026-11-18); the crash class keeps string/array/object/null", "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row (VP-012) mirroring sibling BC-1.03.015's OD-161 row"]
+modified: ["1.2.1 2026-11-17: EC-008/009 float+negative cached-size classification (OD-160); dropped uncited DI-012 (ADV-P2-C09/C11)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C13/C18): float cached size classified per path (equality path never seeks), DI-012 cited for the OD-160 legs", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C13) — EC-007 carves JSON bool `size` out of the crash class: Python bool is an int (`size == 1` compare, `seek(true)` = `seek(1)`, oracle-verified 2026-11-18); the crash class keeps string/array/object/null", "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row (VP-012) mirroring sibling BC-1.03.015's OD-161 row", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C09) — EC-008 gains the NaN cached-size leg: NaN fails all comparisons, never resets, and raises TypeError at fh.seek(nan) (SL:1043) on either grow or shrink (OD-160 class; json.load accepts the token per BC-1.06.001 EC-002)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,7 +84,7 @@ no-new-bytes test.
 | EC-005 | Cache file is not JSON / unreadable | loads as `{}` → off 0 → behaves as first run |
 | EC-006 | `size == off == 0` (empty transcript, no cache) | zeros returned, no cache file created |
 | EC-007 | Cached `size` is a non-number (foreign cache) | foreign-cache crash class CP-C (ruling b): out of byte-parity scope; not specified here. ADV-P6-C13: a JSON bool `size` is **not** in this class — Python bool is an int (`isinstance(true, int)`), so `off = true` compares (`size == 1`) and `fh.seek(true)` = `seek(1)` cleanly; bool behaves as the integer it denotes (OD-160 table test) |
-| EC-008 | Cached `size` is a float (foreign cache) | path-dependent (SL:1027-1043): a float equal to the file size (cached `39.0`, file 39 B) hits `size == off` and returns the cached values with **no seek and no crash** (39 == 39.0, oracle-verified); a file that **grew** (`size > off`) reaches `fh.seek(off)` and the float raises `TypeError` (oracle-verified), uncaught by the OSError-only handler (SL:1053) → legacy degraded refresh, no save; a file that **shrank** (`size < off`) or a missing key with `off > 0` takes the reset path (postcondition 3) and re-parses from 0 with no crash. foreign-cache class (ruling b, exclusion id `OD-160`); hylo replicates the classification and degrades only on the grow path, out of byte-parity scope |
+| EC-008 | Cached `size` is a float (foreign cache) | path-dependent (SL:1027-1043): a float equal to the file size (cached `39.0`, file 39 B) hits `size == off` and returns the cached values with **no seek and no crash** (39 == 39.0, oracle-verified); a file that **grew** (`size > off`) reaches `fh.seek(off)` and the float raises `TypeError` (oracle-verified), uncaught by the OSError-only handler (SL:1053) → legacy degraded refresh, no save; a file that **shrank** (`size < off`) or a missing key with `off > 0` takes the reset path (postcondition 3) and re-parses from 0 with no crash. foreign-cache class (ruling b, exclusion id `OD-160`); hylo replicates the classification and degrades only on the grow path, out of byte-parity scope. Outside that path split: a cached `size` of NaN — which `json.load` accepts (BC-1.06.001 EC-002) — fails all of `<`, `==` and `>`, so it never takes the reset or no-new-bytes path and reaches `fh.seek(nan)` (SL:1043), raising `TypeError` whether the file grew or shrank; the grow-path-only wording does not hold for NaN (OD-160 class) |
 | EC-009 | Cached `size` is negative (foreign cache) | `size < off` false, `seek(negative)` raises `OSError` (oracle-verified), caught at SL:1053 → return without write; nothing is saved, so the parse makes no progress on every later refresh; foreign-cache class (ruling b, exclusion id `OD-160`) |
 
 ## Canonical Test Vectors

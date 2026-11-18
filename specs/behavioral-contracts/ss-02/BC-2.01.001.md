@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:45:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - domain-spec/invariants.md
-input-hash: "e7fed40"
+input-hash: "7a02283"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444, 902-903)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-19T04:30:00Z (1.2.5) ADV-P6 remediation D15 — PC-6 gains the backend-variable carve-out: a well-formed HYLO_BACKENDS_<i>_<FIELD> variable is a backend-entry variable (BC-2.01.002 PC-4/PC-5), never an unknown setting, closing the undefined-stderr gap for HYLO_BACKENDS_1_METRICS_URL"
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D08 - PC-2 empty-Text rule keyed to the REGISTERED range: free-text (theme.separator, subagent.joiner) and any-text (telemetry.query) keys accept the empty string; only non-empty-bound Text keys error"
   - "2026-11-19T21:00:00Z (1.2.7): ADV-P8 remediation D18 — PC-6 pins the unknown-setting warning ORDER: ascending byte-lexicographic by variable name (deterministic spec choice; Go map iteration is unordered), so the BC-2.03.001 same-order cross-reference resolves"
+  - "2026-11-20T18:30:00Z (1.2.8): ADV-P9 remediation D06+A12+D07 — carve-out notes per-key backend errors sort after all registry keys (index then field name, BC-2.01.002); the platform seam paragraph states internal/platform as the SINGLE HOME of EnvVars (cmd/hylo and statusline consume it, ARCH-00); PC-2 keys default-only Text/List empty values to the Text-class non-empty reason (checks run first, BC-2.01.005 PC-7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -69,7 +70,10 @@ happens once per process, before any side effect.
    the control-byte bound (`statusline.theme.separator`, `statusline.subagent.joiner`)
    or ANY TEXT (`statusline.telemetry.query`) ACCEPT the empty string — it carries no
    control byte, so it is in range (pass-7 D08; an empty value still renders the
-   separator/joiner as the empty string) — an
+   separator/joiner as the empty string) — a DEFAULT-ONLY Text/List key (BC-2.01.005
+   PC 7) instead runs its Text-class checks FIRST, so an empty value yields the
+   Text-class non-empty reason `expected non-empty control-free text`, not the default
+   comparison (ADV-P9-D07) — an
    empty SGR value is not a parameter list (BC-2.01.003 PC 2), and an empty composite
    value fails the shape check (BC-2.01.005 PC 5) (type coverage completed, ADV-P5-D32).
 3. No config file is opened: not the per-OS default path (BC-2.03.002), not `HYLO_CONFIG`,
@@ -91,7 +95,9 @@ happens once per process, before any side effect.
    (Go map iteration is unordered; `os.Environ` order varies by OS), pinned so
    `hylo config validate`'s stderr (BC-2.03.001 PC-2) and any table test are
    reproducible. Carve-out (ADV-P6-D15): a well-formed `HYLO_BACKENDS_<i>_<FIELD>` variable is
-   NOT an unknown setting — even though `backends[<i>]` has no registry entry in P1 — it is
+   NOT an unknown setting — even though `backends[<i>]` has no registry entry in P1 (its
+   per-key errors therefore sort after all registry keys, by index then field name —
+   BC-2.01.002 PC-4, ADV-P9-D06) — it is
    a backend-entry variable governed by BC-2.01.002 PC-4/PC-5 (a P1 `<FIELD>` establishes
    the index and draws the cardinality error; a non-P1 `<FIELD>` warns as an unknown
    setting per index, before any cardinality error). Name matching follows OS environment-variable case semantics (ADV-P2-D17
@@ -107,7 +113,10 @@ happens once per process, before any side effect.
    the Windows folding rule is exercised on every OS by a table test against the seam's
    injected test double (feed both casings through the fold; no Windows CI leg is needed
    to test the fold itself). The seam is named `platform.EnvVars` (orchestrator call 9:
-   `EnvVars` everywhere, not `Environ`). Reserved names, never warned and never config keys: `HYLO_CONFIG` (config path
+   `EnvVars` everywhere, not `Environ`), and `internal/platform` is its SINGLE HOME
+   (ADV-P9-A12, orchestrator call 13: `platform.EnvVars` is the one declaration of the
+   type; cmd/hylo and package statusline consume it, satisfying ARCH-00's
+   one-component-one-section rule). Reserved names, never warned and never config keys: `HYLO_CONFIG` (config path
    override, BC-2.03.002), `HYLO_TEST_NOW` (harness clock hook, design §3.2; a malformed
    value is ignored with one stderr warning and the real clock is used — BC-6.01.003,
    ADV-P1-D22 spec choice), `HYLO_PARITY_PYTHON` (harness interpreter setting, OD-104),

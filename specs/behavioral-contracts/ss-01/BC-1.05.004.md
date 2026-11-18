@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T16:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "bf7fc6f"
+input-hash: "afdb881"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,15 @@ parity_class: "OD-166"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.2.1) VP citation reconciliation — VP-001 added", "2026-11-17 (v1.2.2) pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "2026-11-18 (v1.2.3) pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "2026-11-18 (v1.2.5) pass-4 remediation ADV-P4-C2-03 (OD-166 closed-set id per OD-169; DI-012 cited) + ADV-P4-C2-06 (guard pinned: usd OR api_ms, sign-agnostic, gate-independent; EC-011 + vector)", "2026-11-18 (v1.2.6) pass-5 remediation ADV-P5-C2-06 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)", "2026-11-19T16:00:00Z (v1.2.7) sync-check adv-p6 closure (SC-25) — the OD-166 postcondition parenthetical extends to the TWELVE-id closed set with OD-181; the ordinal (11th id) is unchanged; no behavioral change", "2026-11-18 (v1.2.8) pass-8 remediation ADV-P8-C2-07 (row-1 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"]
+modified:
+  - "2026-11-17 (v1.2.1) VP citation reconciliation — VP-001 added"
+  - "2026-11-17 (v1.2.2) pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)"
+  - "2026-11-18 (v1.2.3) pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)"
+  - "2026-11-18 (v1.2.5) pass-4 remediation ADV-P4-C2-03 (OD-166 closed-set id per OD-169; DI-012 cited) + ADV-P4-C2-06 (guard pinned: usd OR api_ms, sign-agnostic, gate-independent; EC-011 + vector)"
+  - "2026-11-18 (v1.2.6) pass-5 remediation ADV-P5-C2-06 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)"
+  - "2026-11-18 (v1.2.7) sync-check adv-p6 closure (SC-25) — the OD-166 postcondition parenthetical extends to the TWELVE-id closed set with OD-181; the ordinal (11th id) is unchanged; no behavioral change"
+  - "2026-11-18 (v1.2.8) pass-8 remediation ADV-P8-C2-07 (row-1 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"
+  - "2026-11-18 (v1.2.9) pass-9 remediation ADV-P9-C2-03 (OD-166 convertibility skip moved out of the PC1 guard to the write step, PC4 — after the history load and the sessions.get(sid) lookup, so CP-S15 at SL:230 still fires first; OD-166 scope unchanged) + ADV-P9-C2-05 (DI-008 lifted into the L2 row)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,31 +67,37 @@ is visible to other sessions' thresholds in the same instant but never to its ow
 
 1. **Guard (no read, no write):** if `sid` is falsy (absent, null, `""`, `0`, `false`),
    or `lane` is not exactly `"dgx"` or `"anth"`, or `usd` is not a number (bool counts as
-   a number), return without touching the file (SL:226-227). Per ruling **OD-166**,
-   closed-set-ratified by **OD-169** (exclusion id `OD-166`, the 11th id of the closed
-   set — D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160,
-   OD-161, OD-166, OD-181), the guard also rejects the refresh when **either** numeric field —
-   `usd` **or** the paired `api_ms` — cannot convert to float: an exact stdin int with
-   magnitude >= 2**1024 - 2**970 (smallest overflowing magnitude, oracle-verified
-   CPython 3.11.7, 2026-11-17) — so an unconvertible value is **not recorded**. The
-   test is convertibility only: **sign-agnostic** — a negative huge value fails it
-   identically and is likewise not recorded (legacy records it harmlessly; the
-   legacy-writes / hylo-skips byte divergence is exactly the `OD-166` exclusion) — and
-   **gate-independent**: the `>= burn_min_api_ms` render gate (BC-1.05.002 PC1) does not
-   participate in the record decision. So a huge positive `api_ms` passes the gate,
-   degrades the current refresh via CP-O11 (BC-1.05.007), and is not recorded; a huge
-   negative `api_ms` fails the gate, the current refresh renders normally with no $/h
-   segment (BC-1.05.002 PC4), and is not recorded either. (Legacy did record the giant
-   int via `round(usd, 4)` + `json.dump`, SL:234-237, poisoning later refreshes at
-   SL:255 — a foreign-history class path, BC-1.05.005 EC-011.) The current refresh still
-   renders/degrades as ruled (BC-1.05.007 CP-O10/CP-O11).
+   a number), return without touching the file (SL:226-227). The **OD-166**
+   convertibility skip is not part of this guard: it is decided at the write step
+   (PC4), after the history load and the `sessions.get(sid)` lookup, so legacy's
+   earlier raise sites (CP-S15 at SL:230) still fire first (ADV-P9-C2-03, orchestrator
+   call 11; OD-166's scope is unchanged — only the absent entry, BC-1.05.009).
 2. Otherwise load the history (BC-1.06.001 load: any error → `{}`), take
    `sessions = h.setdefault("sessions", {})` and `e = sessions.get(sid) or {}`
    (SL:228-230).
 3. **Throttle:** if `e.src == "cc"` and `now - e.get("ts", 0) < record_throttle_s`,
    return without writing (SL:232-233).
-4. Otherwise set `sessions[sid] = {"lane": lane, "usd": round(usd, 4), "api_ms": api_ms
-   if numeric else null, "ts": now, "src": "cc"}` and save the whole history atomically
+4. At the write step — reached only after the load and lookup (PC2) and the throttle
+   check (PC3) — per ruling **OD-166**, closed-set-ratified by **OD-169** (exclusion id
+   `OD-166`, the 11th id of the closed set — D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76,
+   temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166, OD-181), the refresh writes
+   **nothing** when **either** numeric field — `usd` **or** the paired `api_ms` —
+   cannot convert to float: an exact stdin int with magnitude >= 2**1024 - 2**970
+   (smallest overflowing magnitude, oracle-verified CPython 3.11.7, 2026-11-17) — so an
+   unconvertible value is **not recorded**. The test is convertibility only:
+   **sign-agnostic** — a negative huge value fails it identically and is likewise not
+   recorded (legacy records it harmlessly; the legacy-writes / hylo-skips byte
+   divergence is exactly the `OD-166` exclusion) — and **gate-independent**: the
+   `>= burn_min_api_ms` render gate (BC-1.05.002 PC1) does not participate in the
+   record decision. So a huge positive `api_ms` passes the gate, degrades the current
+   refresh via CP-O11 (BC-1.05.007), and is not recorded; a huge negative `api_ms`
+   fails the gate, the current refresh renders normally with no $/h segment
+   (BC-1.05.002 PC4), and is not recorded either. (Legacy did record the giant int via
+   `round(usd, 4)` + `json.dump`, SL:234-237, poisoning later refreshes at SL:255 — a
+   foreign-history class path, BC-1.05.005 EC-011.) The current refresh still
+   renders/degrades as ruled (BC-1.05.007 CP-O10/CP-O11). Otherwise set
+   `sessions[sid] = {"lane": lane, "usd": round(usd, 4), "api_ms": api_ms if numeric
+   else null, "ts": now, "src": "cc"}` and save the whole history atomically
    (BC-1.06.001 save) (SL:234-237). An existing key keeps its position; a new key is
    appended last; every other key and entry is preserved unchanged.
 5. An entry with any other `src` (e.g. `"backfill"`) is overwritten on the first
@@ -105,13 +119,13 @@ is visible to other sessions' thresholds in the same instant but never to its ow
 | EC-002 | refresh at `ts + 60.000` | written (strict `<`) |
 | EC-003 | lane None (no prefixes or empty model id) | no read, no write |
 | EC-004 | `session_id` absent / `""` | no write (the `nosession` fallback is never used here) |
-| EC-005 | `session_id` unhashable (non-empty list/object) | legacy `sessions.get(sid)` raises TypeError (CP-S15, SL:230) after the load, before any write → degraded line (BC-1.01.001); Go degrades at the same step |
+| EC-005 | `session_id` unhashable (non-empty list/object) | legacy `sessions.get(sid)` raises TypeError (CP-S15, SL:230) after the load, before any write → degraded line (BC-1.01.001); Go degrades at the same step — the OD-166 write-step skip (PC4) never preempts it: an unhashable `sid` with a huge unconvertible `api_ms` still degrades via CP-S15, it does not render normally (ADV-P9-C2-03) |
 | EC-006 | numeric `session_id` | OD-30 known difference, see BC-1.05.006 |
 | EC-007 | entry `ts` missing | default 0 → throttle not applied → written |
 | EC-008 | corrupt history shapes (top level not an object; `sessions` or an entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10 foreign-cache crash paths: out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); the Go writer only ever writes legacy's exact format |
 | EC-009 | `api_ms` = `"x"` | stored as `null` |
-| EC-010 | `usd` = 2**1024 (309-digit exact stdin int; numeric guard passes) | not recorded (OD-166 guard: magnitude >= 2**1024 - 2**970 cannot convert to float); file unchanged; the current refresh degrades via CP-O10 (BC-1.05.007); legacy did record it (ADV-P3-C2-01) |
-| EC-011 | `usd` = 2.0, `api_ms` = -(2**1024) (negative huge exact int) | not recorded (OD-166 guard is sign-agnostic: the value cannot convert to float); the current refresh renders normally — `-(2**1024) >= burn_min_api_ms` is false, so no $/h segment (BC-1.05.002 PC4); legacy recorded it harmlessly (writes diverge; exclusion `OD-166`, ADV-P4-C2-06) |
+| EC-010 | `usd` = 2**1024 (309-digit exact stdin int; numeric guard passes) | not recorded (OD-166 write-step skip, PC4: magnitude >= 2**1024 - 2**970 cannot convert to float); file unchanged; the current refresh degrades via CP-O10 (BC-1.05.007); legacy did record it (ADV-P3-C2-01) |
+| EC-011 | `usd` = 2.0, `api_ms` = -(2**1024) (negative huge exact int) | not recorded (OD-166 write-step skip, PC4, is sign-agnostic: the value cannot convert to float); the current refresh renders normally — `-(2**1024) >= burn_min_api_ms` is false, so no $/h segment (BC-1.05.002 PC4); legacy recorded it harmlessly (writes diverge; exclusion `OD-166`, ADV-P4-C2-06) |
 
 ## Canonical Test Vectors
 
@@ -125,6 +139,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | sid `""`, or lane `zzz`, or usd `"3"` | no file written / file unchanged | error |
 | sid `t`, lane anth, usd = 2**1024 (exact int), api 1000 | file unchanged (OD-166 record guard) | edge-case |
 | sid `t`, lane dgx, usd 2.0, api = -(2**1024) (negative huge exact int) | file unchanged (OD-166 record guard, sign-agnostic); the refresh renders normally, no $/h segment (BC-1.05.002 PC4) | edge-case |
+| sid `["x"]` (unhashable), lane dgx, usd 2.0, api = -(2**1024) | degraded line — CP-S15 TypeError at the lookup (PC2, SL:230) fires before the PC4 OD-166 skip; not a normal render (ADV-P9-C2-03) | edge-case |
 
 ## Verification Properties
 
@@ -141,7 +156,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 (cost history; format is status-line-owned, OD-124) |
-| L2 Domain Invariants | DI-007, DI-012 (exclusion id `OD-166` under the named-deviation rule, OD-169) |
+| L2 Domain Invariants | DI-007, DI-008 (the EC-005 CP-S15 TypeError degrade rides the never-blank ladder: 29-byte line, exit 0; ADV-P9-C2-05), DI-012 (exclusion id `OD-166` under the named-deviation rule, OD-169) |
 | Architecture Module | `internal/cost` history.go `Record` (design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (throttled write) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); call site render_lane (SL:603-606) |

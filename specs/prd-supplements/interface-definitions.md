@@ -1,19 +1,20 @@
 ---
 document_type: prd-supplement-interface-definitions
 level: L3
-version: "1.14"
+version: "1.15"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T12:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "109a0cc"
+input-hash: "982366b"
 modified:
   - "1.11 2026-11-19T02:00:00Z: pass-5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] → [base, span] and law restated as base + span·i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
   - "1.12 2026-11-19T06:00:00Z: pass-6 remediation — glyph width rule restated in legacy's render width (code points; OD-184); `statusline.cache.rename_retry_delay_ms` registered (OD-186); default-only keys given exact env spellings (A13); Text-class reason strings for List-entry violations and non-theme control bytes (A14); subagent token ascending-pair check fire-at and D4-EX-3 naming rule (A19); rationale codes aligned to the owning BCs (B07); stale glyphs-never-named sentence fixed (B15); metrics_url row notes the OD-181 plain-http parity scope"
   - "1.13 2026-11-19T12:00:00Z: pass-7 remediation — unit-selector defaults resolved to their single accepted spellings with the legacy-letter rationale (A04/A05/D01, orchestrator call 5); `git.ttl_s` mirrored floor pinned in the Seconds-class note and the row (A06); `statusline.telemetry.timeout_s` validation ceiling labeled (A21); `Float quad` type named for `sparkline.scale` (D09); `statusline.cache.rename_retry_limit` registered (OD-188); dead-backend labels `statusline.labels.vllm_down`/`lmcache_down` and `statusline.subagent.name_fallback` registered (OD-189); registry back-references completed for `units.tokens`/`limits.windows`/`timer.min_ms` (B10) and the S1.07 consumers (C10)"
   - "1.14 2026-11-19T22:00:00Z: pass-8 remediation — context-denominator rationale cites BC-1.02.006 (the existing contract), not the nonexistent BC-2.01.006 (A01); `Float triple` shape name `array of 3 numbers` added to the Composite-Type grammar for `statusline.theme.heat` (A12); Default/Range cells of `theme.heat` and `limits.windows` re-spelled to the env spellings `[0.22,0.85,0.80]` / `5h,7d` (D06/call 11); `cost.percentiles` ascending check clarified as an intra-key member-pair check whose D4-EX-3 line names the whole key with its full JSON env value (A11)"
+  - "1.15 2026-11-20T18:00:00Z: pass-9 remediation — subagent stdin payload section and NDJSON stdout row schema added (zero-byte cases included), copied from BC-1.07.001/.003/.004 (A01); `depthMetricsReply` 992/993 added to the Measured site list (A10); `paths.cache_dir` Range cell re-spelled ABSOLUTE-required with reason `not an absolute path` (A11/call 13); registry back-references completed for `sparkline.trace`/`cost.min_usd`/`cost.display_floor_usd` (C2-10)"
 traces_to: prd.md
 ---
 
@@ -70,7 +71,10 @@ hylo config path [--config <path>]  # print config, cache and state paths, one p
   Measured: stdin (main → json.load, 6 frames) 993 accepted / 994 rejected;
   transcript lines (main → _mix_counts → json.loads, 6 frames) 993/994; session cache
   (main → effective_rl → load_cache, 8 frames) 991/992; git cache (main → render_lane →
-  git_segment → load_cache, 9 frames) 990/991. Derived from equal chain depth: the
+  git_segment → load_cache, 9 frames) 990/991; metrics reply (main → get_sample →
+  fetch_sample → json.loads(resp.read()), 7 frames) 992/993, MEASURED end to end
+  against a localhost HTTP reply (pass-5 ADV-P5-A2-05; ARCH-06 `depthMetricsReply`;
+  supplement site list completed pass-9 A10). Derived from equal chain depth: the
   get_sample, claude_window_start and mix-cache loaders (8 frames) 991/992; the
   cost-history loaders record_cost and cost_thresholds, called from render_lane
   (9 frames) 990/991. Boundaries are call-context dependent (ADV-P1-B17) and pinned by
@@ -83,6 +87,19 @@ hylo config path [--config <path>]  # print config, cache and state paths, one p
   optional fields `output_style.name`, `pr.kind`, `prompt_cache.last_miss_cause`/`miss_causes`
   (market-intel §6.1). Any field may be absent or null; wrong inner types degrade per the
   CP-S01..S17 register, never fail (BC-1.02.x, BC-1.03.015).
+
+### Subagent stdin payload (--subagent)
+
+Distinct from the MAIN contract above (BC-1.07.001 Pre-1/Pre-2): one NDJSON-style single
+JSON object, assumed `{"columns": N, "tasks": [...]}` with per-task fields `id`, `name`,
+`agentType`, `status`, `description`, `label`, `startTime` (ms), `model`, `tokenCount`
+(ASSUMP-107-1: the Claude Code 2.1.326 `subagentStatusLine` payload is assumed compatible
+with the 2.1.322 contract legacy parsed; verified by a capture before Phase 2 writes the
+S1.07 stories, OD-192). Ingestion is TOTAL (BC-1.07.003): unparseable stdin, a non-object
+top level, non-UTF-8 bytes, a BOM, trailing data, or falsy `tasks` absorbs to
+`{}`/zero rows — zero bytes on stdout, exit 0, never the 29-byte line from the parse
+path; the site runs on the same 6-frame chain depth as MAIN stdin (993 accepted / 994
+rejected, VP-006). `columns` is carried but never trims subagent rows (BC-1.07.004 EC-007).
 
 ## Output Byte Contract (statusline stdout)
 
@@ -100,6 +117,14 @@ hylo config path [--config <path>]  # print config, cache and state paths, one p
   `hylo: unknown flag <flag> (--subagent is the only P1 flag)` per flag; checked before
   config resolution (BC-4.01.002 PC-3; pass-4 A11 — the former "takes no flags" text is
   false since OD-155).
+- Subagent mode (`--subagent`): zero or more LF-terminated NDJSON rows, one default-JSON
+  object per eligible task — `{"id": <decoded task id re-serialized>, "content":
+  <rendered row>}` — with CPython default separators (`, ` and `: `) and
+  `ensure_ascii=True` (pure ASCII wire; every non-ASCII character as a `\uXXXX` escape);
+  zero eligible tasks → zero bytes, exit 0; a subagent-mode config error → zero stdout
+  bytes with ALL reason lines on stderr (OD-168). The MAIN-mode outcomes above (1-2 line
+  happy path, degraded ladder, config-error line, unknown-flag line) do not apply in this
+  mode (BC-1.07.002/.003/.004; row schema and zero-byte cases: BC-1.07.004; pass-9 A01).
 - Side-effect order on a degrade: legacy order preserved; earlier writes kept (BC-1.01.009).
 
 ## HYLO_* Key Schema (P1 subset)
@@ -173,7 +198,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `backends[0].metrics_url` | URL | `http://192.0.2.10:8428` | scheme http(s), host present; a URL with userinfo (`http://u:p@host:8428`) loads and then reproduces legacy: no sample (the dead rung) — no exclusion id (OD-180, pass-5 C2-03). Parity metrics cases use plain http only (OD-181 closed-set id: non-http(s) redirect targets → hylo no sample; https verifies against the OS trust store — table-tested, out of byte-parity scope) | OWNER (OD-123) | BC-2.01.002, BC-2.02.005 |
 | `backends[0].model_prefixes` | List | `claude-sonnet` | comma list; startswith match | OWNER (OD-111/123) | BC-2.01.002, BC-1.02.001, BC-1.07.006, BC-1.07.008 |
 | `statusline.lane.reroute_all_prefixes` | List | `["claude", "claude-"]` (legacy) | comma list; every entry non-empty, no control bytes (OD-179, pass-5 B09: the reroute-all markers become config, sourcing the hard-coded "named constant" in BC-1.02.009); entry violation reason `expected non-empty control-free text in every entry`, Text class (OD-178; pass-6 A14) | OWNER (OD-179) | BC-1.02.009 |
-| `paths.cache_dir` | Path | per-OS hylo cache dir | not the legacy literal (exception) | OWNER (OD-101) | BC-3.01.001 |
+| `paths.cache_dir` | Path | per-OS hylo cache dir | ABSOLUTE path required (env `HYLO_PATHS_CACHE_DIR`; `~` expansion per OD-61): a relative value resolves against the per-project cwd and splits caches and cost history, so it is a config error with reason `not an absolute path` (path-grammar family — BC-2.01.005 grammar, riding E-CFG-001 without a dedicated class per the Reason-Vocabulary note in BC-2.02.006; exact string minted pass-9 A11/call 13, mirrored in error-taxonomy; agent 8's BC-2.01.005 absoluteness amendment not yet on disk when this row landed) — closing the P20/OD-162 range gap of the former "not the legacy literal (exception)" cell; still not the legacy literal (exception, OD-101) | OWNER (OD-101) | BC-3.01.001 |
 | `statusline.cache.rename_retry_delay_ms` | Int | 10 | `1..1000` — both bounds labeled judgment call (J): long enough to clear a Windows sharing violation, short enough to stay inside the refresh budget (OD-186, pass-6 A09: the retry delay was a timing value outside the registry) | J (OD-186) | BC-1.06.001 |
 | `statusline.cache.rename_retry_limit` | Int | 2 | `0..10` — both bounds labeled judgment call (J); TOTAL attempts = 1 + limit (limit 0 = the initial replace only, no retry). Beside its sibling `rename_retry_delay_ms`; supersedes the `renameRetryLimit = 2` code constant (OD-188, pass-7 A19/A2-07: the knob decides whether a Windows cache write persists, which is parity-visible via the `temp-file` exclusion, so the "no parity-visible behavior" reason for keeping it a constant no longer holds) | J (OD-188) | BC-1.06.001 |
 | `statusline.theme.reset` | SGR | `0` | SGR parameter list (non-list = config error, BC-2.01.003) | DOC (OD-113) | BC-2.01.003 |
@@ -195,7 +220,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.pill.label_unknown` | Text | `?` | non-empty, no control bytes, display width 1..16 (as above; OD-173) | OWNER (OD-173) | BC-1.02.001 |
 | `statusline.theme.separator` | Text | ` · ` (U+00B7) | free text, no control bytes (control byte = config error, BC-2.01.003 PC-3) | DOC (OD-113) | BC-2.01.003 |
 | `statusline.window_age.process_name` | Text | `claude` | non-empty, no control bytes; exact basename match (Windows `.exe` stripped) | OWNER (OD-133) | BC-3.02.001/.002 |
-| `statusline.sparkline.trace` | Enum | `rate` | `rate\|kv\|ttft` (legacy `mine` retired) | DOC | BC-2.02.004 |
+| `statusline.sparkline.trace` | Enum | `rate` | `rate\|kv\|ttft` (legacy `mine` retired) | DOC | BC-2.02.004, BC-1.04.009 (consumer; pass-9 C2-10) |
 | `statusline.context.cells` | Int | 10 | `1..100` — upper bound 100 is a labeled judgment call (J), same rationale as `kv.cells`: caps O(cells) render work and visible-width blowup within the 25 ms p95 budget; the T-codes justify the DEFAULT, not the bound (BC-1.02.006 PC3-PC5 define the widget for any cell count; pass-4 B09 aligns the bound with `kv.cells`). An out-of-range value is a config error, never a clamp (pass-5 B15/call 16) | J (T-027..T-029) | BC-1.02.006 |
 | `statusline.context.plain_max` | Float | 50 | any finite number (comparison-total `pct > plain_max` colour gate — plain percentage vs heat-coloured number; not the `min(…,n)` cells formula; BC-1.02.006 PC3-PC5; type aligned to the BC's "any finite JSON number", pass-4 B08) | DOC | BC-1.02.006 |
 | `statusline.context.red_from` | Float | 85 | any finite number (band threshold, operator `>=`; BC-1.02.006 PC3-PC5; type aligned to the BC, pass-4 B08) | DOC | BC-1.02.006 |
@@ -217,7 +242,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.sparkline.scale` | Float quad (composite) | `[1.0, 1.0, 0.1, 1e-9]` = `[k_top, v_floor, f_floor, other]` | array of 4 finite numbers (`array of 4 numbers`), each `> 0` (strict JSON env grammar, per-key shape in Composite-Type Env Grammar; pass-5 A03/call 3; `Float quad` joins the BC-2.01.004 `Type` enum — pass-7 D09) | Dv (T-045) | BC-1.04.009 |
 | `statusline.cost.min_sessions` | Int | 10 | `>= 1` (0 raises IndexError on an empty list in legacy, SL:261) | OWNER (T-020) | BC-1.05.005 |
 | `statusline.cost.percentiles` | Float pair | (0.75, 0.95) | each a finite Float in `[0, 1]`, ASCENDING pair: `p75 <= p95` is ratified — a descending pair is a number-range config error (strict JSON env grammar, see Composite-Type Env Grammar; pass-3 C2-07; ratified in BC-1.05.005 on its own grounds — index overflow and negative wrap — not mirrored from the limits bands, whose chained red-first comparison is comparison-total for any finite pair, so no ordering constraint is ratified there); when the ascending check fails, the D4-EX-3 line names the WHOLE key `statusline.cost.percentiles` with its full JSON env value (intra-key member-pair check — both members live in the one key's JSON value, no per-member env spelling; cf. the two-key `subagent.tokens` pair, which names the second key; pass-8 A11) | OWNER (T-024) | BC-1.05.005 |
-| `statusline.cost.min_usd` | Float | 1.0 | finite `>= 0` (grey test strict `<`) | Dv (T-019) | BC-1.05.001 |
+| `statusline.cost.min_usd` | Float | 1.0 | finite `>= 0` (grey test strict `<`) | Dv (T-019) | BC-1.05.001, BC-1.05.005 (PC2 skip gate; pass-9 C2-10) |
 | `statusline.cost.cold_yellow_usd` | Float | 25.0 | finite `>= 0` (cold test inclusive `>=`) | OWNER (T-021) | BC-1.05.001 |
 | `statusline.idle.running_below` | Float | 1 | finite `>= 0`, NaN rejected | DOC (T-108) | BC-1.04.012 |
 | `statusline.subagent.enabled` | Bool | true | on/off panel gate, default = legacy (OD-155) | OWNER (OD-155) | BC-1.07.002 |
@@ -247,7 +272,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.cost.record_throttle_s` | Seconds | 60 | finite `> 0` (strict `<` throttle; pass-3 A05) | Dv (T-022) | BC-1.05.004 |
 | `statusline.cost.rate_min_api_ms` | Int map | `{cc: 300000, other: 1800000}` | each value an Int `> 0` (ratio gate; strict JSON env grammar, see Composite-Type Env Grammar; `<= 0` would let `api_ms` = 0 pass the gate and Python raises ZeroDivisionError at the render SL:623 or in `cost_thresholds` SL:255, which Go floats would silently not reproduce — restricted pass-5 C2-08/call 16). The `_ms` values are millisecond denominations: the BC-2.01.004 PC-3(e) millisecond-type rule applies to the VALUE denomination for map-valued keys (pass-5 D14) | Dv (T-023) | BC-1.05.005 |
 | `statusline.cost.burn_min_api_ms` | Int | 300000 | Int `> 0` (ratio gate; ZeroDivisionError guard as above, pass-5 C2-08/call 16) | Dv (T-043) | BC-1.05.002 |
-| `statusline.cost.display_floor_usd` | Float | 0.005 | finite Float (operator `>=`); renamed from `cost.basis_min_shown_usd` by OD-174 (pass-4 B21: the key is a display floor for the `⛏` pick, not a basis minimum; not yet shipped, so the rename is free of compatibility debt) | Dv (T-044) | BC-1.02.029 |
+| `statusline.cost.display_floor_usd` | Float | 0.005 | finite Float (operator `>=`); renamed from `cost.basis_min_shown_usd` by OD-174 (pass-4 B21: the key is a display floor for the `⛏` pick, not a basis minimum; not yet shipped, so the rename is free of compatibility debt) | Dv (T-044) | BC-1.02.029, BC-1.05.003 (PC3 pick gate; pass-9 C2-10) |
 | `statusline.cost.basis_min_mtok_month` | Float | 30.4 | finite Float (operator `>=`) | Dv (T-012) | BC-1.02.029, BC-1.05.003 |
 | `statusline.telemetry.query` | Text | legacy `QUERY` literal (SL:102-123, byte-pinned golden) | any text (percent-encoded into the URL; upstream errors give no sample — the dead rung of the freshness ladder, never a CP-S degrade: BC-1.04.001 PC3/PC5; disposition corrected pass-5 C2-16) | DOC | BC-1.04.001 |
 | `statusline.telemetry.timeout_s` | Seconds | 1.5 | finite Float > 0, validation ceiling `<= 25` (HTTP client timeout; <= 0 not legacy-covered). Ceiling rationale (J, pass-7 A21): ~16x the 1.5 s default and an order of magnitude under the 300 s `keep_dead_s` retention horizon — OD-56 makes the fetch a synchronous total deadline inside the render, so an unbounded accepted value could stall the line for its whole duration; the numeric ceiling is a labeled judgment call, not a measured bound | J (T-005) | BC-1.04.001 |
@@ -389,12 +414,18 @@ the running binary resolves, overrides honored the same way the status line hono
 
 ## JSON Output Schema
 
-P1 emits no JSON on stdout: every statusline outcome is the byte contract above (happy
-path, degraded ladder, config-error line, unknown-flag line), and `config validate` /
-`config path` emit plain text lines. The only JSON surface in P1 is the stdin payload
-(contract: `## stdin JSON Contract (statusline)` above). When the config-file layer
-arrives in P4 (OD-107), its parse errors surface as D4-EX-3 config errors and this
-section will document the file-parse output schema.
+MAIN-mode statusline emits no JSON on stdout: every MAIN statusline outcome is the byte
+contract above (happy path, degraded ladder, config-error line, unknown-flag line), and
+`config validate` / `config path` emit plain text lines. The one JSON emitter in P1 is
+the `--subagent` panel: NDJSON stdout rows `{"id": <task id>, "content": <rendered row>}`
+— property order id-then-content, CPython default separators (`, ` and `: `),
+`ensure_ascii=True`, one LF-terminated line per eligible task in input order, zero-byte
+outcomes legitimate (renderer off, zero eligible rows, config error per OD-168,
+unparseable/non-object stdin absorbed per BC-1.07.003) (BC-1.07.004; pass-9 A01). The
+only JSON INPUT surfaces in P1 are the stdin payloads (MAIN contract:
+`## stdin JSON Contract (statusline)` above; subagent payload: the subsection above).
+When the config-file layer arrives in P4 (OD-107), its parse errors surface as D4-EX-3
+config errors and this section will document the file-parse output schema.
 
 ## Config File Schema
 

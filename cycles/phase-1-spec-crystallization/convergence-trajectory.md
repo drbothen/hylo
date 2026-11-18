@@ -91,3 +91,12 @@ Finding progression across adversarial passes in this cycle.
 - Tags: 2 [owner-question], 3 [process-gap] (ADV-P8-INDEX row tags).
 - Trajectory note: total −26 vs pass 7 (114 → 88), the second-largest total drop of the series, with HIGH easing 14 → 12; the orchestrator spot-verified eight findings (A01, A02, A05, A2-01, A2-05, B01, C2-03, C2-13) on disk and against CPython 3.11.7, all held.
 - Verdict: NOT_CONVERGED (per OD-176: three consecutive cosmetic-only passes required — 0 so far). Next: owner ruling OD-193 + fix burst (8 fix agents + 2 residual sweeps, executed same burst; OD-193 keeps OD-158 — coverage gate S1+S5 only, `internal/parity` reported not gated; VP↔BC edges 269; sync check adv-p8 — 87 closed / 1 rejected (C02, measured unreachable) / 0 open, SC-32 disposed as no-change), then pass 9.
+
+### Pass 9 — 2026-11-18 (phase-1d adversarial spec review)
+
+- Scope: full P1 spec package, re-reviewed as the same six fresh-context perimeters as passes 1-8. Verbatim reports: `adversarial-reviews/pass-9.md`; index: `adversarial-reviews/ADV-P9-INDEX.md`.
+- Perimeter counts: A 17, A2 20, B 7, C 11, C2 10, D 20.
+- Perimeter severities: A 3H/9M/4L/1C; A2 4H/8M/7L/1C; B 1H/4M/2L/0C; C 2H/4M/4L/1C; C2 1H/4M/5L/0C; D 4H/9M/6L/1C.
+- Novelty: pass-level MEDIUM-HIGH (per-perimeter: A HIGH, A2 HIGH, B/C/C2/D MEDIUM).
+- Trajectory note: total −3 vs pass 8 (88 → 85), the smallest total drop of the series, but HIGH rose 12 → 15 — many findings are regressions introduced by pass-8 fixes: four pass-8 "for all inputs" VPs false over legal inputs (ADV-P9-A2-01..04, B01), 11 spec files left with unparsable YAML frontmatter (ADV-P9-C02), one measured case (HTTP 100) generalized to the class "any 1xx" (ADV-P9-C2-01), plus partial-fix sibling residues (A02, D01, D03, D05, B01/B02). The burst answered with four burst-wide gates for future fix agents: YAML-`safe_load` frontmatter on every changed file, for-all properties derived from the owning BC's postconditions, no generalizing one measured case to a class, ASCII-only wire goldens.
+- Verdict: NOT_CONVERGED (per OD-176: three consecutive cosmetic-only passes required — 0 so far). Next: fix burst (8 fix agents incl. one agent-breakdown re-dispatch + 1 residual sweep + 1 closing fix, executed same burst; no owner rulings this pass — next free OD-194; crash register 48 → 49 paths, CP-O12 minted; VP↔BC `bcs:` edges re-machine-checked at 270; sync check `sync-check-adv-p9-2026-11-18.md` — 85 closed / 0 rejected / 0 open, SC-33/SC-34 closed), then pass 10.

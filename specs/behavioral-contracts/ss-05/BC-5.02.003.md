@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.10"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "07f2944"
+input-hash: "307012c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -27,6 +27,8 @@ modified:
   - "2026-11-19T02:00:00Z (1.2.6) pass-5 remediation sweep — PC-7 encoder reconciliation restated to the re-measured sweep-C law (995 − s json.dump / 994 − s json.dumps, s = frames at the encode call inclusive; per-site budgets session/mix 991, record_cost/git 990, composition 991/990; Save budget equals Load budget; exposure = stdin rate_limits value depth 991..992, session-save document flip 991 saved / 992 skipped), matching BC-5.02.006 PC-6 and ARCH-06"
   - "2026-11-19T14:00:00Z (1.2.7) pass-6 residual sweep (call 5) — PC-1 rider: the one-line rule governs the stdin/transcript/cache line-splitting sites; the metrics reply body is decoded whole (ModeBytes, may be multi-line) at 992 accepted / 993 rejected (BC-1.04.001 PC3, VP-006)"
   - "2026-11-19T21:00:00Z (1.2.8): ADV-P8 remediation D03 — Pre-1 corrected: stdin (json.load(sys.stdin), SL:930/1202) and the cache loaders (json.load(fh)) read the WHOLE input; only the transcript is line-split; the metrics reply stays the named whole-input fetch site"
+  - "2026-11-20T18:30:00Z (1.2.9): ADV-P9 remediation D13+D03 (orchestrator calls 15+1) — Pre-1 anchors swapped (SL:1202 is main()'s load, SL:930 the subagent path's); PC-7 encoder reconciliation respelled: the mix cache is the measured Save≠Load exception (Save 994 / Load 991, depth unit = total nesting of the saved document, top-level object = 1) with the measured next-refresh re-read loop; the equality claim is scoped to the equal-budget caches (session, git, cost-history)"
+  - "2026-11-18T16:52:00Z (1.2.10): pass-9 residual sweep (call 13) — the Decisions 'both current sites measure 993/994' cell marked as a historical design-quote ('Validation log'), superseded by the five measured sites (prd §8)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +52,7 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
 1. `b` is one line produced by `SplitLinesBytes` (BC-5.03.002) from the complete-lines blob (SL:1055-1059); it never
    contains `\n` or `\r`. The TRANSCRIPT is the only input legacy splits into lines and decodes line by line
    (pass-8 D03): the stdin decode (BC-1.01.002) reads the whole input with one `json.load(sys.stdin)`
-   (legacy SL:930, and SL:1202 for the subagent path), and the cache loaders (ARCH-04) read the whole file with
+   (legacy SL:1202, and SL:930 for the subagent path — PC-7 below; ADV-P9-D13), and the cache loaders (ARCH-04) read the whole file with
    one `json.load(fh)` — neither is line-split (a port that split pretty-printed stdin into lines would diverge;
    this Pre-1 previously mislabeled both sites as line-splitting). The metrics reply is likewise a whole-input
    site: BC-1.04.001 PC3 decodes the complete reply body, `json.loads(resp.read())` on bytes (ModeBytes
@@ -104,15 +106,24 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
    encoder also spends one slot per level and one per Python frame, but its acceptance is `K_entry − s`:
    `995 − s` for `json.dump` (cache writes) and `994 − s` for `json.dumps` (C encoder), with `s` = Python
    frames at the encode call, invoking frame inclusive (`<module>` = 1). Pinned per-site budgets (measured
-   end to end with `python3 -I`, CPython 3.11.7, isolated temp HOME+cwd): session/mix saves 991,
+   end to end with `python3 -I`, CPython 3.11.7, isolated temp HOME+cwd): session saves 991,
    record_cost/git 990, composition 991/990; the session-save end-to-end flip is a stdin document nesting
    991 saved / 992 skipped (stdin `rate_limits` value 990 — encoded document 991 — is the deepest that
-   still saves). At equal chain depth every cache's Save budget EQUALS its Load budget (session/mix
-   991/991, git/cost 990/990), so `Decode(Save(x))` never rejects what `Save` produced; a deeper stack
-   never has the larger budget and a shallower stack never has the smaller one. The real exposure is the
-   stdin side: a `rate_limits` nested to total value depth 991..992 decodes here (decoder bound 993) yet
-   breaches the session Save budget 991, so a value that decodes can still fail to re-encode. `Decode`
-   keeps its per-call-site `L`; the encoder's per-site `budget` travels with `Dumps`/`DumpsLen`.
+   still saves). ADV-P9-D03 / orchestrator call 1 (mix-cache save/load asymmetry, orchestrator-measured):
+   the MIX cache is the measured exception to the Save-equals-Load reconciliation — its save site
+   stores saved documents of total nesting (top-level saved object = 1, the `Dumps` budget unit) up to
+   994 and skips 995, while its loader accepts documents only up to 991; a transcript line decoded here
+   at total depth 993 with a deep `message.id` saves a mix cache of document depth 993, and on the NEXT
+   refresh the load fails, legacy treats the cache as absent, re-reads the transcript from offset 0 and
+   rewrites the cache — every refresh while that line remains (file rewritten, same size, no temp leak,
+   exit 0). hylo reproduces this (the re-read loop is pinned in the owning transcript/cache BC). For the
+   equal-budget caches the reconciliation stands: at equal chain depth Save EQUALS Load (session
+   991/991, git/cost 990/990), so `Decode(Save(x))` never rejects what `Save` produced for THEM; a deeper
+   stack never has the larger budget and a shallower stack never has the smaller one. The other real
+   exposure is the stdin side: a `rate_limits` nested to total value depth 991..992 decodes here
+   (decoder bound 993) yet breaches the session Save budget 991, so a value that decodes can still fail
+   to re-encode. `Decode` keeps its per-call-site `L`; the encoder's per-site `budget` travels with
+   `Dumps`/`DumpsLen`.
 
 ## Invariants
 
@@ -167,7 +178,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 `json.loads(bytes)`.
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1059-1063: `for line in blob[:cut].splitlines(): try: e = json.loads(line) except Exception: continue`) |
 | Legacy contract | BC-SL-067 (new in P3r1 with BC-SL-033 refinement; index P3r4 §7.3) |
-| Decisions | OD-103; design IM-01; pitfalls PR-09, PR-10, PR-11, PR-19; validation-log note (budgets are per call site and each site's value must be measured end to end; both current sites measure 993/994, design "Validation log") |
+| Decisions | OD-103; design IM-01; pitfalls PR-09, PR-10, PR-11, PR-19; validation-log note (budgets are per call site and each site's value must be measured end to end; "both current sites measure 993/994" is a historical design-quote ("Validation log"), superseded by the five measured sites — stdin 993/994, transcript line 993/994, metrics reply 992/993, session-cache loaders 991/992, git cache 990/991 (prd §8)) |
 
 ## Related BCs (Recommended)
 

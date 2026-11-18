@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-20T08:00:00Z
+timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.001.md, behavioral-contracts/ss-02/BC-2.03.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, prd-supplements/error-taxonomy.md]
-input-hash: "40e3681"
+input-hash: "87e5ec6"
 traces_to: prd.md
 source_bc: BC-4.01.001
 bcs: [BC-4.01.001, BC-4.01.003, BC-2.03.001, BC-2.03.002, BC-1.07.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-20T08:00:00Z: pass-8 fixes (A2-15, A2-07) — the usage-error norm names bare `hylo` (EC-004) and an unknown verb (EC-005, e.g. `hylo status`) exit 2 beside the non-statusline verbs (BC-4.01.001 PC-4), and the legal statusline states include BOTH entries (subagent: zero or more LF-terminated NDJSON lines, zero bytes allowed, config error = zero stdout bytes per OD-168, BC-1.07.001); the BC-4.01.001 for-all row gained a matching property leg: fuzz over all argv/env/stdin with args[0]==\"statusline\" (FuzzStatuslineExitSurface), method and Proof Method table updated; bcs: gains BC-1.07.001 (subagent NDJSON wire grammar of the subagent leg)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-20T08:00:00Z: pass-8 fixes (A2-15, A2-07) — the usage-error norm names bare `hylo` (EC-004) and an unknown verb (EC-005, e.g. `hylo status`) exit 2 beside the non-statusline verbs (BC-4.01.001 PC-4), and the legal statusline states include BOTH entries (subagent: zero or more LF-terminated NDJSON lines, zero bytes allowed, config error = zero stdout bytes per OD-168, BC-1.07.001); the BC-4.01.001 for-all row gained a matching property leg: fuzz over all argv/env/stdin with args[0]==\"statusline\" (FuzzStatuslineExitSurface), method and Proof Method table updated; bcs: gains BC-1.07.001 (subagent NDJSON wire grammar of the subagent leg)", "1.3 2026-11-20T12:00:00Z: pass-9 fixes (A2-12, A2-20) — the MAIN fuzz leg's generator domain excludes `--subagent` (a `--subagent` anywhere in argv routes the run to the subagent renderer, whose legal zero-byte output false-failed the MAIN non-empty check; legacy routes on `--subagent` anywhere in argv, SL:1240-1241); the fuzz sketch derives argv/env from byte blobs — Go fuzzing supports only primitive parameter types, not []string or map[string]string (A2-20)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,8 +48,12 @@ error — bare `hylo` with no args (EC-004), an unknown verb (EC-005, e.g. `hylo
 status`), and usage errors on non-statusline verbs — with the golden usage text on
 stderr (BC-4.01.001 PC-4). No verb/state pair exists
 outside the table, and `runStatusline` cannot propagate a non-zero code. For all argv
-with `args[0]=="statusline"`, all env and all stdin — the BC-4.01.001 for-all row —
-the exit is 0: MAIN-mode stdout is non-empty and LF-terminated; SUBAGENT-mode stdout
+with `args[0]=="statusline"` and no `--subagent` argument — the BC-4.01.001 for-all
+row; the MAIN fuzz generator's domain EXCLUDES `--subagent` (A2-12: `--subagent`
+anywhere in argv routes the whole run to the subagent renderer, legacy SL:1240-1241,
+whose legal zero-byte output would false-fail the MAIN non-empty check) —
+all env and all stdin, the exit is 0: MAIN-mode stdout is non-empty and LF-terminated;
+SUBAGENT-mode stdout
 is zero or more LF-terminated NDJSON lines, zero bytes allowed.
 
 ## Source Contract
@@ -70,7 +74,8 @@ is zero or more LF-terminated NDJSON lines, zero bytes allowed.
   (`usage.golden`), plus the version-chain fallback table (ldflags stamp -> VCS -> dev);
   plus the BC-4.01.001 for-all property leg as a fuzz harness over arbitrary argv /
   env / stdin shapes with `args[0]=="statusline"`: exit 0 always, MAIN-mode stdout
-  non-empty LF-terminated, SUBAGENT-mode stdout zero or more LF-terminated NDJSON
+  non-empty LF-terminated (generator excludes `--subagent`, A2-12), SUBAGENT-mode
+  stdout zero or more LF-terminated NDJSON
   lines with zero bytes legal (BC-1.07.001; the subagent NDJSON check of the BC row).
 - **Honesty:** testable-only. The table is the proof object; exhaustiveness follows
   from the dispatcher being a closed switch (statically checkable, ARCH-01).
@@ -80,7 +85,7 @@ is zero or more LF-terminated NDJSON lines, zero bytes allowed.
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
 | Table test + golden | Go test, `cmd/hylo` | yes — closed verb/state table | every verb x validity state |
-| For-all fuzz (`FuzzStatuslineExitSurface`) | `go test -fuzz`, `cmd/hylo` | bounded by the closed dispatcher switch | all argv/env/stdin with `args[0]=="statusline"`, both entries |
+| For-all fuzz (`FuzzStatuslineExitSurface`) | `go test -fuzz`, `cmd/hylo` | bounded by the closed dispatcher switch | all argv/env/stdin with `args[0]=="statusline"`, both entries (MAIN leg: no `--subagent`, A2-12) |
 
 ## Proof Harness Skeleton
 
@@ -99,7 +104,21 @@ func FuzzStatuslineExitSurface(f *testing.F) { // BC-4.01.001 for-all row (A2-07
     // argv with args[0]=="statusline", all env, all stdin — exit 0; MAIN-mode stdout
     // non-empty LF-terminated; SUBAGENT-mode stdout zero or more LF-terminated
     // NDJSON lines, zero bytes allowed (BC-1.07.001; OD-168 for the config-error case).
-    f.Fuzz(func(t *testing.T, args []string, env map[string]string, stdin []byte) {
+    // A2-20: Go fuzzing supports only primitive parameter types — argv and env are
+    // derived in-body from byte blobs (argv split on NUL, env on LF "K=V" lines).
+    f.Fuzz(func(t *testing.T, argBlob, envBlob, stdin []byte) {
+        var args []string
+        for _, a := range strings.Split(string(argBlob), "\x00") {
+            if a != "" {
+                args = append(args, a)
+            }
+        }
+        if slices.Contains(args, "--subagent") {
+            return // MAIN generator domain excludes --subagent (A2-12): any
+            // --subagent in argv routes the run to the subagent renderer
+            // (SL:1240-1241), whose legal zero-byte output would false-fail MAIN.
+        }
+        env := parseEnvBlob(envBlob) // LF-separated "K=V" lines; malformed lines skipped
         mainStdout, _, exit := runStatusline(append([]string{"statusline"}, args...), env, stdin)
         if exit != 0 { t.Fatalf("MAIN: exit = %d, want 0", exit) }
         if len(mainStdout) == 0 || mainStdout[len(mainStdout)-1] != '\n' {

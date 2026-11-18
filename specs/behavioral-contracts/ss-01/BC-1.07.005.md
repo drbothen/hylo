@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.7"
+version: "1.1.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
@@ -27,6 +27,7 @@ modified:
   - "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
   - "1.1.6 2026-11-19T18:00:00Z: pass-7 remediation (ADV-P7-C11/C14) — the name fallback is the config key statusline.subagent.name_fallback (Text, default ?, OD-189), respelled in Description, PC2, EC-004 and the Refactoring Notes (ADV-P7-C11, P20); invariant 3's prose pseudo-escape replaced with the source glyph (ADV-P7-C14)"
   - "1.1.7 2026-11-20T12:30:00Z: pass-8 residual sweep (OD-192) — ASSUMP-107-1 capture deadline respelled: before Phase 2 writes the S1.07 stories, not before Phase 3"
+  - "1.1.8 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C07) — EC-005 corrected: the failed-row ? fallback appears with NO name fields (PC2's every-field-missing chain), not with all name fields (ADV-P9-C07)"
 
 deprecated: null
 deprecated_by: null
@@ -92,7 +93,7 @@ else the configured name fallback (default `?`). Rows with a non-running status 
 | EC-002 | `status = "paused"` (not in map) | U+25CD grey, suffix ` paused` grey |
 | EC-003 | `name = ""` with `label = "lab"` | shows `lab` (or-chain falls through empty string) |
 | EC-004 | All name fields missing | name-fallback text after the glyph (`statusline.subagent.name_fallback`, default `?` — OD-189) |
-| EC-005 | `failed` row (U+2718 red) with all name fields | U+2718 red + `?` + grey ` failed` trail |
+| EC-005 | `failed` row (U+2718 red) with no name fields | U+2718 red + `?` + grey ` failed` trail |
 | EC-006 | Unicode names (accented letters, emoji, CJK) | rendered on the wire as their `ensure_ascii` `\uXXXX` escapes inside the JSON string — "verbatim" applies only to the decoded row content before dumping; no byte-for-byte UTF-8 passthrough (BC-1.07.004 PC3; ADV-P6-C14) |
 | EC-007 | Truthy non-string chain value (`name=True` / `1.0` / `['x']` / `{'a': 1}`) | displayed as the `str()` literal (`True`, `1.0`, `['x']`, `{'a': 1}`) — PC5 |
 | EC-008 | `status` present but falsy (`""`, `0`, `False`, `null`) | fallback glyph U+25CD grey (not a map key), NO status suffix — the `and` half of the SL:921 gate (ADV-P4-C06; oracle-checked 2026-11-18) |

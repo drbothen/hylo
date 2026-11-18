@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.18"
+version: "0.2.20"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T06:00:00Z
+timestamp: 2026-11-21T00:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -16,12 +16,14 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "ae77e22"
+input-hash: "239bfdf"
 traces_to: domain-spec/L2-INDEX.md
 modified:
   - "0.2.16 2026-11-19T12:00:00Z: pass-7 remediation — NFR-001 states the conditional >512 KB timing-fixture exemption with the OD-191 100 ms ceiling, case-flag identification and report line (A02/call 3); E-REN-002 carrier list completed and CP-T09 added (A14/B11/call 8); E-NET-001 gains the KEEP_DEAD dead rung (C2-13); §9 ASM-002 aligned with the revised assumption register (A15); ASM-007 validation moved before Phase 2 S1.07 story writing per OD-192 with corrected ASSUMP-107-1 precondition cites (A22/C13)"
   - "0.2.17 2026-11-19T22:00:00Z: pass-8 remediation — NFR-002 trigger list ends with the Windows MSVC localtime-domain degrade CP-T09 (A02/call 2); NFR-001 pins the >512 KB timing threshold at more than 524,288 bytes (512 KiB, equal to the transcript.read_cap_bytes default; D19/call 17); §1 gate-scope sentence records OD-193: S6 internal/parity coverage is reported, not gated (A04)"
   - "0.2.18 2026-11-20T12:00:00Z: pass-8 residual sweep — §2.01 BC-2.01.005 title row synced to the contract's H1 verbatim (bc_h1_is_title_source_of_truth)"
+  - "0.2.19 2026-11-20T18:00:00Z: pass-9 remediation — NFR-002 trigger list and §5 E-REN-002 gain the cost-pick equivalence overflow CP-O12 with its carrier cites (call 4/B03); E-NET-001 dead rung states it follows `statusline.theme.red` and `statusline.glyphs.degraded` (A14); §8 per-call-site recursion budget names all five measured sites including the metrics reply 992/993 (A10)"
+  - "0.2.20 2026-11-21T00:00:00Z: pass-9 residual sweep — §2.06 BC-6.04.002 title row synced to the contract's H1 verbatim (large-transcript exemption: 100 ms ceiling; bc_h1_is_title_source_of_truth)"
 supplements:
   - prd-supplements/interface-definitions.md
   - prd-supplements/error-taxonomy.md
@@ -420,7 +422,7 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 | BC ID | Title | Legacy | Priority |
 |-------|-------|--------|----------|
 | [BC-6.04.001](behavioral-contracts/ss-06/BC-6.04.001.md) | CI matrix: ubuntu-24.04 / macos-15 arm64 / windows-2025; Go 1.26.x leg; -race; gitleaks | new | P0 |
-| [BC-6.04.002](behavioral-contracts/ss-06/BC-6.04.002.md) | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target | new | P1 |
+| [BC-6.04.002](behavioral-contracts/ss-06/BC-6.04.002.md) | Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling) | new | P1 |
 | [BC-6.04.003](behavioral-contracts/ss-06/BC-6.04.003.md) | Tier C differential fuzz: nightly all three OSes, one clean run, non-gating, random valid inputs | new | P1 |
 
 ### 2.7 Reserved subsystems (no BCs this cycle)
@@ -485,7 +487,7 @@ the supplement.
 | ID | Requirement | Target | Validation | Contract |
 |---|---|---|---|---|
 | NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Conditional >512 KB timing-fixture exemption (OD-187, ceiling OD-191): the exempt fixture is identified by a validated case flag `timing_exempt: large-transcript` (exactly one case in the corpus, and its transcript must exceed 512 KB — more than 524,288 bytes; 512 KiB, equal to the `transcript.read_cap_bytes` default); it is exempt from the 25 ms p95 target, but the gate still fails if its p95 exceeds 100 ms (judgment call: 4x the target, well under the refresh interval), and the timing job prints one report line when the exemption is used. Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
-| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11, CP-A01..A05, CP-T09) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
+| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11/O12, CP-A01..A05, CP-T09) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
 | NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20). The tunable cap keys (`transcript.read_cap_bytes`, `transcript.dedup_memory`, `sparkline.history_cap`) carry judgment-call config-VALIDATION upper bounds (67108864 / 65536 / 1000; supplement) — config range bounds, not new runtime caps (pass-5 A13) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
@@ -501,12 +503,12 @@ the supplement.
 | Code | Surface | Observable | Exit | Contract |
 |---|---|---|---|---|
 | E-REN-001 | Panic guard (any crash path) | `\e[90mstatusline degraded\e[0m\n` (29 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`) | 0 | BC-1.01.001 |
-| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.01.008, BC-1.02.001, BC-1.02.006, BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
+| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.01.008, BC-1.02.001, BC-1.02.006, BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.029 (CP-O12 owner; pass-9 call 4), BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.003 (CP-O12 co-owner), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
 | E-CFG-001 | D4-EX-3 config error (seven classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134; Text — OD-178) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
 | E-VAL-001 | `config validate` on invalid config | plain reason lines (no SGR) on stdout | 1 | BC-2.03.001 |
-| E-NET-001 | Metrics unreachable / 500 / garbage | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (marker word from `statusline.pill.label_local`, OD-189); render never fails | 0 | BC-1.04.001/.004, BC-1.04.002 |
+| E-NET-001 | Metrics unreachable / 500 / garbage | freshness ladder down to the stale suffix; past KEEP_DEAD the dead rung `\e[31m◌ <label_local> ?\e[0m` (the red parameter is the `statusline.theme.red` value — default `31`, byte-equal to legacy — and the glyph is `statusline.glyphs.degraded`, default U+25CC: the rung follows the config keys, BC-1.04.004 PC3, pass-9 A14; marker word from `statusline.pill.label_local`, OD-189); render never fails | 0 | BC-1.04.001/.004, BC-1.04.002 |
 | E-FS-001 | Cache load/save faults | never-raise; render continues from defaults; failed replace persists nothing | 0 | BC-1.06.001/.002 |
 | E-HAR-001 | Harness integrity (canary, missing table test, glob entry, id outside closed set) | harness run FAILs with a named reason | non-zero (harness only) | BC-6.01.003, BC-6.03.004 |
 
@@ -610,8 +612,12 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 - **Cache-format ownership (ruling b).** Go is byte-exact cache writer and reader across
   Python/Go swaps for all four caches (BC-1.02.013, BC-1.03.002, BC-1.05.009,
   BC-1.06.001/.002, BC-6.02.004).
-- **Per-call-site resources.** JSON recursion budget — per call site, each measured end to end; both current
-  sites (stdin, transcript) measure 993/994) and whitespace sets (int/float vs str.isspace) are stated per site, never globally
+- **Per-call-site resources.** JSON recursion budget — per call site, each measured end to end; the
+  measured sites: stdin 993/994, transcript line 993/994, metrics reply 992/993, session-cache
+  loaders 991/992, git cache 990/991 (derived per equal chain depth: get_sample,
+  claude_window_start and mix-cache loaders 991/992; cost-history loaders 990/991 —
+  interface-definitions §stdin JSON Contract; ARCH-06 `json.go`) and whitespace sets (int/float vs
+  str.isspace) are stated per site, never globally
   (BC-1.01.002, BC-5.02.003, BC-5.01.002, BC-5.03.002).
 - **Public-repo hygiene (policy 21).** Repo-relative paths only; synthetic fixtures;
   real inputs replayed from git-ignored captures/ (BC-6.02.001); the placeholder IP

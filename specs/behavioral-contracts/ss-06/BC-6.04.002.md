@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "d991296"
+input-hash: "0d02138"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -28,6 +28,7 @@ modified:
   - "1.2.2 2026-11-18: ADV-P4 remediation D23 - gate binds on EVERY case p95 (worst case named); VP-036 de-pooled; unreachable EC-005 low-sample note withdrawn"
   - "1.2.3 2026-11-19T17:00:00Z: ADV-P7 remediation A02/OD-191/D26 (orchestrator call 3) - PC-3 gains the conditional large-transcript exemption: exactly one validated case flag timing_exempt: large-transcript (transcript must exceed 512 KB), exempt from the 25 ms target only when it misses it, ceiling 100 ms (OD-191), and exactly one report line whenever the exemption is used; PC-1 states the 20-timed-runs rationale (smallest round count with an interior nearest-rank p95, fixed n, CI-budget judgment call). ARCH-08 and PRD NFR-001 to copy"
   - "2026-11-19T21:00:00Z (1.2.4): ADV-P8 remediation D19 (orchestrator call 17) — timing_exempt size condition pinned in bytes: 512 KB = more than 524,288 bytes (512 KiB, the read_cap_bytes default); report shorthand unchanged"
+  - "2026-11-20T18:30:00Z (1.2.5): ADV-P9 remediation D19 (P7) — H1 enriched with the PC-3 large-transcript exemption (100 ms ceiling): 'Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling)'; BC-INDEX and BC-ALLOCATION title columns synced; prd.md's row is out of this burst's file set"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,7 +37,7 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-6.04.002: Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target
+# Behavioral Contract BC-6.04.002: Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling)
 
 ## Description
 

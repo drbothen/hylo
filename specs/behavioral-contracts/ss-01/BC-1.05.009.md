@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "1dff169"
+input-hash: "b306da0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,11 @@ parity_class: "OD-30, OD-166"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-18 (v1.3.1) pass-4 remediation ADV-P4-C2-05 (Description and exclusion scope list both permitted differences: OD-30 sub-case and OD-166 record skip; EC-010; parity_class)", "2026-11-18 (v1.3.2) pass-5 remediation ADV-P5-C2-06 (Decisions-row riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)", "2026-11-18 (v1.3.3) pass-8 remediation ADV-P8-C2-07 (Dumps-differential fuzz row rerouted to VP-024, the pyfmt JSON-equivalence VP whose bcs gains BC-1.05.009, per pass-8 call 12; cache-swap row keeps VP-020/VP-019)"]
+modified:
+  - "2026-11-18 (v1.3.1) pass-4 remediation ADV-P4-C2-05 (Description and exclusion scope list both permitted differences: OD-30 sub-case and OD-166 record skip; EC-010; parity_class)"
+  - "2026-11-18 (v1.3.2) pass-5 remediation ADV-P5-C2-06 (Decisions-row riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)"
+  - "2026-11-18 (v1.3.3) pass-8 remediation ADV-P8-C2-07 (Dumps-differential fuzz row rerouted to VP-024, the pyfmt JSON-equivalence VP whose bcs gains BC-1.05.009, per pass-8 call 12; cache-swap row keeps VP-020/VP-019)"
+  - "2026-11-18 (v1.3.4) pass-9 remediation ADV-P9-C2-04 (VP-012 closure rows for OD-30 and OD-166 in the VP table + VP Anchors line) and cross-references updated to BC-1.05.004 PC4 (OD-166 skip moved to the write step, ADV-P9-C2-03)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,10 +49,10 @@ float `repr`, `NaN`/`Infinity` tokens, int/float preserved, inherited key order,
 trailing newline. The format is byte-exact for every string session id. Exactly two
 differences are permitted, and only these (ADV-P4-C2-05): the **OD-30 sub-case**
 (non-string session id: one string-form key instead of legacy's duplicates, specified
-in BC-1.05.006) and the **OD-166 record skip** (BC-1.05.004 PC1: a refresh whose
+in BC-1.05.006) and the **OD-166 record skip** (BC-1.05.004 PC4: a refresh whose
 numeric `usd` or `api_ms` cannot convert to float writes **no entry** where legacy
 persisted the raw int — an absent-entry byte divergence, sign-agnostic and
-gate-independent).
+gate-independent; decided at the write step, after load and lookup, ADV-P9-C2-03).
 
 ## Preconditions
 
@@ -101,7 +105,7 @@ gate-independent).
 | EC-007 | re-record of key `b` that sits before key `a` | `b` stays first; `a` (even a foreign shape like `{"x": 1}`) re-emitted unchanged |
 | EC-008 | non-string sid | OD-30 sub-case → BC-1.05.006 |
 | EC-009 | save fails (unwritable dir) | nothing persisted, error swallowed (BC-1.06.001) |
-| EC-010 | unconvertible `usd`/`api_ms` (OD-166, BC-1.05.004 PC1) | no entry written at all — the skip is decided before this contract applies; this contract governs only the bytes of writes that happen |
+| EC-010 | unconvertible `usd`/`api_ms` (OD-166, BC-1.05.004 PC4) | no entry written at all — the skip is decided before this contract applies; this contract governs only the bytes of writes that happen |
 
 ## Canonical Test Vectors
 
@@ -120,6 +124,8 @@ Clock 1794615009.0.
 |--------|----------|-------------|
 | VP-024 | `pyfmt.Dumps` equals CPython `json.dumps` (defaults) on generated ordered values incl. NaN/inf, ints, surrogates | fuzz (differential vs the oracle) (routed to VP-024, the pyfmt JSON-equivalence differential — pass-8 call 12; VP-020/VP-019 had no fuzz leg) |
 | VP-020, VP-019 | Python-written file → Go record → bytes equal Python record on the same file (string sids) | manual (cache-swap test) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-30` (non-string sid: one string-form key, BC-1.05.006) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-30` entry and its riding table test `TestCostHistory_OD30_NumericSidStringKey`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-166` (a refresh whose numeric `usd` or `api_ms` cannot convert to float writes no entry where legacy wrote one; the absent entry is the excluded divergence) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-166` entry and its riding table test `TestCostHistory_OD166_RecordGuard`, and the mutation test fails closed if that entry is dropped | property test (VP-012, go test; OD-169) |
 
 ## Traceability
 
@@ -132,7 +138,7 @@ Clock 1794615009.0.
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); cost_thresholds read (SL:245-246); save_cache json.dump (SL:203) |
 | Legacy contract | BC-SL-102 (P3r3 §4.2; re-confirmed P3r4 §1.1); writer-format ruling (b) P3r2 §0 |
 | Decisions | **OD-30** (numeric-sid sub-case: one string-form key), **OD-105/OD-110** (named exclusion entry `OD-30` / case `numeric-session-id`, dedicated test `TestCostHistory_OD30_NumericSidStringKey`, shared with BC-1.05.006), OD-101, OD-103, OD-106, OD-124, **OD-166/OD-169** (record skip: unconvertible `usd`/`api_ms`, exclusion entry `OD-166`, dedicated table test `TestCostHistory_OD166_RecordGuard`) |
-| Exclusion scope | Only non-string-sid cases (OD-30) and entries a refresh skips under the OD-166 record guard (BC-1.05.004 PC1) are excluded; every other string-sid case is compared byte for byte on stdout and `cost-history.json` — the absent OD-166 entry itself is the excluded divergence |
+| Exclusion scope | Only non-string-sid cases (OD-30) and entries a refresh skips under the OD-166 record guard (BC-1.05.004 PC4) are excluded; every other string-sid case is compared byte for byte on stdout and `cost-history.json` — the absent OD-166 entry itself is the excluded divergence |
 
 ## Related BCs (Recommended)
 
@@ -154,6 +160,7 @@ S-N.MM — cost history (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-024 — Dumps differential fuzz (pass-8 call 12); VP-020, VP-019 — cache-swap parity (row 2)
+- VP-012 — exclusion-closure cover for the named deviations `OD-30` and `OD-166`
 
 
 #### Source Evidence

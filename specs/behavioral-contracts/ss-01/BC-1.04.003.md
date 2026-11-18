@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "5f0276f"
+input-hash: "8e821c7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:329-350)"
@@ -18,7 +18,14 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)", "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-13/14/15 (preempt_marker_above config key + queue.yellow independence; output-neutrality qualified by points <= history_cap; EC-008 KeyError degrade outcome)", "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (EC-008 KeyError scoped to hist[-1] + OD-160 tag) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and design call 16 (history_cap range 1..1000; preempt_marker_above Float >= 0)", "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-008/EC-009 degrades ride the never-blank ladder) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, VP-031 de-cited; pass-8 call 12)"]
+modified:
+  - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)"
+  - "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)"
+  - "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-13/14/15 (preempt_marker_above config key + queue.yellow independence; output-neutrality qualified by points <= history_cap; EC-008 KeyError degrade outcome)"
+  - "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (EC-008 KeyError scoped to hist[-1] + OD-160 tag) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and design call 16 (history_cap range 1..1000; preempt_marker_above Float >= 0)"
+  - "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-008/EC-009 degrades ride the never-blank ladder) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, VP-031 de-cited; pass-8 call 12)"
+  - "1.3.5 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC2/PC3 name the registered keys statusline.sparkline.max_age_s and statusline.sparkline.min_gap_s beside their default literals)"
+  - "1.3.6 2026-11-18: pass-9 residual sweep (call 9, ADV-P9-A2-04 disk sync) — the VP-030 quick-leg row names the registered keys (statusline.sparkline.history_cap, statusline.sparkline.max_age_s) instead of the 32/90 literals, states the pruning invariant on the success path only, and adds the failure-path verbatim re-save (SL:327, SL:353-355; Inv 2), matching VP-030's statement"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,10 +66,10 @@ at the last 32 points.
 
 1. Each stored point is normalized by `_norm_pt`: list `p` → `{"t": p[0], "v": p[1]}`;
    dict unchanged; anything else → `{}`.
-2. Points with `now - p.get("t", 0) < 90` are kept (strict; a point aged exactly 90 s is
-   dropped).
+2. Points with `now - p.get("t", 0) < statusline.sparkline.max_age_s` (default 90) are
+   kept (strict; a point aged exactly `max_age_s` is dropped).
 3. A new point is appended only if the kept list is empty or
-   `now - hist[-1]["t"] >= 2`.
+   `now - hist[-1]["t"] >= statusline.sparkline.min_gap_s` (default 2).
 4. The new point is built in this key order: `t=now`; then `v` ← `dgx_sl:gen_rate1m`,
    `k` ← `vllm:kv_cache_usage_perc`, `f` ← `dgx_ttft:p95_30m`, each only if the series is
    in the sample; then, if `v` is still absent and `dgx_tokens:gen_rate5m` is present,
@@ -117,7 +124,7 @@ at the last 32 points.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | Go property test (testing/quick) (routed to the VP-030 quick leg, pass-8 call 12; VP-031 de-cited from this row) |
+| VP-030 | On the success path, saved history length ≤ `statusline.sparkline.history_cap` with every saved point satisfying `now - t < statusline.sparkline.max_age_s` or being the new point; the fetch-failure path re-saves the stored history verbatim, unpruned (SL:327, SL:353-355; Inv 2) | Go property test (testing/quick) (routed to the VP-030 quick leg, pass-8 call 12; VP-031 de-cited from this row) |
 | VP-030, VP-031 | Point key order equals legacy for every subset of the four series | manual (table over 16 subsets) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008/EC-009 foreign-cache crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped (ADV-P5-C2-17) | property test (VP-012, go test) |
 

@@ -1,7 +1,7 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.11"
+version: "1.12"
 status: draft
 producer: architect
 timestamp: 2026-11-19T22:00:00Z
@@ -9,9 +9,10 @@ phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "241bc1a"
+input-hash: "bb6b82d"
 modified:
-  - "1.11 2026-11-20T12:00:00Z: pass-8 residual sweep (task 8) — the parity fakes respelled: "httptest fake" referred to Go's net/http/httptest package, which hylo never uses; the fakes are raw net.Listener listeners (ARCH-03 test seam, ARCH-07 parity fake)"
+  - "1.12 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-17, orchestrator call 5) — inventory row #2's decode-edge count corrected: 72 S1 BCs (all 101 S1 contracts less the 21 transcript S1.03 contracts of row #6 and the 8 subagent S1.07 contracts of row #5, which carry their own inventory rows), replacing '101 S1 BCs'; frontmatter: the 1.11 entry's inner double quotes repaired to single quotes so the modified list parses (YAML repair, orchestrator call 5); no history entry lost"
+  - "1.11 2026-11-20T12:00:00Z: pass-8 residual sweep (task 8) — the parity fakes respelled: 'httptest fake' referred to Go's net/http/httptest package, which hylo never uses; the fakes are raw net.Listener listeners (ARCH-03 test seam, ARCH-07 parity fake)"
   - "1.10 2026-11-19T22:00:00Z: pass-8 fix (ADV-P8-A2-12, orchestrator call 19) — the ASSUMP-107-1 owner-capture due date respelled to OD-192's settled claim, before Phase 2 writes the S1.07 stories (replacing 'before Phase 3') in the Integration Surface Inventory row #5, the Dependency Summary row #5 and the Boundary Reproduction Register row #5; the transcript 2.x-schema capture rows (#6, inventory and Dependency Summary) re-anchored to the same assumption discipline as ASSUMP-107-1 with the OD-192 date, removing the stale 'before Phase 3'"
   - "1.9 2026-11-19T18:00:00Z: pass-7 fix (A2-05, call 13) — the D4-EX-1 riding test name respelled to the settled TestWindowAge_D4EX1_Windows_AncestorFound in the Tier tables and the Dependency Summary (VP-012 v1.13's fixed name)"
 
@@ -51,7 +52,7 @@ carries their boundaries.
 | # | Service | Protocol | Fidelity | DTU? | Justification |
 |---|---------|----------|----------|------|---------------|
 | 1 | Prometheus-compatible metrics query API (VictoriaMetrics) | HTTP GET `/api/v1/query` | L2 | No | Stateless request/response; entire boundary = a handful of response envelopes. Existing raw `net.Listener` fake (ARCH-07) plus the register's sample-string extension rows (defensive-parse ratification is P6 per OD-157, not P1 — pass-3 A2-16 removes the stale OD-130-as-P1 vectors); a Docker clone cannot serve the child-process legacy oracle in Tier A (VP-034; wording updated pass-7 A2-22). |
-| 2 | Claude Code statusLine stdin JSON | One JSON object on stdin per render | L3 (decode semantics only) | No | Not a network service — an upstream push contract. Its clone *is* the harness corpus (`stdin.json.tmpl` cases). Decode edges carry 101 S1 BCs and are already corpus-pinned. |
+| 2 | Claude Code statusLine stdin JSON | One JSON object on stdin per render | L3 (decode semantics only) | No | Not a network service — an upstream push contract. Its clone *is* the harness corpus (`stdin.json.tmpl` cases). Decode edges carry 72 S1 BCs (all 101 S1 contracts less the 21 transcript S1.03 contracts of row #6 and the 8 subagent S1.07 contracts of row #5) and are already corpus-pinned. |
 | 5 | Claude Code `subagentStatusLine` agent-panel stdin (OD-155) | One JSON object on stdin per panel render: `{"columns": N, "tasks": [{id, name, agentType, status, description, label, startTime, model, tokenCount, ...}]}` | L3 (decode + per-task render semantics, BC-1.07.003..008) | No | Not a network service — a SECOND upstream push contract, separate from the statusLine stdin (added pass-3 A2-16). Its clone is the `subagent`-family harness corpus rows (`argv` field + `stdin.json.tmpl`, ARCH-07). Compatibility with the 2.1.326 payload is ASSUMP-107-1, still to be verified by an owner capture due before Phase 2 writes the S1.07 stories (OD-192). |
 | 6 | Claude Code transcript JSONL (pass-5 A2-23) | Upstream-owned append-only JSONL file read through a seek/read window (`transcript_path`): one JSON object per line — `type`/`message`/`timestamp`/`uuid`/`parentUuid`/... driving the transcript machine (accumulation, boundaries, turn recorder, W-predicates) | L3 (line-machine decode semantics; 21 S1.03 BCs, BC-1.03.001..021) | No | Not a network service — the THIRD upstream push contract. Its clone is the `transcript`-family harness corpus rows plus the seeded mix/`BASE` caches (ARCH-07; BC-1.03.019's 21-row D4-EX-2 table). Format is UPSTREAM-OWNED: the compatibility assumption is that the 2.x line-object schema is stable for P1, pinned by capture replay from git-ignored `captures/` under the same assumption discipline as ASSUMP-107-1 (owner capture due before Phase 2 writes the S1.07 stories, OD-192), not a Docker clone. Extension vectors: the D4-EX-2 wrong-shape table and CP-O06..O08 overflow rows pin boundary behaviors at the seam. |
 

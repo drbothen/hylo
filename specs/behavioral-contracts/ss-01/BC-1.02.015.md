@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "1580f27"
+input-hash: "cd770f7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane._hm (SL:539-549, 563)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): the segment-presence for-all row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the timer glyph is named as the registry key statusline.glyphs.timer instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"]
+modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): the segment-presence for-all row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the timer glyph is named as the registry key statusline.glyphs.timer instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z", "1.3 pass-9 remediation (ADV-P9-B06): the VP-041 for-all leg restricted to finite dur in non-degrading renders, with the three degrade carve-outs named (dur/api ±Infinity → CP-S12/CP-S13, BC-1.02.027; dur at or beyond the int→float bound with a numeric win_start → CP-O05, BC-1.02.017); 2026-11-19T16:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -108,7 +108,7 @@ start, so only the base segment appears).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028 | `_hm` equals CPython for ints and floats sampled at every k·60000 ± {0, 1, 0.5, 1 ulp} up to 1e8 | table test vs CPython goldens — golden leg |
-| VP-041 | Segment present iff number and `> 60000` — for all renders | property test (for-all leg; VP-028 delivers the oracle legs) |
+| VP-041 | Segment present iff number and `> 60000` — for all finite `dur` in non-degrading renders (degrade carve-outs: `dur`/`api` ±Infinity → CP-S12/CP-S13, BC-1.02.027; `dur` at or beyond the int→float conversion bound with a numeric `win_start` → CP-O05, BC-1.02.017) | property test (for-all leg; VP-028 delivers the oracle legs) |
 
 ## Traceability
 

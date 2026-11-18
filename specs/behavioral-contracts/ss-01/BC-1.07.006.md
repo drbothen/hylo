@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.8"
+version: "1.1.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
@@ -19,7 +19,16 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)", "1.1.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C03/C06) — lane-tag square pinned to statusline.glyphs.lane (U+25E8) and words to statusline.pill.label_local/label_cloud (OD-173); theme.grey named for the model bit; refactoring note uses pyfmt.Strip, never TrimSpace (OD-170)", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.7 2026-11-19T21:00:00Z: pass-7 remediation (ADV-P7-C14) — the three prose pseudo-escapes replaced with the source glyph (U+25E8, source bytes e2 97 a8): Description lane-pill clause and EC-003; escaped golden wire forms kept as depict the wire, "1.1.8 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"]
+modified:
+  - "1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)"
+  - "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced"
+  - "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)"
+  - "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)"
+  - "1.1.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C03/C06) — lane-tag square pinned to statusline.glyphs.lane (U+25E8) and words to statusline.pill.label_local/label_cloud (OD-173); theme.grey named for the model bit; refactoring note uses pyfmt.Strip, never TrimSpace (OD-170)"
+  - "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "1.1.7 2026-11-19T21:00:00Z: pass-7 remediation (ADV-P7-C14) — the three prose pseudo-escapes replaced with the source glyph (U+25E8, source bytes e2 97 a8): Description lane-pill clause and EC-003; escaped golden wire forms kept as depict the wire"
+  - "1.1.8 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
+  - "1.1.9 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02) — frontmatter modified list repaired to block style (lost closing quote restored); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

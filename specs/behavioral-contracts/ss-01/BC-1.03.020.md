@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T13:05:00Z
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C10/C11) — VP row: only C1 maps to BC-1.03.019 row 13; C2's native-hylo reference is row 15 plus appended A9/S11 (lr [90.0, false]); EC-005 quotes OD-32 literally (cur.t0 is a number) and credits CONV-ABS-15 for the non-numeric-out half"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +75,7 @@ hylo at the next turn event, with a known composition residual.
 | EC-002 | Poisoned cache, then a continuation line of the same id with no closer | legacy does **not** crash (it only moves `t1`); hylo opens a new turn instead → caches differ (C3 below); excluded under D4-EX-2 |
 | EC-003 | `out` is `["x"]` or `{"a": 1}` | same as `"abc"` (legacy crashes at the closer; hylo applies the rule) |
 | EC-004 | `out` is `true` or `1.5` (numbers) | rule does not fire; legacy and hylo agree (no crash) |
-| EC-005 | `out` null / `""` / `[]` / `{}` (falsy non-numbers) | unreachable from either writer (SL:1079 coerces falsy to 0); a foreign-cache state (CP-C class, out of byte-parity scope under ruling b). OD-32's literal text ("not int/float/bool") treats them as absent; hylo follows that text |
+| EC-005 | `out` null / `""` / `[]` / `{}` (falsy non-numbers) | unreachable from either writer (SL:1079 coerces falsy to 0); a foreign-cache state (CP-C class, out of byte-parity scope under ruling b). OD-32's literal text ("treat as no open turn when cur.t0 is a number") treats them as absent; the non-numeric-`out` half comes from CONV-ABS-15; hylo follows both |
 | EC-006 | `cur.t0` null with `out` `"abc"` | rule does **not** fire (BC-1.03.021) |
 
 ## Canonical Test Vectors
@@ -102,7 +102,7 @@ expectation = legacy run on the seed with `cur` replaced by null).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-029, VP-013 | Rule fires iff `cur` is an object, `t0` is a number (int, float or bool), `out` is not a number | table test |
-| VP-029, VP-013 | After the rule and one turn event, turn state equals native hylo's | table test (C1/C2 vs BC-1.03.019 row 13) |
+| VP-029, VP-013 | After the rule and one turn event, turn state equals native hylo's | table test (C1 vs BC-1.03.019 row 13; C2's native-hylo reference is row 15 plus appended `A9`, `S11`, giving `lr [90.0, false]`) |
 | VP-012 | Postcondition 5 closure: the OD-32 cache-swap cases are admitted under the closed D4-EX-2 register, each with an expected output file and a dedicated `TestMixCache_OD32_*` test; no globs | repository test over `exclusions.json` |
 
 ## Traceability

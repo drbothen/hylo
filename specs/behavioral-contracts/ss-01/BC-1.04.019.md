@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "81a6f43"
+input-hash: "b2312ac"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:792-799)"
@@ -18,7 +18,9 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-08 (testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)"]
+modified:
+  - "1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-08 (testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)"
+  - "1.2.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 sibling sweep (PC1/PC2/PC3 name the registered keys statusline.ttft.integer_from_s, statusline.ttft.yellow_s and statusline.ttft.min_samples beside their default literals)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,9 +45,11 @@ byte 0x1B.
 
 ## Postconditions
 
-1. `val = F(ttft, 0) + "s"` if `ttft >= 10`, else `F(ttft, 1) + "s"`.
-2. Color yellow iff `ttft > 8` (raw) and not in the "max" form.
-3. "max" form iff `n` is a number and `n < 20`.
+1. `val = F(ttft, 0) + "s"` if `ttft >= statusline.ttft.integer_from_s` (default 10),
+   else `F(ttft, 1) + "s"`.
+2. Color yellow iff `ttft > statusline.ttft.yellow_s` (default 8; raw) and not in the
+   "max" form.
+3. "max" form iff `n` is a number and `n < statusline.ttft.min_samples` (default 20).
 
 ## Invariants
 

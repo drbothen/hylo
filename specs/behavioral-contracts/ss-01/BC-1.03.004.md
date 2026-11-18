@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:21:12Z
+timestamp: 2026-11-21T00:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "650b999"
+input-hash: "75de44d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1063)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-038", "1.2.2 2026-11-17: depth-limit correction 989/990 (SC-01..02) + VP-006 citation (SC-06)", "1.2.3 2026-11-17: depth re-probe 993/994 (989/990 not reproducible) + surrogatepass UTF-8 exception (ADV-P2-C08)", "1.2.4 2026-11-17T21:21:41Z: EC-009 observation restated per end-to-end measurement recipe (tin=7 counted / tin=0 skipped); duplicate modified entry consolidated (ADV-P5-C17)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-A2-20, C17) — VP-038 row corrected to keepends=False corner-table-pinned fuzz self-oracle (no live differential, no ends-retained property); duplicate 1.2.4 modified entry consolidated"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-038", "1.2.2 2026-11-17: depth-limit correction 989/990 (SC-01..02) + VP-006 citation (SC-06)", "1.2.3 2026-11-17: depth re-probe 993/994 (989/990 not reproducible) + surrogatepass UTF-8 exception (ADV-P2-C08)", "1.2.4 2026-11-17T21:21:41Z: EC-009 observation restated per end-to-end measurement recipe (tin=7 counted / tin=0 skipped); duplicate modified entry consolidated (ADV-P5-C17)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-A2-20, C17) — VP-038 row corrected to keepends=False corner-table-pinned fuzz self-oracle (no live differential, no ends-retained property); duplicate 1.2.4 modified entry consolidated", "1.2.6 2026-11-21T00:00:00Z: pass-9 residual sweep (call 8) — the VP-029 skipped-piece for-all row respelled per the pass-9 gate: state unchanged except the offset advance (bytes consumed past `cut`, PC4), retiring the bit-identical claim"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -110,7 +110,7 @@ expected `conv` and cache `size` were re-pinned 2026-11-15 with the legacy oracl
 |--------|----------|-------------|
 | VP-038 | `SplitLinesBytes` equals CPython `bytes.splitlines()` **with `keepends=False`** on random byte strings: same split points, pieces carry no terminators; losslessness as stripped-losslessness (concatenation of pieces = input minus every `\r`/`\n`) | fuzz (self-oracle: terminator freedom + stripped-losslessness) pinned by the committed corner table (OD-142 regime) — **no live differential** (ADV-P5-A2-20 disposition) |
 | VP-006 | Per-call-site JSON depth budget holds at this site's edge: depth 993 accepted, 994 rejected, oracle invoked in the script's own frame shape (justified: EC-009's depth edge case is the transcript-site instance of VP-006's per-call-site budget obligation) | fuzz (boundary L/L+1 vs oracle) |
-| VP-029 | A skipped piece leaves the parser state bit-identical | Go property test (testing/quick) (state snapshot before/after) |
+| VP-029 | A skipped piece leaves the parser state unchanged except that the offset advances (its bytes are consumed past `cut`, PC4) | Go property test (testing/quick) (state snapshot before/after) |
 | VP-029 | Go and legacy agree on random transcripts mixing valid, torn and invalid-UTF-8 records | fuzz (Tier C) |
 
 ## Traceability

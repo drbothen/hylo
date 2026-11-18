@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "67b13d8"
+input-hash: "33c24ef"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,7 @@ modified:
   - "1.3.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-3 stamp re-dated ascending (it predated the preceding 1.3.1 reconciliation entry); no behavioral change"
   - "1.3.4 pass-7 remediation (ADV-P7-B01): H1 states the rows == 2 qualifier (negative COLUMNS hides row 2 only when rows == 2; rows >= 3 keeps it untrimmed per PC3/EC-004, SL:1224); no postcondition change; 2026-11-19T07:00:00Z"
   - "1.3.5 pass-8 remediation (ADV-P8-B02): row-2 omission conditioned on the configured narrow_cols — negative COLUMNS hides row 2 unconditionally only while narrow_cols > cols (default 72); a negative narrow_cols admits negative cols (Description, PC2, Inv 1, VP-040 P7 row, VP Anchors; consistent with BC-1.01.003 PC1); H1 unchanged; 2026-11-19T08:00:00Z"
+  - "1.3.6 pass-9 remediation (ADV-P9-B02, orchestrator call 2): the row-2 predicate carries its rows >= 2 term everywhere it is stated (Inv 1, PC4, VP-040 P7 row, VP Anchors) — legacy enters the row-2 block only when rows_env >= 2 (SL:1217), so rows=1 with a negative narrow_cols that would admit cols still prints no row 2 (counterexample rows=1, narrow_cols=-10, COLUMNS=-5); H1 unchanged (the width-rule leg it names is the PC2/PC3 scope); 2026-11-19T16:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,7 +45,9 @@ treats it as follows: trimming is skipped (`cols > 0` is false) and, when `rows 
 The hiding is via `cols < narrow_cols`, so it is unconditional for negative cols only while the configured
 `statusline.narrow_cols` (range: any Int) is non-negative: at the default 72 every negative col hides row 2, but a
 negative `narrow_cols` admits negative cols — e.g. `narrow_cols=-10`, `COLUMNS=-5`, `rows=2` shows row 2
-(`-5 >= -10`), consistent with BC-1.01.003 PC1.
+(`-5 >= -10`), consistent with BC-1.01.003 PC1. The full registered gate (SL:1217, 1224): row 2 is rendered
+iff `rows >= 2` AND (`rows > 2` OR `cols == 0` OR `cols >= narrow_cols`) — the `rows >= 2` term dominates at
+rows = 1, where no width prints a row 2 (PC4).
 
 ## Preconditions
 
@@ -57,14 +60,19 @@ negative `narrow_cols` admits negative cols — e.g. `narrow_cols=-10`, `COLUMNS
 2. rows = 2 -> row 2 is omitted **iff** `cols < narrow_cols`; at the default `narrow_cols = 72` this holds for every
    `cols < 0`, while a negative configured `narrow_cols` admits negative cols (BC-1.01.003 PC1). stdout is row 1 + `\n`.
 3. rows >= 3 -> row 2 is present (untrimmed).
-4. rows = 1 -> row 1 only (unchanged rule).
+4. rows = 1 -> row 1 only: the `rows >= 2` gate (SL:1217) fails, so row 2 is absent at any width — including a
+   negative configured `narrow_cols` that would admit `cols` (ADV-P9-B02).
 5. The metrics fetch still runs when rows >= 2 (BC-1.04.013), even though row 2 is hidden.
 
 ## Invariants
 
-1. `cols < 0` and `cols == 0` differ only in the row-2 decision; both disable trimming. For `cols < 0` the row-2
-   decision is `cols >= narrow_cols` (comparison-total; BC-1.01.003 PC1), so the omission of PC2 is unconditional for
-   negative cols only when `narrow_cols > cols` — the default 72 satisfies this for every negative col.
+1. `cols < 0` and `cols == 0` differ only in the row-2 decision; both disable trimming. The registered row-2 rule
+   (BC-1.01.003 PC1; SL:1217, 1224) renders row 2 iff `rows >= 2` AND (`rows > 2` OR `cols == 0` OR
+   `cols >= narrow_cols`); in this contract's domain (`cols < 0`, so `cols == 0` is false) the decision reduces to
+   `rows >= 2 and (rows > 2 or cols >= narrow_cols)` (comparison-total; BC-1.01.003 PC1). The `rows >= 2` term gates
+   the whole predicate: at rows = 1 there is no row 2 at any width (PC4). For `rows >= 2` the omission of PC2 is
+   unconditional for negative cols only when `narrow_cols > cols` — the default 72 satisfies this for every
+   negative col.
 2. The sign must survive int64 overflow in Go (BC-1.01.005 postcondition 4).
 
 ## Edge Cases
@@ -97,7 +105,7 @@ verified `COLUMNS` unset/0 behavior; row 5 pinned in P3r2 §A1 (`cols.py`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-040 | P7: for all cols < 0: rows untrimmed and row 2 present iff (`rows > 2` or `cols >= narrow_cols`) | property-test (testing/quick); VP-027 keeps the breakpoint matrix |
+| VP-040 | P7: for all cols < 0: rows untrimmed and row 2 rendered iff `rows >= 2` and (`rows > 2` or `cols == 0` or `cols >= narrow_cols`) — in-domain (`cols < 0`) iff `rows >= 2` and (`rows > 2` or `cols >= narrow_cols`); equivalently row 2 omitted iff `rows <= 1` or (`rows == 2` and `cols < narrow_cols`) | property-test (testing/quick); VP-027 keeps the breakpoint matrix |
 
 ## Traceability
 
@@ -127,8 +135,10 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-040 P7 — for-all negative-COLUMNS universality (rows untrimmed, row 2 iff `rows > 2` or `cols >= narrow_cols`;
-  VP-027 retains the breakpoint matrix; ADV-P3-B03; narrowed by ADV-P8-B02)
+- VP-040 P7 — for-all negative-COLUMNS universality (rows untrimmed; row 2 rendered iff `rows >= 2` and
+  [`rows > 2` or `cols >= narrow_cols`] in this contract's `cols < 0` domain;
+  VP-027 retains the breakpoint matrix; ADV-P3-B03; narrowed by ADV-P8-B02; the `rows >= 2` term restored by
+  ADV-P9-B02)
 
 ---
 

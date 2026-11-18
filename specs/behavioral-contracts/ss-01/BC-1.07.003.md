@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.6"
+version: "1.0.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T08:00:00Z
+timestamp: 2026-11-21T00:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "b6a3490"
+input-hash: "46f6c56"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main_subagent (SL:928-936)"
@@ -19,7 +19,15 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: non-English term replaced with 'short-circuit' (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: parse notes re-anchored to pyfmt.Decode(ModeText), never encoding-json, with the four decoder-divergence reasons (ADV-P4-C03); non-UTF-8 leg tied to the BC-1.01.008 locale pin and BOM case added (ADV-P4-C14)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C15) — VP-006 citation added (row and anchor): reciprocal with VP-006 bcs listing", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format, "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"]
+modified:
+  - "1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005"
+  - "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: non-English term replaced with 'short-circuit' (ADV-P3-C22)"
+  - "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: parse notes re-anchored to pyfmt.Decode(ModeText), never encoding-json, with the four decoder-divergence reasons (ADV-P4-C03); non-UTF-8 leg tied to the BC-1.01.008 locale pin and BOM case added (ADV-P4-C14)"
+  - "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C15) — VP-006 citation added (row and anchor): reciprocal with VP-006 bcs listing"
+  - "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
+  - "1.0.7 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02) — frontmatter modified list repaired to block style (lost closing quote restored); no behavioral change"
+  - "1.0.8 2026-11-21T00:00:00Z: pass-9 residual sweep (call 11) — the VP-005 parse-path row narrowed to the pass-9 oracle: undecodable or non-object stdin emits EXACTLY ZERO stdout bytes (absorbed to {}, SL:928-936); rows follow only a parsed task list (BC-1.07.004)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -91,7 +99,7 @@ SL:929-933; falsy-tasks short-circuit from `render_subagent_rows` SL:890-891 (`d
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-005 | For every byte string s, stdin=s yields exit 0 with either rows or zero bytes — never the degraded line via the parse path (stdin-absorb totality leg) | fuzz over stdin corpus |
+| VP-005 | For every byte string s: stdin=s yields exit 0; undecodable or non-object stdin is absorbed to {} and emits EXACTLY ZERO stdout bytes (SL:928-936) — never rows and never the degraded line via the parse path; rows follow only a parsed task list (framing contract BC-1.07.004) | fuzz over stdin corpus |
 | VP-006 | Per-call-site JSON depth budget at the subagent stdin-absorb site: depth 993 accepted, 994 rejected and absorbed as `{}` → zero bytes (not the degraded line); same 6-frame chain as stdin (VP-006 §main_subagent row) | fuzz (boundary L/L+1 vs oracle) |
 
 ## Traceability

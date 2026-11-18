@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "7e9aa61"
+input-hash: "8176847"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "1.2 pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted; 2026-11-17T12:00:00Z"
   - "1.4 pass-6 remediation (ADV-P6-B08 + B16): the pick glyph is named as the registry key statusline.glyphs.cost_pick instead of the wildcard statusline.glyphs.* (Config keys row); history label version-prefixed; 2026-11-19T04:00:00Z"
+  - "1.5 pass-9 remediation (ADV-P9-B03, orchestrator call 4): the legacy exact-int overflow leg registered as CP-O12 — PC1 qualifies float64 to converting tot values and states the SL:633 OverflowError degrade; EC-009 + a CP-O12 canonical vector minted (oracle-checked 2026-11-18 through the real entry point, isolated HOME and cwd); Related BCs gains the bearer kin BC-1.02.025; crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,7 +55,11 @@ case, BC-1.05.003).
 
 ## Postconditions
 
-1. `eq` is computed left to right as `(tot * mtok) / 1e6` in float64.
+1. `eq` is computed left to right as `(tot * mtok) / 1e6` in float64 — on `tot` values that convert to float:
+   legacy's `tot` is an exact int (BC-1.02.018), and at or beyond the registered int→float conversion threshold
+   (error-taxonomy "Conversion threshold": raises only for `|n| >= 2**1024 − 2**970`) the multiply
+   `tot * mtok` (SL:633) itself raises uncaught OverflowError and the whole line degrades (CP-O12, EC-009) —
+   it does not yield `inf`.
 2. If `eq >= statusline.cost.display_floor_usd` (default 0.005, operator `>=`): append `\e[90m ⛏` +
    `F(eq, 2)` + `\e[0m` to the `$` block (half-even `.2f`; `inf` spelled `inf`).
 3. Otherwise append nothing.
@@ -79,6 +84,7 @@ case, BC-1.05.003).
 | EC-006 | mtok NaN or `None`, or rate below 30.4 | basis invalid → ` ⛏n/a` (BC-1.05.003, not this contract) |
 | EC-007 | tot = 0 | no `⛏` part at all |
 | EC-008 | cloud-lane model | no `⛏` part |
+| EC-009 | `tin`/`tout` each below the int→float conversion threshold but their exact-int sum `tot` (SL:626) at or above it; local lane, valid basis | the multiply `tot * mtok` (SL:633) raises uncaught OverflowError → guard line (OD-156; taxonomy **CP-O12**): exactly the 29-byte degraded line, exit 0, earlier writes kept — **not** `⛏inf` (a float64 port that computes `inf` and renders `⛏inf` is a parity diff) |
 
 ## Canonical Test Vectors
 
@@ -98,6 +104,22 @@ is below the $1 minimum, BC-1.05.001).
 
 Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-104) using the legacy prefix variable
 (`LOCAL_MODEL_PREFIXES=claude-sonnet`, quoted as provenance only).
+
+CP-O12 cost-pick equivalence overflow (pass-9 ADV-P9-B03; oracle-checked 2026-11-18 through the real entry point
+`python3 -I -s legacy/dgx_statusline.py` with an isolated HOME and cwd, CPython 3.11.7): the bearer is the
+integer-only transcript accumulation (kin of CP-O04, BC-1.02.025 EC-010). Seed: stdin `{"session_id":"r4",
+"transcript_path":"<T>","workspace":{"project_dir":"<T>"},"model":{"id":"claude-sonnet-x"},
+"cost":{"total_cost_usd":0.5}}` (local lane, prefixes `claude-sonnet`); session cache `statusline-r4.json` seeded
+`{"fetch_ts": <now>, "ts": <now>, "up": true, "sample": {"dgx_cost:dgx_usd_per_mtok": 2.0,
+"dgx_tokens:rate_mtok_month": 1000000000}}` (valid basis, fresh TTL); transcript one assistant line
+`{"type":"assistant","timestamp":"2026-11-18T12:00:00.000Z","message":{"id":"msg_1","usage":
+{"input_tokens": 95·10³⁰⁶, "output_tokens": 95·10³⁰⁶}}}` — each total below the conversion threshold (float()
+succeeds), `tot = 1.9·10³⁰⁸` at or above it (SL:626). Expected: exactly `\e[90mstatusline degraded\e[0m\n` (29
+bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`), exit 0; the step-2 mix cache and the step-7c
+cost-history write persist (measured: `statusline-mix-r4.json` and `cost-history.json` present after the run; the
+session cache additionally admitted a machine-dependent trailing `proc_start` key, BC-1.01.001 EC-003-style).
+Control (same seed, totals 4·10³⁰⁷ each, `tot = 8·10³⁰⁷` below the threshold): full render, no degrade. Boundary
+measured on the same oracle: `float(2**1024 − 2**970 − 1)` converts, `float(2**1024 − 2**970)` raises.
 
 ## Verification Properties
 
@@ -124,6 +146,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 - BC-1.05.003 — composes with (⛏ pick inside the `$` block; basis threshold and `n/a`)
 - BC-1.02.001 — depends on (client-view lane)
 - BC-1.02.018 — depends on (transcript token totals)
+- BC-1.02.025 — related to (same integer-only transcript bearer: CP-O04 at `_fmt_tok_c`, CP-O12 at the SL:633 multiply)
 - S1.04 metrics BCs — depends on (`mtok` and `rate` from the sample)
 
 ## Architecture Anchors (Recommended)

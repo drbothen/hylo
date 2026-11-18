@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.8"
+version: "1.10"
 status: draft
 producer: architect
-timestamp: 2026-11-19T21:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "93ef1cd"
+input-hash: "1c12089"
 
 ---
 
@@ -25,7 +25,13 @@ input-hash: "93ef1cd"
   state, ADV-P2-A14; cicd-setup.md agrees) — with `go-version-file`, CI therefore
   installs 1.26.0, the oldest 1.26 patch, so the "Go 1.26.x leg" lacks later stdlib
   security fixes. Approved-in-spec remedy: add a `toolchain go1.26.x` line to go.mod
-  (lands on main with the owner's approval; spec-only here). `CGO_ENABLED=0`,
+  (lands on main with the owner's approval; spec-only here). ORDERING (ADV-P9-A06):
+  the `toolchain` line MUST land BEFORE govulncheck becomes a required PR check
+  (Hardening posture below) — govulncheck reports stdlib advisories against the Go
+  version actually used (crypto/tls and net are reachable through the metrics client),
+  so promoting the required check onto a no-patch 1.26.0 toolchain either goes
+  permanently red or ships binaries carrying known stdlib vulnerabilities; go.mod
+  changes only when the owner asks. `CGO_ENABLED=0`,
   one static binary per OS. Version stamping via `-ldflags "-X main.version=..."` from
   the released tag; fallback VCS stamp, then `dev` (BC-4.01.003).
 - **Dependency policy (AD-02):** P1 runtime deps = `golang.org/x/sys` only; stdlib first
@@ -39,13 +45,14 @@ input-hash: "93ef1cd"
 flowchart LR
     PR["pull_request / push"] --> L["lint: gofmt, vet, staticcheck"]
     L --> M{"matrix:<br/>ubuntu-24.04 / macos-15 (arm64) / windows-2025"}
-    M --> PY["setup-python 3.11.x (floating latest patch, OD-104/OD-185;<br/>harness self-checks measured constants, fail closed on drift) -> absolute path -> HYLO_PARITY_PYTHON<br/>(pass-5 A04: setup-python precedes go generate, so the<br/>staleness step never falls back to PATH Python, OD-104)"]
+    M -->|"ubuntu-24.04 leg ONLY<br/>(ADV-P9-A16: the macOS/Windows test legs<br/>install NO interpreter — text below)"| PY["setup-python 3.11.x (floating latest patch, OD-104/OD-185;<br/>harness self-checks measured constants, fail closed on drift) -> absolute path -> HYLO_PARITY_PYTHON<br/>(pass-5 A04: setup-python precedes go generate, so the<br/>staleness step never falls back to PATH Python, OD-104)"]
     PY --> GEN["go generate ./... staleness check: git diff --exit-code (OD-170)<br/>ubuntu-24.04 ONLY — the Windows Tier B leg needs no Python (goldens committed)"]
     GEN --> T["go test -race (Linux/macOS) -count=1 ./... — Tier A EXCLUDED (pass-6 A12); setup-python BEFORE go test/generate (pass-3 D22, pass-4 D08)"]
+    M -->|"macos-15 / windows-2025 legs"| T
     T --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
     TB --> HL["gitleaks --log-opts=--all + category pattern scan"]
     HL --> J["report timing per leg, non-gating (OD-117)"]
-    COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07; same Tier A exclusion as the<br/>plain test step — no Python, timeout kept):<br/>go test -coverpkg=./internal/... over IN-PROCESS tests (OD-193:<br/>Tier A drives the built binary as a subprocess, which -coverpkg<br/>does not profile); >= 95 percent line coverage, S1/S5 packages (OD-158)"] --> REQ["required check-run `coverage`"]
+    COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07; runs on EVERY PR — never probe-gated<br/>on internal/parity, ADV-P9-A04):<br/>go test -coverpkg=./internal/... over IN-PROCESS tests; Tier A excluded because it<br/>needs the Python oracle, which the coverage job does not install (ADV-P9-A07);<br/>checks each gated package that EXISTS — prints `coverage: G of 3 gated packages present`;<br/>>= 95 percent line coverage, S1/S5 packages (OD-158)"] --> REQ["required check-run `coverage`"]
     Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz, non-gating"]
 ```
 
@@ -77,16 +84,26 @@ flowchart LR
   Python off the Windows leg's critical path — Windows consumes committed Tier B
   goldens, which need no interpreter.
 - **Coverage gate (OD-158, pass-4 A13; restructured pass-7 A07, orchestrator call 12; gate
-  scope per OD-193 and Tier A exclusion per pass-8 orchestrator call 1):**
+  scope per OD-193 and Tier A exclusion per pass-8 orchestrator call 1; every-PR scope and
+  Tier A rationale per ADV-P9-A04/A07):**
   coverage is its OWN JOB on ubuntu-24.04 — required checks bind to check-runs
   (jobs), and a step inside a 3-OS matrix job emits no `coverage` check-run — and it
   produces the profile with `go test -count=1 -coverpkg=./internal/...` over the SAME
   Tier A exclusion the plain test step applies (the dedicated Tier A job is the one
-  authoritative run). The coverage job therefore installs NO interpreter (no Python
-  consumer) and keeps its 10-minute timeout: one run, one timeout. S1/S5 coverage comes
-  from IN-PROCESS tests only: Tier A drives the built binary as a subprocess, which
-  `-coverpkg` does not profile, so parity runs do NOT count toward statusline coverage
-  (OD-193 corrects the pass-7 A07 cross-package premise). The job enforces **line coverage
+  authoritative run). The job RUNS ON EVERY PR — it is never gated on `internal/parity`
+  existing (the probe placeholder mechanism does not apply to it: parity is built LAST,
+  so a parity-keyed gate would leave S1/S5 merging while a required check is skipped —
+  ADV-P9-A04). The coverage job therefore installs NO interpreter (no Python
+  consumer) and keeps a 30-minute timeout — at least the test job's 30 minutes, since
+  it runs the same selection plus `-coverpkg` instrumentation (ADV-P9-A15): one run,
+  one timeout. S1/S5 coverage comes
+  from IN-PROCESS tests only — Tier A is excluded because Tier A needs the Python
+  oracle, which the coverage job does not install (ADV-P9-A07; Tier A runs every case
+  in-process and a subset as the built binary — ARCH-07 — so the earlier blanket
+  "drives the built binary as a subprocess" premise is superseded) — hence parity runs
+  do NOT count toward statusline coverage (gate scope per OD-193). The job checks each
+  gated package that EXISTS and prints `coverage: G of 3 gated packages present`; it
+  enforces **line coverage
   >= 95 %** per package for S1 — `internal/statusline` and `internal/cost` — and
   S5 — `internal/pyfmt` (OD-158 stands unchanged per OD-193). `internal/cost` IS gated:
   SS-01 comprises `internal/statusline` and
@@ -144,11 +161,17 @@ flowchart LR
   - Pattern scan: `hygiene: K files scanned, H hits` — fails if `K == 0` (scan ran over
     nothing) AND if `H > 0` (a found hit is a failure, pass-3 A18), so the scan cannot
     pass while flagging hygiene terms.
-  - Coverage gate (pass-5 A16; fail scope per pass-8 orchestrator call 1): `coverage: P packages profiled, min line coverage
-    M% >= 95` — fails if any gated package — `internal/statusline`, `internal/cost`,
-    `internal/pyfmt` — is ABSENT from the profile or
-    reports `[no statements]` (a package trivially "passing" coverage by having no
-    statements is a failure, not a pass); `internal/parity`'s figure is reported for
+  - Gitleaks (secret scan; ADV-P9-A05): `gitleaks: N commits scanned` — fails if
+    `N == 0`; a shallow or narrowed `--log-opts` would scan nothing and still exit 0,
+    so the positive-coverage line computes the commit count at runtime across main +
+    factory-artifacts (fetch-depth 0).
+  - Coverage gate (pass-5 A16; fail scope per pass-8 orchestrator call 1; presence scope
+    per ADV-P9-A04): `coverage: G of 3 gated packages present; min line coverage
+    M% >= 95` — checks each gated package that EXISTS — `internal/statusline`,
+    `internal/cost`, `internal/pyfmt` — and fails if one exists and reports
+    `[no statements]` (a package trivially "passing" coverage by having no statements
+    is a failure, not a pass) or `M < 95`; the job runs on every PR and is never gated
+    on `internal/parity` existing (ADV-P9-A04); `internal/parity`'s figure is reported for
     information and does not bind (OD-193).
   - Generated-table staleness (pass-5 A16): `generate: N generated paths checked,
     D regenerated` — fails if `N == 0` (a tree with zero `go:generate` directives
@@ -193,6 +216,8 @@ flowchart LR
   guard) beside gofmt and vet, and govulncheck is promoted from the informational
   weekly sweep to a required PR check in ci.yml (distinct check-run name, e.g.
   `govulncheck (required)`, alongside the weekly `govulncheck` in security.yml).
+  Sequencing (ADV-P9-A06): this promotion lands AFTER the go.mod `toolchain go1.26.x`
+  line (Build section) — never before it.
   Workflow edits land on main with the owner's approval (spec-only here).
 
 ## Mapping

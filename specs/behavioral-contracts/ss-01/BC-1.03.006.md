@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C04) — PC3 and EC-010 name the OD-167 in-flight-turn drop; timestamped CP-O06 turn-drop vector added: the drop is observable in `lr` (hylo null) against the plain-deletion oracle (lr [50.0, true], oracle-run 2026-11-18)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O06 D4-EX-2 legs (VP-013 register, VP-012 closure)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C08) — the CP-O06 turn-drop leg now cites where the A-template is defined (BC-1.03.016 PC2; self-contained copy in BC-1.03.010 CP-O08) instead of relying on an out-of-file template"]
+modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C04) — PC3 and EC-010 name the OD-167 in-flight-turn drop; timestamped CP-O06 turn-drop vector added: the drop is observable in `lr` (hylo null) against the plain-deletion oracle (lr [50.0, true], oracle-run 2026-11-18)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O06 D4-EX-2 legs (VP-013 register, VP-012 closure)", "1.2.7 2026-11-19T20:15:00Z: pass-7 remediation (ADV-P7-C08) — the CP-O06 turn-drop leg now cites where the A-template is defined (BC-1.03.016 PC2; self-contained copy in BC-1.03.010 CP-O08) instead of relying on an out-of-file template", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C03; orchestrator call 4) — PC5 gains the BC-1.03.018 Inv-3 cross-reference: counted exact-int totals degrade the later render (CP-O04, CP-O09, CP-O12); parse-time skips never fire for int+int sums"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,7 +73,10 @@ totals are cumulative for the session and are **not** reset at compaction.
    above the limit. **Not moot in hylo (ADV-P3-C09):** the CP-O06..O08 skip rule requires an int to meet a float,
    but two exact ints add without ever touching a float, so nothing is skipped; hylo counts both lines exactly
    (EC-002) and reproduces the **no-write** observable and the re-failing parse on every later refresh; the
-   temp-file disposition is ruled by OD-163 (BC-1.06.001 EC-010).
+   temp-file disposition is ruled by OD-163 (BC-1.06.001 EC-010). Cross-reference (BC-1.03.018 Inv 3): a counted
+   exact-int total above the render-side conversion bounds degrades the later render at the aggregate sites
+   (CP-O04, CP-O09, now CP-O12) — the CP-O06..O08 parse-time skip never fires for int+int sums, so nothing at
+   parse time prevents the stored total from poisoning the render.
 6. A `compact_boundary` line does not change these totals (BC-1.03.008).
 
 ## Invariants

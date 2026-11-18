@@ -4,10 +4,10 @@ level: L3
 version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "5f0276f"
+input-hash: "e27a750"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:822-834)"
@@ -18,7 +18,10 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/12", "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.idle with default ☾, OD-189 sibling treatment)"]
+modified:
+  - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/12"
+  - "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.idle with default ☾, OD-189 sibling treatment)"
+  - "1.3.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names the registered keys statusline.idle.after_s and statusline.idle.running_below beside their default literals)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,8 +51,10 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
 
 ## Postconditions
 
-1. Segment exists iff `last` is truthy, `last > 0`, `now - last > 300` (strict) and
-   `(m.get("vllm:num_requests_running") or 0) < 1`.
+1. Segment exists iff `last` is truthy, `last > 0`,
+   `now - last > statusline.idle.after_s` (default 300; strict) and
+   `(m.get("vllm:num_requests_running") or 0) < statusline.idle.running_below`
+   (default 1).
 2. `idle_min = int((now - last) // 60)` (float floor division, CPython `float_divmod`
    semantics, BC-5.01.003).
 3. Age text and boundaries per BC-1.04.017: `<d>d<hh>h` from 1440 min, `<h>h<mm>m` from

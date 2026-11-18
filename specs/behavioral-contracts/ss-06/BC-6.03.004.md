@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "86e67c3"
+input-hash: "2997e8e"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -36,6 +36,7 @@ modified:
   - "2026-11-19T17:00:00Z (1.3.0): ADV-P7 remediation D15 - PC-3's Number-value enumeration is the exhaustive union of the BC-2.02.002/BC-2.02.003 exclusion lists: the formerly unstated float-accepted values 2_0, ٢, -inf, 99999999999999999999 (int64 overflow) and 9223372036.854776 (Duration ceiling) now render-and-write on the oracle leg under the standard two-legged asymmetry"
   - "2026-11-19T19:00:00Z (1.3.1): pass-7 residual remediation — cp-x03's dedicated table test named TestCPX03_WriteFailureExit0 (OD-145 provisional name settled; ADV-P7-B09; VP-003, VP-012 and BC-1.01.001 EC-005 agree); OD-159 rider citation corrected from BC-1.03.001 PC-3 (the stat-race postcondition, which never mentions OD-159) to its real home BC-1.02.004 TestGitTextReads_OD159_StrictUTF8, the closure-validated riding test (VP-012's OD-159 row corrected to match); no behavioral change"
   - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation A2-05+D14 — OD-160 register riders corrected to the on-disk-verified anchors BC-1.02.017 EC-004..006 and BC-1.01.008 PC3 (the former EC-010/EC-011 pointed at the CP-O05 overflow row and a nonexistent row); PC-3 float-accepted enumeration respelled as the union of the float-accepted values in the BC-2.02.002/003 exclusion case lists AND edge cases (1e400 is BC-2.02.002 EC-004, not a named case)"
+  - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D01 (orchestrator call 7) — rider-test closure pinned: NO exclusions.json entry exists for OD-76 or D4-EX-1 (no corpus case can exercise either id); register rows and a post-table note respelled; EC-006's example respelled to an OD-30 + D4-EX-2 pair (the former OD-76 repeated-DST corpus case is impossible under the UTC-only corpus)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,11 +94,11 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
    | `id` | Approved by | Scope of the exclusion | Contract that defines the expected behavior |
    |---|---|---|---|
-   | `D4-EX-1` | D4-EX-1 | ⌂ on Windows (fake probe returns a start) | BC-3.02.001 (`TestWindowAge_D4EX1_Windows*`) |
+   | `D4-EX-1` | D4-EX-1 | ⌂ on Windows (fake probe returns a start); NO `exclusions.json` entry exists (every corpus case seeds `proc_start`, BC-3.02.001 Invariant 4): rider-test closure, ADV-P9-D01 | BC-3.02.001 (`TestWindowAge_D4EX1_Windows*`) |
    | `D4-EX-2` | D4-EX-2, OD-21/OD-32 | wrong-shape transcript lines skipped | BC-1.03.018/019/020 (21 BC-SL-099 rows + BC-SL-100/103 rows) |
    | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..006 (`TestD4EX3_{Number,Boolean,URL,Enum,Text}` + `config validate`; no Theme member — theme settings are rejected by the corpus validator, BC-6.02.003 PC-3/EC-007, so no Theme D4-EX-3 case can exist; by the same no-legacy-equivalent rule `TestD4EX3_Text` is a GO TABLE TEST ONLY and backs no parity exclusion entry — Text keys (glyphs, labels, suffix) have no legacy analog; ADV-P6-D14, orchestrator call 1; ADV-P4-D22) |
    | `OD-30` | OD-30, OD-110 | numeric sid: one string-form cost-history key | BC-1.05.006, BC-1.05.009 |
-   | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails) | BC-3.02.002 |
+   | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails); NO `exclusions.json` entry exists (UTC-only corpus; rider-test closure, ADV-P9-D01) | BC-3.02.002 |
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
    | `cp-x03` | OD-136 | degraded-line write itself fails (stdout closed); Go swallows the error and exits 0 where legacy CP-X03 exits 1 | BC-1.01.001 EC-005 (dedicated table test `TestCPX03_WriteFailureExit0` — the OD-145 provisional name settled; ADV-P7-B09) |
    | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01; rider: BC-1.02.004 riding table test `TestGitTextReads_OD159_StrictUTF8` — the deviation's defining UTF-8-read contract, ADV-P3-D19) |
@@ -105,6 +106,15 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    | `OD-161` | OD-161 | integer `transcript_path` → no transcript | stories owning the stdin path-field verbs (SS-01; rider: BC-1.03.015 PC-3 directional test, ADV-P3-D19) |
    | `OD-166` | OD-169 | cost-history bytes written after a refresh whose `usd` or `api_ms` could not convert to float (nothing else) | BC-1.05.004 (dedicated table test; VP-012 closure row per OD-169) |
    | `OD-181` | OD-181 | metrics transport beyond plain http: non-http(s) redirect targets (hylo: no sample) and TLS trust-store differences for https (hylo: OS trust store); parity cases use plain http only, table tests pin hylo's behaviour | BC-1.04.001 (dedicated table tests) |
+
+   ADV-P9-D01 / orchestrator call 7 (rider-test closure): NO committed `exclusions.json`
+   entry exists for `OD-76` or `D4-EX-1` — no corpus case can exercise either id (the
+   corpus is UTC-only, so a repeated-DST case cannot exist, and every corpus case seeds
+   `proc_start`, BC-3.02.001 Invariant 4, so no unseeded-probe or Windows ⌂ case exists
+   either). Each of the two ids is closed by its rider test alone — the dedicated Go table
+   tests of BC-3.02.002 and BC-3.02.001. PC-1's `case`-existence requirement applies only
+   when an entry is minted; a future phase that adds such a case mints the entry then. The
+   ids stay in the closed set (owner-approved deviation classes, DI-012).
 
 ## Postconditions
 
@@ -194,7 +204,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 | EC-003 | Entry whose `table_test` names a deleted test | Run FAIL: table test missing |
 | EC-004 | Excluded case where Go output now equals the oracle | Passes against its expected file only if the expected file also equals that output. Otherwise FAIL; the entry must be revisited, never silently ignored |
 | EC-005 | `-update` (Tier B) run | Does not touch any `expected_output_file` of an exclusion entry |
-| EC-006 | Same case listed under two different ids (e.g. a macOS numeric-sid case that hits both OD-30 and OD-76's repeated-DST class, each entry declaring `scope: stdout+caches`) | Allowed. Each entry checked independently. Conflict rule: the entries' comparison halves must not DISAGREE on an artifact — two entries on one case must declare the same scope for the same artifact, or an explicitly narrower one (`stdout` inside `stdout+caches` is fine); disagreement on any claimed artifact fails the run (ADV-P3-D38: the former "must not both claim stdout" phrasing was wrong — the OD-30/OD-76 entries declare stdout+caches; scope is REQUIRED with no default, ADV-P5-D20) |
+| EC-006 | Same case listed under two different ids (e.g. a case with a numeric sid whose transcript also contains a wrong-shape line, hitting both OD-30 and D4-EX-2, each entry declaring `scope: stdout+caches`) | Allowed. Each entry checked independently. Conflict rule: the entries' comparison halves must not DISAGREE on an artifact — two entries on one case must declare the same scope for the same artifact, or an explicitly narrower one (`stdout` inside `stdout+caches` is fine); disagreement on any claimed artifact fails the run (ADV-P3-D38: the former "must not both claim stdout" phrasing was wrong — the OD-30/D4-EX-2 entries declare stdout+caches; scope is REQUIRED with no default, ADV-P5-D20) |
 
 ## Canonical Test Vectors
 
@@ -232,7 +242,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 - BC-2.02.001 — depends on: D4-EX-3 entries and their table tests
 - BC-1.03.019 — depends on: D4-EX-2 entries (21 rows)
 - BC-1.05.006 — depends on: OD-30 entry
-- BC-3.02.001, BC-3.02.002 — depend on: D4-EX-1 and OD-76 entries
+- BC-3.02.001, BC-3.02.002 — depend on: D4-EX-1 and OD-76 (rider-test closure; NO `exclusions.json` entries, ADV-P9-D01)
 
 ## Architecture Anchors (Recommended)
 

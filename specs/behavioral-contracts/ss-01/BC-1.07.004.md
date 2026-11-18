@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.8"
+version: "1.1.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
@@ -28,7 +28,7 @@ modified:
   - "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
   - "1.1.7 2026-11-19T20:00:00Z: pass-7 remediation (ADV-P7-C02/C14, OD-190) — PC3 escape list completed with the CPython short escapes \\b and \\f (orchestrator-verified json.dumps emissions; ADV-P7-C02); vector-row prose pseudo-escape replaced with the em dash (ADV-P7-C14); PC5 states OD-190 LF-on-every-OS with the Windows oracle normalization declared beside PYTHONIOENCODING=utf-8"
   - "1.1.8 2026-11-20T12:30:00Z: pass-8 residual sweep (OD-192) — ASSUMP-107-1 capture deadline respelled: before Phase 2 writes the S1.07 stories, not before Phase 3"
-
+  - "1.1.9 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C06) — the string-token vector's raw token restored to the \u0041 JSON escape so the input token and its output differ (the decoded input and output were identical, a vacuous pair); PC4 example respelled to match; oracle-checked"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,7 +73,7 @@ before a single print, so a render fault never leaves partial rows on stdout.
 4. The `id` is the **decoded value re-serialized by `pyfmt` `Dumps`** (ADV-P6-C04; SL:924
    decodes stdin and re-dumps — not a byte-for-byte token copy): any JSON value (string, number, bool,
    null, array, object; the array case is verified in the vectors below) is dumped from its decoded
-   form, so raw-token spellings do not survive — `1.50`→`1.5`, `1E2`→`100.0`, `"A"`→`"A"`,
+   form, so raw-token spellings do not survive — `1.50`→`1.5`, `1E2`→`100.0`, `"\u0041"`→`"A"`,
    duplicate object keys collapse (last-wins kept — oracle-verified 2026-11-18,
    `/opt/homebrew/anaconda3/bin/python3 -I` 3.11.7); it is not coerced to string before dumping. The
    dump runs under the per-site encoder recursion budget measured for the SL:924 site — measured
@@ -116,7 +116,7 @@ before a single print, so a render fault never leaves partial rows on stdout.
 | `{"tasks":[]}` | zero bytes, exit 0 | happy-path |
 | `{"tasks":[{"id":"a9","name":"a\ud800b","status":"completed"}]}` | one line: `{"id": "a9", "content": "\u001b[32m\u2714 a\ud800b\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}`, exit 0 | edge-case |
 | `{"tasks":[{"id":["x"],"name":"n","status":"completed"}]}` | one line: `{"id": ["x"], "content": "\u001b[32m\u2714 n\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}` (id array echoed from its decoded value), exit 0 | edge-case |
-| `{"tasks":[{"id": 1.50, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": 1E2, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": "A", "name":"n","status":"completed"}]}` (ADV-P6-C04) | one line each: `{"id": 1.5, ...}`, `{"id": 100.0, ...}`, `{"id": "A", ...}` — decoded value re-serialized, not the raw token (oracle-verified 2026-11-18) | edge-case |
+| `{"tasks":[{"id": 1.50, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": 1E2, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": "\u0041", "name":"n","status":"completed"}]}` (ADV-P9-C06: the raw stdin token is the 7-byte JSON escape spelling, so the input token and its re-serialized output differ; oracle pass-9 2026-11-18) | one line each: `{"id": 1.5, ...}`, `{"id": 100.0, ...}`, `{"id": "A", ...}` — decoded value re-serialized, not the raw token (oracle-verified 2026-11-18; pass-9 re-run: stdin "\u0041" echoes as "A") | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`, legacy module imported and exercised; goldens
 re-derived escaped after the adv-p3 C01 escape-decoding incident): rows 1, 2, 4, 5 byte-reproduced;

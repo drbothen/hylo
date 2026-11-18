@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.9"
+version: "1.3.10"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -29,6 +29,7 @@ modified:
   - "2026-11-18 (v1.3.7) pass-7 remediation ADV-P7-C2-01/02/04/08 (body framing = the http.client read ladder: chunked, then Content-Length, else EOF; compat32 header rule corrected to lstrip space/tab then rstrip CRLF — leading whitespace stripped too; http/https client versus plain-http parity corpus disentangled; the next GET drops the URL fragment) + ADV-P7-C2-03 (VP-012 closure row for OD-181) + ADV-P7-C2-09 (stale ARCH-03 line label corrected)"
   - "2026-11-18 (v1.3.8) pass-8 remediation ADV-P8-C2-02 (followed-3xx body drained under the PC1 framing ladder before the next hop; a drain failure raises IncompleteRead and gives no sample with one fewer wire request), ADV-P8-C2-03 (chunked = the exact equality tr_enc.lower() == \"chunked\"; trailing-space and list values fall to Content-Length/EOF), ADV-P8-C2-13 (_MAXHEADERS = 100, the 65536-byte header-line limit, and the interim 1xx skip pinned), ADV-P8-C2-10 (ARCH-03 line anchors re-verified on disk: 187/270), ADV-P8-A2-17 (stale Transport{Proxy: nil} residue dropped from PC2)"
   - "2026-11-18 (v1.3.9) pass-8 residual — Refactoring Notes seam respelled to the ARCH-03 TEST SEAM ruling: raw net.Listener fake in tests, not httptest"
+  - "2026-11-18 (v1.3.10) pass-9 remediation ADV-P9-C2-01 (interim skip = status 100 only; 101/102/103 final → HTTPError → no sample even with a 200 behind them; EC-025), ADV-P9-C2-02 (urlsplit sanitization before scheme guard and quote: leading C0/space stripped, TAB/CR/LF deleted anywhere, scheme lowercased; oracle: /a<TAB>b → /ab, <VT>/foo → /foo, HTTP:// hop followed), ADV-P9-C2-07 (Host = URL netloc as written, percent-unquoted, port only when written), ADV-P9-C2-06 (ARCH-03 citations as section anchors, line labels dropped)"
 
 deprecated: null
 deprecated_by: null
@@ -68,8 +69,17 @@ is byte 0x1B.
    `http/1.1` only, and the OS trust store (system roots on Linux) — it is the PARITY
    CORPUS that is plain http only (OD-181), never the client (ADV-P7-C2-04). It
    sends exactly what urllib sends, byte for byte and in urllib's order — request line
-   `GET <selector> HTTP/1.1`, then `Accept-Encoding: identity`, `Host: <host:port>`,
-   `User-Agent: Python-urllib/3.11`, `Connection: close` — and nothing else (header
+   `GET <selector> HTTP/1.1`, then `Accept-Encoding: identity`,
+   `Host: <URL netloc as written, percent-unquoted, with the port only when the URL
+   carries one>`, `User-Agent: Python-urllib/3.11`, `Connection: close` — and nothing
+   else (Host measured against a local listener, CPython 3.11.7, 2026-11-18, one run
+   each: `http://127.0.0.1:55785/...` → `Host: 127.0.0.1:55785`;
+   `http://127.0.0.%31:55785/...` → `Host: 127.0.0.1:55785` — `Request._parse` does
+   `self.host = unquote(self.host)`; a URL with no port sends `Host: 127.0.0.1` with
+   the port omitted — `HTTPConnection.putrequest`'s `urlsplit(url)`-netloc Host branch
+   emits the netloc verbatim, and `_get_hostport` normalizes the absent port to the
+   scheme default; the portless leg is source-derived, a privileged port not being
+   wire-capturable; ADV-P9-C2-07) (header
    spelling and order verified from the CPython 3.11.7 stdlib source — `do_request_`
    adds `Host` then the `addheaders` `User-agent`, `do_open` appends `Connection:
    close` and title-cases, `putrequest` emits `Accept-Encoding: identity` before the
@@ -95,10 +105,18 @@ is byte 0x1B.
    `_MAXHEADERS` = 100 header lines raises `HTTPException` ("got more than 100
    headers") → no sample; a header line longer than `_MAXLINE` = 65536 bytes raises
    `LineTooLong` ("got more than 65536 bytes when reading header line") → no sample;
-   an INTERIM `1xx` response header block (e.g. `HTTP/1.1 100 Continue` with no body)
-   is SKIPPED — `HTTPResponse.begin` reads the next status line and the caller sees
-   the real response (oracle: a 100-block followed by a 200-block yields status 200
-   and the body). The constants 100/65536 are CPython stdlib class constants emulated
+   an interim header block is skipped for STATUS 100 ONLY (ADV-P9-C2-01, correcting
+   the pass-8 "1xx" wording; oracle-measured through urllib on CPython 3.11.7,
+   2026-11-18, one run against a local listener): `HTTPResponse.begin` loops only
+   while the status is 100, so a `HTTP/1.1 100 Continue` block followed by a 200-block
+   yields status 200 and the body, while a 101/102/103 block IS THE FINAL RESPONSE —
+   it is not in 200-299, so `HTTPErrorProcessor` raises `HTTPError` with that code and
+   legacy gets NO SAMPLE even when a 200-block follows on the SAME connection (oracle:
+   `HTTP/1.1 103 Early Hints` then `HTTP/1.1 200 OK` on one connection → `HTTPError`
+   code 103 and the pending 200 is never parsed; 101 "Switching Protocols" and 102
+   "Processing" are equally final). A Go client that skips ANY 1xx takes the 200
+   behind a 103 and obtains a sample where legacy obtains none (EC-025). The constants
+   100/65536 are CPython stdlib class constants emulated
    for parity — named constants in hylo with a "why not config" comment, not config
    keys (P16). Body framing is `http.client`'s `HTTPResponse.read()` ladder, because
    legacy `resp.read()` (SL:172) reads through `http.client`: (i)
@@ -148,9 +166,16 @@ is byte 0x1B.
    corrected rule). A redirect naming only
    `URI:` is therefore followed
    by legacy and must be followed by hylo; a client that reads only `Location` gets no
-   sample where legacy gets one (ADV-P4-C2-08). Scheme guard: the scheme of the raw
-   (pre-normalization) target must be `http`, `https`, `ftp` or empty (inherit); anything
-   else makes urllib raise `HTTPError` (→ no sample). Hylo rule (exclusion id **OD-181**,
+   sample where legacy gets one (ADV-P4-C2-08). Scheme guard: the scheme AFTER
+   `urlsplit` sanitization of the raw target must be `http`, `https`, `ftp` or empty
+   (inherit); anything else makes urllib raise `HTTPError` (→ no sample). The
+   sanitization happens BEFORE the guard and before quote (ADV-P9-C2-02; urlsplit,
+   CPython 3.11.7): all leading C0 controls and spaces are stripped, every `\t`, `\r`
+   and `\n` byte anywhere in the target is deleted, and the scheme is LOWERCASED — so
+   `HTTP://…` passes the guard as `http` and urllib follows it (oracle: a
+   `Location: HTTP://127.0.0.1:PORT/x` hop is followed, second request
+   `GET /x HTTP/1.1` observed on a local listener, 2026-11-18); a guard written
+   against the raw header string would wrongly reject it. Hylo rule (exclusion id **OD-181**,
    DI-012 closed set): the manual loop follows only `http`/`https` targets after
    empty-scheme inheritance — an `ftp:` or other non-http(s) target gives **no
    sample**. Legacy MAY produce a sample there: its default opener keeps
@@ -163,7 +188,13 @@ is byte 0x1B.
    certificate trusted by only one store yields a sample on one side and no sample on
    the other; table tests pin hylo's behaviour (OS store), parity cases plain http.
    Target normalization (ADV-P4-C2-07; completed ADV-P5-C2-02): the
-   loop-detection key is the target AFTER the raw-header scheme check, the empty-path fix
+   loop-detection key is the target AFTER the raw-header scheme check, the `urlsplit`
+   sanitization (leading C0 controls and spaces stripped, `\t`/`\r`/`\n` deleted
+   anywhere in the target, scheme lowercased — an inner TAB vanishes: `Location: /a␉b`
+   keys and targets `/ab`, NOT `/a%09b` as the former chain spelled it; a leading
+   `\x0b`, which compat32 rule (a) above keeps, is stripped: `Location: \x0b/foo`
+   targets `/foo`; oracle-measured through urllib on CPython 3.11.7, 2026-11-18, local
+   listener, ADV-P9-C2-02), the empty-path fix
    (netloc with no path → `/`), the `urlunparse` round trip (an empty query or empty
    params component is dropped, so `/x?` and `/x` are ONE key; an EMPTY fragment is
    dropped too — `urlunsplit` adds `#` only when the fragment is non-empty — so `/x#`
@@ -199,7 +230,9 @@ is byte 0x1B.
    (`location` then `uri`; a present-but-empty value resolves as
    `urljoin(<URL of the request that received this 3xx>, "")` — hop 1: the original URL
    (query included); hop ≥ 2: the current hop's URL), apply the scheme
-   guard, normalize (empty-path fix → `urlunparse` →
+   guard, normalize (`urlsplit` sanitization — leading C0 controls and spaces
+   stripped, `\t`/`\r`/`\n` deleted anywhere, scheme lowercased, ADV-P9-C2-02 — then
+   empty-path fix → `urlunparse` →
    `quote(..., "iso-8859-1", safe=string.punctuation)` → `urljoin`), then consult the
    `redirect_dict` emulation — refuse (no sample, and never parse the refused 3xx body)
    iff `count[normalized] >= 4 || len(count) >= 10`, otherwise `count[normalized]++` and
@@ -305,7 +338,8 @@ is byte 0x1B.
 | EC-021 | two series, both `__name__` = `NaN` | one shared NaN object → dict identity collides → first wins (ADV-P3-C2-10) |
 | EC-022 | followed 302 announces `Content-Length: 100`, sends 3 body bytes, closes; target 200 serves valid JSON | the drain of the 3xx body raises `IncompleteRead(3 bytes read, 97 more expected)` before the next hop → **no sample**, exactly ONE wire request observed (oracle-verified CPython 3.11.7, 2026-11-18, ADV-P8-C2-02) |
 | EC-023 | `Transfer-Encoding: Chunked␠` (trailing space) or `gzip, chunked`, chunked-style body, no `Content-Length` | NOT chunked (exact equality `tr_enc.lower() == "chunked"`); the raw chunk-size lines `3\r\n{"a\r\n4\r\n: 1}\r\n0\r\n\r\n` reach `json.loads` → **no sample**; bare `chunked` de-chunks to `{"a: 1}` (oracle-verified CPython 3.11.7, 2026-11-18, ADV-P8-C2-03) |
-| EC-024 | reply with 101 header lines / a 70,000-byte header line / a `100 Continue` block then a 200 block | >100 headers → `HTTPException` ("got more than 100 headers") → **no sample**; >65536-byte line → `LineTooLong` → **no sample**; interim 1xx skipped, caller sees status 200 and the body (oracle-verified CPython 3.11.7, 2026-11-18, ADV-P8-C2-13) |
+| EC-024 | reply with 101 header lines / a 70,000-byte header line / a `100 Continue` block then a 200 block | >100 headers → `HTTPException` ("got more than 100 headers") → **no sample**; >65536-byte line → `LineTooLong` → **no sample**; the interim skip is status-100-only: a `100 Continue` block then a 200 block yields status 200 and the body (oracle-verified CPython 3.11.7, 2026-11-18, ADV-P8-C2-13; narrowed ADV-P9-C2-01) |
+| EC-025 | `HTTP/1.1 103 Early Hints` block (101 or 102 alike) with a `HTTP/1.1 200 OK` JSON block behind it on the SAME connection | the 1xx-non-100 block is the FINAL response → `HTTPError` with that code → **no sample**; the pending 200 is never parsed (oracle-measured through urllib, CPython 3.11.7, 2026-11-18, ADV-P9-C2-01) |
 
 ## Canonical Test Vectors
 
@@ -338,7 +372,7 @@ is byte 0x1B.
 | L2 Capability | CAP-010 |
 | L2 Domain Invariants | DI-007, DI-008, DI-012 (metrics-URL D4-EX-3 deviation, BC-2.02.005; ftp/TLS transport deviations named under exclusion id OD-181, ADV-P6-C2-07/08) |
 | Decisions | OD-123 (metrics URL under backends[0]), OD-56 (timeout = total deadline), OD-57 E-0 (T-005), D14 (proxy bypass is defense in depth) |
-| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces — `MetricsClient` interface at line 187, `telemetry.go` in the file list at line 270; line anchors re-verified on disk 2026-11-18, ADV-P8-C2-10) |
+| Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces — the `MetricsClient` interface declaration and the `telemetry.go` file-list row; cited by SECTION anchor only, never line numbers, per pass-9 ADV-P9-C2-06 — the third line-label drift there after ADV-P7-C2-09 and ADV-P8-C2-10) |
 | Stories | TBD (story-writer) |
 
 ## Related BCs (Recommended)

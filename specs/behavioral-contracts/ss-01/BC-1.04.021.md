@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr.md]
-input-hash: "8043075"
+input-hash: "10b1018"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:337)"
@@ -18,7 +18,11 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.3.1 2026-11-18: pass-6 metadata alignment (ADV-P6-C2-15) — D22 sweep entry redated to the pass-4 burst date (2026-11-18) and timestamp raised above the last modified entry; no behavioral change", "1.3.2 2026-11-18: pass-7 remediation ADV-P7-C2-11 (VP-030 property leg gains the monotonic non-decreasing clock precondition — a backward step voids the appended-gap property per EC-003)"]
+modified:
+  - "1.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"
+  - "1.3.1 2026-11-18: pass-6 metadata alignment (ADV-P6-C2-15) — D22 sweep entry redated to the pass-4 burst date (2026-11-18) and timestamp raised above the last modified entry; no behavioral change"
+  - "1.3.2 2026-11-18: pass-7 remediation ADV-P7-C2-11 (VP-030 property leg gains the monotonic non-decreasing clock precondition — a backward step voids the appended-gap property per EC-003)"
+  - "1.3.3 2026-11-18: pass-9 remediation ADV-P9-C2-09 sibling sweep (PC1/PC2 name the registered key statusline.sparkline.min_gap_s beside its default literal)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,9 +48,10 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
 
 ## Postconditions
 
-1. If the newest kept history point has `now - t < 2`, no point is appended for this fetch;
-   the sample is still stored and the row still renders from it.
-2. If `now - t >= 2`, a point is appended.
+1. If the newest kept history point has
+   `now - t < statusline.sparkline.min_gap_s` (default 2), no point is appended for this
+   fetch; the sample is still stored and the row still renders from it.
+2. If `now - t >= statusline.sparkline.min_gap_s` (default 2), a point is appended.
 3. In steady state with TTL 4, consecutive points are ≥ 4 s apart (gap never bites).
 
 ## Invariants

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
 timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.02.001.md, behavioral-contracts/ss-01/BC-1.02.004.md, behavioral-contracts/ss-01/BC-1.02.016.md, behavioral-contracts/ss-01/BC-1.02.018.md, behavioral-contracts/ss-01/BC-1.02.019.md, behavioral-contracts/ss-01/BC-1.02.021.md, behavioral-contracts/ss-01/BC-1.02.022.md, behavioral-contracts/ss-01/BC-1.02.023.md, behavioral-contracts/ss-01/BC-1.02.025.md, behavioral-contracts/ss-01/BC-1.02.027.md, behavioral-contracts/ss-01/BC-1.02.028.md, prd-supplements/test-vectors.md]
-input-hash: "97d85ee"
+input-hash: "c25da45"
 traces_to: prd.md
 source_bc: BC-1.02.001
 bcs: [BC-1.02.001, BC-1.02.004, BC-1.02.016, BC-1.02.018, BC-1.02.019, BC-1.02.021, BC-1.02.022, BC-1.02.023, BC-1.02.025, BC-1.02.027, BC-1.02.028, BC-1.02.002, BC-1.02.003, BC-1.02.006, BC-1.02.007, BC-1.02.009, BC-1.02.010, BC-1.02.013, BC-1.02.015]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.0 2026-11-18T15:05:00Z: created — ADV-P4 fix (B03, plan item 18): S1.02 for-all property legs split from VP-028, exactly as VP-040 was split from VP-027 in pass 3; VP-028 keeps the bounded golden tables", "1.1 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-04, B08, A2-08) — the four BC-routed legs now exist as properties: P-i BC-1.02.019 dense-grid triple equality over [-10, 110] (arm64 generated table vs CPython oracle), P-j BC-1.02.025 float64 token-format fuzz, P-k BC-1.02.027 _hm fuzz, P-l BC-1.02.028 win_ms fuzz in [300000, 1e12]; P-b and P-g oracles restated as LIVE pinned-CPython calls per generated input (ARCH-07 recipe) — a static pinned table cannot oracle random inputs (A2-08)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (B01/call 10, A2-16: eight properties P-m..P-t added for the ADV-P6-B01 BCs (bcs: and the generator table extended); P-g's live-oracle half moves to the Tier C harness (VP-038 discipline); P-h has no oracle half)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-11) — P-b's live `_hm` oracle half moves to the Tier C harness with P-g's (pass-6 A2-16 left it behind): the Generators table row no longer claims a live in-tree oracle call, the Method quick-set lists the structural halves only, and the Tier C Proof Method row gains P-b", "1.4 2026-11-20T12:00:00Z: pass-8 residual sweep (task 5) — P-o width formula corrected to 10 + 1 + len(number text) + 1 + len(denominator text) (the middle 1 is the %; BC-1.02.006 PC7/VP row)"]
+modified: ["1.0 2026-11-18T15:05:00Z: created — ADV-P4 fix (B03, plan item 18): S1.02 for-all property legs split from VP-028, exactly as VP-040 was split from VP-027 in pass 3; VP-028 keeps the bounded golden tables", "1.1 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-04, B08, A2-08) — the four BC-routed legs now exist as properties: P-i BC-1.02.019 dense-grid triple equality over [-10, 110] (arm64 generated table vs CPython oracle), P-j BC-1.02.025 float64 token-format fuzz, P-k BC-1.02.027 _hm fuzz, P-l BC-1.02.028 win_ms fuzz in [300000, 1e12]; P-b and P-g oracles restated as LIVE pinned-CPython calls per generated input (ARCH-07 recipe) — a static pinned table cannot oracle random inputs (A2-08)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (B01/call 10, A2-16: eight properties P-m..P-t added for the ADV-P6-B01 BCs (bcs: and the generator table extended); P-g's live-oracle half moves to the Tier C harness (VP-038 discipline); P-h has no oracle half)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-11) — P-b's live `_hm` oracle half moves to the Tier C harness with P-g's (pass-6 A2-16 left it behind): the Generators table row no longer claims a live in-tree oracle call, the Method quick-set lists the structural halves only, and the Tier C Proof Method row gains P-b", "1.4 2026-11-20T12:00:00Z: pass-8 residual sweep (task 5) — P-o width formula corrected to 10 + 1 + len(number text) + 1 + len(denominator text) (the middle 1 is the %; BC-1.02.006 PC7/VP row)", "1.5 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-13, ADV-P9-A2-14, ADV-P9-B06; orchestrator call 3) — P-b gains its missing precondition (the API suffix exists only inside the timer segment, which renders only when dur > 60000, SL:540/SL:551-553; the generator draws dur > 60000); P-t restricted to absent-or-finite timers in NON-DEGRADING renders (CP-S12/S13/O05 carved out: predicate holds, render degrades, no segment); the Method bullet now names the P-i generated-table leg, which previously appeared only in the Proof Method table"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,8 +42,11 @@ delivers the quantified legs:
 
 - **P-a (BC-1.02.001):** for all string ids and prefix lists, `on_local ==
   any(strings.HasPrefix(id, p))` whenever both are non-empty, else None.
-- **P-b (BC-1.02.016):** for every finite numeric `api`, the shown suffix is present
-  iff `api >= 60000`, and spells `\e[2m·` + `_hm(api)` + `\e[0m`.
+- **P-b (BC-1.02.016):** inside the timer segment — which renders only when
+  `dur > 60000` (gate SL:540; suffix SL:551-553) — for every finite numeric `api`,
+  the shown `·<api>` suffix is present iff `api >= 60000`, and spells
+  `\e[2m·` + `_hm(api)` + `\e[0m`; the generator draws `dur > 60000` (a generator
+  varying `dur` below the gate false-fails — pass-9 ADV-P9-A2-13).
 - **P-c (BC-1.02.018):** brackets appear iff at least two inner parts are > 0.
 - **P-d (BC-1.02.019):** the blue channel is 30 for all finite inputs.
 - **P-i (BC-1.02.019):** for all float64 `pct` in a dense grid over [-10, 110] the Go
@@ -74,8 +77,11 @@ delivers the quantified legs:
   only if `reset > now` (shown ⇒ reset > now), over generated (reset, now) pairs.
 - **P-s (BC-1.02.013, ADV-P6-B01):** a cached `used` value is displayed only when its
   age < `keep_s`, for generated (now, cached_at, keep_s) triples.
-- **P-t (BC-1.02.015, ADV-P6-B01):** the timer segment is present iff the number is
-  set and > 60000, for generated numeric timers.
+- **P-t (BC-1.02.015, ADV-P6-B01):** for generated ABSENT or FINITE numeric timers in
+  non-degrading renders, the timer segment is present iff the number is set and
+  > 60000. Degrading renders are carved out (pass-9 ADV-P9-B06, call 3): dur =
+  +Infinity (CP-S12), api = +Infinity (CP-S13), and dur ≥ OV with a numeric win_start
+  (CP-O05) each satisfy the predicate but degrade the render, so no segment prints.
 - **P-e (BC-1.02.021):** `pyfmt.Str(v)` equals CPython `str(v)` for generated JSON
   values (nested lists/objects, big ints, floats).
 - **P-f (BC-1.02.022):** `PosixNormpath`/`NtNormpath` + `Basename` equal CPython for
@@ -110,7 +116,8 @@ delivers the quantified legs:
 - **Method:** property test (testing/quick) for the structural rows P-a, P-c,
   P-d and the STRUCTURAL HALVES of P-b and P-g (in-tree: the structural half only —
   no live interpreter call, per
-  VP-038's oracle discipline, A2-16); Tier C differential fuzz for the oracle rows
+  VP-038's oracle discipline, A2-16); a generated-table-vs-oracle leg for P-i (the
+  dense heat triple over [-10, 110], arm64); Tier C differential fuzz for the oracle rows
   P-e, P-f, P-g, P-j, P-k, P-l, P-n AND P-b's differential half, budgeted by
   `HYLO_PARITY_FUZZSECONDS` (nightly leg, ARCH-08), same oracle discipline as VP-011;
   fake-FileSystem table for P-h's write-scope observation (P-h has no oracle half);
@@ -143,7 +150,7 @@ delivers the quantified legs:
 | P-q | generated stdin objects with reroute_all prefix sets on/off | structural: limits-segment absence predicate |
 | P-r | (reset, now) pairs spanning reset < now, == now, > now | structural: shown ⇒ reset > now |
 | P-s | (now, cached_at, keep_s) triples around the keep_s edge | structural: age < keep_s display predicate |
-| P-t | numeric timers around 60000 ± ulp, absent/NaN cases | structural: presence iff number && > 60000 |
+| P-t | absent or finite numeric timers around 60000 ± ulp; renders constrained to non-degrading dispositions (CP-S12/S13/O05 renders carved out, pass-9 call 3) | structural: presence iff number && > 60000, over absent/finite dur in non-degrading renders |
 
 ## Proof Method
 

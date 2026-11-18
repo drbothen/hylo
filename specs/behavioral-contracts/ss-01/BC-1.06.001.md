@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T16:00:00Z
@@ -28,7 +28,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C15/C16) — PC1 states the read-encoding pin: legacy opens caches with the locale encoding, hylo reads UTF-8 per named deviation OD-159 (OD-183 covers stdio only), divergence reachable only via foreign non-ASCII caches (OD-160), VP-012 closure; parity_class relabeled from byte-exact to temp-file, matching sibling BC-1.06.002 (the contract carries the OD-163 own-temp-cleanup divergence)", "1.2.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-24) — EC-009 respelled to the OD-186 single attempt count: three attempts total (initial attempt plus two retries), matching ARCH-04, VP-018, BC-6.03.003 and BC-2.01.004; no behavioral change", "1.2.8 2026-11-19T17:30:00Z: pass-7 remediation — EC-009 attempt count respelled to the OD-188 config key statusline.cache.rename_retry_limit (1 + limit attempts, default 2 → three, range 0..10, beside rename_retry_delay_ms); PC2 and the happy-path vector qualify mode 0600 POSIX-only with the Windows 0666/0444 expectation (ADV-P7-C09); VP-012 closure row and anchor added (SC-21 reciprocity, ADV-P7-C05); EC-011 respelled to reproduce legacy per orchestrator call 1: POSIX surrogateescape equivalence (U+DCxx → raw byte 0xx), other lone surrogates fail the name encode, Windows keeps lone surrogates as UTF-16 units (pass-6 call 16), no WTF-8 exclusion (ADV-P7-C01)", "1.2.9 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C05; orchestrator call 18) — EC-009 states the parity ruling outright: the rename-retry outcome rides the temp-file exclusion as widened by OD-186 (a succeeding retry persists a cache file legacy would not have written — a file-content difference beyond the directory listing)"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C15/C16) — PC1 states the read-encoding pin: legacy opens caches with the locale encoding, hylo reads UTF-8 per named deviation OD-159 (OD-183 covers stdio only), divergence reachable only via foreign non-ASCII caches (OD-160), VP-012 closure; parity_class relabeled from byte-exact to temp-file, matching sibling BC-1.06.002 (the contract carries the OD-163 own-temp-cleanup divergence)", "1.2.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-24) — EC-009 respelled to the OD-186 single attempt count: three attempts total (initial attempt plus two retries), matching ARCH-04, VP-018, BC-6.03.003 and BC-2.01.004; no behavioral change", "1.2.8 2026-11-19T17:30:00Z: pass-7 remediation — EC-009 attempt count respelled to the OD-188 config key statusline.cache.rename_retry_limit (1 + limit attempts, default 2 → three, range 0..10, beside rename_retry_delay_ms); PC2 and the happy-path vector qualify mode 0600 POSIX-only with the Windows 0666/0444 expectation (ADV-P7-C09); VP-012 closure row and anchor added (SC-21 reciprocity, ADV-P7-C05); EC-011 respelled to reproduce legacy per orchestrator call 1: POSIX surrogateescape equivalence (U+DCxx → raw byte 0xx), other lone surrogates fail the name encode, Windows keeps lone surrogates as UTF-16 units (pass-6 call 16), no WTF-8 exclusion (ADV-P7-C01)", "1.2.9 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C05; orchestrator call 18) — EC-009 states the parity ruling outright: the rename-retry outcome rides the temp-file exclusion as widened by OD-186 (a succeeding retry persists a cache file legacy would not have written — a file-content difference beyond the directory listing)", "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C08) — PC4 and the 777 vector state the no-regular-transcript precondition: with a transcript, a non-string sid degrades via CP-S14 (SL:1017) before any session-cache write (BC-1.03.013 EC-007/008)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,7 +94,10 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
    `b.json`); it concatenates directory, separator and name.
 4. Session-cache names: `abc` → `statusline-abc.json`; `777` → `statusline-777.json`;
    `true` → `statusline-True.json`; `1.5` → `statusline-1.5.json`; absent/`null`/`""`
-   → `statusline-nosession.json`.
+   → `statusline-nosession.json`. The non-string names arise only when no regular transcript file
+   exists: with a transcript, a non-string sid raises CP-S14 at the mix-cache name
+   substitution (SL:1017) before the session-cache path is built (SL:1215), the line
+   degrades and no session cache is written (BC-1.03.013 EC-007/008).
 
 ## Invariants
 
@@ -127,7 +130,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 |-------|----------------|----------|
 | save `{"z": 1, "a": [1.0, inf]}` to `t.json` | file bytes `{"z": 1, "a": [1.0, Infinity]}`, mode 0600 (POSIX legs; on Windows `Stat` reports 0666/0444 — ADV-P7-C09), no temp left | happy-path |
 | load of a missing file | `{}` | edge-case |
-| stdin `session_id: 777` | session cache `statusline-777.json` | edge-case |
+| stdin `session_id: 777` | session cache `statusline-777.json` (no transcript present; with a transcript the line degrades via CP-S14 instead — BC-1.03.013 EC-007) | edge-case |
 | load of bytes `{"a":\xff}` | `{}` | error |
 
 ## Verification Properties

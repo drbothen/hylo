@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T12:00:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "545327e"
+input-hash: "4396cf7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:617-625)"
@@ -25,7 +25,13 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-11a (zero recorded rates)", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-01 (CP-O11 overflow at SL:623; OD-166 record guard) + ADV-P3-C2-11 (EC-005 pinned pair)", "2026-11-18 (v1.3.2) pass-4 remediation ADV-P4-C2-06 (PC5: negative huge api_ms renders normally and is likewise not recorded; guard is sign-agnostic)", "2026-11-18 (v1.3.3) pass-5 design call 16 (ADV-P5-C2-08 BC-side: burn_min_api_ms range restricted to Int > 0 with the ZeroDivisionError rationale)", "2026-11-18 (v1.3.4) pass-6 remediation ADV-P6-C2-01 (canonical vector +inf/(0.0,0.0) corrected to RED — SL:624 tests r >= p95 first) + ADV-P6-C2-10 (DI-008 lifted) + ADV-P6-C2-15 (EC-009 row reordered after EC-008, ascending)"]
+modified:
+  - "2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-11a (zero recorded rates)"
+  - "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-01 (CP-O11 overflow at SL:623; OD-166 record guard) + ADV-P3-C2-11 (EC-005 pinned pair)"
+  - "2026-11-18 (v1.3.2) pass-4 remediation ADV-P4-C2-06 (PC5: negative huge api_ms renders normally and is likewise not recorded; guard is sign-agnostic)"
+  - "2026-11-18 (v1.3.3) pass-5 design call 16 (ADV-P5-C2-08 BC-side: burn_min_api_ms range restricted to Int > 0 with the ZeroDivisionError rationale)"
+  - "2026-11-18 (v1.3.4) pass-6 remediation ADV-P6-C2-01 (canonical vector +inf/(0.0,0.0) corrected to RED — SL:624 tests r >= p95 first) + ADV-P6-C2-10 (DI-008 lifted) + ADV-P6-C2-15 (EC-009 row reordered after EC-008, ascending)"
+  - "2026-11-18 (v1.3.5) pass-9 remediation ADV-P9-C2-03 cross-reference: the OD-166 record-guard citation now points at BC-1.05.004 PC4 (skip moved to the write step)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +81,7 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
    history (BC-1.05.004 guard); the current refresh still degrades. A **negative** huge
    `api_ms` fails the gate (`< burn_min_api_ms`), renders normally with no $/h segment
    (PC4), and is likewise **not recorded** — the OD-166 record guard is
-   convertibility-only and sign-agnostic (BC-1.05.004 PC1, ADV-P4-C2-06).
+   convertibility-only and sign-agnostic (BC-1.05.004 PC4, ADV-P4-C2-06).
 
 ## Invariants
 

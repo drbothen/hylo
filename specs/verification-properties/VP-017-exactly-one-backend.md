@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c3567f7"
+input-hash: "fa66cbd"
 traces_to: prd.md
 source_bc: BC-2.01.002
 bcs: [BC-2.01.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T14:48:00Z: ADV-P4 fix (A2-18) — Method no longer claims cardinality 0 is tested through Load: 1 and 2 run through Load, the backends=0 guard is exercised directly at the validator seam (unreachable through Load in P1), joining the Load-driven table at P4", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-01) — skeleton aligned with the ARCH-02 API: the typed error is taken via ErrorSet.First() (Load returns (*Config, *ErrorSet))", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-09: statement/method/skeleton agree the backends=0 guard is exercised now at the validator seam (Load row joins at P4); the two BC-2.01.002 quick legs (Load ⇒ one entry; metrics_url never ends '/') delivered)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-15) — the leftover A2-09-fix sentence 'validated directly when the P4 file layer makes the case reachable' removed; the now-seam wording (validator unit test with an empty entry slice, joining the Load-driven table at P4) is the single disposition"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T14:48:00Z: ADV-P4 fix (A2-18) — Method no longer claims cardinality 0 is tested through Load: 1 and 2 run through Load, the backends=0 guard is exercised directly at the validator seam (unreachable through Load in P1), joining the Load-driven table at P4", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-01) — skeleton aligned with the ARCH-02 API: the typed error is taken via ErrorSet.First() (Load returns (*Config, *ErrorSet))", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-09: statement/method/skeleton agree the backends=0 guard is exercised now at the validator seam (Load row joins at P4); the two BC-2.01.002 quick legs (Load ⇒ one entry; metrics_url never ends '/') delivered)", "1.5 2026-11-19T18:00:00Z: pass-7 fix (A2-15) — the leftover A2-09-fix sentence 'validated directly when the P4 file layer makes the case reachable' removed; the now-seam wording (validator unit test with an empty entry slice, joining the Load-driven table at P4) is the single disposition", "1.6 2026-11-20T12:00:00Z: pass-9 fix (A2-20) — the sketch's Load calls take the ARCH-02 three-value signature (*Config, []Warning, *ErrorSet); the former two-value calls contradicted VP-015's skeleton and ARCH-02:91"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,11 +79,11 @@ ends with `/`.
 *Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestBackends_ExactlyOneUntilP6(t *testing.T) {
-    if _, err := config.Load(oneBackendOpts()); err != nil { t.Fatalf("one backend rejected: %v", err) }
-    if _, err := config.Load(twoBackendsOpts()); err == nil ||
-        err.First().Reason != "exactly one backend entry until P6" || // Load returns (*Config, *ErrorSet),
-        err.First().Value != "backends=2" { // ARCH-02: the error comes via nil-safe First()
-        t.Fatalf("two backends: got %v", err)
+    if _, _, es := config.Load(oneBackendOpts()); es != nil { t.Fatalf("one backend rejected: %v", es.First()) } // A2-20: Load is three-valued (ARCH-02:91)
+    if _, _, es := config.Load(twoBackendsOpts()); es == nil ||
+        es.First().Reason != "exactly one backend entry until P6" || // Load returns (*Config, []Warning, *ErrorSet),
+        es.First().Value != "backends=2" { // ARCH-02: the error comes via nil-safe First()
+        t.Fatalf("two backends: got %v", es)
     }
     // backends=0 is unreachable through Load in P1 (defaults create index 0,
     // BC-2.01.002 Inv-2); the guard is exercised NOW at the validator seam and
@@ -94,8 +94,8 @@ func TestBackends_ExactlyOneUntilP6(t *testing.T) {
     // A2-09: the two testing/quick legs BC-2.01.002's VP table routes here.
     cfg := &quick.Config{MaxCount: 500, Values: genBackendEnvValues}
     if err := quick.Check(func(env map[string]string) bool {
-        c, err := config.Load(backendEnvOpts(env))
-        if err != nil { return true } // invalid envs are the class tables' domain
+        c, _, es := config.Load(backendEnvOpts(env)) // A2-20: three-value signature
+        if es != nil { return true } // invalid envs are the class tables' domain
         return len(c.Backends) == 1 && // Load ⇒ exactly one entry
             !strings.HasSuffix(c.Backends[0].MetricsURL, "/") // stored value never ends with '/'
     }, cfg); err != nil {

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "902314c"
+input-hash: "8e3ff51"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -26,6 +26,7 @@ modified:
   - "1.3.2 pass-6 remediation (ADV-P6-B05 + B12): PC2 pin marked POSIX-only with the Windows lone-surrogate outcome spun out as new EC-014 (wide-string stat; Go U+FFFD substitution flagged for a named-deviation ruling, OD-188); detached-HEAD ref[:7] marked a named format constant, not config, with the D15 rationale (Inv 4); 2026-11-19T04:00:00Z"
   - "1.3.3 pass-6 residual sweep (orchestrator call 16): EC-014 resolved with no exclusion — internal/platform encodes WTF-8 path values to UTF-16 itself, keeping lone surrogates as single 16-bit units (no U+FFFD substitution), Windows table test (ARCH-05); deviation-ruling note removed; 2026-11-19T14:00:00Z"
   - "1.3.4 pass-7 remediation (ADV-P7-B07): the cwd read is stated, not hidden — abspath resolves a relative input directory against cwd (reachable via BC-1.02.003 EC-004) and the empty-string fallback reads it too; both route through Env.Cwd / platform.Abs, and the Purity row drops the 'unreachable fallback' wording; no behavioral change; 2026-11-19T07:00:00Z"
+  - "1.3.5 pass-9 remediation (ADV-P9-B04/B05, orchestrator call 12; one measurement each on the pinned oracle): PC2.3 pins the chunk-scoped strict decode of the pointer read — readline() decodes a whole buffered chunk (io.DEFAULT_BUFFER_SIZE 8192), so an invalid byte after the first LF still fails the read (end-to-end: no ancestor fallback, the walk stops) — and PC3 partitions the error kinds: isdir/isfile catch (OSError, ValueError) and return False (probes: embedded NUL ValueError, mode-000 PermissionError errno 13), so stat-level errors only make the level count as not-a-directory and the walk continues upward; only open/read failures reach the SL:394 handler; vectors 11-12 added; 2026-11-19T16:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,8 +43,8 @@ The branch lookup walks from the absolute project directory up to the filesystem
 stops at the first directory that is a real repository: its `.git` is a directory, or a
 pointer file whose first line starts with `gitdir:`, **and** the resolved git directory
 holds a `HEAD` file. It returns the branch name for `ref: refs/heads/<name>`, otherwise the
-first 7 code points of HEAD (detached head), or `""` when no repository is found or any
-error occurs. It never invokes the git binary.
+first 7 code points of HEAD (detached head), or `""` when no repository is found or an open/decode
+error occurs (stat-level errors only skip a level — PC3). It never invokes the git binary.
 
 ## Preconditions
 
@@ -88,13 +89,30 @@ error occurs. It never invokes the git binary.
       newlines: `\n`, `\r\n` and a lone `\r` all end the line), strip Python whitespace;
       if it starts with `gitdir:` → `gitdir = normpath(join(d, rest.strip()))` (an
       absolute `rest` replaces `d`, as `os.path.join` does).
+
+      **Chunk-scoped decode (pass-9 ADV-P9-B04, oracle-verified 2026-11-18):** the pointer read is
+      `open(dotgit).readline()` (SL:380-381), which decodes a whole buffered chunk — `io.DEFAULT_BUFFER_SIZE`
+      = 8192 — not a line-scoped validation: a raw invalid byte after the first LF still fails the read with
+      `UnicodeDecodeError` when it falls inside the decoded chunk (probe: 95-byte pointer file, clean ASCII
+      first line, raw `\xff` at offset 14 → raise; end-to-end through the real entry point: pointer
+      `gitdir: ../gd\n` + raw `\xff` → `""` immediately, no ancestor fallback despite a qualifying ancestor
+      repo), while an invalid byte beyond the decoded chunk (probe: offset 9015; 4096-byte prefetch observed)
+      did not fail the first read. Go must reproduce the chunk-scoped strict decode, not a
+      validate-only-the-first-line read.
    4. If `gitdir` is set and `join(gitdir, "HEAD")` is a regular file → read it whole in
       text mode, strip Python whitespace into `ref`, and **return**:
       `ref[len("ref: refs/heads/"):]` if `ref` starts with `ref: refs/heads/`, else
       `ref[:7]` (code points).
    5. `parent = dirname(d)`; if `parent == d` → return `""`; else `d = parent`.
-3. Any exception anywhere in the walk (unreadable file, invalid UTF-8, permission error)
-   → return `""` immediately (the walk does **not** continue upward).
+3. Errors partition by kind (pass-9 ADV-P9-B05, oracle-verified 2026-11-18): **stat-level errors never
+   raise** — `os.path.isdir`/`isfile` catch `(OSError, ValueError)` and return `False` (oracle
+   `genericpath` source; probes: an embedded NUL — `ValueError: embedded null byte` — and a mode-000 parent
+   component — `PermissionError` errno 13 — both return `False`), so EACCES on a parent component,
+   `ENAMETOOLONG`, `ENOTDIR` and embedded NULs only make the level count as not-a-directory and the walk
+   **continues upward** (end-to-end: start under a mode-000 directory above a repo → the repo's branch,
+   not `""`); this is the general rule behind the PC2 lone-surrogate pin. Only `open`/read failures —
+   including the PC2.3 chunk-decode error — reach the outer handler (SL:394) and return `""` immediately
+   (the walk does **not** continue upward).
 
 ## Invariants
 
@@ -132,7 +150,8 @@ error occurs. It never invokes the git binary.
 ## Canonical Test Vectors
 
 Verified against the oracle (CPython 3.11.7) on 2026-11-15 with synthetic trees under a
-temp root `<T>` that has no repository above it.
+temp root `<T>` that has no repository above it; rows 11-12 (ADV-P9-B04/B05) verified 2026-11-18 through
+the real entry point (`python3 -I -s legacy/dgx_statusline.py`, isolated HOME and cwd).
 
 | Input (tree, start dir) | Expected Output | Category |
 |-------|----------------|----------|
@@ -147,6 +166,8 @@ temp root `<T>` that has no repository above it.
 | `<T>/k/.git/HEAD` empty | `""` | edge-case |
 | `<T>/none/x`, no repo anywhere | `""` | edge-case |
 | `<T>/h/.git/HEAD` = bytes `ref: refs/heads/\xff\xfe\n` | `""` | error |
+| `<T>/r/.git/HEAD` = `ref: refs/heads/ancestor\n`; `<T>/r/wt/.git` = `gitdir: ../gd\n` + raw `\xff` bytes; `<T>/gd/HEAD` = `ref: refs/heads/feature\n`; start `<T>/r/wt` | `""` (chunk-decode error stops the walk; no ancestor fallback) | error |
+| `<T>/u/.git/HEAD` = `ref: refs/heads/main\n`; start `<T>/u/child` where `child` is mode 000 (stat EACCES) | `main` (stat-level error: the walk continues upward) | edge-case |
 
 ## Verification Properties
 

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "reserved-boundaries"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1b
 inputs: [prd.md, research/peer-tool-lessons-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "633693f"
+input-hash: "302ff71"
 ---
 
 # ARCH-09 — Reserved package boundaries (P2-P7), no design
@@ -35,8 +35,11 @@ Boundary rules for the P1 skeleton:
 2. The config registry `Class` field and `LoadOptions.FileLayer` extension point are
    the only P4 seams pre-provisioned (OD-107); `backends[]` widening happens in one
    validator (OD-123).
-3. DI-007 (status line never reads the ledger) is enforced architecturally in P1 by the
-   read-scope of `Env` (ARCH-03) having no ledger seam at all.
+3. DI-007 (status line never reads the ledger) is enforced in P1 by VP-022's static
+   analysis, not by the type system alone: `Env`'s `FileSystem.ReadFile(name string)`
+   accepts any path (ARCH-03), so the read-scope of `Env` (no dedicated ledger seam)
+   states the design intent that the VP-022 analysis verifies — it is not itself the
+   enforcement mechanism (ADV-P9-A13).
 4. Peer-lesson dispositions that touch P1 bytes: none — L1-L6 all land P3/P4/P6; the
    P1 metrics client's proxy-free direct dial (raw net.Conn: no http.Transport, no
    `*_proxy` consultation) is the D14-(b) precedent, output-neutral (wording updated

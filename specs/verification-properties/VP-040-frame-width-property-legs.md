@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md]
-input-hash: "9961bcf"
+input-hash: "956c902"
 traces_to: prd.md
 source_bc: BC-1.01.004
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-34) — P7 split into its own quick.Check: negated-int64 cols from its own generator (the shared anchorCols config could not serve it) and the rows > 2 constraint expressed by construction; the shared segCfg now serves P1/P5/P6 only", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-15: P7 varies the statusline.rows setting (covering rows == 2) with cols < 0, instead of guarding on segment count)", "1.5 2026-11-20T12:00:00Z: pass-8 residual sweep (task 5) — P7 restated per BC-1.01.007 PC2 (incl. negative narrow_cols): row 2 is OMITTED iff rows == 2 and cols < narrow_cols; the former 'present iff rows > 2' phrasing dropped the narrow_cols condition"]
+modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-34) — P7 split into its own quick.Check: negated-int64 cols from its own generator (the shared anchorCols config could not serve it) and the rows > 2 constraint expressed by construction; the shared segCfg now serves P1/P5/P6 only", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-15: P7 varies the statusline.rows setting (covering rows == 2) with cols < 0, instead of guarding on segment count)", "1.5 2026-11-20T12:00:00Z: pass-8 residual sweep (task 5) — P7 restated per BC-1.01.007 PC2 (incl. negative narrow_cols): row 2 is OMITTED iff rows == 2 and cols < narrow_cols; the former 'present iff rows > 2' phrasing dropped the narrow_cols condition", "1.6 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-01/B01, orchestrator call 2) — P7 restated to the canonical TOTAL predicate from legacy SL:1217/SL:1224: row 2 is rendered iff rows ≥ 2 and (rows > 2 or cols == 0 or cols ≥ narrow_cols); the pass-8 omission form was false for rows ≤ 1 (row 2 is never rendered there, so three of the generator's eight settings violated it); omission form and skeleton corrected, and the P7 generator now varies narrow_cols so both halves of the comparison are exercisable"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,8 +52,14 @@ this VP delivers the quantified legs:
   exact SEP bytes.
 - **P6 (BC-1.01.006):** after trim, `visible(out) <= cols` or out contains no SEP.
 - **P7 (BC-1.01.007):** for all `statusline.rows` settings and all cols < 0: rows
-  untrimmed, and row 2 omitted iff rows == 2 and cols < narrow_cols
-  (BC-1.01.007 PC2, incl. negative narrow_cols).
+  untrimmed, and row 2 is rendered iff `rows ≥ 2` and (`rows > 2` or `cols == 0` or
+  `cols ≥ narrow_cols`) (legacy SL:1217, SL:1224; BC-1.01.007 PC2–PC4, incl. negative
+  narrow_cols) — equivalently, row 2 is omitted iff rows ≤ 1, or (rows == 2 and
+  `cols ≠ 0` and `cols < narrow_cols`). Within the cols < 0 domain the `cols == 0`
+  disjunct is vacuous, but the predicate is stated as the BC's canonical total
+  form, not a domain-restricted rewrite (the pass-8 restricted rewrite is what
+  regressed: it required row 2 to be present at rows ≤ 1, where legacy never
+  renders it).
 
 ## Source Contract
 
@@ -84,7 +90,7 @@ this VP delivers the quantified legs:
 | P4 | Python int grammar corners crossed with random decimal/underscore/sign/whitespace permutations and invalid-UTF-8 bytes | pinned CPython 3.11 oracle (ARCH-07 recipe) |
 | P5 | segment lists with SEP-free text (filter), crossing drop counts | structural model re-derivation |
 | P6 | trim inputs from P5's generator at cols inside/outside the matrix | structural inequality check |
-| P7 | `statusline.rows` settings {-1,0,1,2,3,4,5,10} × cols drawn from negated int64 spread | structural predicate check (both iff halves: rows == 2 hides row 2) |
+| P7 | `statusline.rows` settings {-1,0,1,2,3,4,5,10} × cols drawn from negated int64 spread × `narrow_cols` drawn from an int64 spread (negatives included, so both halves of the `cols ≥ narrow_cols` comparison are exercisable) | structural predicate check of the full rule: rows ≤ 1 never renders row 2; at rows == 2 row 2 hides iff `cols ≠ 0` and `cols < narrow_cols`; rows ≥ 3 always renders it |
 
 ## Proof Method
 
@@ -119,14 +125,17 @@ func TestFrameProp_All(t *testing.T) {
     p7Cfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
         args[0] = reflect.ValueOf(rowsSettingSpread(r)) // A2-15: statusline.rows ∈ {-1, 0, 1, 2, 3, 4, 5, 10}, covering rows == 2 and rows > 2
         args[1] = reflect.ValueOf(negInt64ColSpread(r)) // negated int64 spread
-        args[2] = reflect.ValueOf(genSEPFreeText(r))    // enough segments to compose any row count
+        args[2] = reflect.ValueOf(int64Spread(r))       // narrow_cols setting, negatives included (pass-9 call 2)
+        args[3] = reflect.ValueOf(genSEPFreeText(r))    // enough segments to compose any row count
     }}
-    if err := quick.Check(func(rowsSetting, cols int, text string) bool {
+    if err := quick.Check(func(rowsSetting, cols, narrowCols int, text string) bool {
         segs := splitSegments(text)
         out := renderFrameWithRows(rowsSetting, segs, cols)
-        // P7 model, iff both halves: untrimmed at cols < 0, and row 2 present
-        // IFF rows > 2 — hidden exactly at rows == 2 (A2-15).
-        return framePropMatchesP7(out, rowsSetting, segs, cols)
+        // P7 model (pass-9 call 2, legacy SL:1217/SL:1224): untrimmed at cols < 0,
+        // and row 2 rendered IFF rows >= 2 AND (rows > 2 OR cols == 0 OR
+        // cols >= narrowCols) — omitted at rows <= 1, and at rows == 2 exactly
+        // when cols != 0 and cols < narrowCols (A2-15, ADV-P9-A2-01/B01).
+        return framePropMatchesP7(out, rowsSetting, cols, narrowCols, segs)
     }, p7Cfg); err != nil {
         t.Fatalf("P7 violated: %v", err)
     }

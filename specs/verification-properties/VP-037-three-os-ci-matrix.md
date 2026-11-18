@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-11-19T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.001.md, prd-supplements/nfr-catalog.md]
-input-hash: "5954678"
+input-hash: "8025997"
 traces_to: prd.md
 source_bc: BC-6.04.001
 bcs: [BC-6.04.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:11:00Z: ADV-P3 fixes — “Windows runs Tier B without Python” corrected: setup-python installs the oracle on all three legs and Tier A runs on all three (BC-6.04.001, A2-10); POL-11 positive-coverage gate added to the sketch: every harness step asserts a computed “N … validated” count > 0 (A2-06)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-20, P19) — the -race legs (Linux, macOS) set CGO_ENABLED=1: the race detector requires cgo on Linux, so a CGO_ENABLED=0 race build is not a truthful toolchain claim; the CGO_ENABLED=0 build legs stand"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:11:00Z: ADV-P3 fixes — “Windows runs Tier B without Python” corrected: setup-python installs the oracle on all three legs and Tier A runs on all three (BC-6.04.001, A2-10); POL-11 positive-coverage gate added to the sketch: every harness step asserts a computed “N … validated” count > 0 (A2-06)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-20, P19) — the -race legs (Linux, macOS) set CGO_ENABLED=1: the race detector requires cgo on Linux, so a CGO_ENABLED=0 race build is not a truthful toolchain claim; the CGO_ENABLED=0 build legs stand", "1.4 2026-11-20T15:00:00Z: pass-9 cosmetic fix (ADV-P9-A2-20) — missing space in 'report.The' repaired"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,7 +37,7 @@ removal_reason: null
 Every change runs the full matrix — ubuntu-24.04, macos-15 (arm64), windows-2025 — on
 Go 1.26.x with `CGO_ENABLED=0` builds, and the `-race` legs (Linux and macOS) set
 `CGO_ENABLED=1` because the race detector requires cgo (A2-20) — Tier A corpus
-(interpreter path from setup-python, OD-108) on all three legs, Tier B goldens, gitleaks + category scan, and the printed timing report.The resolved
+(interpreter path from setup-python, OD-108) on all three legs, Tier B goldens, gitleaks + category scan, and the printed timing report. The resolved
 Python patch version is recorded in Tier B golden metadata (RK-4). Non-zero harness
 exits never occur inside `hylo` (E-HAR-001 is the harness process). Positive coverage
 (POL-11): every regression-detector step asserts a computed “N cases/goldens/entries

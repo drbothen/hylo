@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T08:30:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "d2e0a2c"
+input-hash: "bfdb440"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -31,6 +31,7 @@ modified:
   - "2026-11-19T03:10:00Z (1.2.3): ADV-P6 remediation D27 + OD-183 - Description pins restated (GP-1..GP-4 forbidden outright, GP-5/GP-6 set to case temp values, nothing inherited); Windows oracle child gains exactly one extra variable PYTHONIOENCODING=utf-8 (stdio only; PYTHONUTF8 stays forbidden; POSIX unchanged), EC-002/CTV/VP rows aligned"
   - "2026-11-19T08:30:00Z (1.2.4): ADV-P7 remediation D05 (orchestrator call 2) + call 4 + OD-190 - this file is AUTHORITATIVE for the per-OS child-env allowlists: PC-1 consolidates the four exact key sets (POSIX/Windows × oracle/Go) with the conditional PATH/COLUMNS/setting keys, HOMEDRIVE/HOMEPATH explicitly not constructed, HOME+USERPROFILE on both OSes; PC-2 drops statusline.Env(Getenv,Home) for the platform.EnvVars seam with HomeDir(env)/LocalZone(env)/CacheDir(env) signatures; PC-4 names the OD-190 LF normalization (UTF-8 + LF on every OS) beside PYTHONIOENCODING=utf-8. ARCH-07 and VP-034 copy these sets verbatim"
   - "2026-11-19T21:00:00Z (1.2.5): ADV-P8 remediation D13+D10 — in-process Go path env lookups respelled EnvVars.Lookup(name) (string, bool) per ARCH-01; the conditional fake-PATH bullet states it has no P1 consumer (OD-76 D1-D4 vectors are Go table tests; machinery kept for the validator rejection rule and later phases)"
+  - "2026-11-20T18:30:00Z (1.2.6): ADV-P9 remediation D10 — PC-4's parenthetical no longer claims the Windows env differs from POSIX by that key alone: the delta is PYTHONIOENCODING plus TMP, TEMP and SYSTEMROOT (the PC-1 Windows delta), and the table test asserts the exact per-OS key sets"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -158,8 +159,11 @@ to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (
    to UTF-8 strict with `newline="\n"`. Windows text-mode stdout would otherwise write
    `\r\n` and encode as cp1252 (research P25). By OD-183 the Windows oracle child's
    stdio encoding additionally comes from the builder's `PYTHONIOENCODING=utf-8` —
-   exactly one variable, stdio only; a table test proves it changes stdio encoding
-   only (the constructed env differs from the POSIX builder in that key alone).
+   exactly one `PYTHON*` variable, stdio only; a table test proves it changes stdio
+   encoding only (ADV-P9-D10: the constructed env differs from the POSIX builder by
+   `PYTHONIOENCODING` PLUS `TMP`, `TEMP` and `SYSTEMROOT` — the PC-1 Windows delta —
+   and the table test asserts the exact per-OS key sets, so this parenthetical no
+   longer claims "that key alone").
    By OD-190 this LF behavior is hylo-wide and named beside the builder variable,
    never hidden in the shim: hylo writes UTF-8 + LF line endings on every OS (OD-190
    extends OD-183), and the Windows oracle's LF normalization is produced by the two

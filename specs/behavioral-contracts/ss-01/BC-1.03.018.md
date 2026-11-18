@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.12"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:45:10Z
+timestamp: 2026-11-21T00:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4529a98"
+input-hash: "75de44d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1149; raise sites SL:994, 1069, 1072, 1079, 1097, 1099, 1108, 1112, 1143, 1145)"
@@ -32,6 +32,8 @@ modified:
   - "2026-11-19T14:00:00Z (v1.2.10): pass-6 residual sweep — closed-set exclusion count restated to twelve ids with OD-181 (ADV-P6-C2-07/08; owner ruling OD-181)"
   - "2026-11-19T19:00:00Z (v1.2.11): pass-7 residual remediation (call 8/B03) — the eleventh, OS-dependent degrade leg named crash id CP-T09 (Windows MSVC localtime domain OSError on a naive transcript timestamp; CP-T08 retired; register 48 paths, T family 8) in the Description and invariant 3, with a PC3 table row marked as a degrade, not a skip; no behavioral change"
   - "2026-11-19T23:59:00Z (v1.2.12): pass-8 remediation (ADV-P8-C03/C06; A2-07 call 12) — PC5 and the Exclusion-entry traceability row add the D4-EX-2 skip rows of BC-1.03.014 (single-line CP-T06) and BC-1.03.016 (T15) to the dedicated-test closure list; CP-O08's legacy raise-site cell states the SL:996 divide is unreachable at CP-O08 magnitudes (BC-1.03.010 EC-009); the delete-the-line fuzz row names VP-013's property-method home (pass-8 call 12)"
+  - "1.3.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C03; orchestrator call 4) — Inv 3 respelled: parse-time skip never degrades, but counted exact-int totals can degrade the later render (CP-O04, CP-O09, now CP-O12); BC-1.03.006 PC5 cross-references it"
+  - "1.3.1 2026-11-21T00:00:00Z: pass-9 residual sweep (calls 4 + 8) — Description register count 48 → 49 paths (family tally X4 S17 T8 N3 O12 A5; CP-O12 minted pass 9), history lines untouched; the VP-029/VP-013 W-line for-all row respelled per the pass-9 gate: state after = state before except as PC2 rules (offset advances; CP-O06..O08 drop `cur` to null), retiring the bit-identical claim"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,7 +49,8 @@ removal_reason: null
 **Approved deviation D4-EX-2** (owner ruling Q-c, 2026-11-14; extended by rulings OD-156 and OD-167, 2026-11-17/18). Legacy has
 ten transcript crash paths, CP-T01..T07 and CP-O06..O08 — plus, on Windows only, an eleventh, OS-dependent
 degrade leg — crash id **CP-T09**, the Windows MSVC localtime domain `OSError` on a naive transcript
-timestamp (append-only id; the crash register is 48 paths, the T family 8 — T01..T07 plus T09, CP-T08
+timestamp (append-only id; the crash register is 49 paths — X4 S17 T8 N3 O12 A5, CP-O12 minted
+pass 9; the T family 8 — T01..T07 plus T09, CP-T08
 retired): a naive transcript timestamp outside MSVC `localtime_s`'s domain raises `OSError` out of
 `_iso_ts` and degrades the whole line (BC-5.04.001 PC6, ADV-P5-D01/owner call 8; not a W-predicate — legacy
 degrades, hylo reproduces the degrade, see invariant 3):
@@ -124,7 +127,13 @@ transcript-borne overflow skips the offending line AND drops the in-flight turn"
    (T02−), continuation line with array usage (T03− continuation), untimed array usage (T03− untimed), already-seen
    id with bad usage (T04− seen id), `cb` with bad usage (T04− cb), `cb` with numeric text (T06− cb), list text
    (T06− list), unhashable id without usage (T07− no usage), and the CP-T05 shape when `lu` is null (T05− lu none).
-3. On POSIX the status line never degrades on any transcript line content in hylo (DI-008). On Windows a naive
+3. On POSIX no transcript line degrades AT PARSE TIME on its content: wrong shapes and transcript-borne
+   overflows are skipped whole (D4-EX-2; CP-T01..T07, CP-O06..O08). Transcript-borne exact-int totals that are
+   COUNTED (not skipped) can still degrade a later render at the aggregate sites (CP-O04 at the `_fmt_tok_c`
+   float cast, CP-O09's above-the-digit-limit total, now CP-O12 at the cost-pick `tot * dgx_mtok`): e.g. a
+   counted `input_tokens: 10^309` is stored exactly (BC-1.03.006 PC3) and the refresh then degrades via the
+   guard line (BC-1.02.025 EC-010), sticky because the mix cache keeps the total (BC-1.03.006 PC5 carries the
+   cross-reference). On Windows a naive
    transcript timestamp whose `LocalToUnix` probe leaves MSVC's domain — on or before 1970-01-01, or year 3001 or
    later — raises `OSError` out of `_iso_ts` (SL:983-985 catches `ValueError` only) and the whole line
    **degrades** (crash id CP-T09); hylo reproduces this exactly (BC-5.04.001 PC6, ADV-P5-D01/owner call 8;
@@ -158,7 +167,7 @@ BC-1.03.010 (CP-O08); the CP-O06/O07 legs are timestamped so the OD-167 in-fligh
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-029, VP-013 | For every W-line, parser state after = state before (bit-identical) | Go property test (testing/quick) with generated W-lines per CP |
+| VP-029, VP-013 | For every W-line, parser state after = state before except as PC2 rules — the offset advances (the line's bytes are consumed) and CP-O06..O08 additionally drop `cur` to null | Go property test (testing/quick) with generated W-lines per CP |
 | VP-029, VP-013 | Delete-the-line equivalence holds on random transcripts with injected W-lines, modulo the OD-167 exception of PC4(b): at each overflow skip the post-skip state additionally includes `cur` → null (the open turn discarded, never finished) | fuzz (oracle on the transcript with W deleted, state-adjusted per PC4(b); the property method lives in VP-013 — pass-8 call 12) |
 | VP-012 | Postcondition 5 closure: every predicate-triggering input is a named D4-EX-2 exclusion entry carrying its own expected-output file and dedicated table test; no globs | repository test over `exclusions.json` |
 

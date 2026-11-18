@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.9"
+version: "1.2.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T20:00:00Z
@@ -19,7 +19,17 @@ confidence: H
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths added to the catalog as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919), five crash paths total (ADV-P3-C04); guard anchor cites the real ARCH-03 Interfaces heading (ADV-P3-C15)", "1.1.2 2026-11-18T08:00:00Z: pass-4 remediation: row-write stdout failure ruled stop-and-exit-0 with no degraded attempt, riding cp-x03 per OD-172 (ADV-P4-C13); stale LOCAL_MODEL_PREFIXES cite corrected to SL:902-903 (ADV-P4-C12)", "1.1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C14/C11/C17) — refactoring note folds CP-A01..A05; stale ARCH-03 line anchor replaced with #statusline-guard; EC table reordered EC-001..009", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C07) — crash-register count reconciled to 47 (error-taxonomy register: 4+17+7+3+11+5)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format", "1.1.6 2026-11-19T19:00:00Z: pass-7 remediation (ADV-P7-C12/C14) — VP-001/VP-003 row respelled to the actual promise (render-time faults end in the 29 degraded bytes; stdin faults absorb to zero bytes per BC-1.07.003; row-write EPIPE stops with no degraded attempt per EC-009/OD-172); EC-003's stray '{}'-less garble respelled to the falsy-values list", "1.1.7 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-31) — Legacy-contract cell's pass-6 register count marked as history (47 at ADV-P6-C07; 48 since pass-7 CP-T09)", "1.1.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C04) — EC-009's legacy contrast corrected from the end-to-end closed-stdout oracle (exit 120 via shutdown-flush BrokenPipeError + stderr Exception-ignored message; guard not entered for buffered row sets; no in-process degraded print) — hylo's ruled OD-172 behavior unchanged, "1.1.9 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"]
+modified:
+  - "1.1.1 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths added to the catalog as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919), five crash paths total (ADV-P3-C04); guard anchor cites the real ARCH-03 Interfaces heading (ADV-P3-C15)"
+  - "1.1.2 2026-11-18T08:00:00Z: pass-4 remediation: row-write stdout failure ruled stop-and-exit-0 with no degraded attempt, riding cp-x03 per OD-172 (ADV-P4-C13); stale LOCAL_MODEL_PREFIXES cite corrected to SL:902-903 (ADV-P4-C12)"
+  - "1.1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C14/C11/C17) — refactoring note folds CP-A01..A05; stale ARCH-03 line anchor replaced with #statusline-guard; EC table reordered EC-001..009"
+  - "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C07) — crash-register count reconciled to 47 (error-taxonomy register: 4+17+7+3+11+5)"
+  - "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "1.1.6 2026-11-19T19:00:00Z: pass-7 remediation (ADV-P7-C12/C14) — VP-001/VP-003 row respelled to the actual promise (render-time faults end in the 29 degraded bytes; stdin faults absorb to zero bytes per BC-1.07.003; row-write EPIPE stops with no degraded attempt per EC-009/OD-172); EC-003's stray '{}'-less garble respelled to the falsy-values list"
+  - "1.1.7 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-31) — Legacy-contract cell's pass-6 register count marked as history (47 at ADV-P6-C07; 48 since pass-7 CP-T09)"
+  - "1.1.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C04) — EC-009's legacy contrast corrected from the end-to-end closed-stdout oracle (exit 120 via shutdown-flush BrokenPipeError + stderr Exception-ignored message; guard not entered for buffered row sets; no in-process degraded print) — hylo's ruled OD-172 behavior unchanged"
+  - "1.1.9 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
+  - "1.2.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02) — frontmatter modified list repaired to block style (lost closing quote restored); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

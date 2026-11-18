@@ -349,3 +349,73 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   formatting convention must agree.
 
 **Closes:** recorded as a Drift Item in STATE.md (plugin owner, tooling drift)
+
+## L-PG-32 [process-gap] — For-all properties are derived from the owning BC's postconditions
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-9 burst, ADV-P9-A2-01..04, B01) The
+  pass-8 remediation wrote "for all inputs" VP properties by paraphrase, not by
+  derivation from the owning BC's postconditions; four were false over legal inputs
+  (skip, degrade, drop and offset/size-adjustment paths broke them).
+- **Remedy:** A "for all inputs" property is derived from every PC, EC and exception
+  of the owning BC — including skips, degrades, drops and offset/size adjustments —
+  and walked against legacy's code paths before it is written; if any legal input
+  breaks it, the domain is narrowed explicitly.
+
+**Closes:** burst gate 2 (for-all derivation) — recorded as a Drift Item in STATE.md
+
+## L-PG-33 [process-gap] — Every changed file is YAML-parsed before handoff
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-9 burst, ADV-P9-C02 + six companions)
+  Pass-8 edits left 11 spec files with unparsable YAML frontmatter; nothing in the
+  burst pipeline caught it — the defects survived until the pass-9 adversary filed
+  them.
+- **Remedy:** Every fix agent runs `yaml.safe_load` on each file it changed after its
+  last edit, and the orchestrator re-parses the whole changed set before commit; a
+  commit-time frontmatter-parse hook is the candidate mechanization.
+
+**Closes:** burst gate 1 (YAML-safe_load) — recorded as a Drift Item in STATE.md
+
+## L-PG-34 [process-gap] — State only what was measured
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-9 burst, ADV-P9-C2-01) A single
+  measured case — HTTP 100 (Continue) skipped by the metrics client — was
+  generalized to the class "any 1xx response is skipped"; 101/102/103 are final
+  responses that yield no sample but are not skipped.
+- **Remedy:** Statements pin exactly the measured case and its measured basis; a
+  class claim ("any 1xx") requires measuring — or reading the source for — every
+  class member before it is written.
+
+**Closes:** burst gate 3 (no generalized measurements) — recorded as a Drift Item in STATE.md
+
+## L-PG-35 [process-gap] — ARCH-doc anchors are section anchors, never line numbers
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-9 burst, ADV-P9-C2-06) Line-number
+  anchors into ARCH-03 broke for the third consecutive pass as the doc churned
+  across remediation bursts.
+- **Remedy:** Anchors into churning docs (ARCH-03 in particular) cite section
+  anchors; line numbers in agent briefs are recreated from a numbered read at
+  dispatch time, never stored in specs.
+
+**Closes:** recorded as a Drift Item in STATE.md (section-anchor rule)
+
+## L-PG-36 [process-gap] — Fix-agent findings are routed by target file
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-9 burst) The orchestrator's agent
+  table assigned two findings (A2-11, A2-16) to an agent whose assigned file set did
+  not contain the target file; the findings would have gone unowned.
+- **Remedy:** Findings are routed to fix agents by their target file, and the agent
+  table is checked — every finding's target file ∈ the agent's assigned set — before
+  dispatch (companion to L-PG-24's out-of-set-edit rule).
+
+**Closes:** recorded as a Drift Item in STATE.md (routing check; companion to L-PG-24)
+
+## L-PG-37 [process-gap] — Synthetic values use the pre-push hook's allowlist
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-9 burst) A synthetic test value (an
+  `@example.invalid` email) would have been blocked by the repo's own pre-push
+  hygiene hook, which allowlists only specific synthetic placeholders.
+- **Remedy:** Synthetic values in committed fixtures use the hook's allowlist —
+  example.com/.org/.net addresses, 192.0.2.x (RFC 5737) IPs, `/home/example...`
+  paths — or are scrubbed by a committed, reviewed script.
+
+**Closes:** recorded as a Drift Item in STATE.md (fixture-placeholder allowlist)

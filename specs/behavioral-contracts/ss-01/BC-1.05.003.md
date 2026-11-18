@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r6.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "7595210"
+input-hash: "a614197"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:626-636)"
@@ -26,7 +26,10 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-4 residual sweep — key renamed to statusline.cost.display_floor_usd (OD-174)", "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the pick named as the config key statusline.glyphs.cost_pick with default ⛏, OD-189 sibling treatment)"]
+modified:
+  - "1.3 2026-11-17: pass-4 residual sweep — key renamed to statusline.cost.display_floor_usd (OD-174)"
+  - "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the pick named as the config key statusline.glyphs.cost_pick with default ⛏, OD-189 sibling treatment)"
+  - "1.3.2 2026-11-18: pass-9 orchestrator call 4/B03 (CP-O12 co-owner EC-011 added — cost-pick equivalence overflow at SL:633; owner EC in BC-1.02.029) and DI-008 lifted into the L2 row"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -97,6 +100,7 @@ equivalent, unless that is below half a cent.
 | EC-008 | tot 1000, mtok 5.0 → eq 0.005 | ` ⛏0.01` (inclusive; `.2f` of 0.005 → `0.01`) |
 | EC-009 | `total_cost_usd` = `true` | `\e[97m$1.00\e[0m…\e[90m ⛏0.25\e[0m` with the basis below |
 | EC-010 | tot = 0 | no `⛏` |
+| EC-011 | cost-pick equivalence overflow (crash id **CP-O12**; Surface 1, render-time degrade, like CP-O04): `tin` and `tout` each below the int→float overflow bound but their exact-int sum `tot` (SL:626) at or above it enters `tot * dgx_mtok` (SL:633) on the local lane with a valid basis → OverflowError → degraded line | degraded line (BC-1.01.001); the pick is not rendered for this refresh |
 
 ## Canonical Test Vectors
 
@@ -125,7 +129,7 @@ Common inputs: model `claude-sonnet-5-5` (local lane under the default prefix), 
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 (owned-hardware cost), CAP-010 |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007, DI-008 (the EC-011 CP-O12 OverflowError degrade rides the never-blank ladder: 29-byte line, exit 0; pass-9 orchestrator call 4/B03) |
 | Architecture Module | `internal/statusline` cost.go (BC-COMPONENT-MAP: internal/statusline/cost.go (⛏ in $ block) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-602, 626-636); main (SL:1220-1223); MIN_BASIS_MTOK_MONTH (SL:98) |

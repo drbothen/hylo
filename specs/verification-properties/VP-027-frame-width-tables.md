@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-11-18T02:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md, behavioral-contracts/ss-01/BC-1.01.010.md]
-input-hash: "aa6c5a2"
+input-hash: "4e0ac86"
 traces_to: prd.md
 source_bc: BC-1.01.010
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007, BC-1.01.010]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: pass-2 follow-up — the for-all property rows and Tier C differential legs claimed by BC-1.01.003..007 (row/LF structure, visible additivity and CPython differential, term_cols grammar differential, trim structure/boundedness, negative-COLUMNS) spun off to VP-040; this VP remains the fixed breakpoint matrix + Python int grammar for COLUMNS"]
+modified: ["1.1 2026-11-17: pass-2 follow-up — the for-all property rows and Tier C differential legs claimed by BC-1.01.003..007 (row/LF structure, visible additivity and CPython differential, term_cols grammar differential, trim structure/boundedness, negative-COLUMNS) spun off to VP-040; this VP remains the fixed breakpoint matrix + Python int grammar for COLUMNS", "1.2 2026-11-20T15:00:00Z: pass-9 fix (ADV-P9-A2-09) — the unconditional 'negative COLUMNS hides row 2' claim qualified to the BC-1.01.007 v1.3.4/1.3.5 rule: hidden at rows == 2 with cols < narrow_cols; row 2 is never rendered at rows ≤ 1"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,9 +36,11 @@ removal_reason: null
 
 Row joining (LF, row 2 only when width permits), visible-width counting (code points
 after SGR stripping), the trim breakpoint matrix across widths (double-reset, recycle
-row, single-reset), negative-COLUMNS disabling trim and hiding row 2, and COLUMNS
+row, single-reset), negative-COLUMNS disabling trim and — at `rows == 2` with
+`cols < narrow_cols` — hiding row 2 (row 2 is never rendered at `rows ≤ 1`;
+BC-1.01.007 PC2/PC4 v1.3.4/1.3.5 qualification, pass-9 ADV-P9-A2-09), and COLUMNS
 parsing with the Python int grammar (else 0; overflowing negative stays negative —
-row 2 hidden; only the over-4,300-digit error path maps to 0) all match the
+row 2 hidden exactly as PC2 qualifies; only the over-4,300-digit error path maps to 0) all match the
 oracle-pinned matrix exactly.
 
 ## Source Contract

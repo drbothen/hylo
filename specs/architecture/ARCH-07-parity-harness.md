@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.13"
+version: "1.14"
 status: draft
 producer: architect
 timestamp: 2026-11-20T12:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "fc57013"
+input-hash: "6337f69"
 
 ---
 
@@ -176,7 +176,7 @@ input-hash: "fc57013"
 | Cache swap | `TestParityCacheSwap_FourCaches` |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
 | Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` (corpus root; OD-148, matching BC-6.02.001/.003, BC-6.04.003) |
-| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpt09 (the Windows-only CP-T09 MSVC localtime-domain family, pass-8 orchestrator call 2 — cpt08 is retired and not reused), cpn01..cpn03, cpo01..cpo11, cpa01..cpa05. SUBAGENT FAMILY RULE (pass-7 D14): a subagent-family case is identified by the case-id SUFFIX `-sub` on a base case (e.g. `row1-003-sub`), the marker BC-6.01.001/BC-6.02.003/BC-6.03.001 use ("id suffix `-sub`"); the grammar's `subagent` token denotes that suffix family, NOT a `<subagent>-<nnn>` spelling, so the validator's rule is the determinate suffix match |
+| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpt09 (the Windows-only CP-T09 MSVC localtime-domain family, pass-8 orchestrator call 2 — cpt08 is retired and not reused), cpn01..cpn03, cpo01..cpo12, cpa01..cpa05. SUBAGENT FAMILY RULE (pass-7 D14): a subagent-family case is identified by the case-id SUFFIX `-sub` on a base case (e.g. `row1-003-sub`), the marker BC-6.01.001/BC-6.02.003/BC-6.03.001 use ("id suffix `-sub`"); the grammar's `subagent` token denotes that suffix family, NOT a `<subagent>-<nnn>` spelling, so the validator's rule is the determinate suffix match |
 | Case contents | `stdin.json.tmpl`, `settings`, `argv` (pass-4 ruling, ADV-P4-A15/D09: the HANDLER-RELATIVE argument list — the elements after the `statusline` verb; default `[]`. In P1 the corpus validator admits only `[]` and `["--subagent"]`; the oracle receives `[python, -s, script]` plus the same list, so the oracle — which has no `statusline` verb — sees exactly the handler arguments. Other argv shapes are covered by Go table tests (BC-4.01.002), never parity. Supersedes the pass-3 "passed to the built `hylo` binary verbatim, default `["statusline"]`" wording and BC-4.01.002:111's "no flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps` (clock step + transcript appends per step, carried INSIDE `case.json` — pass-4 D10 — not as a sibling `steps.jsonl`) |
 | Exclusions file | `internal/statusline/testdata/parity/exclusions.json` (beside the corpus root; OD-148 layout, BC-6.03.003/.004 PC-1); capture replays additionally use a git-ignored `captures/exclusions.json` validated by the same closed-set rule, CI never runs captures (pass-4 D12) |
 | Tier B goldens | `internal/statusline/testdata/goldens/*.golden`, `*.windows.golden` |

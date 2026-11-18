@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.1"
+version: "1.4.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "81a6f43"
+input-hash: "b2312ac"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
@@ -18,7 +18,11 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (points/scale ranges, OD-162)", "1.4 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.4.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the ramp named as the config key statusline.glyphs.sparkline with its 8-glyph default, OD-189 sibling treatment)"]
+modified:
+  - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (points/scale ranges, OD-162)"
+  - "1.4 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"
+  - "1.4.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the ramp named as the config key statusline.glyphs.sparkline with its 8-glyph default, OD-189 sibling treatment)"
+  - "1.4.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names statusline.sparkline.points and PC5/PC6 name the statusline.sparkline.colors members beside their default literals)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,15 +63,19 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 
 ## Postconditions
 
-1. `pts` = for each point in `hist[-12:]`, normalized (`_norm_pt`), the triple
-   `(t, p.get(key), p.get("p"))`, kept only when the value is not None.
+1. `pts` = for each point in `hist[-N:]`, `N = statusline.sparkline.points` (default 12),
+   normalized (`_norm_pt`), the triple `(t, p.get(key), p.get("p"))`, kept only when the
+   value is not None.
 2. If `len(pts) < 2` → `""`.
 3. `top` = 1.0 when key is `k`; else `Max(Max(vals), floor)` (Python `max` semantics).
 4. `idx(v) = Int(Min(Max(v, 0.0) / top * 7, 7) + 0.5)` (half-up, BC-5.01.003).
-5. For each trail point `i` in `pts[:-1]`: if `p` truthy → RGB (220,170,60); else
+5. For each trail point `i` in `pts[:-1]`: if `p` truthy → RGB of the
+   `statusline.sparkline.colors` member `amber` (default [220,170,60]); else
    `fade = 0.55 + 0.45 * i / Max(len(pts) - 2, 1)` and RGB = `int(c * fade)` per channel
-   of (70,170,190); emit `"\e[38;2;R;G;Bm" + glyph[idx(v)]`.
-6. Head: if `p` truthy → `"\e[33m" + glyph`; else `"\e[38;2;140;235;255m" + glyph`.
+   of the `colors` members `fade` (default [0.55, 0.45]) and `trail` (default
+   [70,170,190]); emit `"\e[38;2;R;G;Bm" + glyph[idx(v)]`.
+6. Head: if `p` truthy → `"\e[33m" + glyph`; else `"\e[38;2;140;235;255m" + glyph` (the
+   `colors` member `head`, default [140,235,255]).
 7. Return the concatenation + `"\e[0m"`.
 
 ## Invariants

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T00:20:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
-input-hash: "8e87750"
+input-hash: "0fa7ceb"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces json.dump cache-file bytes; ruling (b) P3r2 §0)"
@@ -28,6 +28,7 @@ modified:
   - "2026-11-19T00:20:00Z (1.2.4) pass-5 sweep C end-to-end re-measurement (isolated temp HOME+cwd, real legacy) — PC-6 law restated: 995 − s (json.dump) / 994 − s (json.dumps), s = Python frames at the encode call inclusive; json.dump accepts one level more than json.dumps at equal stack; budgets session/mix saves 991 (measured flip: stdin rate_limits value 990 saves / 991 skips), record_cost/git 990, composition 991/990; mix/git/cost payloads flat so their encoder limits are unreachable from input; exposure window corrected to 991..992"
   - "2026-11-19T03:45:00Z (1.2.5): ADV-P6 remediation D08 — PC-6 table gains the missing SL:924 row: subagent stdout json.dumps, chain <module>→main_subagent→render_subagent_rows, s = 3, budget 991; measured end to end this burst on real legacy with an isolated temp HOME+cwd and deeply nested task[\"id\"] chains (chain 990 = wire object 991 renders; chain 991 = stdin document 994 exceeds the stdin decoder limit 993 and is swallowed inside main_subagent — empty stdout, exit 0), so the wire budget is exactly attainable from stdin"
   - "2026-11-20T12:00:00Z (1.2.6): ADV-P8 residual sweep — mix-cache save row corrected (agent 6 measurement, orchestrator re-verification): the mix payload is NOT flat (cur.id/cur.out carry input nesting); the save boundary is payload 994 saves / 995 fails, so the save constant is 994, not 991, and the save failure is unreachable from stdin because the transcript decode edge (993) binds below it; the Save-EQUALS-Load reconciliation is scoped to the equal-budget caches (session, git, cost-history)"
+  - "2026-11-20T18:30:00Z (1.2.7): ADV-P9 remediation D04 (orchestrator call 1) — the mix save site is stated as the ONE measured exception to the 995 − s law; the budget/payload unit is defined (total object nesting of the saved document, top-level saved object = 1); the load-bearing consequence of Save 994 / Load 991 is pinned (saved documents nesting 992..994 save, fail to load on the next refresh, and legacy re-reads from offset 0 and rewrites every refresh)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,8 +83,13 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
    the encode call, invoking frame inclusive, `<module>` = 1): the maximum encodable
    **total object nesting** is `995 − s` for `json.dump` (cache writes) and `994 − s`
    for `json.dumps` (C encoder) — `json.dump` accepts exactly one level more than
-   `json.dumps` at equal stack. **Per-site budgets** (legacy runtime: `<module>→main`
-   is `s = 2` before the caller chain):
+   `json.dumps` at equal stack. The law has ONE measured exception (ADV-P9-D04,
+   orchestrator call 1): the `_mix_counts` mix-cache save site, whose measured budget
+   is 994 at `s = 4` (row below) — stated as an exception, not derived from `995 − s`.
+   **Per-site budgets** (legacy runtime: `<module>→main`
+   is `s = 2` before the caller chain; "budget" and "payload" throughout this PC count
+   TOTAL OBJECT NESTING of the saved document, top-level saved object = 1 — the `Dumps`
+   budget unit):
 
    | Encode site | Legacy chain | s | Budget |
    |---|---|---|---|
@@ -114,7 +120,14 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
    `Decode(Save(x))` never rejects what `Save` produced for the equal-budget caches,
    and a shallower stack never has
    the smaller budget (budget is strictly monotone decreasing in frame depth on both
-   sides). The exposure is real and legacy-identical, and was measured end to end this
+   sides). For the mix cache the exception is load-bearing (ADV-P9-D03 / orchestrator
+   call 1): a saved mix document of total nesting 992..994 (top-level saved object = 1)
+   SAVES but its load fails on the next refresh (loader bound 991); legacy then treats
+   the cache as absent, re-reads the transcript from offset 0 and rewrites the cache —
+   every refresh while the deep line remains (file rewritten, same size, no temp leak,
+   exit 0); hylo reproduces this, and the re-read loop is pinned in the owning
+   transcript/cache BC. The other exposure is real and legacy-identical, and was measured
+   end to end this
    burst (isolated temp HOME+cwd): a `rate_limits` nested to total value depth 991..992
    decodes fine and skips the write (value 990 — encoded document 991 — is the deepest
    that still saves). **The SL:924 row was measured end to end this burst too
