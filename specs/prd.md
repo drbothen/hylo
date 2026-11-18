@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.10"
+version: "0.2.11"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:11:24Z
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "e37f41f"
+input-hash: "6e97abc"
 traces_to: domain-spec/L2-INDEX.md
 supplements:
   - prd-supplements/interface-definitions.md
@@ -72,10 +72,10 @@ output against the CPython 3.11.x oracle over the synthetic fixture corpus and t
 owner's recorded real inputs, on all three OSes (D4 parity is the definition of done).
 Rendering never fails: faults produce the degraded ladder — one-line output, exit 0
 (DI-008). Approved deviations ride only the closed exclusion set pinned in BC-6.03.004
-D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161;
-DI-012). Configuration in P1 is typed `HYLO_*` env over built-in defaults
-(file layer arrives P4, OD-107); invalid config renders the D4-EX-3 one-line error and
-exits 0.
+(D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161,
+OD-166 — eleven ids; DI-012). Configuration in P1 is typed `HYLO_*` env over built-in
+defaults (file layer arrives P4, OD-107); invalid config renders the D4-EX-3 one-line
+error and exits 0.
 
 ### 1.3 Key Differentiators (P1-visible)
 
@@ -168,7 +168,7 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 |-------|-------|--------|----------|
 | [BC-1.02.001](behavioral-contracts/ss-01/BC-1.02.001.md) | Lane pill derives from model-prefix startswith match | BC-SL-006 | P0 |
 | [BC-1.02.002](behavioral-contracts/ss-01/BC-1.02.002.md) | Model label falls back display_name → id → "?" | BC-SL-007 | P0 |
-| [BC-1.02.003](behavioral-contracts/ss-01/BC-1.02.003.md) | Project label is basename(normpath(cwd)) | BC-SL-008 | P0 |
+| [BC-1.02.003](behavioral-contracts/ss-01/BC-1.02.003.md) | Project label: basename(normpath(project_dir \| current_dir \| cwd)) | BC-SL-008 | P0 |
 | [BC-1.02.004](behavioral-contracts/ss-01/BC-1.02.004.md) | Branch walk reads .git dir or file and HEAD | BC-SL-009 | P0 |
 | [BC-1.02.005](behavioral-contracts/ss-01/BC-1.02.005.md) | Branch segment cached with a 5 s TTL | BC-SL-010 | P0 |
 | [BC-1.02.006](behavioral-contracts/ss-01/BC-1.02.006.md) | Context thermometer and its denominator | BC-SL-011 | P0 |
@@ -477,7 +477,7 @@ the supplement.
 | ID | Requirement | Target | Validation | Contract |
 |---|---|---|---|---|
 | NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
-| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02, CP-O01..O05, CP-O10/O11, CP-A01..A05) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
+| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11, CP-A01..A05) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
 | NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
@@ -493,7 +493,7 @@ the supplement.
 | Code | Surface | Observable | Exit | Contract |
 |---|---|---|---|---|
 | E-REN-001 | Panic guard (any crash path) | `\e[90mstatusline degraded\e[0m\n` (29 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`) | 0 | BC-1.01.001 |
-| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02, the OD-156 Surface 1 family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05; Surface 2 transcript CP-O06..O09 resolve to the D4-EX-2 skip, not a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
+| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
 | E-CFG-001 | D4-EX-3 config error (six classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
@@ -524,7 +524,7 @@ in the harness process only.
 | json.dumps length oracle (63 cases; row 53 script-generated, OD-142) | BC-5.02.002, BC-5.02.001 |
 | json.loads(bytes) acceptance set (BOM/UTF-16/32, depth, NaN, duplicates) | BC-5.02.003 |
 | get_sample 11-step pinned sequence + exact cache JSON | BC-1.04.020 |
-| Cost colouring goldens (20 seeded sessions, 12 outputs + 5 scenarios) | BC-1.05.008 |
+| Cost colouring goldens (21 seeded sessions, 12 outputs + 5 scenarios) | BC-1.05.008 |
 | heat() HSV cell colours; trim; ladder thresholds | BC-1.02.019, BC-1.01.010, BC-1.04.004 |
 | Row goldens A/B/C (Tier B, Python-written, per-OS variants) | BC-6.03.001 |
 | CPython-generated pyfmt expectation tables | BC-5.01.001..003, BC-5.03.x, BC-5.04.x |
@@ -550,8 +550,8 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 
 | BC range | Source CAP | Module | Priority | Test type |
 |---|---|---|---|---|
-| BC-1.01.001..010 | CAP-009 | `internal/statusline` (frame, guard, width, trim) | P0 | oracle-pinned table tests |
-| BC-1.02.001..030 | CAP-009 | `internal/statusline` (widgets) + `internal/pyfmt` | P0 | oracle-pinned table tests |
+| BC-1.01.001..010 | CAP-009; CAP-010 (BC-1.01.003/.010), CAP-011 (BC-1.01.009) | `internal/statusline` (frame, guard, width, trim) | P0 | oracle-pinned table tests |
+| BC-1.02.001..030 | CAP-009; CAP-011 (BC-1.02.029) | `internal/statusline` (widgets) + `internal/pyfmt` | P0 | oracle-pinned table tests |
 | BC-1.03.001..021 | CAP-009 | `internal/statusline` (transcript parser) | P0 | oracle-pinned table tests, D4-EX-2 table |
 | BC-1.04.001..021 | CAP-009, CAP-010 | `internal/statusline` (row 2, metrics client) | P0 | table tests + fake-server integration |
 | BC-1.05.001..009 | CAP-011, CAP-009 | `internal/statusline` + `internal/cost` (cost history, colors) | P0 | seeded goldens, table tests |
@@ -583,10 +583,13 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 - **DI-010 — typed, validated config.** Every key is registry-declared with a rationale
   (D15); invalid values render the D4-EX-3 line and continue (BC-2.01.004, BC-2.02.x).
 - **DI-012 — closed deviation set.** Behavior may differ from the oracle only via named,
-  tested exclusions — the closed ten-id set: D4-EX-1/2/3, OD-30, OD-76, `temp-file`,
-  `cp-x03`, OD-159, OD-160, OD-161 (the last three minted by the owner rulings of
-  2026-11-17: OD-159 all files read as UTF-8 on every OS; OD-160 foreign-cache shapes,
-  ruling Q-b; OD-161 integer `transcript_path`). D4-EX-2 is extended by OD-156 to cover
+  tested exclusions — the closed eleven-id set: D4-EX-1/2/3, OD-30, OD-76, `temp-file`,
+  `cp-x03`, OD-159, OD-160, OD-161, OD-166 (OD-159/OD-160/OD-161 minted by the owner
+  rulings of 2026-11-17: OD-159 all files read as UTF-8 on every OS; OD-160 foreign-cache
+  shapes, ruling Q-b; OD-161 integer `transcript_path`; OD-166 minted by the pass-4
+  ruling OD-169, scoped to cost-history bytes written after a refresh whose `usd` or
+  `api_ms` could not convert to float — own table test and VP-012 closure row).
+  D4-EX-2 is extended by OD-156 to cover
   transcript-borne numeric-overflow lines (the offending line is skipped — see the
   OD-156 register in `prd-supplements/error-taxonomy.md`). The id set is closed
   (BC-6.03.004); a new class needs an owner decision.
@@ -650,7 +653,7 @@ remain in git history and in the BCs' edge-case registers.
 | OQ-10 | OD-145 | Resolved: proposed test names and seed paths likewise delegated to the architect (marked provisional in BC-1.06.002, BC-3.02.001/.002, BC-6.03.004, BC-1.05.008); no behavior change |
 | OQ-11 | OD-144 | Resolved: relative/empty `XDG_*` values are ignored (XDG spec); on Windows `%LOCALAPPDATA%\hylo\cache` and `%LOCALAPPDATA%\hylo\state` are separate subdirectories (BC-3.01.001; interface-definitions.md) |
 | OQ-12 | OD-133 | Resolved: the process name becomes the config key `statusline.window_age.process_name`, default `claude`, type/range and D15 rationale registered (BC-3.02.001/.002; interface-definitions.md) |
-| OQ-13 | OD-141 | Resolved: one helper-level contract each for the six pyfmt helpers `D` (BC-5.01.004), `Repr` (BC-5.01.005), `MaxSeq` (BC-5.01.006), `Str` (BC-5.02.005), `Dumps` (BC-5.02.006), `TimeFloat` (BC-5.04.003); S5 is module-critical (OD-135); cycle total 145 BCs (then; 153 after OD-155, SC-04) |
+| OQ-13 | OD-141 | Resolved: one helper-level contract each for the six pyfmt helpers `D` (BC-5.01.004), `Repr` (BC-5.01.005), `MaxSeq` (BC-5.01.006), `Str` (BC-5.02.005), `Dumps` (BC-5.02.006), `TimeFloat` (BC-5.04.003); S5 is module-critical (OD-135); cycle total 145 BCs (then; 153 after OD-155, SC-04; 154 after pass-3 added BC-5.01.007) |
 | OQ-14 | OD-142 | Resolved: the whole json.dumps oracle table for BC-5.02.002 regenerated by script from CPython 3.11 (no hand-recorded literals); the generating script is recorded inline in the BC; row 53 = 38 (generated) |
 
 Carried, closed by spec decision (no owner action needed): RK-5 (HYLO_TEST_NOW stderr

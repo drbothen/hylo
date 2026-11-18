@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.2"
+version: "1.1.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "88b1379"
+input-hash: "fff619b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows (SL:888-936)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: joiner sourced from statusline.subagent.joiner (ADV-P4-C04); parse/emit notes re-anchored to pyfmt.Decode + ordered pyfmt.Value, never encoding-json (ADV-P4-C03)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,9 +58,11 @@ before a single print, so a render fault never leaves partial rows on stdout.
    array case is verified in the vectors below); it is not coerced to string before dumping.
 5. Lines are LF-terminated; the last line carries the terminating LF (print semantics).
 6. Zero eligible tasks: zero bytes, exit 0.
-7. Between content bits the joiner is, at source level, the three characters space + U+00B7 + space
-   (UTF-8 `20 c2 b7 20`; U+00B7, NOT U+2027); on the json.dumps wire it is the 8 ASCII bytes
-   `20 5c 75 30 30 62 37 20` (that is, `" \u00b7 "`). No SGR codes wrap it.
+7. Between content bits the joiner is the configured `statusline.subagent.joiner` (D15; Text key
+   registered in the BC-2.01.004 registry, free text with no control bytes, BC-2.01.003 PC-3), whose
+   default is, at source level, the three characters space + U+00B7 + space
+   (UTF-8 `20 c2 b7 20`; U+00B7, NOT U+2027); on the json.dumps wire the default renders as the 8
+   ASCII bytes `20 5c 75 30 30 62 37 20` (that is, `" \u00b7 "`). No SGR codes wrap it.
 
 ## Invariants
 
@@ -163,6 +165,11 @@ TBD — filled by story-writer
 
 #### Refactoring Notes
 
-Go: `for _, task := range tasks { if m, ok := task.(map[string]any); ok { if id, has := m["id"]; has {
-... } } }`; emit via a bytes.Buffer flushed once. JSON escaping must match CPython `ensure_ascii`
-byte-for-byte — prefer routing through `internal/pyfmt`'s encoder so VP-024's equivalence carries.
+Go: parse with `pyfmt.Decode(b, ModeText)` (BC-1.01.002, BC-5.02.003) in the shell, then iterate the
+ordered `pyfmt.Value` model (BC-5.02.004): eligibility and the `id` echo via `Value.Kind`/`Get`/`Dumps`
+(objects stay insertion-ordered; ids survive verbatim, any JSON value). Emit via a bytes.Buffer
+flushed once. The joiner comes from resolved config (`statusline.subagent.joiner`, default
+`" · "`; ADV-P4-C04). JSON escaping must match CPython `ensure_ascii` byte-for-byte — route
+through `internal/pyfmt`'s encoder (VP-024 family); never `encoding/json` (rejects NaN/Infinity; maps
+reorder object-id keys; float64 big ints break PC4's verbatim echo; `\ud800` becomes U+FFFD
+contradicting EC-005; no CPython depth budget).

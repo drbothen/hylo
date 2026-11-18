@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "e59c0d3"
+input-hash: "6869c11"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (points/scale ranges, OD-162)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (points/scale ranges, OD-162)", "1.4 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -89,7 +89,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | EC-007 | `kv` trace, `k` [0.5, 1.0] | `▅█` (fixed top 1.0) |
 | EC-008 | `ttft` trace, `f` [0.02, 0.05] (floor 0.1) | `▂▅` |
 | EC-009 | idx at top 7: v/top*7 = 0.49 / 0.5 / 2.5 | glyph 0 / 1 / 3 (half-up) |
-| EC-010 | Legacy `DGX_SL_TRACE=mine` (or any unknown trace) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.004); legacy fell back to `rate`. OD-105 exclusion entry `D4-EX-3`, dedicated test `TestConfigError_D4EX3_Enum` |
+| EC-010 | Legacy `DGX_SL_TRACE=mine` (or any unknown trace) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.004); legacy fell back to `rate`. OD-105 exclusion entry `D4-EX-3`, dedicated test `TestD4EX3_Enum` |
 
 ## Canonical Test Vectors
 

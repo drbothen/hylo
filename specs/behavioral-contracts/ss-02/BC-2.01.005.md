@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "a20fec3"
+input-hash: "720fc73"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.2 2026-11-18: ADV-P3 remediation D07 — P1 Bool set completed with queue.yellow and subagent.enabled"]
+modified: ["1.2.2 2026-11-18: ADV-P3 remediation D07 — P1 Bool set completed with queue.yellow and subagent.enabled", "1.2.3 2026-11-18: ADV-P4 remediation D19+D26 — composite strict-JSON env grammar (PC-5) and OD-173 label-Text validation (PC-6) added; queue.yellow priority citation corrected to OD-175"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,10 +53,10 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    `""`, `TRUE`, `on`, ` 1`) yields `<key>=<value> (not a boolean (true|false|1|0|yes|no))`.
    P1 bool keys: `statusline.sparkline.enabled` (legacy `DGX_SL_SPARK`, SL:76),
    `statusline.git.enabled` (legacy `DGX_SL_GIT`, SL:77),
-   `statusline.queue.yellow` (P1 per the 2026-11-18 owner ruling, ADV-P3-D07) and
+   `statusline.queue.yellow` (P1 per OD-175, ADV-P3-D07) and
    `statusline.subagent.enabled` (OD-155; default true). Legacy treated every value except
    `"0"` as on; values legacy accepted that are outside this grammar are D4-EX-3 boolean-class
-   cases (BC-2.02.001, test `TestConfigError_D4EX3_Boolean`).
+   cases (BC-2.02.001, test `TestD4EX3_Boolean`).
 2. **List:** the value is split on `,`; each item is stripped with Python `str.strip()`
    semantics (`pyfmt.Strip`, OD-103); empty items are dropped; order and duplicates are kept.
    `""` → empty list (valid). This reproduces legacy SL:444-445 for
@@ -72,6 +72,28 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    empty-path error (resolution semantics of BC-2.03.002 PC-2b/EC-007, ADV-P1-D25).
 4. **COLUMNS:** no registry key reads or shadows `COLUMNS`; `HYLO_COLUMNS` is not a key
    (an unknown-setting warning if set). The renderer reads `COLUMNS` per BC-1.01.005.
+5. **Composite numeric types (ADV-P4-D19, orchestrator design call 1):** a key whose
+   registry type is composite — `FloatPair` (Float pair), `FloatTriple` (Float triple),
+   `IntMap` (Int map), `RGBTriplesFloat` (RGB triples + Float) or `NumberList` (any list of
+   numbers) — takes its env value as **strict JSON** of the declared shape, e.g.
+   `HYLO_STATUSLINE_COST_PERCENTILES='[50,90]'` (FloatPair) or
+   `HYLO_STATUSLINE_COST_RATE_MIN_API_MS='{"cc":1,"other":2}'` (IntMap). A value that is
+   not valid JSON of the declared shape yields
+   `<key>=<value> (expected JSON <shape>)`, where `<shape>` spells the declared shape —
+   `array of 2 numbers` (FloatPair), `array of 3 numbers` (FloatTriple),
+   `object {cc,other} of integers` (IntMap with keys `cc`, `other`),
+   `array of 3 arrays of 3 numbers plus 1 number` (RGBTriplesFloat), `array of numbers`
+   (NumberList). JSON numbers only (no `NaN`/`Infinity` tokens); integer-valued members of
+   an IntMap must be JSON integers. Range checks (registry `Range`) apply **after** the
+   shape check, member-wise. Default-only composite keys (`statusline.theme.heat`,
+   `statusline.units.context`; design call 6) never read their env name — the grammar
+   exists so the registry type is writable in a later phase without a second grammar.
+6. **Label Text keys (OD-173, ADV-P4-B16):** the lane-pill label keys
+   `statusline.pill.label_local`, `statusline.pill.label_cloud` and
+   `statusline.pill.label_unknown` are `Text` keys validated as: non-empty, no control
+   bytes (U+0000–U+001F, U+007F), display width 1..16 (OD-02 width discipline; judgment
+   call keeping the pill short). A violating value yields
+   `<key>=<value> (expected non-empty control-free text of display width 1..16)`.
 
 ## Invariants
 
@@ -99,6 +121,8 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 | `HYLO_STATUSLINE_SPARKLINE_ENABLED=0` | sparkline disabled | happy-path |
 | `HYLO_BACKENDS_0_MODEL_PREFIXES=" claude-sonnet ,claude-haiku "` | `["claude-sonnet","claude-haiku"]` | edge-case |
 | `HYLO_STATUSLINE_GIT_ENABLED=2` (legacy: on) | statusline stdout `\e[90mhylo: config error: statusline.git.enabled=2 (not a boolean (true\|false\|1\|0\|yes\|no))\e[0m\n` (`\e` = 0x1B), exit 0 | error |
+| `HYLO_STATUSLINE_COST_PERCENTILES=[0.5,0.9]` | percentiles (0.5, 0.9) — strict-JSON FloatPair grammar (ADV-P4-D19) | happy-path |
+| `HYLO_STATUSLINE_COST_PERCENTILES=0.5,0.9` | `\e[90mhylo: config error: statusline.cost.percentiles=0.5,0.9 (expected JSON array of 2 numbers)\e[0m\n`, exit 0 | error |
 
 ## Verification Properties
 
@@ -113,7 +137,7 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 | Field | Value |
 |-------|-------|
 | Source | new — OD-05 (typed booleans), OD-74 (comma-list encoding in env), OD-61 (expand `~` in every path), OD-59 (typed + validated); replaces legacy/dgx_statusline.py:module tunables (SL:76-77 `!= "0"`, SL:78 `expanduser`), render_lane (SL:444-445), term_cols (SL:1185-1190, kept as protocol input) |
-| Parity / exclusion | boolean values legacy accepted outside the grammar → D4-EX-3 (boolean class), exclusion entry `D4-EX-3`, test `TestConfigError_D4EX3_Boolean` (OD-102, OD-105) |
+| Parity / exclusion | boolean values legacy accepted outside the grammar → D4-EX-3 (boolean class), exclusion entry `D4-EX-3`, test `TestD4EX3_Boolean` (OD-102, OD-105) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
 | Architecture Module | `internal/config/types.go` (BC-COMPONENT-MAP: internal/config/types.go (value grammars) — ARCH-02) |

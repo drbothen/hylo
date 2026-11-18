@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T14:35:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.009.md, behavioral-contracts/ss-05/BC-5.04.003.md, domain-spec/invariants.md]
-input-hash: "4a8972b"
+input-hash: "c21f245"
 traces_to: prd.md
-source_bc: BC-1.01.009
-bcs: [BC-1.01.009, BC-5.04.003]
+source_bc: BC-5.04.003
+bcs: [BC-5.04.003]
 module: internal/statusline (Render, Env)
 proof_method: property-test (testing/quick)
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-18T14:35:00Z: ADV-P4 fix (A2-10) — semantic re-anchor (P4): source_bc moved from BC-1.01.009 to BC-5.04.003, the contract whose VP table cites this VP (TimeFloat value discipline + one-read-per-render); BC-1.01.009 had explicitly dropped the citation (its :149-150 note: determinism, not effect order — ADV-P1-B11), so BC-1.01.009 is removed from bcs: and the VP-INDEX map is reconciled"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,11 +42,15 @@ sources are `Env` members; none is read behind `Render`'s back.
 
 ## Source Contract
 
-- **Primary BC:** BC-1.01.009 — Side effects run in legacy order; a degrade keeps
-  earlier writes (order totality implies seam-closedness).
-- **Partial coverage:** BC-5.04.003 (TimeFloat: ns→s float, once per render).
-- **Invariant verified:** DI-007 corollary (inputs are only stdin, transcript, metrics
-  store, own caches — structurally, via Env); AD-03/AD-10 seam discipline.
+- **Primary BC:** BC-5.04.003 — TimeFloat: ns→s float, once per render (its VP table
+  carries this VP for the value discipline and the one-read-per-render rows; A2-10).
+  Determinism is the property; effect ORDER is BC-1.01.009's concern (VP-008), which
+  explicitly declines this citation (ADV-P1-B11).
+- **Partial coverage:** none (standalone determinism property; the replay generator
+  reuses the AD-10 seam recordings).
+- **Invariant verified:** IM-14 (one clock read per render); DI-007 corollary (inputs
+  are only stdin, transcript, metrics store, own caches — structurally, via Env);
+  AD-03/AD-10 seam discipline.
 
 ## Property Class and Verification Method
 

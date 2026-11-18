@@ -9,6 +9,7 @@ Finding progression across adversarial passes in this cycle.
 | 1 (phase-1d, 2026-11-17) | 129 (21 HIGH / 63 MEDIUM / 40 LOW / 5 COSMETIC) | — | NOT_CONVERGED — novelty HIGH; owner questions + fix burst next |
 | 2 (phase-1d, 2026-11-17) | 116 (17 HIGH / 58 MEDIUM / 35 LOW / 6 COSMETIC) | −13 | NOT_CONVERGED — novelty MEDIUM; owner rulings OD-155..159 + fix burst next |
 | 3 (phase-1d, 2026-11-18) | 150 (36 HIGH / 61 MEDIUM / 48 LOW / 5 COSMETIC) | +34 | NOT_CONVERGED — **REGRESSION** (investigated before continuing, see below); novelty MEDIUM; owner questions + fix burst next |
+| 4 (phase-1d, 2026-11-17) | 133 (39 HIGH / 57 MEDIUM / 32 LOW / 5 COSMETIC) | −17 | NOT_CONVERGED — total down 17 but HIGH up 3 (36 → 39), many findings sibling-propagation; novelty MEDIUM-HIGH; owner rulings OD-169..175 + fix burst next |
 
 ## Per-Pass Details
 
@@ -40,3 +41,13 @@ Finding progression across adversarial passes in this cycle.
 - **REGRESSION (first delta-positive pass of the series: 129 → 116 → 150; HIGH 21 → 17 → 36).** Rule applied: investigate before continuing (adversarial-review skill, trajectory monotonicity) — done, before dispatching any fix burst.
 - Root cause (orchestrator analysis): the pass-2 remediation added new scope without pre-validation, and that scope's propagation debt dominates the increase. Specifically: (1) OD-155 (8 new BC-1.07 `--subagent` BCs) and rulings OD-156..165 were not yet propagated to the parity harness, the Python oracle, the SS-02 config contracts, the SS-05 consumer lists or the L2 (L2/SM-04/DI-008 have no zero-byte carve-out; harness case model has no argv field; SS-02 Bool-set lists omit `statusline.subagent.enabled`; SS-05 dumps/consumer lists miss the subagent sites) — most pass-3 HIGH findings sit here (A01-A08, C01-C05, D04-D10); (2) the ARCH-06 reconciled signature canon was not propagated to BC-5.04.002/003 (D02, D03); (3) an escape-decoding corruption unescaped valid uXXXX sequences in expected-output/golden cells (C01, D09), making expected bytes ambiguous; (4) most pre-existing content shows refinements only — fixed findings did not relapse.
 - Verdict: NOT_CONVERGED. Next: consolidate owner questions, fix burst (propagate OD-155/OD-156..165 scope + ARCH-06 canon, regenerate corrupted expected-output cells), then pass 4.
+
+### Pass 4 — 2026-11-17 (phase-1d adversarial spec review)
+
+- Scope: full P1 spec package, re-reviewed as the same six fresh-context perimeters as passes 1-3. Verbatim reports: `adversarial-reviews/pass-4.md`; index: `adversarial-reviews/ADV-P4-INDEX.md`.
+- Perimeter counts: A 19, A2 26, B 22, C 15, C2 17, D 34.
+- Perimeter severities: A 10H/6M/3L; A2 6H/11M/7L/2C; B 5H/9M/8L; C 3H/7M/4L/1C; C2 4H/9M/4L; D 11H/15M/6L/2C.
+- Novelty: A HIGH, A2 HIGH, B MEDIUM, C MEDIUM, C2 MEDIUM, D MEDIUM — pass-level MEDIUM-HIGH.
+- Tags: owner-question and process-gap rows continue (ADV-P4-INDEX); 7 owner rulings minted (OD-169..OD-175), next free OD-176; closed exclusion set grows to 11 ids (OD-166 added).
+- Trajectory note: total down 17 (150 → 133) but HIGH up 3 (36 → 39). Many findings were sibling-propagation: fixed facts re-flagged at their sibling sites, not relapses of fixed findings; the HIGH concentration sits on the interface-definitions/registry closure (ADV-P4-A04/A05) and partial-fix propagation (ADV-P4-A2-03).
+- Verdict: NOT_CONVERGED. Next: owner rulings OD-169..175 + fix burst (8 parallel fix agents + 2 residual sweeps + OD-148 layout correction + 2 sync-fix agents), then pass 5.

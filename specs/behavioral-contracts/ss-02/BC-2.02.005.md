@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "bc396c7"
+input-hash: "720fc73"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy URL handling at legacy/dgx_statusline.py SL:73, SL:165-187)"
@@ -104,7 +104,7 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
 | Field | Value |
 |-------|-------|
 | Source | new — OD-114 (T10: non-http(s) metrics URL is a config error), OD-102, OD-123 (key under the backend entry); legacy behavior replaced: legacy/dgx_statusline.py:module tunables (SL:73 `VM_URL ... .rstrip("/")`), fetch_sample (SL:165 URL build, SL:186-187 catch-all → no sample) |
-| Parity / exclusion | **Approved deviation D4-EX-3 (URL class).** Named exclusion entry id `D4-EX-3`, cases `ftp://192.0.2.10:8428`, `192.0.2.10:8428`, `http://`, `""`, each with its expected output file; dedicated table test `TestConfigError_D4EX3_URL` (OD-105, OD-110) |
+| Parity / exclusion | **Approved deviation D4-EX-3 (URL class).** Named exclusion entry id `D4-EX-3`, cases `ftp://192.0.2.10:8428`, `192.0.2.10:8428`, `http://`, `""`, each with its expected output file; dedicated table test `TestD4EX3_URL` (OD-105, OD-110) |
 | L2 Capability | CAP-015 (supports CAP-010) |
 | L2 Domain Invariants | DI-008, DI-010 |
 | Architecture Module | `internal/config/types.go` (`URL`) (BC-COMPONENT-MAP: internal/config/errors.go (URL class) — ARCH-02) |

@@ -1,14 +1,15 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.3"
+version: "1.4"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
-input-hash: "ef14751"
+input-hash: "acd3a6b"
+
 ---
 
 # CI/CD setup — phase-1-cicd-setup (OD-150)
@@ -21,8 +22,9 @@ workflows (phase-1)") — the `.worktrees/ci-phase-1-setup` worktree no longer e
 and `.github/workflows/*.yml`, `go.mod` and `.gitleaksignore` live in the repo root
 (branch protection applied per OD-151 after the first green run). One finding from
 setup stands: `.worktrees/` belongs in `main`'s `.gitignore`; the appended line below
-landed with the change. The ci.yml timing placeholder still just echoes its report
-text and passes once `internal/statusline` exists — activating it (with the
+landed with the change. The ci.yml timing job's placeholder body predates the pass-3 D39
+wiring — the REQUIRED behaviour is the in-tree timing test below, not an echo (see the
+lag notes section; ADV-P4-A08). Activating it (with the
 positive-coverage lines below) is Phase 3 work.
 
 ## Files created (landed on main via PR #1)
@@ -97,6 +99,62 @@ CLAUDE.md hygiene set): personal/infra hostnames, usernames, session links and
 UUIDs (Claude-session links included), and "Claude" in product/binary/logo names.
 Regexes verified against positive and negative
 fixtures before landing.
+
+## Pass-4 required behaviour and landed-ci.yml lag notes (ADV-P4-A07/A08/A13/A14/A17)
+
+The spec above states the REQUIRED job behaviour; the committed `.github/workflows/ci.yml`
+(on public `main`, owner-committed — not edited in this burst) lags it in four places.
+Each lag carries its own "change required before" deadline.
+
+1. **Test job interpreter (ADV-P4-A07).** REQUIRED (pass-3 D22, cicd-setup line
+   above): the `test` job runs `actions/setup-python` FIRST and exports
+   `HYLO_PARITY_PYTHON` (absolute interpreter path, OD-108) before
+   `go test -race -count=1 ./...`. **Landed ci.yml lags:** the committed test job
+   (ci.yml, the three matrix legs) has neither the setup-python step nor the
+   `HYLO_PARITY_PYTHON` export — once `internal/parity` lands, Tier A runs inside the
+   plain test step with no interpreter and either fails or quietly skips. **Change
+   required before the first Tier A integration story lands (Phase 3).**
+2. **Timing job (ADV-P4-A08).** REQUIRED: the timing job gates on the probe's
+   `parity` output — `TestTiming` lives in `internal/parity` (`par/timing.go`,
+   BC-COMPONENT-MAP), not `internal/statusline`, so a statusline-probe gate is
+   wrong — and executes `go test ./internal/parity -run '^TestTiming$' -count=1`
+   with the positive-coverage line `timing: N cases timed > 0`. Its echoed placeholder
+   text must state the designed sampling (1 discarded warm-up + 20 timed runs per
+   case, nearest-rank p95 = 19th sorted sample, per case, no pooling) — the stale
+   "1 warm-up + 5 timed runs" wording must not survive activation. **Landed ci.yml
+   lags:** the committed job is an `echo` gated on the statusline probe with the
+   stale 5-sample wording. **Change required before Phase 3 activates the timing
+   job.**
+3. **Hygiene scan (ADV-P4-A14).** REQUIRED: the category pattern scan implements ALL
+   categories above (adding hostnames, usernames, session links, UUIDs and the
+   product-name rule to the landed three), prints `hygiene: K files scanned, H hits`
+   and fails on `K == 0` or `H > 0`; and the scan runs on every push (NFR-006),
+   including pushes to the public `factory-artifacts` branch — the landed trigger set
+   (`pull_request`, `push` to `main` only) never pattern-scans that branch.
+   **Landed ci.yml lags:** only IPs, home paths and emails are scanned, a fixed
+   "clean" message prints with no count, and the branch trigger is missing.
+   **Change required before the next factory-artifacts push (NFR-006).**
+4. **Coverage gate (ADV-P4-A13).** REQUIRED: a required `coverage` step produces the
+   per-package profile (`go test -count=1 -coverprofile`) and enforces OD-158's
+   line-coverage gate, **>= 95 %**, for `internal/statusline`, `internal/cost` and
+   `internal/pyfmt`. `internal/cost` IS gated — SS-01 comprises
+   `internal/statusline` and `internal/cost` (ARCH-INDEX Subsystem Registry) and
+   module-criticality.md classes it CRITICAL by inheritance, so the "S1/S5" gate
+   reading covers all three packages. Kill-rate targets stay Phase 6 (OD-158).
+   **Landed ci.yml lags:** no coverage job, no profile producer, no threshold check.
+   **Change required before the P1 exit record is written (Phase 5 gate).**
+5. **Hardening posture (ADV-P4-A17).** REQUIRED: govulncheck promoted to a required
+   PR check in ci.yml (`govulncheck (required)`, distinct from security.yml's weekly
+   `govulncheck`), and the lint job gains a version-pinned staticcheck-class analysis
+   (`honnef.co/go/tools/cmd/staticcheck`) beside gofmt and vet, both with the
+   empty-module guard. **Landed ci.yml lags:** govulncheck runs only in the
+   informational security.yml; lint is gofmt + vet. **Change lands on main with the
+   owner's approval (workflow edits are owner-committed); before Phase 4.**
+6. **Generated-table staleness (OD-170).** REQUIRED: every Go matrix leg runs
+   `go generate ./...` followed by `git diff --exit-code` over the generated paths;
+   any diff fails the leg, so a stale committed Unicode 14.0 table or pyfmt oracle
+   table can never pass CI. **Landed ci.yml lags:** no such step. **Change required
+   before the pyfmt generators land (Phase 3).**
 
 ## Release (`release.yml`)
 

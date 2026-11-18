@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "9ae073d"
+input-hash: "76b3a2d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:329-350)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)"]
+modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)", "2026-11-18 (v1.3.2) pass-4 remediation ADV-P4-C2-13 (config key statusline.sparkline.preempt_marker_above; independence from queue.yellow), ADV-P4-C2-14 (output-neutrality qualified by points <= history_cap), ADV-P4-C2-15 (EC-008 KeyError degrade outcome)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,7 +46,8 @@ at the last 32 points.
    rationale accepted OD-57 E-0, kept as keys per OD-55). OD-162 range for
    `history_cap`: Int ≥ 1 — the saved slice generalizes as `hist[-cap:]` for cap ≥ 1,
    but cap 0 is a number-range config error because Python `hist[-0:]` returns the
-   whole list (SL:350), not an empty one.
+   whole list (SL:350), not an empty one. `statusline.sparkline.preempt_marker_above`
+   Int 0, range `>= 0` (T-107; ADV-P4-C2-13 — see PC4).
 
 ## Postconditions
 
@@ -60,9 +61,19 @@ at the last 32 points.
    `k` ← `vllm:kv_cache_usage_perc`, `f` ← `dgx_ttft:p95_30m`, each only if the series is
    in the sample; then, if `v` is still absent and `dgx_tokens:gen_rate5m` is present,
    `v` ← that value (so `v` lands after `f`); then `p=1` if
-   `sample.get("dgx_preempt:rate5m", 0) > 0` (T-107, same rule as the queue).
-5. The cache stores `hist[-32:]`; the caller receives the uncapped list (output-neutral:
-   the sparkline reads only the last 12).
+   `sample.get("dgx_preempt:rate5m", 0) > statusline.sparkline.preempt_marker_above`
+   (T-107; config key `statusline.sparkline.preempt_marker_above`, Int, default 0, range
+   `>= 0`: the `p` marker shows when preempt > value, default 0 reproducing legacy's
+   hard-coded `> 0` — P20. The marker is independent of the `statusline.queue.yellow`
+   Bool (OD-175): `queue.yellow=false` suppresses the queue segment's yellow colour but
+   the `p` marker still plots, ADV-P4-C2-13).
+5. The cache stores `hist[-cap:]` (cap = `statusline.sparkline.history_cap`, 32); the
+   caller receives the uncapped list. This is output-neutral only while
+   `statusline.sparkline.points <= history_cap` (12 <= 32 by default): both lists share
+   their last `points` entries. Under an allowed config with `points > history_cap`
+   (e.g. points 100, cap 32 — both in range), a history longer than the cap renders
+   differently on the fetch path (uncapped list) than on the next cached path (capped
+   32-entry list), ADV-P4-C2-14.
 
 ## Invariants
 
@@ -81,7 +92,7 @@ at the last 32 points.
 | EC-005 | Only `gen_rate5m` 12.5, ttft 2.0, preempt 0.01 | `{"t": 1310.0, "f": 2.0, "v": 12.5, "p": 1}` |
 | EC-006 | Preempt `NaN` | no `p` (`nan > 0` false) |
 | EC-007 | 40 points within 90 s, then one appended | 41 returned, 32 saved |
-| EC-008 | Point is a string or number | normalized to `{}`, `t` default 0 → dropped unless `now < 90` |
+| EC-008 | Point is a string or number | normalized to `{}`, `t` default 0 → dropped unless `now < 90`; a `{}` point kept when `now < 90` makes `hist[-1]["t"]` raise KeyError at the gap check (SL:336-337) → degraded line (ADV-P4-C2-15) |
 | EC-009 | Point is `[[0]]`-shaped (list of length 1) | IndexError → degraded (CP-C05, foreign cache; out of byte-parity scope, P3 r2 ruling (b); foreign-cache class carries named exclusion id **OD-160**) |
 
 ## Canonical Test Vectors

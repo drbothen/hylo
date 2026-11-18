@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "32eafc0"
+input-hash: "80e3f54"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-13", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-008)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-13", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "1.3.2 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,7 +46,7 @@ it is younger than KEEP_DEAD.
    `keep_dead` = `statusline.telemetry.keep_dead_s` (default 300, T-004, judgment
    "5 min of last-known telemetry before giving up", OD-57 E-A). Non-finite or negative
    TTL is a config error — approved deviation D4-EX-3 (BC-2.02.002; OD-105 exclusion
-   entry `D4-EX-3`, dedicated test `TestConfigError_D4EX3_Number`); TTL 0 is valid
+   entry `D4-EX-3`, dedicated test `TestD4EX3_Number`); TTL 0 is valid
    (always fetch).
 
 ## Postconditions

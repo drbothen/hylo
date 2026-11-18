@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T02:24:00Z
+timestamp: 2026-11-18T14:52:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.01.001.md, behavioral-contracts/ss-05/BC-5.01.002.md, behavioral-contracts/ss-05/BC-5.01.003.md, behavioral-contracts/ss-05/BC-5.01.004.md, behavioral-contracts/ss-05/BC-5.01.005.md, behavioral-contracts/ss-05/BC-5.01.006.md, owner-decisions-log-2026-11-14.md]
-input-hash: "277425f"
+input-hash: "07bcfaf"
 traces_to: prd.md
 source_bc: BC-5.01.001
-bcs: [BC-5.01.001, BC-5.01.002, BC-5.01.003, BC-5.01.004, BC-5.01.005, BC-5.01.006, BC-5.01.007]
+bcs: [BC-5.01.001, BC-5.01.002, BC-5.01.003, BC-5.01.004, BC-5.01.005, BC-5.01.006, BC-5.01.007, BC-2.02.003]
 module: internal/pyfmt (num.go)
 proof_method: property-test (testing/quick)
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — divmod identity corrected to a == b*FloorDiv(a,b) + Mod(a,b), float-approximate (A2-10)", "1.3 2026-11-18T02:24:00Z: ADV-P3 sync — BC-5.01.007 added (mixed int/float Num semantics: NumToF/TrueDiv/NumCmp cite this VP)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — divmod identity corrected to a == b*FloorDiv(a,b) + Mod(a,b), float-approximate (A2-10)", "1.3 2026-11-18T02:24:00Z: ADV-P3 sync — BC-5.01.007 added (mixed int/float Num semantics: NumToF/TrueDiv/NumCmp cite this VP)", "1.4 2026-11-18T14:52:00Z: ADV-P4 fixes — math/big site register corrected to THREE sites (A2-15): the two ruled duration-format sites (OD-137) plus _fmt_lines (OD-156), and the BC-5.01.007 helper set (NumToF/TrueDiv/NumCmp) named inside the closed helper set; OD-170 Unicode-table leg added: hylo carries its own Unicode 14.0 tables generated from CPython 3.11.7 unicodedata by a committed go-generate script, with a version constant (14.0.0) and a staleness test — pyfmt never consults Go's unicode package for the consulted classes (Nd decimal digits, printable, whitespace)", "1.5 2026-11-18: ADV-P4 pass-4 sync — BC-2.02.003 added to bcs (its Verification Properties table cites this VP for the pinned Nd-verdict tables leg, OD-170)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -39,10 +39,18 @@ For the entire closed helper set — `Round` (ties-to-even + decimal re-round), 
 `FloorDiv`/`Mod` (the CPython `float_divmod` port, not `math.Floor(a/b)`),
 `FloorDivInt/ModInt`, `Max`/`Min` (first-maximal-wins NaN argument order), `MaxSeq`,
 `Repr` (shortest round-trip, .0 suffix, inf/nan spellings), `ParseInt`/`ParseFloat`
-(Python grammar: underscores, Unicode digits, 4,300-digit limit, 1e400) — the Go
+(Python grammar: underscores, Unicode digits, 4,300-digit limit, 1e400), and the
+BC-5.01.007 mixed int/float helpers `NumToF`/`TrueDiv`/`NumCmp` — the Go
 implementation agrees with the committed CPython 3.11-generated expectation tables, and
-beyond-int64 durations stay byte-exact via `math/big` at exactly the two ruled
-duration-format sites (OD-137).
+beyond-int64 durations stay byte-exact via `math/big` at exactly the three ruled
+sites: the two duration-format sites (OD-137) plus `_fmt_lines` (OD-156).
+
+Unicode tables (OD-170): hylo carries its own Unicode 14.0 tables for every class
+pyfmt consults — decimal-digit Nd, printable, whitespace — generated from CPython
+3.11.7 `unicodedata` by a committed generator script run under `go generate`; pyfmt
+never consults Go's `unicode` package for these classes. A version constant
+(`14.0.0`) and a test pin the generated file to the oracle; CI fails if the generated
+file is stale. P6 may move to current Unicode.
 
 ## Source Contract
 
@@ -52,7 +60,9 @@ duration-format sites (OD-137).
   (divmod/typed NaN/Overflow, Max/Min NaN order), BC-5.01.004 (D), BC-5.01.005 (Repr),
   BC-5.01.006 (MaxSeq), BC-5.01.007 (mixed int/float Num semantics — NumToF
   ErrOverflow bound, TrueDiv exact-once rounding, NumCmp exact comparison, Max/Min
-  exact ties; its Verification Properties table cites this VP).
+  exact ties; its Verification Properties table cites this VP); BC-2.02.003
+  (number-grammar: the tables leg — its Verification Properties table cites this VP
+  for the Unicode-14.0-pinned Nd verdicts, OD-170).
 - **Invariant verified:** NFR-003 substrate (banned Go stdlib codecs on protocol
   inputs); AD-04 (CPython-generated tables, banned stdlib on protocol inputs);
   FMA-sensitivity disposed by `// pyfmt: no-fuse` sites run on arm64 (IM-10/PR-15).
@@ -87,6 +97,17 @@ func TestNum_OracleTables(t *testing.T) {
     }
 }
 func FuzzParseFloat(f *testing.F) { /* f.Add seeds; agree with golden spellings */ }
+
+func TestUnicodeTables_PinnedToUnicodedata140(t *testing.T) { // OD-170 (A2-06 rider)
+    if got := pyfmt.UnicodeTableVersion(); got != "14.0.0" { // version constant
+        t.Fatalf("generated Unicode tables moved off unicodedata 14.0.0: %q", got)
+    }
+    for _, cp := range oracleClassSamples() { // Nd digits (Kawi U+11F50-59 in 14.1, not 14.0), printable, whitespace
+        if pyfmt.ConsultedClass(cp) != oracleUnicodedataClass(cp) {
+            t.Fatalf("U+%04X: Go class != CPython 3.11.7 unicodedata oracle", cp)
+        }
+    }
+}
 ```
 
 ## Named Tests (OD-145 table where applicable)

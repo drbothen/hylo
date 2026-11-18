@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.2"
+version: "1.0.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "14effd8"
+input-hash: "2ea2c17"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_tokens + token/elapsed branches (SL:909-921, 876-885)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,8 +51,11 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 ## Postconditions
 
 1. Token bit: only when `tokenCount` is int/float/bool with value > 0; bytes
-   `\e[36m<fmt> tok\e[0m` where fmt = `f"{n:.0f}"` (< 1000), `f"{n/1000:.1f}k"` (< 1e6),
-   `f"{n/1e6:.2f}M"` (>= 1e6) after `float(n)`; the threshold compares the float value first, then the
+   `\e[36m<fmt><suffix>\e[0m` where `<suffix>` is the configured `statusline.subagent.tokens.suffix`
+   (Text, default ` tok`) and fmt = `f"{n:.0f}"` (n < k_from), `f"{n/1e3:.1f}k"` (n < m_from),
+   `f"{n/1e6:.2f}M"` (n >= m_from) after `float(n)` — `k_from`/`m_from` (defaults 1000/1e6) are display
+   thresholds only (the PC branch points); the 1e3/1e6 divisors are format constants that do NOT
+   follow the thresholds (Inv5); the threshold compares the float value first, then the
    format rounds (round-half-to-even applied by CPython `format()` to the exact binary double) —
    EC-003.
 2. Clock bit: only when `status == "running"` AND `startTime` is int/float/bool AND `startTime > 0`;
@@ -77,9 +80,13 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
    conversion and Python operation order; Go must not fuse `x*y + z` across statements on arm64.
    Detector test placed on darwin/arm64 CI only (GOAMD64=v3; v1 never fuses — CONV-ABS-77).
 4. The clock base `now_ms` is captured once per render, not per row (SL:889).
-5. The ` tok` suffix and the 1000/1e6 scale thresholds come from `statusline.subagent.tokens.*`
-   config keys (leaf spellings registered by the architect in the BC-2.01.004 registry, per the
-   ADV-P3-C05 ruling) with legacy defaults (` tok`, 1000, 1e6); no hard-coded literals in logic (D15).
+5. The ` tok` suffix comes from `statusline.subagent.tokens.suffix` (Text, default ` tok`); the
+   `k_from`/`m_from` keys (defaults 1000/1e6) are display thresholds only — they move the PC1 branch
+   points, nothing else. The 1e3/1e6 divisors are format constants, NOT config: named constants with a
+   "why not config" comment (they define the K/M units, the iron rule's format-constant carve-out), so
+   a non-default `k_from` never changes the divisor. Leaf spellings registered in the BC-2.01.004
+   registry (per the ADV-P3-C05 ruling); with defaults the bytes are exactly legacy's (SL:909-911) and
+   no hard-coded literals own them in logic (D15).
 
 ## Edge Cases
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -14,7 +14,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "761df32"
+input-hash: "d53f404"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,7 +26,10 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "2026-11-18T01:42:00Z ADV-P3 remediation D40: hostname/username pattern examples confirmed synthetic"
+  - "1.2.1 2026-11-18T01:42:00Z ADV-P3 remediation D40: hostname/username pattern examples confirmed synthetic"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D12 - captures/ replays gain a git-ignored captures/exclusions.json validated by the same closed-set machinery (design call 12); CI never runs captures"
+  - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - corpus root restored to the OD-148 home internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package); committed-testdata hygiene scan covers internal/statusline/testdata/ including parity/"
+  - "1.2.4 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,7 +61,7 @@ together form the P1 success criterion (OD-107).
 ## Postconditions
 
 1. **Two corpus roots.** The harness loads cases from
-   `internal/parity/testdata/cases/` (committed, synthetic) and, when the directory
+   `internal/statusline/testdata/parity/cases/` (committed, synthetic) and, when the directory
    exists, from `captures/` at the repository root (git-ignored, local only).
 2. **Captures never leave `captures/`.**
    - When a captures case is run with `-update`, its expected outputs are written under
@@ -68,10 +71,19 @@ together form the P1 success criterion (OD-107).
 3. **Captures are optional.** When `captures/` is absent (always the case in CI), the
    real-input suite skips with `parity: captures/ absent; real-input replay skipped
    (OD-107, local only)`. The synthetic suite is unaffected.
+3b. **Captures exclusion path (ADV-P4-D12, orchestrator design call 12).** Replays from
+   `captures/` validate against a git-ignored `captures/exclusions.json` — never committed
+   (PC-2 hygiene; real session ids and paths stay local) — using the SAME closed-set
+   machinery as the committed exclusion file: identical id registry (the eleven minted ids,
+   BC-6.03.004), per-entry expected-output and table-test rules, no blanket exclusions, and
+   fail-the-run on an entry without its test. CI never runs captures, so the committed
+   suite's closed set is unaffected. This makes the local "0 unexplained diffs on real
+   inputs" criterion reachable: real sessions that diverge through D4-EX-2-, OD-76- or
+   OD-159-class mechanisms are admissible only as named entries in that file.
 4. **Hygiene gate on committed fixtures.** A test (`TestCorpusHygiene`) scans every
-   file under every committed `testdata/` directory — `internal/statusline/testdata/`,
-   `internal/pyfmt/testdata/`, `internal/config/testdata/`, `cmd/hylo/testdata/` and
-   `internal/parity/testdata/` — and fails on any match of:
+   file under every committed `testdata/` directory — `internal/statusline/testdata/`
+   (including `parity/`), `internal/pyfmt/testdata/`, `internal/config/testdata/`,
+   `cmd/hylo/testdata/` — and fails on any match of:
    - IPv4 addresses outside the RFC 5737 documentation ranges (`192.0.2.0/24`,
      `198.51.100.0/24`, `203.0.113.0/24`) and outside loopback `127.0.0.0/8`;
      RFC 1918 addresses always fail;

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r6.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "5452a6a"
+input-hash: "c7734db"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:626-636)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-4 residual sweep — key renamed to statusline.cost.display_floor_usd (OD-174)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,7 +58,7 @@ equivalent, unless that is below half a cent.
    `dgx_tokens:rate_mtok_month`, raw (SL:1223). Both are None when no sample was
    fetched (rows < 2, or no sample).
 5. Config: `statusline.cost.basis_min_mtok_month` = 30.4 (T-012, derived: 1M backend
-   tokens per 24 h ≈ 30.4 MTok/month, review #11.1); `statusline.cost.basis_min_shown_usd`
+   tokens per 24 h ≈ 30.4 MTok/month, review #11.1); `statusline.cost.display_floor_usd`
    = 0.005 (T-044, derived: "skip sub-half-cent noise", SL:634; boundary detail in BC-1.02.029).
    Grey `\e[90m`, reset `\e[0m` (OD-113 theme keys).
 
@@ -68,7 +68,7 @@ equivalent, unless that is below half a cent.
    `dgx_mtok` is a number and `dgx_mtok > 0` (SL:628-629).
 2. Not `basis_ok` → append exactly `\e[90m ⛏n/a\e[0m` (SL:631).
 3. `basis_ok` → `eq = tot * dgx_mtok / 1e6` (left-to-right double arithmetic, SL:633);
-   if `eq >= basis_min_shown_usd` append `\e[90m ⛏` + F(eq, 2) + `\e[0m` (SL:634-635);
+   if `eq >= display_floor_usd` append `\e[90m ⛏` + F(eq, 2) + `\e[0m` (SL:634-635);
    else append nothing (not `n/a`).
 4. The text is appended after `$` and any `$/h`, inside the same segment, with no
    separator (SL:636).

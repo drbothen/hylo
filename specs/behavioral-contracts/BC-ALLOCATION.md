@@ -2,7 +2,7 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.2.5"
+version: "0.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:11:24Z
@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.5"
+modified: "0.2.6"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "eefb77f"
+input-hash: "7175a3f"
 traces_to: ../prd.md
 ---
 
@@ -117,7 +117,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 |---|---|---|---|---|---|---|
 | BC-1.02.001 | Lane pill derives from model-prefix startswith match | BC-SL-006 | byte-exact | SL:441-462 | H | B1 |
 | BC-1.02.002 | Model label falls back display_name → id → "?" | BC-SL-007 | byte-exact | SL:441-462 | H | B1 |
-| BC-1.02.003 | Project label is basename(normpath(cwd)) | BC-SL-008 | byte-exact | SL:441-462 | H | B1 |
+| BC-1.02.003 | Project label: basename(normpath(project_dir \| current_dir \| cwd)) | BC-SL-008 | byte-exact | SL:441-462 | H | B1 |
 | BC-1.02.004 | Branch walk reads .git dir or file and HEAD | BC-SL-009 | byte-exact | SL:372-396 | H | B1 |
 | BC-1.02.005 | Branch segment cached with a 5 s TTL | BC-SL-010 | byte-exact | SL:405-411 | H | B1 |
 | BC-1.02.006 | Context thermometer and its denominator | BC-SL-011 | byte-exact | SL:418-437 | H | B1 |
@@ -164,7 +164,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-1.03.012 | Short + long line completes over two refreshes | BC-SL-066 | byte-exact | SL:1041-1052 | H | C |
 | BC-1.03.013 | Mix cache sid sanitized per code point | BC-SL-070 | byte-exact | SL:1017 | H | C |
 | BC-1.03.014 | text/thinking block value types | BC-SL-072 | byte-exact | SL:1120-1149 | H | C |
-| BC-1.03.015 | transcript_path type semantics (truthy int → no transcript, no descriptor I/O) | BC-SL-088 | byte-exact | SL:1010-1015 | M | C |
+| BC-1.03.015 | transcript_path type semantics (truthy int → no transcript, no descriptor I/O) | BC-SL-088 | OD-161 | SL:1010-1015 | M | C |
 | BC-1.03.016 | Turn-machine exhaustive table (20 rows) | BC-SL-094 | byte-exact | SL:1064-1087 | H | C |
 | BC-1.03.017 | Turn identity ignores seen_ids | BC-SL-095 | byte-exact | SL:1064-1087 | H | C |
 | BC-1.03.018 | D4-EX-2 wrong-shape line W-predicates (skip, no partial mutation) | BC-SL-098 | D4-EX-2 | D4-EX-2; SL:1060-1063 | M | C |
@@ -478,7 +478,7 @@ Register-level vectors are out of scope here; canonical golden tables are named 
 prd.md Section 5b (STAGE 3) and specified per contract in stage 2 from the pinned
 sources: turn machine (20 rows, BC-SL-094), D4-EX-2 table (21 rows, BC-SL-099),
 json.dumps length oracle (63 cases, BC-SL-096), get_sample 11-step sequence (BC-SL-091),
-cost colouring (20 sessions, BC-SL-101), CPython-generated pyfmt expectation tables
+cost colouring (21 sessions, BC-SL-101; recount per pass-4 A09/C2-04), CPython-generated pyfmt expectation tables
 (design §2.6).
 
 ## Verification Properties

@@ -2,14 +2,15 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.4"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-18T22:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "089b35b"
+input-hash: "6144b8f"
+
 ---
 
 # ARCH-07 — Parity harness (`internal/parity`)
@@ -32,19 +33,21 @@ input-hash: "089b35b"
   two directories); **B** committed goldens (written by **Python** under the pinned
   oracle, never Go; `*.golden` on the Linux oracle run, `*.windows.golden` on the
   **Windows** oracle run — BC-6.03.001, ADV-P2-A09; Go must match on every OS);
- Tier C differential fuzz, nightly on all three OSes (OD-149; design doc had Linux), non-gating, random valid inputs to both sides.
+ **C** differential fuzz, nightly on all three OSes (OD-149; design doc had Linux), non-gating, random valid inputs to both sides.
 - **Rationale:** Tier A proves parity on live runs (the D4 exit criterion); Tier B makes
   parity executable without Python on every CI leg and PR; Tier C hunts P27-class hidden
-  exception paths the 43-path catalogue may have missed (RK-2).
+  exception paths the catalogued crash-path register (error-taxonomy.md; CP-X/S/T/N/O/A
+  families) may have missed (RK-2).
 - **Consequences:** the exclusion list is JSON (zero-dependency budget), one entry per
   excluded case `{id, case, expected_output_file, table_test}`; harness FAILs with a
   named reason on: an excluded case without a matching table test, an excluded case whose
   Go output differs from its own expected file, a glob ("no blanket exclusions"), or an
-  id outside the closed set — TEN ids: {D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76,
-  temp-file, cp-x03, OD-159, OD-160, OD-161} (spelling exactly per BC-6.03.004;
+  id outside the closed set — ELEVEN ids: {D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76,
+  temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166} (spelling exactly per BC-6.03.004;
   ADV-P1-A05; OD-159 = Go reads files as UTF-8 on all OSes, OD-160 = foreign-cache
   shapes ruling Q-b, OD-161 = integer `transcript_path` → no transcript, never touch
-  foreign descriptors).
+  foreign descriptors, OD-166 = cost-history bytes written after a refresh whose `usd`
+  or `api_ms` could not convert to float — nothing else; OD-169).
   stderr is never compared (Python tracebacks invisible to Claude Code).
 - **Verification feasibility:** comparison and exclusion machinery are
   **provably-closable**: a closure property test proves every exclusion id ∈ closed set,
@@ -93,21 +96,26 @@ input-hash: "089b35b"
 | Exclusion machinery | `TestParityExclusions_ClosedSet` |
 | Cache swap | `TestParityCacheSwap_FourCaches` |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
-| Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` |
-| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpn01, cpn02, cpo01..cpo11, cpa01..cpa05 |
-| Case contents | `stdin.json.tmpl`, `settings`, `argv` (one JSON array of string arguments passed to the built `hylo` binary verbatim; default `["statusline"]`; subagent-family rows carry the flag arrangements under test, e.g. `["statusline", "--", "--subagent"]` — pass-3 A03, OD-155/OD-168: the harness invokes the built binary with the case argv, superseding the earlier "invokes `hylo statusline` without flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps.jsonl` (clock step + transcript appends per step) |
-| Exclusions file | `internal/statusline/testdata/parity/exclusions.json` |
+| Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` (corpus root; OD-148, matching BC-6.02.001/.003, BC-6.04.003) |
+| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpn01..cpn03, cpo01..cpo11, cpa01..cpa05 |
+| Case contents | `stdin.json.tmpl`, `settings`, `argv` (pass-4 ruling, ADV-P4-A15/D09: the HANDLER-RELATIVE argument list — the elements after the `statusline` verb; default `[]`. In P1 the corpus validator admits only `[]` and `["--subagent"]`; the oracle receives `[python, -s, script]` plus the same list, so the oracle — which has no `statusline` verb — sees exactly the handler arguments. Other argv shapes are covered by Go table tests (BC-4.01.002), never parity. Supersedes the pass-3 "passed to the built `hylo` binary verbatim, default `["statusline"]`" wording and BC-4.01.002:111's "no flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps` (clock step + transcript appends per step, carried INSIDE `case.json` — pass-4 D10 — not as a sibling `steps.jsonl`) |
+| Exclusions file | `internal/statusline/testdata/parity/exclusions.json` (beside the corpus root; OD-148 layout, BC-6.03.003/.004 PC-1); capture replays additionally use a git-ignored `captures/exclusions.json` validated by the same closed-set rule, CI never runs captures (pass-4 D12) |
 | Tier B goldens | `internal/statusline/testdata/goldens/*.golden`, `*.windows.golden` |
 | Clock shim | `internal/statusline/testdata/pyhooks/sitecustomize.py` |
 | pyfmt generators/tables | `internal/pyfmt/testdata/gen/*.py`; tables `internal/pyfmt/testdata/*.golden` |
 | Replay captures (git-ignored) | `captures/` (repo root) |
-| D4-EX-3 class tests | `TestConfigError_D4EX3_{Number,NumberGrammar,Boolean,URL,Enum,Theme}` — six names, six classes (pass-2 follow-up, syncing ARCH-07 to VP-016's A2-07 number-grammar table): `Number` covers number-range (BC-2.02.002), `NumberGrammar` covers number-grammar (BC-2.02.003); the other four names map one-to-one |
+| D4-EX-3 class tests | `TestD4EX3_{Boolean,Enum,URL,Number}` — FOUR names, four classes (pass-4 D22, canonical set): `Number` covers both number-range (BC-2.02.002) and number-grammar (BC-2.02.003; the grammar class maps to `_Number`). No Theme member — theme settings are rejected by the corpus validator (BC-6.02.003 EC-007), so a Theme D4-EX-3 case cannot exist in the corpus; superseding the earlier six-name list |
 | D4-EX-1 test | `TestWindowAge_D4EX1_Windows` |
 | Seeds reference | `seed/` holds the four cache files under their legacy file-name formats (legacy-shared named constants, BC-1.06.001; not renamed by the harness) |
 
-Fixture co-location ADR (AD-13): fixtures live under `internal/statusline/testdata/`
-(goldens pin statusline bytes) while the runner is `internal/parity`; Go testdata is
-opaque, so the cross-package read is deliberate — one fixture home, no duplicate corpus.
+Fixture co-location ADR (AD-13, OD-148): the synthetic corpus root is
+`internal/statusline/testdata/parity/cases/`, with the committed exclusions file
+`internal/statusline/testdata/parity/exclusions.json` beside it — fixtures stay with
+the subject package while the runner `internal/parity` is generic and reads the
+fixtures from the subject package (the pass-4 D10 fix aligned all live docs to this
+OD-148 layout); Tier B goldens stay under `internal/statusline/testdata/` (they pin
+statusline bytes); Go testdata is opaque, so the cross-package read is deliberate —
+one fixture home per fixture class, no duplicate corpus.
 
 ## Mapping
 

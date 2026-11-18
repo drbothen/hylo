@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "ea5ce52"
+input-hash: "b0c3890"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,6 +25,7 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
+  - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - promotion target path restored to the OD-148 corpus root internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04+D25+D31: --subagent family in generator domain; OS-scoped exclusions named (Windows naive timestamps, OD-159/160/161); provenance updated to OD-149 three-leg wording"
 deprecated: null
@@ -91,7 +92,7 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
    (BC-6.03.003).
 4. **Divergence artifact.** For each divergent case the run uploads a materialized
    case directory as a workflow artifact, in the BC-6.02.003 case model with seed and
-   index. A maintainer can promote it into `internal/parity/testdata/cases/` as a
+   index. A maintainer can promote it into `internal/statusline/testdata/parity/cases/` as a
    regression case. It is synthetic by construction.
 5. **Non-gating.**
    - A divergence marks the nightly run failed and visible.

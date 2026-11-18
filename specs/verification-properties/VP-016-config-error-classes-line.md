@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.02.001.md, behavioral-contracts/ss-02/BC-2.02.002.md, behavioral-contracts/ss-02/BC-2.02.003.md, behavioral-contracts/ss-02/BC-2.02.004.md, behavioral-contracts/ss-02/BC-2.02.005.md, behavioral-contracts/ss-02/BC-2.02.006.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "dd5c779"
+input-hash: "b0401b4"
 traces_to: prd.md
 source_bc: BC-2.02.001
 bcs: [BC-2.01.002, BC-2.01.003, BC-2.01.005, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-2.03.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go", "1.3 2026-11-18: ADV-P4 pass-4 fix (D22) — test names canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}: the Number table covers both number-range and number-grammar rows; no Theme member (theme settings are rejected by the corpus validator, BC-6.02.003 EC-007)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,9 +62,9 @@ for the same errors.
 ## Property Class and Verification Method
 
 - **Class:** invariant.
-- **Method:** unit/table test — one table per class (six tables; the five settled
-  ARCH-07 names are joined by `TestConfigError_D4EX3_NumberGrammar` so number-grammar
-  has its own rows) with
+- **Method:** unit/table test — one table per class under the four canonical ARCH-07
+  names (`TestD4EX3_{Number,Boolean,URL,Enum}`, pass-4 D22; the `Number` table covers
+  both number-range and number-grammar rows, BC-2.02.002/BC-2.02.003) with
   exact expected bytes; plus a registry-order property test (first-error selection is
   order-stable under permutation of invalid variables); plus a no-cache-writes assert
   (empty temp dir after a config-error run).
@@ -81,12 +81,12 @@ for the same errors.
 ## Proof Harness Skeleton
 
 ```go
-func TestConfigError_D4EX3_Number(t *testing.T)        { runClassTable(t, numberRangeRows) }
-func TestConfigError_D4EX3_NumberGrammar(t *testing.T) { runClassTable(t, numberGrammarRows) } // BC-2.02.003 (A2-07)
-func TestConfigError_D4EX3_Boolean(t *testing.T)  { runClassTable(t, booleanRows) }
-func TestConfigError_D4EX3_URL(t *testing.T)      { runClassTable(t, urlRows) }          // incl. control-character rows
-func TestConfigError_D4EX3_Enum(t *testing.T)     { runClassTable(t, enumRows) }
-func TestConfigError_D4EX3_Theme(t *testing.T)    { runClassTable(t, themeRows) }         // incl. control-character rows
+func TestD4EX3_Number(t *testing.T)  { runClassTable(t, numberRangeRows); runClassTable(t, numberGrammarRows) } // range BC-2.02.002 + grammar BC-2.02.003 (A2-07)
+func TestD4EX3_Boolean(t *testing.T) { runClassTable(t, booleanRows) }
+func TestD4EX3_URL(t *testing.T)     { runClassTable(t, urlRows) } // incl. control-character rows
+func TestD4EX3_Enum(t *testing.T)    { runClassTable(t, enumRows) }
+// No Theme member (pass-4 D22): theme settings are rejected by the corpus validator
+// (BC-6.02.003 EC-007), so a Theme D4-EX-3 case cannot exist in the corpus.
 func TestConfigError_PathGrammarReasons(t *testing.T)  { runClassTable(t, pathGrammarRows) }       // taxonomy: BC-2.01.005 reasons
 func TestConfigError_BackendsCardinalityReason(t *testing.T) { runClassTable(t, backendsCardinalityRows) } // taxonomy: BC-2.01.002 reason
 
@@ -103,10 +103,10 @@ func TestConfigError_FirstErrorRegistryOrder(t *testing.T) {
 
 ## Named Tests (OD-145 table where applicable)
 
-`TestConfigError_D4EX3_{Number,NumberGrammar,Boolean,URL,Enum,Theme}` (the five
-settled ARCH-07 names plus `NumberGrammar`, A2-07 — ARCH-07's five-name set shares
-`Number` between range and grammar rows; renaming there is an ARCH-07 citation
-change, flagged to the architect) ; order
+`TestD4EX3_{Number,Boolean,URL,Enum}` — the four-name canonical set (pass-4 D22):
+`Number` covers both number-range (BC-2.02.002) and number-grammar (BC-2.02.003)
+rows; no Theme member (theme settings are rejected by the corpus validator,
+BC-6.02.003 EC-007), superseding the earlier six-name list; order
 property named `TestConfigError_FirstErrorRegistryOrder`.
 
 ## Feasibility Assessment

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -13,10 +13,10 @@ inputs:
   - domain-spec/ubiquitous-language.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "8ee4968"
+input-hash: "3507555"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445)"
+extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445, 902-903)"
 subsystem: "SS-02"
 capability: "CAP-015"
 legacy_id: new
@@ -24,7 +24,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-016 added"]
+modified: ["1.2.3 2026-11-18: ADV-P4 remediation D27 — second LOCAL_MODEL_PREFIXES read site SL:902-903 cited; BC-1.07.006 consumer listed"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -130,7 +130,7 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-123 (N backends in config, exactly one validated until P6, keys under the entry), OD-111 (default `claude-sonnet`), OD-120 (term backend); legacy inputs replaced: legacy/dgx_statusline.py:module tunables (SL:73 `VM_URL ... .rstrip("/")`), fetch_sample (SL:165 URL build), render_lane (SL:444-445 prefix split/strip) |
+| Source | new — OD-123 (N backends in config, exactly one validated until P6, keys under the entry), OD-111 (default `claude-sonnet`), OD-120 (term backend); legacy inputs replaced: legacy/dgx_statusline.py:module tunables (SL:73 `VM_URL ... .rstrip("/")`), fetch_sample (SL:165 URL build), render_lane (SL:444-445 prefix split/strip), subagent model-segment lane tag (SL:902-903, P1 since OD-155) |
 | Parity / exclusion | n.a.; legacy SL default for the prefixes is `""` (lane unknown) — parity cases for an unset prefix set `HYLO_BACKENDS_0_MODEL_PREFIXES=` explicitly (OD-111) |
 | L2 Capability | CAP-015 (supports CAP-009, CAP-010) |
 | L2 Domain Invariants | DI-010 |
@@ -143,6 +143,7 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 - BC-2.01.005 — depends on (comma-list grammar)
 - BC-2.02.005 — composes with (URL validation of metrics_url)
 - BC-1.02.001 — consumer (lane pill from prefixes)
+- BC-1.07.006 — consumer (subagent model-segment lane tag from prefixes, SL:902-903)
 - BC-2.02.001 — composes with (error rendering)
 
 ## Architecture Anchors (Recommended)

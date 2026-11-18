@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "476fd5f"
+input-hash: "54a213d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "pass-3 remediation (ADV-P3-B05/B07/B18): float_div converts the int operand to float first (OverflowError at the int->float threshold, double-rounded quotient); OD-162 justification reworded to its actual test; EC-004 tie wording fixed; 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B04): EC-013 names CP-O03; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -95,7 +96,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-010 | `cost` truthy non-object | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
 | EC-011 | ±Infinity | OverflowError not caught → guard line (BC-1.02.026, CP-S11) |
 | EC-012 | `total_lines_added` a JSON integer beyond int64 but within float64, e.g. int(1e300) | `int(n)` is exact (Python arbitrary precision); `n / 1e6` converts `n` to float first (exact here) and rounds twice — the result is `float(n)/1e6`, not the correctly rounded exact quotient (e.g. n = 2**53+1 → 9007199254.740992, where the exact quotient rounds to …93; oracle-verified 2026-11-18) → hylo reproduces the oracle bytes by emulating the double rounding (OD-156, extends OD-137; oracle: `format(int(1e300)/1e6, ".1f")` = the 298-character `……1056.0M` string) |
-| EC-013 | a JSON integer beyond the int→float conversion threshold, e.g. 2·10³¹⁵ or 10**310 | `n / 1e6` raises OverflowError because the int operand cannot be converted to float (|n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸) — even though a 1e304 quotient would fit — uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156; oracle-verified 2026-11-18) |
+| EC-013 | a JSON integer beyond the int→float conversion threshold, e.g. 2·10³¹⁵ or 10**310 | `n / 1e6` raises OverflowError because the int operand cannot be converted to float (|n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸; taxonomy **CP-O03**) — even though a 1e304 quotient would fit — uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156; oracle-verified 2026-11-18) |
 
 ## Canonical Test Vectors
 
@@ -117,6 +118,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 | 0, 0 | no segment | edge-case |
 | `"1e3"`, 1 | `\e[32m▲?\e[0m\e[2m/\e[0m\e[31m▼1\e[0m` | error |
 | NaN, 0 | `\e[32m▲?\e[0m\e[2m/\e[0m\e[31m▼0\e[0m` | error |
+| 10**310, 0 (a JSON integer ≥ OV = `2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792) | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (`n / 1e6` OverflowError at SL:857; CP-O03, EC-013) | error |
 
 `_fmt_lines` direct: `10000000` → `10.0M`; `"1_000"` → `1000`; `"  -3\n"` → `-3`;
 `999950` → `999k` (verified).

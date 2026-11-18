@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "42e090a"
+input-hash: "ae22e31"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -24,7 +24,9 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "2026-11-18T01:42:00Z ADV-P3 remediation D37: build-time reserved EnvName list extended with HYLO_TIMING_GATE and HYLO_PARITY_FUZZSECONDS"
+  - "1.2.1 2026-11-18T01:42:00Z ADV-P3 remediation D37: build-time reserved EnvName list extended with HYLO_TIMING_GATE and HYLO_PARITY_FUZZSECONDS"
+  - "1.2.2 2026-11-18: ADV-P4 remediation A04/A05/D19 + OD-173/174/175 — composite registry types with strict-JSON env grammar; glyph families enumerated member-wise (1 code point / 1 column, OD-02); statusline.labels.input Text key; pill-label and display_floor_usd keys; queue.yellow OD-175 ratification"
+  - "1.2.3 2026-11-18: pass-4 sync-check SC-09 — registry text extended with statusline.subagent.tokens.suffix (C05), statusline.sparkline.preempt_marker_above (C2-13) and the dotted key statusline.subagent.glyphs.unknown (C07), type/default/range per interface-definitions.md; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,8 +48,14 @@ incomplete, whose default fails its own validation, or whose env name collides.
 ## Preconditions
 
 1. The P1 key subset is the one listed in design §2.4 (from the P4r7 §B.2.1 register,
-   rationales resolved by OD-57), as amended by OD-113 (theme keys, BC-2.01.003) and OD-123
-   (backend keys, BC-2.01.002).
+   rationales resolved by OD-57), as amended by OD-113 (theme keys, BC-2.01.003), OD-123
+   (backend keys, BC-2.01.002), and the pass-4 owner rulings OD-173 (lane-pill label Text
+   keys `statusline.pill.label_local`/`label_cloud`/`label_unknown`, defaults `DGX`/`ANTH`/`?`),
+   OD-174 (`statusline.cost.display_floor_usd`, renamed from `cost.basis_min_shown_usd`),
+   and OD-175 (`statusline.queue.yellow` ratified as a P1 `Bool` key, default `true`); the
+   pass-4 orchestrator design calls add `statusline.subagent.tokens.suffix` (call 3),
+   `statusline.subagent.glyphs.unknown` (call 4) and
+   `statusline.sparkline.preempt_marker_above` (call 5) — see PC-6 and PC-8.
 
 ## Postconditions
 
@@ -55,7 +63,11 @@ incomplete, whose default fails its own validation, or whose env name collides.
    RationaleCode, Class`:
    - `Name`: dotted lower-snake, matching
      `^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*|\[[0-9]+\])*$` (CV-19).
-   - `Type`: one of `Seconds, Int, Float, Bool, Enum, URL, List, Path, SGR, Text`.
+   - `Type`: one of `Seconds, Int, Float, Bool, Enum, URL, List, Path, SGR, Text`; the
+     composite numeric types `FloatPair` (Float pair), `FloatTriple` (Float triple),
+     `IntMap` (Int map), `RGBTriplesFloat` (RGB triples + Float) and `NumberList` (any list
+     of numbers) are additional registry types whose env grammar is strict JSON of the
+     declared shape (BC-2.01.005 PC-5, ADV-P4-D19).
    - `Range`: the valid domain stated explicitly (e.g. ttl_s: finite, `>= 0`,
      `<= 9223372036.854775`; trace: `rate|kv|ttft`).
    - `Op`: the comparison exactly as legacy writes it (e.g. ttl_s: `fetch_ts > now − ttl`,
@@ -87,6 +99,53 @@ incomplete, whose default fails its own validation, or whose env name collides.
    status line default `""`; OD-111, OD-123).
 5. Registry order is stable and is the order used for config-error reporting
    (BC-2.02.001).
+6. **Glyph registry enumeration (ADV-P4-A05, orchestrator design call 2):** the
+   `statusline.glyphs.*` family comprises exactly these members, each a `Text` key that is
+   exactly **1 code point and 1 display column** (OD-02; env name via PC-2's `EnvName`):
+
+   | Key | Default | Consumer |
+   |-----|---------|----------|
+   | `statusline.glyphs.tools` | `▤` (U+25A4) | BC-1.02.007 |
+   | `statusline.glyphs.conversation` | `❙` (U+2759) | BC-1.02.007 |
+   | `statusline.glyphs.thinking` | `◈` (U+25C8) | BC-1.02.007 |
+   | `statusline.glyphs.lines_up` | `▲` (U+25B2) | BC-1.02.014 |
+   | `statusline.glyphs.lines_down` | `▼` (U+25BC) | BC-1.02.014 |
+   | `statusline.glyphs.timer` | `⏱` (U+23F1) | BC-1.02.015, BC-1.02.028 |
+   | `statusline.glyphs.window_age` | `⌂` (U+2302) | BC-1.02.017, BC-1.02.028 |
+   | `statusline.glyphs.tokens_up` | `↑` (U+2191) | BC-1.02.018 |
+   | `statusline.glyphs.write` | `✍` (U+270D) | BC-1.02.018 |
+   | `statusline.glyphs.reroute` | `⟳` (U+27F3) | BC-1.02.018 |
+   | `statusline.glyphs.tokens_down` | `↓` (U+2193) | BC-1.02.018 |
+   | `statusline.glyphs.stale` | `↻` (U+21BB) | BC-1.02.018 |
+   | `statusline.glyphs.cache_hit` | `♻` (U+267B) | BC-1.02.023 |
+
+   The `statusline.subagent.glyphs.*` family comprises `running` (`»`, U+00BB),
+   `completed` (`✔`, U+2714), `failed` (`✘`, U+2718), `killed` (`◍`, U+25CD) and —
+   added by the pass-4 C07 disposition as its own key (not derived from `glyphs.killed`,
+   though sharing its default) — `statusline.subagent.glyphs.unknown` (`Text`, default
+   `◍` U+25CD; exactly 1 code point and 1 column (OD-02), non-empty, no control bytes;
+   rendered in `statusline.theme.grey`; SL:894; env
+   `HYLO_STATUSLINE_SUBAGENT_GLYPHS_UNKNOWN`). The two-character input label is NOT a
+   glyph: it is the `Text` key `statusline.labels.input` (default `in`, env
+   `HYLO_STATUSLINE_LABELS_INPUT`). A glyph member whose value is not exactly 1 code point
+   / 1 column fails the build-time tests of PC-3.
+7. **Label and floor keys (OD-173/OD-174):** the lane-pill words are the `Text` keys
+   `statusline.pill.label_local` (default `DGX`), `statusline.pill.label_cloud` (default
+   `ANTH`) and `statusline.pill.label_unknown` (default `?`), range: non-empty, no control
+   bytes, display width 1..16 (BC-2.01.005 PC-6). The cost-basis display floor is
+   `statusline.cost.display_floor_usd` (Float, 0.005) — the rename of
+   `cost.basis_min_shown_usd` per OD-174; the D7 citation is dropped with the rename.
+8. **Subagent token suffix and sparkline preempt-marker keys (pass-4 C05 and C2-13,
+   orchestrator design calls 3 and 5):** the registry carries
+   `statusline.subagent.tokens.suffix` (Text, default ` tok` — U+0020 + `tok`; range:
+   non-empty, no control bytes, mirroring BC-2.01.003 PC-3; env
+   `HYLO_STATUSLINE_SUBAGENT_TOKENS_SUFFIX`) and
+   `statusline.sparkline.preempt_marker_above` (Int, default `0`; range `>= 0`; the
+   history `p` marker shows when preempt > the value; independent of
+   `statusline.queue.yellow`; env `HYLO_STATUSLINE_SPARKLINE_PREEMPT_MARKER_ABOVE`).
+   The `k_from`/`m_from` values are display thresholds only — the divisors 1e3/1e6 are
+   format constants that define the K/M units, not config (why-not-config comment
+   required at the call site).
 
 ## Invariants
 

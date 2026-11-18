@@ -2,14 +2,15 @@
 document_type: architecture-section
 level: "L3"
 section: "configuration"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "f457392"
+input-hash: "69fc7fe"
+
 ---
 
 # ARCH-02 — Configuration (`internal/config`)
@@ -63,7 +64,11 @@ drawn in ARCH-00's dependency graph; pyfmt and platform remain the two sinks.
   and `backends[0].model_prefixes` = `claude-sonnet` (OD-111/OD-123). Per OD-162 every
   key carries a `Range`; an out-of-range value is a **number-range config error**
   (BC-2.02.002/.003), and where the owning BC defines no non-default behavior the
-  range is the default value only (e.g. the units/context/heat triples). int64-overflow
+  range is the default value only (e.g. `statusline.units.context` — the fixed
+  1e6/1000 M/K divisors are format constants, so no non-default labels exist, and
+  `statusline.theme.heat`, BC-1.02.019 — pass-4 A12: the `statusline.context.*`
+  percentage keys are NOT default-only; BC-1.02.006 PC3-PC5 defines non-default
+  behavior). int64-overflow
   and Duration-ceiling values are number-range cases riding D4-EX-3 (OD-164).
 - **Verification feasibility:** grammars and ordering are pure — **provable** by
   oracle-pinned class tables (BC-2.02.002..006) plus a registry-order property test
@@ -104,6 +109,38 @@ line's metrics URL and prefixes live at `backends[0].metrics_url` /
 (OD-133); `statusline.theme.*` SGR keys validated as SGR parameter lists (OD-113/OD-134).
 Skeleton obligations for later phases: `LoadOptions.FileLayer` extension point (P4),
 `backends[]` cardinality check isolates to one validator function (P6 widens it).
+
+## Fragment anchors (pass-4 A01; stable targets for BC-body fragment links)
+
+BC bodies link fragments like `architecture/ARCH-02-configuration.md#registry`; the
+eleven anchors below are the complete, closed set for this section — new BC fragment
+links must target one of these.
+
+<a id="registry"></a>
+<a id="types"></a>
+<a id="load"></a>
+<a id="backends"></a>
+<a id="errors"></a>
+<a id="seconds"></a>
+<a id="numbers"></a>
+<a id="enum"></a>
+<a id="url"></a>
+<a id="classes"></a>
+<a id="theme"></a>
+
+| Anchor | Target |
+|---|---|
+| `#registry` | the "Key registry" section (D15, OD-114, BC-2.01.004) |
+| `#types` | the per-type grammars in `types.go` (typed bool, comma lists, `~` expansion, `COLUMNS` exclusion) in the Key registry section |
+| `#load` | `Load` in the Interfaces block (full ordered error list, ADV-P2-A01) |
+| `#backends` | the "Backends" paragraph (exactly-one-entry cardinality, OD-123) |
+| `#errors` | the D4-EX-3 config-error line decision (first error in registry order on stdout, full list + `[from <ENVNAME>]` on stderr, no cache writes) |
+| `#seconds` | the Seconds grammar class (BC-2.02.002) inside the closed six-class register |
+| `#numbers` | the number-grammar/number-range classes (BC-2.02.002/.003) |
+| `#enum` | the enum class (BC-2.02.004) |
+| `#url` | the URL class (BC-2.02.005) |
+| `#classes` | the boolean class and the closed six-class register as a whole (BC-2.02.006; theme/SGR validation per OD-113/OD-134) |
+| `#theme` | `statusline.theme.*` SGR key validation (OD-113/OD-134) in the Backends paragraph |
 
 ## Mapping
 

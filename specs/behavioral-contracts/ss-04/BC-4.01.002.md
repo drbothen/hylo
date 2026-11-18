@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.2"
+version: "1.1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "54c520c"
+input-hash: "7c5b42b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; --subagent is a valid P1 flag dispatched per BC-1.07.*, OD-155; legacy reference: the --subagent dispatch at legacy/dgx_statusline.py SL:1240-1241)"
@@ -22,8 +22,9 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
-  - "2026-11-18T01:42:00Z ADV-P3 remediation D05+D28: EC-004 exempts --subagent anywhere in argv[1:] incl. after -- (OD-155, SL:1240); stderr suffix amended"
+  - "1.1.2 2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "1.1.3 2026-11-18T01:42:00Z ADV-P3 remediation D05+D28: EC-004 exempts --subagent anywhere in argv[1:] incl. after -- (OD-155, SL:1240); stderr suffix amended"
+  - "1.1.4 2026-11-18: ADV-P4 remediation D05 - parity argv row corrected: case argv admits only [] and [\"--subagent\"] in P1 (design call 9); subagent mode performs no flag validation (PC-4 qualifier); pass-4 sync-check SC-07 — repaired the unescaped double quotes that broke YAML parsing; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +63,9 @@ non-zero status (OD-112, same rule as D4-EX-3).
    flag in argv order (suffix amended per ADV-P3-D28; the former "takes no flags" text is
    false since OD-155).
 4. The check runs before configuration resolution: an unknown flag takes precedence over a
-   config error (BC-2.02.001 is not printed). No stdin read is required, no cache file is
+   config error (BC-2.02.001 is not printed). MAIN MODE ONLY — the subagent mode performs
+   no flag validation at all (BC-2.02.001 PC-8, ADV-P4-D04). No stdin read is required, no
+   cache file is
    read or written, no network request or subprocess runs.
 5. Positional arguments alone (no flag) do not trigger this BC; the normal render runs
    (BC-4.01.001).
@@ -107,8 +110,8 @@ non-zero status (OD-112, same rule as D4-EX-3).
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-112 (T8: unknown flag → `hylo: unknown flag ...`, exit 0), OD-155 (owner ruling 2026-11-17: `--subagent` IS a valid P1 flag, dispatched per BC-1.07.*), DI-008; legacy reference: legacy/dgx_statusline.py:`__main__` (SL:1240-1241 `--subagent` dispatch; SL:1243-1245 never-nonzero guard) |
-| Parity / exclusion | n.a.: no parity case passes flags (the harness invokes `hylo statusline` without flags; the `--subagent` mode carries its own contracts, BC-1.07.*). Covered by its own Go table test `TestStatusline_UnknownFlag` |
+| Source | new — OD-112 (T8: unknown flag → `hylo: unknown flag ...`, exit 0), OD-155 (owner ruling 2026-11-17: `--subagent` IS a valid P1 flag, dispatched per BC-1.07.*), DI-008; legacy reference: legacy/dgx_statusline.py:`__main__` (SL:1240-1241 `--subagent` dispatch; SL:1243-1245 never-nonzero guard); parity argv correction ADV-P4-D05 (design call 9) |
+| Parity / exclusion | n.a.: a parity case's handler-relative `argv` (after the `statusline` verb, BC-6.01.001 PC-5) admits only `[]` and `["--subagent"]` in P1 (orchestrator design call 9, ADV-P4-D05/D09), so no parity case passes a flag — the oracle receives `[python, -s, script]` plus the same list; every other argv shape (unknown flags, `--`, positionals) is covered by this BC's Go table tests, never parity. Covered by its own Go table test `TestStatusline_UnknownFlag` |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Architecture Module | `cmd/hylo/statusline.go` (BC-COMPONENT-MAP: cmd/hylo/statusline.go (unknown-flag scan) — ARCH-01) |

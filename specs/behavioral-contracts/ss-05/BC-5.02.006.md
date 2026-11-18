@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
-input-hash: "b5ce211"
+input-hash: "6c4cd7b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces json.dump cache-file bytes; ruling (b) P3r2 §0)"
@@ -23,6 +23,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D10+D12: Dumps scoped to include the subagent stdout json.dumps (SL:924, BC-1.07.004); encoder failure on 4300-digit ints = typed ErrValue and legacy no-write"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D17 — json.dump encoder depth boundary measured directly (python3 -I, temp dir): succeeds through depth 992, RecursionError from 993 at limit 1000 module scope; law limit−8, slope verified at 700/1000/1300; typed ErrDepth + legacy no-write pinned (PC-6, EC-007/008, CTV)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -68,6 +69,25 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
    partial temp file leaks exactly as legacy's does (covered by the temp-file exclusion
    class) and the previous cache file is left untouched. `Dumps` never writes a partial
    destination itself (it returns bytes; the writer owns the file).
+6. **Depth boundary (measured, ADV-P4-D17).** CPython's `json.dump` encodes through the
+   pure-Python `_iterencode` generator chain: ONE recursion slot per container nesting
+   level. Measured law (`python3 -I`, CPython 3.11.7, isolated temp dir, never the real
+   HOME): a nested-dict `Value` encodes successfully through depth **992** and raises
+   `RecursionError` from depth **993** when called at module scope with the default
+   recursionlimit of 1000; the boundary is `recursionlimit − 8` at module scope (slope
+   verified at limits 700/1000/1300) minus one slot per caller frame, and `json.dump`'s
+   frame cost differs from the C encoder used by `json.dumps`. Consequently legacy's
+   `save_cache` (SL:307) — invoked from the hook-handler stack — can fail with
+   `RecursionError` on a stdin whose `rate_limits` decoded fine (the decoder accepts up to
+   depth 993 at init context); the `except Exception: pass` swallows it and NOTHING is
+   written: the previous cache file is untouched and the partial temp file leaks (temp-file
+   exclusion class). hylo reproduces the observable: for a `Value` nested deeper than the
+   pinned reference boundary (depth ≥ 993 at the module-scope reference; the cache-writer
+   call site's effective boundary is the reference minus its legacy caller-frame depth),
+   `Dumps` returns typed `ErrDepth` (sibling of `ErrValue`) and the calling cache writer
+   performs the same legacy no-write; shallower values encode regardless of depth. The
+   boundary constant is recursion-limit-derived and pinned by the oracle table test, not by
+   a magic number in logic (D15).
 
 ## Invariants
 
@@ -85,6 +105,8 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
 | EC-004 | int-vs-float preserved: `{"a":1}` vs `{"a":1.0}` | `{"a": 1}` vs `{"a": 1.0}` |
 | EC-005 | WTF-8 str member with a lone surrogate | re-escaped `\udXXX` (BC-5.02.003) |
 | EC-006 | Nested empty containers | `{"a": {}, "b": []}` |
+| EC-007 | `Value` nested 992 deep (module-scope reference) | encodes; bytes equal the CPython oracle (ADV-P4-D17) |
+| EC-008 | `Value` nested 993 deep at a call site whose legacy stack matches the reference | typed `ErrDepth`; cache writer no-write, previous file untouched (temp-file class) |
 
 ## Canonical Test Vectors
 
@@ -94,6 +116,8 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
 | `Dumps(load('{"a":1.0}'))` | bytes `{"a": 1.0}` | edge-case |
 | `Dumps(Value with NaN)` | bytes `{"a": NaN}` | edge-case |
 | `Dumps(load('{"a":1e-5}'))` | bytes `{"a": 1e-05}` | edge-case |
+| nested object, depth 992 (module-scope reference) | encodes; bytes equal the CPython oracle | edge-case |
+| nested object, depth 993 (reference call site) | `ErrDepth`; cache writer performs the legacy no-write | error |
 
 Pinned against CPython 3.11 (OD-104 oracle discipline; realistic cache shapes from the
 corpus cases).

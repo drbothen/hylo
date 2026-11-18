@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "44590c6"
+input-hash: "5cb6c46"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_iso_ts, _finish_turn, _mix_counts (SL:954-996, 1064-1087)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited"]
+modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: CP-O08 vector made self-contained (exact line templates, 100/467/160 B) and byte math re-pinned from the oracle — size 727 = 567 + 160 deleted, conv 3, cur null per OD-167 (was 656/conv 5/131 B; ADV-P4-C09)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -108,7 +108,7 @@ The exhaustive pinned table is BC-1.03.016 (20 rows). Representative rows (TZ=UT
 | T18: U0, A80, S81 | `"lr": [3.75, false]` | edge-case |
 | T10: A2, B10, S11 | `"lr": null`, `"lu": null` | edge-case |
 | T15: U0, A2 (out 10), B5 (out 5), A8 (`output_tokens: "abc"`), U9 | legacy: `TypeError` at SL:994, no cache; hylo (D4-EX-2): `"lr": [5.0, true]`, `"cur": null` | error |
-| CP-O08 (ADV-P3-C10; TZ=UTC, base 1794650400.0): U0; A2 = assistant id `A`, `{"output_tokens": 10^309}`; B10 = assistant id `B`, `{"output_tokens": 300}`, +10 s. Legacy: `OverflowError` at SL:994 (`4.0 × out`) while processing the closer B10, degraded line, cache not saved (oracle-verified 2026-11-18) | hylo (OD-167: closer B10 skipped, in-flight turn dropped): cache exactly `{"size": 656, "res": 0, "conv": 5, "think": 0, "tin": 0, "tout": 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 0, "ids": ["A"], "lr": null, "lu": 1794650400.0, "cur": null}` (token totals from U0+A2 pinned from legacy on the U0+A2 transcript, size + 131 deleted bytes) | error |
+| CP-O08 (ADV-P3-C10, byte math re-pinned ADV-P4-C09; TZ=UTC, base 1794650400.0). Self-contained templates (Python `json.dumps` defaults, each LF-terminated; the BC-1.03.016 PC2 family): U0 = `{"type": "user", "message": {"role": "user", "content": "go"}, "timestamp": "2026-11-14T10:00:00Z"}` (100 B); A2 = the A-template with id `A`, `{"output_tokens": 10^309}`, ts 10:00:02Z (467 B); B10 = the A-template with id `B`, `{"output_tokens": 300}`, ts 10:00:10Z (160 B), where A-template = `{"type": "assistant", "message": {"id": "<id>", "content": [{"type": "text", "text": "x"}], "usage": {"output_tokens": <out>}}, "timestamp": "<ts>"}`. Legacy on U0+A2+B10: `OverflowError` at SL:994 (`4.0 × out`) while processing the closer B10, degraded line, cache not saved (oracle-verified 2026-11-18) | hylo (OD-167: closer B10 skipped, in-flight turn dropped): cache exactly `{"size": 727, "res": 0, "conv": 3, "think": 0, "tin": 0, "tout": 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 0, "ids": ["A"], "lr": null, "lu": 1794650400.0, "cur": null}` (lr/u.l re-pinned ADV-P4-C09: the legacy U0+A2 golden has `"size"` 567, `conv` 3 — oracle-run 2026-11-18; hylo `"size"` = 567 + 160 deleted bytes = 727 per BC-1.03.018 PC4, `cur` forced to null per OD-167) | error |
 
 ## Verification Properties
 

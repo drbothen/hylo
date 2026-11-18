@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T15:00:00Z
@@ -15,18 +15,18 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "752ad87"
+input-hash: "3fd3c56"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-102"
-parity_class: "OD-30"
+parity_class: "OD-30, OD-166"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["2026-11-18 (v1.3.1) pass-4 remediation ADV-P4-C2-05 (Description and exclusion scope list both permitted differences: OD-30 sub-case and OD-166 record skip; EC-010; parity_class)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,9 +42,13 @@ removal_reason: null
 When `record_cost` writes (BC-1.05.004), hylo produces `cost-history.json` byte for
 byte as legacy's `json.dump` would: default Python separators, ASCII escapes, Python
 float `repr`, `NaN`/`Infinity` tokens, int/float preserved, inherited key order, no
-trailing newline. The format is byte-exact for every string session id. The only
-permitted difference is the **OD-30 sub-case** (non-string session id: one
-string-form key instead of legacy's duplicates), specified in BC-1.05.006.
+trailing newline. The format is byte-exact for every string session id. Exactly two
+differences are permitted, and only these (ADV-P4-C2-05): the **OD-30 sub-case**
+(non-string session id: one string-form key instead of legacy's duplicates, specified
+in BC-1.05.006) and the **OD-166 record skip** (BC-1.05.004 PC1: a refresh whose
+numeric `usd` or `api_ms` cannot convert to float writes **no entry** where legacy
+persisted the raw int — an absent-entry byte divergence, sign-agnostic and
+gate-independent).
 
 ## Preconditions
 
@@ -97,6 +101,7 @@ string-form key instead of legacy's duplicates), specified in BC-1.05.006.
 | EC-007 | re-record of key `b` that sits before key `a` | `b` stays first; `a` (even a foreign shape like `{"x": 1}`) re-emitted unchanged |
 | EC-008 | non-string sid | OD-30 sub-case → BC-1.05.006 |
 | EC-009 | save fails (unwritable dir) | nothing persisted, error swallowed (BC-1.06.001) |
+| EC-010 | unconvertible `usd`/`api_ms` (OD-166, BC-1.05.004 PC1) | no entry written at all — the skip is decided before this contract applies; this contract governs only the bytes of writes that happen |
 
 ## Canonical Test Vectors
 
@@ -121,13 +126,13 @@ Clock 1794615009.0.
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 |
-| L2 Domain Invariants | DI-007, DI-012 (OD-30 sub-case deviation) |
+| L2 Domain Invariants | DI-007, DI-012 (OD-30 sub-case deviation; OD-166 record skip) |
 | Architecture Module | `internal/cost` history.go; `internal/pyfmt` json.go `Dumps` (BC-COMPONENT-MAP: internal/cost/history.go (exact write format) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); cost_thresholds read (SL:245-246); save_cache json.dump (SL:203) |
 | Legacy contract | BC-SL-102 (P3r3 §4.2; re-confirmed P3r4 §1.1); writer-format ruling (b) P3r2 §0 |
-| Decisions | **OD-30** (numeric-sid sub-case: one string-form key), **OD-105/OD-110** (named exclusion entry `OD-30` / case `numeric-session-id`, dedicated test `TestCostHistory_OD30_NumericSidStringKey`, shared with BC-1.05.006), OD-101, OD-103, OD-106, OD-124 |
-| Exclusion scope | Only non-string-sid cases are excluded; every string-sid case is compared byte for byte on stdout and `cost-history.json` |
+| Decisions | **OD-30** (numeric-sid sub-case: one string-form key), **OD-105/OD-110** (named exclusion entry `OD-30` / case `numeric-session-id`, dedicated test `TestCostHistory_OD30_NumericSidStringKey`, shared with BC-1.05.006), OD-101, OD-103, OD-106, OD-124, **OD-166/OD-169** (record skip: unconvertible `usd`/`api_ms`, exclusion entry `OD-166`, dedicated table test `TestCostHistory_OD166_UnconvertibleNotRecorded`) |
+| Exclusion scope | Only non-string-sid cases (OD-30) and entries a refresh skips under the OD-166 record guard (BC-1.05.004 PC1) are excluded; every other string-sid case is compared byte for byte on stdout and `cost-history.json` — the absent OD-166 entry itself is the excluded divergence |
 
 ## Related BCs (Recommended)
 

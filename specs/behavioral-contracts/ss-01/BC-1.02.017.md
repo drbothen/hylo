@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "c3336e3"
+input-hash: "99bca80"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B17): EC-010 states the numeric precondition — the SL:559 OverflowError fires only when win_start is numeric; otherwise the huge exact timer text renders with no degrade; 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B05/B04/B07): Inv 3 self-contradiction removed (rendering carries no exclusion; acquisition and foreign-cache shapes do — OD-160); EC-004..006 and the -Infinity vector tagged OD-160 (hand-edited-cache shapes); EC-010 names CP-O05 with the exact threshold; canonical OV overflow vector added; DI-012 cited; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,9 +67,9 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
    return a start) is excluded from the parity diff through the OD-105 exclusion-list entry `D4-EX-1` with dedicated
    tests `TestWindowAge_D4EX1_Windows*`; the macOS/Linux native-probe differences (true start in the repeated DST hour,
    `⌂` where legacy's localized `ps` fails) are the OD-76 entry named by OD-110, with their own table tests
-   (BC-3.02.002). No case of this contract is excluded. Foreign-cache shapes (EC-007's hand-edited `proc_start`;
-   ruling Q-b) carry exclusion id **OD-160**: vectors that rely on a hand-edited cache are Go table tests, not
-   byte-parity obligations.
+   (BC-3.02.002). The rendering rules of this contract itself carry no exclusion; the foreign-cache shapes
+   (EC-004..EC-007's hand-edited `proc_start`; ruling Q-b) carry exclusion id **OD-160**: vectors that rely on a
+   hand-edited cache are Go table tests, not byte-parity obligations.
 4. The 300000 default comes from `statusline.window_age.min_margin_ms` (register T-040: owner request, review row 9
    revisit, "otherwise it would repeat the elapsed figure").
 
@@ -79,13 +80,13 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
 | EC-001 | `win_ms - dur` exactly 300000 (now − start = 27000 s, dur = 26,700,000) | shown (`>=`) |
 | EC-002 | now − start = 26999.9 s, dur = 26,700,000 | hidden |
 | EC-003 | `win_start` in the future | `win_ms` negative → hidden |
-| EC-004 | `win_start` = NaN | hidden (comparison false) |
-| EC-005 | `win_start` = `+Infinity` | `win_ms = -inf` → hidden |
-| EC-006 | `win_start` = `-Infinity` | `win_ms = +inf` passes the gate; `int(inf // 60000)` raises ValueError at SL:560 → 29-byte degraded line (BC-1.02.028 EC, BC-1.01.001) |
+| EC-004 | `win_start` = NaN (hand-edited-cache shape, **OD-160**: Go's encoder never emits NaN) | hidden (comparison false) |
+| EC-005 | `win_start` = `+Infinity` (hand-edited-cache shape, **OD-160**) | `win_ms = -inf` → hidden |
+| EC-006 | `win_start` = `-Infinity` (hand-edited-cache shape, **OD-160**) | `win_ms = +inf` passes the gate; `int(inf // 60000)` raises ValueError at SL:560 → 29-byte degraded line (BC-1.02.028 EC, BC-1.01.001) |
 | EC-007 | `win_start` = `true` (only reachable through a hand-edited cache `proc_start`) | treated as epoch second 1; at now = 1794600000 renders `⌂20770d19h` |
 | EC-008 | stdin has no `session_id` | acquisition is skipped (SL:1229), `win_start = None` → no suffix |
 | EC-009 | FMA contraction of `(now - win_start)*1000 - dur` | forbidden; tests for this site run on arm64 (macos-15 runner), where fusion is detectable (design IM-10) |
-| EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer beyond float64 range, e.g. 10³⁰⁹, **with `win_start` numeric** (the SL:559 subtraction is reached) | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int; oracle-verified 2026-11-18). With a *non-numeric* `win_start` the gate block is skipped and legacy renders the exact huge `_hm(10**309)` timer text (integer arithmetic only) with no degrade — PC1's "timer shown" plus numeric `win_start` is what reaches the crash site |
+| EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17), e.g. 10³⁰⁹, **with `win_start` numeric** (the SL:559 subtraction is reached) | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int; taxonomy **CP-O05**). With a *non-numeric* `win_start` the gate block is skipped and legacy renders the exact huge `_hm(10**309)` timer text (integer arithmetic only) with no degrade — PC1's "timer shown" plus numeric `win_start` is what reaches the crash site |
 
 ## Canonical Test Vectors
 
@@ -99,7 +100,8 @@ now = 1794600000.0; stdin `{"cost": {...}}`; `win_start = now - (now−start)`; 
 | now−start 26999.9 s, dur 26,700,000 | `\e[90m⏱ 7h25m\e[0m` | edge-case (hidden) |
 | win_start = now + 1000, dur 120000 | `\e[90m⏱ 2m\e[0m` | edge-case |
 | win_start = NaN, dur 120000 | `\e[90m⏱ 2m\e[0m` | edge-case |
-| win_start = -Infinity, dur 60001 | whole stdout = `\e[90mstatusline degraded\e[0m\n` | error |
+| win_start = -Infinity, dur 60001 | whole stdout = `\e[90mstatusline degraded\e[0m\n` (hand-edited-cache shape, **OD-160**) | error |
+| dur = OV (`2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792, the smallest positive integer that fails float conversion), win_start numeric | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (`win_ms - dur` OverflowError at SL:559; CP-O05, EC-010) | error |
 
 Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-104); the 112000 s vector is also
 confirmed by golden A (deep pass-3 round 2).
@@ -116,7 +118,7 @@ confirmed by golden A (deep pass-3 round 2).
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (⌂ gate) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:554-563; gate SL:557-559, append SL:562) |

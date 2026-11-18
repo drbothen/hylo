@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "2b60ae8"
+input-hash: "9af8495"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -28,6 +28,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04: subagent corpus family added to the Python-written goldens with --subagent oracle argv (OD-155)"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D10 - -update relocated to ./internal/parity (corpus-owning package, canonical layout)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -136,8 +137,9 @@ Go must reproduce them on every OS without Python installed. OS-dependent cases 
    Exit code 0 for all three. These figures were re-derived from the strings above
    and match P3r2 §A1.
 6. **Tier B write rule.**
-   - `go test ./internal/statusline -update` writes these goldens by running the
-     oracle (BC-6.01.001) on Linux, never from Go output.
+   - `go test ./internal/parity -update` writes these goldens by running the
+     oracle (BC-6.01.001) on Linux, never from Go output (the `-update` flag lives in
+     `./internal/parity`, the package that owns the corpus — ADV-P4-D10 layout).
    - `-update` without a valid oracle interpreter fails; it never falls back to writing
      Go's output.
    - Golden metadata records the resolved CPython patch version (RK-4).

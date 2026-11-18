@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
@@ -15,18 +15,18 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "718be36"
+input-hash: "636c800"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
 subsystem: "SS-01"
 capability: "CAP-011"
 legacy_id: "BC-SL-028"
-parity_class: "byte-exact"
+parity_class: "OD-166"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-001 added", "1.2.2 2026-11-17: pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "1.2.3 2026-11-18: pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)"]
+modified: ["2026-11-17 (v1.2.1) VP citation reconciliation — VP-001 added", "2026-11-17 (v1.2.2) pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "2026-11-18 (v1.2.3) pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "2026-11-18 (v1.2.5) pass-4 remediation ADV-P4-C2-03 (OD-166 closed-set id per OD-169, DI-012 cited) + ADV-P4-C2-06 (guard pinned: usd OR api_ms, sign-agnostic, gate-independent; EC-011 + vector)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,12 +59,23 @@ is visible to other sessions' thresholds in the same instant but never to its ow
 
 1. **Guard (no read, no write):** if `sid` is falsy (absent, null, `""`, `0`, `false`),
    or `lane` is not exactly `"dgx"` or `"anth"`, or `usd` is not a number (bool counts as
-   a number), return without touching the file (SL:226-227). Per ruling **OD-166**, the
-   guard also rejects a numeric `usd` (and the paired `api_ms`) whose float conversion
-   would overflow — an exact stdin int with magnitude >= 2**1024 - 2**970 — so an
-   unconvertible value is **not recorded** (exclusion id `OD-166`; legacy did record the
-   giant int via `round(usd, 4)` + `json.dump`, SL:234-237, poisoning later refreshes at
-   SL:255 — a foreign-history class path, BC-1.05.005 EC-011). The current refresh still
+   a number), return without touching the file (SL:226-227). Per ruling **OD-166**,
+   closed-set-ratified by **OD-169** (exclusion id `OD-166`, the 11th id of the closed
+   set — D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160,
+   OD-161, OD-166), the guard also rejects the refresh when **either** numeric field —
+   `usd` **or** the paired `api_ms` — cannot convert to float: an exact stdin int with
+   magnitude >= 2**1024 - 2**970 (smallest overflowing magnitude, oracle-verified
+   CPython 3.11.7, 2026-11-17) — so an unconvertible value is **not recorded**. The
+   test is convertibility only: **sign-agnostic** — a negative huge value fails it
+   identically and is likewise not recorded (legacy records it harmlessly; the
+   legacy-writes / hylo-skips byte divergence is exactly the `OD-166` exclusion) — and
+   **gate-independent**: the `>= burn_min_api_ms` render gate (BC-1.05.002 PC1) does not
+   participate in the record decision. So a huge positive `api_ms` passes the gate,
+   degrades the current refresh via CP-O11 (BC-1.05.007), and is not recorded; a huge
+   negative `api_ms` fails the gate, the current refresh renders normally with no $/h
+   segment (BC-1.05.002 PC4), and is not recorded either. (Legacy did record the giant
+   int via `round(usd, 4)` + `json.dump`, SL:234-237, poisoning later refreshes at
+   SL:255 — a foreign-history class path, BC-1.05.005 EC-011.) The current refresh still
    renders/degrades as ruled (BC-1.05.007 CP-O10/CP-O11).
 2. Otherwise load the history (BC-1.06.001 load: any error → `{}`), take
    `sessions = h.setdefault("sessions", {})` and `e = sessions.get(sid) or {}`
@@ -100,6 +111,7 @@ is visible to other sessions' thresholds in the same instant but never to its ow
 | EC-008 | corrupt history shapes (top level not an object; `sessions` or an entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10 foreign-cache crash paths: out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); the Go writer only ever writes legacy's exact format |
 | EC-009 | `api_ms` = `"x"` | stored as `null` |
 | EC-010 | `usd` = 2**1024 (309-digit exact stdin int; numeric guard passes) | not recorded (OD-166 guard: magnitude >= 2**1024 - 2**970 cannot convert to float); file unchanged; the current refresh degrades via CP-O10 (BC-1.05.007); legacy did record it (ADV-P3-C2-01) |
+| EC-011 | `usd` = 2.0, `api_ms` = -(2**1024) (negative huge exact int) | not recorded (OD-166 guard is sign-agnostic: the value cannot convert to float); the current refresh renders normally — `-(2**1024) >= burn_min_api_ms` is false, so no $/h segment (BC-1.05.002 PC4); legacy recorded it harmlessly (writes diverge; exclusion `OD-166`, ADV-P4-C2-06) |
 
 ## Canonical Test Vectors
 
@@ -112,6 +124,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | then sid `t`, usd 4.0 at now + 60.000 | `{"sessions": {"t": {"lane": "anth", "usd": 4.0, "api_ms": 1000, "ts": 1794615069.0, "src": "cc"}}}` | edge-case |
 | sid `""`, or lane `zzz`, or usd `"3"` | no file written / file unchanged | error |
 | sid `t`, lane anth, usd = 2**1024 (exact int), api 1000 | file unchanged (OD-166 record guard) | edge-case |
+| sid `t`, lane dgx, usd 2.0, api = -(2**1024) (negative huge exact int) | file unchanged (OD-166 record guard, sign-agnostic); the refresh renders normally, no $/h segment (BC-1.05.002 PC4) | edge-case |
 
 ## Verification Properties
 
@@ -121,19 +134,20 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | VP-020 | All non-target keys survive a write byte-identically | manual (cache-swap test, design §5.2) |
 | VP-001 | Corrupt cost history (CP-C09/C10, EC-008) still yields ≥1 stdout byte and exit 0 — out of parity scope, never-blank per DI-008 | fault-injection table (exhaustive CP-*) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008 foreign-cache crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-166` (a refresh whose numeric `usd` or `api_ms` cannot convert to float writes no entry where legacy wrote one; sign-agnostic, gate-independent) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-166` entry and its riding table test `TestCostHistory_OD166_UnconvertibleNotRecorded`, and the mutation test fails closed if that entry is dropped | property test (VP-012, go test; OD-169) |
 
 ## Traceability
 
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 (cost history; format is status-line-owned, OD-124) |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007, DI-012 (exclusion id `OD-166` under the named-deviation rule, OD-169) |
 | Architecture Module | `internal/cost` history.go `Record` (design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (throttled write) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); call site render_lane (SL:603-606) |
 | Legacy contract | BC-SL-028 (P3r1 row 57; refined P3 deep r1) |
 | Thresholds | T-022 (60 s throttle; derived, accepted in the OD-57 E-0 bulk row — it bounds cache-loss repair to under a minute, R-4 rationale, pass-4-deep-nfr-r7 §C) |
-| Decisions | D4, D7-style format freeze for the cost history (OD-106 copies it at cutover), D15, OD-101 (cache dir), OD-124 |
+| Decisions | D4, D7-style format freeze for the cost history (OD-106 copies it at cutover), D15, OD-101 (cache dir), OD-124, OD-166 (unconvertible usd/api_ms not recorded), OD-169 (closed-set ratification, 11 ids) |
 
 ## Related BCs (Recommended)
 
@@ -154,7 +168,7 @@ S-N.MM — cost history (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-020 — throttle; VP-001 — never-blank/exit-0 under CP-C09/C10 corrupt history
-- VP-012 — exclusion-closure cover for the named deviation `OD-160`
+- VP-012 — exclusion-closure cover for the named deviations `OD-160` and `OD-166`
 
 
 #### Source Evidence

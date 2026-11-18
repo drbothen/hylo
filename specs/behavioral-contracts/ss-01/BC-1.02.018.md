@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "d909e2a"
+input-hash: "6fa6c16"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B15/B03): the two-character in label is the Text key statusline.labels.input, not a glyphs member (OD-02); for-all bracket-rule leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +53,7 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
 2. When shown, the segment bytes are, in order:
    1. `\e[90m↑\e[0m\e[97m` + `_fmt_tok_c(tin or 0)` + `\e[0m`;
    2. inner parts, each only when its value is numeric and `> 0`, in this order:
-      `\e[97min` + `_fmt_tok_c(c_in)` + `\e[0m`, `\e[33m✍` + `_fmt_tok_c(c_wr)` + `\e[0m`,
+      `\e[97m` + `statusline.labels.input` (default `in`) + `_fmt_tok_c(c_in)` + `\e[0m`, `\e[33m✍` + `_fmt_tok_c(c_wr)` + `\e[0m`,
       `\e[36m⟳` + `_fmt_tok_c(c_rd)` + `\e[0m`;
    3. if there are **two or more** inner parts: `\e[2m[\e[0m` + parts joined by one space + `\e[2m]\e[0m`
       (a single part equals `↑` and is omitted entirely);
@@ -64,8 +65,9 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
 
 1. The segment never reads stdin token fields (`context_window.total_*` are the last response, not the session;
    review 2026-11-13 #10.1).
-2. Glyphs `↑ ✍ ⟳ ↓ ↻` and the `in` label are legacy defaults of `statusline.glyphs.*`; colours are
-   `statusline.theme.*` (OD-113).
+2. Glyphs `↑ ✍ ⟳ ↓ ↻` are legacy defaults of `statusline.glyphs.*`, each exactly 1 code point and 1 column
+   (OD-02); the two-character `in` label is **not** a glyph member — it is the Text key
+   `statusline.labels.input` (default `in`); colours are `statusline.theme.*` (OD-113).
 3. Compact units follow `statusline.units.tokens` (T-042: 1000 / 1e6, `>=`; approved mockup, review #10 revisit).
 
 ## Edge Cases
@@ -103,7 +105,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | Brackets appear iff at least two inner parts are > 0 | Go property test (testing/quick) vs oracle |
+| VP-041 | Brackets appear iff at least two inner parts are > 0 | Go property test (testing/quick) vs oracle (VP-028 retains the bounded golden tables) |
 | VP-028 | Segment shown iff the visibility predicate of Postcondition 1 holds | table test |
 
 ## Traceability
@@ -116,7 +118,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:565-600) and legacy/dgx_statusline.py:_fmt_tok_c (SL:863-873) |
 | Legacy contract | BC-SL-024 (pass-3 r1; refined deep pass-3 round 1) |
-| Config keys | `statusline.units.tokens` (T-042), `statusline.glyphs.*`, `statusline.theme.*` (OD-113) |
+| Config keys | `statusline.units.tokens` (T-042), `statusline.glyphs.*`, `statusline.labels.input` (default `in`), `statusline.theme.*` (OD-113) |
 | Parity | byte-exact (no exclusion entry) |
 
 ## Related BCs (Recommended)
@@ -135,7 +137,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028 — bracket rule
+- VP-041 — bracket rule (for-all); VP-028 — golden segment bytes
 
 ---
 

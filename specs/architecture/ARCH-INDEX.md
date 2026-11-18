@@ -1,15 +1,16 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.9"
+version: "1.12"
 status: draft
 producer: architect
-timestamp: 2026-11-18T02:27:55Z
+timestamp: 2026-11-18T22:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "cff06c0"
+input-hash: "b70a8ae"
 traces_to: ../prd.md
 deployment_topology: single-service
+
 ---
 
 # Architecture Index: hylo P1 (status line)
@@ -70,7 +71,7 @@ deployment_topology: single-service
 
 | ID | Decision | Section | Rationale (one-line) |
 |----|----------|---------|---------------------|
-| AD-01 | Single static binary, modular monolith, six P1 packages | ARCH-00 | One binary per OS is the PLAN §3 goal; subcommands later |
+| AD-01 | Single static binary, modular monolith, seven P1 packages (pass-4 A19) | ARCH-00 | One binary per OS is the PLAN §3 goal; subcommands later |
 | AD-02 | Strictly acyclic deps; pyfmt/platform sinks; x/sys sole runtime dep | ARCH-00 | Cycles defeat verification scoping; stdlib-first budget |
 | AD-03 | Pure widgets + ordered effect script (not one pure function) | ARCH-03 | Failed-replace read-back semantics require order-preserving effects |
 | AD-04 | Hand-written pyfmt with CPython-generated tables, banned Go stdlib codecs on protocol inputs | ARCH-06 | Every cache/widget byte depends on CPython fidelity |
@@ -82,7 +83,7 @@ deployment_topology: single-service
 | AD-10 | Env seam set; HYLO_TEST_NOW is a harness hook, not a setting | ARCH-03 | Determinism seams double as harness hooks (RK-5 disposition) |
 | AD-11 | Closed verb-scoped exit-code table; 3-OS gate; GitHub Releases | ARCH-01/08 | Exhaustive test surface; D5/D12 |
 | AD-12 | Reserved P2-P7 boundaries named; P1 skeleton pre-provisions only FileLayer + backends validator | ARCH-09 | Feature Mode needs unblocked seams, not designs |
-| AD-13 | Fixture co-location under internal/statusline/testdata, runner in internal/parity | ARCH-07 | One fixture home; testdata is opaque to Go, cross-read is deliberate (confirmed by OD-148) |
+| AD-13 | Synthetic-corpus co-location: corpus root `internal/statusline/testdata/parity/cases/` with the committed exclusions file `internal/statusline/testdata/parity/exclusions.json` beside it (OD-148 layout: fixtures stay with the subject package); the generic runner and its `-update` flag live in `internal/parity` and read the fixtures from the subject package; Tier B goldens stay under `internal/statusline/testdata/goldens` | ARCH-07 | One fixture home per fixture class; testdata is opaque to Go, cross-read is deliberate (OD-148; the pass-4 D10 fix aligned all live docs to this layout) |
 | AD-14 | Test-only dependencies, pinned in go.mod at adoption: `github.com/flyingmutant/rapid` (metamorphic property generators, ARCH-06/ARCH-00) and `gremlins` (mutation-testing CLI, P19 tool named in ARCH-00) | ARCH-00/06/08 | Each carries a stated reason per the dependency policy; they never enter the runtime binary; the go.mod test-dep additions land on main with the owner's approval (ADV-P2-A19, spec-only in pass 2) |
 
 ## Owner tensions (all resolved by owner rulings)
@@ -94,8 +95,14 @@ deployment_topology: single-service
    exit status. There is no unknown-key config-error class to build a story against
    (BC-2.01.001 PC-6, BC-2.01.002 PC-5, VP-015; ADV-P1-A03).
 2. **Fixture co-location** (AD-13) — resolved by OD-148 (owner, 2026-11-16): fixtures
-   stay with the subject package under `internal/statusline/testdata/parity/...`; the
-   runner `internal/parity` stays generic; AD-13 confirmed.
+   stay with the subject package — corpus root `internal/statusline/testdata/parity/cases/`
+   and committed exclusions file `internal/statusline/testdata/parity/exclusions.json`
+   beside it; the runner `internal/parity` stays generic and reads the fixtures from the
+   subject package (multi-step `steps` live inside `case.json`); AD-13 confirmed. Tier B
+   goldens remain under `internal/statusline/testdata/goldens`. The pass-4 D10 fix
+   aligned every live doc (ARCH-07, BC-6.02.001/.003, BC-6.03.003/.004, BC-6.04.003,
+   the ss-01/ss-02 exclusion rows and the VP-009/VP-012 harness skeletons) to this
+   OD-148 layout (BC-6.03.003/.004 PC-1).
 3. **Tier C clean-run count** — resolved by OD-149 (owner, 2026-11-16): the Tier C exit
    condition is ONE clean nightly differential-fuzz run on all three OSes, 30 minutes
    of fuzzing per OS (`HYLO_PARITY_FUZZSECONDS=1800`); owner judgment call.
@@ -112,19 +119,19 @@ verification-feasibility assessments that Pass 2 formalized.
 
 ## Verification Properties (Pass 2 cross-reference)
 
-Catalog: `../verification-properties/VP-INDEX.md` — 40 VPs covering all 154 BCs
-(machine-checked, rebuilt 2026-11-18T02:27:55Z after the pass-3 sync: BC-5.01.007 added
-to VP-023's `bcs:`, VP-012 v1.4 rider names aligned to the rider BCs; by-class and
-by-method totals unchanged from v1.5). By class: invariant 32,
-safety 7, performance 1. By primary method: unit/table 20, property/fuzz 12, golden 3,
-parity 2, static analysis 1, measured 1, CI observation 1 (regenerated 2026-11-18 per
-CA-02 and SC-05, matching the VP-INDEX Totals; VP-011's body class reads "safety, not
+Catalog: `../verification-properties/VP-INDEX.md` — 41 VPs covering all 154 BCs
+(machine-checked; pass-4 orchestration call 18: `VP-041` = the S1.02 for-all property
+legs split from VP-028, which keeps the bounded golden tables — as VP-040 was split
+from VP-027 in pass 3). By class: invariant 33,
+safety 7, performance 1. By primary method: unit/table 20, property/fuzz 13, golden 3,
+parity 2, static analysis 1, measured 1, CI observation 1 (matching the VP-INDEX Totals
+block, which remains the machine-checked source; VP-011's body class reads "safety, not
 liveness (A2-26)"). Zero formal proofs claimed (iron law: Go cycle — the
 provable-grade pure cores are verified by exhaustive oracle tables + property/fuzz,
 declared per VP). Aggregate VP mapping by primary home (first ARCH home in each
 VP-INDEX catalog row; every VP listed exactly once): ARCH-00 P4 → VP-001; ARCH-01 →
 VP-002/004; ARCH-02 → VP-015/016/017; ARCH-03 →
-VP-003/005/007/008/021/022/027/028/029/030/031/038/039/040; ARCH-04 → VP-018/019/020;
+VP-003/005/007/008/021/022/027/028/029/030/031/038/039/040/041; ARCH-04 → VP-018/019/020;
 ARCH-05 → VP-014/032/033; ARCH-06 → VP-006/023/024/025/026; ARCH-07 →
 VP-009/010/011/012/013/034/035; ARCH-08 → VP-036/037. Eight VPs carry a second ARCH
 home in VP-INDEX (VP-001, VP-005, VP-014, VP-019, VP-020, VP-022, VP-035, VP-038); all

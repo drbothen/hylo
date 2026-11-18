@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "5db72e4"
+input-hash: "99bca80"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,18 +54,16 @@ case, BC-1.05.003).
 ## Postconditions
 
 1. `eq` is computed left to right as `(tot * mtok) / 1e6` in float64.
-2. If `eq >= statusline.cost.basis_min_shown_usd` (default 0.005, operator `>=`): append `\e[90m ⛏` +
-   `F(eq, 2)` + `\e[0m` to the `$` block (half-even `.2f`; `inf` spelled `inf`). Despite the name, this key is the
-   **display floor for the `eq` estimate**, not a basis minimum; the actual basis guard is
-   `statusline.cost.basis_min_mtok_month`.
+2. If `eq >= statusline.cost.display_floor_usd` (default 0.005, operator `>=`): append `\e[90m ⛏` +
+   `F(eq, 2)` + `\e[0m` to the `$` block (half-even `.2f`; `inf` spelled `inf`).
 3. Otherwise append nothing.
 
 ## Invariants
 
 1. A below-threshold estimate never renders `⛏n/a`.
-2. The 0.005 default comes from `statusline.cost.basis_min_shown_usd` (register T-044: "skip sub-half-cent noise");
-   it is the display floor for the `eq` estimate, not a basis minimum — do not confuse it with
-   `basis_min_mtok_month`, which is the real basis guard.
+2. The 0.005 default comes from `statusline.cost.display_floor_usd` (register T-044: "skip sub-half-cent noise"),
+   named for what it is: the display floor of the `eq` estimate. The real basis guard is
+   `statusline.cost.basis_min_mtok_month`.
 3. Cloud-lane and unknown-lane sessions never show `⛏`.
 
 ## Edge Cases
@@ -116,7 +115,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:633-635, inside the ⛏ block SL:626-636) |
 | Legacy contract | BC-SL-083 (deep pass-3 round 1, new) |
-| Config keys | `statusline.cost.basis_min_shown_usd` (T-044), `statusline.cost.basis_min_mtok_month`, `backends[0].model_prefixes` (OD-123), `statusline.glyphs.*` |
+| Config keys | `statusline.cost.display_floor_usd` (T-044, renamed from `cost.basis_min_shown_usd` by OD-174), `statusline.cost.basis_min_mtok_month`, `backends[0].model_prefixes` (OD-123), `statusline.glyphs.*` |
 | Parity | byte-exact (no exclusion entry) |
 
 ## Related BCs (Recommended)

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,10 +12,10 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - domain-spec/invariants.md
-input-hash: "4e7ba29"
+input-hash: "d75c50e"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444)"
+extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444, 902-903)"
 subsystem: "SS-02"
 capability: "CAP-015"
 legacy_id: new
@@ -26,6 +26,7 @@ introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D07+D37: all-defaults vector gains queue.false/subagent.true; reserved names extended with HYLO_TIMING_GATE and HYLO_PARITY_FUZZSECONDS"
+  - "2026-11-18T12:00:00Z ADV-P4 remediation D01+D27: all-defaults vector queue.yellow corrected to true (OD-175); LOCAL_MODEL_PREFIXES second legacy read site SL:902-903 cited and BC-1.07.006 consumer listed"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,8 +65,9 @@ happens once per process, before any side effect.
    result.
 4. No legacy name is read. In particular `DGX_SL_VM_URL`, `DGX_SL_TTL`, `DGX_SL_ROWS`,
    `DGX_SL_SPARK`, `DGX_SL_GIT`, `DGX_SL_TRACE` (legacy SL:73-77, 89) and
-   `LOCAL_MODEL_PREFIXES` (legacy SL:444) have no effect whatever their value, including
-   values that crashed legacy.
+   `LOCAL_MODEL_PREFIXES` (legacy reads it twice: render_lane SL:444 for the main lane pill
+   and the subagent model segment SL:902-903 for the per-task lane tag, P1 since OD-155)
+   have no effect whatever their value, including values that crashed legacy.
 5. Resolution runs once, at startup, before stdin decode and before any cache read or write
    (design §3.1 step 0). The resolved `*Config` is immutable for the rest of the run (legacy
    read `LOCAL_MODEL_PREFIXES` at render time; hylo reads it once, which is output-identical
@@ -114,7 +116,7 @@ happens once per process, before any side effect.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| env `{}` | ttl_s 4, rows 2, sparkline.enabled true, sparkline.trace `rate`, git.enabled true, queue.yellow false, subagent.enabled true, `backends[0].metrics_url` `http://192.0.2.10:8428`, `backends[0].model_prefixes` `[claude-sonnet]`, `paths.cache_dir` = platform cache dir (OD-101) | happy-path |
+| env `{}` | ttl_s 4, rows 2, sparkline.enabled true, sparkline.trace `rate`, git.enabled true, queue.yellow true (OD-175: default true = legacy rule, yellow when queue > 0 or preempt > 0), subagent.enabled true, `backends[0].metrics_url` `http://192.0.2.10:8428`, `backends[0].model_prefixes` `[claude-sonnet]`, `paths.cache_dir` = platform cache dir (OD-101) | happy-path |
 | env `{HYLO_STATUSLINE_TELEMETRY_TTL_S: "10"}` | ttl_s 10; others default | happy-path |
 | env `{DGX_SL_ROWS: "2.0", DGX_SL_TRACE: "kv"}` | rows 2, trace `rate` (legacy names ignored) | edge-case |
 | env `{HYLO_STATUSLINE_ROWS: "x"}` | `Load` error `statusline.rows=x (not an integer)` | error |
@@ -130,7 +132,7 @@ happens once per process, before any side effect.
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-107 (P1 config = HYLO_* env + built-in defaults; file layer P4), OD-05 (HYLO_* + config only, no DGX_* aliases), OD-01 (unknown HYLO_* warned), D15; legacy names it replaces: legacy/dgx_statusline.py:module tunables (SL:73-77, 89), render_lane (SL:444) |
+| Source | new — OD-107 (P1 config = HYLO_* env + built-in defaults; file layer P4), OD-05 (HYLO_* + config only, no DGX_* aliases), OD-01 (unknown HYLO_* warned), D15; legacy names it replaces: legacy/dgx_statusline.py:module tunables (SL:73-77, 89), render_lane (SL:444), subagent model-segment lane tag (SL:902-903, P1 since OD-155) |
 | Parity / exclusion | n.a. (no output change for equal effective values; harness sets HYLO_* on the Go side and DGX_* on the legacy side, design §3.2) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |
@@ -145,6 +147,7 @@ happens once per process, before any side effect.
 - BC-2.02.001 — composes with (error rendering)
 - BC-2.03.002 — related to (config path; file not read in P1)
 - BC-3.01.001 — related to (paths.cache_dir default)
+- BC-1.07.006 — consumer (subagent model-segment lane tag reads model_prefixes, SL:902-903)
 
 ## Architecture Anchors (Recommended)
 

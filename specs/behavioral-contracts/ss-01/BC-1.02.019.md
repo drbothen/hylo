@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "6d885b3"
+input-hash: "e95460b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B03): for-all grid-equality and blue-channel legs re-anchored to VP-041 (B01: this BC's default-only Inv 3 stands; the contradicting registry row is the architect's fix); 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -97,8 +98,8 @@ Pinned 2026-11-15 by calling the legacy `heat` under CPython 3.11 (oracle, OD-10
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For all float64 `pct` in a dense grid over [-10, 110] the Go triple equals the CPython triple | generated table vs oracle (arm64) |
-| VP-028 | Blue channel is 30 for all finite inputs | Go property test (testing/quick) |
+| VP-041 | For all float64 `pct` in a dense grid over [-10, 110] the Go triple equals the CPython triple | generated table vs oracle (arm64; VP-028 retains the bounded golden vector table above) |
+| VP-041 | Blue channel is 30 for all finite inputs | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -129,7 +130,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028 — grid equality vs CPython
+- VP-041 — grid equality vs CPython (for-all/differential); VP-028 — the pinned golden vector table above
 
 ---
 

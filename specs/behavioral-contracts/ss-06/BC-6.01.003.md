@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "0d819d5"
+input-hash: "9a36039"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,6 +26,7 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
+  - "1.2.2 2026-11-18: ADV-P4 remediation D24+D28 - HYLO_TEST_NOW grammar authority minted here (decimal regex + finite + time.Time range; runtime surpluses rejected); read-site count reconciled to ten (adds SL:889)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D23+D10: shim contract lists the UTF-8/newline stdio reconfigure duty with a gating canary leg; tenth clock read SL:889 added to stepped read sites"
 deprecated: null
 deprecated_by: null
@@ -43,7 +44,7 @@ A `sitecustomize.py` shim on the oracle's `PYTHONPATH` replaces `time.time`, and
 default-argument forms of `time.strftime`, `time.localtime` and `time.gmtime`, with
 versions that read the frozen instant from `HYLO_TEST_NOW` (OD-58 mode 1). The Go side
 reads the same instant through `Env.Now`; the built binary honors `HYLO_TEST_NOW`. The
-harness sets one instant per refresh step, so all nine `time.time()` reads within a
+harness sets one instant per refresh step, so all ten `time.time()` reads within a
 refresh see the same value. CPython swallows exceptions raised in `sitecustomize`, and
 `-I`/`-E`/`-S` skip the shim without any error. A canary therefore proves, before any
 oracle case runs, that the shim actually took effect.
@@ -58,9 +59,16 @@ oracle case runs, that the shim actually took effect.
 2. The oracle runs with `-s` and the env of BC-6.01.002, which sets `PYTHONPATH` to the
    shim directory and `HYLO_TEST_NOW` to the step instant.
 3. `HYLO_TEST_NOW` is a decimal string produced by the harness with
-   `strconv.FormatFloat(now, 'f', -1, 64)`. Python `float()` and Go
-   `strconv.ParseFloat(s, 64)` both round decimal strings correctly, so both sides get
-   the identical float64 (research P20).
+   `strconv.FormatFloat(now, 'f', -1, 64)`. **Grammar authority (ADV-P4-D24; mirrored by
+   BC-5.04.003 Pre-2):** a value is WELL-FORMED iff it matches
+   `^[+-]?[0-9]+(\.[0-9]*)?([eE][+-]?[0-9]+)?$`, parses to a finite float64, and lies
+   within the `time.Time` representable range (|seconds| ≤ 62135596800; values like
+   `1e300` are malformed). Both shims implement this split identically, rejecting each
+   runtime's surplus: the Go shim does NOT accept `strconv.ParseFloat`'s extras (`inf`,
+   `NaN`, hex floats like `0x1p3` are malformed), and the Python shim's `float()` surplus
+   (surrounding whitespace, `_`, `nan`/`inf` spellings) is likewise malformed. Both sides
+   get the identical float64 for every well-formed value (correct decimal rounding,
+   research P20).
 
 ## Postconditions
 
@@ -144,7 +152,7 @@ oracle case runs, that the shim actually took effect.
 
 | Field | Value |
 |-------|-------|
-| Source | OD-58 (extended clock shim, mode 1 frozen P1-P3); OD-109 (`-s` never `-I`; canary fails the harness if the shim did not load); design §3.2 "Clock" row (freezes `time.time`, `time.strftime`, `time.localtime`, `time.gmtime` from `HYLO_TEST_NOW`, stepped between refreshes); P5r3 §B.3 DET-01..08, DET-15..18; research P20 (decimal string parsed by both sides); legacy read sites `legacy/dgx_statusline.py` SL:231, 243, 304, 322, 408, 499, 558, 825-826 |
+| Source | OD-58 (extended clock shim, mode 1 frozen P1-P3); OD-109 (`-s` never `-I`; canary fails the harness if the shim did not load); design §3.2 "Clock" row (freezes `time.time`, `time.strftime`, `time.localtime`, `time.gmtime` from `HYLO_TEST_NOW`, stepped between refreshes); P5r3 §B.3 DET-01..08, DET-15..18; research P20 (decimal string parsed by both sides); the TEN legacy read sites `legacy/dgx_statusline.py` SL:231, 243, 304, 322, 408, 499, 558, 825, 826, 889 (reconciled with PC-2's list and legacy's grep, ADV-P4-D28) |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |

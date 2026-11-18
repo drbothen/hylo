@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
-input-hash: "b79ef38"
+input-hash: "7f7d14b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy CACHE_DIR at legacy/dgx_statusline.py SL:78)"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D17: default exceptions aligned with BC-2.01.004 PC-4 (two exceptions, OD-101 + OD-111)"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D21/D30 — platform LocalZone contract added (OD-171: TZ honoured on every OS, OS-zone fallback, TZ=UTC parity pins); purity table rescoped to the paths functions (pure over injected env)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,6 +61,18 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
    never read (OD-101, OD-05).
 4. Paths are returned joined with the OS separator (`/` on Unix, `\` on Windows), with no trailing separator.
 5. No directory is created and no file is touched by these functions.
+6. **Local zone resolution (OD-171, ADV-P4-D21):** `internal/platform` also provides
+   `LocalZone(env) (*time.Location, error)`, the only way hylo derives its local zone
+   (`Env.Loc` is populated from it; BC-5.04.001, BC-6.01.002, BC-6.02.003 route through
+   it). On every OS it honours `TZ`: (a) `TZ` set and parseable as an IANA name present in
+   the zone database → that zone (`LoadLocation(name)`); (b) `TZ` set but unparseable /
+   unknown → fall back to the OS local zone (same verdicts as (c)); (c) `TZ` unset → the
+   OS local zone. It never calls `time.Local` directly for the decision (Go's `time.Local`
+   ignores `TZ` on Windows); the OS-zone fallback itself may resolve through the runtime's
+   local-time machinery. Documented limitation (OD-171): POSIX-style TZ strings (e.g.
+   `EST5EDT`) may differ between Go's zone loader and the MSVC runtime on Windows; parity
+   cases therefore pin `TZ=UTC` only (parity harness, BC-6.01.002). Canonical table legs:
+   `TZ` unset / `UTC` / IANA name / unparseable.
 
 ## Invariants
 
@@ -81,6 +94,9 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 | EC-005 | `HYLO_PATHS_CACHE_DIR=~/c` | `$HOME/c` (OD-61 `~` expansion); `CacheDir()` is not consulted |
 | EC-006 | Windows with `XDG_CACHE_HOME` set | Ignored; `%LOCALAPPDATA%\hylo\cache` |
 | EC-007 | Parity harness run (OD-101, design §3.2) | The harness sets `HYLO_PATHS_CACHE_DIR=<temp>/hylo-cache` and points `XDG_CACHE_HOME` and `LOCALAPPDATA` into the temp tree; caches are compared by file name across the two directories (design §5.3), so the directory difference is not a parity diff and needs no exclusion entry |
+| EC-008 | `TZ=Europe/Paris` (valid IANA name) | `LocalZone` returns that zone, on all three OSes (OD-171) |
+| EC-009 | `TZ=Not/AZone` (unparseable/unknown) | fall back to the OS local zone; no error surfaced to the renderer (OD-171) |
+| EC-010 | windows-2025 leg, naive local-time parity cases | executed with no skip — the harness pins `TZ=UTC` for both binaries, so the cases are OS-neutral (OD-171; VP-026's `posix-only` tag removed) |
 
 ## Canonical Test Vectors
 
@@ -136,10 +152,10 @@ TBD — platform paths (design step S7)
 
 | Property | Assessment |
 |----------|-----------|
-| **I/O operations** | syscalls, `/proc`, `sysctl`, Win32 |
-| **Global state access** | none beyond OS probes |
-| **Deterministic** | no (live OS state) |
-| **Thread safety** | build-tag confined per OS |
-| **Overall classification** | infrastructure |
+| **I/O operations** | none — pure computation over the injected env lookup (PC-5: no directory created, no file touched); the enclosing `internal/platform` package is infrastructure (process and OS probes live in its other files) |
+| **Global state access** | none (env lookup is a parameter, Inv 3) |
+| **Deterministic** | yes (given the injected environment; ADV-P4-D30) |
+| **Thread safety** | safe (stateless functions); build-tag confined per OS |
+| **Overall classification** | pure core (package: infrastructure) |
 
 Owning component `internal/platform` (BC-COMPONENT-MAP: plat/paths*.go (per-OS dirs, OD-144) - ARCH-05); the ARCH-00 package table classifies the package infrastructure - syscalls, `/proc`, `sysctl`, Win32, build-tag confined.

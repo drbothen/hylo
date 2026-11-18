@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7d75fbc"
+input-hash: "4f5dcbc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B03): float64-table and never-degrade for-all legs re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,8 +94,8 @@ from this run (not listed in the legacy pass-3 rows).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For all float64 `hr` (including NaN, ±Inf, ±0) the Go segment equals the oracle's | generated table vs oracle |
-| VP-028 | No numeric `hr` degrades | Go property test (testing/quick) |
+| VP-041 | For all float64 `hr` (including NaN, ±Inf, ±0) the Go segment equals the oracle's | generated table vs oracle (VP-028 retains the bounded golden vector table above) |
+| VP-041 | No numeric `hr` degrades | Go property test (testing/quick) |
 
 ## Traceability
 
@@ -125,7 +126,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028 — float64 table equality
+- VP-041 — float64 table equality (for-all/differential) and the never-degrade property; VP-028 — the pinned golden vector table above
 
 ---
 

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:23:00Z
+timestamp: 2026-11-18T14:28:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, behavioral-contracts/ss-01/BC-1.06.001.md, behavioral-contracts/ss-01/BC-1.06.002.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "6386364"
+input-hash: "7f43358"
 traces_to: prd.md
 source_bc: BC-1.06.001
 bcs: [BC-1.06.001, BC-1.06.002, BC-6.03.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: dropped BC-1.03.002 from bcs — VP-018 verifies none of its properties (reset predicate, zero-save, 16-key order)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — OD-163: a save removes only its own temp file, no directory-wide sweep (concurrency ruling for ADV-P2-A03/A2-15); load-failure wording aligned with VP-020 (the next save overwrites the file — A2-03); swallow/retry and cleanup-timing wording reconciled with the skeleton (A2-28)", "1.4 2026-11-18T09:23:00Z: ADV-P3 fix (A2-25) — retry scope pinned: the rename-retry arm is Windows-only (sharing violations are the named Windows fs difference); on POSIX a failed rename reports failure immediately, matching legacy"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: dropped BC-1.03.002 from bcs — VP-018 verifies none of its properties (reset predicate, zero-save, 16-key order)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — OD-163: a save removes only its own temp file, no directory-wide sweep (concurrency ruling for ADV-P2-A03/A2-15); load-failure wording aligned with VP-020 (the next save overwrites the file — A2-03); swallow/retry and cleanup-timing wording reconciled with the skeleton (A2-28)", "1.4 2026-11-18T09:23:00Z: ADV-P3 fix (A2-25) — retry scope pinned: the rename-retry arm is Windows-only (sharing violations are the named Windows fs difference); on POSIX a failed rename reports failure immediately, matching legacy", "1.5 2026-11-18T14:28:00Z: ADV-P4 fix (A2-07) — TestCacheStore_OD110_TempCleanup skeleton OS-gated: the success-after-retry leg runs only on windows (runtime.GOOS gate); POSIX legs assert immediate failure reporting, so a correct implementation no longer goes red on the ubuntu/macos CI legs"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,14 +93,21 @@ const renameRetryLimit = 2 // named constant: transient Windows sharing violatio
 
 func TestCacheStore_OD110_TempCleanup(t *testing.T) {
     dir := tempCacheDir(t)
-    store := newFailingRenameStore(dir, failFirst(renameRetryLimit))
-    if err := store.Save("statusline-abc.json", val); err != nil {
-        t.Fatalf("save within retry budget: %v", err)
+    if runtime.GOOS == "windows" { // A2-07: the retry arm is Windows-only — a
+        // POSIX run must not expect success after failed renames
+        store := newFailingRenameStore(dir, failFirst(renameRetryLimit))
+        if err := store.Save("statusline-abc.json", val); err != nil {
+            t.Fatalf("save within retry budget: %v", err)
+        }
+        if tmps(dir) != 0 { t.Fatal("temp leaked") }
+        if !savedTargetIntact(dir) { t.Fatal("partial file") }
     }
-    if tmps(dir) != 0 { t.Fatal("temp leaked") }
-    if !savedTargetIntact(dir) { t.Fatal("partial file") }
 
-    hopeless := newFailingRenameStore(dir, failFirst(renameRetryLimit+1))
+    // Immediate-failure leg (all OSes): past the retry budget the save reports
+    // failure by error return — and on POSIX the FIRST failed rename already does.
+    fails := renameRetryLimit + 1
+    if runtime.GOOS != "windows" { fails = 1 } // POSIX: no retry arm, report immediately
+    hopeless := newFailingRenameStore(dir, failFirst(fails))
     if err := hopeless.Save("statusline-abc.json", val); err == nil {
         t.Fatal("save past retry budget should report failure, not succeed") // caller swallows (DI-008)
     }

@@ -1,15 +1,17 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.4"
+version: "1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:38:15Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "c2ae96e"
+input-hash: "2746ce6"
 traces_to: prd.md
+modified:
+  - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -37,7 +39,7 @@ traces_to: prd.md
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02, the OD-156 Surface 1 overflow family CP-O01..O05 and CP-O10/O11, and the Surface 3 subagent family CP-A01..A05 (the Surface 2 transcript family CP-O06..O09 resolves to the D4-EX-2 skip discipline, not a line degrade) — BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05 and CP-O10/O11, and the Surface 3 subagent family CP-A01..A05 (the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
@@ -53,7 +55,7 @@ Format (BC-2.02.001, OD-102): `\e[90m` + `hylo: config error: ` + `<key>` + `=` 
 first error in stable registry order; the full list goes to stderr; a config-error run
 writes no caches. `<key>` is the dotted config name (not the env var); `<value>` is
 escaped with control bytes and invalid UTF-8 as `\xNN`. In `--subagent` mode a config
-error emits **zero bytes on stdout**; the reason lines go to stderr (OD-168).
+error emits **zero bytes on stdout**; all reason lines (the full list) go to stderr (OD-168; pass-4 A22).
 
 Classes and owner rulings: number-range (BC-2.02.002; OD-114 keeps TTL 0 valid, contra
 IM-16; every registry key declares a range and an out-of-range value is a number-range
@@ -118,22 +120,27 @@ degrading the whole render (ADV-P2-B01/C01 evidence).
 | CP-O03 | lines segment (SL:857) | BC-1.02.014 | huge int enters `n / 1e6` in `_fmt_lines` |
 | CP-O04 | token segment (SL:866) | BC-1.02.025 | huge int enters `float(n)` in `_fmt_tok_c` |
 | CP-O05 | window-age suffix (SL:558-559) | BC-1.02.017 | huge `total_duration_ms` enters `win_ms − dur` |
-| CP-O10 | cost segment (SL:616) | BC-1.05.007 | huge exact int `usd` from the cost history enters `f"{usd:.2f}"` (int-to-float conversion) |
-| CP-O11 | API-time suffix (SL:623) | BC-1.05.007 | huge exact int `api_ms` from the cost history enters `api_ms / 3.6e6` |
+| CP-O10 | cost segment (SL:616) | BC-1.05.007 | huge exact int `usd` — from stdin `cost.total_cost_usd`, or from the cost history via `cost_thresholds` (SL:255, BC-1.05.005 EC-011) — enters `f"{usd:.2f}"` (int-to-float conversion) |
+| CP-O11 | $/h burn-rate division (SL:622-623) | BC-1.05.007 | huge exact int `api_ms` — from stdin `cost.total_api_duration_ms`, or from the cost history via `cost_thresholds` (SL:255, BC-1.05.005 EC-011) — enters `api_ms / 3.6e6` |
 
-CP-O10/O11 bearer: the cost-history cache (record_cost persisted the huge exact int
-earlier, SL:234-237), so every later refresh on that lane whose entry passes the API-time
-gate raises at the same sites (ADV-P3-C2-01). **OD-166 (owner, 2026-11-18):** a cost value
+CP-O10/O11 bearers (pass-4 B14/C2-10 anchor correction): SL:616 and SL:622-623 read the
+stdin `cost` fields; the cost-history-borne raise happens in `cost_thresholds` at SL:255
+(the history division; BC-1.05.005 EC-011), after record_cost persisted the huge exact int
+earlier (SL:234-237) — not at SL:616/623. The `_hm` API-time-suffix helper (BC-1.02.016)
+uses integer arithmetic only and cannot overflow. **OD-166 (owner, 2026-11-18) as ruled by
+OD-169:** a cost value
 (`usd` or `api_ms`) that cannot convert to float is **not recorded** in the cost history —
 hylo's `record_cost` skips it where legacy persisted the raw int; the current refresh
-still degrades per OD-156 (E-REN-002). The cache-byte divergence cites OD-166 and rides
-the extended D4-EX-2 discipline; the closed ten-id exclusion set is unchanged.
+still degrades per OD-156 (E-REN-002). The resulting cache-byte divergence is the
+closed-set exclusion id `OD-166` (pass-4 ruling OD-169), scoped to cost-history bytes
+written after such a refresh and nothing else; it has its own table test and a VP-012
+closure row, and no longer rides the extended D4-EX-2 discipline.
 
 **Surface 1 exception (OD-156, extending OD-137):** ints beyond int64 at the `_fmt_lines`
 site are carried exactly via `math/big`, staying byte-exact where CPython itself renders
-(`int(1e300)` is exact, SL:853/857 — no degrade); the int64-typed `pyfmt.Int` sketch in
-BC-1.02.026 PC2 is superseded by this ruling — `Int` is exact beyond int64, matching
-ARCH-06 / BC-5.01.003.
+(`int(1e300)` is exact, SL:853/857 — no degrade); `pyfmt.Int` is exact beyond int64
+matching ARCH-06 / BC-5.01.003, in agreement with BC-1.02.026 PC2 (pass-4 B19 — the
+former "superseded int64 sketch" cross-reference, in both directions, is stale).
 
 **Surface 2 — transcript-borne overflow: the offending line is skipped and the in-flight
 turn is dropped (D4-EX-2 extension; sharpened by OD-167).** Hylo's W-predicate family
@@ -186,18 +193,58 @@ foreign descriptors). The pass-3 rulings sharpen the register: **OD-166** - a co
 (`usd` or `api_ms`) that cannot convert to float is not recorded in the cost history (the
 refresh still degrades per OD-156); **OD-167** - a transcript-borne overflow skips the
 line AND drops the in-flight turn; **OD-168** - a config error in `--subagent` mode
-emits zero bytes on stdout with the reason lines on stderr. The closed ten-id exclusion
-set (D4-EX-1/2/3, OD-30, OD-76, `temp-file`, `cp-x03`, OD-159, OD-160, OD-161) is
-unchanged by OD-156 and the pass-3 rulings — the transcript extension rides the existing
-D4-EX-2 id.
+emits zero bytes on stdout with the reason lines on stderr. The closed exclusion set counts
+eleven ids (D4-EX-1/2/3, OD-30, OD-76, `temp-file`, `cp-x03`, OD-159, OD-160, OD-161,
+OD-166): OD-169 added `OD-166` as a closed-set id of its own, scoped to cost-history bytes
+written after a refresh whose `usd` or `api_ms` could not convert to float and nothing
+else (own table test; VP-012 closure row), so the divergence no longer rides the
+extended D4-EX-2 id — the transcript extension still does.
+
+## Foreign-cache crash family CP-C01..C10 (named exclusion OD-160)
+
+The foreign-cache family was minted by owner ruling **OD-160** (ruling Q-b,
+owner-decisions-log-2026-11-14.md:144): foreign-form cached values are out of byte-parity
+scope under the named exclusion id **OD-160**; vectors relying on hand-edited/foreign
+caches are Go table tests, **not byte-parity** (on caches Go authored itself these shapes
+are unreachable — the Go writer emits legacy's exact format). The family is catalogued
+below in the same register shape as the other surfaces. **It lies outside the 47-path
+crash register**, which counts the X/S/T/N/O/A families only (CP-X01..X04, CP-S01..S17,
+CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4 + 17 + 7 + 3 + 11 + 5 = 47); the
+C register is a separate, ninth register. **CP-C06 and CP-C07 are reserved**: minted by
+the OD-160 closed-set label "CP-C01..C10" but not cited by any live BC or VP.
+
+| Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
+|-----------|------------------|--------------|---------|
+| CP-C01 | session-cache load / `effective_rl` consult (SL:273-275, 307-312) | BC-1.01.009, BC-3.02.001 | session cache holds a JSON non-object (e.g. `[]`): the consult yields None or faults outside the load's try |
+| CP-C02 | `effective_rl` short-circuit (SL:312) | BC-1.02.013, BC-1.01.009 | cached `rl_ts` a string while cached `rl` is an object — TypeError at the `isinstance(rl, dict) and` short-circuit |
+| CP-C03 | metrics sample, rows >= 2 (SL:1217-1218) | BC-1.01.009 | wrong-shape metrics fetch result restored from the session cache |
+| CP-C04 | metrics sample, rows >= 2 (SL:1217-1218) | BC-1.01.009 | wrong-shape `up` flag (`up: false` bearer) restored from the session cache |
+| CP-C05 | sparkline history shaping (BC-1.04.003 EC-009) | BC-1.04.003 | a history Point is `[[0]]`-shaped (list of length 1) — IndexError |
+| CP-C06 | — | reserved | not cited by any live BC/VP; reserved within the foreign-cache family (OD-160) |
+| CP-C07 | — | reserved | not cited by any live BC/VP; reserved within the foreign-cache family (OD-160) |
+| CP-C08 | badge/model/project, git segment (SL:441-462, 411) | BC-1.02.005, BC-1.01.009 | git cache foreign forms: cached `ts` a string (`"x"`) — TypeError; top-level JSON array (`[1,2]`) — AttributeError |
+| CP-C09 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | corrupt cost history: top level not an object, or `sessions`/an entry not an object |
+| CP-C10 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | cost-history entry `ts` non-numeric; within-step order exception: the record_cost write lands first, then the fault (BC-1.01.009) |
+
+Family-level citations: BC-1.06.001 EC-001 (the cache loader) and BC-1.04.002 EC-008
+(retention path) cite CP-C01..C10 as a class; VP-001 and VP-020 exercise CP-C09/C10 by
+fault injection (out of parity scope; never-blank/exit-0 per DI-008).
 
 ## Crash-path register coverage
 
 Every CP-S/CP-T/CP-N/CP-O/CP-A trigger resolves to E-REN-001 or E-REN-002 or a stated
-widget fallback (Surface 2 transcript triggers resolve to the D4-EX-2 skip discipline);
+widget fallback (Surface 2 transcript triggers resolve to the D4-EX-2 skip discipline for
+CP-O06..O08 and to the legacy no-write save for CP-O09 — BC-1.03.006 PC5);
 the per-trigger disposition lives in the owning BC (CP-S01..S17 in BC-1.02.x /
-BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-N01/N02 in BC-1.04.x, CP-O01..O11 per the OD-156
+BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-N01/N02 in BC-1.04.x, CP-N03 — the metrics-borne
+degrade: a numeric `__name__` key sorts ahead of every `vllm:` key and `k.startswith`
+raises AttributeError, SL:717 — in BC-1.04.x per the pass-4 design call 17,
+CP-O01..O11 per the OD-156
 register above, CP-A01..A05 per the Surface 3 register). The import/exit-time triggers
 CP-X01/X02 are replaced by D4-EX-3 (BC-2.02.001) and CP-X03 is the named exclusion
-`cp-x03` (BC-1.01.001 EC-005, OD-136); CP-X04 (signals) is out of scope. A trigger whose
+`cp-x03` (BC-1.01.001 EC-005, OD-136); CP-X04 (signals) is out of scope. The
+foreign-cache family CP-C01..C10 (register above) is governed by its named exclusion
+OD-160 — the Python-side observable stays the standard degrade/guard ladder and the
+Go-side obligation is Go table tests, never byte-parity — so its disposition is the
+exclusion itself, not a register gap. A trigger whose
 disposition is neither of those is a spec gap and fails the consistency check.

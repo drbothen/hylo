@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T18:40:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "a821ab6"
+input-hash: "4213b95"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:save_cache (SL:198-206)"
@@ -25,7 +25,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: own-temp-only write-failure cleanup (OD-163) + EC-006 (ADV-P2-C10/C12)"]
+modified: ["1.2.1 2026-11-17: own-temp-only write-failure cleanup (OD-163) + EC-006 (ADV-P2-C10/C12)", "1.2.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
 deprecated: null
 deprecated_by: null
 replacement: null

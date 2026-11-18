@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T13:05:00Z
@@ -13,7 +13,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - CLAUDE.md
-input-hash: "ea5a0e4"
+input-hash: "6737e0c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,10 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-010 added"]
+modified:
+  - "1.2.1 2026-11-17: VP citation reconciliation — VP-010 added"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D08 - setup-python reordered BEFORE go test (Tier A cannot skip under CI=true; aligns with ARCH-08)"
+  - "1.2.3 2026-11-18: pass-4 sync-check SC-08 — converted the mixed flow/block modified history to uniform block style (the mix broke YAML parsing); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,13 +68,16 @@ gitleaks scans the full history. The workflow is gating: any red leg blocks the 
 3. **Steps per leg, in order:**
    1. `gofmt -l .`, which must print nothing;
    2. `go vet ./...`;
-   3. `go test ./...`, which includes the Tier B goldens (BC-6.03.001), the exclusion
+   3. the parity toolchain FIRST: `actions/setup-python` installs CPython 3.11 on the
+      leg BEFORE any `go test`. Its reported absolute interpreter path is exported as
+      `HYLO_PARITY_PYTHON` (OD-108), with `CI=true`, so Tier A cannot skip
+      (BC-6.01.001 PC-6) when the test step below runs it — setup-python must precede
+      `go test ./...` or every leg fails (ADV-P4-D08, aligning this BC with ARCH-08's
+      corrected order). The clock-shim canary runs first (BC-6.01.003).
+   4. `go test ./...`, which includes Tier A (live differential, now with
+      `HYLO_PARITY_PYTHON` set), the Tier B goldens (BC-6.03.001), the exclusion
       table tests (BC-6.03.004) and the corpus hygiene test (BC-6.02.001). Linux and
       macOS add `-race`; Windows runs without it.
-   4. the parity job: `actions/setup-python` installs CPython 3.11. Its reported
-      absolute interpreter path is exported as `HYLO_PARITY_PYTHON` (OD-108), with
-      `CI=true`, so Tier A cannot skip (BC-6.01.001). The clock-shim canary runs first
-      (BC-6.01.003).
 4. **gitleaks.** One job checks out with `fetch-depth: 0` and runs a pinned,
    checksum-verified gitleaks binary over the whole history with
    `--log-opts="--all"`. This matches the CLAUDE.md pre-push command. A finding fails

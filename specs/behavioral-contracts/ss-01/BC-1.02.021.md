@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6ac5b1e"
+input-hash: "4f5dcbc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B03): Str-vs-str fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -105,7 +106,7 @@ the deep pass-3 round 1 finding (crash at print, BC-1.01.008).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | `pyfmt.Str(v)` equals CPython `str(v)` for generated JSON values (nested lists/objects, big ints, floats) | fuzz vs oracle |
+| VP-041 | `pyfmt.Str(v)` equals CPython `str(v)` for generated JSON values (nested lists/objects, big ints, floats) | fuzz vs oracle (VP-028 retains the bounded golden tables) |
 | VP-028 | Falsy values select the next candidate | table test |
 
 ## Traceability
@@ -138,7 +139,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028 — `Str` equals CPython `str`
+- VP-041 — `Str` equals CPython `str` (fuzz); VP-028 — golden label bytes
 
 ---
 

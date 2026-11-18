@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "278b2ba"
+input-hash: "4f5dcbc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B04): Refactoring Notes aligned with the superseding definition — pyfmt.Int(x float64) (Num, error), exact beyond int64 (BC-1.02.026 PC2, ARCH-06); 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B05/B03): EC-006 and its vector row tagged OD-160 (hand-edited-cache shape); _hm fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +68,7 @@ degraded line. NaN and `-Infinity` durations never reach `_hm` (they fail the `>
 | EC-003 | `dur` = NaN | timer hidden |
 | EC-004 | `api = -Infinity` | no suffix |
 | EC-005 | Finite `dur` above about 5.53e23 ms (minutes beyond int64) | legacy renders exact big-integer hours (for `1e24`: `⏱ 277777777777777766h24m`); resolved by OD-137: byte-exact via `math/big` at this duration-format site — no wrap, no degrade, no exclusion entry |
-| EC-006 | Window-age `win_ms = +inf` (win_start `-Infinity`) | raises the same ValueError at SL:560 (not via `_hm`); owned by BC-1.02.028 |
+| EC-006 | Window-age `win_ms = +inf` (win_start `-Infinity`; hand-edited-cache shape, **OD-160**) | raises the same ValueError at SL:560 (not via `_hm`); owned by BC-1.02.028 |
 
 ## Canonical Test Vectors
 
@@ -82,6 +83,7 @@ stdin `{"cost": {...}}`.
 | `total_duration_ms: -Infinity` | no timer segment | edge-case |
 | `total_duration_ms: 120000, total_api_duration_ms: -Infinity` | timer segment `\e[90m⏱ 2m\e[0m` | edge-case |
 | `total_duration_ms: Infinity` | whole stdout = `\e[90mstatusline degraded\e[0m\n` | error (CP-S12) |
+| `total_duration_ms: 120000`, win_start = `-Infinity` (hand-edited-cache shape, **OD-160**) | whole stdout = `\e[90mstatusline degraded\e[0m\n` (ValueError at SL:560; owned by BC-1.02.028, EC-006) | error |
 | `total_duration_ms: 120000, total_api_duration_ms: Infinity` | whole stdout = `\e[90mstatusline degraded\e[0m\n` | error (CP-S13) |
 
 Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-104).
@@ -91,7 +93,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028, VP-001 | `+Infinity` in `dur`, or in `api` with a shown timer, degrades; NaN/`-Infinity` never degrade | table test |
-| VP-028 | `_hm` output equals CPython for finite float64 inputs across the full range | fuzz vs oracle |
+| VP-041 | `_hm` output equals CPython for finite float64 inputs across the full range | fuzz vs oracle (VP-028 retains the bounded golden tables) |
 
 ## Traceability
 
@@ -124,7 +126,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028, VP-001 — `+Infinity` degrades
+- VP-028, VP-001 — `+Infinity` degrades; VP-041 — `_hm` fuzz equality
 
 ---
 

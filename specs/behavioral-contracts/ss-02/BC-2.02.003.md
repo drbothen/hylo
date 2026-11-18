@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "e649c6c"
+input-hash: "5ea52a3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy float()/int() parse at legacy/dgx_statusline.py SL:74-75)"
@@ -25,6 +25,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D14 — Nd classification pinned to hylo's generated Unicode 14.0.0 tables (OD-170); TestD4EX3_Name rename (D22)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,7 +56,11 @@ BC-2.02.001):
 
 1. The value contains `_` (U+005F) anywhere → `<key>=<value> (underscore in numeral)`.
 2. The value contains a code point of Unicode category Nd other than ASCII `0`-`9` (e.g.
-   U+0664 `٤`, U+FF14 `４`) → `<key>=<value> (non-ASCII digit)`.
+   U+0664 `٤`, U+FF14 `４`) → `<key>=<value> (non-ASCII digit)`. The Nd classification is
+   consulted from hylo's own generated tables pinned to Unicode 14.0.0 (OD-170, generated
+   from CPython 3.11.7 `unicodedata` by a committed `go generate` script); pyfmt never
+   consults Go's `unicode` package for this class, so the verdict is oracle-stable
+   regardless of the Go release's newer tables.
 3. `Seconds`/`Float`: `pyfmt.ParseFloat` (Python 3.11 `float()` grammar, BC-5.01.002) fails
    → `<key>=<value> (not a number)`. Accepted forms keep Python semantics: surrounding
    whitespace, leading `+`/`-`, exponent (`1e1`), `nan`/`inf`/`infinity` spellings (then
@@ -112,13 +117,14 @@ BC-2.02.001):
 |--------|----------|-------------|
 | VP-016, VP-012 (frontmatter closure) | For ASCII-only, underscore-free strings, hylo's parse result equals CPython 3.11 `float()`/`int()` (oracle table) | table test vs CPython goldens + fuzz |
 | VP-016, VP-012 (frontmatter closure) | No string containing `_` or a non-ASCII Nd digit is accepted | Go property test (testing/quick) |
+| VP-023 (tables leg) | Nd verdicts match CPython 3.11.7 (`unicodedata`, Unicode 14.0.0) for every code point the generated-table test sweeps; the generated file is pinned by a version constant and CI fails when stale (OD-170) | generated-table test vs pinned oracle |
 
 ## Traceability
 
 | Field | Value |
 |-------|-------|
 | Source | new — OD-114 (T10: `4_0`-style underscores and Unicode digits are config errors), OD-102, OD-103 (pyfmt grammar), PR-18; legacy behavior replaced: legacy/dgx_statusline.py:module tunables (SL:74 `float(DGX_SL_TTL)`, SL:75 `int(DGX_SL_ROWS)`); legacy contract notes BC-SL-087, CP-X01/CP-X02 (pass-3 r1) |
-| Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3`, one case per value (`4_0`, `٤`, `2_0`, `٢`, and the legacy crash inputs `""`, `four`, `0x4`, `2.0`, plus the OD-164 number-RANGE cases: the int64-overflow `99999999999999999999` and the Duration-ceiling `9223372036.854776`), each with its expected output file; dedicated table test `TestConfigError_D4EX3_Number` (OD-105, OD-110, OD-164, ADV-P2-D09) |
+| Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3`, one case per value (`4_0`, `٤`, `2_0`, `٢`, and the legacy crash inputs `""`, `four`, `0x4`, `2.0`, plus the OD-164 number-RANGE cases: the int64-overflow `99999999999999999999` and the Duration-ceiling `9223372036.854776`), each with its expected output file; dedicated table test `TestD4EX3_Number` (OD-105, OD-110, OD-164, ADV-P2-D09) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-008, DI-010 |
 | Architecture Module | `internal/config/types.go`; `internal/pyfmt/num.go` (BC-COMPONENT-MAP: internal/config/errors.go (number-grammar class) — ARCH-02) |

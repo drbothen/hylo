@@ -1,15 +1,16 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T08:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "c3b4cd1"
+input-hash: "05bc8a1"
+
 ---
 
 # DTU Assessment: hylo P1 (status line)
@@ -160,6 +161,7 @@ above; no further extension beyond the platform-family cases already scheduled
 | 2 | Claude Code statusLine stdin | Upstream push contract — clone *is* the fixture corpus, already mandated by ARCH-07 |
 | 3 | git repository state | Local filesystem content; seeded tree behind `Files`/`Cwd` seams is exact |
 | 4 | Per-OS process tables | Host-fidelity impossible in containers on macOS/Windows; seam fake is the only faithful clone |
+| 5 | Claude Code `subagentStatusLine` agent-panel stdin (OD-155) | Second upstream push contract — same reason as #2: its clone is the `subagent`-family harness corpus rows (pass-4 A2-21: row was missing from this table though present in the inventory and Dependency Summary; ASSUMP-107-1 capture still pending) |
 
 ## DTU Architecture
 

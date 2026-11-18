@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.2"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "ac3dc50"
+input-hash: "b6774a1"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "pass-3 remediation (ADV-P3-B02): file-read encoding pinned to OD-159 (Go reads files as UTF-8 on all OSes, named deviation); the LANG rationale replaced; 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B18/B06/B07/B03): CPython os.fsencode/surrogateescape path-encoding pin (P18); parity-class row acknowledges the OD-159 deviation; DI-012 cited; for-all walk-termination and fake-FS syscall legs re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,6 +55,13 @@ error occurs. It never invokes the git binary.
    instead of erroring. Windows-oracle goldens for non-ASCII or
    invalid-UTF-8 HEAD/`.git` content therefore carry the OD-159 exclusion and are regenerated
    on the Windows CI leg (EC-012); POSIX goldens are unaffected.
+
+   **Path-encoding pin (P18, pass-4 ADV-P4-B18):** path arguments are encoded exactly as CPython encodes them with
+   `os.fsencode` — the `surrogateescape` handler: code points U+DC80..DCFF map to the raw bytes 0x80..0xFF, so
+   `.../\udcff/sub` stats a real directory whose name is the single byte 0xFF; any other lone surrogate raises
+   `UnicodeEncodeError` on encoding and counts as not-a-directory (the walk's `except` returns `""`). Go must
+   reproduce this mapping byte-for-byte: a WTF-8 port would statt the three bytes ED B3 BF and the `sub` label
+   would not degrade, diverging the branch (oracle-verified CPython 3.11.7, 2026-11-17).
 
 ## Postconditions
 
@@ -98,6 +106,7 @@ error occurs. It never invokes the git binary.
 | EC-010 | HEAD bytes invalid UTF-8 | decode error → `""` (no further walking) |
 | EC-011 | start dir does not exist | walk still runs lexically; an existing ancestor repo is found if any, else `""` |
 | EC-012 | Windows paths | ntpath `abspath`/`dirname`/`join`; the loop ends when `dirname(d) == d` at the drive root; OS-specific goldens |
+| EC-013 | Directory segment holding a lone surrogate (hand-crafted tree) | U+DC80..DCFF encode to the raw bytes 0x80..0xFF (`os.fsencode`/surrogateescape); any other lone surrogate raises → treated as not-a-directory → `""`; Go reproduces the mapping (P18 pin, PC2) |
 
 ## Canonical Test Vectors
 
@@ -122,8 +131,8 @@ temp root `<T>` that has no repository above it.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | Walk terminates for every start path (strictly shorter `d` each step until `dirname(d)==d`) | table test + reasoning |
-| VP-028 | No write syscalls during the walk | fake FileSystem test |
+| VP-041 | Walk terminates for every start path (strictly shorter `d` each step until `dirname(d)==d`) | table test + reasoning (VP-028 retains the bounded golden tables) |
+| VP-041 | No write syscalls during the walk | fake FileSystem test (VP-028 retains the bounded golden tables) |
 | VP-028 | Results equal the oracle on the 10-layout table (pass-3 #3) on all three OSes | table test against CPython goldens |
 | VP-012 | The named deviation this contract defines — exclusion id `OD-159` (Go reads files as UTF-8 on all OSes; Windows HEAD/`.git` decoding) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-159` entry and its riding table test `TestGitTextReads_OD159_StrictUTF8`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
@@ -133,9 +142,9 @@ temp root `<T>` that has no repository above it.
 |-------|-------|
 | Source | Source: legacy/dgx_statusline.py:git_branch (SL:364-396; allocation cites SL:372-396, the body) |
 | Legacy contract | BC-SL-009 (confirmed fully guarded, locale text mode: pass-3 r1 §A; r8 audit) |
-| Parity class | byte-exact (no exclusion-list entry) |
+| Parity class | byte-exact; carries the named deviation `OD-159` (Go reads files as UTF-8 on all OSes — PC2, EC-012), covered by the exclusion-closure row VP-012 |
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 |
 | Owner decisions | D5 (cross-platform, no shelling out to git), OD-104 (oracle CPython 3.11), OD-159 (files read as UTF-8 on all OSes — Windows HEAD/`.git` decoding cases) |
 | Config keys | none directly (enable/TTL in BC-1.02.005) |
 | Architecture Module | `internal/statusline/git.go` (design §2.2) |
@@ -159,7 +168,7 @@ TBD — branch segment story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — walk termination and read-only property
+- VP-041 — walk termination and read-only property (for-all start paths; fake-FS no-syscall leg); VP-028 — golden layout table
 - VP-012 — exclusion-closure cover for the named deviation `OD-159`
 
 ---

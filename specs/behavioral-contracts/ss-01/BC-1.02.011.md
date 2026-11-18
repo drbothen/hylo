@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "0a4ac25"
+input-hash: "6f1b8e8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:510-522, 531-532)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B04): EC-010 names CP-O02 and states the exact int->float threshold; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,7 +83,7 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 | EC-007 | pct 120 / -5 | clamped to 100 / 0 before banding and text |
 | EC-008 | pct 44.5 / 45.5 | text `44%` / `46%` (half-even) |
 | EC-009 | pct NaN | `7dnan%` grey, countdown kept (BC-1.02.024 family, pass-3 r1 BC-SL-061) |
-| EC-010 | `resets_at` a JSON integer beyond float64 range (e.g. 10³⁰⁹) | `reset - now` raises OverflowError at SL:515 (mixed int/float arithmetic converts the int) → guard line (stdin-borne render overflow, OD-156) |
+| EC-010 | `resets_at` a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17: `2**1024 − 2**970 − 1` converts, `2**1024 − 2**970` raises; e.g. 10³⁰⁹) | `reset - now` raises OverflowError at SL:515 (mixed int/float arithmetic converts the int) → guard line (stdin-borne render overflow, OD-156; taxonomy **CP-O02**) |
 
 ## Canonical Test Vectors
 
@@ -104,6 +105,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; `rate_limits` shown,
 | 7d -5 % no reset | `\e[90m7d0%\e[0m` | edge-case |
 | 7d 44.5 % / 45.5 % no reset | `\e[90m7d44%\e[0m` / `\e[90m7d46%\e[0m` | edge-case |
 | 7d `used_percentage` `"44"` | none (unreported, BC-1.02.010) | error |
+| 5h `resets_at` = OV (`2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792, the smallest positive integer that fails float conversion) | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (`reset - now` OverflowError at SL:515; CP-O02, EC-010) | error |
 
 ## Verification Properties
 

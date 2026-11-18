@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:20:00Z
+timestamp: 2026-11-18T15:02:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "b7953c3"
+input-hash: "7af5e45"
 traces_to: prd.md
 source_bc: BC-6.04.002
 bcs: [BC-6.04.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — sampling aligned to NFR-001: 20 runs per case, p95 = 19th sorted, binds per case, no pooling (A2-27)", "1.3 2026-11-18T09:20:00Z: ADV-P3 fixes (A2-09) — skeleton drops Go-named arguments (positional call with comments); gate computation excludes the >512 KB oversize fixture, which is timed and reported but exempt from the gate"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — sampling aligned to NFR-001: 20 runs per case, p95 = 19th sorted, binds per case, no pooling (A2-27)", "1.3 2026-11-18T09:20:00Z: ADV-P3 fixes (A2-09) — skeleton drops Go-named arguments (positional call with comments); gate computation excludes the >512 KB oversize fixture, which is timed and reported but exempt from the gate", "1.4 2026-11-18T15:02:00Z: ADV-P4 fix (A2-19) — the >512 KB fixture exemption made conditional per product-brief: the exception applies only when the fixture misses the p95 target; if it meets the budget it is gated like every case"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,9 +41,10 @@ Sampling discipline is per **case** (NFR-001): each case gets 1 warm-up + 20 tim
 runs; the case's 20 samples are sorted and the nearest-rank p95 is the 19th sample;
 the gate **binds per case** — every case's p95 must meet the budget, with no pooling
 across the corpus (pooling would hide a slow case behind fast ones). One stated
-exception: the >512 KB-line fixture is timed and reported but its
-miss does not fail the gate (the exception product-brief's speed judgment call
-promises to state). The gate fails the build only with `HYLO_TIMING_GATE=1` — it binds on
+exception, conditional per the product brief: the >512 KB-line fixture is timed and
+reported, and its miss does not fail the gate ONLY if it actually misses the target
+(the exception the brief's speed judgment call states explicitly); if it meets the
+budget it is judged like any other case. The gate fails the build only with `HYLO_TIMING_GATE=1` — it binds on
 the owner's Mac target; CI legs print the report and pass regardless.
 
 ## Source Contract

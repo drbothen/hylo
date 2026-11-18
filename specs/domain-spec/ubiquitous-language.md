@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "ubiquitous-language"
-version: "1.4"
+version: "1.5"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T01:55:00Z
+timestamp: 2026-11-18T03:35:34Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md]
-input-hash: "6d19052"
+input-hash: "8f2fec5"
 traces_to: L2-INDEX.md
 ---
 
@@ -36,14 +36,14 @@ traces_to: L2-INDEX.md
 | **Near-key** | Composite correlation key `(session, path, model_req, req_bytes)` ±1 s — ambiguous on client retries | LEGACY-OBSERVED (P2r4 §3.3) |
 | **Flow / flow_id** | One request + outcomes; exact correlation via the internal event stream only | DECIDED OD-25 |
 | **Ledger** | The append-only JSONL of 13 legacy-named events (D7-frozen) | DECIDED D7 |
-| **Degraded line / ladder** | One-line output, exit 0, for any fault (DI-008); the degraded line itself is exactly 29 bytes (BC-1.01.001) — the config-error and unknown-flag rungs render longer lines. Carve-out: the `--subagent` agent-panel mode (OD-155) prints JSON lines or zero bytes — never the ladder; a config error there yields zero bytes on stdout with the diagnostic on stderr (OD-168) | LEGACY-OBSERVED + DECIDED OD-102/OD-155/OD-168 |
+| **Degraded line / ladder** | One-line output, exit 0, for any fault (DI-008); the degraded line itself is exactly 29 bytes (BC-1.01.001) — the config-error and unknown-flag rungs render longer lines. Carve-out: the `--subagent` agent-panel mode (OD-155) prints JSON rows on success and zero stdout bytes for zero tasks, unparseable stdin, enabled=false and config errors (OD-168: diagnostic on stderr); a catalogued render fault there (CP-A01..A05) still reaches the ladder's bottom rung — the same 29-byte line (BC-1.07.008) | LEGACY-OBSERVED + DECIDED OD-102/OD-155/OD-156/OD-168 |
 | **Config-error line** | `hylo: config error: <key>=<value> (<reason>)`, exit 0 (D4-EX-3) | DECIDED OD-102 |
 | **Widget** | One status line visual element with rule-level tests | LEGACY-OBSERVED (STATUSLINE-WIDGETS) |
 | **Freshness ladder** | fresh/stale/dead + serving-down (SM-05) | LEGACY-OBSERVED |
 | **Fake stop / Kev / verdict** | Optional Stop-hook oracle mediating turn completion; median-of-3, `p < 0.40`; regex fallback | LEGACY-OBSERVED; optional DECIDED D11 |
 | **Composition** | Byte-share of context since the last compaction boundary (`▤❙◈`) | LEGACY-OBSERVED |
 | **Plan window** | The 5h/7d subscription usage windows, computed by the status line from stdin `rate_limits` only — captured headers stay in the ledger (ADV-P2-A2-19) | LEGACY-OBSERVED |
-| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle; the closed id set is D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161 (BC-6.03.004) | DECIDED OD-105/OD-110/OD-136 |
+| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle; the closed id set is D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166 (BC-6.03.004) | DECIDED OD-105/OD-110/OD-136, OD-169 |
 | **Parity** | Byte/decision equality with the frozen prototype on recorded inputs; definition of done P1-P3 (D4) | DECIDED D4 |
 | **Rebuild (exporter)** | Full rescan of ledger + hook log into exporter state | LEGACY-OBSERVED; trigger DECIDED OD-39 |
 | **Exposition** | The 28-name Prometheus text rendering on `/metrics` | LEGACY-OBSERVED |

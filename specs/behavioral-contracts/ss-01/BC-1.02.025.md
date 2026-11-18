@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r5.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "5a51d58"
+input-hash: "ee13ff6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B04/B03): EC-010 names CP-O04 with the exact int->float threshold; canonical OV overflow vector added; float64 fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,7 +81,7 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 | EC-007 | `None`, `"abc"`, `[1]` | `?` |
 | EC-008 | `True` | `1` |
 | EC-009 | `-5` | `-5` |
-| EC-010 | a JSON integer beyond float64 range, e.g. 10³⁰⁹ | `float(n)` raises OverflowError (uncaught) → guard line (OD-156, stdin-borne render overflow); oracle-verified 2026-11-17 |
+| EC-010 | a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17), e.g. 10³⁰⁹ | `float(n)` raises OverflowError (uncaught) → guard line (OD-156, stdin-borne render overflow; taxonomy **CP-O04**) |
 
 ## Canonical Test Vectors
 
@@ -112,6 +113,7 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 | `None` | `?` | error |
 | `"abc"` | `?` | error |
 | `[1]` | `?` | error |
+| OV = `2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792 (the smallest positive integer that fails float conversion) | `float(n)` raises OverflowError (uncaught at SL:866; full render prints the 29-byte guard line; CP-O04, EC-010) | error |
 
 Pinned 2026-11-15 by calling the legacy `_fmt_tok_c` under CPython 3.11 (oracle, OD-104); consistent with deep
 pass-3 rounds 1 and 5.
@@ -120,8 +122,8 @@ pass-3 rounds 1 and 5.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For all float64 inputs, Go output equals CPython output | fuzz vs oracle |
-| VP-028 | Overflow behavior per Inv 1: `?` on TypeError/ValueError; beyond-float64 integers raise OverflowError → guard line | table test + fuzz |
+| VP-041 | For all float64 inputs, Go output equals CPython output | fuzz vs oracle (VP-028 retains the bounded golden tables) |
+| VP-028 | Overflow behavior per Inv 1: `?` on TypeError/ValueError; beyond-float64 integers raise OverflowError → guard line | table test (fuzz leg rides VP-041) |
 
 ## Traceability
 
@@ -152,7 +154,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028 — float64 fuzz equality
+- VP-041 — float64 fuzz equality; VP-028 — golden token-format vectors
 
 ---
 

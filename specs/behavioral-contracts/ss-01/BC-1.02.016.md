@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "2e4f698"
+input-hash: "748d355"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B03): for-all suffix-presence leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -98,7 +99,7 @@ All expected values pinned 2026-11-15 by running the legacy `render_lane` under 
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For every finite numeric `api` and shown timer, the suffix is present iff `api >= 60000` | Go property test (testing/quick; table + generated values vs oracle) |
+| VP-041 | For every finite numeric `api` and shown timer, the suffix is present iff `api >= 60000` | Go property test (testing/quick; table + generated values vs oracle; VP-028 retains the bounded golden tables) |
 | VP-028 | The suffix bytes equal `\e[2m·` + `_hm(api)` + `\e[0m` | table test vs oracle |
 
 ## Traceability
@@ -131,7 +132,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028 — presence iff `api >= 60000`
+- VP-041 — presence iff `api >= 60000` (for-all); VP-028 — golden suffix bytes
 
 ---
 

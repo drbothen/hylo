@@ -1,14 +1,14 @@
 ---
 document_type: module-criticality
 level: ops
-version: "1.6"
+version: "1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:38:15Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "c2ae96e"
+input-hash: "2746ce6"
 traces_to: prd.md
 ---
 
@@ -59,6 +59,12 @@ rulings OD-155..OD-165 are settled constraints for this schedule.
 | CLI (S4) | `cmd/hylo` | MEDIUM | thin dispatch over statusline/config; usage goldens pin it | >= 80% | 5 (VP-001, -002, -003, -004, -016) |
 | Pyfmt (S5) | `internal/pyfmt` | CRITICAL | parity foundation under every widget and both JSON modes; Python-semantics surface (half-even, WTF-8, divmod) is where mutants hide | >= 95% | 7 (VP-005, -006, -023, -024, -025, -026, -038) |
 | Parity Harness (S6) | `internal/parity` | HIGH | referees D4: weak machinery fake-passes parity; strong mutants survive behind it | >= 90% | 8 (VP-009, -010, -011, -012, -019, -034, -035, -037) |
+| Exporter (S7) | — | Reserved (P2) | — | — | — |
+| Proxy And Routing (S8) | — | Reserved (P3) | — | — | — |
+| Ledger (S9) | — | Reserved (P3) | — | — | — |
+| Launcher Hook Doctor CA (S10) | — | Reserved (P4) | — | — | — |
+| UIs (S11) | — | Reserved (P4/P6) | — | — | — |
+| Multi-Backend (S12) | — | Reserved (P6) | — | — | — |
 
 > VP counts regenerated from `verification-properties/VP-INDEX.md` (Catalog Module
 > column; regenerated 2026-11-18T05:30:00Z, adv-p2 sync SC-03 — includes
@@ -71,12 +77,6 @@ rulings OD-155..OD-165 are settled constraints for this schedule.
 > (internal/cost) has its own row since the ADV-P1-A16 burst; VP-035 spans
 > internal/parity and CI; VP-037 (module "CI workflow") is attributed to S6 via
 > source_bc BC-6.04.001. Union across the classifications = 40/40 (all 40 VPs).
-| Exporter (S7) | — | Reserved (P2) | — | — | — |
-| Proxy And Routing (S8) | — | Reserved (P3) | — | — | — |
-| Ledger (S9) | — | Reserved (P3) | — | — | — |
-| Launcher Hook Doctor CA (S10) | — | Reserved (P4) | — | — | — |
-| UIs (S11) | — | Reserved (P4/P6) | — | — | — |
-| Multi-Backend (S12) | — | Reserved (P6) | — | — | — |
 
 ## Per-Module Risk Assessment
 
@@ -128,7 +128,8 @@ test-only.)
 
 ## Implementation Priority Order
 
-1. internal/platform — infrastructure sink, nothing imports it; per-OS dirs and probes
+1. internal/platform — infrastructure import sink (the frame, config, window age and
+   parity harness all import it); per-OS dirs and probes
    the frame, config defaults and window age need (correct order per ADV-P2-A10:
    config imports platform)
 2. internal/pyfmt — pure sink; parity foundation; every widget consumes it (design step S1)

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "44590c6"
+input-hash: "5cb6c46"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1149; raise sites SL:994, 1069, 1072, 1079, 1097, 1099, 1108, 1112, 1143, 1145)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: eighth crash path CP-T08 numeric overflow (ruling OD-156; ADV-P2-C01)", "1.2.3 2026-11-17: CP-T08 renamed to taxonomy ids CP-O06..O08 (OD-156 register)", "1.2.4 2026-11-17: pass-3 remediation (ADV-P3-C03/C06/C07/C10/C11): ten-predicate count, CPython int→double overflow bound 2^1024−2^970, CP-O07 re-anchored to the SL:1117 rebuild check (owner BC-1.03.007), CP-O08 closer-skip plus in-flight turn drop (ruling OD-167)"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: eighth crash path CP-T08 numeric overflow (ruling OD-156; ADV-P2-C01)", "1.2.3 2026-11-17: CP-T08 renamed to taxonomy ids CP-O06..O08 (OD-156 register)", "1.2.4 2026-11-17: pass-3 remediation (ADV-P3-C03/C06/C07/C10/C11): ten-predicate count, CPython int→double overflow bound 2^1024−2^970, CP-O07 re-anchored to the SL:1117 rebuild check (owner BC-1.03.007), CP-O08 closer-skip plus in-flight turn drop (ruling OD-167)", "1.2.5 2026-11-18T08:00:00Z: pass-4 remediation: general overflow rule stated — any accumulator OverflowError in the SL:1108-1117 window is CP-O06/O07 class; CP-O06 widened to SL:1108-1112, CP-O07 to either direction incl. huge-int pp vs float prompt (ADV-P4-C08)", "1.2.6 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized; closed set restated as eleven ids incl. OD-166 (OD-169)", "1.2.7 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,7 +42,11 @@ the refresh renders normally. This BC defines the ten predicates precisely so th
 mutation. Predicates CP-T01..T07 come from legacy's wrong-shape raise sites; **CP-O06..O08** (rulings OD-156 and OD-167;
 `prd-supplements/error-taxonomy.md`) cover transcript-borne numeric overflow: an exact int with magnitude at or above
 CPython's int→double overflow bound 2^1024 − 2^970 meeting a float operand (oracle-verified `OverflowError` "int too
-large to convert to float"; magnitudes below the bound convert silently). The lazy CP-O08 site additionally drops the
+large to convert to float"; magnitudes below the bound convert silently). **General rule (ADV-P4-C08):
+any `OverflowError` raised by an accumulator site in the SL:1108-1117 window — `tin` SL:1108, `c_in`
+SL:1109, `c_wr` SL:1110, `c_rd` SL:1111, `tout` SL:1112, or the rebuild-check arithmetic SL:1117-1118 —
+is CP-O06/O07 class; the per-row "raise site" columns below name the canonical legs, not the full set.**
+The lazy CP-O08 site additionally drops the
 in-flight turn so that later lines parse normally (ruling OD-167; no sticky state, ARCH-03 `#transcript`).
 
 ## Preconditions
@@ -71,8 +75,8 @@ in-flight turn so that later lines parse normally (ruling OD-167; no sticky stat
 | CP-T05 | `ts_ok`, `assistant`, `m.id` truthy, opens a new turn, **`lu` is not null**, the usage is **not counted** (an object whose id is already in `seen_ids`), and `(m.usage or {}).output_tokens` truthy and not a number | SL:994 (lazily, when the turn later closes, possibly next refresh) | previous turn closed, `cur` opened with the bad `out`, composition counted — hylo skips at the opening line; previous turn stays open, composition and `lu` unchanged |
 | CP-T06 | not `cb`; `m.content` is a list; some object block has `type == "text"` with `text` truthy and without a length (number, `true`), or `type == "thinking"` with `thinking` likewise | SL:1143 / SL:1145 | turn step, usage, ids, composition of earlier blocks of the line |
 | CP-T07 | not `cb`; `m.usage` is an object (even `{}`); `m.id` truthy and unhashable (array or object) | SL:1099 | with `ts_ok` and `assistant`: previous turn closed and `cur = {id: [..], …}` opened |
-| CP-O06 | The line's numbers are all JSON numbers, yet the usage-accumulation step raises `OverflowError`: an exact int with \|value\| ≥ 2^1024 − 2^970 (CPython's int→double overflow bound; JSON admits ints up to 4,300 digits, and magnitudes below the bound — DBL_MAX ≈ 1.7976e308 included — convert silently, oracle-verified 2026-11-17) meets a float operand in the SL:1108/1112 accumulation | SL:1108, 1112 | none (immediate raise during accumulation) |
-| CP-O07 | Same overflow condition at the **rebuild-check** step (owner BC-1.03.007): SL:1117 evaluates `_w − max(0, prompt − pp)` with a float `pp` carried from an earlier counted line and a huge exact int `_w` (its own SL:1108 accumulation is int-only and overflow-free when `tin` is an int) | SL:1117 | none (immediate raise; the `pp = prompt` assignment is not reached) |
+| CP-O06 | The line's numbers are all JSON numbers, yet a usage-accumulation step raises `OverflowError`: an exact int with \|value\| ≥ 2^1024 − 2^970 (CPython's int→double overflow bound; JSON admits ints up to 4,300 digits, and magnitudes below the bound — DBL_MAX ≈ 1.7976e308 included — convert silently, oracle-verified 2026-11-17) meets a float operand at **any** accumulation site (general rule, ADV-P4-C08: `tin` SL:1108, `c_in` SL:1109, `c_wr` SL:1110, `c_rd` SL:1111, `tout` SL:1112) | SL:1108-1112 | none (immediate raise during accumulation) |
+| CP-O07 | Same overflow condition at the **rebuild-check** step (owner BC-1.03.007): SL:1117-1118 in either direction — a float `pp` carried from an earlier counted line meeting a huge exact int `_w` (the canonical leg; its own SL:1108 accumulation is int-only and overflow-free when `tin` is an int), **or a huge exact int `pp` meeting a float `prompt`** (mirror leg, ADV-P4-C08) | SL:1117-1118 | none (immediate raise; the `pp = prompt` assignment is not reached) |
 | CP-O08 | Same overflow condition at the turn-machine steps: SL:994 `stale_factor × out / floor_tps` or SL:996 `out / span` with a huge exact int `out` (lazy: the raise surfaces while processing the **closer** line). **Deviation (ruling OD-167):** hylo skips the closer line **and drops the in-flight turn** (`cur` → null; `lr`, `lu` unchanged), so later lines parse normally — no sticky state (ARCH-03 `#transcript`) | SL:994, 996 | for the lazy `_finish_turn` sites: the closer line's own turn/lu bookkeeping (legacy keeps the bad turn open, so every later closer re-raises inside `finish` and is skipped too: new-id assistant lines, real user prompts and timed system/`compact_boundary` lines stop counting — totals freeze for the rest of the session) |
 
 4. **Equivalence oracle:** hylo on transcript T yields the same mix cache and render as legacy on T with the skipped
@@ -131,7 +135,7 @@ BC-1.03.010 (CP-O08). Representative rows:
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1059-1149), _finish_turn (SL:988-996); raise sites as tabulated |
 | Legacy contract | BC-SL-098 (pass-3 r2 §A6; refined r3); replaces BC-SL-068 (sticky crash) |
 | Parity class | **D4-EX-2** (approved deviation, owner ruling Q-c 2026-11-14) |
-| Exclusion entry | OD-105 / OD-110 named list, id `D4-EX-2`; CP-O06..O08 entries cite ruling `OD-156` (there is no exclusion id `OD-156`; the closed ten-id set is unchanged); dedicated tests = BC-1.03.019 (21 rows, CP-T legs) + the CP-O06..O08 vector rows in BC-1.03.006, BC-1.03.007, BC-1.03.010 + BC-1.03.020 rows (DI-012) |
+| Exclusion entry | OD-105 / OD-110 named list, id `D4-EX-2`; CP-O06..O08 entries cite ruling `OD-156` (there is no exclusion id `OD-156`; the closed set is now eleven ids incl. `OD-166` (OD-169)); dedicated tests = BC-1.03.019 (21 rows, CP-T legs) + the CP-O06..O08 vector rows in BC-1.03.006, BC-1.03.007, BC-1.03.010 + BC-1.03.020 rows (DI-012) |
 | Confidence note | M — predicates must leave no partial mutation (design §8) |
 | Architecture Module | `internal/statusline/transcript_wshape.go` |
 | Stories | S-TBD |

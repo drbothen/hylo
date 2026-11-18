@@ -17,22 +17,22 @@ Greenfield-pipeline sub-workflow (phase-1-spec-crystallization), scoped to P1 = 
 
 ## Status
 
-IN_PROGRESS (as of the 2026-11-17 housekeeping burst).
+IN_PROGRESS (as of the 2026-11-17 pass-4 recording + remediation burst).
 
-DONE this cycle (2026-11-15..16): market intel GO (P1); porting decision; semport target design + validation; product brief (product-level, OD-115..117); L2 domain spec (product-level, OD-118..130); P1 PRD (145 BCs under ss-01..ss-06 + 5 supplements + BC-INDEX, OD-131..145); architecture (ARCH-00..09, 13 ADRs, 37 VPs covering 145/145 BCs, OD-146..149); parallel steps — architect-feasibility-review (verdict 'PRD CHANGES REQUIRED: none'), phase-1-dtu-assessment (DTU_REQUIRED false), phase-1-gene-transfusion-assessment; phase-1-cicd-setup (PR #1 merged; main @ fd031da; branch protection live per OD-150, merge rulings OD-151).
+DONE this cycle (2026-11-15..17): market intel GO (P1); porting decision; semport target design + validation; product brief (product-level, OD-115..117); L2 domain spec (product-level, OD-118..130); P1 PRD (154 BCs under ss-01..ss-06 + 5 supplements + BC-INDEX, OD-131..145); architecture (ARCH-00..09, 13 ADRs, 41 VPs, OD-146..149); parallel steps — architect-feasibility-review (verdict 'PRD CHANGES REQUIRED: none'), phase-1-dtu-assessment (DTU_REQUIRED false), phase-1-gene-transfusion-assessment; phase-1-cicd-setup (PR #1 merged; main @ fd031da; branch protection live per OD-150, merge rulings OD-151); phase-1-consistency-audit DONE 2026-11-17 (PASS-WITH-FINDINGS, all 12 fixed; re-check PASS); phase-1-gate PASSED 2026-11-17; phase-1d ADV passes 1-4 recorded (129 → 116 → 150 → 133 findings, all NOT_CONVERGED; pass 3 a root-caused REGRESSION; pass 4 Δ −17 but HIGH +3, sibling-propagation) with remediation bursts after each (pass-4: rulings OD-169..175, 41 VPs incl. VP-041, crash register 47 paths, CP-N03, sync check adv-p4 PASS-WITH-FINDINGS).
 
-NEXT: phase-1-consistency-audit, then phase-1-gate, phase-1d adversarial spec review (>=3 clean passes), phase-1d second-model spec review, phase-1-state-backup, check-input-drift, phase-1-human-approval.
+NEXT: phase-1d adversarial spec review pass 5 (>=3 clean passes), phase-1d second-model spec review, phase-1-state-backup, check-input-drift, phase-1-human-approval.
 
 ## Delivered
 
 | Metric | Value |
 |--------|-------|
 | Stories delivered | none yet (decomposition is Phase 2) |
-| BCs created | 145 BC files (BC-S.SS.NNN, ss-01..ss-06; provisional until the Phase 1 gate) |
-| VPs created | 37 (VP-001..VP-037 + VP-INDEX) |
+| BCs created | 154 BC files (BC-S.SS.NNN, ss-01..ss-06; provisional until the Phase 1 gate) |
+| VPs created | 41 (VP-001..VP-041 + VP-INDEX) |
 | Holdout scenarios | 0 new, 0 retired |
 | Total cost | not tracked (session-local agents) |
-| Adversarial passes | 0 (phase-1d spec review pending) |
+| Adversarial passes | 4 (phase-1d spec review; all NOT_CONVERGED — pass 5 next) |
 | Final holdout satisfaction | n/a |
 | Release version | n/a |
 
@@ -75,6 +75,7 @@ Retrieve: git -C .factory log --follow specs/ (history on factory-artifacts)
 
 ## Notes
 
-- Owner rulings this cycle: OD-115..OD-151 (log: `specs/owner-decisions-log-2026-11-14.md`); next free OD-152.
+- Owner rulings this cycle: OD-115..OD-175 (log: `specs/owner-decisions-log-2026-11-14.md`); next free OD-176. Closed exclusion set after OD-169: 11 ids (OD-166 added).
 - PRD open questions OQ-1..OQ-14 resolved 2026-11-15 by OD-132..OD-145 (OQ-3 deferred).
 - Cycle directory created retroactively by the 2026-11-17 housekeeping burst (check-state-health warning resolved); operational artifacts from the cycle's sessions are archived under `cycles/phase-0-ingestion/` where they were written at the time.
+- Process-gap lessons this cycle: L-PG-01..03 (CI/CD burst, target before Phase 3), L-PG-04..16 (ADV remediation bursts, target before Phase 2). L-PG-14 closes the regression-state.json tracking slip (hook scratch, untracked + gitignored 2026-11-17).

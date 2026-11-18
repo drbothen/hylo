@@ -2,14 +2,15 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "ea79506"
+input-hash: "aa9c64a"
+
 ---
 
 # ARCH-08 — Build, CI, release
@@ -36,24 +37,38 @@ input-hash: "ea79506"
 
 ```mermaid
 flowchart LR
-    PR["pull_request / push"] --> L["lint: gofmt, vet"]
+    PR["pull_request / push"] --> L["lint: gofmt, vet, staticcheck"]
     L --> M{"matrix:<br/>ubuntu-24.04 / macos-15 (arm64) / windows-2025"}
-    M --> T["go test -race (Linux/macOS) -count=1 ./..."]
-    T --> PY["setup-python 3.11.x -> absolute path -> HYLO_PARITY_PYTHON"]
-    PY --> TA["Tier A corpus (interpreter path from setup-python, OD-108)"]
-    TA --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
-    TB --> HL["gitleaks --log-opts=--all + category pattern scan"]
+    M --> GEN["go generate ./... staleness check: git diff --exit-code (OD-170)"]
+    GEN --> PY["setup-python 3.11.x -> absolute path -> HYLO_PARITY_PYTHON"]
+    PY --> T["go test -race (Linux/macOS) -count=1 ./... — Tier A included; setup-python BEFORE go test (pass-3 D22, pass-4 D08)"]
+    T --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
+    TB --> COV["coverage gate: >= 95 percent line coverage internal/statusline, internal/cost, internal/pyfmt (OD-158)"]
+    COV --> HL["gitleaks --log-opts=--all + category pattern scan"]
     HL --> J["report timing per leg, non-gating (OD-117)"]
     Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz, non-gating"]
 ```
 
 - Race detector on Linux and macOS; the resolved Python patch version is recorded in
-  Tier B golden metadata (RK-4). Ordering (pass-3 D22): GitHub Actions always sets
+  Tier B golden metadata (RK-4). Ordering (pass-3 D22; diagram corrected pass-4 D08):
+  GitHub Actions always sets
   `CI=true`, and Tier A runs live inside the plain `go test ./...` step — so every
   `test` job installs setup-python and exports `HYLO_PARITY_PYTHON` BEFORE the
   `go test` step; the plain test step never discovers the interpreter afterwards.
   Alternatively a leg may exclude the Tier A selector from the plain step, but env-first
   is the designed default.
+- **Generated-table staleness (OD-170):** the test job runs `go generate ./...` and then
+  `git diff --exit-code` over the generated paths (Unicode 14.0 class tables and the
+  pyfmt oracle tables, ARCH-06); any diff fails the leg — a stale committed table can
+  never pass CI.
+- **Coverage gate (OD-158, pass-4 A13):** a required `coverage` step produces the
+  profile (`go test -count=1 -coverprofile` per package) and enforces **line coverage
+  >= 95 %** per package for `internal/statusline`, `internal/cost` and
+  `internal/pyfmt`. `internal/cost` IS gated: SS-01 comprises `internal/statusline` and
+  `internal/cost` (ARCH-INDEX Subsystem Registry) and module-criticality.md classes it
+  CRITICAL by inheritance, so the "S1/S5" gate reading covers all three packages. The
+  mutation kill-rate targets stay Phase 6 targets (OD-158) — this gate is line coverage
+  only. Designed behaviour; see cicd-setup.md for the landed-ci.yml lag note.
 - **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report — per corpus
   case, 1 discarded warm-up + **20 timed runs**, samples sorted per case, nearest-rank
   p95 = **19th of the 20 sorted samples** (per nfr-catalog.md; with 5 samples the
@@ -108,6 +123,13 @@ flowchart LR
 - **Verification feasibility:** workflow behavior is testable-only (CI leg observation);
   the in-tree part (corpus hygiene test, timing report printer) is table-tested; gitleaks
   cleanliness is a push-gate, not a proof.
+
+- **Hardening posture (P19, pass-4 A17):** the lint job runs a staticcheck-class
+  analysis (`honnef.co/go/tools/cmd/staticcheck`, version-pinned, same empty-module
+  guard) beside gofmt and vet, and govulncheck is promoted from the informational
+  weekly sweep to a required PR check in ci.yml (distinct check-run name, e.g.
+  `govulncheck (required)`, alongside the weekly `govulncheck` in security.yml).
+  Workflow edits land on main with the owner's approval (spec-only here).
 
 ## Mapping
 

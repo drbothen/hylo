@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "013d953"
+input-hash: "a7014d0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces os.path normpath/basename used at legacy/dgx_statusline.py SL:373-390, 460)"
@@ -18,7 +18,7 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-18: ADV-P4 remediation D18 - abspath/join/dirname de-scoped from pyfmt (ARCH-06 agreement); flavor selection pinned to runtime.GOOS incl. Basename", "1.2.2 2026-11-17: pass-4 residual sweep — BC-1.02.003 cross-reference updated to the enriched project-label title (ADV-P4-B17)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -33,7 +33,8 @@ removal_reason: null
 
 Legacy's `os.path` is `posixpath` on macOS and Linux and `ntpath` on Windows. `pyfmt.PosixNormpath`,
 `pyfmt.NtNormpath` and `pyfmt.Basename` reproduce CPython 3.11's `normpath` and `basename` for each flavor, and the
-caller selects the flavor by the running OS, never by the path's look. Go's `filepath.Clean` differs (it turns `//`
+flavor is selected at build time by `runtime.GOOS` (posix on darwin/linux, nt on windows; Pre-2 — including for
+`Basename`, per ARCH-06's ruling, ADV-P4-D18), never by the path's look. Go's `filepath.Clean` differs (it turns `//`
 into `/`, BC-SL-059), so it is not used (design IM-11; pitfall PR-20).
 
 ## Preconditions
@@ -59,8 +60,12 @@ into `/`, BC-SL-059), so it is not used (design IM-11; pitfall PR-20).
 2. Per-OS goldens: the CPython-generated tables for `NtNormpath` are produced by the oracle on the Windows runner
    (`*.windows.golden`, design RK-3); posix tables on Linux/macOS. CPython 3.11.7 implements both via the C
    `_path_normpath` when available.
-3. Uses served: SL:460 (project label), SL:373, 375, 383 (`abspath`/`join`/`normpath` in the git walk), SL:390
-   (`dirname`, walk step).
+3. pyfmt serves ONLY the normpath/basename primitives of this contract. `abspath`, `join`
+   and `dirname` (git-walk sites SL:373, 375, 383, 390) are **NOT** pyfmt helpers (ARCH-06):
+   the git-walk module composes them directly, and their per-flavor behavior (on Windows
+   `abspath` resolves through `GetFullPathNameW`; posix/nt `join`/`dirname` flavors) is
+   pinned by that module's contract, not here — anchoring gap flagged to the architect
+   (ADV-P4-D18).
 
 ## Edge Cases
 
@@ -103,11 +108,11 @@ committed Windows goldens are generated on the Windows runner).
 | L2 Domain Invariants | DI-012 |
 | Architecture Module | `internal/pyfmt/str.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/str.go (Posix/Nt Normpath, Basename) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
-| Source | New contract. OD-103; design IM-11; pitfall PR-20; D5 (cross-platform). Legacy uses served: SL:373, 375, 383, 390, 460 |
+| Source | New contract. OD-103; design IM-11; pitfall PR-20; D5 (cross-platform). pyfmt-served legacy uses: SL:460 (project label normpath/basename); git-walk sites SL:373, 375, 383, 390 compose `abspath`/`join`/`dirname` OUTSIDE pyfmt (ADV-P4-D18 de-scope; architect to pin the owning contract) |
 
 ## Related BCs (Recommended)
 
-- BC-1.02.003 — consumed by (project label `basename(normpath(cwd))`)
+- BC-1.02.003 — consumed by (project label `basename(normpath(project_dir | current_dir | cwd))`)
 - BC-1.02.022 — consumed by (POSIX normpath keeps `//`)
 - BC-1.02.004 — consumed by (branch walk paths)
 

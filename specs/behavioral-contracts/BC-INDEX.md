@@ -2,7 +2,7 @@
 artifact_type: bc-index
 document_type: bc-index
 level: L3
-version: "0.2.4"
+version: "0.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:11:24Z
@@ -12,7 +12,7 @@ origin: greenfield
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.4"
+modified: "0.2.5"
 extracted_from: "behavioral-contracts/ss-01..ss-06 frontmatter and H1 headings (generated; do not hand-edit rows)"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -22,7 +22,7 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "c9cfc9a"
+input-hash: "3a67bb5"
 traces_to: ../prd.md
 
 ---
@@ -47,6 +47,12 @@ traces_to: ../prd.md
 >
 > Revision note (2026-11-18, pass-3 remediation sync): +1 contract, BC-5.01.007
 > (ADV-P3-D08); titles are the file H1s verbatim.
+>
+> Revision note (2026-11-17, pass-4 remediation sync): BC-1.02.003 title enriched to the
+> postcondition's selection order (pass-4 B17, ruled text; BC file H1 to be synced by the
+> BC agent in the same burst); BC-1.03.015 parity column corrected to `OD-161` (pass-4
+> C10 — frontmatter and traceability already said OD-161). Titles are the file H1s
+> verbatim modulo table pipe escaping.
 
 ### S1.01 — Input/output contract
 
@@ -69,7 +75,7 @@ traces_to: ../prd.md
 |---|---|---|---|---|---|---|---|
 | BC-1.02.001 | Lane pill derives from model-prefix startswith match | S1.02 | BC-SL-006 | byte-exact | H | draft | [BC-1.02.001](ss-01/BC-1.02.001.md) |
 | BC-1.02.002 | Model label falls back display_name → id → "?" | S1.02 | BC-SL-007 | byte-exact | H | draft | [BC-1.02.002](ss-01/BC-1.02.002.md) |
-| BC-1.02.003 | Project label is basename(normpath(cwd)) | S1.02 | BC-SL-008 | byte-exact | H | draft | [BC-1.02.003](ss-01/BC-1.02.003.md) |
+| BC-1.02.003 | Project label: basename(normpath(project_dir \| current_dir \| cwd)) | S1.02 | BC-SL-008 | byte-exact | H | draft | [BC-1.02.003](ss-01/BC-1.02.003.md) |
 | BC-1.02.004 | Branch walk reads .git dir or file and HEAD | S1.02 | BC-SL-009 | byte-exact | H | draft | [BC-1.02.004](ss-01/BC-1.02.004.md) |
 | BC-1.02.005 | Branch segment cached with a 5 s TTL | S1.02 | BC-SL-010 | byte-exact | H | draft | [BC-1.02.005](ss-01/BC-1.02.005.md) |
 | BC-1.02.006 | Context thermometer and its denominator | S1.02 | BC-SL-011 | byte-exact | H | draft | [BC-1.02.006](ss-01/BC-1.02.006.md) |
@@ -116,7 +122,7 @@ traces_to: ../prd.md
 | BC-1.03.012 | Short + long line completes over two refreshes | S1.03 | BC-SL-066 | byte-exact | H | draft | [BC-1.03.012](ss-01/BC-1.03.012.md) |
 | BC-1.03.013 | Mix cache sid sanitized per code point | S1.03 | BC-SL-070 | byte-exact | H | draft | [BC-1.03.013](ss-01/BC-1.03.013.md) |
 | BC-1.03.014 | text/thinking block value types | S1.03 | BC-SL-072 | byte-exact | H | draft | [BC-1.03.014](ss-01/BC-1.03.014.md) |
-| BC-1.03.015 | transcript_path type semantics (truthy int → no transcript, no descriptor I/O) | S1.03 | BC-SL-088 | byte-exact | M | draft | [BC-1.03.015](ss-01/BC-1.03.015.md) |
+| BC-1.03.015 | transcript_path type semantics (truthy int → no transcript, no descriptor I/O) | S1.03 | BC-SL-088 | OD-161 | M | draft | [BC-1.03.015](ss-01/BC-1.03.015.md) |
 | BC-1.03.016 | Turn-machine exhaustive table (20 rows) | S1.03 | BC-SL-094 | byte-exact | H | draft | [BC-1.03.016](ss-01/BC-1.03.016.md) |
 | BC-1.03.017 | Turn identity ignores seen_ids | S1.03 | BC-SL-095 | byte-exact | H | draft | [BC-1.03.017](ss-01/BC-1.03.017.md) |
 | BC-1.03.018 | D4-EX-2 wrong-shape line W-predicates (skip, no partial mutation) | S1.03 | BC-SL-098 | D4-EX-2 | M | draft | [BC-1.03.018](ss-01/BC-1.03.018.md) |

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "54c520c"
+input-hash: "7c5b42b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -23,6 +23,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D16: validate stderr order aligned with statusline emission order (warnings then errors)"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D33 — unknown-setting warning order pinned to lexicographic byte-wise name order (os.Environ order is OS-dependent)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,7 +50,9 @@ when `config.Load` returns any error. The error set is identical to the set that
 1. **Valid config:** stdout is exactly `hylo: config ok\n`; stderr carries only
    unknown-setting warnings (BC-2.01.001 PC-6), if any; exit 0.
 2. **Invalid config:** stdout is empty; stderr carries the unknown-setting warnings in
-   encounter order FOLLOWED by one line per error in registry order — the same
+   lexicographic byte-wise order of the variable name — a pinned, OS-independent order,
+   NOT `os.Environ` encounter order, which varies by OS (ADV-P4-D33) — FOLLOWED by one
+   line per error in registry order — the same
    emission order as the statusline side (BC-2.01.002 pins the example: warning first,
    then the fatal load error; ADV-P3-D16 aligning this file with it), in the same form as
    the statusline stderr detail,
@@ -96,7 +99,7 @@ when `config.Load` returns any error. The error set is identical to the set that
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-102 (`hylo config validate` exits non-zero for the same errors), OD-107 (ships in P1; env + defaults only), tension T6 |
+| Source | new — OD-102 (`hylo config validate` exits non-zero for the same errors), OD-107 (ships in P1; env + defaults only), tension T6; unknown-setting warning order pinned lexicographic (ADV-P4-D33) |
 | Parity / exclusion | n.a. (not a legacy surface); part of the D4-EX-3 test set named in design §5.4 ("+ `config validate`") |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-010 |

@@ -2,14 +2,15 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "de05e56"
+input-hash: "44d9c3e"
+
 ---
 
 # ARCH-03 — Status line render pipeline (`internal/statusline`)
@@ -45,9 +46,12 @@ input-hash: "de05e56"
 ## Effect-step script (design doc §3.1, normative)
 
 **Ownership of step 0 (ADV-P2-A08):** config resolution is NOT inside `Render`. `Main`
-performs step 0: it calls `config.Load`; on any error it prints the E-CFG-001 line
+performs step 0: it calls `config.Load` through the injected `EnvVars` seam it is given
+(AD-10 amended; ARCH-01), then constructs the `CacheStore` over the Load-resolved
+`paths.cache_dir`; on any error it prints the E-CFG-001 line
 (first error in registry order, full list to stderr) and returns 0 having written no
-caches — `Render` is never entered. `Render`'s precondition is `env.Config != nil`
+caches — `Render` is never entered. `Render`'s precondition is `env.Config != nil &&
+env.Cache != nil`
 (non-error `*config.Config`), guaranteed by `Main`; the "no cache writes" guarantee
 follows because every cache write sits inside `Render`'s step script.
 
@@ -55,59 +59,85 @@ follows because every cache write sits inside `Render`'s step script.
 |---|---|---|---|
 | 0 | config resolved by `Main` (precondition; D4-EX-3 before any write) | `config.Load` (in `Main`) | config-error line |
 | 1 | stdin decode (`pyfmt.Decode`, ModeText) | stdin | no — invalid => `{}` (BC-1.01.002/.008) |
-| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010) |
+| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010) |
 | 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no |
 | 4 | get_sample when ROWS >= 2: fetch, then session-cache write | `Metrics`, `Cache`, `Now` | no |
-| 5 | row-2 render (width rule) | pure | CP-N01/N02 |
+| 5 | row-2 render (width rule) | pure | CP-N01/N02/N03 |
 | 6 | window start (may write `proc_start`) | `Proc`, `Cache` | no |
 | 7a | lane badge/model/project; git segment (git-cache write) | `Files`, `Cache`, `Cwd` | CP-S01..S04 |
 | 7b | thermometer/composition/cache-hit/limits/lines/timer/⌂/tokens | pure | CP-S05..S13 |
-| 7c | record_cost (write), then cost_thresholds | `internal/cost` via `Cache` | CP-S15 |
-| 7d | $, $/h, ⛏ (pure) | pure | no |
+| 7c | record_cost (write), then cost_thresholds | `internal/cost` via `Cache` | CP-S15; unconvertible `usd`/`api_ms` is not recorded (OD-166) — Go skips the record where legacy persisted the raw int, the ruled write-divergence exclusion `OD-166` |
+| 7d | $, $/h, ⛏ (pure) | pure | CP-O10/O11 (E-REN-002) |
 | 8 | trim, surrogate check, single stdout write | stdout | CP-S17 after all writes |
 
 Import-time crash paths CP-X01/X02 are replaced by D4-EX-3 at step 0; CP-X03 (the
 degraded-line write failing) is the named exclusion `cp-x03` — Go swallows the write
-error and exits 0 (OD-136); CP-X04 (signals) is out of scope.
+error and exits 0 (OD-136; per OD-172 the same discipline extends to `--subagent` row
+writes: a stdout write failure while printing rows stops writing and exits 0, with no
+degraded-line attempt); CP-X04 (signals) is out of scope.
 
 **Typed crash-path register (normative dispositions live in the owning BCs).** The
 script's Degrade? column names the CP families; the full trigger tables are
 error-taxonomy.md. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 (transcript
-machine), CP-N01/N02 (row-2 telemetry), **CP-O01..O11** (OD-156 numeric-overflow family:
+machine), CP-N01..N03 (row-2 telemetry; pass-4 C2-12), **CP-O01..O11** (OD-156 numeric-overflow family:
 CP-O01..O05 stdin/metrics-borne at render → E-REN-002, the 29-byte line, exit 0, earlier
 writes kept; CP-O06..O08 transcript-borne → the offending line is skipped whole under the
-extended D4-EX-2 discipline, no sticky state; CP-O09 moot in hylo; CP-O10/O11
-cost-segment stdin-borne overflow — a huge stdin int in `usd`/`api_ms` hitting float
-conversion at render, same E-REN-002 disposition, owners BC-1.05.007/.002 — pass-3
+extended D4-EX-2 discipline, no sticky state, and the in-flight turn is dropped
+(OD-167); CP-O09 reachable in hylo — two 4,300-digit ints accumulate without meeting a
+float and breach CPython's int-to-string limit at the save (ADV-P3-C09; not moot,
+disposition per the owning BC); CP-O10/O11
+cost-segment overflow — a huge exact int in `usd`/`api_ms` meeting float conversion at
+the render sites (SL:616/623; bearer per error-taxonomy: the cost-history cache
+persisted it earlier), same E-REN-002 disposition, owners BC-1.05.007/.002 — pass-3
 C2-01), and **CP-A01..A05** (subagent panel, BC-1.07.008: typed degrades to the 29-byte
 line, exit 0; CP-A04/A05 = huge-int `tokenCount`/`startTime` OverflowError paths added
-by the pass-3 ruling, owners BC-1.07.007/.008).
+by the pass-3 ruling, owners BC-1.07.007/.008), and **CP-N03** (pass-4 C2-12: the
+metrics-borne degrade — a numeric `__name__` key sorting ahead of every `vllm:` key so
+`k.startswith` raises AttributeError, SL:717; owner BC-1.04.001, E-REN-002 disposition).
 
 ## Interfaces (design doc §2.2, reused as the contract)
 
 ```go
 package statusline
 
-// Main runs one refresh: reads stdin, renders, writes stdout. Always returns 0.
-func Main(stdin io.Reader, stdout, stderr io.Writer, env Env) int
+// Main runs one refresh and always returns 0. Wiring order (ADV-P4-A06): step 0
+// resolves config THROUGH the injected EnvVars seam (AD-10 amended — never a bare
+// func(string) string); only then does Main construct the CacheStore over the
+// Load-resolved paths.cache_dir. Env.Cache is therefore empty before step 0 and
+// filled by Main — the store does not presuppose the dir, breaking the circularity.
+func Main(stdin io.Reader, stdout, stderr io.Writer, env *Env) int
 
 // Render is the orchestrator behind Main (BC-1.01.009 order). On errDegraded the
 // caller prints degradedLine; cache writes made before the error persist.
+// Preconditions: env.Config != nil && env.Cache != nil, guaranteed by Main.
 func Render(stdin []byte, env Env) ([]byte, error)
+
+// Panel is the subagent entry point's body (BC-1.07.001..008), called by
+// runStatuslineSubagent after that entry point resolves config itself (OD-168).
+// Renders the NDJSON panel rows to stdout; the elapsed-clock widget reads Now
+// (BC-1.07.007). Same degrade discipline as Main (typed CP-A01..A05 sites + the
+// recover() backstop), and OD-172 row-write discipline: a stdout write failure
+// while printing rows stops writing and exits 0.
+func Panel(stdin io.Reader, stdout, stderr io.Writer, env *Env) int
 
 const degradedLine = "\x1b[90mstatusline degraded\x1b[0m\n" // 29 bytes, BC-1.01.001
 var errDegraded = errors.New("statusline degraded")
 
 type Env struct {
-    Now     func() float64        // Python time.time() value; read ONCE per render (IM-14)
+    Now     func() float64        // Python time.time() value; read ONCE per render (IM-14); the panel reads it too (BC-1.07.007)
     Loc     *time.Location        // naive transcript timestamps (BC-5.04.001)
-    Getenv  func(string) string   // COLUMNS only (protocol input, not a setting)
-    Config  *config.Config        // resolved once at step 0 (D15)
-    Cache   CacheStore            // paths.cache_dir (OD-101); temp dir in tests
+    EnvVar  EnvVars               // AD-10 seam (ARCH-01: Lookup + Names); backs the COLUMNS lookup (BC-1.01.005) and the unknown-HYLO_* sweep (BC-2.01.001 PC-6). The former bare Getenv func(string) string is superseded (ADV-P4-A06)
+    Config  *config.Config        // filled by Main at step 0 (D15); Render precondition
+    Cache   CacheStore            // constructed by Main after step 0 over the resolved dir (OD-101); temp dir in tests
     Metrics MetricsClient         // backends[0].metrics_url; httptest fake in tests
     Proc    ProcStarter           // platform.FindAncestor; fake in tests
     Files   FileSystem            // transcript and .git reads; os-backed by default
     Cwd     func() string         // git fallback when no project dir
+}
+
+type EnvVars interface {
+    Lookup(name string) (value string, ok bool) // ok=false => unset; ok=true + "" => set-but-empty
+    Names() []string                            // full environ listing; backs the unknown-HYLO_* sweep
 }
 
 type CacheStore interface {
@@ -115,7 +145,12 @@ type CacheStore interface {
     Save(name string, v pyfmt.Value) error // reports the write outcome to the caller (ADV-P2-A25, VP-018); Render swallows it — DI-008 never-raise at the orchestrator
 }
 type MetricsClient interface {
-    Query(ctx context.Context, promql string) ([]byte, error) // total deadline, Proxy: nil
+    // total deadline, Proxy: nil. Transport MUST set DisableCompression: true
+    // (ADV-P4-C2-09): urllib sends Accept-Encoding: identity and parses raw bytes,
+    // while Go's default http.Transport adds gzip and transparently decompresses —
+    // a gzip response legacy never asked for would give Go a sample where legacy
+    // gets none, a spurious VP-030 divergence.
+    Query(ctx context.Context, promql string) ([]byte, error)
 }
 type ProcStarter interface {
     WindowStart() (start float64, ok bool) // whole seconds, as float64

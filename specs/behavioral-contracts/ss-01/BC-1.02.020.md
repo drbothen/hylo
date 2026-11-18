@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:21:12Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "d059ea2"
+input-hash: "4f5dcbc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["consolidated pass-2 follow-up: EC-011 overflow condition corrected (int operand converted to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01", "consolidated pass-2 follow-up: EC-011 overflow condition corrected (int operand converted to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"]
+modified: ["consolidated pass-2 follow-up: EC-011 overflow condition corrected (int operand converted to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z", "pass-4 remediation (ADV-P4-B13/B04): repeated modified entry deduplicated; canonical OV overflow vector added; 2026-11-17T12:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -101,6 +101,7 @@ Output is the exact `fmt_ctx` string (thermometer segment). `G` below abbreviate
 | -0.0, 1000 | `G`×10 + `\e[0m -0%\e[0m\e[2m/1K\e[0m` | edge-case |
 | NaN, 1000 | whole stdout = `\e[90mstatusline degraded\e[0m\n` | error (CP-S06) |
 | 50, `"x"` | whole stdout = `\e[90mstatusline degraded\e[0m\n` | error (CP-S07) |
+| 50, OV with OV = `2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792 (the smallest positive integer that fails float conversion; any int ≥ OV overflows) | whole stdout = `\e[90mstatusline degraded\e[0m\n`, exit 0 (`total >= 1e6` compares exact; `total / 1e6` raises OverflowError at SL:435; CP-O01, EC-011) | error |
 
 "5 heat cells" = the first five cell colours of BC-1.02.019 each followed by `▰`. Pinned 2026-11-15 by calling the
 legacy `fmt_ctx` under CPython 3.11 (oracle, OD-104). The `-0.0` vector is a new pin from this run (not listed in

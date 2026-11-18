@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.1"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "476fd5f"
+input-hash: "cffed41"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -18,9 +18,10 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01", "consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"]
 modified:
+  - "consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"
   - "pass-3 remediation (ADV-P3-B07): PC3-PC5 parametrize on cells/plain_max/red_from, so Inv 3 now gives them real ranges (cells int >= 1; plain_max/red_from any finite number); only units.context stays default-only; 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B13/B08/B04): duplicate modified keys merged; cells range 1..100 (B09 cap, same as kv.cells); units.context default-only reason cites the fixed M/K divisors; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,15 +82,18 @@ Notation: `\e` is the byte 0x1B.
 3. Valid ranges (Policy 20, OD-162): PC3-PC5 define this widget's behavior for **any**
    `cells`/`plain_max`/`red_from` (`d = 100/n`, `min(Int(pct/d + 0.5), n)`, the loop over
    `n` cells, the `pct > plain_max` / `pct >= red_from` comparisons), so those keys get
-   real ranges: `statusline.context.cells` = integer ≥ 1 (n = 0 would divide by zero);
+   real ranges: `statusline.context.cells` = integer in **1..100** (n = 0 would divide by
+   zero; n > 100 is capped — the same 1..100 cap as `kv.cells`/`sparkline.points` — because
+   the bar is O(n) render work and n columns wide against the 25 ms p95 budget);
    `statusline.context.plain_max` and `statusline.context.red_from` = any finite JSON
    number (compared against the clamped [0, 100] pct). Any out-of-range value is a
    number-range config error (BC-2.02.003, OD-162). For architect registration:
-   cells = int ≥ 1, plain_max = finite number, red_from = finite number. By contrast,
+   cells = int 1..100, plain_max = finite number, red_from = finite number. By contrast,
    `statusline.units.context` (`1e6 → M`, else `K`) has no derivable non-default
-   semantics from legacy — OD-162's test for default-only — so its valid range is its
-   registered default only; any other value is a number-range config error. Byte parity
-   (vectors, VP sweeps) is obligated at the defaults.
+   semantics from legacy — the M/K divisors (1e6 and the SI 1000) are fixed format
+   constants, so no alternative denominator scheme is derivable — OD-162's test for
+   default-only — so its valid range is its registered default only; any other value is a
+   number-range config error. Byte parity (vectors, VP sweeps) is obligated at the defaults.
 4. Rationale (D15, design T-027..T-029): 10 cells half-up (review #5.2: half-even gave
    45 % → 4 cells but 55 % → 6); 50 / 85 thresholds (85 % leaves ~117K tokens before the
    ~967K auto-compact of a 1M window, review #5.1; documented); M/K are SI units
@@ -127,6 +131,7 @@ prefixes listed in Postcondition 4; `E` = `\e[90m▱`.
 | `{"used_percentage":50.4,"context_window_size":500}` | `C0▰`..`C4▰` + `E`×5 + `\e[0m \e[38;2;204;144;30m50%\e[0m\e[2m/0K\e[0m` | edge-case |
 | `{"used_percentage":null}` | no segment | edge-case |
 | `context_window` = `"x"` | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 | error |
+| `{"used_percentage":45,"context_window_size":OV}` with OV = `2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792 (the smallest positive integer that fails float conversion: `2**1024 − 2**970 − 1` converts, `2**1024 − 2**970` raises `OverflowError`; oracle-verified CPython 3.11.7) | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (`total >= 1e6` compares exact; `total / 1e6` raises OverflowError at SL:435; CP-O01, EC-010) | error |
 
 ## Verification Properties
 

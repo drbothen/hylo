@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -9,7 +9,7 @@ phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "4638cd2"
+input-hash: "56ea08d"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; grammar from OD-05 as pinned in BC-2.01.005)"
@@ -22,6 +22,8 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D07: P1 Bool set completed with queue.yellow (P1 ruling, amending joins-in-P4) and subagent.enabled"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D26 — queue.yellow P1 priority citation corrected to OD-175"
+  - "1.2.3 2026-11-17: pass-4 residual sweep — phantom 2026-11-18 owner-ruling narrative removed from the precondition; P1 priority cites OD-175 directly"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,8 +50,9 @@ additional classes.
 
 1. Resolution per BC-2.01.001; the value is the raw env string of a `Bool` key (P1 bool
    keys enumerated in BC-2.01.005 postcondition 1: `statusline.sparkline.enabled`,
-   `statusline.git.enabled`, `statusline.queue.yellow` (P1 per the 2026-11-18 owner
-   ruling; ADV-P3-D07, amending the earlier "joins in P4") and
+   `statusline.git.enabled`, `statusline.queue.yellow` (P1 per OD-175, which ratifies default `true` = legacy rule
+   "yellow when queue > 0 or preempt > 0", `false` = never yellow; ADV-P3-D07 amends the
+   earlier "joins in P4") and
    `statusline.subagent.enabled` (OD-155) — the complete P1 set).
 2. Rendering context per BC-2.02.001 (D4-EX-3 line, exit 0, stderr detail, no cache writes).
 
@@ -105,7 +108,7 @@ byte observability here is the error line, so no CPython run is owed.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-016, VP-012 (frontmatter closure) | Every string outside the six-token set produces the boolean-class line; every token inside it parses | Go property test (testing/quick) over random value strings |
-| VP-016, VP-012 (frontmatter closure) | `TestConfigError_D4EX3_Boolean` covers one valid token and one invalid value per P1 bool key | table test |
+| VP-016, VP-012 (frontmatter closure) | `TestD4EX3_Boolean` covers one valid token and one invalid value per P1 bool key | table test |
 
 ## Traceability
 

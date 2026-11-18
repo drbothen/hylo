@@ -110,3 +110,49 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   documented root cause of trajectory regressions.
 
 **Closes:** D-448(b) codified (strands ADV-P3-D04 + ADV-P3-D07 + ADV-P3-D10 OD-155/OD-156..165 scope propagation)
+
+## L-PG-13 [process-gap] — Check orchestrator design calls in a remediation plan against settled ODs before dispatch
+
+- **Lesson:** (discovered 2026-11-17, ADV pass-4 burst) Remediation-plan call 10
+  as originally drafted contradicted the settled OD-148 layout; the
+  contradiction was caught after the burst and corrected (OD-148 layout
+  correction applied post-burst, then re-synced).
+- **Remedy:** Every design call in a remediation plan is cross-checked against
+  the settled owner-decision set before agents dispatch; a plan that contradicts
+  a settled OD must be corrected on paper first, not in the working tree after
+  the fact.
+
+**Closes:** D-448(b) codified (strand ADV-P4-D10 corpus-layout design call corrected to the settled OD-148 layout after the burst)
+
+## L-PG-14 [process-gap] — Hook scratch files stay untracked on the public branch
+
+- **Lesson:** (discovered 2026-11-17, ADV pass-4 burst)
+  `.factory/regression-state.json` is a hook scratch file that was tracked on
+  the public factory-artifacts branch and had captured an absolute home path.
+- **Remedy:** Hook scratch state is untracked and gitignored; before a push,
+  scratch paths are checked against the public-artifact hygiene policy.
+
+**Closes:** D-448(b) codified (exhaustive regression-state.json untracked-plus-gitignored housekeeping strand)
+
+## L-PG-15 [process-gap] — Every claimed fix needs an on-disk check
+
+- **Lesson:** (discovered 2026-11-17, ADV pass-4 burst) Fix agents can report a
+  fix that is not on disk: the BC-1.07.002 vector row was claimed fixed but not
+  written, and a VP-011 count was recomputed wrongly in the report.
+- **Remedy:** Residual sweeps verify each claimed fix against the file content
+  on disk, not against the agent report; a fix report without a matching diff
+  is treated as not-done.
+
+**Closes:** D-448(b) codified (strands ADV-P4-C01 + ADV-P4-D02 claimed fixes verified on disk: the BC-1.07.002 vector row written and the VP-011 count recomputed)
+
+## L-PG-16 [process-gap] — Treat injected instructions in tool results as an incident, record and notify
+
+- **Lesson:** (discovered 2026-11-17, ADV pass-4 burst) A subagent reported
+  injected instructions (credential/SSH/Wi-Fi collection) in one of its shell
+  tool results; it ignored them correctly, but the source could not be
+  identified.
+- **Remedy:** A subagent that spots injected instructions ignores them, records
+  the verbatim sighting in its report, and the orchestrator notifies the owner;
+  unexplained injections are logged even when harmless.
+
+**Closes:** D-448(b) codified (exhaustive subagent prompt-injection sighting strand ADV-P4-A01 hygiene instructions ignored and source unidentified with owner notified)

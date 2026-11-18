@@ -1,14 +1,15 @@
 ---
 document_type: bc-component-map
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T08:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "85f3ed2"
+input-hash: "e197094"
 traces_to: ../prd.md
+
 ---
 
 # BC-COMPONENT-MAP: hylo P1 (154/154)
@@ -156,7 +157,7 @@ traces_to: ../prd.md
 | BC-1.07.005 | sl/subagent.go (status glyph, name fallback, settled suffix) | ARCH-03 |
 | BC-1.07.006 | sl/subagent.go (model-prefix lane tag) | ARCH-03 |
 | BC-1.07.007 | sl/subagent.go (_fmt_tokens, running-only elapsed) | ARCH-03 |
-| BC-1.07.008 | sl/subagent.go (CP-A01..A03 degrade, 29-byte line) | ARCH-03 |
+| BC-1.07.008 | sl/subagent.go (CP-A01..A05 degrade, 29-byte line) | ARCH-03 |
 
 ## S2 — Configuration (13)
 
@@ -239,7 +240,9 @@ traces_to: ../prd.md
 ## Coverage
 
 101 + 13 + 3 + 3 + 20 + 14 = **154/154**. Every row names exactly one primary component
-home and at least one ARCH section; two-row exception: BC-6.04.001 (par + ARCH-08
-workflow; BC-1.03.015 collapsed to sl-only when OD-161 removed the fd helpers, pass-3
-A06). No BC unmapped; no component without a BC set
+home and at least one ARCH section. Multi-home rows (pass-4 A18: the earlier "two-row
+exception" note wrongly implied BC-6.04.001 was the only one): BC-6.04.001 (par +
+ARCH-08 workflow), BC-1.07.001 (cmd/hylo + sl/subagent.go; ARCH-03 + ARCH-01), and
+BC-1.05.008 (sl/cost.go + cost/history.go). BC-1.03.015 collapsed to sl-only when OD-161
+removed the fd helpers (pass-3 A06). No BC unmapped; no component without a BC set
 except theme.go (serves BC-2.01.003 via cfg) and env.go seams (serve BC-1.01.009).

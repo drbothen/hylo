@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "state-machines"
-version: "1.5"
+version: "1.6"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T02:41:14Z
+timestamp: 2026-11-18T03:35:34Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r8.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "1d0cf11"
+input-hash: "9e57762"
 traces_to: L2-INDEX.md
 ---
 
@@ -60,17 +60,21 @@ carve-out below); **(2) config-error
 line (D4-EX-3, OD-102)** — checked at step 0, before any render; **(3) render
 success, else the degraded one-line fallback**. Terminal for that refresh: every
 refresh starts fresh; the ladder always ends exit 0 with at least one line (DI-008) —
-except in the `--subagent` agent-panel mode (carve-out below).
+the `--subagent` agent-panel mode narrows this (carve-out below: exit 0 always, stdout
+may be empty, render faults still reach the ladder's bottom rung).
 Legacy conflated the config-error and unknown-flag conditions — both surfaced as
 crash/import paths; hylo splits them into distinct rungs (DECIDED).
 
 Carve-out — `--subagent` agent-panel mode (OD-155): membership of `--subagent`
 anywhere in `argv[1:]` routes to the agent-panel renderer before any flag handling,
 including the unknown-flag check (legacy SL:1240-1241; BC-1.07.001). Inside that mode the
-ladder does not apply: the output is JSON lines or zero bytes — zero tasks
-(BC-1.07.004 PC6), unparseable stdin (BC-1.07.003), enabled=false (BC-1.07.002 PC2)
-and config errors (OD-168: zero bytes on stdout, diagnostic on stderr) each print
-nothing on stdout — always exit 0.
+two pre-render rungs (unknown-flag line, config-error line) do not run, and the output
+is exactly one of three classes: JSON rows (successful render); zero bytes on stdout —
+zero tasks (BC-1.07.004 PC6), unparseable stdin (BC-1.07.003), enabled=false
+(BC-1.07.002 PC2) and config errors (OD-168: diagnostic on stderr); or the shared
+29-byte non-JSON degraded line, exit 0, for the catalogued render faults CP-A01..A05
+(BC-1.07.008 — one ladder, one rung text) and the unmapped-panic backstop. Rows and
+degraded line never mix within one refresh (buffer-then-print).
 
 ## SM-05 Backend health freshness ladder
 
@@ -79,7 +83,9 @@ States: **fresh → stale → dead**, plus **serving-down** as an overlay verdic
 "5 min of last-known telemetry" rule (OD-57 E-A); NaN samples are kept as floats, as
 in legacy (ADV-P1-A2-02; CP-N01/N02) — those NaN values drive the catalogued crash
 paths, reproduced per BC-1.04.014..016. +Inf/-Inf handling: P1 reproduces legacy
-behaviour per BC-1.04.014 (+Inf degrades the sample, -Inf clamps to `▁`);
+behaviour per BC-1.04.014 (NaN on any trace, or +Inf on the `v`/`f` traces, degrades
+the sample at the sparkline's half-up index; +Inf on the `k` trace is safe — the fixed
+top gives `min(+Inf, 7)`; -Inf clamps to `▁`);
 OD-130's treat-as-unknown rule takes effect only from P6 (DECIDED OD-157), with the
 confirming owner capture (one real metrics response, read-only) deferred until the
 owner confirms the backend soak has been scored. [LEGACY-OBSERVED P2r3 §2; sampling config DECIDED

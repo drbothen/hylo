@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "493ab23"
+input-hash: "8e7e7cf"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -23,6 +23,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "1.2.3 2026-11-18: ADV-P4 remediation D20 — empty HYLO_PATHS_CACHE_DIR reports the same empty-path error as the status line (no platform-default fallback, OD-165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D36: empty override = not present; trailing separator printed as given, OD-165 agreement held at Clean-ed granularity"
 deprecated: null
 deprecated_by: null
@@ -73,10 +74,15 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 3. Override paths (a)/(b) get `~` expansion (OD-61, BC-2.01.005) and are otherwise printed
    as given (not made absolute, not cleaned). Overrides are applied wherever they exist:
    `config:` (a)/(b) and `cache:` (`HYLO_PATHS_CACHE_DIR`); the state directory has no
-   override in P1 (OD-165). Edge discipline (ADV-P3-D36): an override that is set but
-   EMPTY (`HYLO_PATHS_CACHE_DIR=` or `HYLO_CONFIG=`) counts as not present — the (b)/(c)
-   fallback order proceeds as if the variable were unset (an empty override would
-   otherwise print an empty path). A trailing separator in an override is printed exactly
+   override in P1 (OD-165). Edge discipline (ADV-P3-D36, amended ADV-P4-D20): an override
+   that is set but EMPTY splits by label — `HYLO_CONFIG=` counts as not present (the
+   (a)/(b)/(c) fallback proceeds as if the variable were unset, ADV-P1-D25), while
+   `HYLO_PATHS_CACHE_DIR=` does NOT fall back to the platform default: it reports the same
+   `empty path` error the status line's grammar raises (BC-2.01.005 PC-3, BC-2.01.001 PC-2),
+   keeping OD-165's agreement that `config path` and the status line resolve the same
+   cache directory. Observable per PC-4: the `cache:` line prints `cache: (unavailable)`,
+   stderr carries `hylo: config path: cannot determine cache directory (empty path)\n`,
+   and the exit code is 1. A trailing separator in an override is printed exactly
    as given (`/tmp/x/` prints with the slash); this is a PRINT ordering only — OD-165's
    "the status line and `config path` agree on the same directory" holds at
    resolved-directory granularity (Clean-ed), not byte-for-byte on the printed string.
@@ -112,6 +118,7 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 | EC-008 | Unix, `HOME` and `XDG_CONFIG_HOME` unset | three lines all `(unavailable)`; three stderr lines — `...config directory (HOME unset)`, `...cache directory (HOME unset)`, `...state directory (HOME unset)` in label order; exit 1 |
 | EC-009 | `HYLO_STATUSLINE_ROWS=x` set | paths printed normally, exit 0 |
 | EC-010 | Windows, `LOCALAPPDATA` unset, `APPDATA` set | `config:` resolves; `cache: (unavailable)` and `state: (unavailable)`; stderr detail twice; exit 1 |
+| EC-011 | `HYLO_PATHS_CACHE_DIR=` (present, empty) | `cache: (unavailable)`; stderr `hylo: config path: cannot determine cache directory (empty path)`; exit 1 — same `empty path` error as the status line (ADV-P4-D20) |
 
 ## Canonical Test Vectors
 

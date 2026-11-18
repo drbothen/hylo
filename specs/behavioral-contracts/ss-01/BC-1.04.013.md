@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "9ae073d"
+input-hash: "76b3a2d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main (SL:1217-1227)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-13 (request count counts redirect hops)"]
+modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-13 (request count counts redirect hops)", "2026-11-18 (v1.3.2) pass-4 remediation ADV-P4-C2-16 (bool-is-a-number semantics on dgx_mtok: True kept, False none)", "1.3.3 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,9 +47,10 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 
 1. If `rows >= 2`: call `get_sample` exactly once → `(sample, age, up, hist)`.
    - If `sample` is a dict: `dgx_mtok = sample.get("dgx_cost:dgx_usd_per_mtok")`, set to
-     none when it is not a number (bool included) or `<= 0`; NaN is a number and
-     `NaN <= 0` is false, so NaN passes through **raw** here (SL:1221; the `> 0`
-     re-test lives in the ⛏ basis guard, BC-1.05.003 EC-005).
+     none when it is not a number or `<= 0` (bool **is** a number here: `True <= 0` is
+     false so `True` is kept raw; only `False` becomes none, ADV-P4-C2-16); NaN is a
+     number and `NaN <= 0` is false, so NaN passes through **raw** here (SL:1221; the
+     `> 0` re-test lives in the ⛏ basis guard, BC-1.05.003 EC-005).
      `dgx_rate = sample.get("dgx_tokens:rate_mtok_month")` passed **raw** (no type or
      range check here).
    - Row 2 is rendered and appended iff `rows > 2 or cols == 0 or cols >= narrow_cols`;
@@ -78,7 +79,7 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 | EC-006b | `dgx_cost:dgx_usd_per_mtok` = NaN | `dgx_mtok` stays NaN (raw); ⛏ then renders `⛏n/a` (BC-1.05.003 EC-005) |
 | EC-007 | `dgx_tokens:rate_mtok_month` = NaN | passed raw as NaN |
 | EC-008 | sample none (dead) | `dgx_mtok = dgx_rate = none`; row 2 = `◌ DGX ?` when shown |
-| EC-009 | rows value `2_0` (legacy parsed it as 20 and forced row 2) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.003); OD-105 exclusion entry `D4-EX-3`, dedicated test `TestConfigError_D4EX3_Number` |
+| EC-009 | rows value `2_0` (legacy parsed it as 20 and forced row 2) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.003); OD-105 exclusion entry `D4-EX-3`, dedicated test `TestD4EX3_Number` |
 
 ## Canonical Test Vectors
 

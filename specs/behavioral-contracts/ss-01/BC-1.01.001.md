@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "278b2ba"
+input-hash: "4f5dcbc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,8 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B01/B11/B16): --subagent routes under this guard per OD-155 (supersedes OD-14); degraded-line SGR cites OD-113 not OD-162; second VP row is VP-003; 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B12/B07): config-error precondition carves out --subagent mode (OD-168: zero stdout bytes); DI-012 cited for the carried closed-set ids; 2026-11-17T12:00:00Z"
+  - "pass-4 residual sweep (ADV-P4-D22): D4-EX-3 table-test name canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,16 +37,19 @@ removal_reason: null
 ## Description
 
 Any fault raised while rendering one status-line refresh (after configuration has resolved) is caught by one
-top-level guard, which writes exactly the 29-byte degraded line to stdout and exits 0. The status line is never
-blank and never non-zero (DI-008). This is the outermost rung of the degraded ladder; config errors (D4-EX-3) and
-unknown flags (OD-112) use their own one-line formats and are not this contract.
+top-level guard, which writes exactly the 29-byte degraded line to stdout and exits 0. In the main render the status
+line is never blank and never non-zero (DI-008); the `--subagent` mode carves out zero-stdout-bytes outcomes
+(OD-155, OD-168). This is the outermost rung of the degraded ladder; config errors (D4-EX-3) and unknown flags
+(OD-112) use their own one-line formats and are not this contract.
 
 ## Preconditions
 
 1. `hylo statusline` is invoked with any argv that BC-4.01.001 routes to either render path — the main render or
    the `--subagent` render (OD-155; legacy runs `main_subagent` under the same top-level guard, SL:1238-1243) —
    excluding unknown flags (that case is BC-4.01.002).
-2. Configuration resolved without error (an invalid value renders the D4-EX-3 line instead, BC-2.02.001).
+2. Configuration resolved without error. In the main render an invalid value renders the D4-EX-3 line instead
+   (BC-2.02.001); in `--subagent` mode a config error prints **zero stdout bytes** (diagnostic on stderr) per
+   OD-168 — the PRD/DI-008 carve-out for the agent-panel mode.
 3. During the refresh a fault occurs at any guarded site: a crash-path site CP-S01..S17 (stdin type confusion,
    lone surrogate at output), CP-N01/N02 (row-2 NaN paths, BC-1.04.014/015), or any unexpected Go panic.
 
@@ -77,7 +82,7 @@ unknown flags (OD-112) use their own one-line formats and are not this contract.
 | EC-001 | Fault inside the row-1 widgets after the git-cache write (e.g. thermometer, CP-S06) | Degraded line; git cache and earlier writes kept (BC-1.01.009) |
 | EC-002 | Fault at the final print: a rendered str holds a lone surrogate (CP-S17) | Degraded line after every cache write of the refresh (BC-1.01.008) |
 | EC-003 | Go panic not mapped to any CP site (programming error) | `recover()` backstop prints the same 29 bytes, exit 0; the parity diff still flags it because legacy would not degrade on that input |
-| EC-004 | Legacy import-time env crash (CP-X01/X02: unparseable TTL/ROWS -> empty stdout, exit 1) | Not reachable in Go: invalid settings are config errors, approved deviation **D4-EX-3** (OD-102, OD-114) rendered by BC-2.02.001; excluded from the parity diff via the OD-105 exclusion entry `D4-EX-3` with dedicated tests `TestConfigError_D4EX3_{Number,Boolean,URL,Enum}` — one per class with its own dedicated grammar (number-range, boolean, URL, enum); the number-grammar (BC-2.02.003) and theme/SGR (BC-2.01.003) classes are pinned by their class contracts, and the register is closed at six (OD-114 + OD-134 + OD-140) |
+| EC-004 | Legacy import-time env crash (CP-X01/X02: unparseable TTL/ROWS -> empty stdout, exit 1) | Not reachable in Go: invalid settings are config errors, approved deviation **D4-EX-3** (OD-102, OD-114) rendered by BC-2.02.001; excluded from the parity diff via the OD-105 exclusion entry `D4-EX-3` with dedicated tests `TestD4EX3_{Number,Boolean,URL,Enum}` — one per class with its own dedicated grammar (number-range, boolean, URL, enum); the number-grammar (BC-2.02.003) and theme/SGR (BC-2.01.003) classes are pinned by their class contracts, and the register is closed at six (OD-114 + OD-134 + OD-140) |
 | EC-005 | Writing the degraded line itself fails (stdout closed / EPIPE; legacy CP-X03 exits 1 with no stdout) | Ruled OD-136: Go swallows the write error and still returns exit 0 (DI-008). This is the named exclusion `cp-x03` in the OD-105/OD-110 closed set, with its own dedicated table test (name provisional — architect (OD-145)). Not observable by Claude Code (the consumer is gone); out of parity comparison (P3r1 §B marks CP-X03 not parity-relevant) |
 | EC-006 | SIGINT/SIGTERM (legacy CP-X04) | Out of scope; no output contract |
 | EC-007 | argv contains `--subagent` | This contract covers it: OD-155 (superseding OD-14 (a)) ports the subagent panel in P1; legacy guards `main_subagent` identically (SL:1238-1243), so a fault in the subagent render ends in the same 29 bytes, exit 0 (BC-1.07.008, CP-A01..A03). An *unknown* flag is the separate BC-4.01.002 line (OD-112) |
@@ -108,7 +113,7 @@ Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`,
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 |
 | Architecture Module | `internal/statusline` guard (`guard.go`, design §2.2) (BC-COMPONENT-MAP: internal/statusline/guard.go (29-byte degraded line, recover backstop) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:`__main__` guard (SL:1238-1245); degraded colors RESET SL:127, GREY SL:131-132 |

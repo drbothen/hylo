@@ -17,6 +17,7 @@ Burst narratives for this cycle, in chronological order.
 - .factory/cycles/phase-1-spec-crystallization/burst-log.md
 - .factory/cycles/phase-1-spec-crystallization/session-checkpoints.md
 - .factory/cycles/phase-1-spec-crystallization/lessons.md
+- .factory/cycles/phase-1-spec-crystallization/burst-log.md
 - .factory/cycles/phase-1-spec-crystallization/convergence-trajectory.md
 - .factory/cycles/phase-0-ingestion/convergence-trajectory.md
 - .factory/cycles/phase-0-ingestion/burst-log.md
@@ -484,3 +485,197 @@ Burst narratives for this cycle, in chronological order.
 **Closes:** all 150 pass-3 findings remediated across perimeters A/A2/B/C/C2/D (reports `adversarial-reviews/pass-3.md` + `ADV-P3-INDEX.md`), sync check adv-p3 (verdict PASS, 4 warnings fixed), rulings OD-166..OD-168 recorded, lessons L-PG-09..12 codified. Still open: ADV pass 4 (>=3 clean passes to convergence); CR-04 dependent-artifact hash staleness (check-input-drift, pre-gate).
 
 **Next:** ADV pass 4 (fresh-context perimeters; >=3 clean passes to convergence).
+
+## Burst: ADV pass-4 recording + remediation — rulings OD-169..175 applied, VP-041 minted, crash register 47 paths, sync check PASS-WITH-FINDINGS (2026-11-17)
+
+**Parent-commit:** 9c5dda3 (factory(phase-1d): pass-3 remediation, BC-5.01.007, rulings OD-166..168)
+
+**Adversary verdict:** pass 4 recorded 2026-11-17: NOT_CONVERGED, 133 findings (39H/57M/32L/5C), Δ −17 vs pass 3 (150) but HIGH 36 → 39; many findings sibling-propagation — fixed facts re-flagged at sibling sites, not relapses; HIGH concentrated on the interface-definitions/registry closure (ADV-P4-A04/A05) and partial-fix propagation (ADV-P4-A2-03). Novelty pass-level MEDIUM-HIGH (A HIGH, A2 HIGH, B/C/C2/D MEDIUM). Reports `adversarial-reviews/pass-4.md` + `ADV-P4-INDEX.md` (133 rows cross-checked: A 19, A2 26, B 22, C 15, C2 17, D 34). This burst remediates all 133 findings; next: ADV pass 5.
+
+**Codifications:** owner rulings OD-169..OD-175 recorded 2026-11-17 (owner chose the recommended option each time; next free OD-176 — log: `specs/owner-decisions-log-2026-11-14.md`). Highlights: OD-169 cost-history divergence gets its own closed-set exclusion id `OD-166` (closed set now 11 ids); OD-170 hylo carries its own Unicode 14.0 tables generated from CPython 3.11.7; OD-171 local zone resolved through internal/platform honouring TZ on every OS (VP-026 posix-only tag removed); OD-173 lane-pill words become config keys; OD-174 `cost.basis_min_shown_usd` renamed `statusline.cost.display_floor_usd`; OD-175 `statusline.queue.yellow` ratified as a P1 Bool key. Four [process-gap] lessons codified L-PG-13..16 in `cycles/phase-1-spec-crystallization/lessons.md` and recorded as Drift Items in STATE.md: L-PG-13 remediation-plan design calls checked against settled ODs before dispatch (plan call 10 first contradicted OD-148 — corrected post-burst); L-PG-14 hook scratch files untracked and gitignored (regression-state.json was tracked on the public branch with an absolute home path); L-PG-15 every claimed fix verified on disk (BC-1.07.002 vector row unwritten, VP-011 count recomputed wrongly — both caught by the residual sweeps); L-PG-16 injected instructions in a tool result recorded and the owner notified (pass-4 subagent sighting: credential/SSH/Wi-Fi collection instructions ignored, source unidentified).
+
+**Scope.** Remediation of ADV pass 4 (133 findings; source `adversarial-reviews/pass-4.md`, canonical rulings and minted ids in `pass-4-remediation-plan.md`). Executed as 8 parallel fix agents + 2 residual sweeps + the OD-148 layout correction (plan call 10 as first drafted moved the parity corpus root to internal/parity/testdata/cases/, contradicting the settled OD-148 fixture layout — corrected post-burst: corpus root internal/statusline/testdata/parity/cases/, generic runner in ./internal/parity) + 2 sync-fix agents. Fixed across domain-spec, product-brief, prd.md, prd-supplements, behavioral contracts, architecture, verification properties and the cicd / dtu / gene-transfusion / feasibility documents. New crash id CP-N03; crash register now 47 paths including the foreign-cache CP-C family under OD-160. Residual sweeps verified claimed fixes on disk (L-PG-15). One subagent reported injected instructions in a shell tool result; it ignored them and the sighting was escalated to the owner (L-PG-16).
+
+**Counts.** Contract count unchanged at 154 (S5 = 20); VP count 40 → 41 (VP-041 minted, row-1 property legs); crash register 47 paths.
+
+**Sync check (post-burst).** `sync-check-adv-p4-2026-11-17.md`: verdict PASS-WITH-FINDINGS; all 8 findings (SC-05..SC-12) closed before this commit. 157 dirty files vs 9c5dda3 scanned; 239 spec .md files across 7 trees.
+
+**Housekeeping.** `regression-state.json` (hook scratch that had captured an absolute home path) removed from tracking and added to `.factory/.gitignore`.
+
+**Dim-2 Attestation:** artifact counts verified on disk this burst: 154 BC files under `specs/behavioral-contracts/ss-01..ss-06`; 41 VP files (+ VP-INDEX) under `specs/verification-properties/`; 10 ARCH sections (+ ARCH-INDEX) under `specs/architecture/`.
+
+**Dim-5 Attestation:** N/A — no compiled artifacts in this burst (markdown state/bookkeeping files only).
+
+**Dim-6 Attestation:** N/A — no schema-structured file edited; policies.yaml untouched this burst.
+
+**Dim-7 Attestation:** N/A — no repo test suite in scope (markdown state/bookkeeping files only).
+
+**Files touched (Dim-1): 163 unique paths** (regression-state.json removed from tracking; linkscan.tmp scratch left unstaged)
+
+- .factory/.gitignore
+- .factory/cycles/phase-1-spec-crystallization/adversarial-reviews/ADV-P4-INDEX.md
+- .factory/cycles/phase-1-spec-crystallization/adversarial-reviews/pass-4.md
+- .factory/cycles/phase-1-spec-crystallization/burst-log.md
+- .factory/cycles/phase-1-spec-crystallization/convergence-trajectory.md
+- .factory/cycles/phase-1-spec-crystallization/cycle-manifest.md
+- .factory/cycles/phase-1-spec-crystallization/lessons.md
+- .factory/cycles/phase-1-spec-crystallization/pass-4-remediation-plan.md
+- .factory/cycles/phase-1-spec-crystallization/sync-check-adv-p4-2026-11-17.md
+- .factory/regression-state.json
+- .factory/sidecar-learning.md
+- .factory/specs/architecture-feasibility-report.md
+- .factory/specs/architecture/ARCH-00-overview.md
+- .factory/specs/architecture/ARCH-01-binary-cli.md
+- .factory/specs/architecture/ARCH-02-configuration.md
+- .factory/specs/architecture/ARCH-03-statusline.md
+- .factory/specs/architecture/ARCH-05-platform.md
+- .factory/specs/architecture/ARCH-06-pyfmt.md
+- .factory/specs/architecture/ARCH-07-parity-harness.md
+- .factory/specs/architecture/ARCH-08-build-ci-release.md
+- .factory/specs/architecture/ARCH-INDEX.md
+- .factory/specs/architecture/BC-COMPONENT-MAP.md
+- .factory/specs/behavioral-contracts/BC-ALLOCATION.md
+- .factory/specs/behavioral-contracts/BC-INDEX.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.008.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.01.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.011.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.012.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.013.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.014.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.016.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.017.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.018.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.019.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.020.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.021.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.022.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.023.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.025.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.027.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.028.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.029.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.02.030.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.010.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.014.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.015.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.018.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.03.020.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.013.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.020.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.04.021.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.05.009.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.06.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.001.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.002.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.003.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.004.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.005.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.006.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.007.md
+- .factory/specs/behavioral-contracts/ss-01/BC-1.07.008.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.001.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.002.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.004.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.01.005.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.001.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.002.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.003.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.004.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.005.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.02.006.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.03.001.md
+- .factory/specs/behavioral-contracts/ss-02/BC-2.03.002.md
+- .factory/specs/behavioral-contracts/ss-03/BC-3.01.001.md
+- .factory/specs/behavioral-contracts/ss-03/BC-3.02.001.md
+- .factory/specs/behavioral-contracts/ss-03/BC-3.02.002.md
+- .factory/specs/behavioral-contracts/ss-04/BC-4.01.001.md
+- .factory/specs/behavioral-contracts/ss-04/BC-4.01.002.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.002.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.01.007.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.001.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.005.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.02.006.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.03.004.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.04.001.md
+- .factory/specs/behavioral-contracts/ss-05/BC-5.04.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.01.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.01.002.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.01.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.002.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.02.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.003.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.03.004.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.04.001.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.04.002.md
+- .factory/specs/behavioral-contracts/ss-06/BC-6.04.003.md
+- .factory/specs/cicd-setup.md
+- .factory/specs/domain-spec/bounded-contexts.md
+- .factory/specs/domain-spec/capabilities.md
+- .factory/specs/domain-spec/invariants.md
+- .factory/specs/domain-spec/owner-validation-list.md
+- .factory/specs/domain-spec/state-machines.md
+- .factory/specs/domain-spec/ubiquitous-language.md
+- .factory/specs/dtu-assessment.md
+- .factory/specs/gene-transfusion-assessment.md
+- .factory/specs/owner-decisions-log-2026-11-14.md
+- .factory/specs/prd-supplements/assumptions-register.md
+- .factory/specs/prd-supplements/error-taxonomy.md
+- .factory/specs/prd-supplements/interface-definitions.md
+- .factory/specs/prd-supplements/module-criticality.md
+- .factory/specs/prd-supplements/nfr-catalog.md
+- .factory/specs/prd-supplements/risk-register.md
+- .factory/specs/prd-supplements/test-vectors.md
+- .factory/specs/prd.md
+- .factory/specs/product-brief.md
+- .factory/specs/verification-properties/VP-001-never-blank-exit0.md
+- .factory/specs/verification-properties/VP-002-unknown-flag-one-line.md
+- .factory/specs/verification-properties/VP-003-cpx03-write-failure-exit0.md
+- .factory/specs/verification-properties/VP-005-stdin-decode-totality.md
+- .factory/specs/verification-properties/VP-006-json-depth-budgets.md
+- .factory/specs/verification-properties/VP-007-render-determinism-seams.md
+- .factory/specs/verification-properties/VP-009-tier-a-live-parity.md
+- .factory/specs/verification-properties/VP-011-tier-c-differential-fuzz.md
+- .factory/specs/verification-properties/VP-012-exclusion-set-closure.md
+- .factory/specs/verification-properties/VP-013-d4ex2-wrong-shape-tables.md
+- .factory/specs/verification-properties/VP-016-config-error-classes-line.md
+- .factory/specs/verification-properties/VP-017-exactly-one-backend.md
+- .factory/specs/verification-properties/VP-018-atomic-cache-writes.md
+- .factory/specs/verification-properties/VP-020-cost-history-integrity.md
+- .factory/specs/verification-properties/VP-021-cost-colour-goldens.md
+- .factory/specs/verification-properties/VP-022-ledger-read-scope-absence.md
+- .factory/specs/verification-properties/VP-023-pyfmt-num-equivalence.md
+- .factory/specs/verification-properties/VP-026-pyfmt-time-equivalence.md
+- .factory/specs/verification-properties/VP-028-row1-widget-tables.md
+- .factory/specs/verification-properties/VP-029-transcript-parse-tables.md
+- .factory/specs/verification-properties/VP-030-telemetry-row2-tables.md
+- .factory/specs/verification-properties/VP-036-render-latency-p95.md
+- .factory/specs/verification-properties/VP-039-elapsed-clock-ulp-agreement.md
+- .factory/specs/verification-properties/VP-040-frame-width-property-legs.md
+- .factory/specs/verification-properties/VP-041-row1-property-legs.md
+- .factory/specs/verification-properties/VP-INDEX.md
+- .factory/STATE.md
+
+**Closes:** all 133 pass-4 findings remediated across perimeters A/A2/B/C/C2/D (reports `adversarial-reviews/pass-4.md` + `ADV-P4-INDEX.md`), sync check adv-p4 (verdict PASS-WITH-FINDINGS, SC-05..SC-12 closed), rulings OD-169..OD-175 recorded, lessons L-PG-13..16 codified. Still open: ADV pass 5 (>=3 clean passes to convergence); CR-04 dependent-artifact hash staleness (check-input-drift, pre-gate).
+
+**Next:** ADV pass 5 (fresh-context perimeters; >=3 clean passes to convergence).

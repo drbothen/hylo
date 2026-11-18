@@ -2,14 +2,15 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "bf7d2d7"
+input-hash: "f23533f"
+
 ---
 
 # ARCH-01 — Binary & CLI (`cmd/hylo`)
@@ -91,7 +92,9 @@ OD-112: adapt or hand-roll the scan).
 - **Consequences:** `runStatusline` literally cannot propagate an error code; the guard
   owns the degraded line; `cp-x03` (degraded-write failure) still exits 0 (OD-136); in
   `--subagent` mode a config error likewise exits 0 with zero stdout bytes (OD-168),
-  so the panel surface stays NDJSON-only (pass-3 A02).
+  so the panel surface stays NDJSON-only (pass-3 A02). OD-172 extends `cp-x03` to the
+  panel's row writes: a stdout write failure while printing subagent rows stops writing
+  and exits 0, with no degraded-line attempt (OD-172; no new exclusion id).
 - **Verification feasibility:** all exits are stdout/exit-code byte tables — **testable
   only** (CLI shell), pinned by golden files and per-verb table tests; the pure pieces
   they call are covered under their own sections.
@@ -111,6 +114,24 @@ resolved as `--config` flag, then `HYLO_CONFIG`, then `internal/platform` per-OS
 — exactly the resolutions the running binary uses, with the same overrides the status
 line honors (cache/state lines resolve per BC-3.01.001), so `config path` can never
 disagree with actual use. Paths are computed by `platform`, never assembled here.
+
+## Fragment anchors (pass-4 A01; stable targets for BC-body fragment links)
+
+BC bodies link fragments like `architecture/ARCH-01-binary-cli.md#dispatch`; the four
+anchors below are the complete, closed set for this section — new BC fragment links
+must target one of these.
+
+<a id="dispatch"></a>
+<a id="statusline-args"></a>
+<a id="config"></a>
+<a id="version"></a>
+
+| Anchor | Target |
+|---|---|
+| `#dispatch` | the "Dispatch order is contractual" paragraph: verb parse → `--subagent` routing → unknown-flag scan → `statusline.Main` → exit 0 |
+| `#statusline-args` | the P1 `statusline` argument rules in the same paragraph (no flags; unknown-flag line; bare `-` positional; bare `--` ends only the scan; `ExitOnError` ban) |
+| `#config` | the `hylo config path` section (OD-132, OD-165) |
+| `#version` | the "Decision: version string chain" section (BC-4.01.003) |
 
 ## Mapping
 

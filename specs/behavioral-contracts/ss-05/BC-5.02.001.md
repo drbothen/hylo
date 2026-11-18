@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "5e548b0"
+input-hash: "36cc482"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D09+D12: expected bytes written as escape notation (wire forms shown); DumpsLen gains (int, error) with ErrValue on encoder-failure ints past 4300 digits; anchor fix (notation per PC-4, not BC-5.01.002)"
+  - "1.2.3 2026-11-18: ADV-P4 remediation D17 — Inv 4 recursion economy measured: decoder and encoder consume one slot per nesting level (max depth = limit − 8 at module scope, limits 700/1000/1300), encoder boundary strictly lower at every call site"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -83,8 +84,13 @@ escaping and float-repr code with the cache encoder `Dumps` (IM-03) so the two c
    (`DumpsLen(v Value) (int, error)`): it returns typed `ErrValue` exactly where CPython's `json.dumps` raises
    `ValueError` on such ints (signature amended, ADV-P3-D12). At the composition sites the legacy equivalent
    propagates to the top-level handler → the whole line degrades; in the cache writer the same encoder failure
-   reproduces legacy's no-write (swallowed error, partial temp file, BC-5.02.006). The encoder's recursion
-   budget equals the decoder's per call site (shared primitive, IM-04).
+   reproduces legacy's no-write (swallowed error, partial temp file, BC-5.02.006). Recursion economy
+   (measured, ADV-P4-D17): CPython's decoder and encoder both consume ONE recursion slot per container nesting
+   level (law: max depth = recursionlimit − 8 at module scope; slope verified at limits 700/1000/1300 with
+   `python3 -I`), but the encoder runs deeper in the call stack at every legacy call site, so its absolute
+   boundary is strictly lower than the stdin decoder's (a `rate_limits` dict accepted at decode can still
+   raise `RecursionError` inside `json.dump`); where CPython would raise it, `DumpsLen`/`Dumps` return the
+   depth error per the BC-5.02.006 boundary (shared primitive, IM-04).
 
 ## Edge Cases
 

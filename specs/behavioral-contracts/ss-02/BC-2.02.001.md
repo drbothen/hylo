@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "fea6dfc"
+input-hash: "ddabe95"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -25,6 +25,7 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
+  - "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D18+D32: subagent-mode config error = zero bytes stdout + stderr detail + exit 0 (OD-168); [from ENVNAME] rule covers indexed entries and defaults layer"
 deprecated: null
 deprecated_by: null
@@ -129,8 +130,11 @@ raised by BC-2.01.003. A seventh class needs an owner decision.
    grammar) — while stderr still receives the per-error detail lines of PC 6 and the exit
    status stays 0 (OD-168; ADV-P3-D18; legacy's `main_subagent` analog crashes at import
    with blank stdout and exit 1 — the exit status is an approved deviation per DI-008).
-   Precedence is unchanged: an unknown flag still wins before config resolution
-   (BC-4.01.002 PC-4).
+   In subagent mode no flag other than the `--subagent` selector itself is validated
+   (BC-4.01.002 EC-004, BC-1.07.001 EC-002): an unknown flag draws neither the grey
+   config-error line nor any other stdout byte, so the NDJSON wire stays clean
+   (ADV-P4-D04). Unknown-flag precedence (BC-4.01.002 PC-4) applies to the main renderer
+   only.
 
 ## Invariants
 
@@ -181,7 +185,7 @@ raised by BC-2.01.003. A seventh class needs an owner decision.
 |-------|-------|
 | Source | legacy/dgx_statusline.py:module tunables (SL:73-100), import-time parse at SL:74 (`float(DGX_SL_TTL)`) and SL:75 (`int(DGX_SL_ROWS)`); guard that does NOT cover import at SL:1238-1245; legacy contract BC-SL-087 + crash paths CP-X01/CP-X02 (pass-3 r1 §B) |
 | Decisions | OD-102 (format, exit 0, stderr, validate parity), OD-114 (error classes), OD-105/OD-110 (named exclusion), OD-05, OD-107, D15 |
-| Parity / exclusion | **Approved deviation D4-EX-3.** Exclusion-list entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json` (`{id, case, expected_output_file, table_test}`, OD-105); dedicated table tests `TestConfigError_D4EX3_Number`, `TestConfigError_D4EX3_Boolean`, `TestConfigError_D4EX3_URL`, `TestConfigError_D4EX3_Enum` plus the `config validate` test (BC-2.03.001). No blanket exclusion; an excluded case without its test fails the harness (BC-6.03.004) |
+| Parity / exclusion | **Approved deviation D4-EX-3.** Exclusion-list entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json` (`{id, case, expected_output_file, table_test}`, OD-105); dedicated table tests `TestD4EX3_Number`, `TestD4EX3_Boolean`, `TestD4EX3_URL`, `TestD4EX3_Enum` plus the `config validate` test (BC-2.03.001). No blanket exclusion; an excluded case without its test fails the harness (BC-6.03.004) |
 | L2 Capability | CAP-015 (also CAP-009) |
 | L2 Domain Invariants | DI-008, DI-010 |
 | Architecture Module | `internal/config/errors.go` (`Error.StatusLine()`), `cmd/hylo/statusline.go` (BC-COMPONENT-MAP: internal/config/errors.go (D4-EX-3 line) — ARCH-02) |

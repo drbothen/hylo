@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr.md]
-input-hash: "c1cbee0"
+input-hash: "6567a53"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:337)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,7 +61,7 @@ step. The Go code must keep the gap rule anyway, and a seeded table test must ex
 | EC-002 | Seeded newest point `t`=998.0, fetch at 1000 | appended (gap exactly 2) |
 | EC-003 | Seeded newest point in the future (`t`=1005, backward clock) | not appended (`-5 < 2`) |
 | EC-004 | TTL 1 s, fetches at 1000 and 1001 | second point not appended |
-| EC-005 | TTL `nan` (legacy: fetch every refresh) | not reproduced: D4-EX-3 config error (BC-2.02.002); OD-105 exclusion entry `D4-EX-3`, test `TestConfigError_D4EX3_Number` |
+| EC-005 | TTL `nan` (legacy: fetch every refresh) | not reproduced: D4-EX-3 config error (BC-2.02.002); OD-105 exclusion entry `D4-EX-3`, test `TestD4EX3_Number` |
 
 ## Canonical Test Vectors
 

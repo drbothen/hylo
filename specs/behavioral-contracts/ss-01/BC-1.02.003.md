@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "aac2048"
+input-hash: "47e979d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:451-462)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B17): H1 retitled to match the PC3 selection chain (project_dir | current_dir | cwd), per bc_h1_is_title_source_of_truth; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -27,7 +28,7 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-1.02.003: Project label is basename(normpath(cwd))
+# Behavioral Contract BC-1.02.003: Project label: basename(normpath(project_dir | current_dir | cwd))
 
 ## Description
 

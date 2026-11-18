@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:12:00Z
+timestamp: 2026-11-18T14:40:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-04-data-files.md, architecture/ARCH-09-reserved-boundaries.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2938a6f"
+input-hash: "0b8f340"
 traces_to: prd.md
 source_bc: BC-1.04.001
-bcs: [BC-1.04.001]
+bcs: [BC-1.04.001, BC-1.01.009]
 module: internal/statusline (Env read scope)
 proof_method: manual
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)", "1.4 2026-11-18T14:40:00Z: ADV-P4 fixes — the AST/imports lint leg gets a tracked owner (the ARCH-08 cicd-setup story that wires the lint job) and a POL-11 positive-coverage assertion (one planted ledger-opening mutant flagged + zero flags on the real tree, asserted in CI) (A2-17); BC-1.01.009 added to bcs: to match the body's partial-coverage claim, enumerated as a prose-only exception in VP-INDEX (A2-11); runStatusline call shape unified (A2-22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -86,8 +86,12 @@ this label, not a fetch-parity property.
   names, not a type theorem); (c) a compile-time AST/imports
   lint asserting `internal/statusline` and `internal/cost` reference no ledger package
   or file language AND perform no direct `os.Open`/`os.Create` outside the Env seam
-  implementation — to be carried as a hygiene leg in the ARCH-08 / cicd-setup lint
-  job (currently gofmt + vet only; see Propagation note); (d) architecture
+  implementation — owned by the ARCH-08 cicd-setup story, which wires the lint job
+  (currently gofmt + vet only; see Propagation note); the leg carries a POL-11
+  positive-coverage assertion: CI plants one ledger-opening mutant fixture and asserts
+  the lint flags exactly it, while the real tree flags zero files — 1 planted
+  violation flagged per rule + 0 on the real tree, so the lint cannot pass inert
+  (A2-17); (d) architecture
   conformance at adversarial review.
 - **Honesty:** absence verified by construction + audit, not runtime proof; the P1
   structural claim is the cheapest true form of DI-007 enforcement.
@@ -105,7 +109,7 @@ func TestEnvScope_AllowedPathSet(t *testing.T) {
     for _, tc := range FaultInjectionTable { // full render, all faults
         rec := newRecordingFiles() // wrapper: records every path opened
         env := envWithFiles(rec)
-        runStatusline(env, stdin, func() int { return 0 } /*exit hook*/)
+        runStatusline(env, []string{"statusline"}, testStdin, rec) // canonical shape (A2-22)
         for _, p := range rec.Opened() {
             if !allowedStatuslinePaths(p) { // transcript, caches, cost history, and the
                 // git widget's .git / gitdir-HEAD reads up the ancestor walk (SL:369-389)
@@ -134,7 +138,9 @@ func TestEnvScope_NoLedgerSeam(t *testing.T) {
 
 Not in the OD-145 harness table; in-tree as `TestEnvScope_AllowedPathSet` +
 `TestEnvScope_NoLedgerSeam`; the CI import lint rides a hygiene leg in the ARCH-08 /
-cicd-setup lint job (follow-up: that job currently runs gofmt + vet only).
+cicd-setup lint job — that story is the leg's tracked owner (A2-17), with the
+positive-coverage assertion above (1 planted mutant flagged, real tree zero) so the
+job cannot go green while inert.
 
 ## Feasibility Assessment
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "f65e846"
+input-hash: "99bca80"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B05/B03): EC-005/EC-006 and the -Infinity vector row tagged OD-160 (hand-edited-cache shapes); win_ms fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,8 +67,8 @@ renders `_hm(win_ms)` (`<m>m` or `<h>h<mm>m`).
 | EC-002 | now − start = 86400 s | `1d00h` |
 | EC-003 | now − start = 7200 s | `2h00m` |
 | EC-004 | 104 days | `104d04h` (no padding) |
-| EC-005 | `win_start = true` at now = 1794600000 | `20770d19h` |
-| EC-006 | `win_ms = +inf` | degraded |
+| EC-005 | `win_start = true` at now = 1794600000 (hand-edited-cache shape, **OD-160**; cf. BC-1.02.017 EC-007) | `20770d19h` |
+| EC-006 | `win_ms = +inf` (win_start `-Infinity`; hand-edited-cache shape, **OD-160**) | degraded |
 | EC-007 | Very large finite `win_ms` (minutes beyond int64) | byte-exact big integers via `math/big` at this site (OD-137), same resolution as BC-1.02.027 EC-005; no exclusion entry |
 
 ## Canonical Test Vectors
@@ -83,7 +84,7 @@ now = 1794600000.0, `win_start = now - S`, dur 60001 unless noted; output is the
 | 86400 | `\e[90m⏱ 1m\e[0m\e[90m ⌂1d00h\e[0m` | edge-case |
 | 277200 | `\e[90m⏱ 1m\e[0m\e[90m ⌂3d05h\e[0m` | edge-case |
 | 9000000 | `\e[90m⏱ 1m\e[0m\e[90m ⌂104d04h\e[0m` | edge-case |
-| win_start = -Infinity | whole stdout = `\e[90mstatusline degraded\e[0m\n` | error |
+| win_start = -Infinity | whole stdout = `\e[90mstatusline degraded\e[0m\n` (hand-edited-cache shape, **OD-160**) | error |
 
 Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-104); the first six match deep pass-3
 round 1.
@@ -92,7 +93,7 @@ round 1.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For finite `win_ms` in [300000, 1e12] the Go text equals CPython's | fuzz vs oracle |
+| VP-041 | For finite `win_ms` in [300000, 1e12] the Go text equals CPython's | fuzz vs oracle (VP-028 retains the bounded golden tables) |
 | VP-028 | Day form iff `wm >= 1440` | table test |
 
 ## Traceability
@@ -125,7 +126,7 @@ S-N.MM — filled by story-writer
 
 ## VP Anchors (Recommended)
 
-- VP-028 — format equality
+- VP-041 — format equality (fuzz); VP-028 — day-form table and golden vectors
 
 ---
 

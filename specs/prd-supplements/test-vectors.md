@@ -1,14 +1,14 @@
 ---
 document_type: test-vectors
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:38:15Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "c2ae96e"
+input-hash: "2746ce6"
 traces_to: prd.md
 ---
 
@@ -31,7 +31,7 @@ traces_to: prd.md
 | json.dumps length oracle | 63 cases (row 53 script-generated, OD-142) | BC-5.02.002, BC-5.02.001 | design §8; P3r2 §A5; regenerated 2026-11-15 |
 | json.loads(bytes) acceptance set (BOM/UTF-16/32, surrogates, depth, NaN, duplicates) | vector set | BC-5.02.003 | oracle run 2026-11-15 |
 | get_sample pinned sequence + exact cache JSON | 11 steps | BC-1.04.020 | oracle run |
-| Cost colouring goldens (seeded sessions) | 20 sessions, 12 outputs, 5 scenarios | BC-1.05.008 | oracle run 2026-11-15 |
+| Cost colouring goldens (seeded sessions) | 21 sessions (12 s + 8 g + sess-self), 12 outputs, 5 scenarios | BC-1.05.008 | oracle run 2026-11-15; recount per pass-4 A09/C2-04 |
 | heat() HSV cell colours | cell table | BC-1.02.019 | oracle run |
 | Freshness ladder thresholds + stale suffix | ladder table | BC-1.04.004 | oracle run |
 | Row goldens A/B/C (committed Tier B strings, per-OS variants) | 3 goldens | BC-6.03.001 | P3r2 strings; totals recomputed |
@@ -40,7 +40,7 @@ traces_to: prd.md
 | D4-EX-3 class vectors (one per key class + reason strings) | 1+ per class | BC-2.02.001..006, BC-2.01.003/.005 | spec-pinned (OD-114) |
 | Number-range extremes: int64-overflow and Duration-ceiling rows (OD-164) | 1+ per keyed site | BC-2.02.002 | spec-pinned (OD-164) |
 | Per-OS file-read encoding vectors — every file read as UTF-8 on all OSes; locale-decode differences ride exclusion id `OD-159` | vector set | transcript/cache BCs (BC-1.03.x, BC-1.06.x), BC-5.02.003 | spec-pinned (OD-159) |
-| OD-156 numeric-overflow vectors (CP-O01..O05, CP-O10/O11 stdin/metrics/cache-borne at render → 29-byte line; CP-O06..O09 transcript-borne → skip line; CP-A04/A05 subagent conversions → 29-byte line) | 1+ per trigger | BC-1.02.006/.011/.012/.014/.017/.020/.025, BC-1.03.005/.006/.007/.010/.016/.018, BC-1.05.007, BC-1.06.001, BC-1.07.007 | spec-pinned (OD-156; register in error-taxonomy.md) |
+| OD-156 numeric-overflow vectors (CP-O01..O05, CP-O10/O11 stdin/metrics/cache-borne at render → 29-byte line; CP-O06..O08 transcript-borne → skip line, CP-O09 → legacy no-write save; CP-A04/A05 subagent conversions → 29-byte line; CP-N03 metrics-borne, SL:717) | 1+ per trigger — including an overflow (≥ 2**1024 − 2**970) row in each owning BC's table: pass-4 B04 restores the missing rows in BC-1.02.006/.011/.012/.014/.017/.020/.025 and names the CP-O id in the corresponding EC registers | BC-1.02.006/.011/.012/.014/.017/.020/.025, BC-1.03.005/.006/.007/.010/.016/.018, BC-1.05.007, BC-1.06.001, BC-1.07.007 | spec-pinned (OD-156; register in error-taxonomy.md) |
 | `--subagent` / custom agent-panel row vectors (config off switch; legacy BC-SL-097 surface) | vector set | BC-1.07.001..008, BC-4.01.002 | spec-pinned (OD-155) |
 
 Escape convention: in vector cells, `\uXXXX` escapes (e.g. `\u200B`, `\u00A0`) denote that

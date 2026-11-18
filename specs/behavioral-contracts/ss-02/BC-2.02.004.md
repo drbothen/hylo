@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "bc396c7"
+input-hash: "720fc73"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy fallback at legacy/dgx_statusline.py SL:89, SL:644, SL:662)"
@@ -96,7 +96,7 @@ deviation **D4-EX-3** (enum class).
 | Field | Value |
 |-------|-------|
 | Source | new — OD-114 (T10: unknown TRACE values are config errors), OD-102; legacy behavior replaced: legacy/dgx_statusline.py:module tunables (SL:89 `TRACE = os.environ.get("DGX_SL_TRACE", "rate")`), `TRACE_KEYS` (SL:644), sparkline (SL:662 `TRACE_KEYS.get(TRACE, "v")`) |
-| Parity / exclusion | **Approved deviation D4-EX-3 (enum class).** Named exclusion entry id `D4-EX-3`, cases `mine`, `Rate`, ` kv`, `""`, each with its expected output file; dedicated table test `TestConfigError_D4EX3_Enum` (OD-105, OD-110) |
+| Parity / exclusion | **Approved deviation D4-EX-3 (enum class).** Named exclusion entry id `D4-EX-3`, cases `mine`, `Rate`, ` kv`, `""`, each with its expected output file; dedicated table test `TestD4EX3_Enum` (OD-105, OD-110) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-008, DI-010 |
 | Architecture Module | `internal/config/types.go` (`Enum`) (BC-COMPONENT-MAP: internal/config/errors.go (enum class) — ARCH-02) |

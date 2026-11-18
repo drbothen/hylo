@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "db24750"
+input-hash: "87101f4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,6 +24,7 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
+  - "1.2.3 2026-11-18: ADV-P4 remediation D25 - captured stdin moved to a byte-exact sibling file stdin.bin (never a JSON member); mode: main/subagent marker added"
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D24: captured stdin snapshots spliced byte-level (no re-serialization); parse-required captures are build errors"
 deprecated: null
@@ -51,7 +52,15 @@ are compared after every step (BC-6.03.002).
 1. A captured session is a directory under `captures/` (git-ignored, BC-6.02.001)
    holding `session.json`, an ordered array of steps. Each step has:
    - `now`: required decimal epoch seconds;
-   - `stdin`: required JSON object, the snapshot as Claude Code sent it;
+   - `stdin.bin`: a SIBLING FILE holding that refresh's stdin snapshot byte-exact
+     (advocate design call 15, ADV-P4-D25) — the snapshot is NEVER a JSON member of
+     `session.json`. Because the step's stdin lives outside the JSON document, any captured
+     bytes are representable, including NaN/`Infinity` tokens, big-int literals, duplicate
+     keys or an invalid/non-object snapshot: the harness splices the file's bytes directly
+     and never parses them; a JSON-object-shaped snapshot as Claude Code sent it is the
+     normal case;
+   - `mode`: optional, `main` (default) or `subagent` — the marker for a subagent-mode
+     capture, giving that step the handler-relative argv `["--subagent"]` (design call 9);
    - `metrics`: REQUIRED per step — the metrics source for that step's refresh, in the
      BC-6.02.003 model (`"canned"` serving the case's `metrics.json`, or `"down"`,
      `"500"`, `"garbage"`). There is no default: a step without `metrics` is a harness
@@ -61,12 +70,12 @@ are compared after every step (BC-6.03.002).
    - `columns`: optional, the `COLUMNS` value seen at capture time.
    The directory may also hold `transcript.jsonl` (a copy of the session transcript)
    and the case settings (BC-6.02.003).
-2. Paths inside each `stdin` snapshot (`transcript_path`, `workspace.project_dir`,
+2. Paths inside each `stdin.bin` snapshot (`transcript_path`, `workspace.project_dir`,
    `cwd`) are rewritten by the harness to the per-case temp tree before use. The
    project directory is materialized with the same basename as the captured one.
    **Byte fidelity of the rewritten snapshot (ADV-P3-D24):** the harness performs a
    surgical, byte-level splice — only the path substring occurrences inside the captured
-   JSON text are replaced (lengths adjusted); the snapshot is NOT parsed and
+   bytes are replaced (lengths adjusted); `stdin.bin` is NOT parsed and
    re-serialized. Big-int literals, `NaN`/`Infinity` tokens, duplicate keys, key order
    and the original escaping are thereby preserved verbatim, satisfying the OD-107
    byte-parity-on-real-inputs criterion. If a capture ever requires more than a

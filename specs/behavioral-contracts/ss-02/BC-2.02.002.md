@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "de0e402"
+input-hash: "5ea52a3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy-accepted TTL values at legacy/dgx_statusline.py SL:74, SL:324)"
@@ -23,7 +23,7 @@ parity_class: D4-EX-3
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-18: ADV-P4 remediation A03 — per-key exception: statusline.git.ttl_s admits any finite value, negative = never fresh (legacy SL:409); TestD4EX3_Name rename (D22)", "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,7 +57,13 @@ BC-2.02.001:
 1. Value is NaN, +Inf or -Inf (spelled `nan`, `inf`, `infinity`, any case and sign Python
    accepts, or a literal that overflows to infinity such as `1e400`) →
    `<key>=<value> (not finite)`.
-2. Value < 0 → `<key>=<value> (negative)`. `-0`, `-0.0` and underflow to -0.0 (e.g.
+2. Value < 0 → `<key>=<value> (negative)`. **Per-key exception (ADV-P4-A03):**
+   `statusline.git.ttl_s` admits any finite value, negatives included (registry range "any
+   finite number"): legacy's gate `now - ts > GIT_TTL` (SL:409, tunable SL:99) admits them
+   unvalidated, and a negative TTL makes the gate true for every cached sample, i.e. the
+   git cache is **never fresh** (re-read `.git/HEAD` on every render) — legacy-identical
+   observable behavior, so no D4-EX-3 entry arises. For this key check 2 is skipped.
+   `-0`, `-0.0` and underflow to -0.0 (e.g.
    `-1e-400`) are **not** negative (−0.0 < 0 is false) and are treated as 0.
 3. Value > 9223372036.854775 (the largest seconds value a `time.Duration` holds; PR-22) →
    `<key>=<value> (out of range)`.
@@ -71,9 +77,11 @@ BC-2.02.001:
 
 ## Invariants
 
-1. A loaded `Seconds` value is always finite, `>= 0` and `<= 9223372036.854775`, so a
+1. A loaded `Seconds` value is always finite and `<= 9223372036.854775`, so a
    float→Duration conversion is well-defined on every architecture (PR-22: arm64 saturates,
-   amd64 yields MinInt64 for NaN/out-of-range).
+   amd64 yields MinInt64 for NaN/out-of-range); it is `>= 0` for every key except
+   `statusline.git.ttl_s`, whose per-key exception admits negative values (PC-2, 
+   ADV-P4-A03).
 2. Of the P1 `Seconds` keys only `statusline.telemetry.ttl_s` was settable in legacy (via
    `DGX_SL_TTL`), so it is the only key whose range errors are parity deviations; for the
    other keys the range is a hylo-only validation with no legacy counterpart.
@@ -91,6 +99,7 @@ BC-2.02.001:
 | EC-007 | `HYLO_STATUSLINE_TELEMETRY_TTL_S=" 4 "` | valid, 4 (Python grammar keeps surrounding whitespace legal; not an OD-114 error) |
 | EC-008 | `HYLO_STATUSLINE_TELEMETRY_TIMEOUT_S=0` | `must be > 0` (range `> 0`) |
 | EC-009 | `HYLO_STATUSLINE_TELEMETRY_TTL_S=1e1` | valid, 10 |
+| EC-010 | `HYLO_STATUSLINE_GIT_TTL_S=-5` | valid for `statusline.git.ttl_s` (per-key exception); git cache never fresh — legacy-identical (ADV-P4-A03) |
 
 ## Canonical Test Vectors
 
@@ -103,6 +112,7 @@ BC-2.02.001:
 | `HYLO_STATUSLINE_TELEMETRY_TTL_S=inf` | `\e[90mhylo: config error: statusline.telemetry.ttl_s=inf (not finite)\e[0m\n` | error |
 | `HYLO_STATUSLINE_TELEMETRY_TTL_S=-1` | `\e[90mhylo: config error: statusline.telemetry.ttl_s=-1 (negative)\e[0m\n` | error |
 | `HYLO_STATUSLINE_TELEMETRY_TTL_S=-0.0` | normal render (0) | edge-case |
+| `HYLO_STATUSLINE_GIT_TTL_S=-5` | normal render; git cache never fresh (per-key exception, ADV-P4-A03) | edge-case |
 
 ## Verification Properties
 
@@ -114,8 +124,8 @@ BC-2.02.001:
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-114 (T10: TTL `nan`/`inf`/negative are config errors; TTL `0` stays valid), OD-102; legacy behavior replaced: legacy/dgx_statusline.py:module tunables (SL:74 `TTL = float(...)`) and get_sample (SL:324 `fetch_ts > now - TTL`); legacy contract notes BC-SL-087 (pass-3 r1, r2 §A5) |
-| Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json`, one case per value (`nan`, `inf`, `-inf`, `-1`), each with its expected output file; dedicated table test `TestConfigError_D4EX3_Number` (OD-105, OD-110) |
+| Source | new — OD-114 (T10: TTL `nan`/`inf`/negative are config errors; TTL `0` stays valid), OD-102; legacy behavior replaced: legacy/dgx_statusline.py:module tunables (SL:74 `TTL = float(...)`) and get_sample (SL:324 `fetch_ts > now - TTL`); per-key negative exception for `statusline.git.ttl_s` per the git freshness gate (SL:409, tunable SL:99; ADV-P4-A03); legacy contract notes BC-SL-087 (pass-3 r1, r2 §A5) |
+| Parity / exclusion | **Approved deviation D4-EX-3 (number class).** Named exclusion entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json`, one case per value (`nan`, `inf`, `-inf`, `-1`), each with its expected output file; dedicated table test `TestD4EX3_Number` (OD-105, OD-110) |
 | L2 Capability | CAP-015 |
 | L2 Domain Invariants | DI-008, DI-010 |
 | Architecture Module | `internal/config/types.go` (`Seconds`) (BC-COMPONENT-MAP: internal/config/errors.go (number-range class) — ARCH-02) |

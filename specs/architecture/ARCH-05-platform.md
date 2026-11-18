@@ -2,14 +2,15 @@
 document_type: architecture-section
 level: L3
 section: "platform"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "ea79506"
+input-hash: "aa9c64a"
+
 ---
 
 # ARCH-05 — Platform (`internal/platform`)
@@ -27,6 +28,9 @@ input-hash: "ea79506"
 | `proc_darwin.go` | `unix.SysctlKinfoProc("kern.proc.pid", pid)`: `Eproc.Ppid`, `P_comm`, `P_starttime` |
 | `proc_linux.go` | `/proc/<pid>/stat` after the last `)`; start = `btime` + ticks/`procUserHZ`, with `procUserHZ = 100` a named constant, not config: Linux procfs emits times in USER_HZ, a fixed kernel-ABI unit (= 100, independent of CONFIG_HZ) that equals the glibc `sysconf(_SC_CLK_TCK)`/`CLK_TCK` value on every supported kernel — Go's stdlib has no sysconf, and the constant reproduces that ABI rather than a tunable (ADV-P1-A18) |
 | `proc_windows.go` | `CreateToolhelp32Snapshot` + `GetProcessTimes`; PID-reuse guard (parent created before child) |
+| `envvars_unix.go` / `envvars_windows.go` | Windows implementation of the ARCH-01 `EnvVars` interface with case-insensitive `HYLO_*` name matching (NT names); injected into `config.Load` at the seam (ADV-P2-A02, ADV-P4-A20); the unix flavor is the plain `os.Environ()`-backed implementation |
+| `homedir.go` (+ per-OS flavor) | `HomeDir()` backs `~`/`~\` expansion (OD-61, BC-2.01.005): `$HOME` on unix, `USERPROFILE` on Windows; consumed by `internal/config`, never resolved ad hoc in grammars (ADV-P4-A20) |
+| `zone.go` | `LocalZone() *time.Location` (OD-171): resolves the local zone on EVERY OS by loading the zone named by `TZ` when set and parseable, falling back to the OS zone when `TZ` is unset or unparseable; `time.Local` is not used on Windows (it ignores `TZ`), so this is the single zone seam for `Env.Loc` (ARCH-03), the parity harness's child environments, and `Env.Loc` derivation being routed through `internal/platform` (ADV-P4-D21). Table test: TZ unset / `UTC` / IANA name / unparseable. Documented limitation: POSIX-style TZ strings (e.g. `EST5EDT`) may differ between Go's tzdata loader and the MSVC CRT; the parity harness pins `TZ=UTC` for both binaries, so parity cases never hit the limitation (OD-171) |
 | `proc_other.go` | `//go:build !darwin && !linux && !windows`: not found |
 
 No descriptor helpers exist: OD-161 (pass-3 A06, superseding the "int `transcript_path`
@@ -62,6 +66,34 @@ this section and BC-1.03.015 remapped (BC-COMPONENT-MAP).
   plus the D4-EX-1 Windows fake-probe test `TestWindowAge_D4EX1_Windows`).
 - **x/sys usage:** `golang.org/x/sys/unix` only (`SysctlKinfoProc`); `golang.org/x/sys/windows`
   for Toolhelp32/GetProcessTimes — the sole runtime dependency budget in P1 (AD-02).
+
+### Decision: zone resolution through `internal/platform` (OD-171, pass-4)
+
+- **Context:** Go's `time.Local` ignores `TZ` on Windows, while CPython's MSVC runtime
+  honors it; a naive local-time case would diverge on a non-UTC Windows host.
+- **Decision:** hylo resolves its local zone ONLY through `platform.LocalZone()`, which
+  honors `TZ` on every OS (load the named zone; fall back to the OS zone when `TZ` is
+  unset or unparseable). The parity harness pins `TZ=UTC` for both binaries; the Windows
+  leg runs the naive local-time cases with no skip (VP-026's `posix-only` tag is
+  removed). Table test: TZ unset / `UTC` / IANA name / unparseable. Documented
+  limitation: POSIX-style TZ strings (e.g. `EST5EDT`) may differ from the MSVC runtime
+  on Windows; parity cases use `TZ=UTC` only.
+- **Consequence:** `Env.Loc` (ARCH-03) and the harness child environments derive their
+  zone exclusively from this seam.
+
+## Fragment anchors (pass-4 A01; stable targets for BC-body fragment links)
+
+BC bodies link fragments like `architecture/ARCH-05-platform.md#platform-paths`; the
+two anchors below are the complete, closed set for this section — new BC fragment links
+must target one of these.
+
+<a id="platform-paths"></a>
+<a id="platform-proc"></a>
+
+| Anchor | Target |
+|---|---|
+| `#platform-paths` | the `paths.go` + per-OS flavor rows in the Files table (per-OS dirs, OD-95/OD-101/OD-144) |
+| `#platform-proc` | the `proc.go` + `proc_darwin/linux/windows/other.go` rows in the Files table (native ancestor probe) |
 
 ## Mapping
 

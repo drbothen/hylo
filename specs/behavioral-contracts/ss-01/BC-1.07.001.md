@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.2"
+version: "1.0.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "4fda64d"
+input-hash: "8a86486"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ dispatch (SL:1240-1241)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: stale anchor labels refreshed — ARCH-03:137-138 for the subagent.go placement and legacy/claude-dgx:177 for the launcher wiring (ADV-P4-C12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,7 +77,7 @@ not flag parsing, and it precedes every other mode decision.
 | EC-001 | `--subagent` given twice | Single routing decision; behavior identical to one occurrence |
 | EC-002 | `--subagent` together with other unknown flags | Still routes to the subagent renderer; unknown flags are not validated in this mode |
 | EC-003 | `--subagent` after a `--` separator (`hylo statusline -- --subagent`) | Routes to the subagent renderer: membership in `argv[1:]` holds at any index (ADV-P3-A01/D05 ruling); BC-4.01.002's "positional data" reading is superseded for this occurrence |
-| EC-004 | Launcher wiring | `claude-dgx` launches `hylo statusline --subagent` (legacy L:176 wired `--subagent`); the captured CC stdin payload must be verified per ASSUMP-107-1 before Phase 3 |
+| EC-004 | Launcher wiring | `claude-dgx` launches `hylo statusline --subagent` (legacy/claude-dgx:177 wires the CC `subagentStatusLine` command `--subagent`); the captured CC stdin payload must be verified per ASSUMP-107-1 before Phase 3 |
 | EC-005 | Empty argv (no args at all) | Main render (BC-1.01.001) |
 
 ## Canonical Test Vectors
@@ -104,9 +104,9 @@ SL:1240-1241 (`"--subagent" in sys.argv[1:]`); routing order from SL:1239-1244.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-007 (no ledger access in this mode), DI-008 (exit 0 under the guard) |
-| Architecture Module | `internal/statusline/subagent.go` (placed by ARCH-03:133-135; hosts BC-1.07.001..008, dispatched per ARCH-01) |
+| Architecture Module | `internal/statusline/subagent.go` (placed by ARCH-03:137-138; hosts BC-1.07.001..008, dispatched per ARCH-01) |
 | Stories | TBD (filled by story-writer) |
-| Source | legacy/dgx_statusline.py: `__main__` dispatch (SL:1240-1241); launcher `claude-dgx:176` |
+| Source | legacy/dgx_statusline.py: `__main__` dispatch (SL:1240-1241); launcher `legacy/claude-dgx:177` |
 | Legacy contract | BC-SL-097 (P3r2 §A7; P3r4 §7.3; restored to scope OD-155) |
 | Decisions | OD-155 (supersedes OD-14 a), adv-p3 routing ruling on ADV-P3-A01/D05 (membership is the whole rule), OD-112 (handoff), D4 (byte parity), tension T8 (design §8) |
 
@@ -119,7 +119,7 @@ SL:1240-1241 (`"--subagent" in sys.argv[1:]`); routing order from SL:1239-1244.
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — `subagent.go` hosts the OD-155 agent-panel contracts (ARCH-03:133-135); second entry point dispatched per ARCH-01
+- `architecture/ARCH-03-statusline.md` — `subagent.go` hosts the OD-155 agent-panel contracts (ARCH-03:137-138); second entry point dispatched per ARCH-01
 
 ## Story Anchor (Recommended)
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "9aea85e"
+input-hash: "6fcba92"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:523-530)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B04): EC-012 names CP-O02 and states the exact int->float threshold; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,7 +82,7 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 | EC-009 | `resets_at` non-numeric | no countdown (rem None) |
 | EC-010 | rem NaN (`resets_at` NaN) | gate false → no countdown, absolute bands (pass-3 r1 BC-SL-061) |
 | EC-011 | float dividends near unit boundaries | must match CPython `float_divmod` exactly (reason for confidence M) |
-| EC-012 | `resets_at` a JSON integer beyond float64 range (e.g. 10³⁰⁹) | `rem = reset - now` raises OverflowError at SL:515 before any gate → guard line (stdin-borne render overflow, OD-156; same site as BC-1.02.011 EC-010) |
+| EC-012 | `resets_at` a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17; e.g. 10³⁰⁹) | `rem = reset - now` raises OverflowError at SL:515 before any gate → guard line (stdin-borne render overflow, OD-156; same site as BC-1.02.011 EC-010; taxonomy **CP-O02**) |
 
 ## Canonical Test Vectors
 
@@ -105,6 +106,7 @@ colour is GREY `\e[90m`; segment = `\e[90m7d10%\e[0m` + countdown.
 | 701568 (1.16·7d) | none (segment `\e[90m7d10%\e[0m` only) | edge-case |
 | 5h window, rem 20700 / 20701 | ` \e[90m->5h45m\e[0m` / none | edge-case |
 | 0 | none — window unreported (BC-1.02.010) | error |
+| `resets_at` = OV (`2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792, the smallest positive integer that fails float conversion) | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (OverflowError at SL:515 before any gate; CP-O02, EC-012) | error |
 
 ## Verification Properties
 

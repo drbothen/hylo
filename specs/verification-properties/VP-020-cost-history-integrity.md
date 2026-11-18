@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T14:50:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.004.md, behavioral-contracts/ss-01/BC-1.05.006.md, behavioral-contracts/ss-01/BC-1.05.009.md, owner-decisions-log-2026-11-14.md]
-input-hash: "efe51ab"
+input-hash: "74946a8"
 traces_to: prd.md
 source_bc: BC-1.05.004
 bcs: [BC-1.05.004, BC-1.05.006, BC-1.05.009]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)", "1.3 2026-11-18T14:50:00Z: ADV-P4 fix (A2-03/OD-169) — OD-166 record-guard leg added: record_cost SKIPS a cost value whose usd or api_ms cannot convert to float (legacy persisted the raw int); the current refresh still degrades; the resulting cache-byte divergence cites exclusion id OD-166 with its own table test TestCostHistory_OD166_RecordGuard and its own VP-012 closure row — no 'rides D4-EX-2' wording"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,7 +49,12 @@ this VP's parity scope: legacy raises on them (CP-C09/C10 crash paths, BC-1.05.0
 EC-008 — degraded, no write); they are foreign-cache forms carrying exclusion id
 **OD-160** (ruling Q-b). The throttle is strict `<`; numeric sids write one
 string-form key (OD-30) under which the throttle applies and self-exclusion **holds**
-(BC-1.05.006 PC2/PC3).
+(BC-1.05.006 PC2/PC3). Record guard (OD-166): a cost value (`usd` or `api_ms`) that
+cannot convert to float (magnitude >= 2**1024 - 2**970 as an exact int) is **not
+recorded** — the file is unchanged, where legacy persisted the raw int — while the
+current refresh still degrades (E-REN-002); the cache-byte divergence cites exclusion
+id **OD-166** with its own table test (`TestCostHistory_OD166_RecordGuard`) and its
+own VP-012 closure row — it does not ride D4-EX-2 and is not an OD-156 case.
 
 ## Source Contract
 
@@ -95,12 +100,25 @@ func TestCostHistory_ParseFailure_LegacyReloadSemantics(t *testing.T) {
     // valid-JSON wrong-type shapes are NOT in this table: legacy raises on them
     // (CP-C09/C10, BC-1.05.004 EC-008) — foreign-cache forms, exclusion id OD-160.
 }
+
+func TestCostHistory_OD166_RecordGuard(t *testing.T) { // OD-166/OD-169 record guard (A2-03)
+    dir := tempCacheDir(t)
+    hist := cost.Load(dir)
+    cost.Record(hist, "t", exactIntAboveFloat64Max) // e.g. 2**1024 as a 309-digit int
+    if !fileUnchanged(dir, "cost-history.json") {
+        t.Fatal("unconvertible cost recorded — OD-166 guard skipped nothing")
+    }
+    if !degradeAttempted(t, dir) { // the current refresh still degrades (E-REN-002)
+        t.Fatal("OD-166 guard suppressed the refresh degrade")
+    }
+}
 ```
 
 ## Named Tests (OD-145 table where applicable)
 
 Not in the OD-145 harness table; in-tree as
-`TestCostHistory_ParseFailure_LegacyReloadSemantics`;
+`TestCostHistory_ParseFailure_LegacyReloadSemantics` and
+`TestCostHistory_OD166_RecordGuard` (OD-166 record guard);
 format rows additionally pinned by the `swap` cost family (VP-019).
 
 ## Feasibility Assessment

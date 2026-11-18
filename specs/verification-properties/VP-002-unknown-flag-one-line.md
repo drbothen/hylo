@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-18T12:00:00Z
+timestamp: 2026-11-18T14:30:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4bb618d"
+input-hash: "2545641"
 traces_to: prd.md
 source_bc: BC-4.01.002
 bcs: [BC-4.01.002, BC-4.01.001, BC-1.07.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — fuzz argv encoded as NUL-separated []byte (A2-11); BC-4.01.001 added to bcs, matching the body's partial-coverage claim (A2-04); BC-1.07.001 dispatch-grammar rows added (exact-member --subagent routing and its --subagent=1 unknown-flag complement)", "1.3 2026-11-18T06:00:00Z: Source Contract title quote synced to the current BC-4.01.002 H1 (no --subagent enrichment; adv-p2 sync SC-06 aftermath); harness comment fixed — exact-member --subagent routes to the subagent renderer, it is the substring/suffixed forms that error", "1.4 2026-11-18T09:00:00Z: ADV-P3 fixes (A2-02) — argv-normalization note (handler-relative vectors, argv[0] = verb pinned by the harness); after-`--` routing clarified (the --subagent scan covers argv[1:] including after --, before unknown-flag handling, legacy SL:1240); fuzz-oracle comment reordered to the property's precedence (--subagent membership first, unknown-flag rule second)", "1.5 2026-11-18T12:00:00Z: ADV-P3 sync SC-01 — legacy scan quote corrected to the double-dashed --subagent literal and membership-test cites corrected to SL:1240 (SL:1238 is the __main__ guard line, not the test)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — fuzz argv encoded as NUL-separated []byte (A2-11); BC-4.01.001 added to bcs, matching the body's partial-coverage claim (A2-04); BC-1.07.001 dispatch-grammar rows added (exact-member --subagent routing and its --subagent=1 unknown-flag complement)", "1.3 2026-11-18T06:00:00Z: Source Contract title quote synced to the current BC-4.01.002 H1 (no --subagent enrichment; adv-p2 sync SC-06 aftermath); harness comment fixed — exact-member --subagent routes to the subagent renderer, it is the substring/suffixed forms that error", "1.4 2026-11-18T09:00:00Z: ADV-P3 fixes (A2-02) — argv-normalization note (handler-relative vectors, argv[0] = verb pinned by the harness); after-`--` routing clarified (the --subagent scan covers argv[1:] including after --, before unknown-flag handling, legacy SL:1240)", "1.5 2026-11-18T12:00:00Z: ADV-P3 sync SC-01 — legacy scan quote corrected to the double-dashed --subagent literal and membership-test cites corrected to SL:1240 (SL:1238 is the __main__ guard line, not the test)", "1.6 2026-11-18T14:30:00Z: ADV-P4 fix (A2-08) — table rows normalized to the handler-relative convention (the verb is no longer spelled in routing rows); the fuzz body prepends the verb at the invocation seam and the oracle evaluates the handler-relative slice, killing the off-by-one false failure; stdin/files passed as canonical nil values, not composite literals of undefined types"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -89,37 +89,43 @@ config resolution (E-CLI-001 outranks E-CFG-001); stdlib `flag` with `ExitOnErro
 ```go
 func TestStatusline_UnknownFlag(t *testing.T) { // BC-4.01.002 named test
     for _, argv := range [][]string{
-        // handler-relative vectors: harness pins argv[0] = "statusline", so
-        // "argv[1:]" is unambiguous across rows (A2-02)
-        {"foo", "--a", "--b"},                      // error row: first flag named
-        {"--", "--subagent"},                       // after --: STILL routes to the subagent
-                                                    // renderer — the membership scan covers argv[1:]
-                                                    // including past the terminator (OD-155, SL:1240)
-        {"-"},                                      // bare -: positional (EC-005)
+        // handler-relative vectors: harness pins argv[0] = "statusline", so no row
+        // spells the verb and "argv[1:]" is unambiguous across rows (A2-02/A2-08)
+        {"foo", "--a", "--b"},       // error row: first flag named
+        {"--", "--subagent"},        // after --: STILL routes to the subagent
+                                     // renderer — the membership scan covers argv[1:]
+                                     // including past the terminator (OD-155, SL:1240)
+        {"-"},                       // bare -: positional (EC-005)
         // BC-1.07.001 routing rows: exact-member --subagent routes before flags
-        {"statusline", "--subagent"},               // routes to subagent renderer
-        {"statusline", "x", "--subagent"},          // position-independent (PC-4)
-        {"statusline", "--subagent", "--subagent"}, // EC-001: doubled == once
-        {"--subagent=1"},                           // NOT a match: unknown-flag line (OD-112/OD-155)
-        {"-subagent"},                              // NOT a match: unknown-flag line
+        {"--subagent"},              // routes to subagent renderer
+        {"x", "--subagent"},         // position-independent (PC-4)
+        {"--subagent", "--subagent"}, // EC-001: doubled == once
+        {"--subagent=1"},            // NOT a match: unknown-flag line (OD-112/OD-155)
+        {"-subagent"},               // NOT a match: unknown-flag line
     } {
-        stdout, _, exit := runStatusline(argv, getenv, stdin, files)
+        full := append([]string{"statusline"}, argv...) // verb pinned at the seam
+        stdout, _, exit := runStatusline(testEnv, full, testStdin, nil)
         assertMatchesBCEitherExactOrNormalRender(t, argv, stdout, exit)
     }
 }
 
 func FuzzStatusline_UnknownFlag(f *testing.F) {
     f.Fuzz(func(t *testing.T, joined []byte) { // A2-11: []byte, split into argv
-        argv := strings.Split(string(joined), "\x00") // NUL-separated argv encoding
-        stdout, _, exit := runStatusline(argv, getenv, stdin{}, files{})
-        // oracle precedence = property precedence (A2-02):
-        // 1. if slices.Contains(argv[1:], "--subagent"), the subagent renderer
+        rel := strings.Split(string(joined), "\x00") // NUL-separated argv encoding
+        // A2-08: the decoded vector IS the handler-relative slice (what the harness
+        // passes as argv[1:]); the verb is prepended only at the invocation seam,
+        // so the oracle and the dispatcher agree on one indexing convention.
+        full := append([]string{"statusline"}, rel...)
+        stdout, _, exit := runStatusline(testEnv, full, testStdin, nil)
+        // oracle precedence = property precedence (A2-02), over the handler-relative
+        // slice `rel` (NOT rel[1:] — that was the A2-08 off-by-one):
+        // 1. if slices.Contains(rel, "--subagent"), the subagent renderer
         //    produced all stdout (BC-1.07.001) — checked FIRST, regardless of
         //    unknown flags or `--`;
         // 2. else if any arg before -- starts with "-" and != "-", stdout is
         //    exactly the one-line error;
         // 3. else a normal (non-blank) render.
-        assertUnknownFlagGrammar(t, argv, stdout, exit)
+        assertUnknownFlagGrammar(t, rel, stdout, exit)
     })
 }
 ```

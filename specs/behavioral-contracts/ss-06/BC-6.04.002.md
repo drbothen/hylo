@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,7 +12,7 @@ inputs:
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "7af0edb"
+input-hash: "0bc6938"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,6 +25,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation A04: canonical gate parameters 1 warm-up + 20 runs per case, nearest-rank p95 = 19th sample, binding per case, no pooling; test target moved to internal/parity"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D23 - gate binds on EVERY case p95 (worst case named); VP-036 de-pooled; unreachable EC-005 low-sample note withdrawn"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,8 +82,11 @@ removes.
    per-execution render times (no pooling across cases; nearest-rank p95 = the 19th
    ordered sample; ADV-P3-A04).
 3. **Gate only on the owner's target.**
-   - When the harness setting `HYLO_TIMING_GATE=1` is present, `p95 > 25.0 ms` fails
-     with `timing: p95 <p95> ms > 25 ms target (OD-117, judgment call)`. The owner sets
+   - When the harness setting `HYLO_TIMING_GATE=1` is present, the gate evaluates
+     EVERY case's per-case p95 (each from that case's own 20 timed runs; design call 14,
+     ADV-P4-D23): if ANY case's p95 > 25.0 ms, the gate fails with
+     `timing: p95 <p95> ms > 25 ms target (OD-117, judgment call)` naming the worst
+     case. The owner sets
      this setting on the macOS arm64 machine; it is a harness setting, not a D15 key.
    - CI never sets `HYLO_TIMING_GATE`. CI legs print the report and pass whatever the
      value.
@@ -107,7 +111,7 @@ removes.
 | EC-002 | Owner Mac with `HYLO_TIMING_GATE=1`, p95 = 25.0 ms | Pass (the gate is `> 25.0`) |
 | EC-003 | Owner Mac with `HYLO_TIMING_GATE=1`, p95 = 25.1 ms | FAIL with the OD-117 message |
 | EC-004 | Case with metrics mode `down` (closed listener) | No server-side time to subtract. The connect-refused time (sub-millisecond on loopback) is counted against hylo |
-| EC-005 | Fewer than 20 total samples (tiny corpus subset; threshold rationale, convention: below ~20 samples a nearest-rank p95 is dominated by outlier ordering, so the report says so) | Report printed with `n` and a `low sample count` note; gate still applies if enabled |
+| EC-005 | Tiny corpus subset (few cases) | Unreachable-condition note withdrawn (ADV-P4-D23): every case runs exactly 1 warm-up + 20 timed runs, so the per-case sample count is fixed at 20 by construction and "fewer than 20 total samples" cannot occur; the report lists each case's own `n = 20` |
 
 ## Canonical Test Vectors
 
@@ -115,14 +119,14 @@ removes.
 |-------|----------------|----------|
 | Full synthetic corpus on the owner's Mac, `HYLO_TIMING_GATE=1`, p95 = 9.8 ms | Report `darwin/arm64 n=<N> median … p95 9.8 ms`; pass | happy-path |
 | ubuntu-24.04 CI leg, p95 = 31.2 ms | Report printed; pass | edge-case |
-| Owner's Mac, gate on, p95 = 27.4 ms | FAIL `timing: p95 27.4 ms > 25 ms target (OD-117, judgment call)` | error |
+| Owner's Mac, gate on, worst-case p95 = 27.4 ms | FAIL `timing: p95 27.4 ms > 25 ms target (OD-117, judgment call)` naming that case | error |
 
 ## Verification Properties
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-036 | Nearest-rank p95 is computed correctly over pooled samples | table test on the percentile helper |
-| VP-036 | The gate fails iff `HYLO_TIMING_GATE=1` and p95 > 25.0 ms | table test |
+| VP-036 | Nearest-rank p95 is computed correctly over each case's OWN 20 samples (per case, never pooled; ADV-P4-D23) | table test on the percentile helper |
+| VP-036 | The gate fails iff `HYLO_TIMING_GATE=1` and ANY case's p95 > 25.0 ms | table test |
 
 ## Traceability
 

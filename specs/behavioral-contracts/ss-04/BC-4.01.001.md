@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.1"
+version: "1.1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T03:00:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - docs/RESUME.md
-input-hash: "5d0835d"
+input-hash: "e487064"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy entry point legacy/dgx_statusline.py SL:1238-1245 is the statusline-only analogue)"
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,7 +49,10 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 ## Postconditions
 
 1. `args[0] == "statusline"` → `runStatusline(args[1:], ...)`, which **always returns 0**.
-   Within it: unknown flags → BC-4.01.002; config errors → BC-2.02.001; any render fault →
+   Within it: argv carrying `--subagent` anywhere in `args[1:]` selects the subagent
+   renderer (BC-1.07.001), whose stdout may be ZERO bytes (zero eligible rows, BC-1.07.004
+   PC-6) — main mode otherwise: unknown flags → BC-4.01.002; config errors → BC-2.02.001;
+   any render fault →
    the degraded line (BC-1.01.001); any panic is recovered and mapped to the degraded line.
    Positional (non-flag) arguments are ignored (legacy reads nothing from argv except
    `--subagent`, SL:1240).
@@ -65,7 +68,10 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 ## Invariants
 
-1. `runStatusline` never returns non-zero and never leaves stdout empty (DI-008).
+1. `runStatusline` never returns non-zero; in MAIN-renderer mode it never leaves stdout
+   empty. In SUBAGENT mode stdout may legitimately be zero bytes (zero eligible rows,
+   BC-1.07.001 CTV, BC-1.07.004 PC-6, BC-2.02.001 PC-8) — DI-008's never-blank guarantee
+   is a main-line guarantee (ADV-P4-D03).
 2. Go stdlib `flag.ExitOnError` (exit 2, blank output) is never used on the statusline path
    (OD-112).
 3. No command name, binary name or output contains "Claude" as a product name (CLAUDE.md
@@ -95,7 +101,7 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0 and stdout ends with `\n` and is non-empty | fuzz (`go test -fuzz`) |
+| VP-004 | For all argv with `args[0]=="statusline"`, all env, all stdin: exit 0; MAIN-mode argv (no `--subagent`): stdout ends with `\n` and is non-empty; SUBAGENT-mode argv: stdout is zero or more LF-terminated NDJSON lines, zero bytes allowed (BC-1.07.001) | fuzz (`go test -fuzz`) |
 | VP-002 | Partial coverage: the flag-less/positional branch of the same dispatcher fuzz asserts exit 0 with a normal (non-empty, LF-terminated) render for positional-only argv | fuzz (`go test -fuzz`) |
 
 ## Traceability

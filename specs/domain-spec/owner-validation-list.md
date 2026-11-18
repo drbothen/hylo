@@ -2,13 +2,13 @@
 document_type: spec-open-questions
 level: L2
 section: "owner-validation-list"
-version: "1.2"
+version: "1.3"
 status: resolved
 producer: business-analyst
-timestamp: 2026-11-18T01:55:00Z
+timestamp: 2026-11-18T03:35:34Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "1999450"
+input-hash: "b7714d2"
 traces_to: L2-INDEX.md
 ---
 
@@ -213,7 +213,8 @@ pass-through too, same never-couple rule; no eager upstream connect anywhere.
 capture of one metrics response from the owner's backend (read-only) is taken only
 after the owner confirms the backend soak has been scored. **Amended by OD-157:
 OD-130 applies only from P6 — P1 keeps legacy ±Inf behaviour (parity per BC-1.04.014:
-+Inf degrades the sample, -Inf clamps to the U+2581 light-shade glyph); the defensive
++Inf on the `v`/`f` traces degrades the sample, while +Inf on the `k` trace is safe
+(fixed top); -Inf clamps to the U+2581 light-shade glyph); the defensive
 rule stands from the P6 switch on (SM-05).**
 
 - `+Inf`/`-Inf` samples in the metrics response: VictoriaMetrics documentation says

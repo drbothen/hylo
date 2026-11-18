@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T14:48:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "97d0de8"
+input-hash: "d173611"
 traces_to: prd.md
 source_bc: BC-2.01.002
 bcs: [BC-2.01.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T14:48:00Z: ADV-P4 fix (A2-18) — Method no longer claims cardinality 0 is tested through Load: 1 and 2 run through Load, the backends=0 guard is exercised directly at the validator seam (unreachable through Load in P1), joining the Load-driven table at P4"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,9 +55,11 @@ function that P6 widens — no other code learns the cardinality rule.
 ## Property Class and Verification Method
 
 - **Class:** invariant.
-- **Method:** unit/table test — cardinality 0, 1, 2 through `Load`, asserting the
-  typed error reason and the D4-EX-3 line; plus a `backends[0]` default-values table
-  (prefixes default, metrics_url plumb-through).
+- **Method:** unit/table test — cardinality 1 and 2 through `Load`, asserting the
+  typed error reason and the D4-EX-3 line; the `backends=0` guard is exercised
+  directly at the validator seam (unreachable through `Load` in P1 — see Property
+  Statement), and joins the `Load`-driven table at P4; plus a `backends[0]`
+  default-values table (prefixes default, metrics_url plumb-through).
 - **Honesty:** testable-only; the rule is a ruling (OD-123), finite case space.
 
 ## Proof Method

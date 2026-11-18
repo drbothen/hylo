@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "4bc28df"
+input-hash: "6869c11"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry (SL:693-702)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["2026-11-18 (v1.2.1) pass-4 remediation ADV-P4-C2-12 (metrics-borne SL:717 degrade named CP-N03 on invariant 3)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,7 +61,8 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
 2. The dead rung never shows stale fields or a suffix.
 3. Rendering never fails for a dict sample except via the named crash paths
    (BC-1.04.014, BC-1.04.015) plus the non-string-key site of BC-1.04.001 EC-013: a
-   numeric sample key ahead of every `vllm:` key degrades in `serving_state` (SL:717);
+   numeric sample key ahead of every `vllm:` key degrades in `serving_state` (SL:717;
+   metrics-borne degrade, crash id **CP-N03**);
    after the session-cache write it returns as string `"5"` and no longer degrades.
 
 ## Edge Cases

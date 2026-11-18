@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-11-18T04:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.001.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "a987404"
+input-hash: "bbf0b5b"
 traces_to: prd.md
 source_bc: BC-1.01.001
 bcs: [BC-1.01.001, BC-1.07.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18: BC-1.07.008 added to bcs — shared-guard write-failure leg (BC-1.07.008's Verification Properties table anchors VP-003)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18: BC-1.07.008 added to bcs — shared-guard write-failure leg (BC-1.07.008's Verification Properties table anchors VP-003)", "1.3 2026-11-18T14:12:00Z: ADV-P4 fix (A2-14) — skeleton test renamed to the canonical rider name TestCPX03_WriteFailureExit0 fixed by BC-1.01.001's traceability register and quoted by VP-012"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,7 +65,7 @@ OD-105 closed set with its own table test.
 ## Proof Harness Skeleton
 
 ```go
-func TestCpX03_DegradedWriteFailureExitZero(t *testing.T) {
+func TestCPX03_WriteFailureExit0(t *testing.T) { // canonical rider name, BC-1.01.001 (A2-14)
     exit := runStatuslineWith_stdoutWriter(failingWriter{}, degradedStdin)
     if exit != 0 { t.Fatalf("exit = %d, want 0 (OD-136)", exit) }
 }

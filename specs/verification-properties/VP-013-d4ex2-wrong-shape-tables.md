@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T14:15:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-01/BC-1.03.018.md, behavioral-contracts/ss-01/BC-1.03.019.md, behavioral-contracts/ss-01/BC-1.03.020.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d74dfe3"
+input-hash: "fc969d6"
 traces_to: prd.md
 source_bc: BC-1.03.019
 bcs: [BC-1.03.018, BC-1.03.019, BC-1.03.020]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-18T14:15:00Z: ADV-P4 fixes — W-predicate sharpened per OD-167: a numeric-overflow skip (CP-O06..O08) also drops the in-flight turn (cur → null); the ruled drop is part of the expected post-skip state, not a mutation-on-skip violation (A2-03); skeleton test renamed to the canonical rider name TestMixCache_OD32_WrongShapeTables (BC-1.03.020 register, A2-14)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,7 +35,9 @@ removal_reason: null
 ## Property Statement
 
 For every row of the 21-row wrong-shape table: a transcript line with the ruled wrong
-shape is skipped by the W-predicate (no partial mutation of parser state), the resulting
+shape is skipped by the W-predicate (no partial mutation of committed parser state;
+for the numeric-overflow rows CP-O06..O08 the ruled consequence of the skip is that the
+in-flight turn is dropped — `cur` ends null, OD-167), the resulting
 caches match the exact expected values of that row, and the poisoned-`cur.out` reader
 rule (OD-32) treats a numeric `cur.t0` as no-open-turn and keeps a raw value when `t0`
 is null. Legacy's sticky-crash behavior (BC-SL-068) is intentionally replaced by these
@@ -66,11 +68,14 @@ contracts — a replacement, not a gap.
 ## Proof Harness Skeleton
 
 ```go
-func TestD4EX2_WrongShapeTables(t *testing.T) {
+func TestMixCache_OD32_WrongShapeTables(t *testing.T) { // canonical rider name, BC-1.03.020 (A2-14)
     for _, r := range WrongShapeTable21 {
         st := newParserState(r.Seed)
         st.ApplyLine(r.Line)
-        if !r.WPredicateHolds(st) { t.Fatalf("row %d: mutated on skip", r.ID) }
+        // Ruled skip rule (OD-167 sharpening, A2-03): no partial mutation of
+        // committed state AND the in-flight turn dropped (cur -> null). The null
+        // cur is the ruled post-skip state — not a "mutation on skip" violation.
+        if !r.SkipRuleHolds(st) { t.Fatalf("row %d: skip rule violated", r.ID) }
         assertCachesEqual(t, r.ExpectedCaches, st.Caches())
     }
 }

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "278b2ba"
+input-hash: "1f9d152"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "consolidated pass-2 follow-up: transcript site re-measured end to end at 993/994 — equality with stdin, not 989/990 divergence, 2026-11-17T21:21:12Z"
   - "pass-3 remediation (ADV-P3-B14/B16/B10): 4,300-digit int-literal edge case added; VP table cites VP-005/VP-006 (not VP-001); ARCH-03 anchor normalized to the stable #statusline-guard fragment; 2026-11-18T02:00:00Z"
+  - "pass-4 remediation (ADV-P4-B11 + ADV-P4-A2-16 sibling): VP-001 removed from VP Anchors; EC-006 states the L+1 observable explicitly (default line, not the degraded line); 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -74,7 +75,7 @@ the guard (BC-1.01.001).
 | EC-003 | UTF-8 BOM `EF BB BF` before `{...}` | `{}` (text-mode `json.load` rejects a BOM) |
 | EC-004 | `{"model":{"display_name":"X"}} trailing` | `{}` (extra data) |
 | EC-005 | Object whose member `"z"` holds 992 nested arrays (total depth 993) | accepted, renders `X` |
-| EC-006 | Same with 993 nested arrays (total depth 994) | `{}` (CPython RecursionError at this call site) |
+| EC-006 | Same with 993 nested arrays (total depth 994) | `{}` (CPython RecursionError at this call site); renders the 45-byte default line — the L+1 observable is the default line, **not** the degraded line |
 | EC-007 | `{"model":{"display_name":"X","display_name":"Y"},"v":NaN}` | parses; model label `Y` |
 | EC-008 | `{"model":"x"}` (valid object, wrong inner type) | not this BC: degrades via BC-1.01.001 (CP-S01) |
 | EC-009 | an integer literal of 4,301 digits (over CPython 3.11's `sys.int_max_str_digits` = 4300; oracle-verified 2026-11-18: `json.loads` raises `ValueError` "Exceeds the limit (4300 digits)") | `ValueError` caught at SL:1203-1204 → `{}` → the 45-byte default line |
@@ -142,7 +143,7 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-001, VP-005, VP-006 — decode is total (object or `{}`)
+- VP-005, VP-006 — decode is total (object or `{}`)
 
 ---
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "e81117b"
+input-hash: "035558f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: OD-76
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-18: ADV-P4 remediation D29 — fake-ps weekdays corrected to Fri (2026-11-06, 2026-11-13)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,7 +65,7 @@ byte comparison.
 | D3 | `comm` contains a space (exec path such as `/opt/App Support/claude`) | `split(None, 2)` gives comm `/opt/App`; `basename` = `App` ≠ `claude`, so this level does not match and the walk continues with the (correct) `ppid`; with no other `claude` ancestor → None (SL:284-292) | native name `claude` matches; `⌂` shown | Exclusion (OD-76) |
 | D4 | No `ps` binary, `ps` fails, or `ps` exceeds its 1 s timeout | exception caught → None, not cached (SL:280-281, 293) | start found | Exclusion (OD-76) |
 | I1 | Ordinary start outside DST transitions, C-locale `ps` | `mktime(strptime(lstart))` (SL:286) | same epoch (truncated true start) | Identical |
-| I2 | Space-padded day (`Thu Nov  6 18:10:09 2026`) | parses (format space matches 1+ whitespace) → `1794010209.0` (Chicago) | `1794010209.0` | Identical |
+| I2 | Space-padded day (`Fri Nov  6 18:10:09 2026`) | parses (format space matches 1+ whitespace) → `1794010209.0` (Chicago) | `1794010209.0` | Identical |
 | I3 | Sub-second true start | `lstart` has whole seconds | truncated to whole seconds (BC-3.02.001) | Identical |
 | I4 | Ancestor `comm` is not `claude` (e.g. Linux npm install whose comm is `node`) | no match → None | no match → None | Identical |
 | I5 | Process with no start time (`ps` prints no `lstart`, empty `rest`) | no match, walk continues (SL:285) | no start → treated as no match, walk continues | Identical |
@@ -99,11 +99,11 @@ Legacy side: fake `ps` table (`pid|ppid comm lstart`), `startPID = 500`, `TZ=Ame
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| `500\|400 claude Thu Nov 13 18:10:09 2026`; Go fake 500 = (`claude`, start 1794615009) | both `1794615009.0`; identical cache bytes `{"proc_start": 1794615009.0}` | happy-path (I1) |
-| `500\|400 /x/bin/claude Thu Nov  6 18:10:09 2026`; Go start 1794010209 | both `1794010209.0` | edge-case (I2) |
+| `500\|400 claude Fri Nov 13 18:10:09 2026`; Go fake 500 = (`claude`, start 1794615009) | both `1794615009.0`; identical cache bytes `{"proc_start": 1794615009.0}` | happy-path (I1) |
+| `500\|400 /x/bin/claude Fri Nov  6 18:10:09 2026`; Go start 1794010209 | both `1794010209.0` | edge-case (I2) |
 | `500\|400 claude Sun Nov  1 01:59:59 2026`; Go true start 1793516399 | legacy `1793519999.0`, Go `1793516399.0` → exclusion `OD-76` case, Go output = its expected file | edge-case (D1) |
 | `500\|400 claude Do Nov 13 18:10:09 2026`; Go start 1794615009 | legacy None (no file); Go `1794615009.0` | edge-case (D2) |
-| `500\|400 /opt/App Support/claude Thu Nov 13 18:10:09 2026`; Go comm `claude` | legacy None; Go `1794615009.0` | edge-case (D3) |
+| `500\|400 /opt/App Support/claude Fri Nov 13 18:10:09 2026`; Go comm `claude` | legacy None; Go `1794615009.0` | edge-case (D3) |
 | no `ps` on `PATH`; Go start 1794615009 | legacy None; Go `1794615009.0` | error (D4) |
 
 Legacy column verified 2026-11-15 against CPython 3.11.7 on macOS running `claude_window_start` from

@@ -1,15 +1,17 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.6"
+version: "1.8"
 status: approved
 producer: architect
-timestamp: 2026-11-18T08:00:00Z
+timestamp: 2026-11-17T22:30:00Z
+modified: ["1.8 2026-11-17: pass-4 residual sweep — BC-COMPONENT-MAP home count 153/153 corrected to 154/154"]
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "d0d0e14"
+input-hash: "f3941d9"
 traces_to: prd.md
 prd_version: "0.1"
+
 ---
 
 # Architecture Feasibility Report
@@ -46,7 +48,8 @@ feasibility verdict unchanged; original figures retained.)*
 | §1.2 (OD-107) | BC-2.01.001 | P1 config = `HYLO_*` env over built-in defaults only | Registry closed; six error classes closed (OD-114/134/140) | feasible | Resolution totality VP-015/VP-016/VP-017 |
 | §8 (ruling b) | BC-1.06.001/.002, BC-6.02.004 | Go is byte-exact cache writer/reader across Python/Go swaps, four caches | Byte-exact writers over ordered `pyfmt.Value`; atomic write + Windows retry (AD-08) | risky | Swap-parity tier VP-019; failed-replace semantics pinned by AD-03 overlay decision |
 | §1.6 S3 | BC-3.02.001/.002 | Native per-OS ancestor probe replaces `ps` | Build-tag-confined `internal/platform`; x/sys sole runtime dep (AD-07) | feasible | Probe register VP-033; D4-EX-1 bound VP-014; OQ-3 measurement deferred by design |
-| §2.5 (OD-103) | BC-5.01..5.04 | Python-semantics formatting (half-even, WTF-8, `_mktime`, 4,300-digit grammar) | One sink package `internal/pyfmt`, four files, CPython-generated tables (AD-04) | feasible | Equivalence VPs VP-023..026; `math/big` at two duration sites (OD-137) |
+| §2.5 (OD-103) | BC-5.01..5.04 | Python-semantics formatting (half-even, WTF-8, `_mktime`, 4,300-digit grammar) | One sink package `internal/pyfmt`, four files, CPython-generated tables (AD-04) | feasible | Equivalence VPs VP-023..026; `math/big` at the ruled duration-format sites (OD-137,
+extended to the `_fmt_lines` lines/thresholds path by OD-156 — pass-4 A2-15) |
 | §8 DI-012 | BC-6.03.004 | Closed, glob-free exclusion set; new class needs owner decision | Exclusion machinery fails closed (AD-09) | feasible | VP-012 property test; `cp-x03` rides the closed set (OD-136) |
 
 ## Subsystem Grouping Assessment
@@ -71,7 +74,7 @@ does not move a subsystem boundary and stays inside S1's CRITICAL scope.
 
 | L2 Subsystem | Proposed Modules | Pure/Effectful | Notes |
 |-------------|-----------------|---------------|-------|
-| S1 | `internal/statusline`, `internal/cost` | mixed (core-dominant) / boundary | Pure widgets + ordered effect script via `Env` seams (AD-03); cost inherits S1 CRITICAL kill-rate target |
+| S1 | `internal/statusline`, `internal/cost` | mixed (core-dominant) / boundary | Pure widgets + ordered effect script via `Env` seams (AD-03); cost inherits S1's CRITICAL tier — the >= 95 % kill rate is a Phase 6 target, tracked and reported by the formal-verifier, NOT a P1 gate (OD-158; pass-4 A2-21) |
 | S2 | `internal/config` | boundary | Pure registry/grammars; env read once at `Load` |
 | S3 | `internal/platform` | infrastructure | Syscalls, `/proc`, `sysctl`, Win32; build tags |
 | S4 | `cmd/hylo` | effectful shell | `os.Args`/`os.Std*`/`os.Exit`; no logic |
@@ -88,7 +91,7 @@ after OD-155; BC-COMPONENT-MAP is current for all 153)* *(pass-3 sync 2026-11-18
 | Python/Go cache-swap byte divergence (four caches) | medium | high | Byte-exact writers over ordered `pyfmt.Value`; Tier B goldens + four-cache swap tier (VP-019); failed-replace semantics pinned by the AD-03 overlay decision |
 | p95 <= 25 ms miss on the owner's Mac | medium | medium | Legacy baseline measured (median 84.5 ms); hot-path allocation discipline; per-OS timing report; gate binds only where OD-117 says |
 | Windows-only edge cases marked "not executed" (BC-1.06.001 EC-008, BC-1.06.002 EC-003/005; sitecustomize shim) | medium | medium | Pinned on the windows-2025 CI leg and the harness canary (PRD Assumption 5); disclosed, not hidden |
-| Fake-pass parity: harness weaker than refereed | low | high | AD-09 fail-closed machinery, canary (BC-6.01.003), exclusion closure property test (VP-012); HIGH kill-rate tier |
+| Fake-pass parity: harness weaker than refereed | low | high | AD-09 fail-closed machinery, canary (BC-6.01.003), exclusion closure property test (VP-012); HIGH tier, whose kill-rate target is a Phase 6 target per OD-158, not a P1 gate (pass-4 A2-21) |
 | Purity-annotation drift: per-BC Purity Classification sections present in 90/145 BC files, uneven in enabler/effectful shards (ss-02 1/13, ss-05 4/19) — *amended 2026-11-17 (CA-07): on-disk count is now 145/145; the remaining shards were annotated during the 2026-11-16 Pass 3 anchor back-fill. Original verdict retained.* | low | low | Boundary is carried at module level (ARCH-00 table) and per-VP effectful-shell declarations; recommend annotating the remaining shards during Pass 3 anchor back-fill — documentation consistency, not a feasibility gap *(completed 2026-11-16, 145/145; ss-05 shard now 20 files after BC-5.01.007, pass-3 sync 2026-11-18)* |
 
 Canonical IDs (OD-152, 2026-11-17): the rows above are minted as R-001..R-005, and the
@@ -103,7 +106,7 @@ PRD-carried RK-5/RK-6 dispositions as R-006/R-007, in
 | Endorse AD-03 (pure widgets + ordered effect script, not one pure function) | One pure render + final commit block | Option 2 in ARCH-03 | Referencing AD-03 because legacy read-back semantics (failed replace persists nothing) make a single pure function unable to satisfy BC-1.01.009/BC-1.06.002; order-preserving effects are required for cache-state parity |
 | `internal/cost` inherits S1 CRITICAL rather than getting its own tier | Classify separately | Inherit | Referencing SS-01 because the PO's module-criticality row for `internal/statusline` already enumerates "cost history" in its rationale; the package split is architectural only |
 | Treat VP-INDEX as catalog source of truth for coverage claims | Per-BC anchors only | VP-INDEX | Referencing AD-13/POLICY 9; BC VP-anchor back-fill is Pass 3 (deferred by schedule, not by feasibility). Architect-side nit found and logged: the ARCH-INDEX by-home aggregate buckets VP-022 under ARCH-07/08 while the VP-INDEX catalog row says ARCH-03/ARCH-04/ARCH-09 — to be corrected in ARCH-INDEX at the next architect burst (derived view, no PRD impact). **Resolved 2026-11-17 (CA-08, quote corrected pass-3 A2-27):** the ARCH-INDEX by-home aggregate now reads `ARCH-03/ARCH-04/ARCH-09 → VP-022`, matching the VP-INDEX catalog row; nit closed |
-| Confirm "architect to confirm" module anchors in BC Traceability tables | Defer to story-writer | Confirmed via BC-COMPONENT-MAP | Referencing BC-COMPONENT-MAP (153/153 homes incl. the OD-155 BC-1.07 rows; *pass-3 sync 2026-11-18: 154/154 after BC-5.01.007*): Pass 3 back-fill can replace the placeholders mechanically |
+| Confirm "architect to confirm" module anchors in BC Traceability tables | Defer to story-writer | Confirmed via BC-COMPONENT-MAP | Referencing BC-COMPONENT-MAP (154/154 homes incl. the OD-155 BC-1.07 rows; *pass-3 sync 2026-11-18: 154/154 after BC-5.01.007*): Pass 3 back-fill can replace the placeholders mechanically |
 
 ## Approval
 

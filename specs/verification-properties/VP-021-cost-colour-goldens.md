@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:18:00Z
+timestamp: 2026-11-18T14:18:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.001.md, behavioral-contracts/ss-01/BC-1.05.002.md, behavioral-contracts/ss-01/BC-1.05.003.md, behavioral-contracts/ss-01/BC-1.05.005.md, behavioral-contracts/ss-01/BC-1.05.007.md, behavioral-contracts/ss-01/BC-1.05.008.md]
-input-hash: "ac182a9"
+input-hash: "5dd36ac"
 traces_to: prd.md
 source_bc: BC-1.05.008
 bcs: [BC-1.05.001, BC-1.05.002, BC-1.05.003, BC-1.05.005, BC-1.05.007, BC-1.05.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)"]
+modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -30,18 +30,19 @@ removed: null
 removal_reason: null
 ---
 
-# VP-021: Dynamic dollar colours and percentile goldens over 20 seeded sessions
+# VP-021: Dynamic dollar colours and percentile goldens over 21 seeded sessions
 
 ## Property Statement
 
-Across the 20 canonical seeded sessions: the $ colour derives from the lane percentile
+Across the 21 canonical seeded sessions (12 s-seeded + 8 g-seeded + `sess-self`,
+per BC-1.05.008): the $ colour derives from the lane percentile
 thresholds exactly (p75/p95 percentiles per the cost_thresholds math), $/h threshold
 colouring, the ⛏ pick inside the $ block, and the $ / $/h number formatting match the
 oracle-pinned goldens byte-for-byte, including colour-band boundary rows.
 
 ## Source Contract
 
-- **Primary BC:** BC-1.05.008 — Cost colouring goldens (20 seeded sessions).
+- **Primary BC:** BC-1.05.008 — Cost colouring goldens (21 seeded sessions).
 - **Partial coverage:** BC-1.05.001 ($ colours from lane percentile thresholds),
   BC-1.05.002 ($/h segment threshold colouring), BC-1.05.003 (⛏ basis threshold),
   BC-1.05.005 (cost_thresholds p75/p95 percentiles), BC-1.05.007 ($ and $/h number
@@ -69,7 +70,7 @@ oracle-pinned goldens byte-for-byte, including colour-band boundary rows.
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Golden sessions | Go test, seeded cost histories | yes — 20 sessions | threshold bands, ⛏ basis, formatting |
+| Golden sessions | Go test, seeded cost histories | yes — 21 sessions | threshold bands, ⛏ basis, formatting |
 | Property legs | `testing/quick`, *quick.Config with Values | sized | BC-1.05.001/002/003/005 for-all rows |
 | Differential fuzz | parity harness, `HYLO_PARITY_FUZZSECONDS` | budget-bounded | BC-1.05.007 formatting |
 
@@ -77,7 +78,7 @@ oracle-pinned goldens byte-for-byte, including colour-band boundary rows.
 
 ```go
 func TestCostColouring_SeededSessions(t *testing.T) {
-    for _, s := range SeededSessions20 {
+    for _, s := range SeededSessions21 { // 12 s + 8 g + sess-self (BC-1.05.008)
         frame := renderCostBlock(s.History(), s.USD, s.HourRate)
         assertGoldenBytes(t, s.CostGolden, frame)
     }
@@ -85,8 +86,10 @@ func TestCostColouring_SeededSessions(t *testing.T) {
 
 func TestCostProps_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here by the BCs
     cfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
-        args[0].Elem().Set(genThresholds(r)) // lane percentile thresholds
-        args[1].Elem().Set(genRates(r))      // recorded lane rates
+        // A2-05: a Values filler must ASSIGN each arg (args[i] = reflect.ValueOf(x));
+        // args arrives filled with zero reflect.Values — Elem().Set panics.
+        args[0] = reflect.ValueOf(genThresholds(r)) // lane percentile thresholds
+        args[1] = reflect.ValueOf(genRates(r))      // recorded lane rates
     }}
     if err := quick.Check(func(th thresholds, rates []float64) bool {
         c := costColor(th, rates)
@@ -102,14 +105,14 @@ func TestCostProps_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
 ## Named Tests (OD-145 table where applicable)
 
 Not in the OD-145 harness table; in-tree as `TestCostColouring_SeededSessions`; the
-canonical vector register is BC-ALLOCATION "Canonical Test Vectors" (20 sessions,
+canonical vector register is BC-ALLOCATION "Canonical Test Vectors" (21 sessions,
 BC-SL-101).
 
 ## Feasibility Assessment
 
 | Factor | Assessment | Notes |
 |--------|-----------|-------|
-| Input space size | 20 sessions + boundary rows | bounded |
+| Input space size | 21 sessions + boundary rows | bounded |
 | Proof complexity | N/A | |
 | Tool support | Full | golden files |
 | Estimated proof time | Days | seeding is the cost |

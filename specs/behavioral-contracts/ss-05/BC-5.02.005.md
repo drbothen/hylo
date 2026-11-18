@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -9,7 +9,7 @@ phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "d8623bf"
+input-hash: "0fe46cb"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python str() of values used at legacy/dgx_statusline.py SL:442, 453; BC-SL-058)"
@@ -22,6 +22,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D34+D10: dict repr key/value separator stated; subagent str() sites SL:896/908/922 added"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D14 - isprintable class pinned to the generated Unicode 14.0.0 tables (OD-170, BC-5.01.002 Pre-3)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,7 +58,9 @@ floats, so every `str()` site routes through this helper. Helper-level contract 
    in double quotes (`Str(["it's"])` is `["it's"]`); if it contains both quote characters it
    is wrapped in single quotes with every `'` escaped as `\'`. Inside the quotes: `\` is
    escaped as `\\`; `\n`, `\r`, `\t` use the two-character shorthands; every other
-   non-printable code point (anything false under Python `str.isprintable`, including
+   non-printable code point (anything false under Python `str.isprintable` — the printable
+   class is resolved from hylo's own generated tables pinned to Unicode 14.0.0, OD-170 /
+   BC-5.01.002 Pre-3, never from Go's `unicode` package — including
    U+0000-U+001F, U+007F-U+009F and lone surrogates) is escaped as `\xhh` (U+00XX),
    `\uhhhh` (U+XXXX) or `\Uhhhhhhhh` (astral) with lowercase hex digits. Printable
    non-ASCII code points (e.g. é, 言) are written as themselves, not escaped.

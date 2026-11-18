@@ -2,14 +2,15 @@
 document_type: architecture-section
 level: L3
 section: "overview"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-17T22:30:00Z
 phase: 1b
 inputs: [prd.md, product-brief.md, domain-spec/invariants.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "4deb873"
+input-hash: "e3cd41a"
+
 ---
 
 # ARCH-00 — System Overview
@@ -27,10 +28,11 @@ input-hash: "4deb873"
 
 1. **D4 parity first** — the Go port reproduces legacy byte-for-byte on the fixture
    corpus and the owner's recorded inputs before any behavior change. Every deviation
-   rides the closed named exclusion set (DI-012) — the TEN ids {D4-EX-1, D4-EX-2,
-   D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161}, spelled exactly
-   per BC-6.03.004 (pass-3 A24; superseded the older "D4-EX-1/2/3 + OD-110/OD-136"
-   description).
+   rides the closed named exclusion set (DI-012) — the ELEVEN ids {D4-EX-1, D4-EX-2,
+   D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166}, spelled exactly
+   per BC-6.03.004 (pass-4 OD-169 adds `OD-166` — cost-history bytes written after a
+   refresh whose `usd` or `api_ms` could not convert to float, nothing else — superseding
+   the pass-3 "ten ids" description).
 2. **D15 config over code** — every behavior-shaping value is a registry key with type,
    range, default and rationale; no magic numbers in logic. Protocol/format constants
    (29-byte line, D7 ledger schema, cache file-name formats) are named constants with a

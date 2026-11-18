@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "44590c6"
+input-hash: "5cb6c46"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1009-1015)"
@@ -19,7 +19,10 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: int transcript_path → no-transcript, no foreign-descriptor I/O (ruling OD-161; ADV-P2-C06)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C12/C18): H1 retitled to hylo's behavior, StatFD/fd anchors dropped, parity_class OD-161, int branches disambiguated, DI-012 cited"]
+modified:
+  - "1.2.1 2026-11-17: int transcript_path → no-transcript, no foreign-descriptor I/O (ruling OD-161; ADV-P2-C06)"
+  - "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C12/C18): H1 retitled to hylo's behavior, StatFD/fd anchors dropped, parity_class OD-161, int branches disambiguated, DI-012 cited"
+  - "1.2.4 2026-11-18: pass-4 sync-check SC-11 — version aligned with the last modified entry (the 1.2.3 bump left no history entry); flow list converted to block style; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

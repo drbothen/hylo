@@ -1,10 +1,10 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:38:15Z
+timestamp: 2026-11-18T03:35:34Z
 phase: 1a
 inputs:
   - CLAUDE.md
@@ -12,7 +12,7 @@ inputs:
   - .factory/specs/research/domain-hybrid-routing-claude-code-2026-11-14.md
   - .factory/planning/market-intel.md
   - .factory/specs/owner-decisions-log-2026-11-14.md
-input-hash: "0b266af"
+input-hash: "f6365a2"
 traces_to: docs/PLAN.md
 ---
 
@@ -80,8 +80,9 @@ requirements (this cycle: P1 scope only).
 Notes:
 
 - Parity: "unexplained" means anything not on the closed exclusion set of BC-6.03.004
-  (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161);
-  every exclusion carries its own table tests (OD-105, OD-110). Rationale: D4 — parity is
+  (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161,
+  OD-166);
+  every exclusion carries its own table tests (OD-105, OD-110, OD-169). Rationale: D4 — parity is
   the definition of done for P1–P3.
 - Speed: a labeled JUDGMENT CALL (target ≈3× faster; a static binary removes interpreter
   start). CI reports per-OS timing, but the target binds only on the owner's Mac. If the

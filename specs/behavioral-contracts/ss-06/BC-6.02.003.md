@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T22:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "2455829"
+input-hash: "b0c3890"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,8 +25,11 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
-  - "patch bump: case.json schema gains optional argv (+ subagent case family) per ARCH-07, sync-check SC-03, 2026-11-17T22:00:00Z"
+  - "1.2.1 2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "1.2.2 2026-11-17T22:00:00Z: patch bump: case.json schema gains optional argv (+ subagent case family) per ARCH-07, sync-check SC-03"
+  - "1.2.3 2026-11-18: ADV-P4 remediation D09+D11+D21 - argv minted handler-relative (design call 9, validator admits [] and [\"--subagent\"]); Bool settings translated by value (true=1/false=0); TZ=UTC pinned for both binaries on every leg (OD-171), windows leg unskipped"
+  - "1.2.4 2026-11-18T22:00:00Z: pass-4 correction (item 10) - corpus root restored to the OD-148 home internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
+  - "1.2.5 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,14 +75,16 @@ directory.
 3. `metrics` is `"canned"` (serve `metrics.json`) or one of `"down"` (closed listener),
    `"500"` (HTTP 500) or `"garbage"` (non-JSON body). Timeout-based "slow" modes are not
    allowed (research Q3b: the legacy 1.5 s timeout makes them flaky).
-4. `argv` is an optional JSON array of strings appended after `hylo statusline` when the
-   harness invokes the built Go binary; default `[]` (a plain `hylo statusline`; ARCH-07
-   records the same arrangement as the full binary argv, default `["statusline"]`).
-   Subagent-family cases (id suffix `-sub`, ARCH-07 case grammar) carry the flag
-   arrangements under test, e.g. `["--", "--subagent"]` (pass-3 A03; OD-155/OD-168). The
-   oracle gets the same argv appended after the legacy script path (BC-6.01.001, which
-   spells out the resulting oracle argv: a single `--subagent` script argument for
-   `-sub` cases).
+4. `argv` is an optional JSON array of strings: the case's **handler-relative argument
+   list** — the arguments AFTER the `statusline` verb, both for the Go invocation
+   (`hylo statusline <argv...>`) and for the oracle (`[python, -s, <script>] +
+   <argv>`; BC-6.01.001 PC-5). Default `[]` (a plain `hylo statusline`). The P1 corpus
+   validator admits only `[]` and `["--subagent"]` (orchestrator design call 9,
+   ADV-P4-D09); subagent-family cases (id suffix `-sub`, ARCH-07 case grammar) carry
+   `["--subagent"]`, exercising the `main_subagent` path (SL:1240) on both sides
+   identically. Every other argv shape is Go-table-test territory (BC-4.01.002), never
+   parity. The verb itself is never part of `argv` (ARCH-07's "full binary argv,
+   default `["statusline"]`" reading is superseded — architect to align ARCH-07).
 
 ## Postconditions
 
@@ -91,6 +96,11 @@ directory.
      (`DGX_SL_VM_URL`, `DGX_SL_TTL`, `DGX_SL_ROWS`, `DGX_SL_SPARK`, `DGX_SL_GIT`,
      `DGX_SL_TRACE`, `LOCAL_MODEL_PREFIXES`; `DGX_SL_TRACE` is at SL:89).
    - Go side: the key's HYLO_* env form (OD-05; no DGX_* on the Go side).
+   - **Bool value mapping (ADV-P4-D11, orchestrator design call 11):** a setting whose
+     registry type is `Bool` is translated to the legacy env BY VALUE — `true` → `1`,
+     `false` → `0` — never name-only: legacy treats any value except `"0"` as on
+     (SL:76-77), so emitting the JSON literal `false` verbatim would turn a Go-off case
+     into a legacy-on run and fabricate a divergence.
    - `backends[0].model_prefixes` is always emitted on both sides, even when the case
      does not set it. If the case leaves it unset, the harness emits the legacy
      production value `claude-sonnet`. A case that tests the unset-prefix behavior
@@ -127,12 +137,15 @@ directory.
    `now`, `append` (generator lines appended to the transcript), `stdin` (a replacement
    template) and `columns`. Steps run through the same runner as captured sessions
    (BC-6.02.002).
-8. **Time zone.** `tz` defaults to `UTC`. Naive-timestamp cases run under the P1 pin
-   set: `UTC`, `America/Chicago` and `Europe/London` (P5r5 §B.4). OS restriction
-   (ADV-P2-D02 disposition): non-UTC naive-timestamp cases run on Linux and macOS only;
-   the windows-2025 leg runs only the `UTC` naive-timestamp cases, because CPython on
-   Windows resolves naive timestamps through the MS CRT, which does not accept IANA zone
-   names, so the oracle has no comparable value there (research §476).
+8. **Time zone.** The harness pins `TZ=UTC` for BOTH binaries on every leg (OD-171,
+   ADV-P4-D21); the case schema keeps `tz?` for a later phase, but the P1 corpus
+   validator rejects a non-UTC `tz` (documented limitation: POSIX-style TZ strings may
+   differ between Go's zone loader and the MSVC runtime on Windows, so parity cases use
+   `TZ=UTC` only). The windows-2025 leg therefore runs the naive local-time cases with
+   NO skip (VP-026's `posix-only` tag removed by the architect; superseding the
+   ADV-P2-D02 OS restriction). LocalZone's own verdicts (`TZ` unset / `UTC` / IANA name /
+   unparseable) are Go table tests of `internal/platform` (BC-3.01.001 PC-6), never
+   corpus cases.
 
 ## Invariants
 
@@ -175,11 +188,11 @@ directory.
 
 | Field | Value |
 |-------|-------|
-| Source | design §5.2 case model (`stdin.json.tmpl`, settings declared once and translated, `metrics.json` or mode `down`/`500`/`garbage`, optional cache seed, transcript generator spec, `steps`; out-of-domain setting legal only in a D4-EX-3 case); design §3.2 (metrics, process start, cache dir seams); research Q3b; OD-05; OD-111; OD-123 (`backends[0].*` keys); legacy provenance `legacy/dgx_statusline.py` SL:73-79, 92, 444 (env reads), SL:273-275 (`proc_start` short-circuit), SL:405-406 (git cache key); ARCH-07 case model `argv` field and `subagent` case family (sync-check SC-03, pass-3 A03, OD-155/OD-168) |
+| Source | design §5.2 case model (`stdin.json.tmpl`, settings declared once and translated — Bools by value, design call 11 — `metrics.json` or mode `down`/`500`/`garbage`, optional cache seed, transcript generator spec, `steps` inside `case.json`; out-of-domain setting legal only in a D4-EX-3 case); design §3.2 (metrics, process start, cache dir seams); research Q3b; OD-05; OD-111; OD-123 (`backends[0].*` keys); legacy provenance `legacy/dgx_statusline.py` SL:73-79, 92, 444 (env reads), SL:273-275 (`proc_start` short-circuit), SL:405-406 (git cache key); handler-relative `argv` field and `subagent` case family (sync-check SC-03, pass-3 A03, OD-155/OD-168; design call 9, ADV-P4-D09); TZ=UTC harness pin (OD-171) |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/parity/testdata/cases/`; harness case loader and fake VictoriaMetrics (BC-COMPONENT-MAP: internal/parity/case.go (case model) — ARCH-07) |
+| Architecture Module | `internal/statusline/testdata/parity/cases/`; harness case loader and fake VictoriaMetrics (BC-COMPONENT-MAP: internal/parity/case.go (case model) — ARCH-07) |
 | Stories | TBD (filled by story-writer) |
 
 > Capability anchor rationale (OD-153): the parity harness is verification machinery whose sole purpose is proving CAP-009 byte parity (the D4 exit criterion), governed by DI-012.

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,10 +10,10 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "c11e51b"
+input-hash: "0267ecc"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-extracted_from: "n.a. (greenfield helper; reproduces Python time.time() value discipline at the nine legacy clock reads, P3r1 §A0, DET-01..08)"
+extracted_from: "n.a. (greenfield helper; reproduces Python time.time() value discipline at the ten legacy clock reads, P3r1 §A0, DET-01..08)"
 subsystem: "SS-05"
 capability: "CAP-009"
 legacy_id: new
@@ -25,6 +25,7 @@ modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D27: precondition 2 pins the malformed HYLO_TEST_NOW set (nan/inf/-inf/underscore/whitespace/empty)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D03+D27+D10: TimeFloat takes time.Time per ARCH-06 canon; HYLO_TEST_NOW resolved once to time.Time (never a raw string), malformed = non-finite/non-decimal; subagent now_ms read SL:889 added to consumers"
+  - "1.2.4 2026-11-18: ADV-P4 remediation D24+D34 - HYLO_TEST_NOW grammar pinned (finite decimal within time.Time range; nan/inf/0x/underscore/whitespace/1e300 malformed) with BC-6.01.003 as the single owner; pyfmt contract de-duplicated to value discipline only"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,7 +43,7 @@ removal_reason: null
 research P20): with `ns = t.UnixNano()` read once per render, the value is
 `float64(ns) / 1e9` — the Python value, not Go's monotonic-annotated
 wall-clock methods — read once per render and passed down. Helper-level contract per OD-141
-(the nine legacy clock reads, P3r1 §A0, DET-01..08; motivates the idle-widget
+(the ten legacy clock reads, P3r1 §A0, DET-01..08; motivates the idle-widget
 minute-straddle fix, DET-08).
 
 ## Preconditions
@@ -51,13 +52,15 @@ minute-straddle fix, DET-08).
    (design §2.1); the caller owns the single read, and the helper derives
    `ns = t.UnixNano()` internally.
 2. `HYLO_TEST_NOW` (a decimal string) when set is parsed by both sides identically (§3;
-   RK-5 documents it as a harness hook, not a setting). A **malformed** value is any string
-   that is not a finite decimal number of seconds — `abc`, empty, `nan`, `inf`, `-inf`,
-   containing `_`, or containing whitespace are all malformed; a well-formed value has an
-   optional sign, decimal digits and an optional fraction/exponent. Malformed values are
-   ignored with exactly one stderr warning and the real clock is used — it never
-   config-errors and never degrades the line (spec choice, ADV-P1-D22; mirrors the
-   unknown-`HYLO_*` warning discipline of BC-2.01.001; not an owner-recorded decision).
+   RK-5 documents it as a harness hook, not a setting). **The grammar is owned by
+   BC-6.01.003** (cmd-layer shim duty, ADV-P4-D34); summarized here only for the helper's
+   parity-neutrality claim: a value is well-formed iff it matches
+   `^[+-]?[0-9]+(\.[0-9]*)?([eE][+-]?[0-9]+)?$`, parses to a finite float64, and lies
+   within the `time.Time` representable range (|seconds| ≤ 62135596800, years 1..9999);
+   everything else — `abc`, empty, `nan`, `inf`, `-inf`, `0x1p3`, containing `_` or
+   whitespace, or out-of-range like `1e300` (unspecified before, ADV-P4-D24) — is
+   malformed and ignored with exactly one stderr warning, the real clock used. It never
+   config-errors and never degrades the line (spec choice, ADV-P1-D22).
 
 ## Postconditions
 
@@ -67,13 +70,12 @@ minute-straddle fix, DET-08).
 2. Read once per render and passed down; the idle widget's two legacy reads (SL:825, 826)
    receive one value (DET-08 minute-straddle fix).
 3. Frozen-clock neutrality: under the harness shim both sides parse `HYLO_TEST_NOW` the
-   same way — the decimal string is resolved ONCE into a `time.Time` (seconds parsed as a
-   finite decimal float, then fixed to the identical ns instant on both sides) — so
+   same way — the decimal string is resolved ONCE into a `time.Time` (per the BC-6.01.003
+   grammar of precondition 2, whose well-formed/malformed split both shims implement
+   identically) — so
    `TimeFloat(resolvedNow)` is output-neutral in parity runs (§3). `TimeFloat` never
-   receives the raw string (ADV-P3-D27). A **malformed** value is any string that does not
-   parse as a finite decimal number of seconds (optional sign and exponent; `nan`, `inf`,
-   `_`, embedded whitespace → malformed); it is ignored with exactly one stderr warning and
-   the real clock is used (mirrors ADV-P1-D22; precondition 2 pins the malformed set).
+   receives the raw string (ADV-P3-D27). Parsing and warning are cmd-layer duties, not
+   pyfmt's (ADV-P4-D34); this contract pins only the value discipline.
 
 ## Invariants
 
@@ -89,6 +91,7 @@ minute-straddle fix, DET-08).
 | EC-002 | t exactly on the second | .0 fractional — e.g. 1794650400.0 (Python `time.time()` spelling, cache `rl_ts` form) |
 | EC-003 | `HYLO_TEST_NOW=1794650400` | parsed to 1794650400.0 on both sides |
 | EC-004 | two widgets in one render | same value, not two reads |
+| EC-005 | `HYLO_TEST_NOW=1e300`; `HYLO_TEST_NOW=0x1p3` | both malformed (out-of-range / non-decimal, ADV-P4-D24): one stderr warning, real clock used |
 
 ## Canonical Test Vectors
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.3"
+version: "1.1.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "88b1379"
+input-hash: "fff619b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows model branch (SL:898-907)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,7 +44,8 @@ it is served by Anthropic (review 2026-11-13 #21.4).
 2. `prefixes` = the configured prefix list `backends[0].model_prefixes` (OD-111, OD-123, BC-2.01.002;
    legacy provenance: env `LOCAL_MODEL_PREFIXES`, SL:898-907), read through internal/config — hylo never
    reads the legacy env name (OD-05; the parity harness translates legacy env to `HYLO_*` per case,
-   ASM-003). Comma-separated; entries stripped; empty entries dropped; order kept.
+   ASM-003). Comma-separated; each entry stripped of Python Unicode whitespace (NBSP included;
+   `pyfmt.Strip`, BC-5.03.002 — the BC-1.02.001 PC4 convention); empty entries dropped; order kept.
 
 ## Postconditions
 
@@ -75,7 +76,7 @@ it is served by Anthropic (review 2026-11-13 #21.4).
 | EC-001 | `model` missing / `""` / `0` / `False` | No segment |
 | EC-002 | `model = 123` with prefixes configured | AttributeError site in legacy — degraded line (CP-A03, BC-1.07.008); in Go the Num coercion must NOT occur: route non-str truthy models to the degraded predicate |
 | EC-003 | `model = 123`, prefixes empty | Grey segment `123` via `str()` coercion (same rendering for `True`, `1.0`, `['x']`, `{'a': 1}`), no crash, no pill |
-| EC-004 | Prefixes with spaces (`" claude-sonnet , foo "`) | Entries trimmed; whitespace-only entries dropped |
+| EC-004 | Prefixes with spaces (`" claude-sonnet , foo "`) | Entries trimmed of Python Unicode whitespace (`pyfmt.Strip`, NBSP included); whitespace-only entries dropped |
 | EC-005 | Model `Claude-Sonnet-5-5` vs prefix `claude-sonnet` (case mismatch) | No hit → \u25e8ANTH (case-sensitive) |
 
 ## Canonical Test Vectors
@@ -106,7 +107,7 @@ re-derived escaped after the adv-p3 C01 escape-decoding incident; pill square = 
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (CP-A03 degrade), DI-012 (byte parity) |
 | Architecture Module | `internal/statusline` (model segment; shares the prefix table with the row-1 lane pill) |
-| Config keys | `backends[0].model_prefixes`; pill SGR codes and square glyph from the shared `statusline.theme.*` / `statusline.glyphs.*` keys (OD-113, OD-02 — the same keys BC-1.02.001 PC4 sources; ADV-P3-C05 disposition) |
+| Config keys | `backends[0].model_prefixes`; pill SGR from the shared theme colour keys `statusline.theme.cyan` (default `36`, hit) and `statusline.theme.magenta` (default `35`, miss) — defaults equal to legacy CYAN/MAGENTA (SL:906-907) — and the pill square from `statusline.glyphs.*` (OD-02). NOT the row-1 inverted pills `statusline.theme.pill_local`/`pill_cloud` (defaults `106;30;1`/`105;30;1`): building from those anchors breaks byte parity (ADV-P4-C02) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py: model branch (SL:898-907); pill bytes SL:127-133 |
 | Legacy contract | BC-SL-097 (P3r2 §A7; prefix rule shared with BC-SL-006) |
@@ -145,7 +146,7 @@ TBD — filled by story-writer
 #### Evidence Types Used
 
 - **assertion**: pinned runs for hit/miss/no-prefix/empty cases
-- **guard clause**: `if model:` truthy gate (SL:899); `if prefixes:` pill gate (SL:903-905)
+- **guard clause**: `if model:` truthy gate (SL:899); `if prefixes:` pill gate (SL:905); pill bytes (SL:906-907)
 
 #### Purity Classification
 
@@ -162,5 +163,8 @@ TBD — filled by story-writer
 Go: take `backends[0].model_prefixes` from internal/config (OD-123), parse (split on `,`, TrimSpace,
 drop empties) once per render, then
 `slices.ContainsFunc(prefixes, func(p string) bool { return strings.HasPrefix(model, p) })`. Take the
-pill SGR codes and square glyph from the shared theme/glyph config keys (ADV-P3-C05 disposition), not
-from constants, so byte parity stays auditable next to PILL_DGX/PILL_ANTH defaults.
+pill SGR from `statusline.theme.cyan`/`statusline.theme.magenta` (defaults 36/35 = legacy CYAN/MAGENTA,
+SL:906-907) and the square glyph from `statusline.glyphs.*` (ADV-P3-C05 disposition, corrected by
+ADV-P4-C02: not `statusline.theme.pill_local`/`pill_cloud`, whose inverted-pill defaults
+`106;30;1`/`105;30;1` differ), not from constants, so byte parity stays auditable next to
+PILL_DGX/PILL_ANTH defaults.

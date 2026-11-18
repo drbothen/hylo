@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "04f459c"
+input-hash: "80e3f54"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.3 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -86,7 +86,7 @@ Exact step-2 row bytes:
 | EC-001 | Seed `{"hist": [[900.0, 50.0]]}`, first fetch fails at 1000 | file `{"hist": [[900.0, 50.0]], "fetch_ts": 1000.0, "up": false}` |
 | EC-002 | No file, first fetch fails at 1000 | `{"fetch_ts": 1000.0, "up": false}`; age `now - 0` |
 | EC-003 | Empty file `{}`, fetch S with no plottable series, preempt 0 | `{"fetch_ts": 1000.0, "up": true, "ts": 1000.0, "sample": {…}, "hist": [{"t": 1000.0}]}` |
-| EC-004 | Legacy `DGX_SL_TTL=nan` (fetch every refresh) / `inf` (never fetch, age `now - 9999`) | **not reproduced**: approved deviation D4-EX-3 — a non-finite TTL is a config error line with no cache writes (BC-2.02.002); OD-105 exclusion entry `D4-EX-3`, dedicated test `TestConfigError_D4EX3_Number` |
+| EC-004 | Legacy `DGX_SL_TTL=nan` (fetch every refresh) / `inf` (never fetch, age `now - 9999`) | **not reproduced**: approved deviation D4-EX-3 — a non-finite TTL is a config error line with no cache writes (BC-2.02.002); OD-105 exclusion entry `D4-EX-3`, dedicated test `TestD4EX3_Number` |
 | EC-005 | Temp file names (`statusline-<sid>.json.<random>`) | excluded from cache comparison: OD-110 `temp-file` entry (BC-6.03.003); not an output difference |
 
 ## Canonical Test Vectors

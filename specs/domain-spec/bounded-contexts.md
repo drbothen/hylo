@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "bounded-contexts"
-version: "1.4"
+version: "1.5"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T01:55:00Z
+timestamp: 2026-11-18T03:35:34Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "26c038a"
+input-hash: "4e89fc8"
 traces_to: L2-INDEX.md
 ---
 
@@ -29,7 +29,7 @@ traces_to: L2-INDEX.md
 | BC4 | Observability Ledger | The 13-event append-only record; attribution; correlation limits | P3 | ledger event, attribution, near-key |
 | BC5 | Metrics Exposition | Ledger + hook log → 28 metric names; rebuild semantics | P2 | rebuild, accumulator, exposition |
 | BC6 | Live Inspection | Web/TUI over one live event feed; live + in-memory ring buffer only — exact `flow_id` correlation, no ledger-backed history until P7 (OD-122); in-memory redaction | P4 | flow view, live feed, redaction |
-| BC7 | Session Cockpit (status line) | Two-row render from stdin/transcript/metrics/caches, plus the `--subagent` agent-panel rows (OD-155; JSON lines or zero bytes in that mode); degraded ladder | P1 | widget, pill, thermometer, freshness ladder, degraded line |
+| BC7 | Session Cockpit (status line) | Two-row render from stdin/transcript/metrics/caches, plus the `--subagent` agent-panel rows (OD-155; JSON rows, zero stdout bytes, or the 29-byte degraded line in that mode — BC-1.07.008); degraded ladder | P1 | widget, pill, thermometer, freshness ladder, degraded line |
 | BC8 | Cost Accounting | Cost history, percentile colors, owned-hardware cost, backfill | P1 (backfill P6) | cost entry, percentile band, ⛏ |
 | BC9 | Turn Control | Stop-hook policing: language, fake stop, Kev oracle | P4 | fake stop, verdict, colon fake |
 | BC10 | Trust & Platform | CA lifecycle, doctor, per-OS platform services | P4 | trust root, doctor check |
@@ -60,4 +60,4 @@ traces_to: L2-INDEX.md
 | T2 | Client-view lane vs proxy-authoritative lane | The status line infers the lane from the client-reported `model.id`; the ledger records the proxy's actual decision. Both are true simultaneously; widgets must not conflate them | LEGACY-OBSERVED (P2r4 §3.1); client-view lane a distinct derived value — DECIDED OD-121 |
 | T3 | Correlation translation | Ledger near-key (weak) vs internal `flow_id` (exact, ephemeral); UIs must use the latter for live views and the former for history | DECIDED OD-25 + OD-122 (BC6 history is live + ring buffer only until P7's schema) |
 | T4 | Config-surface translation | `HYLO_*` env / config file / defaults encode the same typed keys; legacy `DGX_*` surface ends at cutover | DECIDED OD-05, OD-101, OD-95 |
-| T5 | Parity translation | Recorded legacy inputs → identical outputs modulo the closed exclusion set (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161; BC-6.03.004); harness-level, not runtime | DECIDED D4, OD-105/OD-110/OD-136 |
+| T5 | Parity translation | Recorded legacy inputs → identical outputs modulo the closed exclusion set (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166; BC-6.03.004); harness-level, not runtime | DECIDED D4, OD-105/OD-110/OD-136, OD-169 |

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "aac2048"
+input-hash: "cffed41"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:441-449)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-4 remediation (ADV-P4-B16/B03): pill label words are config keys statusline.pill.label_* per OD-173 (D7 citation dropped); for-all pill-classification leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,7 +57,7 @@ Notation: `\e` is the byte 0x1B; every other character is its UTF-8 encoding.
    - `None` when `prefixes` is empty or `model_id == ""`;
    - otherwise `true` iff some `p` in `prefixes` satisfies `model_id` starts with `p`
      (code-point prefix, case-sensitive, no glob: `*` is a literal character).
-2. The pill segment bytes are exactly one of:
+2. The pill segment bytes are exactly one of (shown with the default labels, OD-173):
    - `on_local == true` → `\e[106;30;1m ◨ DGX \e[0m`
    - `on_local == false` (and `model_id` non-empty) → `\e[105;30;1m ◨ ANTH \e[0m`
    - otherwise → `\e[100;37;1m ◨ ? \e[0m`
@@ -64,8 +65,10 @@ Notation: `\e` is the byte 0x1B; every other character is its UTF-8 encoding.
    BC-1.01.003); it is never omitted.
 4. The SGR codes come from the `statusline.theme.*` pill keys (OD-113, BC-2.01.003) and the
    `◨` glyph from `statusline.glyphs.*` (OD-02); with defaults they equal the legacy bytes
-   above (SL:130). The words `DGX` / `ANTH` / `?` are legacy output bytes and stay
-   unchanged until after cutover (D4, D7); the domain terms are local lane / cloud lane.
+   above (SL:130). The label words are config keys — `statusline.pill.label_local` (default `DGX`),
+   `statusline.pill.label_cloud` (default `ANTH`), `statusline.pill.label_unknown` (default `?`) — minted by
+   OD-173 (range: non-empty, no control bytes, display width 1..16); with defaults they equal the legacy output
+   bytes, which stay unchanged until after cutover (D4); the domain terms are local lane / cloud lane.
 
 ## Invariants
 
@@ -108,7 +111,7 @@ All vectors verified against the oracle (`legacy/dgx_statusline.py`, CPython 3.1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For all string ids and prefix lists, `on_local == any(strings.HasPrefix(id, p))` when both are non-empty, else None | property test (Go `testing/quick`) + table test |
+| VP-041 | For all string ids and prefix lists, `on_local == any(strings.HasPrefix(id, p))` when both are non-empty, else None | property test (Go `testing/quick`) + table test (VP-028 retains the bounded golden tables) |
 | VP-028 | Pill bytes are one of exactly three constants (with default theme) | table test |
 | VP-028 | Go pill bytes equal oracle pill bytes on the Tier A corpus | parity harness (BC-6.03.002) |
 
@@ -121,8 +124,8 @@ All vectors verified against the oracle (`legacy/dgx_statusline.py`, CPython 3.1
 | Parity class | byte-exact (no exclusion-list entry) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (degrade on fault), DI-012 (no unnamed deviations) |
-| Owner decisions | OD-111 / OD-123 (prefix key and default `claude-sonnet`; empty value expressible), OD-113 (theme keys), OD-121 (client-view lane), OD-05 (no `DGX_*` env) |
-| Config keys | `backends[0].model_prefixes`, `statusline.theme.*` (pill codes), `statusline.glyphs.*` |
+| Owner decisions | OD-111 / OD-123 (prefix key and default `claude-sonnet`; empty value expressible), OD-113 (theme keys), OD-121 (client-view lane), OD-173 (pill label keys), OD-05 (no `DGX_*` env) |
+| Config keys | `backends[0].model_prefixes`, `statusline.theme.*` (pill codes), `statusline.pill.label_local` / `label_cloud` / `label_unknown` (OD-173), `statusline.glyphs.*` |
 | Architecture Module | `internal/statusline/lane.go` (design §2.2; BC-COMPONENT-MAP: internal/statusline/lane.go (prefix startswith pill) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 
@@ -146,7 +149,7 @@ TBD — row-1 lane segments story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — pill classification property
+- VP-041 — pill classification property (for-all over ids and prefix lists); VP-028 — golden pill bytes and Tier A parity
 
 ---
 

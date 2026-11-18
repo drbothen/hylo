@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:08:00Z
+timestamp: 2026-11-18T23:30:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.02.002.md, behavioral-contracts/ss-06/BC-6.02.003.md, behavioral-contracts/ss-06/BC-6.03.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "bdc53a7"
+input-hash: "3bef64c"
 traces_to: prd.md
 source_bc: BC-6.03.002
 bcs: [BC-6.03.002, BC-6.02.002, BC-6.02.003, BC-1.01.009, BC-1.07.002, BC-1.07.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — exclusion ids respelled to the BC form and closed set extended to ten ids (A2-02); subagent corpus family added (BC-1.07.002 enabled=true parity rows, BC-1.07.007 _fmt_tokens dense grid)", "1.3 2026-11-18T09:08:00Z: ADV-P3 fixes — corpus leg asserts a non-zero computed case count and logs “N cases validated” (POL-11, A2-06); “93 contracts” count claim re-anchored honestly (A2-20)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — exclusion ids respelled to the BC form and closed set extended to ten ids (A2-02); subagent corpus family added (BC-1.07.002 enabled=true parity rows, BC-1.07.007 _fmt_tokens dense grid)", "1.3 2026-11-18T09:08:00Z: ADV-P3 fixes — corpus leg asserts a non-zero computed case count and logs “N cases validated” (POL-11, A2-06); “93 contracts” count claim re-anchored honestly (A2-20)", "1.4 2026-11-18: ADV-P4 pass-4 fix (D10) — harness skeleton loads cases from the canonical corpus root internal/parity/testdata/cases", "1.5 2026-11-18T22:00:00Z: pass-4 correction (item 10) — harness skeleton loads cases from the OD-148 corpus root internal/statusline/testdata/parity/cases (fixtures stay with the subject package)", "1.6 2026-11-18T23:30:00Z: pass-4 sync SC-06 — closed-set enumeration gains OD-166 (cost-history unconvertible-field scope, OD-169), completing the eleven-id set to match VP-012 and the other enumeration sites"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,8 +38,8 @@ Over the committed synthetic corpus and the owner's recorded stdin-sequence repl
 (git-ignored `captures/`), a live run of `legacy/` under the CPython 3.11.x oracle and
 the Go port produce identical results per refresh step: stdout bytes, exit code, and
 named caches byte-for-byte by file name — with only the closed named exclusion set
-(D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161)
-carving out ruled differences. Zero
+(D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161,
+OD-166) carving out ruled differences. Zero
 unexplained diffs is the D4 exit criterion (OD-117 target 1). The corpus carries the
 `--subagent` family: enabled=true rows replay the legacy subagent renderer stepwise
 (BC-1.07.002), and the `_fmt_tokens` dense-grid table rides the T-family rows

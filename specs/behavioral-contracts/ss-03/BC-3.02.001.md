@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2ce3f54"
+input-hash: "cfdc823"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D06/D32/D29 — Windows name comparison folds case after case-insensitive .exe strip; PID-reuse guard rejection = non-matching level (walk continues); fake-ps weekday corrected to Fri"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,9 +58,11 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
 2. **Walk.** Otherwise, with `pid = startPID`, repeat at most `maxDepth` times (SL:279):
    a. Probe `pid`. If the probe fails (process gone, permission denied, unsupported OS) → return None (SL:282-283:
       empty `ps` output returns None immediately; it does not continue).
-   b. If `basename(Comm)` equals the configured process name (default `claude`; exact,
-      case-sensitive; on Windows a trailing `.exe` is first stripped
-      case-insensitively) **and** a start time is available → `start = float64(floor(Start in Unix seconds))`;
+   b. If `basename(Comm)` equals the configured process name (default `claude`; on POSIX
+      exact and case-sensitive; on Windows a trailing `.exe` is first stripped
+      case-insensitively and the remainder is then compared case-insensitively — fold —
+      so `claude`, `Claude.exe` and `CLAUDE.EXE` all match, ADV-P4-D06) **and** a start
+      time is available → `start = float64(floor(Start in Unix seconds))`;
       set `proc_start = start` in the loaded cache object (keeping key order: an existing non-numeric `proc_start`
       keeps its position, a new key is appended last; IM-03), save the whole object with the atomic never-raise
       writer, and return `start` (SL:285-289).
@@ -82,7 +85,9 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
 2. Per-OS probe sources (design §2.5): macOS `sysctl kern.proc.pid` (`P_comm`, `Eproc.Ppid`, `P_starttime`) via
    `golang.org/x/sys/unix`; Linux `/proc/<pid>/stat` parsed after the last `)` (comm, ppid, starttime ticks) plus
    `btime` from `/proc/stat`; Windows `CreateToolhelp32Snapshot` + `GetProcessTimes` with a PID-reuse guard (a parent
-   created after its child is rejected); other OSes return not found.
+   created after its child is rejected; ADV-P4-D32: a guard rejection counts as a
+   NON-MATCHING level — the walk continues with `pid = PPID` and records nothing, it does
+   not abort the walk and is not an error); other OSes return not found.
 3. The probe never degrades the status line (never-raise helper, design IM-15).
 4. Parity runs never depend on a native value: ordinary render-parity cases seed `proc_start` on both sides (design
    §8 row 023 "T, seeded"); native values have no oracle. The OD-76 difference-table cases (BC-3.02.002) are the
@@ -121,7 +126,7 @@ Fake `ProcStarter`, `startPID = 500`, defaults (`max_depth` 6).
 | Windows, fake 500 = (`CLAUDE.EXE`, start 1794615009.2) | returns `1794615009.0` (D4-EX-1 case; legacy None) | edge-case |
 
 Legacy behavior behind rows 1-6 verified 2026-11-15 against CPython 3.11.7 running `claude_window_start` from
-`legacy/dgx_statusline.py` with a fake `ps` on `PATH` (`TZ=America/Chicago`, line `400 claude Thu Nov 13 18:10:09
+`legacy/dgx_statusline.py` with a fake `ps` on `PATH` (`TZ=America/Chicago`, line `400 claude Fri Nov 13 18:10:09
 2026` → `1794615009.0`; same cache bytes as rows 1 and 3; depth-6 match found, depth-7 match None; `ps` absent → None).
 
 ## Verification Properties

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:03:00Z
+timestamp: 2026-11-18T14:22:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md]
-input-hash: "aa4ce18"
+input-hash: "e6be72f"
 traces_to: prd.md
 source_bc: BC-1.01.004
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink"]
+modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -97,8 +97,11 @@ this VP delivers the quantified legs:
 func TestFrameProp_All(t *testing.T) {
     // A2-05: custom generators via Values (a nil config would use defaults);
     // testing/quick does not shrink — failures print the counterexample as-is.
+    // A Values filler must ASSIGN each arg (args[i] = reflect.ValueOf(x)):
+    // args arrives as zero reflect.Values — Elem()/Set would panic.
     segCfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
-        args[0].Elem().SetString(genSEPFreeText(r)) // LF/CR-free, SEP-free segments
+        args[0] = reflect.ValueOf(genSEPFreeText(r)) // LF/CR-free, SEP-free segments
+        args[1] = reflect.ValueOf(anchorCols(r))     // 2-arg property: cols is set too (A2-05)
     }}
     if err := quick.Check(func(text string, cols int) bool {
         segs := splitSegments(text) // SEP-free by construction
@@ -108,8 +111,8 @@ func TestFrameProp_All(t *testing.T) {
         t.Fatalf("P1/P5/P6/P7 violated: %v", err)
     }
     pairCfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
-        args[0].Elem().SetString(genSGRBearing(r)) // P2: SGR runs + astral + WTF-8
-        args[1].Elem().SetString(genSGRBearing(r))
+        args[0] = reflect.ValueOf(genSGRBearing(r)) // P2: SGR runs + astral + WTF-8
+        args[1] = reflect.ValueOf(genSGRBearing(r))
     }}
     if err := quick.Check(func(a, b string) bool {
         return visible(a+b) == visible(a)+visible(b) // P2, split guards

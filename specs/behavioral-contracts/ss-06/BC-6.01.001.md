@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "7367722"
+input-hash: "b1d0f63"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,6 +26,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04+D26: oracle argv allows --subagent for the subagent corpus family (OD-155 supersedes OD-14); Architecture Module anchor corrected to internal/parity"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D09 — case.json argv minted as the HANDLER-RELATIVE list (after the verb), default [], P1 validator admits [] and [\"--subagent\"] only (design call 9); PC-5/VP-034 aligned"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -74,13 +75,14 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
    into the Tier B golden metadata when goldens are regenerated (BC-6.03.001; design
    risk RK-4). It is also printed once per Tier A run.
 5. **Exact argv for every oracle refresh:**
-   `[<value>, "-s", <abs>/legacy/dgx_statusline.py]` for every main-render case. Nothing
-   else is passed: no other interpreter flags, no `-X` options. One script argument is
-   allowed for the subagent corpus family (ADV-P3-D04, per OD-155 which supersedes
-   OD-14): cases whose id carries the `-sub` family suffix are refreshed with
-   `[<value>, "-s", <abs>/legacy/dgx_statusline.py, "--subagent"]`, exercising the
-   `main_subagent` path (SL:1240) exactly as the Go side does. No other script arguments
-   are permitted.
+   `[<value>, "-s", <abs>/legacy/dgx_statusline.py]` followed by the case's
+   **handler-relative argv** — the `argv` field of `case.json`, which lists arguments AFTER
+   the `statusline` verb and defaults to `[]` (orchestrator design call 9, ADV-P4-D09; the
+   P1 corpus validator admits only `[]` and `["--subagent"]`, the latter for the `-sub`
+   family per OD-155 which supersedes OD-14, exercising the `main_subagent` path, SL:1240,
+   exactly as the Go side does). No other interpreter flags, no `-X` options; the oracle
+   never receives the verb itself, and any other argv shape is Go-table-test territory
+   (BC-4.01.002), never parity.
 6. **Unset locally means skip; unset in CI means fail.** If the setting is unset and the
    CI marker `CI=true` is absent, Tier A skips with
    `parity: HYLO_PARITY_PYTHON unset; Tier A (live differential) skipped`. Tier B still
@@ -121,7 +123,7 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-034 | For every case/step shape, the oracle argv equals `[abs python, "-s", abs script]` and contains none of `-I`, `-E`, `-S` | table test on the argv builder |
+| VP-034 | For every case/step shape, the oracle argv equals `[abs python, "-s", abs script]` followed by the case's handler-relative argv (`[]` or `["--subagent"]` in P1, design call 9) and contains none of `-I`, `-E`, `-S` | table test on the argv builder |
 | VP-034 | No harness code path calls `exec.LookPath` or a shell to start the oracle | manual review + `go vet`-style grep test |
 | VP-034 | A non-absolute or non-3.11 interpreter never runs an oracle case | table test |
 

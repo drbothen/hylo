@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "db24750"
+input-hash: "87101f4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,8 +24,11 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
-  - "2026-11-18T01:42:00Z ADV-P3 remediation D06+D19+D20+D38: D4-EX-3 cache halves compared asymmetrically (oracle self-consistency + Go empty-listing) making Go-writes-no-caches satisfiable; OD-159/160/161 riders named; canonical entries gain package/scope and JSON expected files; EC-006 scope-conflict rule rewritten"
+  - "1.2.1 2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "1.2.2 2026-11-18T01:42:00Z ADV-P3 remediation D06+D19+D20+D38: D4-EX-3 cache halves compared asymmetrically (oracle self-consistency + Go empty-listing) making Go-writes-no-caches satisfiable; OD-159/160/161 riders named; canonical entries gain package/scope and JSON expected files; EC-006 scope-conflict rule rewritten"
+  - "1.2.3 2026-11-18: ADV-P4 remediation D12+D13+D22+OD-169 - closed set = eleven ids (OD-166 added with own scope wording); oracle self-consistency leg defined for single-step and Number-class shapes; exclusions.json relocated beside the corpus root; TestD4EX3 canonical names, Theme member removed"
+  - "1.2.4 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json and corpus root restored to the OD-148 homes internal/statusline/testdata/parity/exclusions.json and internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
+  - "1.2.5 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,13 +55,16 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 ## Preconditions
 
-1. The file is `internal/statusline/testdata/parity/exclusions.json`. JSON keeps the P1
+1. The file is `internal/statusline/testdata/parity/exclusions.json`, beside the corpus root
+   `internal/statusline/testdata/parity/cases/` (OD-148 layout; single meaning for "relative to
+   the corpus root"). JSON keeps the P1
    build at zero added dependencies.
 2. Each entry is an object with exactly these keys:
-   - `id`, one of the closed set `D4-EX-1`, `D4-EX-2`, `D4-EX-3`, `OD-30`, `OD-76`,
-     `temp-file`, `cp-x03`, `OD-159`, `OD-160`, `OD-161` (the parity-class names of
-     BC-ALLOCATION.md; `cp-x03` added by OD-136; `OD-159`/`OD-160`/`OD-161` added by the
-     owner rulings of 2026-11-17);
+   - `id`, one of the closed set of ELEVEN ids `D4-EX-1`, `D4-EX-2`, `D4-EX-3`, `OD-30`,
+     `OD-76`, `temp-file`, `cp-x03`, `OD-159`, `OD-160`, `OD-161`, `OD-166` (the
+     parity-class names of BC-ALLOCATION.md; `cp-x03` added by OD-136;
+     `OD-159`/`OD-160`/`OD-161` added by the owner rulings of 2026-11-17; `OD-166`
+     added by OD-169);
    - `case`, a case directory path relative to the corpus root;
    - `expected_output_file`, a path relative to the corpus root;
    - `package`, the Go test package import path that declares `table_test` (the tests
@@ -80,7 +86,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    |---|---|---|---|
    | `D4-EX-1` | D4-EX-1 | ⌂ on Windows (fake probe returns a start) | BC-3.02.001 (`TestWindowAge_D4EX1_Windows*`) |
    | `D4-EX-2` | D4-EX-2, OD-21/OD-32 | wrong-shape transcript lines skipped | BC-1.03.018/019/020 (21 BC-SL-099 rows + BC-SL-100/103 rows) |
-   | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..006 + theme class BC-2.01.003 (`TestConfigError_D4EX3_{Number,Boolean,URL,Enum,Theme}` + `config validate`) |
+   | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..006 (`TestD4EX3_{Number,Boolean,URL,Enum}` + `config validate`; no Theme member — theme settings are rejected by the corpus validator, BC-6.02.003 PC-3/EC-007, so no Theme D4-EX-3 case can exist; ADV-P4-D22) |
    | `OD-30` | OD-30, OD-110 | numeric sid: one string-form cost-history key | BC-1.05.006, BC-1.05.009 |
    | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails) | BC-3.02.002 |
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
@@ -88,6 +94,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01; rider: BC-1.03.001 PC-3 directional test, ADV-P3-D19) |
    | `OD-160` | OD-160 | foreign-cache shapes in the cache directories | stories owning the cache-store verbs (SS-01; riders: BC-1.02.017 EC-010, BC-1.01.008 EC-011 directional tests, ADV-P3-D19) |
    | `OD-161` | OD-161 | integer `transcript_path` → no transcript | stories owning the stdin path-field verbs (SS-01; rider: BC-1.03.015 PC-3 directional test, ADV-P3-D19) |
+   | `OD-166` | OD-169 | cost-history bytes written after a refresh whose `usd` or `api_ms` could not convert to float (nothing else) | BC-1.05.004 (dedicated table test; VP-012 closure row per OD-169) |
 
 ## Postconditions
 
@@ -117,9 +124,18 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    (SL:73-77, 89, 186), while a config-error run stops at step 0 on the Go side and Go
    writes NO caches. The cache halves are therefore compared ASYMMETRICALLY for these
    cases (ADV-P3-D06 disposition, amending the ADV-P2-D05 wording "still compared to the
-   oracle under BC-6.03.002 PC-6"): the oracle's caches are compared against the oracle's
-   own previous refresh (self-consistency, asserting legacy really rendered and wrote),
-   and the Go side asserts the EMPTY-listing invariant of BC-2.02.001 PC-6 ("Go writes no
+   oracle under BC-6.03.002 PC-6"). The oracle self-consistency leg is DEFINED for every
+   case shape (ADV-P4-D13): when the case has two or more steps, the oracle's caches
+   after step k are compared against its own caches after step k-1; when the case has a
+   SINGLE step, the harness runs the oracle TWICE at the same step instant (two
+   consecutive refreshes) and compares the second refresh's caches against the first's
+   — so "previous refresh" always exists. For the NUMBER class this leg degenerates
+   trivially: legacy crashes at import (CP-X01/X02: exit 1, empty stdout) and writes NO
+   caches, so the oracle leg pins exactly that — exit 1, zero stdout bytes, empty cache
+   listing — while the Go leg pins the config-error line via the expected file. Only the
+   Boolean, Enum and URL classes use the two-legged asymmetry; PC-3 of the class
+   contracts names them exhaustively.
+   The Go side asserts the EMPTY-listing invariant of BC-2.02.001 PC-6 ("Go writes no
    caches") instead of being compared to the oracle's listing. BC-6.03.002 PC-3's
    set-equality requirement is waived for an excluded case by the entry itself — the
    waiver is what the `scope: stdout` entry licenses. The other ids use
@@ -160,7 +176,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Entry `{"id": "D4-EX-3", "case": "config/ttl-nan", "expected_output_file": "config/ttl-nan/expected.json", "package": "internal/statusline", "scope": "stdout", "table_test": "TestConfigError_D4EX3_Number"}`; Go prints the expected config-error line; test passes | Report `D4-EX-3 config/ttl-nan TestConfigError_D4EX3_Number ok` | happy-path |
+| Entry `{"id": "D4-EX-3", "case": "config/ttl-nan", "expected_output_file": "config/ttl-nan/expected.json", "package": "internal/statusline", "scope": "stdout", "table_test": "TestD4EX3_Number"}`; Go prints the expected config-error line; test passes | Report `D4-EX-3 config/ttl-nan TestD4EX3_Number ok` | happy-path |
 | Entry for `temp-file` on `cache/sid-slash-temp` | Cache-listing scope only; stdout still compared to the oracle and equal | edge-case |
 | Entry with `"case": "transcript/*"` | Run FAIL before any case: `exclusion[3]: glob not allowed in case` | error |
 | Entry whose table test fails | Run FAIL: `parity: exclusion D4-EX-2/transcript/cp-t01: table test TestTranscript_D4EX2_T01 failed` | error |
@@ -176,7 +192,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 | Field | Value |
 |-------|-------|
-| Source | OD-105 (named exclusion list D4-EX-1/2/3; each excluded case matches its own expected output in dedicated table tests; an exclusion without a test fails the harness; no blanket exclusions); OD-110 (named entries for OD-30, OD-76 + native probe, Go temp cleanup; still no blanket exclusions); design §5.4 (`exclusions.json`, entry `{id, case, expected_output_file, table_test}`; fail on missing test, differing output, or glob); OD-117 target (1); DI-012 |
+| Source | OD-105 (named exclusion list D4-EX-1/2/3; each excluded case matches its own expected output in dedicated table tests; an exclusion without a test fails the harness; no blanket exclusions); OD-110 (named entries for OD-30, OD-76 + native probe, Go temp cleanup; still no blanket exclusions); design §5.4 (`exclusions.json`, entry `{id, case, expected_output_file, table_test}`; fail on missing test, differing output, or glob); OD-117 target (1); DI-012; OD-169 (OD-166 as the eleventh closed-set id, own table test and VP-012 closure row, "rides D4-EX-2"/"OD-156" wordings removed); ADV-P4-D13 (defined oracle self-consistency leg); ADV-P4-D22 (canonical TestD4EX3 names, no Theme member) |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "c3fc33e"
+input-hash: "bdca2d4"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D13: POSIX-only ValueError claim qualified (Windows MSVC localtime_s raises OSError); range-end oracle rows restricted to Linux/macOS"
+  - "1.2.2 2026-11-18: ADV-P4 remediation D21 - Env.Loc routed through internal/platform.LocalZone (OD-171); phantom HYLO_TEST_* zone citation replaced by TZ=UTC harness pin"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,7 +43,11 @@ Transcript timestamps feed the last-turn rate machine through `_iso_ts(s)` =
 
 1. `s` is the Value at the transcript's `timestamp` field; a non-string Value returns `(0, false)` (None) without
    parsing (SL:979-980).
-2. `loc` is the injected `*time.Location` (`Env.Loc`; production `time.Local`, harness `HYLO_TEST_*`-controlled zone).
+2. `loc` is the injected `*time.Location` (`Env.Loc`), derived exclusively through
+   `internal/platform.LocalZone` (BC-3.01.001 PC-6, OD-171): `TZ` is honored on every OS
+   (named zone → OS-zone fallback), in production and in the parity harness alike — the
+   harness pins `TZ=UTC` for both binaries; no `HYLO_TEST_*` zone variable exists or is
+   reserved (ADV-P4-D21).
 
 ## Postconditions
 
