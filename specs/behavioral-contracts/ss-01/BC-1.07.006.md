@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.4"
+version: "1.1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "fff619b"
+input-hash: "9ac83b1"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows model branch (SL:898-907)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)", "1.1.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C03/C06) — lane-tag square pinned to statusline.glyphs.lane (U+25E8) and words to statusline.pill.label_local/label_cloud (OD-173); theme.grey named for the model bit; refactoring note uses pyfmt.Strip, never TrimSpace (OD-170)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +50,7 @@ it is served by Anthropic (review 2026-11-13 #21.4).
 ## Postconditions
 
 1. `model` falsy or missing → no segment at all (no pill, no grey model).
-2. Truthy `model` that is a string → `<lane><GREY><model><RESET>`; the pill bytes are
+2. Truthy `model` that is a string → `<lane><GREY><model><RESET>`; the GREY model bit is the shared theme colour key `statusline.theme.grey` (default `90`, OD-113); the pill bytes are
    `\e[36m` + U+25E8 + `DGX\e[0m ` (prefix hit) or `\e[35m` + U+25E8 + `ANTH\e[0m ` (miss), each
    followed by `\e[90m<model>\e[0m`.
    A truthy non-string `model` with empty prefixes renders through Python f-string `str()`
@@ -107,7 +107,7 @@ re-derived escaped after the adv-p3 C01 escape-decoding incident; pill square = 
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (CP-A03 degrade), DI-012 (byte parity) |
 | Architecture Module | `internal/statusline` (model segment; shares the prefix table with the row-1 lane pill) |
-| Config keys | `backends[0].model_prefixes`; pill SGR from the shared theme colour keys `statusline.theme.cyan` (default `36`, hit) and `statusline.theme.magenta` (default `35`, miss) — defaults equal to legacy CYAN/MAGENTA (SL:906-907) — and the pill square from `statusline.glyphs.*` (OD-02). NOT the row-1 inverted pills `statusline.theme.pill_local`/`pill_cloud` (defaults `106;30;1`/`105;30;1`): building from those anchors breaks byte parity (ADV-P4-C02) |
+| Config keys | `backends[0].model_prefixes`; pill SGR from the shared theme colour keys `statusline.theme.cyan` (default `36`, hit) and `statusline.theme.magenta` (default `35`, miss) — defaults equal to legacy CYAN/MAGENTA (SL:906-907) — and the pill square from `statusline.glyphs.lane` (U+25E8, 1 code point/1 column; the pass-5 call-1 registry completion member, shared with the row-1 lane pill — BC-2.01.004 owns the closed registry). The tag words DGX/ANTH are NOT constants: they come from the OD-173 keys `statusline.pill.label_local`/`label_cloud` (defaults `DGX`/`ANTH`; BC-1.02.001 is the row-1 consumer) — hard-coding them would violate D15/OD-173 (ADV-P5-C03). NOT the row-1 inverted pills `statusline.theme.pill_local`/`pill_cloud` (defaults `106;30;1`/`105;30;1`): building from those anchors breaks byte parity (ADV-P4-C02) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py: model branch (SL:898-907); pill bytes SL:127-133 |
 | Legacy contract | BC-SL-097 (P3r2 §A7; prefix rule shared with BC-SL-006) |
@@ -160,11 +160,15 @@ TBD — filled by story-writer
 
 #### Refactoring Notes
 
-Go: take `backends[0].model_prefixes` from internal/config (OD-123), parse (split on `,`, TrimSpace,
+Go: take `backends[0].model_prefixes` from internal/config (OD-123), parse (split on `,`, strip each
+entry with `pyfmt.Strip` — Python Unicode whitespace, NBSP included; **never** `strings.TrimSpace`:
+Go's `unicode.IsSpace` leaves U+001C..U+001F which Python's `str.strip()` removes, so a prefix with a
+leading U+001F would match differently from legacy — OD-170; ADV-P5-C06; PC2/EC-004 convention),
 drop empties) once per render, then
 `slices.ContainsFunc(prefixes, func(p string) bool { return strings.HasPrefix(model, p) })`. Take the
+tag words from `statusline.pill.label_local`/`label_cloud` (OD-173), the
 pill SGR from `statusline.theme.cyan`/`statusline.theme.magenta` (defaults 36/35 = legacy CYAN/MAGENTA,
-SL:906-907) and the square glyph from `statusline.glyphs.*` (ADV-P3-C05 disposition, corrected by
+SL:906-907), and the square glyph from `statusline.glyphs.lane` (ADV-P3-C05 disposition, corrected by
 ADV-P4-C02: not `statusline.theme.pill_local`/`pill_cloud`, whose inverted-pill defaults
 `106;30;1`/`105;30;1` differ), not from constants, so byte parity stays auditable next to
 PILL_DGX/PILL_ANTH defaults.

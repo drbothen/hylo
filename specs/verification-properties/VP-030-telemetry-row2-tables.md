@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T09:17:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.04.002.md, behavioral-contracts/ss-01/BC-1.04.004.md, behavioral-contracts/ss-01/BC-1.04.009.md, behavioral-contracts/ss-01/BC-1.04.014.md, behavioral-contracts/ss-01/BC-1.04.020.md, prd-supplements/test-vectors.md]
-input-hash: "4057756"
+input-hash: "88e60a7"
 traces_to: prd.md
 source_bc: BC-1.04.002
 bcs: [BC-1.04.001, BC-1.04.002, BC-1.04.003, BC-1.04.004, BC-1.04.005, BC-1.04.006, BC-1.04.007, BC-1.04.008, BC-1.04.009, BC-1.04.010, BC-1.04.011, BC-1.04.012, BC-1.04.013, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.04.017, BC-1.04.018, BC-1.04.019, BC-1.04.020, BC-1.04.021]
@@ -98,7 +98,10 @@ func TestRow2Props_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
         args[0] = reflect.ValueOf(genRow2State(r)) // generated TTL/freshness/sparkline states
     }}
     if err := quick.Check(func(st row2State) bool {
-        return row2InvariantsHold(st) // TTL monotonicity, ladder ordering, scale bounds
+        // A2-08: the predicates are STRUCTURAL re-derivations of the BC-1.04.x rules
+        // (TTL monotonicity, ladder ordering, scale bounds) — the BC's canonical table
+        // pins only bounded corners and cannot oracle randomly generated states.
+        return row2InvariantsHold(st)
     }, cfg); err != nil {
         t.Fatalf("row-2 invariant violated: %v", err)
     }

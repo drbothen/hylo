@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:45:00Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "76b3a2d"
+input-hash: "6e32f96"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main (SL:1217-1227)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-13 (request count counts redirect hops)", "2026-11-18 (v1.3.2) pass-4 remediation ADV-P4-C2-16 (bool-is-a-number semantics on dgx_mtok: True kept, False none)", "1.3.3 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-13 (request count counts redirect hops)", "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-16 (bool-is-a-number semantics on dgx_mtok: True kept; False none)", "1.3.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.3.4 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — history re-spun version-first and re-dated ascending; comma removed from the 1.3.2 flow element; no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null

@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T14:18:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.001.md, behavioral-contracts/ss-01/BC-1.05.002.md, behavioral-contracts/ss-01/BC-1.05.003.md, behavioral-contracts/ss-01/BC-1.05.005.md, behavioral-contracts/ss-01/BC-1.05.007.md, behavioral-contracts/ss-01/BC-1.05.008.md]
-input-hash: "5dd36ac"
+input-hash: "d97cb9a"
 traces_to: prd.md
 source_bc: BC-1.05.008
 bcs: [BC-1.05.001, BC-1.05.002, BC-1.05.003, BC-1.05.005, BC-1.05.007, BC-1.05.008]
@@ -89,11 +89,16 @@ func TestCostProps_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
         // A2-05: a Values filler must ASSIGN each arg (args[i] = reflect.ValueOf(x));
         // args arrives filled with zero reflect.Values — Elem().Set panics.
         args[0] = reflect.ValueOf(genThresholds(r)) // lane percentile thresholds
-        args[1] = reflect.ValueOf(genRates(r))      // recorded lane rates
+        args[1] = reflect.ValueOf(genFiniteRates(r)) // recorded lane rates, FINITE only (BC-1.05.005 qualifier; OD-138 NaN usd rows are pinned table legs)
     }}
     if err := quick.Check(func(th thresholds, rates []float64) bool {
         c := costColor(th, rates)
-        return c.p75 <= c.p95 && coloringIsPure(th, rates) // p75 ≤ p95 whenever a pair is returned
+        // A2-08: the oracle RE-DERIVES the percentiles from the BC-1.05.005 rule
+        // (sort the finite inputs, pinned indices) — the check CAN fail; the bare
+        // p75 ≤ p95 tautology is kept only as a corollary.
+        return c.p75 == derivePercentile(rates, 0.75) &&
+            c.p95 == derivePercentile(rates, 0.95) &&
+            c.p75 <= c.p95 && coloringIsPure(th, rates)
     }, cfg); err != nil {
         t.Fatalf("cost invariant violated: %v", err)
     }

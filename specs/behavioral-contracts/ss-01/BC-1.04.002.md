@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "80e3f54"
+input-hash: "75b8bd6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -18,7 +18,12 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-13", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "1.3.2 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
+modified:
+  - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-13"
+  - "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-008)"
+  - "1.3.2 2026-11-18: pass-4 residual sweep \u2014 D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)"
+  - "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (KeyError site added to Invariant 1 alongside the IndexError site)"
+  - "1.3.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19) \u2014 version field aligned with the trailing modified entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

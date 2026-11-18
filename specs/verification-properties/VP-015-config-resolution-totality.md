@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:21:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.001.md, behavioral-contracts/ss-02/BC-2.01.004.md, behavioral-contracts/ss-02/BC-2.01.005.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "29b3f56"
+input-hash: "50b668d"
 traces_to: prd.md
 source_bc: BC-2.01.001
 bcs: [BC-2.01.001, BC-2.01.004, BC-2.01.005, BC-2.01.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P2 pass-2 fixes — the totality oracle now asserts the DI-010 substance: generated-invalid values must return a typed Error identifying the offending key (no silent fallback to the default); unknown HYLO_* must warn on stderr with unchanged exit status; DGX_*-only environments must yield the exact default config (A2-08)", "1.2 2026-11-18T09:21:00Z: ADV-P3 fix (A2-25) — multi-invalid determinism pinned: with several invalid values the typed error identifies the FIRST invalid variable in registry order (BC-2.02.001); the generated-invalid assert relies on this"]
+modified: ["1.1 2026-11-17: ADV-P2 pass-2 fixes — the totality oracle now asserts the DI-010 substance: generated-invalid values must return a typed Error identifying the offending key (no silent fallback to the default); unknown HYLO_* must warn on stderr with unchanged exit status; DGX_*-only environments must yield the exact default config (A2-08)", "1.2 2026-11-18T09:21:00Z: ADV-P3 fix (A2-25) — multi-invalid determinism pinned: with several invalid values the typed error identifies the FIRST invalid variable in registry order (BC-2.02.001); the generated-invalid assert relies on this", "1.3 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-01, A2-24) — skeletons and statement aligned with the ARCH-02 API: Load returns (*Config, *ErrorSet) and the offending error is taken via the nil-safe First(); the unknown-HYLO_* exit-status invariant is now ASSERTED (validate entrypoint over the same environment, exit 0) with the generator pool excluding known cardinality-flipping names such as HYLO_BACKENDS_1_NAME"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,14 +35,20 @@ removal_reason: null
 ## Property Statement
 
 For every possible environment-variable assignment, `config.Load` terminates and
-returns either a `*Config` or a single typed `*Error` (Key, Value, Reason, EnvName) —
-never a crash, never a silent fallback. "No silent fallback" is asserted, not
+returns either a `*Config` or a non-empty typed `*ErrorSet` — the stdout line renders
+`Errors.First()`, the full list goes to stderr (ARCH-02) — never a crash, never a
+silent fallback. "No silent fallback" is asserted, not
 narrated: an environment whose generated value is invalid must produce a typed
-`*Error` whose Key/EnvName identify the offending variable — a returned `*Config`
+`*Error` — taken via `First()`, which is nil-safe — whose Key/EnvName identify the
+offending variable — a returned `*Config`
 carrying the default for that key is a failure. Every key is declared in the closed registry
 with type, range/operator, default and rationale (D15/OD-114); `EnvName` derivation is
 collision-free at build time; unknown `HYLO_*` variables must warn on stderr and never
-change exit status (asserted); environments carrying only `DGX_*` variables must yield
+change exit status — asserted by running the `config validate` entrypoint over the
+generated environment and asserting exit 0; the generator's unknown-variable pool
+excludes registry names such as `HYLO_BACKENDS_1_NAME`, which is a KNOWN variable that
+flips the cardinality rule into a config error (exit 1) and so is not "unknown"
+(ADV-P5-A2-24); environments carrying only `DGX_*` variables must yield
 the exact built-in-default config, pinning that `DGX_*` is never read (asserted);
 `COLUMNS` is excluded from the registry as a
 protocol input.
@@ -83,7 +89,7 @@ protocol input.
 ```go
 func TestLoad_TotalOverEnvironment(t *testing.T) {
     for _, env := range RandomEnvironments(500) { // includes unknown HYLO_*, DGX_*, garbage
-        c, err := config.Load(env.Opts())
+        c, err := config.Load(env.Opts()) // Load returns (*Config, *ErrorSet), ARCH-02
         if c == nil && err == nil { t.Fatal("Load returned neither config nor error") }
         if c != nil && err != nil { t.Fatal("Load returned both") }
         if env.HasInvalidValue() { // DI-010 substance: no silent fallback (A2-08)
@@ -91,15 +97,28 @@ func TestLoad_TotalOverEnvironment(t *testing.T) {
                 t.Fatalf("invalid %s=%s silently accepted (got default-filled config)",
                     env.InvalidKey, env.InvalidValue)
             }
+            first := err.First() // nil-safe highest-precedence error (ARCH-02)
+            if first == nil {
+                t.Fatal("empty ErrorSet returned for an invalid environment")
+            }
             // A2-25: with several invalid values, the offending key is the FIRST
             // invalid variable in registry order (BC-2.02.001); env.InvalidKey is
             // pinned to that value by the generator.
-            if err.Key != env.InvalidKey || err.EnvName != env.InvalidEnvName {
-                t.Fatalf("typed error does not identify the offending variable: %+v", err)
+            if first.Key != env.InvalidKey || first.EnvName != env.InvalidEnvName {
+                t.Fatalf("typed error does not identify the offending variable: %+v", first)
             }
         }
-        if env.OnlyUnknownHYLO() && !env.StderrContainsUnknownSettingWarning() {
-            t.Fatal("unknown HYLO_* did not warn on stderr")
+        if env.OnlyUnknownHYLO() {
+            if !env.StderrContainsUnknownSettingWarning() {
+                t.Fatal("unknown HYLO_* did not warn on stderr")
+            }
+            // A2-24: the exit-status invariant is asserted, not narrated — the
+            // validate entrypoint over the same environment must exit 0. The
+            // generator's unknown pool excludes HYLO_BACKENDS_1_NAME (known;
+            // flips cardinality to a config error, exit 1).
+            if exit := runConfigValidate(env.Opts()); exit != 0 {
+                t.Fatalf("unknown HYLO_* changed exit status: %d", exit)
+            }
         }
         if env.OnlyDGXVars() && !c.Equals(DefaultConfig()) {
             t.Fatal("DGX_* influenced the config — DGX_* must never be read (A2-08)")

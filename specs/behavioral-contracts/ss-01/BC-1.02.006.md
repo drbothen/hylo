@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5"
+version: "1.6.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cffed41"
+input-hash: "69ece43"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -21,7 +21,9 @@ introduced: v0.1.0
 modified:
   - "consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"
   - "pass-3 remediation (ADV-P3-B07): PC3-PC5 parametrize on cells/plain_max/red_from, so Inv 3 now gives them real ranges (cells int >= 1; plain_max/red_from any finite number); only units.context stays default-only; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B13/B08/B04): duplicate modified keys merged; cells range 1..100 (B09 cap, same as kv.cells); units.context default-only reason cites the fixed M/K divisors; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B13/B08/B04): duplicate modified keys merged; cells range 1..100 (B09 cap, same as kv.cells); units.context default-only reason cites the fixed M/K divisors; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
+  - "1.6 pass-5 remediation (ADV-P5-B03/B15): thermometer cells named as registry keys statusline.glyphs.cell_on/cell_off (defaults U+25B0/U+25B1, 1 code point/1 column, SL:428); cells above 100 clarified as a number-range config error, never a clamp; 2026-11-18T05:42:56Z"
+  - "1.6.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,8 +60,10 @@ Notation: `\e` is the byte 0x1B.
 2. `pct = Min(Max(pct, 0.0), 100.0)` (NaN-order-preserving `pyfmt.Max/Min`, IM-09).
 3. With `n = cells` and `d = 100.0/n` (exactly 10.0 at the default): `filled =
    min(Int(pct/d + 0.5), n)` — explicit half-up, never `math.Round` (IM-06).
-4. Bar = for `i` in `0..n-1`: `truecolor(heat((i+0.5)*d)) + "▰"` if `i < filled`, else
-   `\e[90m▱`; then `\e[0m`. With the default heat theme the 10 cell colours are, in order,
+4. Bar = for `i` in `0..n-1`: `truecolor(heat((i+0.5)*d)) + cell_on` if `i < filled`, else
+   `\e[90m▱`; then `\e[0m`, where the filled/empty cells are the registry keys
+   `statusline.glyphs.cell_on` / `statusline.glyphs.cell_off` (OD-02; defaults ▰ U+25B0 and ▱ U+25B1, each exactly
+   1 code point / 1 column; SL:428). With the default heat theme the 10 cell colours are, in order,
    `\e[38;2;159;204;30m`, `\e[38;2;182;204;30m`, `\e[38;2;204;202;30m`,
    `\e[38;2;204;179;30m`, `\e[38;2;204;156;30m`, `\e[38;2;204;133;30m`,
    `\e[38;2;204;110;30m`, `\e[38;2;204;87;30m`, `\e[38;2;204;64;30m`,
@@ -83,8 +87,9 @@ Notation: `\e` is the byte 0x1B.
    `cells`/`plain_max`/`red_from` (`d = 100/n`, `min(Int(pct/d + 0.5), n)`, the loop over
    `n` cells, the `pct > plain_max` / `pct >= red_from` comparisons), so those keys get
    real ranges: `statusline.context.cells` = integer in **1..100** (n = 0 would divide by
-   zero; n > 100 is capped — the same 1..100 cap as `kv.cells`/`sparkline.points` — because
-   the bar is O(n) render work and n columns wide against the 25 ms p95 budget);
+   zero; the 1..100 ceiling — the same range registered for `kv.cells`/`sparkline.points` — bounds the O(n)
+   render work and the n-column bar against the 25 ms p95 budget; a value above 100 is **rejected as a
+   number-range config error, never clamped**);
    `statusline.context.plain_max` and `statusline.context.red_from` = any finite JSON
    number (compared against the clamped [0, 100] pct). Any out-of-range value is a
    number-range config error (BC-2.02.003, OD-162). For architect registration:
@@ -151,7 +156,7 @@ prefixes listed in Postcondition 4; `E` = `\e[90m▱`.
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-113 (theme keys incl. heat), OD-103 (pyfmt), OD-156 (render-time overflow → catalogued crash path), OD-162 (valid ranges of the resolved keys) |
-| Config keys | `statusline.context.cells`, `statusline.context.plain_max`, `statusline.context.red_from`, `statusline.units.context`, `statusline.theme.heat` |
+| Config keys | `statusline.context.cells`, `statusline.context.plain_max`, `statusline.context.red_from`, `statusline.units.context`, `statusline.theme.heat`, `statusline.glyphs.cell_on` / `cell_off` (▰ U+25B0 / ▱ U+25B1) |
 | Architecture Module | `internal/statusline/context.go` |
 | Stories | TBD |
 

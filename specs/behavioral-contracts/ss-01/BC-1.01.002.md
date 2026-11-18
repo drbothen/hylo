@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "1f9d152"
+input-hash: "a99539e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,7 +21,8 @@ introduced: "0.1"
 modified:
   - "consolidated pass-2 follow-up: transcript site re-measured end to end at 993/994 — equality with stdin, not 989/990 divergence, 2026-11-17T21:21:12Z"
   - "pass-3 remediation (ADV-P3-B14/B16/B10): 4,300-digit int-literal edge case added; VP table cites VP-005/VP-006 (not VP-001); ARCH-03 anchor normalized to the stable #statusline-guard fragment; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B11 + ADV-P4-A2-16 sibling): VP-001 removed from VP Anchors; EC-006 states the L+1 observable explicitly (default line, not the degraded line); 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B11 + ADV-P4-A2-16 sibling): VP-001 removed from VP Anchors; EC-006 states the L+1 observable explicitly (default line, not the degraded line); 2026-11-18T03:00:00Z"
+  - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

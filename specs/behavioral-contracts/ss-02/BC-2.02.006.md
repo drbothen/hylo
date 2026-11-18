@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -9,7 +9,7 @@ phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "56ea08d"
+input-hash: "3e14c03"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; grammar from OD-05 as pinned in BC-2.01.005)"
@@ -24,6 +24,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D07: P1 Bool set completed with queue.yellow (P1 ruling, amending joins-in-P4) and subagent.enabled"
   - "1.2.2 2026-11-18: ADV-P4 remediation D26 — queue.yellow P1 priority citation corrected to OD-175"
   - "1.2.3 2026-11-17: pass-4 residual sweep — phantom 2026-11-18 owner-ruling narrative removed from the precondition; P1 priority cites OD-175 directly"
+  - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17 sibling sweep) — the register-count sentence respelled to seven with the OD-178 Text class; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,7 +43,7 @@ other value is a D4-EX-3 config error. Before this contract the boolean grammar 
 inside BC-2.01.005 (parsing) with its D4-EX-3 test merely named in BC-2.02.001; this
 contract gives the class its own S2.02 contract, symmetric with number-range, number-
 grammar, enum and URL (BC-2.02.002..005). Register count discipline (ADV-P1-D33): the
-register stays closed at six; the `path` and `backends` reason strings of the Reason
+register is closed at seven (pass-4 six + the OD-178 Text class); the `path` and `backends` reason strings of the Reason
 Vocabulary map to their raising contracts (BC-2.01.005, BC-2.01.002) and are not
 additional classes.
 

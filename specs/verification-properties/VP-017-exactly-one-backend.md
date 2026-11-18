@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:48:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d173611"
+input-hash: "49d9f7d"
 traces_to: prd.md
 source_bc: BC-2.01.002
 bcs: [BC-2.01.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T14:48:00Z: ADV-P4 fix (A2-18) — Method no longer claims cardinality 0 is tested through Load: 1 and 2 run through Load, the backends=0 guard is exercised directly at the validator seam (unreachable through Load in P1), joining the Load-driven table at P4"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T14:48:00Z: ADV-P4 fix (A2-18) — Method no longer claims cardinality 0 is tested through Load: 1 and 2 run through Load, the backends=0 guard is exercised directly at the validator seam (unreachable through Load in P1), joining the Load-driven table at P4", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-01) — skeleton aligned with the ARCH-02 API: the typed error is taken via ErrorSet.First() (Load returns (*Config, *ErrorSet))"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -74,7 +74,8 @@ function that P6 widens — no other code learns the cardinality rule.
 func TestBackends_ExactlyOneUntilP6(t *testing.T) {
     if _, err := config.Load(oneBackendOpts()); err != nil { t.Fatalf("one backend rejected: %v", err) }
     if _, err := config.Load(twoBackendsOpts()); err == nil ||
-        err.Reason != "exactly one backend entry until P6" || err.Value != "backends=2" {
+        err.First().Reason != "exactly one backend entry until P6" || // Load returns (*Config, *ErrorSet),
+        err.First().Value != "backends=2" { // ARCH-02: the error comes via nil-safe First()
         t.Fatalf("two backends: got %v", err)
     }
     // backends=0 is unreachable through Load in P1 (defaults create index 0,

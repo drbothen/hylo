@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "capabilities"
-version: "1.4"
+version: "1.5"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T03:35:34Z
+timestamp: 2026-11-18T05:40:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "4e89fc8"
+input-hash: "b99007e"
 traces_to: L2-INDEX.md
 ---
 
@@ -26,7 +26,7 @@ traces_to: L2-INDEX.md
 | CAP-004 | **Backend credential handling** | Credential resolved before retargeting; failure → local error, never forward; client credentials stripped on the local lane (DI-004) | P3 | P0 |
 | CAP-005 | **Response relaying + SSE usage tap** | Streams responses; taps usage/cache/stop-reason from SSE events without altering them; buffers only where legacy does; non-streamed local replies contribute no usage event — legacy behavior preserved through parity, P6 revisit config-gated (OD-126) | P3 | P0 |
 | CAP-006 | **Observability ledger** | Every lane decision, reply and usage observation lands as an append-only JSONL event (13 legacy-named events, D7-frozen); diagnostic side-logs never affect outcomes (DI-005, DI-006, DI-009) | P3 | P0 |
-| CAP-007 | **Plan-limit capture** | Cloud rate-limit headers captured on change per session for ledger/exporter use; status-line plan-window widgets read stdin `rate_limits` only — never captured headers or the ledger (DI-001, DI-007) | P3 | P0 |
+| CAP-007 | **Plan-limit capture** | Cloud rate-limit headers captured on change per session for ledger/exporter use; status-line plan-window widgets read stdin `rate_limits` when a refresh carries them and otherwise the session cache's last-seen `rl` (shown-unless-stale, kept RL_KEEP = 1800 s — legacy `effective_rl`, SL:297-312, SL:85) — never captured headers or the ledger (DI-001, DI-007) | P3 | P0 |
 | CAP-008 | **Metrics exposition** | 28 metric names recomputed from the whole ledger + hook log on `/metrics`; exposition bytes are part of parity | P2 | P1 |
 | CAP-009 | **Lane-aware status line** | Render reads stdin, transcript, metrics store, its own caches and environment seams (git state, process table, clock, env — AD-03), never the ledger (DI-007); always exits 0 and the output is never blank — faults fall down the degraded ladder (DI-008; carve-out: the `--subagent` agent-panel mode prints one of JSON rows, zero stdout bytes, or the shared 29-byte degraded line for catalogued render faults CP-A01..A05, per OD-155 + BC-1.07.008, with OD-168 routing config-error diagnostics to stderr); rows: session/lane row, backend strip, and agent-panel rows (`--subagent`, ported in P1 with a config off switch — OD-155) | P1 | P0 |
 | CAP-010 | **Backend telemetry strip** | Health, queue, KV, throughput, TTFT, power, idle from the metrics store, with a freshness ladder (fresh/stale/dead/serving-down) | P1 | P1 |
@@ -34,7 +34,7 @@ traces_to: L2-INDEX.md
 | CAP-012 | **Session launch and environment scoping** | Builds the client environment, argv and settings; proxy env and CA scoped to the client only — never leaked to children (DI-014) | P4 | P0 |
 | CAP-013 | **Turn control** | Stop-hook policing of language and fake stops, with the optional Kev oracle and regex fallback (DI-009 bounds its side effects) | P4 | P1 |
 | CAP-014 | **Trust management and diagnostics** | `ca` (install/rotate) and `doctor` (reachability, key readability, CA state, legacy-root detection, config validation) | P4 | P0 (ca) / P1 (doctor) |
-| CAP-015 | **Configuration management** | Typed keys, file→env→default precedence, validate-on-load, last-good reload, one-line error rendering, never pass-through on failure (DI-010, DI-011) | P1 (env+defaults) → P4 (file) | P0 |
+| CAP-015 | **Configuration management** | Typed keys, file→env→default precedence, validate-on-load, last-good reload, one-line error rendering (in the `--subagent` agent-panel mode, zero stdout bytes with the diagnostic on stderr — OD-168), never pass-through on failure (DI-010, DI-011) | P1 (env+defaults) → P4 (file) | P0 |
 | CAP-016 | **Live inspection UIs** | Web + terminal UIs reading one live event feed from the proxy; live + in-memory ring buffer only — exact `flow_id` correlation, no ledger-backed history until P7's schema (OD-122); bodies memory-only, credentials redacted (DI-016) | P4 (web); P6 (terminal, PLAN D16; matches VALID-05) | P1 |
 | CAP-017 | **Shared proxy lifecycle** | One detached proxy per user, state file + lock, client registration, idle stop, restart on demand, bounded drain (SM-02) | P4 | P0 |
 | CAP-018 | **Generalized backend fleet** | N backend entries in config from the start — P6 activates the fleet — with per-backend credential, CA and routing rules (OD-123) | P6 | P2 |

@@ -1,14 +1,14 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.4"
+version: "1.5"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
-input-hash: "acd3a6b"
+input-hash: "45214f0"
 
 ---
 
@@ -77,12 +77,14 @@ fail when it checked nothing. Per job, the required line is:
 | Job | Positive-coverage line | Fail condition |
 |---|---|---|
 | `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0` or `N` ≠ case-directory census (partially lost corpus must not pass, ADV-P2-A15) |
-| `parity tier B` | `tier-b: N goldens compared` | `N == 0` |
+| `parity tier B` | `tier-b: N goldens compared` | `N == 0` OR `N` ≠ committed-golden-file census (partially lost golden set must not pass, pass-5 A19) |
 | `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); PR-side `t.Skip` is fine only because the job is non-gating |
 | exclusion machinery / canary | `exclusions: M entries validated against the closed set` | `M` ≠ file entry count, or the file is missing |
 | `lint` / `test` / `govulncheck` | `go: K files scanned` + `go test: N tests run, S skipped` (test jobs) | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` or `N == 0` fails; an all-skip suite is reported via `S` and investigated, not accepted (ADV-P2-A15) |
 | gitleaks + category pattern scan | `hygiene: K files scanned, H hits` | `K == 0` (scan ran over nothing) or `H > 0` (any flagged hit fails the job — pass-3 A18: "found hits" is a failure, never an accepted pass) |
 | `timing report` (pass-3 A16/D39) | `timing: N cases timed > 0` | `N == 0` (an activated timing job reporting on zero cases must not pass) |
+| `coverage` gate (pass-5 A16) | `coverage: P packages profiled, min line coverage M% >= 95` | a gated package absent from the profile or `[no statements]` (trivial pass), or `M < 95` |
+| generated-table staleness (pass-5 A16) | `generate: N generated paths checked, D regenerated` | `N == 0` (zero `go:generate` directives checks nothing) or `D > 0` |
 
 Additionally: a skipped required check must not count as a pass — the parity/timing
 placeholders stay out of `required_status_checks` until they can execute (Phase 3), and
@@ -150,16 +152,33 @@ Each lag carries its own "change required before" deadline.
    empty-module guard. **Landed ci.yml lags:** govulncheck runs only in the
    informational security.yml; lint is gofmt + vet. **Change lands on main with the
    owner's approval (workflow edits are owner-committed); before Phase 4.**
-6. **Generated-table staleness (OD-170).** REQUIRED: every Go matrix leg runs
-   `go generate ./...` followed by `git diff --exit-code` over the generated paths;
-   any diff fails the leg, so a stale committed Unicode 14.0 table or pyfmt oracle
-   table can never pass CI. **Landed ci.yml lags:** no such step. **Change required
+6. **Generated-table staleness (OD-170).** REQUIRED: the staleness step — which runs
+   `go generate ./...` followed by `git diff --exit-code` over the generated paths; any
+   diff fails the leg, so a stale committed Unicode 14.0 table or pyfmt oracle table can
+   never pass CI — runs AFTER setup-python (pass-5 A04: the generators are
+   `testdata/gen/*.py` under the pinned 3.11.7 oracle, so setup-python must precede
+   `go generate`, never follow it) and on ubuntu-24.04 ONLY (the Windows Tier B leg
+   consumes committed goldens and needs no Python). The interpreter pin is 3.11.7
+   EXACTLY (ASM-001 dual pin), not a floating 3.11.x — a floating patch can regenerate
+   depth/oracle tables that drift and flap the check.
+   **Landed ci.yml lags:** no such step. **Change required
    before the pyfmt generators land (Phase 3).**
+7. **Release job interpreter (pass-5 A17, call 6).** REQUIRED: `release.yml`'s final
+   `go test ./...` includes Tier A (the plain test step), so the release job gets the
+   SAME `actions/setup-python` (3.11.7 exact, ASM-001) + `HYLO_PARITY_PYTHON` export
+   as the test job, before `go test`. **Landed release.yml lags:** the committed job
+   runs `go test ./...` with no setup-python step and no `HYLO_PARITY_PYTHON` — once
+   `internal/parity` lands, the release job's Tier A leg runs with no interpreter and
+   either fails or quietly skips. **Change required before the first release tag cut
+   after Tier A integration (Phase 3).**
 
 ## Release (`release.yml`)
 
 Single job on `tags: v*` (timeout 30 min, `permissions: contents: write` scoped to
 the job): final `go test ./...`, then cross-compiled static builds per ARCH-08 —
+with setup-python (3.11.7 exact, ASM-001) exporting
+`HYLO_PARITY_PYTHON` BEFORE the test step, the same discipline as the test job
+(pass-5 A17, lag note 7 above). Builds:
 `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w -X main.version=<tag>"` (binary
 falls back to the VCS stamp, then `dev`; BC-4.01.003). Targets: `linux/amd64`,
 `linux/arm64`, `darwin/amd64`, `darwin/arm64`, `windows/amd64` — named

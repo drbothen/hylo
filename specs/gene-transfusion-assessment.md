@@ -1,17 +1,17 @@
 ---
 document_type: gene-transfusion-assessment
 level: L3
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1b
 inputs:
   - architecture/ARCH-INDEX.md
   - semport/hylo-legacy/semport-assessment.md
   - semport/hylo-legacy/statusline-target-design.md
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "ac73d2a"
+input-hash: "a9b99f2"
 
 ---
 
@@ -49,7 +49,7 @@ Strategy table (headline deliverable; legacy range citations are definitive in S
 |---|---|---|---|---|---|---|
 | `internal/statusline` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F2–F9, F11, F12: telemetry+cache I/O SL:156–206; smoothing SL:298–312; sample machine SL:315–359; git SL:362–413; row 1 SL:416–637, 849–873; row 2 SL:640–835; transcript SL:938–1183; width/main/guard SL:1185–1245; subagent panel
 SL:837–847, 876–936 (OD-155) | Apache-2.0, same repo (D8) — compatible by construction | 0 tests in-repo (SA §2); Phase 0 oracle corpus substitutes: 103 BCs incl. 63-row `json.dumps` table (BC-SL-096), 20-row turn table (BC-SL-094), 21-row D4-EX-2 table (BC-SL-099), row goldens A/B/C (BC-SL-089), 11-step sample sequence (BC-SL-091), the catalogued crash-path register (error-taxonomy.md: 47 catalogued crash paths as of pass 4 — CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05); 100 % line citation coverage | R1 (Python JSON/number semantics), R2 (side-effect order), R3 (FMA on arm64), R4 (hidden exception paths), R5 (Windows), R10 (stdin churn) — SA §5 |
-| `internal/cost` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F3: `record_cost` SL:224–237, `cost_thresholds` SL:240–262, constants SL:217–221 | Apache-2.0, same repo | 0 in-repo; fully pinned goldens: 20-session cost goldens (BC-SL-101), throttle boundary (BC-SL-102), OD-30 string-form key (BC-SL-079) | R1 (float repr/int-vs-float in writes); OD-30 ruled difference bookkeeping (R6) |
+| `internal/cost` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F3: `record_cost` SL:224–237, `cost_thresholds` SL:240–262, constants SL:217–221 | Apache-2.0, same repo | 0 in-repo; fully pinned goldens: 21-session cost goldens (BC-SL-101), throttle boundary (BC-SL-102), OD-30 string-form key (BC-SL-079) | R1 (float repr/int-vs-float in writes); OD-30 ruled difference bookkeeping (R6) |
 | `internal/pyfmt` | SS-05 | **hybrid — semantic transfusion** | Authority is CPython 3.11 stdlib semantics (`round`, `json.dumps`/`loads`, `str`/`repr`, `int`/`float` parse, `//`/`%`, datetime), exercised by legacy call sites SL:72–153, 203, 983, 1061 and pinned by CPython-generated tables (TD §2.6); not a line port of legacy | Apache-2.0 + CPython PSF license (Python stdlib behavior; behavior reproduced, no code copied — no license conflict) | CPython-generated expectation tables per file (gen scripts in `internal/pyfmt/testdata/gen/`), 10,893 naive-time goldens (PR-14), fuzz targets `Decode`/`DumpsLen`/`FromISOFormat`/`ParseFloat` | R1 (decoder breadth: WTF-8, big ints, depth, NaN), R11 (oracle patch drift) |
 | `internal/config` | SS-02 | **hybrid** | Defaults and env-grammar behavior transfused from legacy import-time parsing SL:72–100 and render-time `LOCAL_MODEL_PREFIXES` SL:444 (D4-EX-3 boundary, TD IM-16); registry/types/errors fresh from BCs (D15, OD-01/05/57/102) | Apache-2.0, same repo | Threshold register P4r7 §B.2.1 (79 rows) + OD-57 rationales; D4-EX-3 test classes in TD S2 | R8 (D4-EX-3 boundary unspecified), R9 (P1 config source, tension T7) |
 | `internal/platform` | SS-03 | **hybrid** | Ancestor-walk semantics transfused from `claude_window_start` SL:265–295 (parent-first, ≤ 6 levels, stop at pid ≤ 1, whole-second truncation); native probes fresh (D4-EX-1 driver; TD IM-19) — no oracle for real probe values | Apache-2.0, same repo | No legacy counterpart (no `ps` on Windows); parity via seeded `proc_start` (BC-SL-023/080); per-OS probe unit tests (TD S7) | R5-adjacent: probe correctness LOW-MEDIUM on Linux (`CLK_TCK`, `node` comm) and Windows (PID reuse); tension T2 difference bookkeeping |

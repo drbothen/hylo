@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "9a36039"
+input-hash: "86ad321"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,8 +26,10 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2.2 2026-11-18: ADV-P4 remediation D24+D28 - HYLO_TEST_NOW grammar authority minted here (decimal regex + finite + time.Time range; runtime surpluses rejected); read-site count reconciled to ten (adds SL:889)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D23+D10: shim contract lists the UTF-8/newline stdio reconfigure duty with a gating canary leg; tenth clock read SL:889 added to stepped read sites"
+  - "2026-11-18T22:00:00Z (1.2.2) ADV-P4 remediation D24+D28 - HYLO_TEST_NOW grammar authority minted here (decimal regex + finite + time.Time range; runtime surpluses rejected); read-site count reconciled to ten (adds SL:889)"
+  - "2026-11-19T00:05:00Z (1.2.3) ADV-P5 remediation D02+D19 — the parsed float64 IS the frozen time.time() value, never round-tripped through time.Time ns (owner call 7); grammar range fixed to the asymmetric epoch-seconds span [-62135596800, 253402300799] (D19); shim N anchored to the Pre-3 grammar; canary instant strengthened to the round-trip-discriminating 1794615009.4245193"
+  - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,18 +64,26 @@ oracle case runs, that the shim actually took effect.
    `strconv.FormatFloat(now, 'f', -1, 64)`. **Grammar authority (ADV-P4-D24; mirrored by
    BC-5.04.003 Pre-2):** a value is WELL-FORMED iff it matches
    `^[+-]?[0-9]+(\.[0-9]*)?([eE][+-]?[0-9]+)?$`, parses to a finite float64, and lies
-   within the `time.Time` representable range (|seconds| ≤ 62135596800; values like
-   `1e300` are malformed). Both shims implement this split identically, rejecting each
+   within the `time.Time` representable range expressed in epoch seconds,
+   `-62135596800 ≤ s ≤ 253402300799` (year 1 .. year 9999; asymmetric about the 1970
+   epoch — ADV-P5-D19 disposes the previously contradictory single-span statement); values
+   like `1e300` are malformed. Both shims implement this split identically, rejecting each
    runtime's surplus: the Go shim does NOT accept `strconv.ParseFloat`'s extras (`inf`,
    `NaN`, hex floats like `0x1p3` are malformed), and the Python shim's `float()` surplus
    (surrounding whitespace, `_`, `nan`/`inf` spellings) is likewise malformed. Both sides
    get the identical float64 for every well-formed value (correct decimal rounding,
-   research P20).
+   research P20). **The parsed float64 IS the frozen `time.time()` value** (ADV-P5-D02,
+   owner call 7): it is used directly and is never round-tripped through `time.Time`
+   nanoseconds (float64 spacing at 1.79e18 ns is 256 ns; the owner measures ~17% of random
+   fractional instants drifting under such a round trip, which would fork the frozen
+   `rl_ts`/`ts`/`fetch_ts` repr bytes).
 
 ## Postconditions
 
-1. **Frozen functions** (shim, on import). Let `N = float(os.environ["HYLO_TEST_NOW"])`,
-   read when each patched function is called:
+1. **Frozen functions** (shim, on import). Let `N` be the float64 obtained by parsing
+   `HYLO_TEST_NOW` under precondition 3's grammar (the well-formed/malformed split,
+   implemented identically by both shims; the harness env builder guarantees
+   well-formedness, EC-003) — read when each patched function is called:
    - `time.time()` returns `N`;
    - `time.localtime()` with no argument or `None` returns `<real localtime>(N)`;
    - `time.gmtime()` with no argument or `None` returns `<real gmtime>(N)`;
@@ -88,9 +98,10 @@ oracle case runs, that the shim actually took effect.
      renderer's `now_ms`, ADV-P3-D10; it only runs under `--subagent` cases).
    - Between steps the value changes only by the case's step schedule (BC-6.02.002,
      BC-6.02.003).
-3. **Go side.** The in-process render receives `Env.Now = now_k`. The built binary
-   parses `HYLO_TEST_NOW` once at start and uses it for every clock read of that
-   refresh. A malformed value (not a valid decimal float) is ignored with exactly one
+3. **Go side.** The in-process render receives `Env.Now = now_k` (float seconds; ADV-P5-D02).
+   The built binary parses `HYLO_TEST_NOW` once at start into a float64 — which IS the
+   frozen `time.time()` value for every clock read of that refresh, never converted
+   through `time.Time` nanoseconds (owner call 7). A malformed value (not a valid decimal float) is ignored with exactly one
    stderr warning and the real clock is used — never a config error, never a degraded
    line (spec choice, ADV-P1-D22; mirrors the unknown-`HYLO_*` warning discipline of
    BC-2.01.001 PC-6; echoed in BC-5.04.003 and BC-2.01.001). `HYLO_TEST_NOW` is a test
@@ -98,8 +109,11 @@ oracle case runs, that the shim actually took effect.
    "test hooks" in the config reference (design §3.2, risk RK-5).
 4. **Canary (gating).** Before the first oracle case of every Tier A run, the harness
    runs `<python> -s -c "import time; print(repr(time.time()))"`. It uses the same
-   interpreter and env builder, with `HYLO_TEST_NOW=1794615009.5`.
-   - Stdout must equal exactly `1794615009.5\n`.
+   interpreter and env builder, with `HYLO_TEST_NOW=1794615009.4245193` (strengthened per
+   ADV-P5-D02: a fractional instant whose repr changes under a `time.Time` ns round trip —
+   `1794615009.4245193` becomes `1794615009.4245195` — so the canary also discriminates the
+   frozen-value round-trip the plain `.5` value hid).
+   - Stdout must equal exactly `1794615009.4245193\n`.
    - On any other output the run fails, not skips, with
      `parity: clock shim not loaded (OD-109 canary): got "<stdout>"`. No oracle case runs.
    - A second canary leg proves the stdio duty (ADV-P3-D23): the harness feeds the probe

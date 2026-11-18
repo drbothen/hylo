@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "44590c6"
+input-hash: "650b999"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094; REBUILD_EXCESS SL:968-972)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)"]
+modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)", "1.2.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C10) — EC-007 names the OD-167 in-flight-turn drop; timestamped CP-O07 turn-drop vector added (`lr` observable: hylo null vs plain-deletion [50.0, true], oracle-run 2026-11-18); DI-012 lifted to the traceability row (sibling convention, ADV-P5-C10)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +75,7 @@ is never a rebuild because `pp` is null.
 | EC-004 | Prompt shrank (growth clamped to 0), write 20,001 | rebuild |
 | EC-005 | Duplicate-id line with a large write | ignored (not counted) |
 | EC-006 | After `compact_boundary`, a 50,000 write | not a rebuild (`pp` null) |
-| EC-007 | Overflow at the rebuild check (CP-O07, ADV-P3-C03): a parse state carrying an int `tin` with a float `pp` (legal stored form, postcondition 6) meets a huge exact int write — \|value\| ≥ 2^1024 − 2^970 — in `_w − max(0, prompt − pp)`; a legacy-written cache always couples a float `pp` with a float `tin`, so its next huge-int line raises earlier at SL:1108 | Python raises `OverflowError` at SL:1117 (oracle-verified 2026-11-18: seed `tin` int 0, `pp` 5.0, one line with `cache_creation_input_tokens` 10^309); legacy degrades sticky; hylo skips the line (D4-EX-2 extension, ruling OD-156; this BC owns the SL:1117 site), `rb` and `pp` unchanged (BC-1.03.018) |
+| EC-007 | Overflow at the rebuild check (CP-O07, ADV-P3-C03): a parse state carrying an int `tin` with a float `pp` (legal stored form, postcondition 6) meets a huge exact int write — \|value\| ≥ 2^1024 − 2^970 — in `_w − max(0, prompt − pp)`; a legacy-written cache always couples a float `pp` with a float `tin`, so its next huge-int line raises earlier at SL:1108 | Python raises `OverflowError` at SL:1117 (oracle-verified 2026-11-18: seed `tin` int 0, `pp` 5.0, one line with `cache_creation_input_tokens` 10^309); legacy degrades sticky; hylo skips the line and drops the in-flight turn (D4-EX-2 extension, rulings OD-156 + OD-167; this BC owns the SL:1117 site), `rb` and `pp` unchanged (BC-1.03.018) |
 
 ## Canonical Test Vectors
 
@@ -103,6 +103,7 @@ CP-O07 vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18): seed cache e
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | seed + the line above | legacy: `OverflowError` at SL:1117, degraded line, exit 0, cache keeps its seed bytes; hylo (D4-EX-2): cache exactly `{"size": 415, "res": 0, "conv": 0, "think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 5.0, "ids": [], "lr": null, "lu": null, "cur": null}` | error |
+| CP-O07 turn-drop leg (timestamped; ADV-P5-C01/C02): the same seed cache (float `pp` 5.0, int `tin`, `ids` `["x"]`) plus four timed lines (TZ=UTC, compact `json.dumps`, LF-terminated): `U_a` ts 10:00:00Z (92 B), `A_x` id `x` usage `{'input_tokens': 5, 'output_tokens': 100}` ts 10:00:02Z (163 B — mid `x` is in the seed's `ids`, so the usage is **deduplicated**: `pp` stays 5.0 while the turn machine still opens the turn), `A_y` id `y` usage `{'cache_creation_input_tokens': 10^309}` ts 10:00:04Z (467 B — SL:1108 is int-only and overflow-free; the rebuild check `prompt − pp` = `10^309 − 5.0` raises), `U_b` ts 10:00:06Z (92 B). Legacy on the full window: `OverflowError` at SL:1117, degraded, seed bytes kept (oracle-run 2026-11-18). Plain-deletion oracle: legacy on `U_a, A_x, U_b` + seed = `{'size': 347, ..., 'lr': [50.0, true], 'lu': 1794650406.0, 'cur': null}` (oracle-run). hylo (OD-167): `A_y` skipped and the open turn discarded — cache exactly `{'size': 814, 'res': 0, 'conv': 5, 'think': 0, 'tin': 0, 'tout': 0, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 5.0, 'ids': ['x'], 'lr': null, 'lu': 1794650406.0, 'cur': null}` (`'size'` 814 = 347 + 467 deleted bytes; `'lr'` null is the ruled drop observable; `'pp'` stays the float 5.0) | error |
 
 ## Verification Properties
 
@@ -116,7 +117,7 @@ CP-O07 vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18): seed cache e
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007; DI-012 (the CP-O07 D4-EX-2 skip and the OD-167 turn-drop are named, tested deviations) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094); constant SL:968-972 |
 | Legacy contract | BC-SL-036 (base; pinned pass-3 r1) |
 | Threshold | T-056 → `statusline.transcript.rebuild_excess` = 20000 (measured) |

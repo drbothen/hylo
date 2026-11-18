@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T14:52:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.01.001.md, behavioral-contracts/ss-05/BC-5.01.002.md, behavioral-contracts/ss-05/BC-5.01.003.md, behavioral-contracts/ss-05/BC-5.01.004.md, behavioral-contracts/ss-05/BC-5.01.005.md, behavioral-contracts/ss-05/BC-5.01.006.md, owner-decisions-log-2026-11-14.md]
-input-hash: "07bcfaf"
+input-hash: "7fcc32b"
 traces_to: prd.md
 source_bc: BC-5.01.001
 bcs: [BC-5.01.001, BC-5.01.002, BC-5.01.003, BC-5.01.004, BC-5.01.005, BC-5.01.006, BC-5.01.007, BC-2.02.003]
@@ -102,7 +102,8 @@ func TestUnicodeTables_PinnedToUnicodedata140(t *testing.T) { // OD-170 (A2-06 r
     if got := pyfmt.UnicodeTableVersion(); got != "14.0.0" { // version constant
         t.Fatalf("generated Unicode tables moved off unicodedata 14.0.0: %q", got)
     }
-    for _, cp := range oracleClassSamples() { // Nd digits (Kawi U+11F50-59 in 14.1, not 14.0), printable, whitespace
+    for _, cp := range oracleClassSamples() { // Nd digits (Kawi U+11F50-59 arrived in Unicode 15.0 — there is no 14.1 —
+                                // so under the pinned 14.0.0 tables these are Nd-negatives), printable, whitespace
         if pyfmt.ConsultedClass(cp) != oracleUnicodedataClass(cp) {
             t.Fatalf("U+%04X: Go class != CPython 3.11.7 unicodedata oracle", cp)
         }

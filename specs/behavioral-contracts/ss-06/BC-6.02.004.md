@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "ea5ce52"
+input-hash: "e1469f0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,6 +26,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D21: swap coverage check stated per direction, matching EC-004 and the vector"
+  - "2026-11-18T06:25:00Z pass-5 residual sweep (A2-22 sibling): the seeded cost-history seed corrected to the 21-session golden (BC-1.05.008); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,7 +80,7 @@ makes it necessary.
    (ADV-P3-D21; "absent in both directions" was ambiguous wording). EC-004's directional
    failure inherits this per-direction reading.
 4. **Seeded variants.** The swap set also includes these seeds (design §5.2):
-   - the BC-SL-101 20-session `cost-history.json`;
+   - the BC-SL-101 21-session `cost-history.json` (the 21-session golden of BC-1.05.008);
    - legacy `[t, v]` history points and `rl`/`rl_ts` in the session cache;
    - a legacy-written poisoned mix cache (BC-SL-100);
    - the T05~ mix state (BC-SL-103).
@@ -110,7 +111,7 @@ makes it necessary.
 |-------|----------------|----------|
 | 3-step case, `swap: "py->go"` at `k=0`, all four caches present after step 0 | Go steps 1-2 byte-equal to pure-legacy steps 1-2 (stdout, exit, four named caches) | happy-path |
 | Same case, `swap: "go->py"` at `k=1` | Legacy step 2 byte-equal to pure-Go step 2 | happy-path |
-| Seeded BC-SL-101 20-session `cost-history.json`, py→go at `k=0` | Go `$`/`$/h` colors at step 1 equal legacy's (percentile colors, not cold-start) | edge-case |
+| Seeded BC-SL-101 21-session `cost-history.json`, py→go at `k=0` | Go `$`/`$/h` colors at step 1 equal legacy's (percentile colors, not cold-start) | edge-case |
 | Corpus with no go→py case containing `cost-history.json` | FAIL: `parity: swap coverage missing cost-history.json` | error |
 
 ## Verification Properties

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "f23533f"
+input-hash: "65dee4f"
 
 ---
 
@@ -43,12 +43,14 @@ func runStatusline(env EnvVars, stdin io.Reader, stdout, stderr io.Writer) int /
 // pass-3 A02). It receives the FULL statusline argument slice — routing matches the
 // exact element "--subagent" anywhere in it, at any index, including after a bare
 // "--" terminator. Resolves config itself (OD-168: config IS loaded on the subagent
-// path); on config error: ZERO bytes on stdout, the error line on stderr, exit 0.
+// path); on config error: ZERO bytes on stdout, the FULL E-CFG-001 reason list on
+// stderr (one line per reason, registry order — the same surface as the main path;
+// pass-5 A08), exit 0.
 func runStatuslineSubagent(args []string, env EnvVars, stdin io.Reader, stdout, stderr io.Writer) int
 
 func runVersion(stdout io.Writer) int                                        // 0
 func runConfigValidate(env EnvVars, stdout, stderr io.Writer) int             // 0 | 1
-func runConfigPath(args []string, env EnvVars, stdout, stderr io.Writer) int  // 0 | 2
+func runConfigPath(args []string, env EnvVars, stdout, stderr io.Writer) int  // 0 | 1 | 2 (BC-2.03.002: 1 when a directory cannot be determined — pass-5 A01)
 ```
 
 Dispatch order is contractual (BC-4.01.001, BC-4.01.002, interface-definitions.md):
@@ -64,7 +66,8 @@ Config on the subagent path (OD-168, pass-3 A02): the subagent entry point resol
 config itself before evaluating the panel gate — the panel needs
 `statusline.subagent.enabled` (BC-1.07.002) and `backends[0].model_prefixes`
 (BC-1.07.006) — so a config error in `--subagent` mode prints ZERO bytes on stdout
-(NDJSON-only surface) and the E-CFG-001 detail line on stderr, exit 0; the grey
+(NDJSON-only surface) and the full E-CFG-001 reason list on stderr (one line per
+reason, registry order; pass-5 A08), exit 0; the grey
 stdout config-error line never applies in `--subagent` mode. With valid config the
 panel is gated by `statusline.subagent.enabled` (default true = legacy,
 BC-1.07.002; disabled = zero bytes, exit 0). Otherwise `statusline` takes no flags in
@@ -83,8 +86,11 @@ OD-112: adapt or hand-roll the scan).
 - **Options considered:** (1) process-wide never-non-zero — breaks `config validate`;
   (2) per-verb exit contracts with a closed table — matches the ruler TOM-side exits.
 - **Decision:** option 2. Exit 0: all statusline runs (happy, degraded, config-error,
-  unknown-flag), `version`, `config path`, `config validate` when valid. Exit 1:
-  `config validate` on invalid config (E-VAL-001, plain reasons, no SGR). Exit 2: usage
+  unknown-flag), `version`, `config path` when all three directories resolve, `config
+  validate` when valid. Exit 1: `config validate` on invalid config (E-VAL-001, plain
+  reasons, no SGR) and `config path` when a directory cannot be determined (BC-2.03.002:85,
+  :91, EC-008/010/011 — the verb's contract is three printed paths, so an unresolvable
+  directory is a failure, not a degradation; pass-5 A01). Exit 2: usage
   errors on non-statusline verbs (E-CLI-002, golden text `cmd/hylo/testdata/usage.golden`).
   Non-zero harness exits never occur inside `hylo` (E-HAR-001 is the harness process).
 - **Rationale:** one closed table (error-taxonomy.md) is testable exhaustively; a global
@@ -114,6 +120,9 @@ resolved as `--config` flag, then `HYLO_CONFIG`, then `internal/platform` per-OS
 — exactly the resolutions the running binary uses, with the same overrides the status
 line honors (cache/state lines resolve per BC-3.01.001), so `config path` can never
 disagree with actual use. Paths are computed by `platform`, never assembled here.
+Exit surface (BC-2.03.002, pass-5 A01): exit 0 when all three lines print; exit 1 when
+any of the three directories cannot be determined (EC-008/010/011); exit 2 is usage
+errors only.
 
 ## Fragment anchors (pass-4 A01; stable targets for BC-body fragment links)
 

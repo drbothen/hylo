@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "aac2048"
+input-hash: "acaa0ec"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:477-479)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "1.2 pass-5 remediation (ADV-P5-B03): the cache-hit glyph is named as the registry key statusline.glyphs.cache_hit (default U+267B) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -105,7 +106,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-113 (theme), OD-02 (glyph), OD-103 (pyfmt) |
-| Config keys | `statusline.glyphs.*` (♻), `statusline.theme.*` (cyan, reset) |
+| Config keys | `statusline.glyphs.cache_hit` (default ♻, U+267B), `statusline.theme.*` (cyan, reset) |
 | Architecture Module | `internal/statusline/context.go` |
 | Stories | TBD |
 

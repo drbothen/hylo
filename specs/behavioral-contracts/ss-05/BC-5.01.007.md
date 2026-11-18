@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.1"
+version: "1.0.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "0267ecc"
+input-hash: "59089af"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython mixed int/float coercion behind legacy/dgx_statusline.py arithmetic: SL:435, 599, 882-885, 919)"
@@ -22,8 +22,9 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "2026-11-18T01:42:00Z new contract (ADV-P3-D08): mixed int/float Num semantics — float(int) conversion with ErrOverflow, true division, exact comparison, Max/Min exact tie-breaks"
-  - "1.0.1 2026-11-18: ADV-P4 remediation D15+D16 — ErrZeroDivision for ANY zero divisor (float zero included, CPython-verified); NumCmp NaN verdict (unordered → 0) and Max/Min Python-derivation formulas; Inv 3 rewritten (cross-multiplication, no quotient); phantom NumToInt64Aware name dropped from EC-011"
+  - "2026-11-18T01:42:00Z (1.0.0) new contract (ADV-P3-D08): mixed int/float Num semantics — float(int) conversion with ErrOverflow, true division, exact comparison, Max/Min exact tie-breaks"
+  - "2026-11-18T22:00:00Z (1.0.1) ADV-P4 remediation D15+D16 — ErrZeroDivision for ANY zero divisor (float zero included, CPython-verified); NumCmp NaN verdict (unordered → 0) and Max/Min Python-derivation formulas; Inv 3 rewritten (cross-multiplication, no quotient); phantom NumToInt64Aware name dropped from EC-011"
+  - "2026-11-18T23:45:00Z (1.0.2) ADV-P5 remediation D09+D27 — relational helpers NumLT/NumLE/NumGT/NumGE/NumEQ/NumNE added (PC 3b: any NaN operand → false except NumNE); NumCmp narrowed to ordered operands; Inv 1 mandates the helpers at every cross-kind comparison site (SL:254 case pinned EC-014); TrueDiv precedence pinned: dividend overflow precedes zero-divisor check (10**400 / 0.0 → OverflowError, EC-013)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,16 +76,29 @@ OD-141. ADV-P3-D08 disposition.
    - mixed (int op float, float op int, float/float): the int operand is converted per PC 1 first (possible
      `ErrOverflow`), then IEEE-754 division (`10**310 / 1e300` raises `ErrOverflow` from the operand
      conversion, not the quotient; `10**400 / 10**300` as int/int would succeed) — except that a zero
-     FLOAT divisor (or dividend operand of zero divisor) raises `ErrZeroDivision` exactly like the int/int
-     case: CPython raises `ZeroDivisionError` for any division by a zero float or int divisor and never
-     produces IEEE `inf` from it (ADV-P4-D15, verified `python3 -I`); the calling site degrades exactly as
-     legacy does.
+     FLOAT divisor raises `ErrZeroDivision` exactly like the int/int case: CPython raises
+     `ZeroDivisionError` for any division by a zero float or int divisor and never produces IEEE `inf`
+     from it (ADV-P4-D15, verified `python3 -I`); the calling site degrades exactly as legacy does.
+     Precedence (ADV-P5-D27): if the dividend's int→float conversion overflows, `ErrOverflow` fires
+     first — CPython converts the int operand before the zero-divisor check; verified
+     `10**400 / 0.0` raises `OverflowError: int too large to convert to float`.
 3. **NumCmp (exact comparison):** int-vs-float comparison is performed on exact values — the int is never
    rounded to float64 first. Observable at 2^53: `(2**53 + 1) > 9007199254740992.0` is true and
    `(2**53 + 1) == 9007199254740992.0` is false (a rounding conversion would collapse both). Bool
-   `Num`s compare as 0/1. **NaN (unordered) verdict (ADV-P4-D16):** when either operand is NaN no
-   strict relation holds in CPython (`nan > 1`, `nan < 1`, `nan == nan` are all false; verified
-   `python3 -I`), so `NumCmp` returns `0` (equal-or-unordered) — never an error.
+   `Num`s compare as 0/1. **NaN (unordered) verdict (ADV-P4-D16, narrowed by ADV-P5-D09):** when either
+   operand is NaN, `NumCmp`'s `-1/0/1` verdict is `0`, but `NumCmp` is defined **only for ordered
+   operands**: contract-carrier of comparison SEMANTICS moves to the relational helpers of PC 3b, which
+   every cross-kind comparison site must use; derived operators written over `NumCmp` alone
+   (`NumCmp(a, b) >= 0` for `>=`, etc.) are NOT Python-conformant for NaN operands and must not appear at
+   comparison sites.
+3b. **Relational helpers (ADV-P5-D09, owner ruling call):** `pyfmt` adds `NumLT`, `NumLE`, `NumGT`,
+   `NumGE`, `NumEQ` (and `NumNE`), each mapping to Python's `__lt__`/`__le__`/`__gt__`/`__ge__`/
+   `__eq__`/`__ne__` on the exact values: any NaN operand makes every helper false **except `NumNE`**
+   (NaN is unequal to everything, including itself: `NumNE(nan, nan)` is true). Verified
+   `python3 -I`: `nan >= 1`, `nan >= 2`, `nan == nan` are all false. Concrete parity case: cost-history
+   `api_ms` = NaN against the int `need` at SL:254 — legacy's `api_ms / 3.6e6` gate reads false and the
+   record appends nothing; a `NumCmp(a, b) >= 0` derivation appends and changes the percentile colors.
+   Every cross-kind comparison site uses these helpers (Invariant 1).
 4. **Max/Min exactness:** `Max(a, b)` (BC-5.01.003 PC 5) is exactly Python's `b if b > a else a`, i.e.
    `Max(a, b) = (NumCmp(a, b) == -1) ? b : a`, and `Min(a, b) = (NumCmp(a, b) == 1) ? b : a`; the
    tie-break and winner are exact: `Max(9007199254740992.0, 2**53+1)` returns the **int** `9007199254740993`
@@ -100,7 +114,8 @@ OD-141. ADV-P3-D08 disposition.
 
 1. No inline Go `float64(n)` conversion on a `Num` at a status-line site: every int→float crossing goes through
    `NumToF` (typed `ErrOverflow`), every mixed division through `TrueDiv`, every cross-kind comparison through
-   `NumCmp` (D15 named-helper discipline, mirroring BC-5.01.003 Invariant 1).
+   the relational helpers `NumLT`/`NumLE`/`NumGT`/`NumGE`/`NumEQ`/`NumNE` (PC 3b), never through a bare
+   `NumCmp` derivation (D15 named-helper discipline, mirroring BC-5.01.003 Invariant 1; ADV-P5-D09).
 2. `ErrOverflow` from `NumToF`/mixed `TrueDiv` maps to CPython `OverflowError` at each site's catch list;
    sites that do not catch it degrade (OD-156 catalogued crash paths, BC-1.03.018).
 3. Comparison helpers never allocate the full quotient (PC 2): int/int strict relations are decided by
@@ -124,6 +139,8 @@ OD-141. ADV-P3-D08 disposition.
 | EC-010 | `TrueDiv(1, 0)` (int/int) | `ErrZeroDivision` |
 | EC-011 | mixed division overflow: `_fmt_lines(n / 1e6)` with int `n = 10**310` (SL:857, BC-1.02.014 EC-012) | mixed division converts `n` via `NumToF` first → `ErrOverflow` → the site's catch degrades (legacy `float_div` converts `n` first) |
 | EC-012 | `TrueDiv(1.0, 0.0)` and `TrueDiv(1, 0.0)` | `ErrZeroDivision` — a zero float divisor raises exactly like an int zero (CPython `ZeroDivisionError`; ADV-P4-D15) |
+| EC-013 | `TrueDiv(10**400, 0.0)` | `ErrOverflow` first (dividend conversion precedes the zero-divisor check; CPython `OverflowError`, verified `python3 -I`; ADV-P5-D27) |
+| EC-014 | `NumGE(nan, 1)`, `NumGE(nan, 2)`, `NumEQ(nan, nan)`; `NumNE(nan, nan)` | false; false; false; true (any NaN operand → false except `NumNE`; ADV-P5-D09) |
 
 ## Canonical Test Vectors
 

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T01:30:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "ae22e31"
+input-hash: "fc1e733"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -27,6 +27,9 @@ modified:
   - "1.2.1 2026-11-18T01:42:00Z ADV-P3 remediation D37: build-time reserved EnvName list extended with HYLO_TIMING_GATE and HYLO_PARITY_FUZZSECONDS"
   - "1.2.2 2026-11-18: ADV-P4 remediation A04/A05/D19 + OD-173/174/175 — composite registry types with strict-JSON env grammar; glyph families enumerated member-wise (1 code point / 1 column, OD-02); statusline.labels.input Text key; pill-label and display_floor_usd keys; queue.yellow OD-175 ratification"
   - "1.2.3 2026-11-18: pass-4 sync-check SC-09 — registry text extended with statusline.subagent.tokens.suffix (C05), statusline.sparkline.preempt_marker_above (C2-13) and the dotted key statusline.subagent.glyphs.unknown (C07), type/default/range per interface-definitions.md; no behavioral change"
+  - "2026-11-19T00:35:00Z (1.2.4) ADV-P5 remediation B03/C03/A18/D14/D15 + calls 1-2, 16 + OD-179 — glyph family completed with the derived row-2 members (lane, git, cell_on/off, cost_pick, telemetry_dot, degraded, ttft, watts, idle, box_rate, sess_rate, host) and the 8-glyph sparkline ramp; reroute→cache_read and stale→cache_rebuild renamed (no alias); statusline.lane.reroute_all_prefixes registered (OD-179); PC-3(e) millisecond-type wording fixed (IntMap members); OD-170 display-width function defined (D15, ARCH-06 coordination); preempt_marker_above type aligned to pass-5 call 16 (Float, per-second rate)"
+  - "2026-11-19T01:30:00Z (1.2.5) pass-5 residual sweep A — glyph-registry consumer cites corrected to the verified renderers and unified with interface-definitions.md (telemetry_dot BC-1.04.005, colour coupled to BC-1.04.004; degraded BC-1.04.004; box_rate BC-1.04.008; sess_rate BC-1.04.018, value from BC-1.03.010; cache_hit adds BC-1.02.008; cell_on/off add BC-1.04.015; ttft adds BC-1.04.019; idle adds BC-1.04.017; cost_pick adds BC-1.05.003); member names, defaults and code points unchanged"
+  - "1.2.6 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-16) — the four call-16 range keys registered in PC-10 (statusline.transcript.read_cap_bytes, statusline.transcript.dedup_memory, statusline.sparkline.history_cap, statusline.cost.burn_min_api_ms) and the Preconditions-1 amendment sentence extended through call 16, type/default/range per interface-definitions.md; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,7 +58,9 @@ incomplete, whose default fails its own validation, or whose env name collides.
    and OD-175 (`statusline.queue.yellow` ratified as a P1 `Bool` key, default `true`); the
    pass-4 orchestrator design calls add `statusline.subagent.tokens.suffix` (call 3),
    `statusline.subagent.glyphs.unknown` (call 4) and
-   `statusline.sparkline.preempt_marker_above` (call 5) — see PC-6 and PC-8.
+   `statusline.sparkline.preempt_marker_above` (call 5) — see PC-6 and PC-8; the pass-5
+   orchestrator design call 16 further amended the ranges of four existing keys, registered
+   with type/default/range in PC-10.
 
 ## Postconditions
 
@@ -90,7 +95,9 @@ incomplete, whose default fails its own validation, or whose env name collides.
    `EnvName`, or an `EnvName` equals a reserved name (`HYLO_CONFIG`, `HYLO_TEST_NOW`,
    `HYLO_PARITY_PYTHON`, `HYLO_TIMING_GATE`, `HYLO_PARITY_FUZZSECONDS`; the last two added
    per ADV-P3-D37/ADV-P3-A20) or `COLUMNS`; (e) a name ending in `_s` is not type `Seconds`, or
-   `_ms` not a millisecond integer/float type; (f) a default differs from the legacy value
+   `_ms` is not a millisecond-valued type — `Int`, `Float`, or a composite numeric type
+   whose members are milliseconds (`IntMap`, e.g. `statusline.cost.rate_min_api_ms`;
+   ADV-P5-D14); (f) a default differs from the legacy value
    recorded in the golden table `internal/config/testdata/legacy_defaults.golden` (key →
    legacy value → SL line), except the two documented exceptions in PC-4.
 4. Documented default exceptions to "defaults equal legacy until cutover" (D15), each
@@ -114,10 +121,24 @@ incomplete, whose default fails its own validation, or whose env name collides.
    | `statusline.glyphs.window_age` | `⌂` (U+2302) | BC-1.02.017, BC-1.02.028 |
    | `statusline.glyphs.tokens_up` | `↑` (U+2191) | BC-1.02.018 |
    | `statusline.glyphs.write` | `✍` (U+270D) | BC-1.02.018 |
-   | `statusline.glyphs.reroute` | `⟳` (U+27F3) | BC-1.02.018 |
+   | `statusline.glyphs.cache_read` | `⟳` (U+27F3; SL:594 — renamed from `reroute`, ADV-P5-B04/call 2: the glyph means cache reads; not shipped, so no alias) | BC-1.02.018 |
    | `statusline.glyphs.tokens_down` | `↓` (U+2193) | BC-1.02.018 |
-   | `statusline.glyphs.stale` | `↻` (U+21BB) | BC-1.02.018 |
-   | `statusline.glyphs.cache_hit` | `♻` (U+267B) | BC-1.02.023 |
+   | `statusline.glyphs.cache_rebuild` | `↻` (U+21BB; SL:598-599 — renamed from `stale`, ADV-P5-B04/call 2: the glyph means cache rebuilds; not shipped, so no alias) | BC-1.02.018 |
+   | `statusline.glyphs.cache_hit` | `♻` (U+267B; SL:479) | BC-1.02.008, BC-1.02.023 |
+   | `statusline.glyphs.lane` | `◨` (U+25E8; the main pill marker AND the subagent-tag marker, SL:447-449/SL:902-903) | BC-1.02.001, BC-1.07.006 |
+   | `statusline.glyphs.git` | `⎇` (U+2387; SL:413) | BC-1.02.005 |
+   | `statusline.glyphs.cell_on` | `▰` (U+25B0; filled cell) | BC-1.02.006, BC-1.04.007, BC-1.04.015 |
+   | `statusline.glyphs.cell_off` | `▱` (U+25B1; empty cell) | BC-1.02.006, BC-1.04.007, BC-1.04.015 |
+   | `statusline.glyphs.cost_pick` | `⛏` (U+26CF; KD-002) | BC-1.02.029, BC-1.05.003 |
+   | `statusline.glyphs.telemetry_dot` | `◉` (U+25C9; row-2 telemetry dot, SL:730) | BC-1.04.005 (dot colour coupled to BC-1.04.004) |
+   | `statusline.glyphs.degraded` | `◌` (U+25CC; row-2 red `◌ DGX ?` marker, SL:696) | BC-1.04.004 |
+   | `statusline.glyphs.ttft` | `◔` (U+25D4; row-2 TTFT marker, SL:797-799) | BC-1.04.010, BC-1.04.019 |
+   | `statusline.glyphs.watts` | `⚡` (U+26A1; row-2 power marker, SL:808-813) | BC-1.04.011 |
+   | `statusline.glyphs.idle` | `☾` (U+263E; row-2 idle marker, SL:834) | BC-1.04.012, BC-1.04.017 |
+   | `statusline.glyphs.box_rate` | `▣` (U+25A3; row-2 box-rate marker, SL:770/783) | BC-1.04.008 |
+   | `statusline.glyphs.sess_rate` | `»` (U+00BB; row-2 session-rate marker, SL:781 — the subagent `running` glyph shares the code point via its own family key) | BC-1.04.018 (value from BC-1.03.010) |
+   | `statusline.glyphs.host` | `↺` (U+21BA; row-2 host-share marker, SL:752/762) | BC-1.04.007 |
+   | `statusline.glyphs.sparkline` | `▁▂▃▄▅▆▇█` — exactly the 8 ordered glyphs U+2581..U+2588 (legacy `SPARK`, SL:136; OD-02; the one member whose value is NOT 1 code point: it is the 8-code-point ramp, indexed left-to-right by bar height) | BC-1.04.009 |
 
    The `statusline.subagent.glyphs.*` family comprises `running` (`»`, U+00BB),
    `completed` (`✔`, U+2714), `failed` (`✘`, U+2718), `killed` (`◍`, U+25CD) and —
@@ -140,12 +161,56 @@ incomplete, whose default fails its own validation, or whose env name collides.
    `statusline.subagent.tokens.suffix` (Text, default ` tok` — U+0020 + `tok`; range:
    non-empty, no control bytes, mirroring BC-2.01.003 PC-3; env
    `HYLO_STATUSLINE_SUBAGENT_TOKENS_SUFFIX`) and
-   `statusline.sparkline.preempt_marker_above` (Int, default `0`; range `>= 0`; the
+   `statusline.sparkline.preempt_marker_above` (Float per pass-5 call 16/C2-11 — it
+   compares the per-second `dgx_preempt:rate5m` rate, so an Int could not express the
+   historical > 0.01/s rule; default `0`; range `>= 0`; the
    history `p` marker shows when preempt > the value; independent of
    `statusline.queue.yellow`; env `HYLO_STATUSLINE_SPARKLINE_PREEMPT_MARKER_ABOVE`).
    The `k_from`/`m_from` values are display thresholds only — the divisors 1e3/1e6 are
    format constants that define the K/M units, not config (why-not-config comment
    required at the call site).
+
+9. **Pass-5 additions (ADV-P5-B03/C03/A18/D14/D15, orchestrator calls 1-2, OD-179):**
+   - **Reroute-all key (OD-179):** the reroute-all markers become the List key
+     `statusline.lane.reroute_all_prefixes` (default `["claude", "claude-"]`, legacy
+     SL:489), range: every entry non-empty and control-free; it is never a hard-coded
+     literal in logic. Consumer: BC-1.02.011 (reroute-all hiding, with BC-1.02.009's
+     provenance).
+   - **Derived members:** the PC-6 table above is the complete enumeration of the
+     behavior-shaping glyph roles legacy prints; every literal printed glyph is a
+     member. Punctuation and format characters (`·`, `°`, `¢`, `->`) are format
+     constants, not glyphs (why-not-config comments at the call sites).
+   - **Display width (D15, OD-170):** the display width of a string is the sum over its
+     code points of the OD-170 width function on hylo's own Unicode 14.0.0 tables:
+     width 2 for East-Asian Width Wide/Fullwidth code points; width 0 for combining
+     marks (Mn, Me) and Cf format code points; width 1 otherwise (Ambiguous counts 1 —
+     the legacy target-terminal behavior; judgment call OD-02 width discipline);
+     U+0000-U+001F and U+007F are control bytes with no width (range violations, not
+     widths). The OD-170 generated-table set grows the East-Asian-Width table
+     (coordination: ARCH-06 adds the width class to its OD-170 table list).
+     Punctuation-or-format characters are not widths; the width function is total over
+     valid UTF-8 input.
+   - **PC-3(d) reserved-name list unchanged** (`HYLO_PARITY_FUZZSECONDS` et al.); the
+     D30 citation target BC-6.04.003 now names the setting and its 0/unset semantics.
+
+10. **Call-16 range registrations (pass-5 A13/C2-08, orchestrator design call 16;
+   sync-check SC-16):** the registry carries the four keys whose ranges call 16 changed,
+   with type/default/range identical to interface-definitions.md:
+   - `statusline.transcript.read_cap_bytes` — `Int (bytes)`, default `524288`, range
+     `1..67108864` (upper bound 64 MiB, labeled judgment call: caps per-refresh read
+     buffering far beyond any real transcript step; RationaleCode `J`, T-054); consumer
+     BC-1.03.003; env `HYLO_STATUSLINE_TRANSCRIPT_READ_CAP_BYTES`.
+   - `statusline.transcript.dedup_memory` — `Int`, default `256`, range `1..65536` (upper
+     bound labeled judgment call; RationaleCode `Dv`, T-060); consumer BC-1.03.005; env
+     `HYLO_STATUSLINE_TRANSCRIPT_DEDUP_MEMORY`.
+   - `statusline.sparkline.history_cap` — `Int`, default `32`, range `1..1000` (upper
+     bound labeled judgment call, same render-budget rationale as `kv.cells`;
+     RationaleCode `Dv`, T-009); consumers BC-1.04.003/.009; env
+     `HYLO_STATUSLINE_SPARKLINE_HISTORY_CAP`.
+   - `statusline.cost.burn_min_api_ms` — `Int`, default `300000`, range `> 0` (ratio
+     gate; ZeroDivisionError guard rationale as for `cost.rate_min_api_ms`, pass-5
+     C2-08/call 16; RationaleCode `Dv`, T-043); consumer BC-1.05.002; env
+     `HYLO_STATUSLINE_COST_BURN_MIN_API_MS`.
 
 ## Invariants
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "ddabe95"
+input-hash: "8c12aa0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -25,8 +25,10 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D18+D32: subagent-mode config error = zero bytes stdout + stderr detail + exit 0 (OD-168); [from ENVNAME] rule covers indexed entries and defaults layer"
+  - "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
+  - "2026-11-19T00:45:00Z (1.2.3) ADV-P5 remediation D05 + OD-178 — reason vocabulary gains the four Text-class strings (composite shape, pill-label width, glyph 1-code-point/1-column, general non-empty control-free text); class register closed at SEVEN classes with Text minted by OD-178; canonical D4-EX-3 test list is the five names incl. TestD4EX3_Text"
+  - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -112,15 +114,24 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `empty path` | path | BC-2.01.005 |
 | `home directory unknown` | path | BC-2.01.005 |
+| `expected JSON <shape>` | text (composite shape) | BC-2.01.005 (PC 5; `<shape>` spells the key's declared shape, e.g. `array of 2 numbers`) |
+| `expected non-empty control-free text of display width 1..16` | text | BC-2.01.005 (PC 6, pill-label keys) |
+| `expected exactly 1 code point and 1 display column` | text (glyph) | BC-2.01.005 (PC 6, glyph-family keys; BC-2.01.004 PC-6/PC-9) |
+| `expected non-empty control-free text` | text | BC-2.01.005 (PC 6, other Text keys) |
 | `exactly one backend entry until P6` | backends | BC-2.01.002 |
 
-Class-count reconciliation (ADV-P1-D33, mirrored from error-taxonomy.md): the class register
-is closed at exactly six classes with dedicated class contracts and D4-EX-3 table tests —
-number-range, number-grammar, enum, URL (OD-114), theme (OD-134), boolean (OD-140). The
+Class-count reconciliation (ADV-P1-D33, mirrored from error-taxonomy.md; the seventh class
+minted by owner ruling OD-178, ADV-P5-D05): the class register is closed at exactly SEVEN
+classes with dedicated class contracts and D4-EX-3 table tests — number-range,
+number-grammar, enum, URL (OD-114), theme (OD-134), boolean (OD-140) and **Text** (OD-178).
+The Text class carries the composite-shape, pill-label, glyph and empty-text errors: the
+four `expected ...` reasons in the table above. The
 `path` and `backends` columns above are reason categories without dedicated class contracts;
 their reasons map to the raising contracts (BC-2.01.005, BC-2.01.002), and `control
 character` maps to the URL class when raised by BC-2.02.005 and to the theme class when
-raised by BC-2.01.003. A seventh class needs an owner decision.
+raised by BC-2.01.003. Canonical D4-EX-3 table tests: `TestD4EX3_Number`,
+`TestD4EX3_Boolean`, `TestD4EX3_URL`, `TestD4EX3_Enum`, `TestD4EX3_Text` (five names,
+OD-178).
 
 (In the table `\|` is a literal `|`.)
 
@@ -185,7 +196,7 @@ raised by BC-2.01.003. A seventh class needs an owner decision.
 |-------|-------|
 | Source | legacy/dgx_statusline.py:module tunables (SL:73-100), import-time parse at SL:74 (`float(DGX_SL_TTL)`) and SL:75 (`int(DGX_SL_ROWS)`); guard that does NOT cover import at SL:1238-1245; legacy contract BC-SL-087 + crash paths CP-X01/CP-X02 (pass-3 r1 §B) |
 | Decisions | OD-102 (format, exit 0, stderr, validate parity), OD-114 (error classes), OD-105/OD-110 (named exclusion), OD-05, OD-107, D15 |
-| Parity / exclusion | **Approved deviation D4-EX-3.** Exclusion-list entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json` (`{id, case, expected_output_file, table_test}`, OD-105); dedicated table tests `TestD4EX3_Number`, `TestD4EX3_Boolean`, `TestD4EX3_URL`, `TestD4EX3_Enum` plus the `config validate` test (BC-2.03.001). No blanket exclusion; an excluded case without its test fails the harness (BC-6.03.004) |
+| Parity / exclusion | **Approved deviation D4-EX-3.** Exclusion-list entry id `D4-EX-3` in `internal/statusline/testdata/parity/exclusions.json` (`{id, case, expected_output_file, table_test}`, OD-105); dedicated table tests `TestD4EX3_Number`, `TestD4EX3_Boolean`, `TestD4EX3_URL`, `TestD4EX3_Enum`, `TestD4EX3_Text` (five canonical names, OD-178) plus the `config validate` test (BC-2.03.001). No blanket exclusion; an excluded case without its test fails the harness (BC-6.03.004) |
 | L2 Capability | CAP-015 (also CAP-009) |
 | L2 Domain Invariants | DI-008, DI-010 |
 | Architecture Module | `internal/config/errors.go` (`Error.StatusLine()`), `cmd/hylo/statusline.go` (BC-COMPONENT-MAP: internal/config/errors.go (D4-EX-3 line) — ARCH-02) |

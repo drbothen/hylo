@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:30:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2545641"
+input-hash: "870f32d"
 traces_to: prd.md
 source_bc: BC-4.01.002
 bcs: [BC-4.01.002, BC-4.01.001, BC-1.07.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — fuzz argv encoded as NUL-separated []byte (A2-11); BC-4.01.001 added to bcs, matching the body's partial-coverage claim (A2-04); BC-1.07.001 dispatch-grammar rows added (exact-member --subagent routing and its --subagent=1 unknown-flag complement)", "1.3 2026-11-18T06:00:00Z: Source Contract title quote synced to the current BC-4.01.002 H1 (no --subagent enrichment; adv-p2 sync SC-06 aftermath); harness comment fixed — exact-member --subagent routes to the subagent renderer, it is the substring/suffixed forms that error", "1.4 2026-11-18T09:00:00Z: ADV-P3 fixes (A2-02) — argv-normalization note (handler-relative vectors, argv[0] = verb pinned by the harness); after-`--` routing clarified (the --subagent scan covers argv[1:] including after --, before unknown-flag handling, legacy SL:1240)", "1.5 2026-11-18T12:00:00Z: ADV-P3 sync SC-01 — legacy scan quote corrected to the double-dashed --subagent literal and membership-test cites corrected to SL:1240 (SL:1238 is the __main__ guard line, not the test)", "1.6 2026-11-18T14:30:00Z: ADV-P4 fix (A2-08) — table rows normalized to the handler-relative convention (the verb is no longer spelled in routing rows); the fuzz body prepends the verb at the invocation seam and the oracle evaluates the handler-relative slice, killing the off-by-one false failure; stdin/files passed as canonical nil values, not composite literals of undefined types"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — fuzz argv encoded as NUL-separated []byte (A2-11); BC-4.01.001 added to bcs, matching the body's partial-coverage claim (A2-04); BC-1.07.001 dispatch-grammar rows added (exact-member --subagent routing and its --subagent=1 unknown-flag complement)", "1.3 2026-11-18T06:00:00Z: Source Contract title quote synced to the current BC-4.01.002 H1 (no --subagent enrichment; adv-p2 sync SC-06 aftermath); harness comment fixed — exact-member --subagent routes to the subagent renderer, it is the substring/suffixed forms that error", "1.4 2026-11-18T09:00:00Z: ADV-P3 fixes (A2-02) — argv-normalization note (handler-relative vectors, argv[0] = verb pinned by the harness); after-`--` routing clarified (the --subagent scan covers argv[1:] including after --, before unknown-flag handling, legacy SL:1240)", "1.5 2026-11-18T12:00:00Z: ADV-P3 sync SC-01 — legacy scan quote corrected to the double-dashed --subagent literal and membership-test cites corrected to SL:1240 (SL:1238 is the __main__ guard line, not the test)", "1.6 2026-11-18T14:30:00Z: ADV-P4 fix (A2-08) — table rows normalized to the handler-relative convention (the verb is no longer spelled in routing rows); the fuzz body prepends the verb at the invocation seam and the oracle evaluates the handler-relative slice, killing the off-by-one false failure; stdin/files passed as canonical nil values, not composite literals of undefined types", "1.7 2026-11-18T23:45:00Z: ADV-P5 fix (A2-30) — the <flag> echo in the statement is specified as \\xNN-escaped (control bytes, invalid UTF-8) per BC-4.01.002, so the byte fuzz oracle matches the contract's rendered bytes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,7 +37,10 @@ removal_reason: null
 For every argv vector containing at least one **flag** — an argument that starts with
 `-`, is not exactly `-`, and appears before a `--` terminator (BC-4.01.002
 Precondition 2) — `hylo statusline` renders exactly
-`\e[90mhylo: unknown flag <flag>\e[0m\n` for the first flag in argv order and exits 0.
+`\e[90mhylo: unknown flag <flag>\e[0m\n` for the first flag in argv order and exits 0,
+where `<flag>` is echoed escaped — control bytes and invalid UTF-8 bytes spelled
+`\xNN` (BC-4.01.002) — so the fuzz's arbitrary byte arguments are compared against the
+same oracle a correct implementation passes.
 A bare `-` is positional and does not trigger the error (EC-005); arguments after `--`
 are positional and render normally (EC-004) — except the exact argument `--subagent`,
 which routes from anywhere in `argv[1:]`, including after `--` and before any

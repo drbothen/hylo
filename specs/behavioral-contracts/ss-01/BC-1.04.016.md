@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md]
-input-hash: "d38840c"
+input-hash: "912ee25"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:732-820)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-03 (CP-N02 reachability scoping)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-03 (CP-N02 reachability scoping)", "1.3.1 2026-11-18: pass-5 remediation ADV-P5-C2-12 (idle-gate running and last operands pinned as EC-006/EC-007; host-share surface cross-linked to BC-1.04.007 EC-010/EC-011; VP row field set scoped)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,7 +41,10 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 
 1. Row 2 is rendered with a dict sample containing NaN or ±Inf in one of: running,
    waiting, preempt rate, box rate, TTFT, TTFT sample count, GPU watts, wall watts,
-   temperature, tariff.
+   temperature, tariff. The VP row's field set additionally covers the three surfaces
+   the pass-5 perimeter had omitted (ADV-P5-C2-12): the KV host share (pinned as
+   BC-1.04.007 EC-010/EC-011) and the idle gate's `running` operand and `last`
+   timestamp (pinned as EC-006/EC-007 below).
 2. `F(x, p)` follows BC-5.01.001: Go must emit `nan`/`inf`/`-inf`, never `NaN`/`+Inf`.
 
 ## Postconditions
@@ -76,6 +79,8 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 | EC-003 | TTFT 3.0 with n NaN | grey `◔3.0s` |
 | EC-004 | wall 1520.0 | yellow `1520W` |
 | EC-005 | GPU watts +Inf, no wall | `\e[97m⚡infW\e[0m` |
+| EC-006 | running +Inf / -Inf / NaN at the idle gate | `(running or 0) < 1` is false for +Inf and NaN (NaN < 1 false), true for -Inf (marker gate passes only via this operand; SL:825) — combined with a > 5 min old `last` the ☾ idle marker plots; with a finite in-window `last` it does not (ADV-P5-C2-12) |
+| EC-007 | `last` +Inf / -Inf / NaN | +Inf: `last > 0` true but `now - inf` << IDLE_AFTER → no idle marker; -Inf: `last > 0` false → no marker; NaN: truthy but `NaN > 0` false → no marker (SL:824-825; ADV-P5-C2-12) |
 
 ## Canonical Test Vectors
 
@@ -91,7 +96,7 @@ Latent in production (capture 2026-11-14). Notation: `\e` is byte 0x1B.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030, VP-001 | For each field × {NaN, +Inf, -Inf}, Go bytes equal legacy bytes and no error is returned | manual (table) |
+| VP-030, VP-001 | For each field × {NaN, +Inf, -Inf} — fields = the PC1 list plus the KV host share (BC-1.04.007 EC-010/EC-011) and the idle-gate `running`/`last` operands (EC-006/EC-007) — Go bytes equal legacy bytes and no error is returned; each surface has a pinned row | manual (table) |
 
 ## Traceability
 

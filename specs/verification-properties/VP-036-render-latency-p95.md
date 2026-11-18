@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T15:02:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "7af5e45"
+input-hash: "2321059"
 traces_to: prd.md
 source_bc: BC-6.04.002
 bcs: [BC-6.04.002]
@@ -40,11 +40,12 @@ fixture corpus, with metrics HTTP wait excluded per the case model, achieves p95
 Sampling discipline is per **case** (NFR-001): each case gets 1 warm-up + 20 timed
 runs; the case's 20 samples are sorted and the nearest-rank p95 is the 19th sample;
 the gate **binds per case** — every case's p95 must meet the budget, with no pooling
-across the corpus (pooling would hide a slow case behind fast ones). One stated
-exception, conditional per the product brief: the >512 KB-line fixture is timed and
-reported, and its miss does not fail the gate ONLY if it actually misses the target
-(the exception the brief's speed judgment call states explicitly); if it meets the
-budget it is judged like any other case. The gate fails the build only with `HYLO_TIMING_GATE=1` — it binds on
+across the corpus (pooling would hide a slow case behind fast ones). One STATED,
+UNCONDITIONAL exception (the brief's speed judgment call): the >512 KB-line fixture is
+exempt from the binding gate — its samples are still collected, reported and ranked in
+the gate output like every case's, but it never fails the build. The exemption is
+authored as an exception, not implied by a conditional that could never fire
+(ADV-P5-A2-13). The gate fails the build only with `HYLO_TIMING_GATE=1` — it binds on
 the owner's Mac target; CI legs print the report and pass regardless.
 
 ## Source Contract

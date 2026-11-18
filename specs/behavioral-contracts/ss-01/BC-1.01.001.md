@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T10:00:00Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "4f5dcbc"
+input-hash: "a99539e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,9 +19,12 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-3 remediation (ADV-P3-B01/B11/B16): --subagent routes under this guard per OD-155 (supersedes OD-14); degraded-line SGR cites OD-113 not OD-162; second VP row is VP-003; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B12/B07): config-error precondition carves out --subagent mode (OD-168: zero stdout bytes); DI-012 cited for the carried closed-set ids; 2026-11-17T12:00:00Z"
-  - "pass-4 residual sweep (ADV-P4-D22): D4-EX-3 table-test name canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}; 2026-11-17T12:00:00Z"
+  - "1.3.2 pass-3 remediation (ADV-P3-B01/B11/B16): --subagent routes under this guard per OD-155 (supersedes OD-14); degraded-line SGR cites OD-113 not OD-162; second VP row is VP-003; 2026-11-18T02:00:00Z"
+  - "1.3.3 pass-4 remediation (ADV-P4-B12/B07): config-error precondition carves out --subagent mode (OD-168: zero stdout bytes); DI-012 cited for the carried closed-set ids; 2026-11-18"
+  - "1.3.4 pass-4 residual sweep (ADV-P4-D22): D4-EX-3 table-test name canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}; 2026-11-18"
+  - "1.3.5 pass-5 remediation (ADV-P5-B02): PC3 widens the guarded-site list to the E-REN-002-routed families (CP-N03, CP-O01..O05, CP-O10/O11; transcript CP-O06..O08/CP-O09 named as skip/no-write disciplines, not this guard); EC-003 no longer claims the parity diff always disagrees — mapped-degrade inputs agree on stdout; 2026-11-18T05:42:56Z"
+  - "1.3.6 pass-5 residual sweep (ADV-P5-B14): EC-007's subagent crash-range corrected to CP-A01..A05; history re-dated ascending (the pass-4 stamps predated pass-3's); no behavioral change; 2026-11-18T06:25:00Z"
+  - "1.3.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17 sibling sweep) — EC-004 register row respelled to the OD-178 canon (five canonical tests incl. TestD4EX3_Text; register closed at seven) and history labels version-prefixed ascending; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,7 +54,11 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
    (BC-2.02.001); in `--subagent` mode a config error prints **zero stdout bytes** (diagnostic on stderr) per
    OD-168 — the PRD/DI-008 carve-out for the agent-panel mode.
 3. During the refresh a fault occurs at any guarded site: a crash-path site CP-S01..S17 (stdin type confusion,
-   lone surrogate at output), CP-N01/N02 (row-2 NaN paths, BC-1.04.014/015), or any unexpected Go panic.
+   lone surrogate at output), CP-N01/N02/N03 (row-2 NaN paths and the metrics-borne numeric-`__name__` degrade,
+   BC-1.04.014/015), the OD-156 overflow sites routed to E-REN-002 through this guard (CP-O01..O05 at the row-1
+   render sites, CP-O10/O11 in the cost segment — the transcript family CP-O06..O08 and CP-O09 resolve to the
+   D4-EX-2 skip / no-write-save disciplines instead, not this guard; error-taxonomy E-REN-002), or any unexpected
+   Go panic.
 
 ## Postconditions
 
@@ -81,11 +88,11 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
 |----|-------------|-------------------|
 | EC-001 | Fault inside the row-1 widgets after the git-cache write (e.g. thermometer, CP-S06) | Degraded line; git cache and earlier writes kept (BC-1.01.009) |
 | EC-002 | Fault at the final print: a rendered str holds a lone surrogate (CP-S17) | Degraded line after every cache write of the refresh (BC-1.01.008) |
-| EC-003 | Go panic not mapped to any CP site (programming error) | `recover()` backstop prints the same 29 bytes, exit 0; the parity diff still flags it because legacy would not degrade on that input |
-| EC-004 | Legacy import-time env crash (CP-X01/X02: unparseable TTL/ROWS -> empty stdout, exit 1) | Not reachable in Go: invalid settings are config errors, approved deviation **D4-EX-3** (OD-102, OD-114) rendered by BC-2.02.001; excluded from the parity diff via the OD-105 exclusion entry `D4-EX-3` with dedicated tests `TestD4EX3_{Number,Boolean,URL,Enum}` — one per class with its own dedicated grammar (number-range, boolean, URL, enum); the number-grammar (BC-2.02.003) and theme/SGR (BC-2.01.003) classes are pinned by their class contracts, and the register is closed at six (OD-114 + OD-134 + OD-140) |
+| EC-003 | Go panic not mapped to any CP site (programming error) | `recover()` backstop prints the same 29 bytes, exit 0; the parity diff still flags the run on every input where legacy renders normally (legacy would not degrade). On an input matching a mapped degrade — the CP-S/CP-N/E-REN-002 families, e.g. a CP-O overflow input — both sides emit the 29-byte line and the stdout diff agrees; the closed, mutation-tested site register (VP-012) is what keeps such a panic from hiding |
+| EC-004 | Legacy import-time env crash (CP-X01/X02: unparseable TTL/ROWS -> empty stdout, exit 1) | Not reachable in Go: invalid settings are config errors, approved deviation **D4-EX-3** (OD-102, OD-114) rendered by BC-2.02.001; excluded from the parity diff via the OD-105 exclusion entry `D4-EX-3` with dedicated tests `TestD4EX3_{Number,Boolean,URL,Enum,Text}` — one per class with its own dedicated grammar (number-range, boolean, URL, enum, text); the number-grammar (BC-2.02.003) and theme/SGR (BC-2.01.003) classes are pinned by their class contracts, and the register is closed at seven (OD-114 + OD-134 + OD-140 + OD-178) |
 | EC-005 | Writing the degraded line itself fails (stdout closed / EPIPE; legacy CP-X03 exits 1 with no stdout) | Ruled OD-136: Go swallows the write error and still returns exit 0 (DI-008). This is the named exclusion `cp-x03` in the OD-105/OD-110 closed set, with its own dedicated table test (name provisional — architect (OD-145)). Not observable by Claude Code (the consumer is gone); out of parity comparison (P3r1 §B marks CP-X03 not parity-relevant) |
 | EC-006 | SIGINT/SIGTERM (legacy CP-X04) | Out of scope; no output contract |
-| EC-007 | argv contains `--subagent` | This contract covers it: OD-155 (superseding OD-14 (a)) ports the subagent panel in P1; legacy guards `main_subagent` identically (SL:1238-1243), so a fault in the subagent render ends in the same 29 bytes, exit 0 (BC-1.07.008, CP-A01..A03). An *unknown* flag is the separate BC-4.01.002 line (OD-112) |
+| EC-007 | argv contains `--subagent` | This contract covers it: OD-155 (superseding OD-14 (a)) ports the subagent panel in P1; legacy guards `main_subagent` identically (SL:1238-1243), so a fault in the subagent render ends in the same 29 bytes, exit 0 (BC-1.07.008, CP-A01..A05). An *unknown* flag is the separate BC-4.01.002 line (OD-112) |
 
 ## Canonical Test Vectors
 

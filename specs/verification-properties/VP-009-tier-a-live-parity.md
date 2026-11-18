@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:30:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.02.002.md, behavioral-contracts/ss-06/BC-6.02.003.md, behavioral-contracts/ss-06/BC-6.03.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "3bef64c"
+input-hash: "5522c5f"
 traces_to: prd.md
 source_bc: BC-6.03.002
 bcs: [BC-6.03.002, BC-6.02.002, BC-6.02.003, BC-1.01.009, BC-1.07.002, BC-1.07.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — exclusion ids respelled to the BC form and closed set extended to ten ids (A2-02); subagent corpus family added (BC-1.07.002 enabled=true parity rows, BC-1.07.007 _fmt_tokens dense grid)", "1.3 2026-11-18T09:08:00Z: ADV-P3 fixes — corpus leg asserts a non-zero computed case count and logs “N cases validated” (POL-11, A2-06); “93 contracts” count claim re-anchored honestly (A2-20)", "1.4 2026-11-18: ADV-P4 pass-4 fix (D10) — harness skeleton loads cases from the canonical corpus root internal/parity/testdata/cases", "1.5 2026-11-18T22:00:00Z: pass-4 correction (item 10) — harness skeleton loads cases from the OD-148 corpus root internal/statusline/testdata/parity/cases (fixtures stay with the subject package)", "1.6 2026-11-18T23:30:00Z: pass-4 sync SC-06 — closed-set enumeration gains OD-166 (cost-history unconvertible-field scope, OD-169), completing the eleven-id set to match VP-012 and the other enumeration sites"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — exclusion ids respelled to the BC form and closed set extended to ten ids (A2-02); subagent corpus family added (BC-1.07.002 enabled=true parity rows, BC-1.07.007 _fmt_tokens dense grid)", "1.3 2026-11-18T09:08:00Z: ADV-P3 fixes — corpus leg asserts a non-zero computed case count and logs “N cases validated” (POL-11, A2-06); “93 contracts” count claim re-anchored honestly (A2-20)", "1.4 2026-11-18: ADV-P4 pass-4 fix (D10) — harness skeleton loads cases from the canonical corpus root internal/parity/testdata/cases", "1.5 2026-11-18T22:00:00Z: pass-4 correction (item 10) — harness skeleton loads cases from the OD-148 corpus root internal/statusline/testdata/parity/cases (fixtures stay with the subject package)", "1.6 2026-11-18T23:30:00Z: pass-4 sync SC-06 — closed-set enumeration gains OD-166 (cost-history unconvertible-field scope, OD-169), completing the eleven-id set to match VP-012 and the other enumeration sites", "1.7 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-14, A2-16) — the byte-exact census corrected to a reproducible count and method: 73 BC frontmatters (68 in SS-01, 5 in SS-05/SS-06) by grep -rl over specs/, dated 2026-11-18; parity cases resolve from the MODULE ROOT via the ARCH-07 helper (walk up to go.mod), never cwd-relative — go test cwd is the package dir and a cwd-relative load finds zero cases, turned false-red by the POL-11 guard"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,8 +51,10 @@ unexplained diffs is the D4 exit criterion (OD-117 target 1). The corpus carries
   caches byte-for-byte by file name; stderr never compared.
 - **Partial coverage:** BC-6.02.002 (stdin-sequence replay, clock stepped per refresh),
   BC-6.02.003 (case model), and collectively the byte-exact-class SS-01 contracts the
-  VP-INDEX coverage table routes to this tier (68 BCs carry `parity_class: byte-exact`
-  by file grep; each is exercised by its corpus family, not by this VP file alone).
+  VP-INDEX coverage table routes to this tier (73 BCs carry `parity_class: byte-exact`
+  in frontmatter — 68 in SS-01, 5 in SS-05/SS-06 — by `grep -rl "parity_class:
+  byte-exact"` over specs/, 2026-11-18, ADV-P5-A2-14; each is exercised by its corpus
+  family, not by this VP file alone).
 - **Invariant verified:** DI-012 (changes only via named tested deviations); NFR-003.
 
 ## Property Class and Verification Method
@@ -74,7 +76,11 @@ unexplained diffs is the D4 exit criterion (OD-117 target 1). The corpus carries
 ```go
 func TestParityTierA_Corpus(t *testing.T) {
     n := 0
-    for _, cs := range LoadCases("internal/statusline/testdata/parity/cases") {
+    // A2-16 (plan call 18): fixtures resolve from the MODULE ROOT (walk up to
+    // go.mod — the helper ARCH-07 names), never cwd-relative: go test sets cwd
+    // to the package dir, and a cwd-relative load finds zero cases, which the
+    // POL-11 guard then reports as a false red.
+    for _, cs := range LoadCases(ModuleRoot("internal/statusline/testdata/parity/cases")) {
         pyOut := RunOracle(cs)                       // CPython 3.11.x, clock shim, -s
         goOut := RunGoPort(cs)                       // in-process + built binary subset
         CompareStepwise(t, cs, pyOut, goOut)         // stdout bytes + exit per step

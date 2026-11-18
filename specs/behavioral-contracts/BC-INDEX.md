@@ -2,17 +2,17 @@
 artifact_type: bc-index
 document_type: bc-index
 level: L3
-version: "0.2.5"
+version: "0.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T02:11:24Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 origin: greenfield
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.5"
+modified: "0.2.7"
 extracted_from: "behavioral-contracts/ss-01..ss-06 frontmatter and H1 headings (generated; do not hand-edit rows)"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -22,7 +22,7 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "3a67bb5"
+input-hash: "9dfecf3"
 traces_to: ../prd.md
 
 ---
@@ -53,6 +53,12 @@ traces_to: ../prd.md
 > BC agent in the same burst); BC-1.03.015 parity column corrected to `OD-161` (pass-4
 > C10 — frontmatter and traceability already said OD-161). Titles are the file H1s
 > verbatim modulo table pipe escaping.
+>
+> Revision note (2026-11-18, pass-5 remediation sync): parity columns corrected to the
+> frontmatter state — BC-1.05.004 → `OD-166`, BC-1.05.009 → `OD-30, OD-166` (pass-5
+> C2-07); BC-1.07.002 → `byte-exact` with the disabled (OD-155 off-switch) half described
+> in the new Parity-class notes section (pass-5 C16). Titles are the file H1s verbatim
+> modulo table pipe escaping.
 
 ### S1.01 — Input/output contract
 
@@ -163,12 +169,12 @@ traces_to: ../prd.md
 | BC-1.05.001 | $ colours from lane percentile thresholds | S1.05 | BC-SL-025 | byte-exact | H | draft | [BC-1.05.001](ss-01/BC-1.05.001.md) |
 | BC-1.05.002 | $/h segment with threshold colouring | S1.05 | BC-SL-026 | byte-exact | H | draft | [BC-1.05.002](ss-01/BC-1.05.002.md) |
 | BC-1.05.003 | ⛏ pick inside the $ block (basis threshold) | S1.05 | BC-SL-027 | byte-exact | H | draft | [BC-1.05.003](ss-01/BC-1.05.003.md) |
-| BC-1.05.004 | record_cost throttled write | S1.05 | BC-SL-028 | byte-exact | H | draft | [BC-1.05.004](ss-01/BC-1.05.004.md) |
+| BC-1.05.004 | record_cost throttled write | S1.05 | BC-SL-028 | OD-166 | H | draft | [BC-1.05.004](ss-01/BC-1.05.004.md) |
 | BC-1.05.005 | cost_thresholds p75/p95 percentiles | S1.05 | BC-SL-029 | byte-exact | H | draft | [BC-1.05.005](ss-01/BC-1.05.005.md) |
 | BC-1.05.006 | Numeric sid keyed by string form — throttle and self-exclusion hold | S1.05 | BC-SL-079 | OD-30 | H | draft | [BC-1.05.006](ss-01/BC-1.05.006.md) |
-| BC-1.05.007 | $ and $/h number formatting | S1.05 | BC-SL-082 | byte-exact | H | draft | [BC-1.05.007](ss-01/BC-1.05.007.md) |
+| BC-1.05.007 | $, $/h and ⛏ number formatting | S1.05 | BC-SL-082 | byte-exact | H | draft | [BC-1.05.007](ss-01/BC-1.05.007.md) |
 | BC-1.05.008 | Cost colouring goldens (21 seeded sessions) | S1.05 | BC-SL-101 | byte-exact | H | draft | [BC-1.05.008](ss-01/BC-1.05.008.md) |
-| BC-1.05.009 | record_cost write contract (exact JSON format) | S1.05 | BC-SL-102 | OD-30 | H | draft | [BC-1.05.009](ss-01/BC-1.05.009.md) |
+| BC-1.05.009 | record_cost write contract (exact JSON format) | S1.05 | BC-SL-102 | OD-30, OD-166 | H | draft | [BC-1.05.009](ss-01/BC-1.05.009.md) |
 
 ### S1.06 — Session caches
 
@@ -182,7 +188,7 @@ traces_to: ../prd.md
 | BC ID | Title | Subsystem / section | Legacy | Parity class | Conf | Status | File |
 |---|---|---|---|---|---|---|---|
 | BC-1.07.001 | `--subagent` in argv selects the subagent renderer before main | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.001](ss-01/BC-1.07.001.md) |
-| BC-1.07.002 | `statusline.subagent.enabled` off switch (default true = legacy) | S1.07 | new (OD-155) | OD-155 off switch | H | draft | [BC-1.07.002](ss-01/BC-1.07.002.md) |
+| BC-1.07.002 | `statusline.subagent.enabled` off switch (default true = legacy) | S1.07 | new (OD-155) | byte-exact | H | draft | [BC-1.07.002](ss-01/BC-1.07.002.md) |
 | BC-1.07.003 | Subagent stdin is total — unparseable or non-object input renders zero rows | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.003](ss-01/BC-1.07.003.md) |
 | BC-1.07.004 | One default-JSON line per eligible task; zero bytes for zero rows | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.004](ss-01/BC-1.07.004.md) |
 | BC-1.07.005 | Status glyph, name-fallback chain, and settled-status suffix | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.005](ss-01/BC-1.07.005.md) |
@@ -222,7 +228,7 @@ traces_to: ../prd.md
 
 | BC ID | Title | Subsystem / section | Legacy | Parity class | Conf | Status | File |
 |---|---|---|---|---|---|---|---|
-| BC-3.01.001 | Per-OS cache/config/state dirs; hylo cache dir from P1 (XDG/hylo, LOCALAPPDATA) | S3.01 | new | n.a. | — | draft | [BC-3.01.001](ss-03/BC-3.01.001.md) |
+| BC-3.01.001 | Per-OS cache/config/state dirs (XDG/hylo, LOCALAPPDATA); LocalZone TZ resolution (OS zone, UTC on empty/unparseable) | S3.01 | new | n.a. | — | draft | [BC-3.01.001](ss-03/BC-3.01.001.md) |
 
 ### S3.02 — Process start / window age
 
@@ -317,4 +323,12 @@ traces_to: ../prd.md
 
 - BC-SL-097: out of scope (OD-14), no new BC.
 - BC-SL-068: accounted as replaced by the BC-SL-098 mapping (D4-EX-2).
+
+## Parity-class notes (prose carve-outs)
+
+- BC-1.07.002: the `byte-exact` parity class covers the ENABLED half (default true =
+  legacy rows); the disabled half (`statusline.subagent.enabled=false`) is the OD-155 off
+  switch — new behavior contracted by BC-1.07.002 itself, not a parity class. The former
+  index value `OD-155 off switch` was not a closed-set id (pass-5 C16; the BC file's
+  frontmatter is to be synced by the BC agent).
 

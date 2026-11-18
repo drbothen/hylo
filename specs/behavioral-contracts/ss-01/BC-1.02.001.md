@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cffed41"
+input-hash: "acaa0ec"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:441-449)"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "pass-4 remediation (ADV-P4-B16/B03): pill label words are config keys statusline.pill.label_* per OD-173 (D7 citation dropped); for-all pill-classification leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "1.3 pass-5 remediation (ADV-P5-B03): the pill glyph is named as the registry key statusline.glyphs.lane (default U+25E8, 1 code point/1 column; shared with the subagent lane tag, BC-1.07.006) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,8 +65,9 @@ Notation: `\e` is the byte 0x1B; every other character is its UTF-8 encoding.
 3. The pill is always element 0 of row 1 (joined to the next element by the separator,
    BC-1.01.003); it is never omitted.
 4. The SGR codes come from the `statusline.theme.*` pill keys (OD-113, BC-2.01.003) and the
-   `◨` glyph from `statusline.glyphs.*` (OD-02); with defaults they equal the legacy bytes
-   above (SL:130). The label words are config keys — `statusline.pill.label_local` (default `DGX`),
+   `◨` glyph from the registry key `statusline.glyphs.lane` (OD-02; default U+25E8, exactly 1 code point /
+   1 column; the same key the subagent lane tag consumes, BC-1.07.006); with defaults they equal the legacy bytes
+   above (SL:130, SL:447-449). The label words are config keys — `statusline.pill.label_local` (default `DGX`),
    `statusline.pill.label_cloud` (default `ANTH`), `statusline.pill.label_unknown` (default `?`) — minted by
    OD-173 (range: non-empty, no control bytes, display width 1..16); with defaults they equal the legacy output
    bytes, which stay unchanged until after cutover (D4); the domain terms are local lane / cloud lane.
@@ -125,7 +127,7 @@ All vectors verified against the oracle (`legacy/dgx_statusline.py`, CPython 3.1
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 (degrade on fault), DI-012 (no unnamed deviations) |
 | Owner decisions | OD-111 / OD-123 (prefix key and default `claude-sonnet`; empty value expressible), OD-113 (theme keys), OD-121 (client-view lane), OD-173 (pill label keys), OD-05 (no `DGX_*` env) |
-| Config keys | `backends[0].model_prefixes`, `statusline.theme.*` (pill codes), `statusline.pill.label_local` / `label_cloud` / `label_unknown` (OD-173), `statusline.glyphs.*` |
+| Config keys | `backends[0].model_prefixes`, `statusline.theme.*` (pill codes), `statusline.pill.label_local` / `label_cloud` / `label_unknown` (OD-173), `statusline.glyphs.lane` (U+25E8) |
 | Architecture Module | `internal/statusline/lane.go` (design §2.2; BC-COMPONENT-MAP: internal/statusline/lane.go (prefix startswith pill) — ARCH-03) |
 | Stories | TBD (filled by story-writer) |
 

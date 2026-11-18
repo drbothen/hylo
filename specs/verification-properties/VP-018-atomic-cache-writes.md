@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T14:28:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, behavioral-contracts/ss-01/BC-1.06.001.md, behavioral-contracts/ss-01/BC-1.06.002.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "7f43358"
+input-hash: "a1fdcf2"
 traces_to: prd.md
 source_bc: BC-1.06.001
 bcs: [BC-1.06.001, BC-1.06.002, BC-6.03.003]
@@ -89,7 +89,11 @@ untouched, and the next successful save overwrites it with regenerated content
 ```go
 const renameRetryLimit = 2 // named constant: transient Windows sharing violations
                             // (AV/indexer locks); not config — no parity-visible
-                            // behavior, legacy has no retry (IM-17, OD-110)
+                            // behavior, legacy has no retry (IM-17, OD-110).
+                            // Value 2 is a LABELED JUDGMENT CALL (P16/D15): unmeasured
+                            // — no parity-visible behavior exists to measure; one
+                            // retry absorbs a transient lock, two observes the lock
+                            // persist (ADV-P5-A2-32)
 
 func TestCacheStore_OD110_TempCleanup(t *testing.T) {
     dir := tempCacheDir(t)

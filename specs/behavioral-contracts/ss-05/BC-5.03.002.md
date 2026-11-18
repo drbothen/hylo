@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "249c67a"
+input-hash: "bebcc79"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces str.strip/rstrip/rsplit and bytes.splitlines used in legacy/dgx_statusline.py)"
@@ -19,8 +19,10 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
-  - "VP citation reconciliation: SplitLinesBytes row re-homed from VP-025 to VP-038 (pass-2 mint; VP-038 partial-coverage note), 2026-11-18T03:00:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T03:00:00Z VP citation reconciliation: SplitLinesBytes row re-homed from VP-025 to VP-038 (pass-2 mint; VP-038 partial-coverage note)"
+  - '2026-11-18T23:50:00Z (1.2.3) ADV-P5 D26 — EC-002 notation: NEL spelled as the \u0085 code-point escape, disambiguated from the BC-5.01.002 raw-byte \xNN convention'
+  - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — 1.2.3 entry requoted single-quoted (the raw-byte escape spellings are not YAML double-quoted-scalar escapes); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,7 +73,7 @@ signature row (`RSplit1(s, sep string) []string`) is reconciled.
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | `Strip("\u00a0 x \u200b")` | `"x \u200b"` (NBSP stripped; ZWSP kept, so the trailing space before it stays) |
-| EC-002 | `Strip("\x1c\x1fx\x85")` | `"x"` |
+| EC-002 | `Strip("\x1c\x1fx\u0085")` (U+0085 NEL written as the `\u0085` code-point escape — a raw `\x85` byte is invalid UTF-8 and not a str here, per the BC-5.01.002 `\xNN` raw-byte notation) | `"x"` |
 | EC-003 | `Strip(" \u3000x\u2028")` (leading plain space + U+3000 IDEOGRAPHIC SPACE; trailing U+2028 LINE SEPARATOR, escape notation) | `"x"` (U+3000 and U+2028 are in Python str.strip()'s space set) |
 | EC-004 | `SplitLinesBytes(b"\n")` | `[b""]` |
 | EC-005 | `SplitLinesBytes(b"a\r\rb")` | `[b"a", b"", b"b"]` |

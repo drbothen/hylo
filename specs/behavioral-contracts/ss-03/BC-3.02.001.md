@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "cfdc823"
+input-hash: "da2b72d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
   - "1.2.2 2026-11-18: ADV-P4 remediation D06/D32/D29 — Windows name comparison folds case after case-insensitive .exe strip; PID-reuse guard rejection = non-matching level (walk continues); fake-ps weekday corrected to Fri"
+  - "2026-11-19T01:10:00Z (1.2.3) ADV-P5 remediation D22 — chain-poison refinement: after a PID-reuse guard rejection the walk keeps climbing but accepts no match at or above the rejected level (a stranger's claude can no longer produce a wrong home marker); match-before-rejection legs pinned"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -86,8 +87,16 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
    `golang.org/x/sys/unix`; Linux `/proc/<pid>/stat` parsed after the last `)` (comm, ppid, starttime ticks) plus
    `btime` from `/proc/stat`; Windows `CreateToolhelp32Snapshot` + `GetProcessTimes` with a PID-reuse guard (a parent
    created after its child is rejected; ADV-P4-D32: a guard rejection counts as a
-   NON-MATCHING level — the walk continues with `pid = PPID` and records nothing, it does
-   not abort the walk and is not an error); other OSes return not found.
+   NON-MATCHING level — the walk continues with `pid = PPID`, does not abort and is not an
+   error). **Chain-poison refinement (ADV-P5-D22):** once a guard rejection occurs, the
+   recorded ancestry is untrustworthy (the impostor's PPID may head an unrelated process
+   chain, where a stranger's `claude` could match and show a wrong `⌂`); the walk keeps
+   climbing and probing to the depth cap but accepts NO match at or above the rejected
+   level — a matching name encountered after a rejection records nothing and the result is
+   None. Matches found strictly BEFORE the first rejection stand. Never-raise discipline
+   unchanged (the poisoned walk is indistinguishable from "no start": nothing written,
+   retry next refresh). Table test legs: match before rejection; rejection then stranger
+   match (discarded, None); rejection then clean climb to depth cap (None).
 3. The probe never degrades the status line (never-raise helper, design IM-15).
 4. Parity runs never depend on a native value: ordinary render-parity cases seed `proc_start` on both sides (design
    §8 row 023 "T, seeded"); native values have no oracle. The OD-76 difference-table cases (BC-3.02.002) are the

@@ -1,13 +1,13 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.12"
+version: "1.13"
 status: draft
 producer: architect
-timestamp: 2026-11-18T22:00:00Z
+timestamp: 2026-11-19T03:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "b70a8ae"
+input-hash: "b153c99"
 traces_to: ../prd.md
 deployment_topology: single-service
 
@@ -76,7 +76,7 @@ deployment_topology: single-service
 | AD-03 | Pure widgets + ordered effect script (not one pure function) | ARCH-03 | Failed-replace read-back semantics require order-preserving effects |
 | AD-04 | Hand-written pyfmt with CPython-generated tables, banned Go stdlib codecs on protocol inputs | ARCH-06 | Every cache/widget byte depends on CPython fidelity |
 | AD-05 | P1 resolution = HYLO_* env -> built-in defaults; file layer reserved P4 | ARCH-02 | OD-107; zero-dependency budget holds (no YAML) |
-| AD-06 | Closed key registry; error classes closed at six | ARCH-02 | Enumerable domain => closable error set => exhaustively testable |
+| AD-06 | Closed key registry; error classes closed at six, extended to seven (Text) by OD-178 (2026-11-18) with the five canonical tests `TestD4EX3_{Boolean,Enum,URL,Number,Text}` | ARCH-02 | Enumerable domain => closable error set => exhaustively testable |
 | AD-07 | Native per-OS ancestor probe replaces ps | ARCH-05 | Removes 6 s latency tail; differences are ruled OD-76/OD-110 entries |
 | AD-08 | Byte-exact cache writers over ordered pyfmt.Value; atomic write + Windows retry + temp cleanup | ARCH-04 | Ruling (b) swap coverage; temp cleanup is the ruled temp-file exclusion |
 | AD-09 | Three-tier harness; exclusion machinery fails closed | ARCH-07 | Referee must be stronger than refereed; closures provable |

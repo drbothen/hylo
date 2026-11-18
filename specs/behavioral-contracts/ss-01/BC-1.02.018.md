@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6fa6c16"
+input-hash: "2e2abee"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-4 remediation (ADV-P4-B15/B03): the two-character in label is the Text key statusline.labels.input, not a glyphs member (OD-02); for-all bracket-rule leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "1.4 pass-5 remediation (ADV-P5-B04): glyphs named per key with the orchestrator-call-2 renames — statusline.glyphs.reroute → cache_read (U+27F3, SL:594), statusline.glyphs.stale → cache_rebuild (U+21BB, SL:598-599); not shipped, no alias; 2026-11-18T05:42:56Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,7 +66,10 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
 
 1. The segment never reads stdin token fields (`context_window.total_*` are the last response, not the session;
    review 2026-11-13 #10.1).
-2. Glyphs `↑ ✍ ⟳ ↓ ↻` are legacy defaults of `statusline.glyphs.*`, each exactly 1 code point and 1 column
+2. Glyphs `↑ ✍ ⟳ ↓ ↻` are legacy defaults of the registry keys `statusline.glyphs.tokens_up` (U+2191),
+   `statusline.glyphs.write` (U+270D), `statusline.glyphs.cache_read` (U+27F3; legacy cache-reads marker, SL:594),
+   `statusline.glyphs.tokens_down` (U+2193) and `statusline.glyphs.cache_rebuild` (U+21BB; legacy cache-rebuilds
+   marker, SL:598-599), each exactly 1 code point and 1 column
    (OD-02); the two-character `in` label is **not** a glyph member — it is the Text key
    `statusline.labels.input` (default `in`); colours are `statusline.theme.*` (OD-113).
 3. Compact units follow `statusline.units.tokens` (T-042: 1000 / 1e6, `>=`; approved mockup, review #10 revisit).
@@ -118,7 +122,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:565-600) and legacy/dgx_statusline.py:_fmt_tok_c (SL:863-873) |
 | Legacy contract | BC-SL-024 (pass-3 r1; refined deep pass-3 round 1) |
-| Config keys | `statusline.units.tokens` (T-042), `statusline.glyphs.*`, `statusline.labels.input` (default `in`), `statusline.theme.*` (OD-113) |
+| Config keys | `statusline.units.tokens` (T-042), `statusline.glyphs.tokens_up` / `write` / `cache_read` / `tokens_down` / `cache_rebuild` (↑ ✍ ⟳ ↓ ↻), `statusline.labels.input` (default `in`), `statusline.theme.*` (OD-113) |
 | Parity | byte-exact (no exclusion entry) |
 
 ## Related BCs (Recommended)

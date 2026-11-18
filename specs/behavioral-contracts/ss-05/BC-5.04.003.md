@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "0267ecc"
+input-hash: "59089af"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python time.time() value discipline at the ten legacy clock reads, P3r1 §A0, DET-01..08)"
@@ -25,7 +25,8 @@ modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D27: precondition 2 pins the malformed HYLO_TEST_NOW set (nan/inf/-inf/underscore/whitespace/empty)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D03+D27+D10: TimeFloat takes time.Time per ARCH-06 canon; HYLO_TEST_NOW resolved once to time.Time (never a raw string), malformed = non-finite/non-decimal; subagent now_ms read SL:889 added to consumers"
-  - "1.2.4 2026-11-18: ADV-P4 remediation D24+D34 - HYLO_TEST_NOW grammar pinned (finite decimal within time.Time range; nan/inf/0x/underscore/whitespace/1e300 malformed) with BC-6.01.003 as the single owner; pyfmt contract de-duplicated to value discipline only"
+  - "2026-11-18T22:00:00Z (1.2.4) ADV-P4 remediation D24+D34 - HYLO_TEST_NOW grammar pinned (finite decimal within time.Time range; nan/inf/0x/underscore/whitespace/1e300 malformed) with BC-6.01.003 as the single owner; pyfmt contract de-duplicated to value discipline only"
+  - "2026-11-18T23:58:00Z (1.2.5) ADV-P5 remediation D02+D19 — frozen clock never round-trips through time.Time nanoseconds (the parsed float64 IS time.time(); ~17% of fractional values drift otherwise; owner call 7); TimeFloat applies to the real clock only; range bound fixed to the asymmetric epoch-seconds span [-62135596800, 253402300799] (D19)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,7 +45,9 @@ research P20): with `ns = t.UnixNano()` read once per render, the value is
 `float64(ns) / 1e9` — the Python value, not Go's monotonic-annotated
 wall-clock methods — read once per render and passed down. Helper-level contract per OD-141
 (the ten legacy clock reads, P3r1 §A0, DET-01..08; motivates the idle-widget
-minute-straddle fix, DET-08).
+minute-straddle fix, DET-08). **TimeFloat applies to the real clock only** (ADV-P5-D02, owner
+call 7): `Env.Now` returns float seconds, and under the harness shim the frozen `HYLO_TEST_NOW`
+value is that float64 itself, never a `time.Time` — see precondition 2 and PC 3.
 
 ## Preconditions
 
@@ -56,7 +59,9 @@ minute-straddle fix, DET-08).
    BC-6.01.003** (cmd-layer shim duty, ADV-P4-D34); summarized here only for the helper's
    parity-neutrality claim: a value is well-formed iff it matches
    `^[+-]?[0-9]+(\.[0-9]*)?([eE][+-]?[0-9]+)?$`, parses to a finite float64, and lies
-   within the `time.Time` representable range (|seconds| ≤ 62135596800, years 1..9999);
+   within the `time.Time` representable range expressed in epoch seconds:
+   `-62135596800 ≤ s ≤ 253402300799` (year 1 .. year 9999; the two spans are asymmetric about
+   the 1970 epoch — ADV-P5-D19 disposes the previously contradictory single-span statements);
    everything else — `abc`, empty, `nan`, `inf`, `-inf`, `0x1p3`, containing `_` or
    whitespace, or out-of-range like `1e300` (unspecified before, ADV-P4-D24) — is
    malformed and ignored with exactly one stderr warning, the real clock used. It never
@@ -69,13 +74,18 @@ minute-straddle fix, DET-08).
    same as Python).
 2. Read once per render and passed down; the idle widget's two legacy reads (SL:825, 826)
    receive one value (DET-08 minute-straddle fix).
-3. Frozen-clock neutrality: under the harness shim both sides parse `HYLO_TEST_NOW` the
-   same way — the decimal string is resolved ONCE into a `time.Time` (per the BC-6.01.003
-   grammar of precondition 2, whose well-formed/malformed split both shims implement
-   identically) — so
-   `TimeFloat(resolvedNow)` is output-neutral in parity runs (§3). `TimeFloat` never
-   receives the raw string (ADV-P3-D27). Parsing and warning are cmd-layer duties, not
-   pyfmt's (ADV-P4-D34); this contract pins only the value discipline.
+3. Frozen-clock neutrality (rewritten, ADV-P5-D02 / owner call 7): under the harness shim
+   both sides parse `HYLO_TEST_NOW` the same way — ONCE, as a float64, with Python `float()`
+   semantics (within the BC-6.01.003 grammar of precondition 2) — and **that float64 IS the
+   `time.time()` value everywhere**; it is never round-tripped through `time.Time`
+   nanoseconds. Measured reason (owner, 2026-11-18): about 17% of random fractional `now`
+   values change when round-tripped float64 → `time.Time` ns → float64, because float64
+   spacing at 1.79e18 ns is 256 ns, more than half an ulp of the seconds double; frozen
+   cache bytes (`rl_ts`, `ts`, `fetch_ts`, written with Python repr) would diverge.
+   Accordingly `TimeFloat` is never called on the frozen value (there is no `time.Time` in
+   the shim path; `Env.Now` hands the parsed float down). The well-formed/malformed split
+   of precondition 2 is implemented identically by both shims; parsing and warning are
+   cmd-layer duties (ADV-P4-D34); this contract pins only the value discipline.
 
 ## Invariants
 
@@ -92,6 +102,7 @@ minute-straddle fix, DET-08).
 | EC-003 | `HYLO_TEST_NOW=1794650400` | parsed to 1794650400.0 on both sides |
 | EC-004 | two widgets in one render | same value, not two reads |
 | EC-005 | `HYLO_TEST_NOW=1e300`; `HYLO_TEST_NOW=0x1p3` | both malformed (out-of-range / non-decimal, ADV-P4-D24): one stderr warning, real clock used |
+| EC-006 | `HYLO_TEST_NOW=1794650400.5`; fractional frozen value | the exact double 1794650400.5 is `time.time()` on both sides everywhere — never round-tripped through `time.Time` ns (ADV-P5-D02) |
 
 ## Canonical Test Vectors
 

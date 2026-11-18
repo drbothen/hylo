@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:22:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md]
-input-hash: "e6be72f"
+input-hash: "1d6d1bd"
 traces_to: prd.md
 source_bc: BC-1.01.004
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic"]
+modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-34) — P7 split into its own quick.Check: negated-int64 cols from its own generator (the shared anchorCols config could not serve it) and the rows > 2 constraint expressed by construction; the shared segCfg now serves P1/P5/P6 only"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,9 +106,24 @@ func TestFrameProp_All(t *testing.T) {
     if err := quick.Check(func(text string, cols int) bool {
         segs := splitSegments(text) // SEP-free by construction
         out := renderFrame(segs, cols)
-        return framePropMatches(out, segs, cols) // P1/P5/P6/P7 model
+        return framePropMatches(out, segs, cols) // P1/P5/P6 model
     }, segCfg); err != nil {
-        t.Fatalf("P1/P5/P6/P7 violated: %v", err)
+        t.Fatalf("P1/P5/P6 violated: %v", err)
+    }
+    // P7 has its own regime (A2-34): the negated-int64 cols spread and the
+    // rows > 2 constraint cannot come out of the shared anchorCols/text generators.
+    p7Cfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
+        args[0] = reflect.ValueOf(genMultiRowSEPFreeText(r, 3)) // > 2 rows by construction
+        args[1] = reflect.ValueOf(negInt64ColSpread(r))          // negated int64 spread
+    }}
+    if err := quick.Check(func(text string, cols int) bool {
+        segs := splitSegments(text)
+        if len(segs) <= 2 {
+            return true // P7 quantifies rows > 2 only
+        }
+        return framePropMatches(renderFrame(segs, cols), segs, cols) // P7 model
+    }, p7Cfg); err != nil {
+        t.Fatalf("P7 violated: %v", err)
     }
     pairCfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
         args[0] = reflect.ValueOf(genSGRBearing(r)) // P2: SGR runs + astral + WTF-8

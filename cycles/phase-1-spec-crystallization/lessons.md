@@ -156,3 +156,34 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   unexplained injections are logged even when harmless.
 
 **Closes:** D-448(b) codified (exhaustive subagent prompt-injection sighting strand ADV-P4-A01 hygiene instructions ignored and source unidentified with owner notified)
+
+## L-PG-17 [process-gap] — Briefs must name the oracle interpreter path
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-5 burst) An agent ran the legacy
+  oracle with `/usr/bin/python3` — macOS system Python 3.9.6 — instead of the
+  pinned CPython 3.11.7, so oracle-backed spec facts briefly rested on the wrong
+  interpreter; the pass-5 review flagged the discrepancy.
+- **Remedy:** Re-running the oracle on CPython 3.11.7 produced identical output,
+  so no spec fact changed; agent briefs must name the interpreter path (CPython
+  3.11.7, `python3 -I`) explicitly for every oracle run.
+
+## L-PG-18 [process-gap] — One measurement per fact: one agent, end to end
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-5 burst) Two agents measured the
+  same encoder depth limits independently and pinned conflicting values in the
+  specs; parallel duplicate measurement diverges exactly like wrapper probes did
+  (cf. L-PG-07).
+- **Remedy:** Each measured fact gets exactly one owning agent, measuring end to
+  end on the real program; every other site consumes the pinned value instead of
+  re-measuring.
+
+## L-PG-19 [process-gap] — Mint canonical lists centrally before parallel dispatch
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-5 burst) Parallel agents minted
+  divergent glyph registries — each invented its own canonical list, and the
+  pass-5 review found the registries inconsistent.
+- **Remedy:** Canonical lists (glyph registries, vocabularies, id allocations)
+  are minted once, centrally, before dispatch; parallel agents receive the
+  canonical list and mint nothing on their own.
+
+**Closes:** D-448(b) codified (pass-5 process strands: oracle interpreter path in briefs, duplicate parallel measurement, centrally minted glyph registries)

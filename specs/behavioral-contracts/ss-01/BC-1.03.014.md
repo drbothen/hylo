@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5cb6c46"
+input-hash: "650b999"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1120-1125, 1142-1145)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.3 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.1 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
+modified: ["1.3 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.1 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.2 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C09) — single-line error rows pinned to the all-zero BASE cache (sizes 70/81, shape oracle-checked 2026-11-18); wrong BC-1.03.019 T06+ cross-reference removed"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,8 +84,8 @@ One line `{"type": "assistant", "message": {"content": <list>}}`; result from th
 | `[{"type":"text","text":[1,2,3]}]` | conv 3 | edge-case |
 | `[{"type":"thinking","thinking":{"a":1,"b":2}}]` | think 2 | edge-case |
 | `[{"type":"text","text":0},{"type":"text","text":""},{"type":"text","text":null},{"type":"thinking","thinking":[]},{"type":"thinking","thinking":false}]` | all 0 | edge-case |
-| `[{"type":"text","text":5}]` | legacy: `TypeError: object of type 'int' has no len()`, degraded; hylo: line skipped, expected cache per BC-1.03.019 T06+ text (`"size": 691`, T01+ state otherwise) | error |
-| `[{"type":"thinking","thinking":true}]` | legacy: `TypeError: object of type 'bool' has no len()`; hylo: BC-1.03.019 T06+ thinking (`"size": 584`) | error |
+| `[{"type":"text","text":5}]` | legacy: `TypeError: object of type 'int' has no len()`, degraded; hylo: line skipped — for this stated **single** line the expected cache is the all-zero BASE form with `"size": 70` (W-line is 70 B with LF; shape oracle-checked 2026-11-18: `{"size": 70, "res": 0, "conv": 0, "think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": null, "ids": [], "lr": null, "lu": null, "cur": null}`; the four-line BC-1.03.019 T06+ golden belongs to that row's transcript, not this input — ADV-P5-C09) | error |
+| `[{"type":"thinking","thinking":true}]` | legacy: `TypeError: object of type 'bool' has no len()`; hylo: line skipped — single-line all-zero BASE cache with `"size": 81` (W-line is 81 B with LF; same oracle-checked shape as the text row, ADV-P5-C09) | error |
 
 ## Verification Properties
 

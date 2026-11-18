@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5245403"
+input-hash: "038ee14"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:444-445, 487-489)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "1.2 pass-5 remediation (ADV-P5-B09 disposition, OD-179): the reroute-all markers become the List key statusline.lane.reroute_all_prefixes (default [\"claude\", \"claude-\"], legacy; entries non-empty, no control bytes); PC1, Config keys, Owner decisions and Refactoring Notes aligned; 2026-11-18T05:42:56Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,7 +45,9 @@ whatever `rate_limits` stdin or the smoothing cache carries.
 
 ## Postconditions
 
-1. `reroute_all = any(RStrip(p, "*") in {"claude", "claude-"} for p in prefixes)`
+1. `reroute_all = any(RStrip(p, "*") in reroute_all_prefixes for p in prefixes)` where
+   `reroute_all_prefixes` is the configured List key `statusline.lane.reroute_all_prefixes` (OD-179; default
+   `["claude", "claude-"]`, equal to the legacy literals; range: every entry non-empty, no control bytes)
    (only `*` is stripped, only from the right; comparison is exact and case-sensitive).
 2. If `reroute_all` → the limits input is the empty mapping: no limits segment is
    emitted (BC-1.02.010/011/012 never produce output).
@@ -107,8 +110,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15, `T = 1800000000.0`, 
 | Parity class | byte-exact (no exclusion-list entry) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Owner decisions | OD-111 / OD-123 (prefix key under `backends[0]`, default `claude-sonnet`) |
-| Config keys | `backends[0].model_prefixes`; the reroute-all literals `claude` / `claude-` are a named constant (model-family protocol names, not a threshold), documented with a "why not config" comment |
+| Owner decisions | OD-111 / OD-123 (prefix key under `backends[0]`, default `claude-sonnet`), OD-179 (reroute-all markers are the List key `statusline.lane.reroute_all_prefixes`) |
+| Config keys | `backends[0].model_prefixes`, `statusline.lane.reroute_all_prefixes` (OD-179; List of Text, default `["claude", "claude-"]`, legacy; every entry non-empty, no control bytes) |
 | Architecture Module | `internal/statusline/limits.go` |
 | Stories | TBD |
 
@@ -160,5 +163,6 @@ TBD — plan-window widget story
 
 #### Refactoring Notes
 
-No refactoring needed. Whether the literals should become config is a post-cutover
-question (D4); this BC keeps them as a named constant.
+No refactoring needed. The reroute-all markers are resolved config: the List key
+`statusline.lane.reroute_all_prefixes` (OD-179, default `["claude", "claude-"]`, legacy); the render takes the
+parsed list from `internal/config` (D15), falling back to nothing hard-coded.

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "035558f"
+input-hash: "bfe9ca6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: OD-76
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18: ADV-P4 remediation D29 — fake-ps weekdays corrected to Fri (2026-11-06, 2026-11-13)"]
+modified: ["1.2.1 2026-11-18: ADV-P4 remediation D29 — fake-ps weekdays corrected to Fri (2026-11-06 and 2026-11-13)", "1.2.2 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — comma inside the flow-list element removed (YAML flow-scalar hazard); no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null

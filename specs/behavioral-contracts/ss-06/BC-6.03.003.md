@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "e94e21e"
+input-hash: "5c180dc"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"
@@ -29,6 +29,8 @@ modified:
   - "1.2.2 2026-11-18: ADV-P4 remediation D10 sibling - exclusions.json path aligned with the canonical internal/parity/testdata home"
   - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json (fixtures stay with the subject package)"
   - "1.2.4 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - "2026-11-19T00:20:00Z (1.2.5) ADV-P5 remediation D20 — temp-file example entry completed to the six-key schema (package, scope=go-cache-listing) with the JSON-object expected file"
+  - "1.2.6 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19/SC-20) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,8 +95,12 @@ It is never a blanket exclusion.
    contains exactly one entry with id `temp-file` per case that triggers a failed
    replace, for example
    `{"id": "temp-file", "case": "cache/sid-slash-temp", "expected_output_file":
-   "cache/sid-slash-temp/expected.go-cache-listing.txt", "table_test":
-   "TestCacheStore_TempFile_CleanupOnFailedReplace"}`. Its scope is the cache-file
+   "cache/sid-slash-temp/expected.json", "package": "internal/statusline",
+   "scope": "go-cache-listing", "table_test":
+   "TestCacheStore_TempFile_CleanupOnFailedReplace"}` — the full six-key schema of
+   BC-6.03.004 (ADV-P5-D20: the former four-key example would fail the missing-key
+   validation, and the expected file is the mandated JSON object, not a `.txt`).
+   Its scope is the cache-file
    comparison only (OD-110). The expected file pins Go's cache-directory listing
    after each step, with no temp file present.
 4. **Dedicated table test** `TestCacheStore_TempFile_CleanupOnFailedReplace`, a Go unit

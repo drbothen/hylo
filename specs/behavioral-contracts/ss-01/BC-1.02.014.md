@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "54a213d"
+input-hash: "69ece43"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -20,7 +20,9 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "pass-3 remediation (ADV-P3-B05/B07/B18): float_div converts the int operand to float first (OverflowError at the int->float threshold, double-rounded quotient); OD-162 justification reworded to its actual test; EC-004 tie wording fixed; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B04): EC-013 names CP-O03; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B04): EC-013 names CP-O03; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
+  - "1.5 pass-5 remediation (ADV-P5-B12/B05): units.lines thresholds cited at SL:856/858 (was the stale SL:866-867); EC-013 scoped to the positive side and notes a huge negative renders exactly via str(n) (SL:860, oracle-verified); 2026-11-18T05:42:56Z"
+  - "1.5.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -74,7 +76,7 @@ Notation: `\e` is the byte 0x1B.
 2. Rationale (D15, T-037, documented): keep row 1 narrow on big refactors (review #8.1).
 3. Valid ranges (Policy 20, OD-162): `statusline.units.lines` is a unit-selector key whose
    non-default behavior cannot be defined from legacy — the thresholds (10,000 `>=` → k;
-   1,000,000 `>=` → M, SL:866-867) are baked into the single derivable semantics, and no
+   1,000,000 `>=` → M, SL:856 and SL:858) are baked into the single derivable semantics, and no
    alternative scheme is derivable from the legacy program — so per OD-162's test its valid
    range is its registered default only; any other value is a number-range config error
    (BC-2.02.003, OD-162). Range for architect registration: units.lines = {`k`/`M`}
@@ -96,7 +98,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-010 | `cost` truthy non-object | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
 | EC-011 | ±Infinity | OverflowError not caught → guard line (BC-1.02.026, CP-S11) |
 | EC-012 | `total_lines_added` a JSON integer beyond int64 but within float64, e.g. int(1e300) | `int(n)` is exact (Python arbitrary precision); `n / 1e6` converts `n` to float first (exact here) and rounds twice — the result is `float(n)/1e6`, not the correctly rounded exact quotient (e.g. n = 2**53+1 → 9007199254.740992, where the exact quotient rounds to …93; oracle-verified 2026-11-18) → hylo reproduces the oracle bytes by emulating the double rounding (OD-156, extends OD-137; oracle: `format(int(1e300)/1e6, ".1f")` = the 298-character `……1056.0M` string) |
-| EC-013 | a JSON integer beyond the int→float conversion threshold, e.g. 2·10³¹⁵ or 10**310 | `n / 1e6` raises OverflowError because the int operand cannot be converted to float (|n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸; taxonomy **CP-O03**) — even though a 1e304 quotient would fit — uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156; oracle-verified 2026-11-18) |
+| EC-013 | a JSON integer beyond the int→float conversion threshold, e.g. 2·10³¹⁵ or 10**310 | **Positive side:** `n / 1e6` raises OverflowError because the int operand cannot be converted to float (|n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸; taxonomy **CP-O03**) — even though a 1e304 quotient would fit — uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156; oracle-verified 2026-11-18). A huge **negative** integer never divides: it fails both `>=` tests and renders exactly via `str(n)` (SL:860; oracle-verified 2026-11-17: `_fmt_lines(−10**400)` emits the exact decimal) |
 
 ## Canonical Test Vectors
 

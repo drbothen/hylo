@@ -2,19 +2,19 @@
 document_type: domain-spec-section
 level: L2
 section: "domain-events"
-version: "1.0"
+version: "1.1"
 near_title: ""
 version_notes: ""
 status: draft
 producer: business-analyst
-timestamp: 2026-11-15T21:30:00Z
+timestamp: 2026-11-18T05:40:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r8.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "600cb42"
+input-hash: "4eeb7ce"
 traces_to: L2-INDEX.md
 ---
 
-# Domain Events (EVT-NNN)
+# Domain Events (EVT-NN)
 
 > Pass 2 output. Two registers: the **ledger** — the D7-frozen, legacy-named catalog
 > (P2r4 §3.2, amended P2r8 §7) — and hylo's **live event stream** (D16). Event names

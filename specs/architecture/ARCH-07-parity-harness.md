@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-18T22:00:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "6144b8f"
+input-hash: "1b3c4df"
 
 ---
 
@@ -58,12 +58,32 @@ input-hash: "6144b8f"
 
 - Explicit absolute CPython 3.11.x interpreter path, never PATH discovery (OD-104);
   invoked with `-s`, never `-I`/`-E` — `-I` would drop the sitecustomize clock shim
-  (OD-109). Child environment constructed from scratch: no `*_proxy`, fixed
-  HOME/USERPROFILE, TMPDIR, `LANG=en_US.UTF-8`, no inherited GP-1..GP-6 variables.
+  (OD-109). Child environment constructed from scratch — ALLOWLIST construction, never
+  inherit-then-strip (BC-6.01.002:70/:157 authoritative; pass-5 A02 aligns VP-034 and
+  this section to it). Per-OS allowlists (exact key sets; the VP-034 skeleton asserts
+  the exact allowlisted key set):
+  - POSIX: `HOME` (fixed per-case temp dir), `TMPDIR`, `PATH`,
+    `LANG=en_US.UTF-8` (the strict UTF-8 parity locale, BC-1.01.008 inv 2),
+    `PYTHONPATH` (sitecustomize clock shim only), `TZ=UTC` (pin, OD-171/OD-177).
+  - Windows: `USERPROFILE` (fixed per-case temp dir), `TMP`, `TEMP`, `SYSTEMROOT`
+    (canonical NT spellings as constructed; the child env is built from scratch, so
+    the host shell's case-insensitive key matching never applies — pass-5 A2-07),
+    `PATH`, `PYTHONPATH` (shim only), `TZ=UTC`.
+  - Both OSes: NO other `PYTHON*` variable except `PYTHONPATH` (EC-002: no
+    `PYTHONUTF8`, no `PYTHONIOENCODING` — BC-1.01.008 inv 2: `PYTHONUTF8=1` is NOT
+    the parity mode), no `*_proxy`, no inherited GP-1..GP-6 variables (e.g. no
+    `DGX_SL_TTL`, which changes legacy TTL).
 - Clock shim `internal/statusline/testdata/pyhooks/sitecustomize.py` on `PYTHONPATH`
   freezes `time.time`/`strftime`/`localtime`/`gmtime` from `HYLO_TEST_NOW` (decimal
   string parsed by both sides), stepped between refreshes; canary test fails the harness
-  if the shim did not load (BC-6.01.003). Depth boundaries are call-context dependent
+  if the shim did not load (BC-6.01.003). Frozen-clock law (pass-5 D02, call 7): the
+  shim parses `HYLO_TEST_NOW` to a float64 exactly as Python `float()` (within the BC
+  grammar) and that float IS the `time.time()` value everywhere — Go parses the value
+  to float64 once and `Env.Now` returns it directly; it is never round-tripped through
+  `time.Time` nanoseconds (float64 spacing at ~1.79e18 ns exceeds the seconds-value
+  ulp, so fractional instants could return as a neighbouring double and repr-drift the
+  cache `ts`/`rl_ts`/`fetch_ts` bytes). `TimeFloat` applies only to the real clock
+  (ARCH-06 time.go). Depth boundaries are call-context dependent
   (ADV-P1-B17): the stdio shim and runner frames change the Python-frame depth at
   `json.load`, so the oracle is always invoked with the exact recorded recipe for the
   site being measured — the END-TO-END program invocation (piped stdin through
@@ -88,7 +108,7 @@ input-hash: "6144b8f"
 |---|---|
 | Runner package | `internal/parity` |
 | Interpreter setting | `HYLO_PARITY_PYTHON` (settled, OD-104/OD-108) |
-| Golden update flag | `-update` (`go test ./internal/parity -run TestParityTierB -update`); writes Python output; fails if interpreter unset |
+| Golden update flag | `-update` (`go test ./internal/parity -run TestParityTierB -update`); writes Python output; fails if interpreter unset. Writes ONLY the host's NATIVE golden set — `*.golden` from a Linux oracle run, `*.windows.golden` from a WINDOWS oracle run (pass-5 D29: a Linux `-update` run never touches `*.windows.golden`, resolving the BC-6.03.001 PC-6/PC-8 contradiction); regenerating the Windows set therefore requires the same command on a Windows host with the pinned interpreter (owner-periodic action; both sets committed together) |
 | Tier A test | `TestParityTierA_Corpus` |
 | Tier B test | `TestParityTierB_Goldens` |
 | Tier C test | `TestParityTierC_DiffFuzz`, budget env `HYLO_PARITY_FUZZSECONDS` (0 = skip; nightly sets 1800 = 30 min per OS, OD-149) |
@@ -104,7 +124,7 @@ input-hash: "6144b8f"
 | Clock shim | `internal/statusline/testdata/pyhooks/sitecustomize.py` |
 | pyfmt generators/tables | `internal/pyfmt/testdata/gen/*.py`; tables `internal/pyfmt/testdata/*.golden` |
 | Replay captures (git-ignored) | `captures/` (repo root) |
-| D4-EX-3 class tests | `TestD4EX3_{Boolean,Enum,URL,Number}` — FOUR names, four classes (pass-4 D22, canonical set): `Number` covers both number-range (BC-2.02.002) and number-grammar (BC-2.02.003; the grammar class maps to `_Number`). No Theme member — theme settings are rejected by the corpus validator (BC-6.02.003 EC-007), so a Theme D4-EX-3 case cannot exist in the corpus; superseding the earlier six-name list |
+| D4-EX-3 class tests | `TestD4EX3_{Boolean,Enum,URL,Number,Text}` — FIVE names, five classes (OD-178, pass-5 A07; superseding the pass-4 four-name set): `Number` covers both number-range (BC-2.02.002) and number-grammar (BC-2.02.003; the grammar class maps to `_Number`); `Text` is the OD-178 seventh D4-EX-3 class covering composite-shape, pill-label, glyph and empty-text errors, with exact reason strings in the taxonomy vocabulary and its own table test `TestD4EX3_Text`. No Theme member — theme settings are rejected by the corpus validator (BC-6.02.003 EC-007), so a Theme D4-EX-3 case cannot exist in the corpus; superseding the earlier six-name list |
 | D4-EX-1 test | `TestWindowAge_D4EX1_Windows` |
 | Seeds reference | `seed/` holds the four cache files under their legacy file-name formats (legacy-shared named constants, BC-1.06.001; not renamed by the harness) |
 
@@ -116,6 +136,15 @@ fixtures from the subject package (the pass-4 D10 fix aligned all live docs to t
 OD-148 layout); Tier B goldens stay under `internal/statusline/testdata/` (they pin
 statusline bytes); Go testdata is opaque, so the cross-package read is deliberate —
 one fixture home per fixture class, no duplicate corpus.
+
+Fixture resolution rule (pass-5 A2-16, call 18): `go test` sets cwd to the PACKAGE
+directory, so cwd-relative fixture paths load zero cases and the POL-11 guard turns
+that into a false red. Tests in `internal/parity` (and any cross-package testdata
+reader) resolve fixtures through the named helper `par.moduleRoot()` — walks up from
+cwd to the directory containing `go.mod`, returns that root; fixture paths are rooted
+at the module root (`internal/statusline/testdata/...` relative to it), never
+cwd-relative. Table-tested by the helper itself (run from a nested package dir:
+resolver finds the root from any package directory).
 
 ## Mapping
 

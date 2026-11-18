@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "ffd4947"
+input-hash: "90ef9bd"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -23,6 +23,8 @@ modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-17T21:58:00Z patch bump + sync-check SC-08: Decode call snippets pinned to the 3-arg signature with the transcript budget"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D01+D11: boundary restated as TOTAL nesting depth (formula L = 999 minus F frames, F = 6); recipe re-derived, largest accepted d = 992 = L-1 (total 993); third stdin site main_subagent SL:930 pinned 993/994, over-limit = zero bytes stdout"
+  - "2026-11-18T23:30:00Z (1.2.5) ADV-P5 remediation D17 — PC-7 reconciliation sentence: encoder budgets measured per site under the unified law 993 − W (BC-5.02.006 PC-6), strictly below the decoder acceptance at every shared context"
+  - "2026-11-19T02:00:00Z (1.2.6) pass-5 remediation sweep — PC-7 encoder reconciliation restated to the re-measured sweep-C law (995 − s json.dump / 994 − s json.dumps, s = frames at the encode call inclusive; per-site budgets session/mix 991, record_cost/git 990, composition 991/990; Save budget equals Load budget; exposure = stdin rate_limits value depth 991..992, session-save document flip 991 saved / 992 skipped), matching BC-5.02.006 PC-6 and ARCH-06"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -89,7 +91,19 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
    site, and importing `_mix_counts` through a runner frame instead of the program's own `main` shifts the measured
    boundary. For the `main_subagent` site the same boundary is observed on stdout: stdin nested to total depth 993
    under `"tasks":[…]` renders a row (90 bytes); total depth 994 yields **zero bytes** (the swallowed `json.load`
-   exception leaves `d = {}`, which renders no rows).
+   exception leaves `d = {}`, which renders no rows). **Encoder reconciliation (ADV-P5-D17, law as re-measured pass-5 sweep C; BC-5.02.006 PC-6, ARCH-06):** the
+   encoder also spends one slot per level and one per Python frame, but its acceptance is `K_entry − s`:
+   `995 − s` for `json.dump` (cache writes) and `994 − s` for `json.dumps` (C encoder), with `s` = Python
+   frames at the encode call, invoking frame inclusive (`<module>` = 1). Pinned per-site budgets (measured
+   end to end with `python3 -I`, CPython 3.11.7, isolated temp HOME+cwd): session/mix saves 991,
+   record_cost/git 990, composition 991/990; the session-save end-to-end flip is a stdin document nesting
+   991 saved / 992 skipped (stdin `rate_limits` value 990 — encoded document 991 — is the deepest that
+   still saves). At equal chain depth every cache's Save budget EQUALS its Load budget (session/mix
+   991/991, git/cost 990/990), so `Decode(Save(x))` never rejects what `Save` produced; a deeper stack
+   never has the larger budget and a shallower stack never has the smaller one. The real exposure is the
+   stdin side: a `rate_limits` nested to total value depth 991..992 decodes here (decoder bound 993) yet
+   breaches the session Save budget 991, so a value that decodes can still fail to re-encode. `Decode`
+   keeps its per-call-site `L`; the encoder's per-site `budget` travels with `Dumps`/`DumpsLen`.
 
 ## Invariants
 

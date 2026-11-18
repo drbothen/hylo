@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:38:00Z
+timestamp: 2026-11-19T03:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.01.002.md, behavioral-contracts/ss-05/BC-5.02.003.md, behavioral-contracts/ss-01/BC-1.03.004.md, prd-supplements/nfr-catalog.md]
-input-hash: "cc8f7c0"
+input-hash: "367ba60"
 traces_to: prd.md
 source_bc: BC-5.02.003
 bcs: [BC-5.02.003, BC-1.01.002, BC-1.03.004, BC-1.07.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — per-site table states both protocol sites at 993/994 (measured end to end on legacy 2026-11-17, superseding the 989/990 direct-probe figure); cache-load sites declared unmeasured/open, due before Phase 3 (A2-13); proof_file_hash field added (A2-29)", "1.3 2026-11-17: pass-2 follow-up — ADV-P2-A07 closed: governing formula limit = 999 − Python frames from <module> down to json.raw_decode recorded; all eight loader sites stated (stdin/transcript 993/994, session cache 991/992 and git cache 990/991 measured; get_sample, claude_window_start, mix cache and the cost-history loaders derived from equal chain depth); per-site measurement recipe added; harness asserts limit/limit+1 at every site", "1.4 2026-11-18T09:07:00Z: ADV-P3 fixes — main_subagent depth row added: same 6-frame chain as stdin, 993/994, over-limit input renders zero bytes (BC-1.07.003), not the degraded line (A2-22); line-number citations to BC-5.02.003 stripped in favor of content anchors (anchor drift, ADV-P3-D29)", "1.5 2026-11-18T14:38:00Z: ADV-P4 fixes — recipe observable corrected per BC-1.01.002: depth L+1 decodes to {} and renders the 45-byte default line, not the degraded line (A2-16); subagent chain re-labelled <module> → main_subagent (legacy calls main_subagent from <module>, SL:1240-1241); BC-1.07.003 added to bcs: to match the body's row (A2-11)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — per-site table states both protocol sites at 993/994 (measured end to end on legacy 2026-11-17, superseding the 989/990 direct-probe figure); cache-load sites declared unmeasured/open, due before Phase 3 (A2-13); proof_file_hash field added (A2-29)", "1.3 2026-11-17: pass-2 follow-up — ADV-P2-A07 closed: governing formula limit = 999 − Python frames from <module> down to json.raw_decode recorded; all eight loader sites stated (stdin/transcript 993/994, session cache 991/992 and git cache 990/991 measured; get_sample, claude_window_start, mix cache and the cost-history loaders derived from equal chain depth); per-site measurement recipe added; harness asserts limit/limit+1 at every site", "1.4 2026-11-18T09:07:00Z: ADV-P3 fixes — main_subagent depth row added: same 6-frame chain as stdin, 993/994, over-limit input renders zero bytes (BC-1.07.003), not the degraded line (A2-22); line-number citations to BC-5.02.003 stripped in favor of content anchors (anchor drift, ADV-P3-D29)", "1.5 2026-11-18T14:38:00Z: ADV-P4 fixes — recipe observable corrected per BC-1.01.002: depth L+1 decodes to {} and renders the 45-byte default line, not the degraded line (A2-16); subagent chain re-labelled <module> → main_subagent (legacy calls main_subagent from <module>, SL:1240-1241); BC-1.07.003 added to bcs: to match the body's row (A2-11)", "1.6 2026-11-18T23:45:00Z: ADV-P5 fix (A2-05) — metrics-reply decode site added to the per-site table and harness: main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames, 992 accepted / 993 rejected — MEASURED end to end (localhost HTTP reply carrying a nested list under an ignored metric key, isolated HOME/cwd per run, python3 -I, 2026-11-18), confirming the 7-frame derivation; BC-5.02.004 names metrics replies pyfmt.Value decodes, so a Go budget drift here is now detected", "1.7 2026-11-19T03:00:00Z: ADV-P5 residual fix — the ModeText cache-loader citation's line-number pointer replaced with the ARCH-04 heading fragment anchor (anchor-drift lesson, ADV-P3-D29)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,6 +47,7 @@ argument is derived from the observed flip depth, not a free constant.
 | stdin payload — main → json.load | 6 | 993 | 994 | measured |
 | subagent stdin — <module> → main_subagent → json.load | 6 | 993 | 994 | measured; over-limit input renders zero bytes (BC-1.07.003), not the degraded line |
 | transcript lines — main → _mix_counts → json.loads | 6 | 993 | 994 | measured |
+| metrics reply — main → get_sample → fetch_sample → json.loads(resp.read()) | 7 | 992 | 993 | measured (localhost HTTP reply, 2026-11-18, ADV-P5-A2-05; BC-5.02.004 names metrics replies pyfmt.Value decodes) |
 | session cache — main → effective_rl → load_cache | 8 | 991 | 992 | measured |
 | get_sample loader (session-cache chain depth) | 8 | 991 | 992 | derived |
 | claude_window_start loader (session-cache chain depth) | 8 | 991 | 992 | derived |
@@ -59,7 +60,8 @@ observable over the wire is zero bytes at depth 994; transcript: re-measured end
 end 2026-11-17, superseding the 989/990 direct-probe figure quoted in an earlier
 revision of BC-5.02.003. Cache loaders:
 ADV-P2-A07 closed — session and git caches measured end to end; peer loaders derived
-from equal chain depth; sites are ModeText, ARCH-04:43.) Each measured site is tested
+from equal chain depth; sites are ModeText ([ARCH-04, byte-exact cache-writer
+decision](../architecture/ARCH-04-data-files.md#decision-go-is-byte-exact-cache-writer-and-reader-across-pythongo-swaps-ad-08).) Each measured site is tested
 at exactly L accepted / L+1 rejected. Boundary values behave identically to CPython
 3.11 `json.load`/`json.loads(bytes)`.
 
@@ -69,7 +71,10 @@ default line (BC-1.01.002 — a decode-to-empty, not the degraded ladder). Trans
 deep JSON line;
 acceptance observable: the count shows in the mix-cache tin. Session cache — deep key
 accepted: the key is kept after a run with rate_limits. Git cache — deep cache
-accepted: the cached branch is shown.
+accepted: the cached branch is shown. Metrics reply — a localhost HTTP server serves
+the /api/v1/query reply with a nested list grown under an ignored `metric` key until
+the flip; the observable is the row-2 telemetry regime (sample present vs no-sample);
+isolated HOME and cwd per run, ADV-P5-A2-05, measured 992/993 on 2026-11-18.
 
 ## Source Contract
 
@@ -105,6 +110,7 @@ func TestDecode_DepthBudgetsPerCallSite(t *testing.T) {
     cases := []struct{ name string; mode pyfmt.DecodeMode; ok, reject int }{
         {"stdin site", pyfmt.ModeText, 993, 994},
         {"transcript site", pyfmt.ModeBytes, 993, 994},
+        {"metrics reply (get_sample → fetch_sample)", pyfmt.ModeBytes, 992, 993}, // ADV-P5-A2-05, measured 2026-11-18
         {"session cache (+ get_sample, claude_window_start, mix cache)", pyfmt.ModeText, 991, 992},
         {"git cache (+ record_cost, cost_thresholds)", pyfmt.ModeText, 990, 991},
     }

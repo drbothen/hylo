@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "6ff22b8"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1016-1017; _MIX_CACHE SL:951)"
@@ -19,7 +19,9 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C12) — `日本` row promoted to the canonical vectors as the per-code-point discriminator; EC-002 corrected (per-byte gives 100, masked by truncation) and EC-002/EC-006 remarks aligned"
+  - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — frontmatter YAML repaired (stray leading comma removed from the modified list); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,11 +66,11 @@ scope).
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | `a.b/c d` | `a_b_c_d` |
-| EC-002 | `é` × 50 | 40 × `_` (a per-byte substitution would give 80 before truncation — wrong) |
+| EC-002 | `é` × 50 | 40 × `_` (a per-byte substitution would give 100, and truncation to 40 masks the difference — this case alone does not discriminate; the discriminating canonical case is `日本`, EC-006) |
 | EC-003 | `../../etc` | `______etc` (no path traversal) |
 | EC-004 | 50 × `x` | 40 × `x` |
 | EC-005 | `""` / null / missing | `nosession` |
-| EC-006 | `日本` | `__` |
+| EC-006 | `日本` | `__` (2 code points substitute to 2 `_` with no truncation involved; per-byte would give 6. Canonical discriminator, promoted to the vector table ADV-P5-C12) |
 | EC-007 | sid `123` (int) with an existing transcript | degraded line (CP-S14); `TypeError: expected string or bytes-like object` in legacy |
 | EC-008 | sid `true` / `["a"]` | degraded (CP-S14) |
 | EC-009 | sid `0` / `false` | falsy → `nosession`, no degrade |
@@ -84,6 +86,7 @@ Re-pinned 2026-11-15 with the legacy oracle (CPython 3.11).
 | sid `ok-_9` | `statusline-mix-ok-_9.json` | happy-path |
 | sid = 50 × `é` | `statusline-mix-________________________________________.json` (40 underscores) | edge-case |
 | sid `../../etc` | `statusline-mix-______etc.json` | edge-case |
+| sid `日本` | `statusline-mix-__.json` (2 underscores; per-byte would give 6 — the per-code-point discriminator, ADV-P5-C12) | edge-case |
 | sid `""` | `statusline-mix-nosession.json` | edge-case |
 | sid `123` (JSON number), transcript exists | stdout = `\x1b[90mstatusline degraded\x1b[0m\n` (29 bytes), exit 0, no mix cache | error |
 

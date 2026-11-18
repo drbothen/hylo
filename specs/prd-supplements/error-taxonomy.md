@@ -1,17 +1,20 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.6"
+version: "1.9"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:38:15Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "2746ce6"
+input-hash: "cbbb005"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
+  - "1.7 2026-11-18: pass-5 remediation — seventh D4-EX-3 class Text (OD-178) with exact reason strings; CP-O06/O07 site widening per BC-1.03.018 (ADV-P4-C08); CP-O10/O11 bearer sites split stdin/history; CP-O09 divergence claim corrected (temp-file, not D4-EX-2; ADV-P5-A21); CP-N03 insertion-order wording (ADV-P5-C2-21)"
+  - "1.8 2026-11-18: pass-5 residual sweep — glyph Text reason string matched byte for byte to the class contract vocabulary (expected exactly 1 code point and 1 display column); no behavioral change"
+  - "1.9 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19/SC-20) — history re-spun oldest-first so the version field matches the last entry; no behavioral change"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -27,7 +30,7 @@ modified:
 | Category Code | Category | Description |
 |--------------|----------|-------------|
 | REN | Rendering degrade | guard recovery or typed crash-path degrade; the 29-byte line |
-| CFG | Configuration | D4-EX-3 invalid `HYLO_*` values (six classes) |
+| CFG | Configuration | D4-EX-3 invalid `HYLO_*` values (seven classes) |
 | CLI | Command-line | unknown flags, usage errors |
 | VAL | Validation | `config validate` reporting |
 | NET | Metrics transport | metrics store unreachable/500/garbage |
@@ -63,9 +66,10 @@ config error — OD-162; int64-overflow and Duration-ceiling values are number-r
 OD-164), number-grammar (BC-2.02.003), enum (BC-2.02.004), URL (BC-2.02.005), boolean
 (BC-2.02.006; OD-140 — dedicated class contract; grammar pinned in BC-2.01.005), theme/SGR
 (BC-2.01.003 — reason string `not an SGR parameter list`, named class per OD-134, resolving
-PRD OQ-6). The class register is closed at six (OD-114 four + OD-134 + OD-140); a seventh
-class needs an owner decision. Unknown-flag precedence: E-CLI-001 is checked before
-E-CFG-001.
+PRD OQ-6), and **Text** (BC-2.01.005 — composite-shape, pill-label, glyph and empty-text
+errors; named seventh class by **OD-178**, pass-5 A06/D05). The class register is closed
+at seven (OD-114 four + OD-134 + OD-140 + OD-178). Unknown-flag precedence: E-CLI-001 is
+checked before E-CFG-001.
 
 ## Reason Vocabulary (exact strings, BC-2.02.001)
 
@@ -80,17 +84,25 @@ E-CFG-001.
 | `scheme must be http or https` / `not a URL` / `missing host` | URL | BC-2.02.005 |
 | `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) | BC-2.02.005, BC-2.01.003 |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
+| `expected JSON <shape>` (`<shape>` = e.g. `array of 2 numbers`, `object {cc,other} of integers`) | Text (composite shape; OD-178) | BC-2.01.005 |
+| `expected non-empty control-free text of display width 1..16` | Text (pill labels; OD-178) | BC-2.01.005 |
+| `expected non-empty control-free text` | Text (generic non-empty Text keys: `window_age.process_name`, `subagent.tokens.suffix`, `labels.input`, ...; OD-178) | BC-2.01.005 |
+| `expected exactly 1 code point and 1 display column` | Text (glyph family and `statusline.subagent.glyphs.*` runtime values; OD-178) | BC-2.01.005, BC-2.01.004 |
 | `empty path` / `home directory unknown` | path (BC-2.01.005 grammar; no dedicated class contract) | BC-2.01.005 |
 | `exactly one backend entry until P6` | backends (BC-2.01.002 cardinality rule; no dedicated class contract) | BC-2.01.002 |
 
-Reconciliation with the closed register: the six closed classes (OD-114 four + OD-134 +
-OD-140) are the classes with dedicated class contracts and D4-EX-3 table tests. The
-vocabulary above also contains reasons raised under the same E-CFG-001 surface by other
-contracts: the path-grammar reasons (`empty path`, `home directory unknown`) come from
-BC-2.01.005 and the backends-cardinality reason from BC-2.01.002 — each maps to its raising
-contract, not to a seventh class; `control character` maps to the URL class when raised by
-BC-2.02.005 and to the theme class when raised by BC-2.01.003. The class register stays
-closed at six.
+Reconciliation with the closed register: the seven closed classes (OD-114 four + OD-134 +
+OD-140 + Text by OD-178) are the classes with dedicated class contracts and D4-EX-3
+table tests. The canonical D4-EX-3 table tests are `TestD4EX3_Boolean`, `TestD4EX3_Enum`,
+`TestD4EX3_URL`, `TestD4EX3_Number` (range and grammar classes merged into one test;
+pass-4 D22) and `TestD4EX3_Text` (OD-178); there is no Theme member (theme settings are
+rejected by the corpus validator; pass-4 D22). The theme class keeps its dedicated class
+contract BC-2.01.003. The vocabulary above also contains reasons raised under the same
+E-CFG-001 surface by other contracts: the path-grammar reasons (`empty path`,
+`home directory unknown`) come from BC-2.01.005 and the backends-cardinality reason from
+BC-2.01.002 — each maps to its raising contract, not to an eighth class;
+`control character` maps to the URL class when raised by BC-2.02.005 and to the theme
+class when raised by BC-2.01.003. The class register stays closed at seven.
 
 ## Severity Definitions
 
@@ -120,8 +132,8 @@ degrading the whole render (ADV-P2-B01/C01 evidence).
 | CP-O03 | lines segment (SL:857) | BC-1.02.014 | huge int enters `n / 1e6` in `_fmt_lines` |
 | CP-O04 | token segment (SL:866) | BC-1.02.025 | huge int enters `float(n)` in `_fmt_tok_c` |
 | CP-O05 | window-age suffix (SL:558-559) | BC-1.02.017 | huge `total_duration_ms` enters `win_ms − dur` |
-| CP-O10 | cost segment (SL:616) | BC-1.05.007 | huge exact int `usd` — from stdin `cost.total_cost_usd`, or from the cost history via `cost_thresholds` (SL:255, BC-1.05.005 EC-011) — enters `f"{usd:.2f}"` (int-to-float conversion) |
-| CP-O11 | $/h burn-rate division (SL:622-623) | BC-1.05.007 | huge exact int `api_ms` — from stdin `cost.total_api_duration_ms`, or from the cost history via `cost_thresholds` (SL:255, BC-1.05.005 EC-011) — enters `api_ms / 3.6e6` |
+| CP-O10 | cost segment (SL:616, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.005 (EC-011, history bearer) | huge exact int `usd` — stdin-borne it enters `f"{usd:.2f}"` at the render site (SL:616); history-borne it raises in `cost_thresholds` at SL:255 (the `usd / (api / 3.6e6)` division or the percentile math), NOT at SL:616 (pass-5 C2-10) |
+| CP-O11 | $/h burn-rate division (SL:622-623, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.005 (EC-011, history bearer), BC-1.05.002 (EC-009, co-owner) | huge exact int `api_ms` — stdin-borne it enters `api_ms / 3.6e6` (SL:622-623); history-borne it raises at the `api / 3.6e6` division in `cost_thresholds` (SL:255) — including a huge positive recorded `api_ms` with a small `usd` (pass-5 C2-10) |
 
 CP-O10/O11 bearers (pass-4 B14/C2-10 anchor correction): SL:616 and SL:622-623 read the
 stdin `cost` fields; the cost-history-borne raise happens in `cost_thresholds` at SL:255
@@ -149,14 +161,16 @@ conversion is skipped whole (no partial mutation of parser state) and the in-fli
 is dropped (OD-167), matching the D4-EX-2 skip discipline. Big integers beyond int64
 accumulate exactly — there is **no** int64 accumulation-overflow skip (BC-1.03.006
 EC-002). Legacy instead degrades sticky (nothing saved that refresh); the resulting
-cache-byte divergence rides the extended D4-EX-2 entry. This resolves ADV-P2-C01
+cache-byte divergence rides the extended D4-EX-2 entry — a claim scoped to the CP-O06..O08
+skip family only: at the save-time CP-O09 site both sides write nothing and there is no
+divergence (see its row; pass-5 A21). This resolves ADV-P2-C01
 ([owner-question]): the degrade is kept for parity by naming it, not by inventing
 behavior.
 
 | Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
 |-----------|------------------|--------------|---------|
-| CP-O06 | usage accumulation (SL:1108) | BC-1.03.006 | `_i + _w`, or a cached float `tin`, meets a 310+-digit `cache_creation_input_tokens` |
-| CP-O07 | rebuild-excess check (SL:1117, `_w - max(0, prompt - pp) > REBUILD_EXCESS`) | BC-1.03.007 | `prompt - pp` with a float `pp` and a huge exact int (ADV-P3-C03: this is the rebuild predicate, not the turn machine) |
+| CP-O06 | usage accumulation (SL:1108-1112, widened per BC-1.03.018; ADV-P4-C08) | BC-1.03.006 | `_i + _w`, a cached float `tin`, or the `c_*`/`tout` updates at SL:1109-1112 meet a 310+-digit `cache_creation_input_tokens` |
+| CP-O07 | rebuild-excess check (SL:1117, `_w - max(0, prompt - pp) > REBUILD_EXCESS`) | BC-1.03.007 | `prompt - pp` with a huge exact int and a float operand on either side: a float `pp` meeting a huge int `prompt`, or the mirror case — a huge-int `pp` meeting a float `prompt` (ADV-P3-C03: this is the rebuild predicate, not the turn machine; mirror case added ADV-P4-C08) |
 | CP-O08 | turn machine (SL:994/996) | BC-1.03.010, BC-1.03.016 | `TURN_STALE * out` or `out / span` with a huge exact int `out` |
 
 **Surface 2 consequence — reachable in hylo (ADV-P3-C09; not moot):** two 4,300-digit
@@ -165,7 +179,7 @@ totals can still breach CPython's 4,300-digit int-to-string limit at the save.
 
 | Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
 |-----------|------------------|--------------|---------|
-| CP-O09 | mix-cache save (SL:203-205) | BC-1.03.005, BC-1.03.006 | totals above CPython's 4,300-digit int-to-string limit fail `json.dump`; legacy swallows, writes nothing, leaves a partial temp — hylo reproduces the no-write, and the cache-byte divergence rides the extended D4-EX-2 entry |
+| CP-O09 | mix-cache save (SL:203-205) | BC-1.03.005, BC-1.03.006 | totals above CPython's 4,300-digit int-to-string limit fail `json.dump`; legacy swallows, writes nothing, leaves a partial temp — hylo reproduces the no-write. Both sides write nothing, so there is NO cache-byte divergence here; the observable difference is the leaked partial temp, covered by the `temp-file` exclusion (BC-6.03.003), not by D4-EX-2 (pass-5 A21) |
 
 **Conversion threshold (verified on the pinned oracle, ADV-P3-C07):** CPython int→float
 rounds to nearest and raises `OverflowError` only for `|n| >= 2**1024 - 2**970`;
@@ -234,11 +248,12 @@ fault injection (out of parity scope; never-blank/exit-0 per DI-008).
 
 Every CP-S/CP-T/CP-N/CP-O/CP-A trigger resolves to E-REN-001 or E-REN-002 or a stated
 widget fallback (Surface 2 transcript triggers resolve to the D4-EX-2 skip discipline for
-CP-O06..O08 and to the legacy no-write save for CP-O09 — BC-1.03.006 PC5);
+CP-O06..O08 and to the legacy no-write save for CP-O09 — BC-1.03.006 PC5 — the save-time
+difference being the `temp-file` exclusion, not a cache-byte divergence; pass-5 A21);
 the per-trigger disposition lives in the owning BC (CP-S01..S17 in BC-1.02.x /
 BC-1.01.x, CP-T01..T07 in BC-1.03.x, CP-N01/N02 in BC-1.04.x, CP-N03 — the metrics-borne
-degrade: a numeric `__name__` key sorts ahead of every `vllm:` key and `k.startswith`
-raises AttributeError, SL:717 — in BC-1.04.x per the pass-4 design call 17,
+degrade: a numeric `__name__` key precedes every `vllm:` key in dict insertion order and
+`k.startswith` raises AttributeError, SL:717 — in BC-1.04.x per the pass-4 design call 17,
 CP-O01..O11 per the OD-156
 register above, CP-A01..A05 per the Surface 3 register). The import/exit-time triggers
 CP-X01/X02 are replaced by D4-EX-3 (BC-2.02.001) and CP-X03 is the named exclusion

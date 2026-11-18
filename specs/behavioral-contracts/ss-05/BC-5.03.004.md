@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "a7014d0"
+input-hash: "bebcc79"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces os.path normpath/basename used at legacy/dgx_statusline.py SL:373-390, 460)"
@@ -18,7 +18,7 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18: ADV-P4 remediation D18 - abspath/join/dirname de-scoped from pyfmt (ARCH-06 agreement); flavor selection pinned to runtime.GOOS incl. Basename", "1.2.2 2026-11-17: pass-4 residual sweep — BC-1.02.003 cross-reference updated to the enriched project-label title (ADV-P4-B17)"]
+modified: ["1.2.1 2026-11-18: ADV-P4 remediation D18 - abspath/join/dirname de-scoped from pyfmt (ARCH-06 agreement); flavor selection pinned to runtime.GOOS incl. Basename", "1.2.2 2026-11-18: pass-4 residual sweep — BC-1.02.003 cross-reference updated to the enriched project-label title (ADV-P4-B17)", "1.2.3 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — 1.2.2 entry re-dated ascending (its stamp predated 1.2.1); no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null

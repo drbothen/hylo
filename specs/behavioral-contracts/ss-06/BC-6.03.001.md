@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "9af8495"
+input-hash: "f2ba5d0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -29,6 +29,7 @@ introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04: subagent corpus family added to the Python-written goldens with --subagent oracle argv (OD-155)"
   - "1.2.2 2026-11-18: ADV-P4 remediation D10 - -update relocated to ./internal/parity (corpus-owning package, canonical layout)"
+  - "2026-11-19T00:25:00Z (1.2.3) ADV-P5 remediation D29 — -update per-OS write path defined: .windows.golden variants are written by an -update run ON Windows; a Linux run never fabricates them; metadata records the writing OS"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -138,8 +139,16 @@ Go must reproduce them on every OS without Python installed. OS-dependent cases 
    and match P3r2 §A1.
 6. **Tier B write rule.**
    - `go test ./internal/parity -update` writes these goldens by running the
-     oracle (BC-6.01.001) on Linux, never from Go output (the `-update` flag lives in
+     oracle (BC-6.01.001) on the OS the variant targets, never from Go output (the
+     `-update` flag lives in
      `./internal/parity`, the package that owns the corpus — ADV-P4-D10 layout).
+     Per-OS write path (ADV-P5-D29): the ubuntu and macOS variants are written by an
+     `-update` run on that OS (CI-adjacent developer runs); the
+     `<name>.windows.golden` variants (PC 8) are written by an `-update` run ON
+     Windows (a windows-2025 runner or workstation executing the same flag) — an
+     `-update` run on Linux writes only the Linux (and, when its flavors match, the
+     shared) golden files and never fabricates a `.windows.golden`. Golden metadata
+     records the writing OS and the resolved CPython patch version (RK-4).
    - `-update` without a valid oracle interpreter fails; it never falls back to writing
      Go's output.
    - Golden metadata records the resolved CPython patch version (RK-4).

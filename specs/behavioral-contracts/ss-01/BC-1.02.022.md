@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "4f5dcbc"
+input-hash: "a99539e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,7 +20,8 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B12): ntpath pin provenance named — macOS oracle host, pure-Python fallback, values verified under it; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B03): normpath fuzz leg and the filepath.Clean lint leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B03): normpath fuzz leg and the filepath.Clean lint leg re-anchored to VP-041; 2026-11-18T03:00:00Z"
+  - "1.2.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

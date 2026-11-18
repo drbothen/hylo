@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T22:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b0c3890"
+input-hash: "e1469f0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -30,6 +30,8 @@ modified:
   - "1.2.3 2026-11-18: ADV-P4 remediation D09+D11+D21 - argv minted handler-relative (design call 9, validator admits [] and [\"--subagent\"]); Bool settings translated by value (true=1/false=0); TZ=UTC pinned for both binaries on every leg (OD-171), windows leg unskipped"
   - "1.2.4 2026-11-18T22:00:00Z: pass-4 correction (item 10) - corpus root restored to the OD-148 home internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
   - "1.2.5 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - '2026-11-19T00:10:00Z (1.2.6) ADV-P5 remediation D03+D21 — placeholder substitution only inside JSON string values with JSON-escaped path insertion (Windows \U/\t round-trip table test); Bool settings mapped by parsed value through the BC-2.01.005 grammar (operator strings, not JSON literals); outside-grammar Bool verbatim only in D4-EX-3 cases'
+  - "1.2.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — 1.2.6 entry requoted single-quoted (the Windows path-escape spelling is not a YAML double-quoted-scalar escape); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,7 +39,6 @@ retired: null
 removed: null
 removal_reason: null
 ---
-
 # Behavioral Contract BC-6.02.003: Case model: stdin template + translated settings + metrics mode + seeds + steps
 
 ## Description
@@ -59,7 +60,14 @@ directory.
 
 1. A case directory contains:
    - `stdin.json.tmpl`, a JSON template whose placeholders (`{{.CaseDir}}`,
-     `{{.ProjectDir}}`, `{{.Transcript}}`) are replaced with absolute per-case paths;
+     `{{.ProjectDir}}`, `{{.Transcript}}`) are replaced with absolute per-case paths.
+     Placeholder substitution rule (ADV-P5-D03, owner call 9): a placeholder is
+     substituted ONLY inside a JSON string value of the template, and the inserted
+     path is JSON-escaped (backslashes and control bytes escaped per the JSON string
+     grammar) before insertion — never spliced raw. A Windows table test proves a
+     path containing `\U` and `\t` byte sequences round-trips (raw insertion would
+     alter or invalidate the JSON, letting both sides decode `{}` and pass while
+     testing nothing);
    - `case.json`, with
      `{now, tz?, columns?, argv?, settings, metrics, seed?, transcript?, steps?}`;
    - optionally `metrics.json`, a canned VictoriaMetrics `/api/v1/query` instant-vector
@@ -97,10 +105,16 @@ directory.
      `DGX_SL_TRACE`, `LOCAL_MODEL_PREFIXES`; `DGX_SL_TRACE` is at SL:89).
    - Go side: the key's HYLO_* env form (OD-05; no DGX_* on the Go side).
    - **Bool value mapping (ADV-P4-D11, orchestrator design call 11):** a setting whose
-     registry type is `Bool` is translated to the legacy env BY VALUE — `true` → `1`,
-     `false` → `0` — never name-only: legacy treats any value except `"0"` as on
-     (SL:76-77), so emitting the JSON literal `false` verbatim would turn a Go-off case
-     into a legacy-on run and fabricate a divergence.
+     registry type is `Bool` is translated to the legacy env BY PARSED VALUE, never
+     name-only and never as a bare JSON literal: the operator-supplied string is parsed
+     through the BC-2.01.005 Bool grammar (`true|1|yes` → true, `false|0|no` → false,
+     byte-exact, case-sensitive, no trimming) and the legacy env receives `1` for the
+     true family and `0` for the false family — legacy treats any value except `"0"`
+     as on (SL:76-77), so emitting anything else verbatim would turn a Go-off case
+     into a legacy-on run and fabricate a divergence (ADV-P5-D21). A value outside the
+     six-string grammar is legal only in a `D4-EX-3` boolean-class case (PC 4), where
+     the operator string passes verbatim to BOTH sides and the ruled config-error
+     divergence is the scenario under test.
    - `backends[0].model_prefixes` is always emitted on both sides, even when the case
      does not set it. If the case leaves it unset, the harness emits the legacy
      production value `claude-sonnet`. A case that tests the unset-prefix behavior

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.3"
+version: "1.0.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T08:00:00Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "2ea2c17"
+input-hash: "429be0d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_tokens + token/elapsed branches (SL:909-921, 876-885)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C07/C03) — clock base is the injected Env.Now() float seconds with the time.time()*1000 float-product rule (call 7); UnixMilli guidance removed; theme keys named for the token/clock colours", "1.0.5 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the CP-A04/A05 legs ride the never-blank ladder); no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,7 +51,7 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 ## Postconditions
 
 1. Token bit: only when `tokenCount` is int/float/bool with value > 0; bytes
-   `\e[36m<fmt><suffix>\e[0m` where `<suffix>` is the configured `statusline.subagent.tokens.suffix`
+   `\e[36m<fmt><suffix>\e[0m` — the `36` is the shared theme colour key `statusline.theme.cyan` (OD-113); the settled-row status suffix and the elapsed clock use `statusline.theme.grey` (default `90`) where `<suffix>` is the configured `statusline.subagent.tokens.suffix`
    (Text, default ` tok`) and fmt = `f"{n:.0f}"` (n < k_from), `f"{n/1e3:.1f}k"` (n < m_from),
    `f"{n/1e6:.2f}M"` (n >= m_from) after `float(n)` — `k_from`/`m_from` (defaults 1000/1e6) are display
    thresholds only (the PC branch points); the 1e3/1e6 divisors are format constants that do NOT
@@ -126,6 +126,7 @@ empirically — `float(2**1024 - 2**970)` raises OverflowError, `float(2**1024 -
 |--------|----------|-------------|
 | VP-009 | `_fmt_tokens` equals CPython format over a dense grid incl. threshold boundaries (rides the Tier A T-family corpus rows) | manual corpus comparison (Tier A) |
 | VP-039 | PR-15: fused vs unfused elapsed-clock floats agree at ulp level on arm64; rendered MM:SS byte-identical across regimes | FMA detector test, darwin/arm64 only (CONV-ABS-77) |
+| VP-001 | The promised output set holds under the fault ladder incl. the subagent regime: render output, the 29-byte degraded line, subagent JSON rows or zero bytes — never blank, exit 0 (CP-A04/A05 legs ride this ladder) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -159,6 +160,7 @@ TBD — filled by story-writer
 
 - VP-009 (T-family `_fmt_tokens` dense grid)
 - VP-039 (PR-15 fused/unfused clock ulp agreement)
+- VP-001 (never-blank/exit-0 ladder; the CP-A04/A05 legs of this contract ride it)
 
 ---
 
@@ -190,5 +192,9 @@ TBD — filled by story-writer
 #### Refactoring Notes
 
 Go: keep `_fmt_tokens` as a pure `func(n any) string` mirroring float64(everything)-then-branch order;
-inject `now_ms` for testability. Apply the PR-15 remedy textually: `nowMs := float64(time.Now().UnixMilli())`
-style single-product expression, never a fused multiply-add chain.
+inject `now_ms` for testability. The clock base comes from the injected `Env.Now()` as **float64 seconds** (the
+`time.time()` value; `HYLO_TEST_NOW` pins that same float — orchestrator call 7), and the millisecond product is
+`nowMs := nowSecs * 1000` — a single float64 product, never a fused multiply-add chain. **Never**
+`float64(time.Now().UnixMilli())`: it truncates below 1 ms and bypasses the injected clock, so when the true
+elapsed time is under 1 ms past a whole second legacy shows N s and Go would show N−1 s — the MM:SS bytes differ
+(ADV-P5-C07).

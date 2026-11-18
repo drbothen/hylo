@@ -2,17 +2,28 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.9"
+version: "1.12"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:30:00Z
+timestamp: 2026-11-19T01:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
-input-hash: "0ae1696"
+input-hash: "a832b1e"
 traces_to: ../architecture/ARCH-INDEX.md
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.2 2026-11-17: VP-038 added (ADV-P1); catalog and BC coverage map regenerated from all 38 VP files", "1.3 2026-11-17: BC coverage map reconciled — BC-1.03.002 row drops VP-018; VP-018/VP-010 bcs aligned (BC-1.06.002 row already carried VP-010)", "1.4 2026-11-18: pass-2 rebuild - catalog regenerated from all 40 VP files (VP-039/VP-040 added); BC coverage map regenerated for all 153 BCs; BC-1.07.008 added to VP-003 bcs (shared-guard write-failure leg)", "1.5 2026-11-18T05:30:00Z: BC-1.07.006 added to VP-028 bcs (shared startswith prefix rule, adv-p2 sync SC-07) - directional residual shrinks to BC-1.01.004 (VP-034) and BC-1.06.001 (VP-022)", "1.6 2026-11-18T02:27:55Z: pass-3 rebuild - catalog regenerated from all 40 VP files; BC-5.01.007 added to VP-023 bcs (cited thrice in that contract's Verification Properties table); coverage map regenerated for all 154 BCs; VP-012 v1.4 rider names aligned to rider BCs (OD-30 rider respelled TestCostHistory_OD30_NumericSidStringKey); known prose-only citation exclusions: VP-022/BC-1.06.001, VP-024/BC-1.07.004, VP-034/BC-1.01.004", "1.7 2026-11-18T15:10:00Z: pass-4 rebuild - catalog regenerated from all 41 VP files (VP-041 added: S1.02 for-all property legs split from VP-028, plan item 18); VP-021 title corrected to 21 seeded sessions (A09/C2-04); VP-007 re-anchored to BC-5.04.003 (A2-10); VP-022 bcs gains BC-1.01.009 and VP-006 bcs gains BC-1.07.003 (A2-11), both enumerated under the prose-only exceptions; VP-012 closed set becomes 11 ids with OD-166 (OD-169)", "1.8 2026-11-18: pass-4 residual sweep — BC-2.02.003 coverage row gains VP-023 (its Verification Properties table cites VP-023 for the Unicode-14.0-pinned Nd-verdict tables leg, OD-170; VP-023 bcs reciprocated); removal-ruling cross-references of VP-026 (BC-3.01.001/6.01.002/6.02.003) enumerated as prose-only residuals", "1.9 2026-11-18T23:30:00Z: pass-4 sync fix — SC-05: BC-1.01.002 map row drops VP-001 (that contract removed VP-001 from its VP Anchors, ADV-P4-B11/A2-16; VP-001 bcs: and Partial coverage reciprocated in the same burst); VP-007 catalog source_bc cell reconciled to BC-5.04.003 (A2-10 follow-through); SC-12: VP-007 in BC-1.01.009 enumerated as a removal-ruling cross-reference; scripted re-sweep (41 VP files × 154 BC bodies) closes the bijection modulo the enumerated residuals"]
+modified:
+  - "1.2 2026-11-17: VP-038 added (ADV-P1); catalog and BC coverage map regenerated from all 38 VP files"
+  - "1.3 2026-11-17: BC coverage map reconciled \u2014 BC-1.03.002 row drops VP-018; VP-018/VP-010 bcs aligned (BC-1.06.002 row already carried VP-010)"
+  - "1.4 2026-11-18: pass-2 rebuild - catalog regenerated from all 40 VP files (VP-039/VP-040 added); BC coverage map regenerated for all 153 BCs; BC-1.07.008 added to VP-003 bcs (shared-guard write-failure leg)"
+  - "1.5 2026-11-18T05:30:00Z: BC-1.07.006 added to VP-028 bcs (shared startswith prefix rule, adv-p2 sync SC-07) - directional residual shrinks to BC-1.01.004 (VP-034) and BC-1.06.001 (VP-022)"
+  - "1.6 2026-11-18T06:00:00Z: pass-3 rebuild - catalog regenerated from all 40 VP files; BC-5.01.007 added to VP-023 bcs (cited thrice in that contract's Verification Properties table); coverage map regenerated for all 154 BCs; VP-012 v1.4 rider names aligned to rider BCs (OD-30 rider respelled TestCostHistory_OD30_NumericSidStringKey); known prose-only citation exclusions: VP-022/BC-1.06.001, VP-024/BC-1.07.004, VP-034/BC-1.01.004"
+  - "1.7 2026-11-18T15:10:00Z: pass-4 rebuild - catalog regenerated from all 41 VP files (VP-041 added: S1.02 for-all property legs split from VP-028, plan item 18); VP-021 title corrected to 21 seeded sessions (A09/C2-04); VP-007 re-anchored to BC-5.04.003 (A2-10); VP-022 bcs gains BC-1.01.009 and VP-006 bcs gains BC-1.07.003 (A2-11), both enumerated under the prose-only exceptions; VP-012 closed set becomes 11 ids with OD-166 (OD-169)"
+  - "1.8 2026-11-18: pass-4 residual sweep \u2014 BC-2.02.003 coverage row gains VP-023 (its Verification Properties table cites VP-023 for the Unicode-14.0-pinned Nd-verdict tables leg, OD-170; VP-023 bcs reciprocated); removal-ruling cross-references of VP-026 (BC-3.01.001/6.01.002/6.02.003) enumerated as prose-only residuals"
+  - "1.9 2026-11-18T23:30:00Z: pass-4 sync fix \u2014 SC-05: BC-1.01.002 map row drops VP-001 (that contract removed VP-001 from its VP Anchors, ADV-P4-B11/A2-16; VP-001 bcs: and Partial coverage reciprocated in the same burst); VP-007 catalog source_bc cell reconciled to BC-5.04.003 (A2-10 follow-through); SC-12: VP-007 in BC-1.01.009 enumerated as a removal-ruling cross-reference; scripted re-sweep (41 VP files \xD7 154 BC bodies) closes the bijection modulo the enumerated residuals"
+  - "1.10 2026-11-18T23:45:00Z: ADV-P5 fix (A2-19) \u2014 coverage-map rows completed per the union definition: BC-1.01.009 gains VP-022 and BC-1.07.003 gains VP-006 (both in those VPs bcs: frontmatter); the residual prose no longer excludes them, it records the owed reciprocal BC-body rows"
+  - "1.11 2026-11-19T01:00:00Z: SC-13/SC-14 closure (sync-check-adv-p5) \u2014 union-rule completion finished: BC-1.05.007 map row becomes VP-001, VP-021 and BC-1.07.007 becomes VP-001, VP-009, VP-039, matching VP-001 bcs: and those contracts' live BC-body rows (ADV-P5-A2-11/C15 reciprocals); VP-012 v1.10 gains BC-1.04.003 and BC-1.05.005 in bcs: (SC-14 reciprocity; ADV-P5-C2-17 closure citations) and the two corresponding map rows carry VP-012, so the Uncovered-BCs exception list is regenerated to exactly the re-run bijection residue (6 reverse-only edges: VP-022/BC-1.06.001, VP-024/BC-1.07.004, VP-034/BC-1.01.004 design references; VP-026 removal citations in BC-3.01.001, BC-6.01.002, BC-6.02.003); the stale VP-007/BC-1.01.009 exception is dropped \u2014 that body's removal note no longer cites VP-007 by ID"
+  - "1.12 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 the 1.6 pass-3-rebuild stamp re-dated ascending (it predated the preceding 1.5 adv-p2-sync entry); no behavioral change"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -108,7 +119,7 @@ modified: ["1.2 2026-11-17: VP-038 added (ADV-P1); catalog and BC coverage map r
 | BC-1.01.006 | VP-027, VP-040 |
 | BC-1.01.007 | VP-027, VP-040 |
 | BC-1.01.008 | VP-005 |
-| BC-1.01.009 | VP-008, VP-009 |
+| BC-1.01.009 | VP-008, VP-009, VP-022 |
 | BC-1.01.010 | VP-027 |
 
 ### S1.02 (30)
@@ -178,7 +189,7 @@ modified: ["1.2 2026-11-17: VP-038 added (ADV-P1); catalog and BC coverage map r
 |---|---|
 | BC-1.04.001 | VP-022, VP-030 |
 | BC-1.04.002 | VP-030 |
-| BC-1.04.003 | VP-030, VP-031 |
+| BC-1.04.003 | VP-012, VP-030, VP-031 |
 | BC-1.04.004 | VP-030 |
 | BC-1.04.005 | VP-030 |
 | BC-1.04.006 | VP-030 |
@@ -206,9 +217,9 @@ modified: ["1.2 2026-11-17: VP-038 added (ADV-P1); catalog and BC coverage map r
 | BC-1.05.002 | VP-021 |
 | BC-1.05.003 | VP-021 |
 | BC-1.05.004 | VP-001, VP-012, VP-020 |
-| BC-1.05.005 | VP-021 |
+| BC-1.05.005 | VP-012, VP-021 |
 | BC-1.05.006 | VP-012, VP-020 |
-| BC-1.05.007 | VP-021 |
+| BC-1.05.007 | VP-001, VP-021 |
 | BC-1.05.008 | VP-021 |
 | BC-1.05.009 | VP-019, VP-020 |
 
@@ -225,11 +236,11 @@ modified: ["1.2 2026-11-17: VP-038 added (ADV-P1); catalog and BC coverage map r
 |---|---|
 | BC-1.07.001 | VP-002 |
 | BC-1.07.002 | VP-005, VP-009 |
-| BC-1.07.003 | VP-005 |
+| BC-1.07.003 | VP-005, VP-006 |
 | BC-1.07.004 | VP-010 |
 | BC-1.07.005 | VP-010 |
 | BC-1.07.006 | VP-010, VP-028 |
-| BC-1.07.007 | VP-009, VP-039 |
+| BC-1.07.007 | VP-001, VP-009, VP-039 |
 | BC-1.07.008 | VP-001, VP-003 |
 
 ### S2 (13)
@@ -313,17 +324,25 @@ modified: ["1.2 2026-11-17: VP-038 added (ADV-P1); catalog and BC coverage map r
 ### Uncovered BCs
 
 None. 154/154 covered (union of VP `bcs:` frontmatter and VP anchors in the BC
-bodies' Verification Properties / VP Anchors sections; re-machine-checked 2026-11-18T23:30:00Z). One-sided `bcs:`↔BC-body residuals are enumerated explicitly:
-Prose mentions excluded by ruling (design references, not citations): VP-022 in
-BC-1.06.001, VP-024 in BC-1.07.004, VP-034 in BC-1.01.004; partial-coverage claims
-made in the VP body without a reciprocal BC-body VP-table row (A2-11): VP-022 in
-BC-1.01.009, VP-006 in BC-1.07.003; removal-ruling cross-references, not coverage
-citations (pass-4): VP-026 in BC-3.01.001 (EC-010), BC-6.01.002 (PC text),
-BC-6.02.003 (PC text) — each records the OD-171 `posix-only` tag removal, and
-VP-026's `bcs:` correctly excludes those BCs; VP-007 in BC-1.01.009 (SC-12) —
-:151-152 records the ADV-P1-B11 mechanical-citation drop and VP-007's A2-10
-re-anchor to BC-5.04.003, so the BC-body mention is a removal note, not a
-coverage claim.
+bodies' Verification Properties / VP Anchors sections; re-machine-checked
+2026-11-19T01:00:00Z after the SC-13/SC-14 closure: 239 directed VP→BC `bcs:`
+edges, 0 forward-only, exactly 6 reverse-only residuals — the enumerated list
+below, which is therefore exactly the residue). Design references, not
+citations (excluded by ruling):
+VP-022 in BC-1.06.001 (mis-anchor note);
+VP-024 in BC-1.07.004 ("VP-024 family" encoder references);
+VP-034 in BC-1.01.004 (parenthetical isolation credit).
+Removal-note citations:
+VP-026 in BC-3.01.001 (EC-010);
+VP-026 in BC-6.01.002 (PC text);
+VP-026 in BC-6.02.003 (PC text) —
+each records the OD-171 `posix-only` tag removal, and VP-026's `bcs:` correctly
+excludes those BCs. Closed in this version (SC-13 / SC-14): the BC-1.05.007 and
+BC-1.07.007 map rows now carry VP-001 per the union rule; VP-012 `bcs:` gains
+BC-1.04.003 and BC-1.05.005 (reciprocity preferred over exception-listing); the
+ADV-P5-A2-19 owed reciprocal rows for BC-1.01.009 (VP-022) and BC-1.07.003
+(VP-006) are delivered; the former VP-007/BC-1.01.009 exception is dropped —
+that body's removal note no longer cites VP-007 by ID.
 
 ## Propagation
 

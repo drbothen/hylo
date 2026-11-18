@@ -1,10 +1,10 @@
 ---
 document_type: domain-spec-index
 level: L2
-version: "1.1"
+version: "1.2"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T11:35:43Z
+timestamp: 2026-11-18T05:40:00Z
 phase: 1a
 inputs:
   - .factory/specs/product-brief.md
@@ -17,7 +17,7 @@ inputs:
   - .factory/specs/research/domain-hybrid-routing-claude-code-2026-11-14.md
   - .factory/specs/research/domain-statusline-landscape-2026-11-15.md
   - .factory/specs/research/peer-tool-lessons-2026-11-14.md
-input-hash: "fd3c686"
+input-hash: "c53d62b"
 traces_to: product-brief.md
 sections:
   - entities.md
@@ -60,10 +60,10 @@ names kept by D7; domain terms (`local lane`, `backend`) are defined in
 
 | Section | File | Tokens | Primary Consumer | Purpose |
 |---------|------|--------|-----------------|---------|
-| Entities | entities.md | ~1400 | architect, product-owner | ENT-NNN entity model, aggregates, value objects |
+| Entities | entities.md | ~1400 | architect, product-owner | ENT-NN entity model, aggregates, value objects |
 | Capabilities | capabilities.md | ~1300 | product-owner, architect, story-writer | CAP-NNN capability catalog + differentiator trace |
 | Invariants | invariants.md | ~1100 | product-owner, architect | DI-NNN domain rules |
-| Domain Events | domain-events.md | ~1200 | architect, product-owner | EVT-NNN: ledger catalog + live event feed |
+| Domain Events | domain-events.md | ~1200 | architect, product-owner | EVT-NN: ledger catalog + live event feed |
 | State Machines | state-machines.md | ~1100 | architect, test-writer | SM-NNN lifecycles: request, proxy, health, render |
 | Bounded Contexts | bounded-contexts.md | ~1100 | architect, product-owner | BC1-BC10 context map and translations |
 | Ubiquitous Language | ubiquitous-language.md | ~1200 | all | Glossary + legacy→domain term mapping |
@@ -84,10 +84,10 @@ names kept by D7; domain terms (`local lane`, `backend`) are defined in
 
 | ID Format | Count | Section |
 |-----------|-------|---------|
-| ENT-NNN | 20 | entities.md |
+| ENT-NN | 20 | entities.md |
 | CAP-NNN | 18 | capabilities.md |
 | DI-NNN | 17 | invariants.md |
-| EVT-NNN | 15 | domain-events.md |
+| EVT-NN | 15 | domain-events.md |
 | SM-NNN | 6 | state-machines.md |
 | BOUNDED CONTEXT | 10 (BC1..BC10) | bounded-contexts.md |
 

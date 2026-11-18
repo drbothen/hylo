@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -13,7 +13,7 @@ inputs:
   - domain-spec/ubiquitous-language.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "3507555"
+input-hash: "090b47c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445, 902-903)"
@@ -24,7 +24,9 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.3 2026-11-18: ADV-P4 remediation D27 — second LOCAL_MODEL_PREFIXES read site SL:902-903 cited; BC-1.07.006 consumer listed"]
+modified:
+  - "1.2.3 2026-11-18: ADV-P4 remediation D27 — second LOCAL_MODEL_PREFIXES read site SL:902-903 cited; BC-1.07.006 consumer listed"
+  - "2026-11-19T01:00:00Z (1.2.4) ADV-P5 remediation D31 — cardinality counts distinct REPRESENTED indices (a set HYLO_BACKENDS_0_* no longer double-counts); [from] tie-break redefined as the lexicographically smallest FIELD, defined for non-P1 fields"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,10 +68,16 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 4. A present variable `HYLO_BACKENDS_<i>_<FIELD>` with `<i>` ≠ `0` (any field name) defines
    an additional entry. If the entry count is not exactly 1, `Load` returns the error
    `backends=<count> (exactly one backend entry until P6)`, rendered per BC-2.02.001, where
-   `<count>` is the number of distinct indices present plus index 0 (always present through
-   its defaults); the `[from <ENVNAME>]` detail (BC-2.02.001) names the variable with the
-   lowest extra index present, tie-broken by registry field order — for a single extra
-   entry that is that entry's own variable (e.g. `HYLO_BACKENDS_1_METRICS_URL`) (spec
+   `<count>` is the number of DISTINCT REPRESENTED indices: an index is represented when any
+   `HYLO_BACKENDS_<i>_<FIELD>` variable is present for it, and index 0 is always
+   represented through its defaults — a set `HYLO_BACKENDS_0_*` variable represents an
+   index that is counted ONCE, not twice (double-count fixed, ADV-P5-D31); e.g. only
+   `HYLO_BACKENDS_0_METRICS_URL` set → `backends=1`, no cardinality error. The
+   `[from <ENVNAME>]` detail (BC-2.02.001) names the variable with the
+   lowest extra index present; when several variables are present for that index, the
+   tie-break is the lexicographically smallest `<FIELD>` name byte-exact (defined for
+   non-P1 fields too, which have no registry order — ADV-P5-D31) — for a single extra
+   variable that is that variable's own name (e.g. `HYLO_BACKENDS_1_METRICS_URL`) (spec
    choice pinning BC-2.03.001 EC-005, ADV-P1-D12). Example:
    `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11:8428` →
    `hylo: config error: backends=2 (exactly one backend entry until P6)`. A variable

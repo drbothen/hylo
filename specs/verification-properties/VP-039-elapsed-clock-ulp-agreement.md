@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T14:32:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.07.007.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c16bf76"
+input-hash: "b1dbe37"
 traces_to: prd.md
 source_bc: BC-1.07.007
 bcs: [BC-1.07.007]
@@ -103,10 +103,18 @@ func TestElapsedClock_UnfusedGoldenParity(t *testing.T) { // PR-15, CONV-ABS-77
         }
     }
 }
+```
 
-// every arm64 target contracts; darwin/arm64 runs the detector in CI
-//
+The fusion-regime detector lives in ITS OWN FILE (elapsed_detector_arm64_test.go),
+with the //go:build constraint BEFORE the package clause (ADV-P5-A2-18): a constraint
+mid-file is not a build constraint, and go vet flags it; as a file-level constraint the
+detector compiles only on arm64 legs instead of breaking amd64 builds.
+
+```go
+// ---------- elapsed_detector_arm64_test.go ----------
 //go:build arm64
+
+package statusline
 
 func TestElapsedClock_FusionRegimeDetector(t *testing.T) { // A2-09: tag on the detector only
     if !contractFMA(probePair()) { // detector: the fused regime is real on arm64

@@ -1,25 +1,37 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.7"
+version: "1.12"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:45:00Z
+timestamp: 2026-11-19T03:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "dca8232"
+input-hash: "f02b009"
 traces_to: prd.md
 source_bc: BC-6.03.004
-bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.05.006]
+bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.05.005, BC-1.05.006]
 module: internal/parity
-proof_method: property-test (testing/quick)
+proof_method: mutation-test (fail-closed catalogue)
 feasibility: feasible
 verification_lock: false
 proof_file_hash: null
 
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — exclusion ids respelled to the BC form (OD-30, OD-76) and closed set extended to ten elements with OD-159/OD-160/OD-161 (A2-02); method recatalogued honestly: mutation generator drives the production harness's fail-closed rejections (A2-09); proof_file_hash field added (A2-29)", "1.3 2026-11-18T09:04:00Z: ADV-P3 fixes — riders + named table tests completed for all ten closed-set ids: OD-30 (BC-1.05.006), cp-x03 (BC-1.01.001), OD-159 (BC-1.02.004, the deviation's defining UTF-8-read contract), OD-160 (BC-1.05.004), OD-161 (BC-1.03.015) (A2-17); ClosedSet skeleton asserts a non-zero computed count and logs “N entries validated” (POL-11, A2-06); test-registry correspondence recast as `go test -list` / AST scan — Go has no live reflection over the test registry (A2-24)", "1.4 2026-11-18T02:24:00Z: ADV-P3 sync — rider test names aligned to the rider BCs' own traceability names: OD-30 rider respelled to TestCostHistory_OD30_NumericSidStringKey (BC-1.05.006 Canonical Test Vectors); D4-EX-1 rider attributed to BC-3.02.001 with TestWindowAge_D4EX1_Windows*; OD-76 split from temp-file (BC-3.02.002, TestWindowStart_OD76_*); D4-EX-2 rider spelled TestMixCache_OD32_*", "1.5 2026-11-18T14:45:00Z: ADV-P4 fixes — OD-169: the cost-history record-guard divergence gets its own exclusion id OD-166; closed set becomes ELEVEN ids with scope 'cost-history bytes written after a refresh whose usd or api_ms could not convert to float; nothing else'; closure row added (riding table test TestCostHistory_OD166_RecordGuard, defined in VP-020) and every 'rides D4-EX-2' / 'named deviation under OD-156' wording for this case removed; canonical concrete test names per rider replace family globs (A2-14): TestMixCache_OD32_WrongShapeTables (VP-013), TestCPX03_WriteFailureExit0 (VP-003), TestD4EX3_{Number,Boolean,URL,Enum} per owner design call 13 — no Theme member (theme settings are rejected by the corpus validator)", "1.6 2026-11-18: ADV-P4 pass-4 fix — skeleton LoadExclusions path aligned with the relocated exclusions file internal/parity/testdata/exclusions.json (BC-6.03.004 PC-1, beside the corpus root)", "1.7 2026-11-18T22:00:00Z: pass-4 correction (item 10) — skeleton LoadExclusions path aligned with the OD-148 exclusions file internal/statusline/testdata/parity/exclusions.json, beside the OD-148 corpus root (fixtures stay with the subject package)"]
+modified:
+  - "1.1 2026-11-17: ADV-P1 pass-1 fixes"
+  - "1.2 2026-11-17: ADV-P2 pass-2 fixes \u2014 exclusion ids respelled to the BC form (OD-30, OD-76) and closed set extended to ten elements with OD-159/OD-160/OD-161 (A2-02); method recatalogued honestly: mutation generator drives the production harness's fail-closed rejections (A2-09); proof_file_hash field added (A2-29)"
+  - "1.4 2026-11-18T02:24:00Z: ADV-P3 sync \u2014 rider test names aligned to the rider BCs' own traceability names: OD-30 rider respelled to TestCostHistory_OD30_NumericSidStringKey (BC-1.05.006 Canonical Test Vectors); D4-EX-1 rider attributed to BC-3.02.001 with TestWindowAge_D4EX1_Windows*; OD-76 split from temp-file (BC-3.02.002, TestWindowStart_OD76_*); D4-EX-2 rider spelled TestMixCache_OD32_*"
+  - "1.3 2026-11-18T09:04:00Z: ADV-P3 fixes \u2014 riders + named table tests completed for all ten closed-set ids: OD-30 (BC-1.05.006), cp-x03 (BC-1.01.001), OD-159 (BC-1.02.004, the deviation's defining UTF-8-read contract), OD-160 (BC-1.05.004), OD-161 (BC-1.03.015) (A2-17); ClosedSet skeleton asserts a non-zero computed count and logs \u201CN entries validated\u201D (POL-11, A2-06); test-registry correspondence recast as `go test -list` / AST scan \u2014 Go has no live reflection over the test registry (A2-24)"
+  - "1.5 2026-11-18T14:45:00Z: ADV-P4 fixes \u2014 OD-169: the cost-history record-guard divergence gets its own exclusion id OD-166; closed set becomes ELEVEN ids with scope 'cost-history bytes written after a refresh whose usd or api_ms could not convert to float; nothing else'; closure row added (riding table test TestCostHistory_OD166_RecordGuard, defined in VP-020) and every 'rides D4-EX-2' / 'named deviation under OD-156' wording for this case removed; canonical concrete test names per rider replace family globs (A2-14): TestMixCache_OD32_WrongShapeTables (VP-013), TestCPX03_WriteFailureExit0 (VP-003), TestD4EX3_{Number,Boolean,URL,Enum} per owner design call 13 \u2014 no Theme member (theme settings are rejected by the corpus validator)"
+  - "1.6 2026-11-18: ADV-P4 pass-4 fix \u2014 skeleton LoadExclusions path aligned with the relocated exclusions file internal/parity/testdata/exclusions.json (BC-6.03.004 PC-1, beside the corpus root)"
+  - "1.7 2026-11-18T22:00:00Z: pass-4 correction (item 10) \u2014 skeleton LoadExclusions path aligned with the OD-148 exclusions file internal/statusline/testdata/parity/exclusions.json, beside the OD-148 corpus root (fixtures stay with the subject package)"
+  - "1.8 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-17, A2-36) \u2014 closure check now rejects glob references in table_test too (only e.Case was covered); OD-76's family abbreviation fixed to the concrete member TestWindowStart_OD76_NativeProbeDiffTable (fixed here per BC-3.02.002's delegation); temp-file spelled as two entries with one concrete test each; frontmatter proof_method relabelled mutation-test (fail-closed catalogue) \u2014 it was never testing/quick (COSMETIC A2-36). OD-30/OD-166 rider names already carry plan call 15's canon (TestCostHistory_OD30_NumericSidStringKey, TestCostHistory_OD166_RecordGuard)"
+  - "1.9 2026-11-18T23:45:00Z: ADV-P5 fix (A2-03 rider) \u2014 the D4-EX-3 riding-name set gains the OD-178 Text member: TestD4EX3_{Number,Boolean,URL,Enum,Text}"
+  - "1.10 2026-11-19T01:00:00Z: SC-14 reciprocity (sync-check-adv-p5) \u2014 bcs: gains BC-1.04.003 and BC-1.05.005, the two OD-160-carrying contracts whose Verification Properties tables cite this VP's closure check (ADV-P5-C2-17 closure citations); Source Contract Partial-coverage bullet names both rows; no closed-set membership or test-name change"
+  - "1.11 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 modified history re-ordered chronologically; no behavioral change"
+  - "1.12 2026-11-19T03:00:00Z: ADV-P5 residual fix \u2014 the Source Contract partial-coverage bullet's D4-EX-3 rider set respelled from the four-name family to the five canonical names TestD4EX3_{Boolean,Enum,URL,Number,Text} (Text per OD-178, 2026-11-18); body now matches the 1.9 history entry, whose respell had not reached this bullet"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,8 +69,8 @@ raw int — and nothing else.
   and the exclusion-riding contracts — one named table test per closed-set id:
   BC-3.02.001 (D4-EX-1, `TestWindowAge_D4EX1_Windows*`), BC-1.03.018/.019/.020
   (D4-EX-2, concrete member `TestMixCache_OD32_WrongShapeTables` in VP-013), BC-2.02.001..006 (D4-EX-3,
-  `TestD4EX3_{Number,Boolean,URL,Enum}` — no Theme member: theme settings are rejected
-  by the corpus validator, owner design call 13),
+  `TestD4EX3_{Boolean,Enum,URL,Number,Text}` — Text added by OD-178 (2026-11-18); no Theme
+  member: theme settings are rejected by the corpus validator, owner design call 13),
   BC-3.02.002 (OD-76, `TestWindowStart_OD76_*`), BC-1.06.002 (temp-file, distinct
   case: `TestCacheStore_OD110_TempCleanup`), BC-1.05.006 (OD-30,
   `TestCostHistory_OD30_NumericSidStringKey`), BC-1.01.001 (cp-x03,
@@ -66,7 +78,11 @@ raw int — and nothing else.
   UTF-8 on all OSes; the defining contract for the deviation,
   `TestGitTextReads_OD159_StrictUTF8`), BC-1.05.004 (OD-160 foreign-cache shapes,
   `TestForeignCacheShape_OD160_Vectors`; OD-166 record guard,
-  `TestCostHistory_OD166_RecordGuard`, defined in VP-020), BC-1.03.015 (OD-161, `TestTranscriptPath_OD161_IntMeansNoTranscript`).
+  `TestCostHistory_OD166_RecordGuard`, defined in VP-020), BC-1.04.003 and
+  BC-1.05.005 (OD-160 tagged on their EC-008/EC-009 and EC-010/EC-011
+  foreign-cache/history crash-shape error columns; their Verification Properties
+  tables cite this closure check — ADV-P5-C2-17; no riding test of their own
+  beyond BC-1.05.004's), BC-1.03.015 (OD-161, `TestTranscriptPath_OD161_IntMeansNoTranscript`).
 - **Invariant verified:** DI-012 (no blanket exclusions; every exclusion carries its
   own table tests); OD-105/OD-110; AD-09 (machinery fails closed).
 
@@ -109,6 +125,9 @@ func TestParityExclusions_ClosedSet(t *testing.T) {
         if seen[e.Case] { t.Fatalf("duplicate case-id %q", e.Case) }
         seen[e.Case] = true
         if strings.ContainsAny(e.Case, "*?[") { t.Fatal("glob entry — blanket exclusions banned") }
+        if strings.ContainsAny(e.TableTest, "*?[") { // A2-17: the check covered only
+            t.Fatal("glob table-test reference — one concrete name per entry") // e.Case
+        }
         if !TableTestExists(e.TableTest) { t.Fatalf("entry %s: missing table test", e.ID) }
         if !GoOutputMatchesExpected(e) { t.Fatalf("entry %s: Go output ≠ own expected file", e.ID) }
     }
@@ -137,16 +156,22 @@ func TestParityExclusions_MutationFailClosed(t *testing.T) { // A2-09
 
 `TestParityExclusions_ClosedSet` and `TestParityExclusions_MutationFailClosed`
 (ARCH-07). Riding table tests named by ruling (one canonical concrete name per
-closed-set id, A2-14; names as fixed by the rider BCs and the BC-6.03.004 register —
+closed-set entry, A2-14; names as fixed by the rider BCs and the BC-6.03.004 register —
 where a register spells a family abbreviation (`*`), the concrete member is fixed
 here or in the defining VP):
 `TestWindowAge_D4EX1_Windows*` (BC-3.02.001), `TestMixCache_OD32_WrongShapeTables`
-(BC-1.03.018/019/020; defined in VP-013), `TestD4EX3_{Number,Boolean,URL,Enum}`
-(BC-2.02.001..006; call-13 canonical set — no Theme member, theme settings are
-rejected by the corpus validator), `TestWindowStart_OD76_*` (BC-3.02.002),
-`TestCostHistory_OD30_NumericSidStringKey` (BC-1.05.006),
-`TestCacheStore_TempFile_CleanupOnFailedReplace` (BC-6.03.003),
-`TestCacheStore_OD110_TempCleanup` (BC-1.06.002), `TestCPX03_WriteFailureExit0`
+(BC-1.03.018/019/020; defined in VP-013), `TestD4EX3_{Number,Boolean,URL,Enum,Text}`
+(BC-2.02.001..006 + the OD-178 Text class member; the pass-4 no-Theme-member note
+stands for theme settings, which the corpus validator rejects),
+`TestWindowStart_OD76_NativeProbeDiffTable` (BC-3.02.002 — the concrete member of
+the formerly abbreviated family, fixed here per that contract's delegation;
+ADV-P5-A2-17),
+`TestCostHistory_OD30_NumericSidStringKey` (BC-1.05.006);
+temp-file carries two ENTRIES, each with its own concrete test (BC-6.03.003's
+`TestCacheStore_TempFile_CleanupOnFailedReplace` and BC-1.06.002's
+`TestCacheStore_OD110_TempCleanup` — one canonical concrete name per ENTRY; the id
+admits distinct cases, ADV-P5-A2-17),
+`TestCPX03_WriteFailureExit0`
 (BC-1.01.001; defined in VP-003), `TestGitTextReads_OD159_StrictUTF8` (BC-1.02.004),
 `TestForeignCacheShape_OD160_Vectors` (BC-1.05.004),
 `TestCostHistory_OD166_RecordGuard` (BC-1.05.004; defined in VP-020),

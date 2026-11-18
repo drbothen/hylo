@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.4"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-19T00:20:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "44d9c3e"
+input-hash: "02e219e"
 
 ---
 
@@ -47,8 +47,12 @@ input-hash: "44d9c3e"
 
 **Ownership of step 0 (ADV-P2-A08):** config resolution is NOT inside `Render`. `Main`
 performs step 0: it calls `config.Load` through the injected `EnvVars` seam it is given
-(AD-10 amended; ARCH-01), then constructs the `CacheStore` over the Load-resolved
-`paths.cache_dir`; on any error it prints the E-CFG-001 line
+(AD-10 amended; ARCH-01), then constructs over the Load-resolved configuration every
+seam that reads config at build time (pass-5 A11 — `Query`/`WindowStart` take no
+config argument, so pre-built arrivals are impossible):
+the `CacheStore` over `paths.cache_dir`, the `MetricsClient` over
+`backends[0].metrics_url` and `telemetry.timeout_s`, and the `ProcStarter` over
+`window_age.process_name` and `window_age.max_depth`; on any error it prints the E-CFG-001 line
 (first error in registry order, full list to stderr) and returns 0 having written no
 caches — `Render` is never entered. `Render`'s precondition is `env.Config != nil &&
 env.Cache != nil`
@@ -66,8 +70,8 @@ follows because every cache write sits inside `Render`'s step script.
 | 6 | window start (may write `proc_start`) | `Proc`, `Cache` | no |
 | 7a | lane badge/model/project; git segment (git-cache write) | `Files`, `Cache`, `Cwd` | CP-S01..S04 |
 | 7b | thermometer/composition/cache-hit/limits/lines/timer/⌂/tokens | pure | CP-S05..S13 |
-| 7c | record_cost (write), then cost_thresholds | `internal/cost` via `Cache` | CP-S15; unconvertible `usd`/`api_ms` is not recorded (OD-166) — Go skips the record where legacy persisted the raw int, the ruled write-divergence exclusion `OD-166` |
-| 7d | $, $/h, ⛏ (pure) | pure | CP-O10/O11 (E-REN-002) |
+| 7c | record_cost (write), then cost_thresholds | `internal/cost` via `Cache` | CP-S15; unconvertible `usd`/`api_ms` is not recorded (OD-166) — Go skips the record where legacy persisted the raw int, the ruled write-divergence exclusion `OD-166`; history-borne CP-O10/O11 raise HERE in `cost_thresholds` (SL:255; site correction per pass-4 B14, propagated pass-5 A09), owner BC-1.05.005 EC-011 — the bearer (the cost-history cache persisted the value earlier) is unchanged |
+| 7d | $, $/h, ⛏ (pure) | pure | CP-O10/O11 (E-REN-002) — disposition only; the history-borne raise sits in step 7c, so the SL:616/623 render sites are unreachable for history-borne values (pass-4 B14) |
 | 8 | trim, surrogate check, single stdout write | stdout | CP-S17 after all writes |
 
 Import-time crash paths CP-X01/X02 are replaced by D4-EX-3 at step 0; CP-X03 (the
@@ -86,25 +90,29 @@ extended D4-EX-2 discipline, no sticky state, and the in-flight turn is dropped
 (OD-167); CP-O09 reachable in hylo — two 4,300-digit ints accumulate without meeting a
 float and breach CPython's int-to-string limit at the save (ADV-P3-C09; not moot,
 disposition per the owning BC); CP-O10/O11
-cost-segment overflow — a huge exact int in `usd`/`api_ms` meeting float conversion at
-the render sites (SL:616/623; bearer per error-taxonomy: the cost-history cache
-persisted it earlier), same E-REN-002 disposition, owners BC-1.05.007/.002 — pass-3
-C2-01), and **CP-A01..A05** (subagent panel, BC-1.07.008: typed degrades to the 29-byte
+cost-segment overflow — a huge exact int in `usd`/`api_ms` breaching int-to-string in
+`cost_thresholds` at SL:255 (step 7c; the SL:616/623 render sites are unreachable for
+history-borne values because `cost_thresholds` raises first — pass-4 B14 site
+correction, propagated pass-5 A09), same E-REN-002 disposition, owner BC-1.05.005
+EC-011, bearer the cost-history cache), and **CP-A01..A05** (subagent panel, BC-1.07.008: typed degrades to the 29-byte
 line, exit 0; CP-A04/A05 = huge-int `tokenCount`/`startTime` OverflowError paths added
 by the pass-3 ruling, owners BC-1.07.007/.008), and **CP-N03** (pass-4 C2-12: the
 metrics-borne degrade — a numeric `__name__` key sorting ahead of every `vllm:` key so
-`k.startswith` raises AttributeError, SL:717; owner BC-1.04.001, E-REN-002 disposition).
+`k.startswith` raises AttributeError, SL:717; owner BC-1.04.005 EC-007 / BC-1.04.004
+(pass-5 A24 correction — the degrade sits in `serving_state`), E-REN-002 disposition).
 
 ## Interfaces (design doc §2.2, reused as the contract)
 
 ```go
 package statusline
 
-// Main runs one refresh and always returns 0. Wiring order (ADV-P4-A06): step 0
-// resolves config THROUGH the injected EnvVars seam (AD-10 amended — never a bare
-// func(string) string); only then does Main construct the CacheStore over the
-// Load-resolved paths.cache_dir. Env.Cache is therefore empty before step 0 and
-// filled by Main — the store does not presuppose the dir, breaking the circularity.
+// Main runs one refresh and always returns 0. Wiring order (ADV-P4-A06; pass-5 A11):
+// step 0 resolves config THROUGH the injected EnvVars seam (AD-10 amended — never a bare
+// func(string) string); only then does Main construct, over the Load-resolved
+// configuration: the CacheStore (resolved paths.cache_dir), the MetricsClient
+// (backends[0].metrics_url + telemetry.timeout_s), and the ProcStarter
+// (window_age.process_name + window_age.max_depth). Env.Cache/Metrics/Proc are empty
+// before step 0 and filled by Main — the seams do not presuppose the dir/url/pid.
 func Main(stdin io.Reader, stdout, stderr io.Writer, env *Env) int
 
 // Render is the orchestrator behind Main (BC-1.01.009 order). On errDegraded the
@@ -124,13 +132,13 @@ const degradedLine = "\x1b[90mstatusline degraded\x1b[0m\n" // 29 bytes, BC-1.01
 var errDegraded = errors.New("statusline degraded")
 
 type Env struct {
-    Now     func() float64        // Python time.time() value; read ONCE per render (IM-14); the panel reads it too (BC-1.07.007)
+    Now     func() float64        // Python time.time() value; read ONCE per render (IM-14); the panel reads it too (BC-1.07.007). Frozen clock (pass-5 D02/call 7): HYLO_TEST_NOW is parsed to a float64 exactly as Python float() (within the BC grammar) and THAT float IS the time.time() value everywhere — never round-tripped through time.Time nanoseconds (float64 spacing at 1.79e18 ns exceeds the seconds-value ulp; cache bytes would drift); TimeFloat applies only to the real clock (ARCH-06 time.go)
     Loc     *time.Location        // naive transcript timestamps (BC-5.04.001)
     EnvVar  EnvVars               // AD-10 seam (ARCH-01: Lookup + Names); backs the COLUMNS lookup (BC-1.01.005) and the unknown-HYLO_* sweep (BC-2.01.001 PC-6). The former bare Getenv func(string) string is superseded (ADV-P4-A06)
     Config  *config.Config        // filled by Main at step 0 (D15); Render precondition
     Cache   CacheStore            // constructed by Main after step 0 over the resolved dir (OD-101); temp dir in tests
-    Metrics MetricsClient         // backends[0].metrics_url; httptest fake in tests
-    Proc    ProcStarter           // platform.FindAncestor; fake in tests
+    Metrics MetricsClient         // constructed by Main after step 0 from backends[0].metrics_url + telemetry.timeout_s (pass-5 A11); httptest fake in tests
+    Proc    ProcStarter           // constructed by Main after step 0 from window_age.process_name + window_age.max_depth (pass-5 A11); fake in tests
     Files   FileSystem            // transcript and .git reads; os-backed by default
     Cwd     func() string         // git fallback when no project dir
 }
@@ -141,11 +149,46 @@ type EnvVars interface {
 }
 
 type CacheStore interface {
+    // Depth budgets are PER FILE, not per interface (pass-5 A10): Load decodes and
+    // Save encodes with the file's constant from the ARCH-06 depth law, in total
+    // JSON nesting depth (the decode convention). Measured END-TO-END on real
+    // legacy this burst (pass-5 sweep C: isolated temp HOME+cwd, never the real
+    // HOME; python3 -I, CPython 3.11.7):
+    //
+    //     file          Load(decode)  Save(encode)   reachable from input?
+    //     session       991           991            YES — Save re-encodes the stdin-borne rl
+    //     mix           991           991            no — flat legacy-computed payload
+    //     git           990           990            no — flat legacy-computed payload
+    //     cost-history  990           990            no — flat legacy-computed payload
+    //
+    // One law, both directions (ARCH-06): the encoder boundary is 995 − s for
+    // json.dump and 994 − s for json.dumps (s = Python frames at the invoke,
+    // invoking frame inclusive), slope exactly 1 slot per frame — a DEEPER stack
+    // never has the larger budget, and every cache's Save budget EQUALS its Load
+    // budget, so Decode(Save(x)) never rejects what Save produced. The real
+    // exposure is the stdin side: a rate_limits value nested 991..992 decodes
+    // (stdin bound 993) yet breaches the session Save budget 991 — legacy skips
+    // the write (SL:307-308), ruled in-band behavior (BC-5.02.006). Mix, git and
+    // cost-history Save constants are unreachable from input (flat payloads) but
+    // are still named per-file constants (D15), pinned by the same law; the
+    // owning-BC gen recipes re-measure and a moved boundary fails table
+    // regeneration (measurement recipes: VP-006).
     Load(name string) pyfmt.Value    // never fails: unreadable => empty object
     Save(name string, v pyfmt.Value) error // reports the write outcome to the caller (ADV-P2-A25, VP-018); Render swallows it — DI-008 never-raise at the orchestrator
 }
 type MetricsClient interface {
-    // total deadline, Proxy: nil. Transport MUST set DisableCompression: true
+    // MANUAL REDIRECT LOOP (pass-5 C2-01, call 14): the transport's CheckRedirect
+    // returns http.ErrUseLastResponse and hylo drives the hops itself, so urllib's
+    // rules apply exactly: follow `location` then `uri` headers; an EMPTY Location
+    // redirects to the original URL (Go alone would treat it as absent, returning the
+    // 3xx as final — no sample); after urlunparse, normalize
+    // quote(url, encoding="iso-8859-1", safe=string.punctuation), then urljoin
+    // (verified in CPython 3.11.7 source); schemes outside http/https (ftp included)
+    // give NO sample. The hop budget is the pinned 37-hop cap (BC-1.04.001).
+    // UserInfo (pass-5 C2-03 ruling OD-180): a metrics URL with userinfo reproduces
+    // legacy — NO sample (urllib puts u:p@host into HTTPConnection's host, DNS fails,
+    // the dead rung); no exclusion id.
+    // Total deadline, Proxy: nil. Transport MUST set DisableCompression: true
     // (ADV-P4-C2-09): urllib sends Accept-Encoding: identity and parses raw bytes,
     // while Go's default http.Transport adds gzip and transparently decompresses —
     // a gzip response legacy never asked for would give Go a sample where legacy
@@ -178,7 +221,11 @@ the frame-level contracts BC-1.01.003/.009 and BC-1.04.013, ADV-P1-A20).
 
 BC bodies link fragments like `architecture/ARCH-03-statusline.md#lane`; the twelve
 anchors below are the complete, closed set — new BC fragment links must target one of
-these.
+these. Practice note (pass-5 C2-14, call 19): BC bodies additionally link the
+auto-generated heading slugs of this section (`#effect-step-script-…`,
+`#interfaces-design-doc-22-…`); those resolve and are recognized targets. The ONLY
+banned form is the bare line-number pointer (`ARCH-03:NNN`) — never an anchor, always
+drifts; line-number pointers in BC bodies are replaced by fragment anchors on sight.
 
 <a id="lane"></a>
 <a id="git"></a>

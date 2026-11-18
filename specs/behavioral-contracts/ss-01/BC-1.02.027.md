@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "4f5dcbc"
+input-hash: "a99539e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,7 +20,9 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B04): Refactoring Notes aligned with the superseding definition — pyfmt.Int(x float64) (Num, error), exact beyond int64 (BC-1.02.026 PC2, ARCH-06); 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B05/B03): EC-006 and its vector row tagged OD-160 (hand-edited-cache shape); _hm fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B05/B03): EC-006 and its vector row tagged OD-160 (hand-edited-cache shape); _hm fuzz leg re-anchored to VP-041; 2026-11-18T03:00:00Z"
+  - "1.4 pass-5 remediation (ADV-P5-B07): DI-012 cited alongside DI-008 (the OD-160-tagged win_start = -Infinity vector); parity row acknowledges the OD-160 ride instead of \"no exclusion entry\"; 2026-11-18T05:42:56Z"
+  - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-18/SC-20) — the ARCH-06 line pointer replaced with the stable #pyfmt-num fragment anchor; pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -100,13 +102,13 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 |
 | Architecture Module | `internal/statusline` (design §8 home `sl/session.go`; BC-COMPONENT-MAP: internal/statusline/session.go (CP-S12/S13 degrade) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane `_hm` (SL:545-548; crash at SL:546 via SL:549 for CP-S12 and SL:553 for CP-S13), timer block SL:534-563 |
 | Legacy contract | BC-SL-064 (deep pass-3 round 1, new; crash paths CP-S12, CP-S13) |
 | Config keys | `statusline.timer.{min_ms, api_min_ms}` (T-038, T-039) |
-| Parity | byte-exact (no exclusion entry) |
+| Parity | byte-exact for Go-authored caches; the hand-edited-cache vector (win_start = -Infinity, owned by BC-1.02.028 EC-006) rides the **OD-160** exclusion entry, cited per DI-012 |
 
 ## Related BCs (Recommended)
 
@@ -158,7 +160,8 @@ S-N.MM — filled by story-writer
 
 Resolved by OD-137: the two duration-format sites (`_hm` here and the window-age form,
 BC-1.02.028) keep byte-exact arbitrary-precision behavior using `math/big`. Design note on
-IM-07 (superseding definition per ARCH-06:78, BC-5.01.003:57 and BC-1.02.026 PC2; the int64
+IM-07 (superseding definition per architecture/ARCH-06-pyfmt.md#pyfmt-num, BC-5.01.003:57
+and BC-1.02.026 PC2; the int64
 sketch in error-taxonomy.md:120-124 is superseded): `pyfmt.Int(x float64) (Num, error)` is
 the typed path and is exact beyond int64 (`Num`); the duration sites call `Int` directly and
 reach for `math/big` only where Python's unbounded `int()` arithmetic demands it (exact

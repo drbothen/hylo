@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:30:00Z
+timestamp: 2026-11-19T00:20:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-00-overview.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.001.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, prd-supplements/error-taxonomy.md, owner-decisions-log-2026-11-14.md]
-input-hash: "0e9417b"
+input-hash: "40ef2f7"
 traces_to: prd.md
 source_bc: BC-1.01.001
-bcs: [BC-1.01.001, BC-1.02.020, BC-1.02.026, BC-1.02.027, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.05.004, BC-1.06.001, BC-1.07.008]
+bcs: [BC-1.01.001, BC-1.02.020, BC-1.02.026, BC-1.02.027, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.05.004, BC-1.05.007, BC-1.06.001, BC-1.07.007, BC-1.07.008]
 module: internal/statusline (guard), cmd/hylo
 proof_method: manual
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)", "1.3 2026-11-18T09:05:00Z: ADV-P3 fixes (A2-07) — FaultInjectionTable comment names the CP-A01..A03 subagent fault rows; fuzz leg asserts the promised output-set membership ({render, 29-byte line, subagent JSON lines, zero bytes}) instead of only exit-0/non-blank, with OD-168 placing a subagent config error at zero bytes", "1.4 2026-11-18T14:05:00Z: ADV-P4 fixes — catalogue closed over the pass-3 register: CP-O10/O11 (cost-history borne, BC-1.05.007), CP-A04/A05 (BC-1.07.007) and CP-N03 (metrics-borne degrade, SL:717) added (A2-03); the never-degraded claim limited to the parse path with a coded parseFault condition — subagent renderer faults (CP-A01..A05) are EXPECTED to end in the degraded line (A2-02); frontmatter proof_method/feasibility line unmerged (A2-12); OD-167 turn-drop and OD-166 record-guard legs cross-referenced to VP-029/VP-020", "1.5 2026-11-18T23:30:00Z: pass-4 sync SC-05 — BC-1.01.002 dropped from bcs: and from Partial coverage: that contract deliberately removed VP-001 from its VP Anchors in the pass-4 burst (ADV-P4-B11 + A2-16 sibling sweep; its invalid-stdin-renders-from-{} seam is VP-005's property, whose source BC it is); VP-INDEX catalog/map reconciled in the same burst"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)", "1.3 2026-11-18T09:05:00Z: ADV-P3 fixes (A2-07) — FaultInjectionTable comment names the CP-A01..A03 subagent fault rows; fuzz leg asserts the promised output-set membership ({render, 29-byte line, subagent JSON lines, zero bytes}) instead of only exit-0/non-blank, with OD-168 placing a subagent config error at zero bytes", "1.4 2026-11-18T14:05:00Z: ADV-P4 fixes — catalogue closed over the pass-3 register: CP-O10/O11 (cost-history borne, BC-1.05.007), CP-A04/A05 (BC-1.07.007) and CP-N03 (metrics-borne degrade, SL:717) added (A2-03); the never-degraded claim limited to the parse path with a coded parseFault condition — subagent renderer faults (CP-A01..A05) are EXPECTED to end in the line (A2-02); frontmatter proof_method/feasibility line unmerged (A2-12); OD-167 turn-drop and OD-166 record-guard legs cross-referenced to VP-029/VP-020", "1.5 2026-11-18T23:30:00Z: pass-4 sync SC-05 — BC-1.01.002 dropped from bcs: and from Partial coverage: that contract deliberately removed VP-001 from its VP Anchors in the pass-4 burst (ADV-P4-B11 + A2-16 sibling sweep; its invalid-stdin-renders-from-{} seam is VP-005's property, whose source BC it is); VP-INDEX catalog/map reconciled in the same burst", "1.6 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-10, A2-11) — the subagent renderer regime of assertPromisedOutputSet now asserts positively: the degraded line and row output never mix (DI-008), and isJSONObject is specified as Python-semantics decode (ARCH-06 ModeBytes: NaN/Infinity tokens) so byte classification cannot false-fail; BC-1.07.007 and BC-1.05.007 added to bcs: and Partial coverage (their CP-A04/A05 and CP-O10/O11 legs are this ladder's — reciprocal BC-body rows are the BC owners' fixes, ADV-P5-A2-11/C15)", "1.7 2026-11-19T00:20:00Z: pass-5 sweep C — the headline catalogue enumeration is closed over CP-A01..A05 (the --subagent renderer faults, BC-1.07.008/.007), which the opening list had left to the second sentence; Source Contract CP-A rows unchanged"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,7 +38,9 @@ For every fault trigger in the closed error taxonomy — CP-S01..S17 (typed widg
 degrades), CP-T01..T07 (transcript faults), CP-N01..N03 (NaN/inf crash paths; N03 the
 metrics-borne degrade — a numeric `__name__` key sorts ahead of every `vllm:` key and
 `k.startswith` raises AttributeError, SL:717), CP-O01..O11 (overflow paths, OD-156;
-O10/O11 the cost-history-borne conversion sites, BC-1.05.007), and untyped panics — one
+O10/O11 the cost-history-borne conversion sites, BC-1.05.007), CP-A01..A05 (the
+`--subagent` renderer faults — A01..A03 the renderer shape faults, BC-1.07.008;
+A04/A05 the `_fmt_tokens`/elapsed-clock OverflowErrors, BC-1.07.007), and untyped panics — one
 refresh of
 `hylo statusline` produces at least one stdout byte and terminates with exit code 0. No
 fault class exists that yields blank output or a non-zero statusline exit. Degraded
@@ -64,7 +66,9 @@ current refresh and so are covered by this ladder.
   (row-2 NaN rendering), BC-1.06.001 (never-raise cache load/save), BC-1.05.004
   (CP-C09/C10 corrupt-cost-history fault injection — out of parity scope, still
   never-blank/exit-0 per DI-008), BC-1.07.008 (CP-A01..A03 subagent-mode faults reach
-  the same guard: 29-byte line, exit 0, no partial rows).
+  the same guard: 29-byte line, exit 0, no partial rows), BC-1.07.007 (CP-A04/A05 the
+  `_fmt_tokens`/elapsed-clock OverflowErrors ride the same ladder), BC-1.05.007
+  (CP-O10/O11 the cost-history-borne conversion sites at the render step, EC-009/EC-010).
 - **Invariant verified:** DI-008 (rendering never fails; degraded ladder ends in
   one-line output, exit 0). NFR-002 (100% of CP-* triggers, fault-injection table).
 
@@ -116,7 +120,10 @@ func FuzzDegradedLadder(f *testing.F) { // BC-1.01.001 any-stdin leg; CI-seeded,
         if exit != 0 { t.Fatalf("exit = %d, want 0", exit) }
         if !subagent && len(stdout) == 0 { t.Fatal("blank stdout on main entry") }
         // A2-02: the parse/render distinction is computable at the harness — a JSON
-        // object reaches the renderer (CP-A fault regime); anything else is parse-borne
+        // object reaches the renderer (CP-A fault regime); anything else is parse-borne.
+        // A2-10: isJSONObject decodes with pyfmt.Decode ModeBytes semantics (Python
+        // json: NaN/Infinity bare tokens accepted, ARCH-06) — an encoding/json-based
+        // classifier would misclassify NaN-token inputs and false-fail correct renders.
         parseFault := subagent && !isJSONObject(stdin)
         assertPromisedOutputSet(t, "fuzz", subagent, parseFault, stdout) // membership, not just non-blank
     })
@@ -139,9 +146,17 @@ func assertPromisedOutputSet(t *testing.T, id string, subagent, parseFault bool,
                 t.Fatalf("%s: degraded line emitted via the parse path", id)
             }
         }
-        // renderer-fault regime (!parseFault): rows, zero bytes (OD-168 config error)
-        // or exactly the degraded line (BC-1.07.008) — all in the promised set
-        return
+        // renderer-fault regime (!parseFault): DI-008 — the degraded line and row
+        // output never mix. Membership is asserted POSITIVELY here (A2-10: a bare
+        // return would make the regime vacuous, unfuzzed): the whole stdout is
+        // either exactly the 29-byte line (a renderer fault ended the refresh) or
+        // NDJSON rows with no degraded line anywhere in them.
+        if stdout == degradedLine {
+            return
+        }
+        if !isNDJSONRows(stdout) || strings.Contains(stdout, degradedLine) {
+            t.Fatalf("%s: subagent renderer stdout outside the output set or mixing rows and the degraded line (%d bytes)", id, len(stdout))
+        }
     }
     if len(stdout) == 0 || !(stdout == degradedLine || isRenderBytes(stdout)) {
         t.Fatalf("%s: stdout outside the promised output set", id)

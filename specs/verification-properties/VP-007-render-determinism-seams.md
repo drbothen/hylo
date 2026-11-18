@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:35:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.009.md, behavioral-contracts/ss-05/BC-5.04.003.md, domain-spec/invariants.md]
-input-hash: "c21f245"
+input-hash: "2650221"
 traces_to: prd.md
 source_bc: BC-5.04.003
 bcs: [BC-5.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T14:35:00Z: ADV-P4 fix (A2-10) — semantic re-anchor (P4): source_bc moved from BC-1.01.009 to BC-5.04.003, the contract whose VP table cites this VP (TimeFloat value discipline + one-read-per-render); BC-1.01.009 had explicitly dropped the citation (its :149-150 note: determinism, not effect order — ADV-P1-B11), so BC-1.01.009 is removed from bcs: and the VP-INDEX map is reconciled"]
+modified: ["1.1 2026-11-18T14:35:00Z: ADV-P4 fix (A2-10) — semantic re-anchor (P4): source_bc moved from BC-1.01.009 to BC-5.04.003, the contract whose VP table cites this VP (TimeFloat value discipline + one-read-per-render); BC-1.01.009 had explicitly dropped the citation (its :149-150 note: determinism, not effect order — ADV-P1-B11), so BC-1.01.009 is removed from bcs: and the VP-INDEX map is reconciled", "1.2 2026-11-18T23:45:00Z: ADV-P5 fix (A2-31) — the NowReads assert is stated against the cumulative counter: capture the count after the first Render and assert the per-render DELTA (exactly 1, IM-14), so a correct implementation reporting 2 after two renders on the same env passes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,10 +77,14 @@ sources are `Env` members; none is read behind `Render`'s back.
 ```go
 func TestRender_DeterministicUnderSeams(t *testing.T) {
     for _, env := range generatedEnvs(200) {
-        a, _ := statusline.Render(stdin, env.Record())
-        b, _ := statusline.Render(stdin, env.Record())
+        e := env.Record()
+        a, _ := statusline.Render(stdin, e)
+        first := e.NowReads() // A2-31: the counter is cumulative on the env — capture
+        b, _ := statusline.Render(stdin, e) //   the baseline, assert the DELTA per render
         if !bytes.Equal(a, b) { t.Fatal("nondeterministic render") }
-        if env.NowReads() != 1 { t.Fatalf("clock read %d times", env.NowReads()) }
+        if d := e.NowReads() - first; d != 1 { // IM-14: exactly one clock read per render
+            t.Fatalf("clock read %d times in the second render", d)
+        }
     }
 }
 ```

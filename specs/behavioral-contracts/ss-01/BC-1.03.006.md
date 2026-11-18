@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5cb6c46"
+input-hash: "650b999"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1104-1112)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)"]
+modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C04) — PC3 and EC-010 name the OD-167 in-flight-turn drop; timestamped CP-O06 turn-drop vector added: the drop is observable in `lr` (hylo null) against the plain-deletion oracle (lr [50.0, true], oracle-run 2026-11-18)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,9 +60,9 @@ totals are cumulative for the session and are **not** reset at compaction.
    `cache_creation_input_tokens` (SL:1108), a float `tin` plus a huge int, or — any accumulation site qualifies
    (ADV-P4-C08 general rule) — a 310-digit `cache_creation_input_tokens` meeting a later float
    `cache_creation_input_tokens: 1.5` at the `c_wr` site SL:1110. Legacy degrades (crash path CP-O06,
-   BC-1.03.018); hylo **skips the line** (owner rulings OD-156/Q-c: the CP-O entries ride the extended `D4-EX-2`
+   BC-1.03.018); hylo **skips the line and drops the in-flight turn** (owner rulings OD-156/Q-c: the CP-O entries ride the extended `D4-EX-2`
    id and cite OD-156; the closed exclusion-id set has no `OD-156` id — ADV-P3-C08), covered by dedicated Go
-   table tests.
+   table tests. The drop rides OD-167 and applies at every accumulation site (ADV-P5-C01).
 4. The cache stores each total in Python `json.dump` form: ints as decimal digits of any length **up to the CPython
    int↔str conversion limit (`sys.get_int_max_str_digits()` = 4,300; oracle-verified 2026-11-17)**, floats as `repr`
    (`1.5`, `2.0`, `1e+16`), `NaN`/`Infinity` as bare tokens.
@@ -94,7 +94,7 @@ totals are cumulative for the session and are **not** reset at compaction.
 | EC-007 | `output_tokens: 2.0` | `tout` 2.0 (float persists in the cache) |
 | EC-008 | `input_tokens: "5"` (truthy string) | CP-T04: line skipped under D4-EX-2 (BC-1.03.018), not accumulated |
 | EC-009 | Accumulator crosses 4,301 decimal digits (two counted 4,300-digit `input_tokens`, int-only — no float operand, so no CP-O06..O08 skip: not moot) | `json.dump` raises `ValueError` mid-write (CPython int↔str limit 4,300, oracle-verified with 19 bytes already streamed); no cache write, previous cache bytes retained (postcondition 5; temp disposition per OD-163); hylo reproduces the no-write |
-| EC-010 | Huge int (e.g. 310-digit `cache_creation_input_tokens`) meets a float operand (`input_tokens: 1.5`, or a float `tin`) | Python raises `OverflowError` at SL:1108 (oracle-verified; bound 2^1024 − 2^970, ADV-P3-C07); legacy degrades (CP-O06, sticky); hylo skips the line per OD-156, totals unchanged |
+| EC-010 | Huge int (e.g. 310-digit `cache_creation_input_tokens`) meets a float operand (`input_tokens: 1.5`, or a float `tin`) | Python raises `OverflowError` at SL:1108 (oracle-verified; bound 2^1024 − 2^970, ADV-P3-C07); legacy degrades (CP-O06, sticky); hylo skips the line and drops the in-flight turn (OD-167), totals unchanged |
 
 ## Canonical Test Vectors
 
@@ -111,6 +111,7 @@ Expected bytes are the complete cache files, re-pinned 2026-11-15 with the legac
 | usage `{"input_tokens": null}` | `{"size": 94, …, "tin": 0, …, "pp": 0, …}` | error |
 | CP-O06 (lines `x` then `y`, distinct ids): `x` = `{"input_tokens": 5}`; `y` = `{"input_tokens": 1.5, "cache_creation_input_tokens": 10^309}` (310 digits, ≥ 2^1024 − 2^970). Legacy: `OverflowError` at SL:1108, degraded line, cache not saved (oracle-verified 2026-11-18) | hylo (OD-156): `y` skipped, `x` counted — cache exactly `{"size": 527, "res": 0, "conv": 0, "think": 0, "tin": 5, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 5, "rb": 0, "pp": 5, "ids": ["x"], "lr": null, "lu": null, "cur": null}` (base bytes pinned from legacy on the `x`-only transcript, `"size"` 91 + 436 deleted bytes per BC-1.03.018 PC4) | error |
 | CP-O06 general-rule leg (lines `x` then `y`, distinct ids; ADV-P4-C08): `x` = `{"input_tokens": -10^309, "cache_creation_input_tokens": 10^309}` (ints cancel: `tin` 0, `pp` 0); `y` = `{"cache_creation_input_tokens": 1.5}`. Legacy: `x` counts; `y` raises `OverflowError` at the `c_wr` site SL:1110 (`10^309 + 1.5`), degraded line, cache not saved (oracle-verified 2026-11-18) | hylo (OD-156): `y` skipped, `x` counted — cache exactly `{"size": 852, "res": 0, "conv": 0, "think": 0, "tin": 0, "tout": 0, "c_wr": 10^309, "c_rd": 0, "mixv6": 1, "c_in": -10^309, "rb": 0, "pp": 0, "ids": ["x"], "lr": null, "lu": null, "cur": null}` (10^309 = the 310-digit integer; base bytes pinned from legacy on the `x`-only transcript, `"size"` 744 + 108 deleted bytes per BC-1.03.018 PC4) | error |
+| CP-O06 turn-drop leg (timestamped; lines `U_a, A_x, A_y, U_b`, distinct ids, TZ=UTC; ADV-P5-C01/C02): `U_a` = the U-template `{'type': 'user', 'message': {'role': 'user', 'content': 'go'}, 'timestamp': '2026-11-14T10:00:00Z'}` (92 B); `A_x` = the A-template with id `x`, usage `{'input_tokens': 5, 'output_tokens': 100}`, ts 10:00:02Z (163 B); `A_y` poisoned as in the canonical leg above (ts 10:00:04Z, 486 B); `U_b` = U-template ts 10:00:06Z (92 B). Legacy on the full window: `OverflowError` at SL:1108 (`1.5 + 10^309`), degraded, no save (oracle-run 2026-11-18). Plain-deletion oracle (PC4(a)): legacy on `U_a, A_x, U_b` = `{'size': 347, ..., 'lr': [50.0, true], 'lu': 1794650406.0, 'cur': null}` (oracle-run). hylo (OD-167): `A_y` skipped and the open turn discarded — cache exactly `{'size': 833, 'res': 0, 'conv': 5, 'think': 0, 'tin': 5, 'tout': 100, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 5, 'rb': 0, 'pp': 5, 'ids': ['x'], 'lr': null, 'lu': 1794650406.0, 'cur': null}` (compact `json.dumps` separators, each line LF-terminated; `'size'` 833 = 347 + 486 deleted bytes; `'lr'` null is the ruled drop observable — the plain-deletion oracle would rate the dropped turn 50.0 tok/s) | error |
 
 (`…` elides keys equal to the first row's values; key order is always the 16-key sequence of BC-1.03.002.)
 

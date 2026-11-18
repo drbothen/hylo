@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "636c800"
+input-hash: "2b6dfbe"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "OD-166"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.2.1) VP citation reconciliation — VP-001 added", "2026-11-17 (v1.2.2) pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "2026-11-18 (v1.2.3) pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "2026-11-18 (v1.2.5) pass-4 remediation ADV-P4-C2-03 (OD-166 closed-set id per OD-169, DI-012 cited) + ADV-P4-C2-06 (guard pinned: usd OR api_ms, sign-agnostic, gate-independent; EC-011 + vector)"]
+modified: ["2026-11-17 (v1.2.1) VP citation reconciliation — VP-001 added", "2026-11-17 (v1.2.2) pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "2026-11-18 (v1.2.3) pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "2026-11-18 (v1.2.5) pass-4 remediation ADV-P4-C2-03 (OD-166 closed-set id per OD-169; DI-012 cited) + ADV-P4-C2-06 (guard pinned: usd OR api_ms, sign-agnostic, gate-independent; EC-011 + vector)", "2026-11-18 (v1.2.6) pass-5 remediation ADV-P5-C2-06 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -134,7 +134,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | VP-020 | All non-target keys survive a write byte-identically | manual (cache-swap test, design §5.2) |
 | VP-001 | Corrupt cost history (CP-C09/C10, EC-008) still yields ≥1 stdout byte and exit 0 — out of parity scope, never-blank per DI-008 | fault-injection table (exhaustive CP-*) |
 | VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008 foreign-cache crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
-| VP-012 | The named deviation this contract carries — exclusion id `OD-166` (a refresh whose numeric `usd` or `api_ms` cannot convert to float writes no entry where legacy wrote one; sign-agnostic, gate-independent) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-166` entry and its riding table test `TestCostHistory_OD166_UnconvertibleNotRecorded`, and the mutation test fails closed if that entry is dropped | property test (VP-012, go test; OD-169) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-166` (a refresh whose numeric `usd` or `api_ms` cannot convert to float writes no entry where legacy wrote one; sign-agnostic, gate-independent) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-166` entry and its riding table test `TestCostHistory_OD166_RecordGuard`, and the mutation test fails closed if that entry is dropped | property test (VP-012, go test; OD-169) |
 
 ## Traceability
 

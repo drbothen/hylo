@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "b6774a1"
+input-hash: "4bdb216"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -20,7 +20,9 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "pass-3 remediation (ADV-P3-B02): file-read encoding pinned to OD-159 (Go reads files as UTF-8 on all OSes, named deviation); the LANG rationale replaced; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B18/B06/B07/B03): CPython os.fsencode/surrogateescape path-encoding pin (P18); parity-class row acknowledges the OD-159 deviation; DI-012 cited; for-all walk-termination and fake-FS syscall legs re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B18/B06/B07/B03): CPython os.fsencode/surrogateescape path-encoding pin (P18); parity-class row acknowledges the OD-159 deviation; DI-012 cited; for-all walk-termination and fake-FS syscall legs re-anchored to VP-041; 2026-11-18T03:00:00Z"
+  - "1.3 pass-5 remediation (ADV-P5-B06/B16): lone-surrogate levels do not raise — genericpath.isdir/isfile return False (caught ValueError), so the walk continues to the nearest ancestor repo instead of returning \"\" (oracle-verified); PC2 pin and EC-013 aligned; typo \"statt\"→\"stat\"; 2026-11-18T05:42:56Z"
+  - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,9 +60,12 @@ error occurs. It never invokes the git binary.
 
    **Path-encoding pin (P18, pass-4 ADV-P4-B18):** path arguments are encoded exactly as CPython encodes them with
    `os.fsencode` — the `surrogateescape` handler: code points U+DC80..DCFF map to the raw bytes 0x80..0xFF, so
-   `.../\udcff/sub` stats a real directory whose name is the single byte 0xFF; any other lone surrogate raises
-   `UnicodeEncodeError` on encoding and counts as not-a-directory (the walk's `except` returns `""`). Go must
-   reproduce this mapping byte-for-byte: a WTF-8 port would statt the three bytes ED B3 BF and the `sub` label
+   `.../\udcff/sub` stats a real directory whose name is the single byte 0xFF; any other lone surrogate makes the
+   level checks fail (no `UnicodeEncodeError` escapes: CPython's `genericpath.isdir`/`isfile` catch the
+   `ValueError` superclass — oracle-verified 2026-11-17: both return `False` on a lone-surrogate path — so the
+   level only counts as not-a-directory and the walk continues upward, returning the nearest ancestor repo's
+   branch, or `""` when no repository is found). Go must
+   reproduce this mapping byte-for-byte: a WTF-8 port would stat the three bytes ED B3 BF and the `sub` label
    would not degrade, diverging the branch (oracle-verified CPython 3.11.7, 2026-11-17).
 
 ## Postconditions
@@ -106,7 +111,7 @@ error occurs. It never invokes the git binary.
 | EC-010 | HEAD bytes invalid UTF-8 | decode error → `""` (no further walking) |
 | EC-011 | start dir does not exist | walk still runs lexically; an existing ancestor repo is found if any, else `""` |
 | EC-012 | Windows paths | ntpath `abspath`/`dirname`/`join`; the loop ends when `dirname(d) == d` at the drive root; OS-specific goldens |
-| EC-013 | Directory segment holding a lone surrogate (hand-crafted tree) | U+DC80..DCFF encode to the raw bytes 0x80..0xFF (`os.fsencode`/surrogateescape); any other lone surrogate raises → treated as not-a-directory → `""`; Go reproduces the mapping (P18 pin, PC2) |
+| EC-013 | Directory segment holding a lone surrogate (hand-crafted tree) | U+DC80..DCFF encode to the raw bytes 0x80..0xFF (`os.fsencode`/surrogateescape); any other lone surrogate makes `isdir`/`isfile` return `False` (the caught `ValueError` superclass) → the level counts as not-a-directory and the walk **continues upward** to the nearest ancestor repo's branch, or `""` when no repo is found; Go reproduces the mapping (P18 pin, PC2; oracle-verified 2026-11-17) |
 
 ## Canonical Test Vectors
 

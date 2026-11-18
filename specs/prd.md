@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.11"
+version: "0.2.14"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T02:11:24Z
+timestamp: 2026-11-19T03:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "6e97abc"
+input-hash: "a56b40f"
 traces_to: domain-spec/L2-INDEX.md
 supplements:
   - prd-supplements/interface-definitions.md
@@ -75,7 +75,8 @@ Rendering never fails: faults produce the degraded ladder — one-line output, e
 (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161,
 OD-166 — eleven ids; DI-012). Configuration in P1 is typed `HYLO_*` env over built-in
 defaults (file layer arrives P4, OD-107); invalid config renders the D4-EX-3 one-line
-error and exits 0.
+error and exits 0 — except in `--subagent` mode, where a config error prints zero bytes
+on stdout with the diagnostics on stderr (OD-168; pass-5 A22).
 
 ### 1.3 Key Differentiators (P1-visible)
 
@@ -259,7 +260,7 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 | [BC-1.05.004](behavioral-contracts/ss-01/BC-1.05.004.md) | record_cost throttled write | BC-SL-028 | P0 |
 | [BC-1.05.005](behavioral-contracts/ss-01/BC-1.05.005.md) | cost_thresholds p75/p95 percentiles | BC-SL-029 | P0 |
 | [BC-1.05.006](behavioral-contracts/ss-01/BC-1.05.006.md) | Numeric sid keyed by string form — throttle and self-exclusion hold | BC-SL-079 | P0 |
-| [BC-1.05.007](behavioral-contracts/ss-01/BC-1.05.007.md) | $ and $/h number formatting | BC-SL-082 | P0 |
+| [BC-1.05.007](behavioral-contracts/ss-01/BC-1.05.007.md) | $, $/h and ⛏ number formatting | BC-SL-082 | P0 |
 | [BC-1.05.008](behavioral-contracts/ss-01/BC-1.05.008.md) | Cost colouring goldens (21 seeded sessions) | BC-SL-101 | P0 |
 | [BC-1.05.009](behavioral-contracts/ss-01/BC-1.05.009.md) | record_cost write contract (exact JSON format) | BC-SL-102 | P0 |
 
@@ -319,7 +320,7 @@ BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 
 | BC ID | Title | Legacy | Priority |
 |-------|-------|--------|----------|
-| [BC-3.01.001](behavioral-contracts/ss-03/BC-3.01.001.md) | Per-OS cache/config/state dirs; hylo cache dir from P1 (XDG/hylo, LOCALAPPDATA) | new | P0 |
+| [BC-3.01.001](behavioral-contracts/ss-03/BC-3.01.001.md) | Per-OS cache/config/state dirs (XDG/hylo, LOCALAPPDATA); LocalZone TZ resolution (OS zone, UTC on empty/unparseable) | new | P0 |
 
 #### S3.02 Process start / window age (writer group G)
 
@@ -435,7 +436,7 @@ S7 exporter (P2), S8 proxy & routing (P3), S9 ledger (P3, D7), S10 launcher/hook
 | `hylo statusline` | 1 or 2 rendered lines on stdout (LF-joined); faults degrade to the 29-byte grey line, never blank. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004) | always 0 | BC-4.01.001, BC-1.01.001/.003 |
 | `hylo version` | `hylo <version>` (build info fallback, then `dev`) | 0 | BC-4.01.003 |
 | `hylo config validate` | `hylo: config ok` or plain reason lines | 0 / 1 | BC-2.03.001 |
-| `hylo config path` | config, cache and state paths, one per line, fixed labels/order (OD-132) | 0 | BC-2.03.002 |
+| `hylo config path` | config, cache and state paths, one per line, fixed labels/order (OD-132); exit 1 when a directory cannot be determined (BC-2.03.002; pass-5 A01) | 0 / 1 | BC-2.03.002 |
 
 Usage errors (bad args/flags on non-statusline verbs) print the golden usage text and
 exit 2 (`cmd/hylo/testdata/usage.golden`). `hylo statusline` recognizes exactly one flag,
@@ -480,7 +481,7 @@ the supplement.
 | NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02/N03, CP-O01..O05, CP-O10/O11, CP-A01..A05) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
-| NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
+| NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20). The tunable cap keys (`transcript.read_cap_bytes`, `transcript.dedup_memory`, `sparkline.history_cap`) carry judgment-call config-VALIDATION upper bounds (67108864 / 65536 / 1000; supplement) — config range bounds, not new runtime caps (pass-5 A13) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
 | NFR-006 | Repo hygiene (public repo) | synthetic-only committed fixtures; gitleaks + pattern scan clean on CI | CI leg + TestCorpusHygiene | BC-6.02.001, BC-6.04.001 |
 
 ## 5. Error Taxonomy
@@ -494,7 +495,7 @@ the supplement.
 |---|---|---|---|---|
 | E-REN-001 | Panic guard (any crash path) | `\e[90mstatusline degraded\e[0m\n` (29 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`) | 0 | BC-1.01.001 |
 | E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05; Surface 2 transcript CP-O06..O08 resolve to the D4-EX-2 skip, CP-O09 reproduces the legacy no-write save — BC-1.03.006 PC5 — none of them a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
-| E-CFG-001 | D4-EX-3 config error (six classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
+| E-CFG-001 | D4-EX-3 config error (seven classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134; Text — OD-178) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
 | E-VAL-001 | `config validate` on invalid config | plain reason lines (no SGR) on stdout | 1 | BC-2.03.001 |
@@ -579,7 +580,9 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
   and the purity classifications in each BC file.
 - **DI-008 — rendering never fails.** Any fault lands on the degraded ladder (E-REN-*) or
   a stated fallback; exit 0 always for `statusline`; config errors and unknown flags are
-  themselves one-line outputs (E-CFG-001, E-CLI-001). Includes D4-EX-3 and OD-112.
+  themselves one-line outputs (E-CFG-001, E-CLI-001). Includes D4-EX-3, OD-112 and the
+  OD-168 subagent carve-out (a config error in `--subagent` mode prints zero bytes on
+  stdout, diagnostics on stderr; pass-5 A22).
 - **DI-010 — typed, validated config.** Every key is registry-declared with a rationale
   (D15); invalid values render the D4-EX-3 line and continue (BC-2.01.004, BC-2.02.x).
 - **DI-012 — closed deviation set.** Behavior may differ from the oracle only via named,
@@ -646,7 +649,7 @@ remain in git history and in the BCs' edge-case registers.
 | OQ-3 | OD-139 | **Deferred:** the per-OS probe test measures the symlinked-binary case (native `P_comm`/`/proc` comm vs `ps comm`); it becomes an owner ruling only if the measured names differ (BC-3.02.002 EC-003) |
 | OQ-4 | OD-138 | Resolved: NaN `usd` in the cost history pinned byte-for-byte; expected bytes generated from the CPython 3.11 oracle (frozen clock, temp HOME, synthetic history; both file orders pinned in BC-1.05.005 EC-009) |
 | OQ-5 | OD-143 | Resolved: T13 confirmed real legacy behavior by the CPython 3.11 oracle run (exact golden reproduction, 2026-11-15); the row stays and BC-1.03.016 remains "20 rows" |
-| OQ-6 | OD-134 | Resolved: OD-114's config-error classes extended with the theme class, reason string `not an SGR parameter list` (BC-2.01.003, error-taxonomy.md); class register closed at six |
+| OQ-6 | OD-134 | Resolved: OD-114's config-error classes extended with the theme class, reason string `not an SGR parameter list` (BC-2.01.003, error-taxonomy.md); class register closed at six — OD-178 (2026-11-18) extended it to seven (Text) with the five canonical tests `TestD4EX3_{Boolean,Enum,URL,Number,Text}` |
 | OQ-7 | OD-140 | Resolved: dedicated boolean-parsing contract stood up in S2.02 (BC-2.02.006); one behavior — typed booleans `true\|false\|1\|0\|yes\|no` per OD-05, anything else is a config error |
 | OQ-8 | OD-132 | Resolved: `hylo config path` prints all three paths — config, cache, state — one per line in that fixed order with those fixed labels (BC-2.03.002; interface-definitions.md) |
 | OQ-9 | OD-145 | Resolved: harness flag names, timing method and remaining spec details delegated to the architect in create-architecture (subject to adversarial review); marked "names provisional — architect (OD-145)" in BC-6.x; no behavior change |

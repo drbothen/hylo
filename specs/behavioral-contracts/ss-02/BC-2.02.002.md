@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "5ea52a3"
+input-hash: "121a7ff"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy-accepted TTL values at legacy/dgx_statusline.py SL:74, SL:324)"
@@ -23,7 +23,10 @@ parity_class: D4-EX-3
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18: ADV-P4 remediation A03 — per-key exception: statusline.git.ttl_s admits any finite value, negative = never fresh (legacy SL:409); TestD4EX3_Name rename (D22)", "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
+modified:
+  - "1.2.1 2026-11-18: ADV-P4 remediation A03 — per-key exception: statusline.git.ttl_s admits any finite value, negative = never fresh (legacy SL:409); TestD4EX3_Name rename (D22)"
+  - "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
+  - "2026-11-19T00:50:00Z (1.2.3) ADV-P5 remediation D11 (A14 sibling) — git.ttl_s bounded by the mirrored Duration floor -9223372036.854775 (values below yield out of range), Inv 1 restated to the symmetric span, VP property row corrected to the per-key exception, EC-011 added"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,13 +60,17 @@ BC-2.02.001:
 1. Value is NaN, +Inf or -Inf (spelled `nan`, `inf`, `infinity`, any case and sign Python
    accepts, or a literal that overflows to infinity such as `1e400`) →
    `<key>=<value> (not finite)`.
-2. Value < 0 → `<key>=<value> (negative)`. **Per-key exception (ADV-P4-A03):**
-   `statusline.git.ttl_s` admits any finite value, negatives included (registry range "any
-   finite number"): legacy's gate `now - ts > GIT_TTL` (SL:409, tunable SL:99) admits them
+2. Value < 0 → `<key>=<value> (negative)`. **Per-key exception (ADV-P4-A03, bounded per
+   ADV-P5-D11):** `statusline.git.ttl_s` admits any finite value in
+   `[-9223372036.854775, 9223372036.854775]` — negatives included (registry range
+   "finite, bounded by the Duration conversion"): legacy's gate `now - ts > GIT_TTL`
+   (SL:409, tunable SL:99) admits them
    unvalidated, and a negative TTL makes the gate true for every cached sample, i.e. the
    git cache is **never fresh** (re-read `.git/HEAD` on every render) — legacy-identical
-   observable behavior, so no D4-EX-3 entry arises. For this key check 2 is skipped.
-   `-0`, `-0.0` and underflow to -0.0 (e.g.
+   observable behavior, so no D4-EX-3 entry arises. For this key check 2 is skipped and
+   check 3's ceiling is mirrored by the floor: a value below `-9223372036.854775`
+   (e.g. `-1e300`) yields `<key>=<value> (out of range)`, so Inv 1's "conversion
+   well-defined" holds for the exception too. `-0`, `-0.0` and underflow to -0.0 (e.g.
    `-1e-400`) are **not** negative (−0.0 < 0 is false) and are treated as 0.
 3. Value > 9223372036.854775 (the largest seconds value a `time.Duration` holds; PR-22) →
    `<key>=<value> (out of range)`.
@@ -77,11 +84,12 @@ BC-2.02.001:
 
 ## Invariants
 
-1. A loaded `Seconds` value is always finite and `<= 9223372036.854775`, so a
-   float→Duration conversion is well-defined on every architecture (PR-22: arm64 saturates,
-   amd64 yields MinInt64 for NaN/out-of-range); it is `>= 0` for every key except
-   `statusline.git.ttl_s`, whose per-key exception admits negative values (PC-2, 
-   ADV-P4-A03).
+1. A loaded `Seconds` value is always finite and within
+   `[-9223372036.854775, 9223372036.854775]`, so a float→Duration conversion is
+   well-defined on every architecture (PR-22: arm64 saturates, amd64 yields MinInt64 for
+   NaN/out-of-range); it is `>= 0` for every key except `statusline.git.ttl_s`, whose
+   per-key exception admits negative values down to the mirrored Duration floor (PC-2,
+   ADV-P4-A03; the floor added by ADV-P5-D11).
 2. Of the P1 `Seconds` keys only `statusline.telemetry.ttl_s` was settable in legacy (via
    `DGX_SL_TTL`), so it is the only key whose range errors are parity deviations; for the
    other keys the range is a hylo-only validation with no legacy counterpart.
@@ -100,6 +108,7 @@ BC-2.02.001:
 | EC-008 | `HYLO_STATUSLINE_TELEMETRY_TIMEOUT_S=0` | `must be > 0` (range `> 0`) |
 | EC-009 | `HYLO_STATUSLINE_TELEMETRY_TTL_S=1e1` | valid, 10 |
 | EC-010 | `HYLO_STATUSLINE_GIT_TTL_S=-5` | valid for `statusline.git.ttl_s` (per-key exception); git cache never fresh — legacy-identical (ADV-P4-A03) |
+| EC-011 | `HYLO_STATUSLINE_GIT_TTL_S=-1e300` | `out of range` (below the mirrored Duration floor; the conversion stays well-defined, ADV-P5-D11) |
 
 ## Canonical Test Vectors
 
@@ -118,7 +127,7 @@ BC-2.02.001:
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-016, VP-012 (frontmatter closure) | Every accepted Seconds value v satisfies `!IsNaN(v) && !IsInf(v,0) && v >= 0 && v <= 9223372036.854775` | Go property test (testing/quick) / fuzz on the parser |
+| VP-016, VP-012 (frontmatter closure) | Every accepted Seconds value v satisfies `!IsNaN(v) && !IsInf(v,0) && v <= 9223372036.854775`, and `v >= 0` for every key except `statusline.git.ttl_s`, for which `v >= -9223372036.854775` (ADV-P5-D11) | Go property test (testing/quick) / fuzz on the parser |
 
 ## Traceability
 

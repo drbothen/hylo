@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T00:20:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "36cc482"
+input-hash: "3ee40d0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,9 +19,10 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
-  - "2026-11-18T01:42:00Z ADV-P3 remediation D09+D12: expected bytes written as escape notation (wire forms shown); DumpsLen gains (int, error) with ErrValue on encoder-failure ints past 4300 digits; anchor fix (notation per PC-4, not BC-5.01.002)"
-  - "1.2.3 2026-11-18: ADV-P4 remediation D17 — Inv 4 recursion economy measured: decoder and encoder consume one slot per nesting level (max depth = limit − 8 at module scope, limits 700/1000/1300), encoder boundary strictly lower at every call site"
+  - "2026-11-18T01:42:00Z (1.2.2) ADV-P3 remediation D09+D12: expected bytes written as escape notation (wire forms shown); DumpsLen gains (int, error) with ErrValue on encoder-failure ints past 4300 digits; anchor fix (notation per PC-4, not BC-5.01.002)"
+  - "2026-11-18T22:00:00Z (1.2.3) ADV-P4 remediation D17 — Inv 4 recursion economy measured: decoder and encoder consume one slot per nesting level (max depth = limit − 8 at module scope, limits 700/1000/1300), encoder boundary strictly lower at every call site"
+  - "2026-11-18T23:30:00Z (1.2.4) ADV-P5 remediation D28+D08/D17 — Description signature corrected to DumpsLen(v Value, budget int) (int, error) (D28); Inv 4 recursion law restated per site (max total nesting = 993 − W at the encode call, W = Python frames; SL:1140/1147 budget 990, SL:1138 genexp budget 989); ErrDepth past the site budget"
+  - "2026-11-19T00:20:00Z (1.2.5) pass-5 sweep C end-to-end re-measurement — Inv 4 depth values: law 994 − s (json.dumps) / 995 − s (json.dump), s = Python frames at the encode call inclusive; composition budgets SL:1140/1147 = 991 (s=3), SL:1138 genexp = 990 (s=4); no input-borne transcript Value can both decode and fail measurement (line-decode cap under the wrapper), correcting the decode-and-still-fail consequence"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -35,10 +36,12 @@ removal_reason: null
 ## Description
 
 The composition widget measures transcript blocks in characters of Python's `json.dumps` output (SL:1138, 1140,
-1147). `pyfmt.DumpsLen(v Value) int` returns exactly `len(json.dumps(v))` for any decoded `Value`, using Python's
+1147). `pyfmt.DumpsLen(v Value, budget int) (int, error)` returns exactly `len(json.dumps(v))` for any decoded
+`Value`, using Python's
 defaults (separators `", "`/`": "`, `ensure_ascii`, float `repr`, NaN tokens, insertion order), and the call sites
 apply legacy's per-site fallbacks, including "a `null` non-list inner value counts 0". `DumpsLen` shares its
-escaping and float-repr code with the cache encoder `Dumps` (IM-03) so the two cannot drift.
+escaping and float-repr code with the cache encoder `Dumps` (IM-03) so the two cannot drift. `budget` is the
+per-site recursion budget (BC-5.02.006 PC-6); exceeding it returns `ErrDepth`.
 
 ## Preconditions
 
@@ -81,16 +84,26 @@ escaping and float-repr code with the cache encoder `Dumps` (IM-03) so the two c
    reorders map keys).
 4. Encoder failure is possible on **accumulated** values (unlike freshly decoded ones): ints past the 4,300-digit
    decode limit can arise from summed totals in a cache. `DumpsLen`'s signature gains the error return
-   (`DumpsLen(v Value) (int, error)`): it returns typed `ErrValue` exactly where CPython's `json.dumps` raises
+   (`DumpsLen(v Value, budget int) (int, error)`): it returns typed `ErrValue` exactly where CPython's `json.dumps` raises
    `ValueError` on such ints (signature amended, ADV-P3-D12). At the composition sites the legacy equivalent
    propagates to the top-level handler → the whole line degrades; in the cache writer the same encoder failure
    reproduces legacy's no-write (swallowed error, partial temp file, BC-5.02.006). Recursion economy
-   (measured, ADV-P4-D17): CPython's decoder and encoder both consume ONE recursion slot per container nesting
-   level (law: max depth = recursionlimit − 8 at module scope; slope verified at limits 700/1000/1300 with
-   `python3 -I`), but the encoder runs deeper in the call stack at every legacy call site, so its absolute
-   boundary is strictly lower than the stdin decoder's (a `rate_limits` dict accepted at decode can still
-   raise `RecursionError` inside `json.dump`); where CPython would raise it, `DumpsLen`/`Dumps` return the
-   depth error per the BC-5.02.006 boundary (shared primitive, IM-04).
+   (measured per site, ADV-P4-D17 as corrected by ADV-P5-D08/D17, re-measured end to end pass-5 sweep C):
+   CPython's encoder spends ONE slot per container nesting level and one per Python frame at every legacy
+   encode site — measured law: maximum encodable total object nesting = `994 − s` for `json.dumps` (`s` =
+   Python frames on the stack at the encode call, invoking frame inclusive, `<module>` = 1), `995 − s` for
+   `json.dump`, slope 1 slot/frame verified over five stacked frames (`python3 -I`, CPython 3.11.7,
+   isolated temp dir/HOME, 2026-11-18). Composition sites: SL:1140 and SL:1147 sit at `s = 3` (budget
+   **991**), the SL:1138 genexp adds a frame (`s = 4`, budget **990**). At each site `DumpsLen` takes
+   `budget` and returns `ErrDepth` past it; a depth failure at a composition site propagates like the
+   `ValueError` leg (whole line degrades). The composition budget (991) is strictly below the stdin
+   decoder's acceptance constant (993, BC-5.02.003 PC-7), but the transcript-line decoder caps every
+   input-borne Value below it: the tool_use input (SL:1147) decodes at most to value depth 989 (line bound
+   993 minus the 4-container wrapper) and a tool_result item (SL:1138) to 988 — both under budget, so no
+   input-borne Value both decodes and fails measurement (supersedes the earlier "can decode and still fail"
+   consequence); the ErrDepth leg is exercised at the helper level (VP-024 fuzz), and legacy's observable
+   line-degrade via composition depth does not occur. A shallower stack never has the smaller budget
+   (budget strictly monotone decreasing in frame depth on both sides).
 
 ## Edge Cases
 

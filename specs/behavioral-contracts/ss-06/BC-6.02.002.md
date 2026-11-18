@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "87101f4"
+input-hash: "04561e0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,9 +24,11 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2.3 2026-11-18: ADV-P4 remediation D25 - captured stdin moved to a byte-exact sibling file stdin.bin (never a JSON member); mode: main/subagent marker added"
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D24: captured stdin snapshots spliced byte-level (no re-serialization); parse-required captures are build errors"
+  - "1.2.3 2026-11-18: ADV-P4 remediation D25 - captured stdin moved to a byte-exact sibling file stdin.bin (never a JSON member); mode: main/subagent marker added"
+  - "2026-11-19T00:12:00Z (1.2.4) ADV-P5 remediation D02+D03 — step `now` parsed once to float64 (Python float()) and never round-tripped through time.Time ns; stdin.bin path rewrites splice JSON-escaped paths only inside JSON string values (BC-6.02.003 PC-1 rule)"
+  - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,7 +53,12 @@ are compared after every step (BC-6.03.002).
 
 1. A captured session is a directory under `captures/` (git-ignored, BC-6.02.001)
    holding `session.json`, an ordered array of steps. Each step has:
-   - `now`: required decimal epoch seconds;
+   - `now`: required decimal epoch seconds. The harness parses it ONCE into a float64
+     with Python `float()` semantics (within the BC-6.01.003 grammar) and that float IS
+     the step's frozen `time.time()` on both sides — it is never round-tripped through
+     `time.Time` nanoseconds (ADV-P5-D02; the owner measures ~17% of random fractional
+     instants drifting under such a round trip, forking the repr bytes written to
+     `rl_ts`/`ts`/`fetch_ts`);
    - `stdin.bin`: a SIBLING FILE holding that refresh's stdin snapshot byte-exact
      (advocate design call 15, ADV-P4-D25) — the snapshot is NEVER a JSON member of
      `session.json`. Because the step's stdin lives outside the JSON document, any captured
@@ -72,6 +79,11 @@ are compared after every step (BC-6.03.002).
    and the case settings (BC-6.02.003).
 2. Paths inside each `stdin.bin` snapshot (`transcript_path`, `workspace.project_dir`,
    `cwd`) are rewritten by the harness to the per-case temp tree before use. The
+   rewrite (ADV-P5-D03, owner call 9): the splice locates the path ONLY as a JSON
+   string value of the snapshot document and inserts the replacement JSON-escaped
+   (backslashes and control bytes escaped) — never raw — so Windows paths containing
+   `\U`, `\t` or control-byte sequences survive byte-exactly; the same rule governs
+   `stdin.json.tmpl` substitution (BC-6.02.003 PC 1). The
    project directory is materialized with the same basename as the captured one.
    **Byte fidelity of the rewritten snapshot (ADV-P3-D24):** the harness performs a
    surgical, byte-level splice — only the path substring occurrences inside the captured

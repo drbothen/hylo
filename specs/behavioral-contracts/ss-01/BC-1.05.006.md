@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "72a3538"
+input-hash: "745f562"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "OD-30"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)", "1.3.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)", "1.3.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.4 2026-11-18: pass-5 remediation ADV-P5-C2-05 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD30_NumericSidStringKey)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -119,7 +119,7 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 |--------|----------|-------------|
 | VP-020 | For any non-string hashable sid with no transcript present, Go output equals legacy output for `str_form(sid)` as a string sid (with a transcript legacy degrades on the numeric sid, CP-S14) | manual (paired oracle runs) |
 | VP-020 | No Go-written cost history contains a duplicate key | Go property test (testing/quick) |
-| VP-012 | The named deviation this contract carries — exclusion id `OD-30` (numeric sid keyed by string form; one key per sid) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-30` entry and its riding table test `TestCacheSwap_OD30_DuplicateKeyTail`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-30` (numeric sid keyed by string form; one key per sid) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-30` entry and its riding table test `TestCostHistory_OD30_NumericSidStringKey`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability
 

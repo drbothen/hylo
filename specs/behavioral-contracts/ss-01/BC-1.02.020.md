@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.4.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:21:12Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "4f5dcbc"
+input-hash: "a99539e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,10 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["consolidated pass-2 follow-up: EC-011 overflow condition corrected (int operand converted to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z", "pass-4 remediation (ADV-P4-B13/B04): repeated modified entry deduplicated; canonical OV overflow vector added; 2026-11-17T12:00:00Z"]
+modified:
+  - "consolidated pass-2 follow-up: EC-011 overflow condition corrected (int operand converted to float first; e.g. 2\xB710\xB3\u2070\u2078) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"
+  - "pass-4 remediation (ADV-P4-B13/B04): repeated modified entry deduplicated; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
+  - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "bf3ec3e"
+input-hash: "c2d284a"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:load_cache/save_cache (SL:190-206)"
@@ -28,7 +28,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -131,7 +131,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 (status-line caches) |
-| L2 Domain Invariants | DI-007 (the status line's own caches are an allowed input) |
+| L2 Domain Invariants | DI-007 (the status line's own caches are an allowed input); DI-012 (the OD-163 own-temp-cleanup deviation PC2 carries is a named, tested deviation — sibling BC-1.06.002 convention, ADV-P5-C10) |
 | Architecture Module | `internal/statusline` cache.go `CacheStore` Load/Save (design IM-17; BC-COMPONENT-MAP: internal/statusline/cache.go (never-raise, raw sid) — ARCH-04) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:load_cache (SL:190-195), save_cache (SL:198-206); main session-cache path (SL:1214-1215) |

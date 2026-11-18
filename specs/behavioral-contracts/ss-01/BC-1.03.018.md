@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5cb6c46"
+input-hash: "650b999"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1059-1149; raise sites SL:994, 1069, 1072, 1079, 1097, 1099, 1108, 1112, 1143, 1145)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: eighth crash path CP-T08 numeric overflow (ruling OD-156; ADV-P2-C01)", "1.2.3 2026-11-17: CP-T08 renamed to taxonomy ids CP-O06..O08 (OD-156 register)", "1.2.4 2026-11-17: pass-3 remediation (ADV-P3-C03/C06/C07/C10/C11): ten-predicate count, CPython int→double overflow bound 2^1024−2^970, CP-O07 re-anchored to the SL:1117 rebuild check (owner BC-1.03.007), CP-O08 closer-skip plus in-flight turn drop (ruling OD-167)", "1.2.5 2026-11-18T08:00:00Z: pass-4 remediation: general overflow rule stated — any accumulator OverflowError in the SL:1108-1117 window is CP-O06/O07 class; CP-O06 widened to SL:1108-1112, CP-O07 to either direction incl. huge-int pp vs float prompt (ADV-P4-C08)", "1.2.6 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized; closed set restated as eleven ids incl. OD-166 (OD-169)", "1.2.7 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-012 added", "1.2.2 2026-11-17: eighth crash path CP-T08 numeric overflow (ruling OD-156; ADV-P2-C01)", "1.2.3 2026-11-17: CP-T08 renamed to taxonomy ids CP-O06..O08 (OD-156 register)", "1.2.4 2026-11-17: pass-3 remediation (ADV-P3-C03/C06/C07/C10/C11): ten-predicate count, CPython int→double overflow bound 2^1024−2^970, CP-O07 re-anchored to the SL:1117 rebuild check (owner BC-1.03.007), CP-O08 closer-skip plus in-flight turn drop (ruling OD-167)", "1.2.5 2026-11-18T08:00:00Z: pass-4 remediation: general overflow rule stated — any accumulator OverflowError in the SL:1108-1117 window is CP-O06/O07 class; CP-O06 widened to SL:1108-1112, CP-O07 to either direction incl. huge-int pp vs float prompt (ADV-P4-C08)", "1.2.6 2026-11-18T12:00:00Z: pass-4 residual sweep — exclusions.json path canonicalized; closed set restated as eleven ids incl. OD-166 (OD-169)", "1.2.7 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.2.8 2026-11-18T23:00:00Z: pass-5 remediation — OD-167 drop applied to every transcript-borne overflow skip (CP-O06, CP-O07 and CP-O08; ADV-P5-C01); delete-the-line oracle gains the OD-167 exception (PC4; ADV-P5-C02); pre-raise legacy mutation table corrected for CP-O06/O07 (ADV-P5-C04); overflow vectors timestamped so the drop is observable in `lr`"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,8 +46,10 @@ large to convert to float"; magnitudes below the bound convert silently). **Gene
 any `OverflowError` raised by an accumulator site in the SL:1108-1117 window — `tin` SL:1108, `c_in`
 SL:1109, `c_wr` SL:1110, `c_rd` SL:1111, `tout` SL:1112, or the rebuild-check arithmetic SL:1117-1118 —
 is CP-O06/O07 class; the per-row "raise site" columns below name the canonical legs, not the full set.**
-The lazy CP-O08 site additionally drops the
-in-flight turn so that later lines parse normally (ruling OD-167; no sticky state, ARCH-03 `#transcript`).
+Every transcript-borne overflow skip additionally drops the
+in-flight turn so that later lines parse normally — all of CP-O06, CP-O07 and CP-O08 (ruling OD-167: "a
+transcript-borne overflow skips the offending line AND drops the in-flight turn"; no sticky state, ARCH-03
+`#transcript`).
 
 ## Preconditions
 
@@ -62,8 +64,10 @@ in-flight turn so that later lines parse normally (ruling OD-167; no sticky stat
 1. Per line, in order: (1) decode fails → skip (legacy); (2) else if any W-predicate below holds → **skip**; (3) else
    process exactly as legacy (BC-1.03.005..010).
 2. A skipped line changes **none** of: `res`, `conv`, `think`, `tin`, `tout`, `c_wr`, `c_rd`, `c_in`, `rb`, `pp`,
-   `cur`, `lr`, `lu`, `seen_ids`, `recent_ids` — except as ruling OD-167 directs for the lazy CP-O08 site (the closer
-   is skipped **and** the in-flight turn is dropped, `cur` → null). The offset still advances past the window's last LF.
+   `cur`, `lr`, `lu`, `seen_ids`, `recent_ids` — except as ruling OD-167 directs for the transcript-borne overflow
+   skips (CP-O06, CP-O07 and CP-O08 alike: the offending line is skipped **and** the in-flight turn is dropped,
+   `cur` → null; `lr`, `lu` unchanged). The ruled drop is part of the expected post-skip state, not a
+   mutation-on-skip violation (VP-013 register). The offset still advances past the window's last LF.
 3. W-predicates (the skipped line is the one satisfying it), with the legacy mutations Go must **not** apply:
 
 | Path | W-predicate | Legacy raise site | Legacy mutations before the raise (not applied by hylo) |
@@ -75,12 +79,18 @@ in-flight turn so that later lines parse normally (ruling OD-167; no sticky stat
 | CP-T05 | `ts_ok`, `assistant`, `m.id` truthy, opens a new turn, **`lu` is not null**, the usage is **not counted** (an object whose id is already in `seen_ids`), and `(m.usage or {}).output_tokens` truthy and not a number | SL:994 (lazily, when the turn later closes, possibly next refresh) | previous turn closed, `cur` opened with the bad `out`, composition counted — hylo skips at the opening line; previous turn stays open, composition and `lu` unchanged |
 | CP-T06 | not `cb`; `m.content` is a list; some object block has `type == "text"` with `text` truthy and without a length (number, `true`), or `type == "thinking"` with `thinking` likewise | SL:1143 / SL:1145 | turn step, usage, ids, composition of earlier blocks of the line |
 | CP-T07 | not `cb`; `m.usage` is an object (even `{}`); `m.id` truthy and unhashable (array or object) | SL:1099 | with `ts_ok` and `assistant`: previous turn closed and `cur = {id: [..], …}` opened |
-| CP-O06 | The line's numbers are all JSON numbers, yet a usage-accumulation step raises `OverflowError`: an exact int with \|value\| ≥ 2^1024 − 2^970 (CPython's int→double overflow bound; JSON admits ints up to 4,300 digits, and magnitudes below the bound — DBL_MAX ≈ 1.7976e308 included — convert silently, oracle-verified 2026-11-17) meets a float operand at **any** accumulation site (general rule, ADV-P4-C08: `tin` SL:1108, `c_in` SL:1109, `c_wr` SL:1110, `c_rd` SL:1111, `tout` SL:1112) | SL:1108-1112 | none (immediate raise during accumulation) |
-| CP-O07 | Same overflow condition at the **rebuild-check** step (owner BC-1.03.007): SL:1117-1118 in either direction — a float `pp` carried from an earlier counted line meeting a huge exact int `_w` (the canonical leg; its own SL:1108 accumulation is int-only and overflow-free when `tin` is an int), **or a huge exact int `pp` meeting a float `prompt`** (mirror leg, ADV-P4-C08) | SL:1117-1118 | none (immediate raise; the `pp = prompt` assignment is not reached) |
+| CP-O06 | The line's numbers are all JSON numbers, yet a usage-accumulation step raises `OverflowError`: an exact int with \|value\| ≥ 2^1024 − 2^970 (CPython's int→double overflow bound; JSON admits ints up to 4,300 digits, and magnitudes below the bound — DBL_MAX ≈ 1.7976e308 included — convert silently, oracle-verified 2026-11-17) meets a float operand at **any** accumulation site (general rule, ADV-P4-C08: `tin` SL:1108, `c_in` SL:1109, `c_wr` SL:1110, `c_rd` SL:1111, `tout` SL:1112) | SL:1108-1112 | turn step (SL:1069-1087: previous turn closed via `lr = finish(cur, lr)`; opening assistant: `cur` opened for this line's id; continuation: `cur["t1"] = ts`; timed user/system closer: previous closed, `cur` → null), `lu` advanced for timed user lines; `seen_ids.add`/`recent_ids.append` (SL:1102-1103); the sums preceding the failing `+=` in `tin, c_in, c_wr, c_rd, tout` order (at the `tin` site none, at `tout` all four); `rb`/`pp` not reached. **hylo:** skip the line whole **and drop the in-flight turn** (OD-167) — no partial accumulation, `lr`/`lu` unchanged |
+| CP-O07 | Same overflow condition at the **rebuild-check** step (owner BC-1.03.007): SL:1117-1118 in either direction — a float `pp` carried from an earlier counted line meeting a huge exact int `_w` (the canonical leg; its own SL:1108 accumulation is int-only and overflow-free when `tin` is an int), **or a huge exact int `pp` meeting a float `prompt`** (mirror leg, ADV-P4-C08) | SL:1117-1118 | turn step (as CP-O06), `lu` for timed user lines, `seen_ids.add`/`recent_ids.append`, and **all five** accumulations `tin/c_in/c_wr/c_rd/tout` (they precede SL:1117 and succeed); `rb += 1` and `pp = prompt` are not reached. **hylo:** skip the line whole **and drop the in-flight turn** (OD-167) — `rb`/`pp` unchanged, `lr`/`lu` unchanged |
 | CP-O08 | Same overflow condition at the turn-machine steps: SL:994 `stale_factor × out / floor_tps` or SL:996 `out / span` with a huge exact int `out` (lazy: the raise surfaces while processing the **closer** line). **Deviation (ruling OD-167):** hylo skips the closer line **and drops the in-flight turn** (`cur` → null; `lr`, `lu` unchanged), so later lines parse normally — no sticky state (ARCH-03 `#transcript`) | SL:994, 996 | for the lazy `_finish_turn` sites: the closer line's own turn/lu bookkeeping (legacy keeps the bad turn open, so every later closer re-raises inside `finish` and is skipped too: new-id assistant lines, real user prompts and timed system/`compact_boundary` lines stop counting — totals freeze for the rest of the session) |
 
 4. **Equivalence oracle:** hylo on transcript T yields the same mix cache and render as legacy on T with the skipped
-   lines deleted, except `size`, which equals legacy's plus the deleted lines' bytes (each + 1 for its LF).
+   lines deleted, except (a) `size`, which equals legacy's plus the deleted lines' bytes (each + 1 for its LF); and
+   (b) the **OD-167 exception** (ADV-P5-C02): deleting the skipped lines alone does not reproduce the ruled
+   in-flight-turn drop at a transcript-borne overflow skip (CP-O06/O07/O08). At each such skip the oracle
+   additionally discards the turn that is open at that point — the discarded turn is never finished and contributes
+   no last-turn rate (`cur` absent from the post-skip state, `lr` unchanged). Plain line-deletion is therefore the
+   wrong oracle whenever a later closer would have finished the discarded turn: the oracle's `lr` then rates a turn
+   hylo dropped (timestamped CP-O06/O07 vectors in BC-1.03.006/.007 settle exactly this in `lr`).
 5. **Exclusion:** every input that triggers a predicate is listed in the parity harness's named exclusion list
    (OD-105/OD-110), entry id `D4-EX-2`, file `internal/statusline/testdata/parity/exclusions.json`; each entry names
    its expected output file and its dedicated table test (BC-1.03.019). An entry without a test fails the harness; no
@@ -110,7 +120,8 @@ in-flight turn so that later lines parse normally (ruling OD-167; no sticky stat
 
 The 21-row table with exact expected caches is BC-1.03.019 (legs CP-T01..T07). Dedicated canonical vectors with exact
 expected caches for the overflow legs CP-O06..O08 live in their owner BCs: BC-1.03.006 (CP-O06), BC-1.03.007 (CP-O07),
-BC-1.03.010 (CP-O08). Representative rows:
+BC-1.03.010 (CP-O08); the CP-O06/O07 legs are timestamped so the OD-167 in-flight-turn drop is observable in
+`lr` (ADV-P5-C01/C02). Representative rows:
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
@@ -123,7 +134,7 @@ BC-1.03.010 (CP-O08). Representative rows:
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-029, VP-013 | For every W-line, parser state after = state before (bit-identical) | Go property test (testing/quick) with generated W-lines per CP |
-| VP-029, VP-013 | Delete-the-line equivalence holds on random transcripts with injected W-lines | fuzz (oracle on the transcript with W deleted) |
+| VP-029, VP-013 | Delete-the-line equivalence holds on random transcripts with injected W-lines, modulo the OD-167 exception of PC4(b): at each overflow skip the post-skip state additionally includes `cur` → null (the open turn discarded, never finished) | fuzz (oracle on the transcript with W deleted, state-adjusted per PC4(b)) |
 | VP-012 | Postcondition 5 closure: every predicate-triggering input is a named D4-EX-2 exclusion entry carrying its own expected-output file and dedicated table test; no globs | repository test over `exclusions.json` |
 
 ## Traceability

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:09:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.001.md, owner-decisions-log-2026-11-14.md]
-input-hash: "35953d8"
+input-hash: "c581460"
 traces_to: prd.md
 source_bc: BC-6.03.001
 bcs: [BC-1.06.002, BC-6.03.001, BC-6.04.001, BC-1.07.004, BC-1.07.005, BC-1.07.006]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: added BC-1.06.002 to bcs — the Tier B golden statement verifies its slash-sid stdout-parity row", "1.3 2026-11-17: subagent goldens added — BC-1.07.004 (NDJSON row framing, ` · ` selector, ensure_ascii, zero-survivor zero-byte case), BC-1.07.005 (glyph/name-fallback/settled-suffix matrix), BC-1.07.006 (lane-pill byte rows; the startswith property leg is VP-028's rule, extended there)", "1.4 2026-11-18T09:09:00Z: ADV-P3 fixes — “matches … on every CI OS without Python installed” corrected: setup-python installs the oracle on all three CI legs and Tier A runs there (BC-6.04.001, A2-10); golden-test leg asserts a non-zero computed golden count and logs “N goldens validated” (POL-11, A2-06)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: added BC-1.06.002 to bcs — the Tier B golden statement verifies its slash-sid stdout-parity row", "1.3 2026-11-17: subagent goldens added — BC-1.07.004 (NDJSON row framing, ` · ` selector, ensure_ascii, zero-survivor zero-byte case), BC-1.07.005 (glyph/name-fallback/settled-suffix matrix), BC-1.07.006 (lane-pill byte rows; the startswith property leg is VP-028's rule, extended there)", "1.4 2026-11-18T09:09:00Z: ADV-P3 fixes — “matches … on every CI OS without Python installed” corrected: setup-python installs the oracle on all three CI legs and Tier A runs there (BC-6.04.001, A2-10); golden-test leg asserts a non-zero computed golden count and logs “N goldens validated” (POL-11, A2-06)", "1.5 2026-11-18T23:45:00Z: ADV-P5 fix (A2-16) — goldens resolve from the MODULE ROOT via the ARCH-07 helper (walk up to go.mod), never cwd-relative: go test cwd is the package dir and a cwd-relative load finds zero goldens, turned false-red by the POL-11 guard"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -78,7 +78,9 @@ resolved Python patch version (RK-4).
 ```go
 func TestParityTierB_Goldens(t *testing.T) {
     n := 0
-    for _, g := range LoadGoldens("internal/statusline/testdata/goldens") {
+    // A2-16 (plan call 18): fixtures resolve from the MODULE ROOT (ARCH-07 helper,
+    // walk up to go.mod), never cwd-relative — go test cwd is the package dir.
+    for _, g := range LoadGoldens(ModuleRoot("internal/statusline/testdata/goldens")) {
         out := RunGoPortForCase(g.Case) // variant-selects *.windows.golden on windows
         if !bytes.Equal(out, g.Bytes) { t.Fatalf("%s: bytes differ", g.Case) }
         n++

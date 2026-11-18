@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "57a9e9a"
+input-hash: "d79b109"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_segment (SL:399-413)"
@@ -20,7 +20,9 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-005 null, EC-006, EC-008) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B05/B07): remaining foreign-cache rows (EC-009, EC-010, vector row) tagged OD-160; DI-012 cited; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B05/B07): remaining foreign-cache rows (EC-009, EC-010, vector row) tagged OD-160; DI-012 cited; 2026-11-18T03:00:00Z"
+  - "1.2.3 pass-5 remediation (ADV-P5-B03): the branch glyph is named as the registry key statusline.glyphs.git (default U+2387, 1 code point/1 column, SL:413) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
+  - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,7 +67,8 @@ Notation: `\e` is the byte 0x1B; `T` = the injected clock (`HYLO_TEST_NOW` /
    (temp file + rename; save failures ignored). The written bytes are Python
    `json.dump` defaults, e.g. `{"ts": 1800000000.0, "branch": "main"}` (BC-5.02.001).
 5. `b = c.branch` (default `""`). If `b` is truthy → segment `\e[90m⎇ ` + str(b) +
-   `\e[0m` (Python `str()` for a non-string cached value); else no segment.
+   `\e[0m`, where the ⎇ glyph is the registry key `statusline.glyphs.git` (OD-02; default U+2387, exactly
+   1 code point / 1 column; SL:413) (Python `str()` for a non-string cached value); else no segment.
 6. When emitted, the segment is placed after the model label and before the project
    label.
 
@@ -128,7 +131,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008, DI-012 |
 | Owner decisions | OD-101 (cache dir), OD-05 (typed bool, no `DGX_*`), OD-110 (temp-file exclusion is cache-only) |
-| Config keys | `statusline.git.enabled` (default true), `statusline.git.ttl_s` (default 5.0 s, operator `>`; rationale: convention — "docs' example pattern" (GIT_TTL SL:99); catalogue T-013 has no measured basis), `paths.cache_dir` |
+| Config keys | `statusline.git.enabled` (default true), `statusline.git.ttl_s` (default 5.0 s, operator `>`; rationale: convention — "docs' example pattern" (GIT_TTL SL:99); catalogue T-013 has no measured basis), `statusline.glyphs.git` (U+2387), `paths.cache_dir` |
 | Architecture Module | `internal/statusline/git.go` |
 | Stories | TBD |
 

@@ -51,3 +51,14 @@ Finding progression across adversarial passes in this cycle.
 - Tags: owner-question and process-gap rows continue (ADV-P4-INDEX); 7 owner rulings minted (OD-169..OD-175), next free OD-176; closed exclusion set grows to 11 ids (OD-166 added).
 - Trajectory note: total down 17 (150 → 133) but HIGH up 3 (36 → 39). Many findings were sibling-propagation: fixed facts re-flagged at their sibling sites, not relapses of fixed findings; the HIGH concentration sits on the interface-definitions/registry closure (ADV-P4-A04/A05) and partial-fix propagation (ADV-P4-A2-03).
 - Verdict: NOT_CONVERGED. Next: owner rulings OD-169..175 + fix burst (8 parallel fix agents + 2 residual sweeps + OD-148 layout correction + 2 sync-fix agents), then pass 5.
+| 5 (phase-1d, 2026-11-18) | 148 (24 HIGH / 75 MEDIUM / 43 LOW / 6 COSMETIC) | +15 | NOT_CONVERGED — total +15 but HIGH down 15 (39 → 24), severity mass moved to MEDIUM (75); novelty MEDIUM; owner rulings OD-176..180 + fix burst next |
+
+### Pass 5 — 2026-11-18 (phase-1d adversarial spec review)
+
+- Scope: full P1 spec package, re-reviewed as the same six fresh-context perimeters as passes 1-4. Verbatim reports: `adversarial-reviews/pass-5.md`; index: `adversarial-reviews/ADV-P5-INDEX.md`.
+- Perimeter counts: A 25, A2 36, B 16, C 17, C2 21, D 33.
+- Perimeter severities: A 5H/13M/7L; A2 4H/22M/9L/1C; B 2H/7M/6L/1C; C 3H/8M/5L/1C; C2 0H/9M/10L/2C; D 10H/16M/6L/1C.
+- Novelty: pass-level MEDIUM (index frontmatter; no per-perimeter novelty split recorded for this pass).
+- Tags: 10 [owner-question], 5 [process-gap] (ADV-P5-INDEX row tags).
+- Trajectory note: total +15 vs pass 4 (133 → 148) while HIGH fell 39 → 24 — the series' first pass where total rose but HIGH fell sharply; the HIGH concentration moved out of the interface-definitions/registry closure that dominated pass 4.
+- Verdict: NOT_CONVERGED. Next: owner rulings OD-176..180 + fix burst (executed same burst; rulings incl. OD-176 keeping the full VSDD convergence standard), then pass 6.

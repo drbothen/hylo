@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-19T00:20:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.03.004.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "7708547"
+input-hash: "97f3072"
 traces_to: prd.md
 source_bc: BC-1.03.004
 bcs: [BC-1.03.004, BC-5.03.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.1"
-modified: ["1.2 2026-11-17: ADV-P2 fixes — legacy calls blob[:cut].splitlines() (keepends=False): pieces have no terminators; oracle rebuilt; re-homed to internal/pyfmt/str.go per BC-5.03.002/ARCH-06 (A2-05, D13)"]
+modified: ["1.2 2026-11-17: ADV-P2 fixes — legacy calls blob[:cut].splitlines() (keepends=False): pieces have no terminators; oracle rebuilt; re-homed to internal/pyfmt/str.go per BC-5.03.002/ARCH-06 (A2-05, D13)", "1.3 2026-11-19T00:20:00Z: pass-5 sweep C (ADV-P5-A2-20) — Source Contract prose cleaned: keepends=False, self-oracle and no-live-differential stated in the contract itself; stale 'no VP yet' and 'currently cites VP-025' residues removed"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,11 +49,19 @@ CPython equivalence rests entirely on the committed corner tables.
 
 ## Source Contract
 
-- **Primary BC:** BC-1.03.004 — record splitting + per-line json.loads consumption
-  (the BC's VP row marks this property "no VP yet"; minted as VP-038 by this pass).
+- **Primary BC:** BC-1.03.004 — record splitting + per-line json.loads consumption.
+  The property is the keepends=False semantics: same split points as CPython 3.11
+  `bytes.splitlines()`, and the pieces carry no terminators (legacy calls
+  `blob[:cut].splitlines()` at SL:1059 — ends are dropped).
 - **Partial coverage:** BC-5.03.002 — the `SplitLinesBytes` str.go port contract
-  (its VP row currently cites VP-025 for the byte-split property; that citation
-  belongs here).
+  (the byte-split property is VP-038's; that BC's VP row is reconciled by the BC
+  owner).
+- **Oracle stance:** self-oracle fuzz only — (a) terminator freedom and (b)
+  stripped-losslessness (both computable from the input alone) — with CPython
+  equivalence pinned solely by the committed oracle-generated corner tables. There
+  is NO live differential: the oracle process is not callable from unit tests, so
+  random sampling never compares against a running CPython. End-to-end divergence
+  hunting on random transcripts rides Tier C (VP-011).
 - **Invariant verified:** NFR-003 substrate (the splitter is on the protocol input
   path; any split-point drift changes `size`/offset bookkeeping).
 

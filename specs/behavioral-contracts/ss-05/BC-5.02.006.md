@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:42:00Z
+timestamp: 2026-11-19T00:20:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
-input-hash: "6c4cd7b"
+input-hash: "d41d1a7"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces json.dump cache-file bytes; ruling (b) P3r2 §0)"
@@ -22,8 +22,10 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "2026-11-18T01:42:00Z ADV-P3 remediation D10+D12: Dumps scoped to include the subagent stdout json.dumps (SL:924, BC-1.07.004); encoder failure on 4300-digit ints = typed ErrValue and legacy no-write"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D17 — json.dump encoder depth boundary measured directly (python3 -I, temp dir): succeeds through depth 992, RecursionError from 993 at limit 1000 module scope; law limit−8, slope verified at 700/1000/1300; typed ErrDepth + legacy no-write pinned (PC-6, EC-007/008, CTV)"
+  - "2026-11-18T01:42:00Z (1.2.1) ADV-P3 remediation D10+D12: Dumps scoped to include the subagent stdout json.dumps (SL:924, BC-1.07.004); encoder failure on 4300-digit ints = typed ErrValue and legacy no-write"
+  - "2026-11-18T22:00:00Z (1.2.2) ADV-P4 remediation D17 — json.dump encoder depth boundary measured directly (python3 -I, temp dir): succeeds through depth 992, RecursionError from 993 at limit 1000 module scope; law limit−8, slope verified at 700/1000/1300; typed ErrDepth + legacy no-write pinned (PC-6, EC-007/008, CTV)"
+  - "2026-11-18T23:30:00Z (1.2.3) ADV-P5 remediation D08+D17+D18 — encoder depth measured PER SITE (law: max total nesting = 993 − W, W = Python frames at the encode call; json.dump and json.dumps alike; slope 1 slot/frame verified W=3..9): session/mix save sites W=4 budget 989, record_cost/git sites W=5 budget 988 (both via render_lane); Dumps takes a depth budget and returns ErrDepth; save_cache anchor corrected to SL:308 invoked from main()'s render stack"
+  - "2026-11-19T00:20:00Z (1.2.4) pass-5 sweep C end-to-end re-measurement (isolated temp HOME+cwd, real legacy) — PC-6 law restated: 995 − s (json.dump) / 994 − s (json.dumps), s = Python frames at the encode call inclusive; json.dump accepts one level more than json.dumps at equal stack; budgets session/mix saves 991 (measured flip: stdin rate_limits value 990 saves / 991 skips), record_cost/git 990, composition 991/990; mix/git/cost payloads flat so their encoder limits are unreachable from input; exposure window corrected to 991..992"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,13 +38,14 @@ removal_reason: null
 
 ## Description
 
-`pyfmt.Dumps(v Value) ([]byte, error)` (json.go, design IM-03) reproduces CPython `json.dump`
+`pyfmt.Dumps(v Value, budget int) ([]byte, error)` (json.go, design IM-03) reproduces CPython `json.dump`
 defaults byte for byte over an ordered `Value`: separators `", "` and `": "`, ensure_ascii
 escaping, `NaN`/`Infinity` tokens, float repr per BC-5.01.005, int-versus-float preserved,
 insertion order — for the four cache files (session, mix, git, cost-history) AND the
 subagent stdout line (`json.dumps` at SL:924, BC-1.07.004's NDJSON wire; ADV-P3-D10).
 Go structs with `encoding/json` are banned for caches: they reorder keys and reformat floats (ruling
-(b), P3r2 §0). Helper-level contract per OD-141.
+(b), P3r2 §0). Helper-level contract per OD-141. `budget` is the per-site recursion budget
+(PC-6); exceeding it returns `ErrDepth` (ARCH-06).
 
 ## Preconditions
 
@@ -69,25 +72,47 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
    partial temp file leaks exactly as legacy's does (covered by the temp-file exclusion
    class) and the previous cache file is left untouched. `Dumps` never writes a partial
    destination itself (it returns bytes; the writer owns the file).
-6. **Depth boundary (measured, ADV-P4-D17).** CPython's `json.dump` encodes through the
-   pure-Python `_iterencode` generator chain: ONE recursion slot per container nesting
-   level. Measured law (`python3 -I`, CPython 3.11.7, isolated temp dir, never the real
-   HOME): a nested-dict `Value` encodes successfully through depth **992** and raises
-   `RecursionError` from depth **993** when called at module scope with the default
-   recursionlimit of 1000; the boundary is `recursionlimit − 8` at module scope (slope
-   verified at limits 700/1000/1300) minus one slot per caller frame, and `json.dump`'s
-   frame cost differs from the C encoder used by `json.dumps`. Consequently legacy's
-   `save_cache` (SL:307) — invoked from the hook-handler stack — can fail with
-   `RecursionError` on a stdin whose `rate_limits` decoded fine (the decoder accepts up to
-   depth 993 at init context); the `except Exception: pass` swallows it and NOTHING is
-   written: the previous cache file is untouched and the partial temp file leaks (temp-file
-   exclusion class). hylo reproduces the observable: for a `Value` nested deeper than the
-   pinned reference boundary (depth ≥ 993 at the module-scope reference; the cache-writer
-   call site's effective boundary is the reference minus its legacy caller-frame depth),
-   `Dumps` returns typed `ErrDepth` (sibling of `ErrValue`) and the calling cache writer
-   performs the same legacy no-write; shallower values encode regardless of depth. The
-   boundary constant is recursion-limit-derived and pinned by the oracle table test, not by
-   a magic number in logic (D15).
+6. **Depth boundary (measured per site, ADV-P4-D17 as corrected by ADV-P5-D08/D17,
+   re-measured end to end pass-5 sweep C).** CPython's encoder consumes ONE recursion
+   slot per container nesting level and one slot per Python frame, at every legacy
+   encode site. Measured law (`python3 -I`, CPython 3.11.7, isolated temp dir and
+   HOME, slope verified over five stacked frames; `s` = Python frames on the stack at
+   the encode call, invoking frame inclusive, `<module>` = 1): the maximum encodable
+   **total object nesting** is `995 − s` for `json.dump` (cache writes) and `994 − s`
+   for `json.dumps` (C encoder) — `json.dump` accepts exactly one level more than
+   `json.dumps` at equal stack. **Per-site budgets** (legacy runtime: `<module>→main`
+   is `s = 2` before the caller chain):
+
+   | Encode site | Legacy chain | s | Budget |
+   |---|---|---|---|
+   | `effective_rl` session-cache save | SL:308 | 4 | 991 |
+   | `get_sample` session-cache save | SL:351/355 | 4 | 991 |
+   | `claude_window_start` session-cache save | SL:288 | 4 | 991 |
+   | `_mix_counts` mix-cache save | SL:1150 | 4 | 991 (flat payload — unreachable from input) |
+   | `record_cost` cost-history save | SL:237 (via `render_lane`, SL:606) | 5 | 990 (flat payload — unreachable from input) |
+   | `git_segment` git-cache save | SL:411 (via `render_lane`, SL:455) | 5 | 990 (flat payload — unreachable from input) |
+   | `_mix_counts` `json.dumps` (inner scalar SL:1140; tool_use input SL:1147) | `main→_mix_counts` | 3 | 991 |
+   | `_mix_counts` `json.dumps` (tool_result list genexp, SL:1138) | `main→_mix_counts→genexp` | 4 | 990 |
+
+   Consequently legacy's `save_cache` call in `effective_rl` (SL:308) — reached from
+   `main()`'s render stack — can fail with `RecursionError` on a stdin whose `rate_limits`
+   decoded fine (the decoder accepts total depth 993 at the stdin site): any saved object
+   nested deeper than the site budget is skipped and NOTHING is written: the previous
+   cache file is untouched and the partial temp file leaks (temp-file exclusion class).
+   hylo reproduces the observable: `Dumps` takes `budget` and, for a `Value` nested deeper
+   than `budget`, returns typed `ErrDepth` (sibling of `ErrValue`) instead of bytes, and
+   the calling cache writer performs the same legacy no-write; shallower values encode
+   regardless of depth. Each call site passes its own pinned constant from the table
+   (named constant, D15); the boundary constants are oracle-table-pinned, never magic
+   numbers in logic. **Reconciliation with the decoder law (BC-5.02.003 PC-7):** both
+   laws spend one slot per frame and one per level; at equal chain depth every cache's
+   Save budget EQUALS its Load budget (session/mix 991/991, git/cost 990/990), so
+   `Decode(Save(x))` never rejects what `Save` produced, and a shallower stack never has
+   the smaller budget (budget is strictly monotone decreasing in frame depth on both
+   sides). The exposure is real and legacy-identical, and was measured end to end this
+   burst (isolated temp HOME+cwd): a `rate_limits` nested to total value depth 991..992
+   decodes fine and skips the write (value 990 — encoded document 991 — is the deepest
+   that still saves).
 
 ## Invariants
 
@@ -105,19 +130,19 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
 | EC-004 | int-vs-float preserved: `{"a":1}` vs `{"a":1.0}` | `{"a": 1}` vs `{"a": 1.0}` |
 | EC-005 | WTF-8 str member with a lone surrogate | re-escaped `\udXXX` (BC-5.02.003) |
 | EC-006 | Nested empty containers | `{"a": {}, "b": []}` |
-| EC-007 | `Value` nested 992 deep (module-scope reference) | encodes; bytes equal the CPython oracle (ADV-P4-D17) |
-| EC-008 | `Value` nested 993 deep at a call site whose legacy stack matches the reference | typed `ErrDepth`; cache writer no-write, previous file untouched (temp-file class) |
+| EC-007 | `Value` at the helper reference (`s = 1`, module scope), total nesting 993 (994 for `json.dump`) | encodes; bytes equal the CPython oracle (ADV-P4-D17; re-verified 2026-11-18, sweep C: boundary `994 − s` / `995 − s`) |
+| EC-008 | `Value` exceeding the site budget (e.g. total nesting 992 at a 4-frame save site, budget 991) | typed `ErrDepth`; cache writer no-write, previous file untouched (temp-file class) |
 
 ## Canonical Test Vectors
 
 | Input | Expected Output | Category |
 |---|---|---|
-| `Dumps(load('{"b":1,"a":2}'))` | bytes `{"b": 1, "a": 2}` | happy-path |
-| `Dumps(load('{"a":1.0}'))` | bytes `{"a": 1.0}` | edge-case |
-| `Dumps(Value with NaN)` | bytes `{"a": NaN}` | edge-case |
-| `Dumps(load('{"a":1e-5}'))` | bytes `{"a": 1e-05}` | edge-case |
-| nested object, depth 992 (module-scope reference) | encodes; bytes equal the CPython oracle | edge-case |
-| nested object, depth 993 (reference call site) | `ErrDepth`; cache writer performs the legacy no-write | error |
+| `Dumps(load('{"b":1,"a":2}'), 991)` | bytes `{"b": 1, "a": 2}` | happy-path |
+| `Dumps(load('{"a":1.0}'), 991)` | bytes `{"a": 1.0}` | edge-case |
+| `Dumps(Value with NaN, 991)` | bytes `{"a": NaN}` | edge-case |
+| `Dumps(load('{"a":1e-5}'), 991)` | bytes `{"a": 1e-05}` | edge-case |
+| nested object, total nesting 993 at `s = 1` (module-scope helper reference) | encodes; bytes equal the CPython oracle | edge-case |
+| nested object, total nesting 992 at a 4-frame site (budget 991) | `ErrDepth`; cache writer performs the legacy no-write | error |
 
 Pinned against CPython 3.11 (OD-104 oracle discipline; realistic cache shapes from the
 corpus cases).

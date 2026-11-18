@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "874a4f0"
+input-hash: "f0970c9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:effective_rl (SL:298-312)"
@@ -20,7 +20,8 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-005, EC-006, and the no-ts / empty-rl vectors) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B05/B07): EC-008 and its vector row tagged OD-160; DI-012 cited; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B05/B07): EC-008 and its vector row tagged OD-160; DI-012 cited; 2026-11-18T03:00:00Z"
+  - "1.2.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null

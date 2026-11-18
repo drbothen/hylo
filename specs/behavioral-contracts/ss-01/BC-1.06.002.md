@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T18:40:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "4213b95"
+input-hash: "52e4487"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:save_cache (SL:198-206)"
@@ -25,7 +25,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: own-temp-only write-failure cleanup (OD-163) + EC-006 (ADV-P2-C10/C12)", "1.2.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"]
+modified: ["1.2.1 2026-11-17: own-temp-only write-failure cleanup (OD-163) + EC-006 (ADV-P2-C10/C12)", "1.2.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.2.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C15) — VP table and VP Anchors reconciled: VP-012 closure row added, anchors now list VP-018, VP-010 and VP-012 (all three VPs list this BC)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -110,6 +110,7 @@ from the cache-file comparison only.
 |--------|----------|-------------|
 | VP-018 (temp-cleanup leg) | After any failed save, no file matching `<base>.*` created by that save remains (Go) | manual (table test with a temp cache dir) |
 | VP-010 (Tier B golden) | stdout over an N-refresh sequence with a `/` sid equals legacy | manual (parity harness case) |
+| VP-012 (closure) | Every ruled temp-file divergence is a named exclusion entry (id `temp-file`) in exclusions.json — one concrete table test per rider, no globs | repository test over exclusions.json |
 
 ## Traceability
 
@@ -146,7 +147,7 @@ S-N.MM — cache store (filled by story-writer)
 > test names and seed paths in this contract are delegated to the architect in
 > create-architecture, subject to adversarial review. No behavior change.
 
-- VP-018, VP-012 — temp cleanup
+- VP-018, VP-010, VP-012 — temp cleanup; Tier B goldens; exclusion-set closure
 
 
 #### Source Evidence

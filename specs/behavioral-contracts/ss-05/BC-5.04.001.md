@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "bdca2d4"
+input-hash: "aeb3e9c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,7 +20,8 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D13: POSIX-only ValueError claim qualified (Windows MSVC localtime_s raises OSError); range-end oracle rows restricted to Linux/macOS"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D21 - Env.Loc routed through internal/platform.LocalZone (OD-171); phantom HYLO_TEST_* zone citation replaced by TZ=UTC harness pin"
+  - "2026-11-18T22:00:00Z (1.2.2) 2026-11-18: ADV-P4 remediation D21 - Env.Loc routed through internal/platform.LocalZone (OD-171); phantom HYLO_TEST_* zone citation replaced by TZ=UTC harness pin"
+  - "2026-11-18T23:55:00Z (1.2.3) ADV-P5 remediation D01 — Windows MSVC localtime_s OSError (naive wall time on/before 1970-01-01 or from year 3001) now reproduces legacy: it propagates and DEGRADES the line (SL:984 catches ValueError only); rule in internal/platform with a table test; no exclusion id"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,11 +63,16 @@ Transcript timestamps feed the last-turn rate machine through `_iso_ts(s)` =
    → None.
 6. **Result:** aware value → `(total microseconds since the epoch) / 1e6` as one correctly rounded division; naive
    value → `float64(LocalToUnix(loc, wall seconds)) + float64(µs) / 1e6` (CPython C `datetime_timestamp` arithmetic).
-   Leading/trailing whitespace → None. Any failure → `(0, false)`; no other error kind escapes on POSIX (P3r8 R-3:
-   only `ValueError` occurs there). On Windows the underlying naive conversion goes through MSVC `localtime_s`,
-   which raises `OSError` (not `ValueError`) outside the representable range — the helper maps every failure kind
-   to `(0, false)` all the same; the range-end oracle rows are pinned on Linux and macOS only (ADV-P3-D13).
-7. **Range ends** (Linux/macOS oracle rows only — on Windows MSVC `localtime_s` raises `OSError`, ADV-P3-D13):
+   Leading/trailing whitespace → None. POSIX: any failure is `ValueError` → `(0, false)` (P3r8 R-3). **Windows
+   (ADV-P5-D01, owner call 8):** the naive conversion goes through MSVC `localtime_s`, whose range starts at
+   1970-01-01 and ends in year 3001; outside it MSVC raises `OSError` (CPython's fold-0 `u1-86400` probe hits
+   it for any naive wall time on or before 1970-01-01 or at or after year 3001). Legacy's `_iso_ts` catches
+   `ValueError` only (SL:984), so the `OSError` propagates out of `_mix_counts` (SL:1069) to the top-level
+   guard and the whole line **degrades** — hylo reproduces this exactly: the rule lives in
+   `internal/platform` (the naive-local-time conversion raises there, with a table test over the
+   before-1970 / in-range / from-3001 legs); it is not a helper-level `(0, false)`, and no closed-set
+   exclusion id covers it. The range-end oracle rows remain pinned on Linux and macOS only (ADV-P3-D13).
+7. **Range ends** (Linux/macOS oracle rows only — on Windows MSVC `localtime_s` raises `OSError` and the line degrades, PC 6 / ADV-P5-D01):
    naive values whose `LocalToUnix` probes leave years 1..9999 → None (TZ-dependent): naive
    `0001-01-01T*` → None in every zone; naive `9999-12-31T23:59:59` → float under UTC but None under UTC+14.
 

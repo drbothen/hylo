@@ -1,13 +1,13 @@
 ---
 document_type: bc-component-map
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "e197094"
+input-hash: "0464e6a"
 traces_to: ../prd.md
 
 ---
@@ -182,7 +182,7 @@ traces_to: ../prd.md
 | BC | Component | ARCH |
 |---|---|---|
 | BC-3.01.001 | plat/paths*.go (per-OS dirs, OD-144) | ARCH-05 |
-| BC-3.02.001 | plat/proc.go + proc_*.go (ancestor probe) | ARCH-05 |
+| BC-3.02.001 | plat/proc.go + proc_*.go (raw per-OS probe) + sl/session.go (cache-first `proc_start` read/write, ARCH-03 effect step 6 — pass-5 A12: the cache-first logic is a session-cache read in `internal/statusline`, NOT in `internal/platform`, which is a sink with no CacheStore; homing it solely in plat/ invited an AD-02 violation) | ARCH-05, ARCH-03 |
 | BC-3.02.002 | plat/proc_*.go (named per-OS edges) | ARCH-05 |
 
 ## S4 — CLI (3)
@@ -242,7 +242,8 @@ traces_to: ../prd.md
 101 + 13 + 3 + 3 + 20 + 14 = **154/154**. Every row names exactly one primary component
 home and at least one ARCH section. Multi-home rows (pass-4 A18: the earlier "two-row
 exception" note wrongly implied BC-6.04.001 was the only one): BC-6.04.001 (par +
-ARCH-08 workflow), BC-1.07.001 (cmd/hylo + sl/subagent.go; ARCH-03 + ARCH-01), and
-BC-1.05.008 (sl/cost.go + cost/history.go). BC-1.03.015 collapsed to sl-only when OD-161
+ARCH-08 workflow), BC-1.07.001 (cmd/hylo + sl/subagent.go; ARCH-03 + ARCH-01),
+BC-1.05.008 (sl/cost.go + cost/history.go), and BC-3.02.001 (plat/proc.go + sl/session.go;
+ARCH-05 + ARCH-03 — pass-5 A12). BC-1.03.015 collapsed to sl-only when OD-161
 removed the fd helpers (pass-3 A06). No BC unmapped; no component without a BC set
 except theme.go (serves BC-2.01.003 via cfg) and env.go seams (serve BC-1.01.009).

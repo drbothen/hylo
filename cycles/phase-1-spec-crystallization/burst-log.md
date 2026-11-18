@@ -679,3 +679,21 @@ Burst narratives for this cycle, in chronological order.
 **Closes:** all 133 pass-4 findings remediated across perimeters A/A2/B/C/C2/D (reports `adversarial-reviews/pass-4.md` + `ADV-P4-INDEX.md`), sync check adv-p4 (verdict PASS-WITH-FINDINGS, SC-05..SC-12 closed), rulings OD-169..OD-175 recorded, lessons L-PG-13..16 codified. Still open: ADV pass 5 (>=3 clean passes to convergence); CR-04 dependent-artifact hash staleness (check-input-drift, pre-gate).
 
 **Next:** ADV pass 5 (fresh-context perimeters; >=3 clean passes to convergence).
+
+## Burst: ADV pass-5 recording + remediation — rulings OD-176..180 applied, seventh D4-EX-3 class Text, sync check PASS-WITH-FINDINGS (2026-11-18)
+
+**Parent-commit:** f920d7f (factory(phase-1d): adversarial pass 4 + remediation, rulings OD-169..175, VP-041)
+
+**Adversary verdict:** pass 5 recorded 2026-11-18: NOT_CONVERGED, 148 findings (24H/75M/43L/6C), Δ +15 vs pass 4 (133) while HIGH fell 39 → 24 — severity mass moved to MEDIUM (75); the first pass of the series where the total rose but HIGH fell sharply. Pass-level novelty MEDIUM. Reports `adversarial-reviews/pass-5.md` + `ADV-P5-INDEX.md` (148 rows; perimeters A 25, A2 36, B 16, C 17, C2 21, D 33). This burst also remediates all 148 findings; next: ADV pass 6.
+
+**Codifications:** owner rulings OD-176..OD-180 recorded 2026-11-18 (owner chose the recommended option each time; next free OD-181 — log: `specs/owner-decisions-log-2026-11-14.md`). Highlights: OD-176 convergence keeps the full VSDD standard — every finding of every severity is fixed each pass and convergence needs three consecutive passes with only cosmetic findings; no severity gate, no scope freeze. OD-177 refines OD-171 to libc semantics on every OS (`TZ` unset → OS zone; `TZ` empty or unparseable → UTC). OD-178 mints a seventh D4-EX-3 class **Text** (composite-shape, pill-label, glyph and empty-text errors) with exact reason strings in the vocabulary and its own table test `TestD4EX3_Text` — canonical D4-EX-3 tests are now TestD4EX3_Boolean, _Enum, _URL, _Number, _Text. OD-179 ratifies the reroute-all markers as the List key `statusline.lane.reroute_all_prefixes` (default `["claude", "claude-"]`, legacy; every entry non-empty, no control bytes). OD-180: a metrics URL with userinfo reproduces legacy — no sample (the dead rung); no exclusion id. Three [process-gap] lessons codified L-PG-17..19 in `cycles/phase-1-spec-crystallization/lessons.md` and recorded as Drift Items in STATE.md: L-PG-17 agent briefs must name the oracle interpreter path (an agent ran the legacy oracle with /usr/bin/python3, macOS Python 3.9.6, not CPython 3.11.7; the re-run on 3.11.7 was identical); L-PG-18 one measurement per fact, one agent, end to end (two agents pinned conflicting encoder depth limits); L-PG-19 canonical lists are minted centrally before parallel dispatch (parallel agents minted divergent glyph registries).
+
+**Scope.** Remediation of ADV pass 5 (148 findings; source `adversarial-reviews/pass-5.md`, canonical rulings and minted ids in `pass-5-remediation-plan.md`), executed across domain-spec, product-brief, prd.md, prd-supplements, behavioral contracts, architecture, verification properties and the cicd / dtu / gene-transfusion / feasibility documents.
+
+**Counts.** Contract count unchanged at 154 (S5 = 20); VP count unchanged at 41; closed exclusion set unchanged at 11 ids; D4-EX-3 classes 6 → 7 (Text) with 5 canonical table tests.
+
+**Sync check (post-burst).** `sync-check-adv-p5-2026-11-18.md`: verdict PASS-WITH-FINDINGS; all 8 findings (SC-13..SC-20) closed before this commit. 146 dirty files vs f920d7f scanned; 239 spec .md files across 7 trees.
+
+**Dim-2 Attestation:** artifact counts verified on disk this burst: 154 BC files under `specs/behavioral-contracts/ss-01..ss-06`; 41 VP files (+ VP-INDEX) under `specs/verification-properties/`; 11 ARCH-*.md files under `specs/architecture/`.
+
+**Next:** ADV pass 6 (fresh-context perimeters; >=3 clean passes to convergence); CR-04 dependent-artifact hash staleness (check-input-drift, pre-gate) remains open.

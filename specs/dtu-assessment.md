@@ -1,15 +1,15 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-18T00:30:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "05bc8a1"
+input-hash: "f95bc4f"
 
 ---
 
@@ -19,14 +19,15 @@ input-hash: "05bc8a1"
 
 | Metric | Value |
 |--------|-------|
-| External dependencies identified | 5 |
+| External dependencies identified | 6 |
 | DTU clones recommended | 0 |
 | Total clone story points | 0 (≈1 pt of fake-extension work folded into existing harness stories) |
 | Estimated Wave 1 capacity needed | 0 points |
 
 **Verdict: `DTU_REQUIRED: false`.** P1 has exactly one network edge (the metrics query
 API, ARCH-03) and four non-network external contracts (statusLine stdin, the
-`subagentStatusLine` agent-panel stdin, git state, process tables). All five are
+`subagentStatusLine` agent-panel stdin, the transcript JSONL, git state, process
+tables). All six are
 reproducible at seam level with fakes the parity harness
 already mandates — and the Tier A differential design actively requires the httptest
 fake, because the legacy oracle must hit the *same* fake in-process through the
@@ -47,6 +48,7 @@ carries their boundaries.
 | 1 | Prometheus-compatible metrics query API (VictoriaMetrics) | HTTP GET `/api/v1/query` | L2 | No | Stateless request/response; entire boundary = a handful of response envelopes. Existing httptest fake (ARCH-07) plus the register's sample-string extension rows (defensive-parse ratification is P6 per OD-157, not P1 — pass-3 A2-16 removes the stale OD-130-as-P1 vectors); a Docker clone cannot serve the in-process legacy oracle in Tier A. |
 | 2 | Claude Code statusLine stdin JSON | One JSON object on stdin per render | L3 (decode semantics only) | No | Not a network service — an upstream push contract. Its clone *is* the harness corpus (`stdin.json.tmpl` cases). Decode edges carry 101 S1 BCs and are already corpus-pinned. |
 | 5 | Claude Code `subagentStatusLine` agent-panel stdin (OD-155) | One JSON object on stdin per panel render: `{"columns": N, "tasks": [{id, name, agentType, status, description, label, startTime, model, tokenCount, ...}]}` | L3 (decode + per-task render semantics, BC-1.07.003..008) | No | Not a network service — a SECOND upstream push contract, separate from the statusLine stdin (added pass-3 A2-16). Its clone is the `subagent`-family harness corpus rows (`argv` field + `stdin.json.tmpl`, ARCH-07). Compatibility with the 2.1.326 payload is ASSUMP-107-1, still to be verified by a capture before Phase 3. |
+| 6 | Claude Code transcript JSONL (pass-5 A2-23) | Upstream-owned append-only JSONL file read through a seek/read window (`transcript_path`): one JSON object per line — `type`/`message`/`timestamp`/`uuid`/`parentUuid`/... driving the transcript machine (accumulation, boundaries, turn recorder, W-predicates) | L3 (line-machine decode semantics; 21 S1.03 BCs, BC-1.03.001..021) | No | Not a network service — the THIRD upstream push contract. Its clone is the `transcript`-family harness corpus rows plus the seeded mix/`BASE` caches (ARCH-07; BC-1.03.019's 21-row D4-EX-2 table). Format is UPSTREAM-OWNED: the compatibility assumption is that the 2.x line-object schema is stable for P1, pinned by capture replay from git-ignored `captures/` before Phase 3 — the same assumption discipline as ASSUMP-107-1, not a Docker clone. Extension vectors: the D4-EX-2 wrong-shape table and CP-O06..O08 overflow rows pin boundary behaviors at the seam. |
 
 ### Outbound Operations (Product → External)
 

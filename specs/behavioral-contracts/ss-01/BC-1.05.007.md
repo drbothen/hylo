@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:45:00Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "94a0403"
+input-hash: "ef6c3c1"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-636)"
@@ -23,7 +23,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O10/CP-O11 overflow crash paths; ruling OD-156; OD-166 record guard cross-ref)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O10/CP-O11 overflow crash paths; ruling OD-156; OD-166 record guard cross-ref)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-19 (H1 enriched with the ⛏ format per bc_h1_is_title_source_of_truth)", "1.3.3 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the stdin-borne CP-O10/O11 legs ride the never-blank ladder); no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -32,7 +32,7 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-1.05.007: $ and $/h number formatting
+# Behavioral Contract BC-1.05.007: $, $/h and ⛏ number formatting
 
 ## Description
 
@@ -119,6 +119,7 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-021 | `pyfmt.F(x, p)` equals CPython `format(x, f".{p}f")` for p ∈ {1, 2} over a generated corpus (boundaries, ties, subnormals, ±0, inf) | fuzz (differential vs the oracle) |
+| VP-001 | The promised output set holds under the fault ladder incl. the stdin-borne overflow legs (CP-O10/O11): render output, the 29-byte degraded line, subagent JSON rows or zero bytes — never blank, exit 0 | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -149,6 +150,7 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `F` differential equivalence
+- VP-001 — never-blank/exit-0 ladder; the stdin-borne CP-O10/O11 legs of this contract ride it
 
 
 #### Source Evidence

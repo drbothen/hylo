@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md, owner-decisions-log-2026-11-14.md]
-input-hash: "8414169"
+input-hash: "faa5879"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; ports CPython datetime._mktime behind naive .timestamp() at legacy/dgx_statusline.py SL:983)"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D02+D13: LocalToUnix returns (int64, error) with ErrValue per ARCH-06 canon; range-end oracle rows restricted to Linux/macOS (Windows MSVC localtime_s OSError)"
+  - "2026-11-18T23:55:00Z (1.2.4) ADV-P5 remediation D10 — Inv 2 Windows skip removed per OD-171/OD-177: parity cases run on all three OSes under the TZ=UTC pin; range-end VALUE rows stay Linux/macOS-pinned, and the Windows OSError leg is the BC-5.04.001 degrade rule"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -66,14 +67,13 @@ or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; p
 ## Invariants
 
 1. `time.Date(..., loc)` and `time.ParseInLocation` are never used for naive wall times.
-2. The location is always injected (`Env.Loc`), never read implicitly from `time.Local` inside the helper; Windows
-   ignores `TZ`, so the harness injects the zone explicitly (research P19). Oracle-side symmetric restriction
-   (ADV-P2-D02 disposition): naive-timestamp parity cases under non-UTC zones run on Linux and macOS only
-   (BC-6.02.003 PC-8) — CPython on Windows resolves naive timestamps through the MS CRT, which does not accept
-   IANA zone names, so there is no Windows oracle value to differ from. Range-end rows specifically (year 1 and
-   year 9999 probes, and any negative-wall probe) run on Linux and macOS only: on Windows the naive
-   `.timestamp()` path goes through MSVC `localtime_s`, which raises `OSError` (not `ValueError`) there, so the
-   POSIX-only "out of range → `ErrValue`" mapping has no Windows oracle (ADV-P3-D13).
+2. The location is always injected (`Env.Loc`), never read implicitly from `time.Local` inside the helper; the
+   harness injects the zone explicitly (research P19). Parity runs pin `TZ=UTC` for both binaries on every OS
+   (OD-171/OD-177), so naive-timestamp parity cases execute on all three OSes with no skip (BC-6.02.003 PC-8,
+   as amended by ADV-P4-A2-06/OD-171; ADV-P5-D10). Range-end rows specifically (year 1 and year 9999 VALUE
+   probes) remain pinned on Linux and macOS only: on Windows those probes raise the MSVC `localtime_s`
+   `OSError`, which per BC-5.04.001 PC-6 now reproduces legacy's degraded line (rule in
+   `internal/platform`, table-tested; no exclusion id, ADV-P5-D01).
 3. `time/tzdata` is embedded so a zone always loads; `time.LoadLocation` still prefers the system database, so the
    oracle (system tzdata) and Go read the same data on a given runner. Goldens are restricted to transitions that are
    identical across tzdata releases in use (labeled assumption; a tzdata mismatch shows up as a golden failure, never

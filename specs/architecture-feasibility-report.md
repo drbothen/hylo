@@ -1,14 +1,14 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.8"
+version: "1.9"
 status: approved
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
-modified: ["1.8 2026-11-17: pass-4 residual sweep — BC-COMPONENT-MAP home count 153/153 corrected to 154/154"]
+timestamp: 2026-11-18T00:30:00Z
+modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6"]
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "f3941d9"
+input-hash: "a967fd5"
 traces_to: prd.md
 prd_version: "0.1"
 
@@ -37,6 +37,10 @@ tallies regenerated to match). Original figures and verdict retained.)*
 *(Amended 2026-11-18, pass-3 consolidated sync: BC-5.01.007 (mixed int/float `Num` semantics,
 ADV-P3-D08) brings the on-disk total to 154 BCs; S5 Pyfmt is now 20. Subsystem grouping and
 feasibility verdict unchanged; original figures retained.)*
+*(Amended 2026-11-18, pass-5 sync A2-21: the catalog is 41 VPs — VP-041 (pass 4,
+dense-grid/`_hm`/`win_ms` property legs) was not propagated into this report by the
+pass-4 sweep; VP-INDEX remains the catalog source of truth and shows 41; verdict
+unchanged.)*
 
 ## Constraint Mapping
 

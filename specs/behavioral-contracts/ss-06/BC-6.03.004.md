@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "87101f4"
+input-hash: "04561e0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -29,6 +29,8 @@ modified:
   - "1.2.3 2026-11-18: ADV-P4 remediation D12+D13+D22+OD-169 - closed set = eleven ids (OD-166 added with own scope wording); oracle self-consistency leg defined for single-step and Number-class shapes; exclusions.json relocated beside the corpus root; TestD4EX3 canonical names, Theme member removed"
   - "1.2.4 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json and corpus root restored to the OD-148 homes internal/statusline/testdata/parity/exclusions.json and internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
   - "1.2.5 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - "2026-11-19T00:20:00Z (1.2.6) ADV-P5 remediation D04+D20+OD-178 — Number class corrected per value (grammar failures crash at import; nan/inf/-1/1e400/4_0/non-ASCII digits parse at SL:74 and use the two-legged asymmetry); scope is required, no default; canonical D4-EX-3 tests gain TestD4EX3_Text (five names, OD-178)"
+  - "1.2.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19/SC-20) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,7 +75,9 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
      ADV-P1-D17);
    - `scope`, one of `stdout` (compares captured stdout and exit code only),
      `stdout+caches` (stdout, exit code and the named-cache listings of both sides),
-     `go-cache-listing` (the Go cache listing only); default `stdout`;
+     `go-cache-listing` (the Go cache listing only); required — no default (all six
+     keys are mandatory, ADV-P5-D20; the formerly implied `stdout` default contradicted
+     the missing-key validation below);
    - `table_test`, the name of a Go test function.
    `expected_output_file` format (one file per entry, defined): a UTF-8 JSON object
    `{"exit": <int>, "stdout": "<literal captured stdout>", "caches": {"<side>":
@@ -86,7 +90,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    |---|---|---|---|
    | `D4-EX-1` | D4-EX-1 | ⌂ on Windows (fake probe returns a start) | BC-3.02.001 (`TestWindowAge_D4EX1_Windows*`) |
    | `D4-EX-2` | D4-EX-2, OD-21/OD-32 | wrong-shape transcript lines skipped | BC-1.03.018/019/020 (21 BC-SL-099 rows + BC-SL-100/103 rows) |
-   | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..006 (`TestD4EX3_{Number,Boolean,URL,Enum}` + `config validate`; no Theme member — theme settings are rejected by the corpus validator, BC-6.02.003 PC-3/EC-007, so no Theme D4-EX-3 case can exist; ADV-P4-D22) |
+   | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..006 (`TestD4EX3_{Number,Boolean,URL,Enum,Text}` + `config validate`; no Theme member — theme settings are rejected by the corpus validator, BC-6.02.003 PC-3/EC-007, so no Theme D4-EX-3 case can exist; ADV-P4-D22) |
    | `OD-30` | OD-30, OD-110 | numeric sid: one string-form cost-history key | BC-1.05.006, BC-1.05.009 |
    | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails) | BC-3.02.002 |
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
@@ -129,12 +133,18 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    after step k are compared against its own caches after step k-1; when the case has a
    SINGLE step, the harness runs the oracle TWICE at the same step instant (two
    consecutive refreshes) and compares the second refresh's caches against the first's
-   — so "previous refresh" always exists. For the NUMBER class this leg degenerates
-   trivially: legacy crashes at import (CP-X01/X02: exit 1, empty stdout) and writes NO
-   caches, so the oracle leg pins exactly that — exit 1, zero stdout bytes, empty cache
-   listing — while the Go leg pins the config-error line via the expected file. Only the
-   Boolean, Enum and URL classes use the two-legged asymmetry; PC-3 of the class
-   contracts names them exhaustively.
+   — so "previous refresh" always exists. For the NUMBER class the degeneration holds
+   ONLY for its grammar-failure values: `""`, `four`, `0x4` and rows `2.0` crash legacy
+   at import (SL:74 `TTL = float(...)` / SL:75 `ROWS = int(...)`; CP-X01/X02: exit 1,
+   empty stdout), so the oracle leg pins exactly that — exit 1, zero stdout bytes, empty
+   cache listing — while the Go leg pins the config-error line via the expected file.
+   The float-accepted Number values (`nan`, `inf`, `-1`, `1e400`, `4_0` and non-ASCII
+   digits such as `٤`) parse at SL:74: legacy renders normally and writes its caches
+   (corrected per value, ADV-P5-D04 / owner call 12; the BC's own canonical
+   `config/ttl-nan` case previously pinned a crash real legacy does not perform). For
+   those values the standard two-legged asymmetry applies. The Boolean, Enum and URL
+   classes — and the float-accepted Number values — use the two-legged asymmetry; PC-3
+   of the class contracts names them exhaustively.
    The Go side asserts the EMPTY-listing invariant of BC-2.02.001 PC-6 ("Go writes no
    caches") instead of being compared to the oracle's listing. BC-6.03.002 PC-3's
    set-equality requirement is waived for an excluded case by the entry itself — the

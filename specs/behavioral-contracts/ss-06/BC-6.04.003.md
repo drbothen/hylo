@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "b0c3890"
+input-hash: "e1469f0"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,9 +25,11 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - promotion target path restored to the OD-148 corpus root internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04+D25+D31: --subagent family in generator domain; OS-scoped exclusions named (Windows naive timestamps, OD-159/160/161); provenance updated to OD-149 three-leg wording"
+  - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - promotion target path restored to the OD-148 corpus root internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
+  - "2026-11-19T00:25:00Z (1.2.4) ADV-P5 remediation D10+D30 — Windows skip removed per OD-171/OD-177 (naive-timestamp cases run on all three legs; BC-5.04.001 OSError rule cited); HYLO_PARITY_FUZZSECONDS named as this contract's harness budget with the 0/unset-fails-on-schedule semantics (D30)"
+  - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,16 +61,26 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
    ADV-P2-D03 disposition; BC-6.04.001) and the same canary
    (BC-6.01.001, BC-6.01.003).
 2. The generator is committed Go code. It reuses the transcript generator
-   (design §5.2), so every generated case is synthetic (BC-6.02.001).
+   (design §5.2), so every generated case is synthetic (BC-6.02.001). The nightly driver consumes the harness setting
+   `HYLO_PARITY_FUZZSECONDS` — the Tier C differential-fuzz budget in seconds
+   (schedule default 1800 = 30 min/OS, OD-149; a reserved harness name per
+   BC-2.01.001 PC-6, never a D15 config key; this contract is its owning contract).
+   On the nightly schedule a 0/unset budget FAILS the job (positive-coverage guard,
+   cicd-setup "parity tier C" row); on a PR-side run the budget may skip via
+   `t.Skip`, the job being non-gating.
 3. The generator's domain is valid inputs only:
    - well-formed stdin objects, with optional fields present or absent at random;
    - transcripts of valid line shapes;
    - metrics replies in instant-vector form, values including NaN/±Inf;
    - settings inside the Go typed domain;
    - string session ids.
-   OS-scoped exclusions (ADV-P3-D25): generated cases with non-UTC naive timestamps do
-   not run on the Windows leg (BC-6.02.003 PC-8 / BC-5.04.002 Invariant 2), and the
-   OD-159/160/161 foreign-shape classes are out of the generator's domain (their
+   OS-scoped notes (ADV-P3-D25, as amended by ADV-P5-D10): there is NO Windows skip —
+   the harness pins `TZ=UTC` for both binaries on every leg (OD-171/OD-177;
+   BC-6.02.003 PC-8, BC-5.04.002 Invariant 2), so generated cases with naive
+   timestamps run on all three legs. On Windows the MSVC `localtime_s` OSError range
+   rule of BC-5.04.001 PC-6 applies to range-end probes (before 1970-01-01 / from
+   year 3001); present-day generated `now` values never enter it. The OD-159/160/161
+   foreign-shape classes are out of the generator's domain (their
    shapes are seeded by the dedicated directional tests, BC-6.03.004 riders).
    Inputs whose difference is owner-ruled are out of the generator's domain: D4-EX-2
    wrong-shape lines, D4-EX-3 out-of-domain settings, OD-30 numeric sids, and

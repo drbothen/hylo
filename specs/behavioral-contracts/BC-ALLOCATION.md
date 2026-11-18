@@ -2,10 +2,10 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.2.6"
+version: "0.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T02:11:24Z
+timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 stage: "1 of 3 (allocation only — individual BC files are created in stage 2 by the writer groups)"
 origin: greenfield
@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.6"
+modified: "0.2.7"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "7175a3f"
+input-hash: "358b55e"
 traces_to: ../prd.md
 ---
 
@@ -205,12 +205,12 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-1.05.001 | $ colours from lane percentile thresholds | BC-SL-025 | byte-exact | SL:601-625 | H | E |
 | BC-1.05.002 | $/h segment with threshold colouring | BC-SL-026 | byte-exact | SL:601-625 | H | E |
 | BC-1.05.003 | ⛏ pick inside the $ block (basis threshold) | BC-SL-027 | byte-exact | SL:601-636 | H | E |
-| BC-1.05.004 | record_cost throttled write | BC-SL-028 | byte-exact | SL:224-237 | H | E |
+| BC-1.05.004 | record_cost throttled write | BC-SL-028 | OD-166 | SL:224-237 | H | E |
 | BC-1.05.005 | cost_thresholds p75/p95 percentiles | BC-SL-029 | byte-exact | SL:240-262 | H | E |
 | BC-1.05.006 | Numeric sid keyed by string form — throttle and self-exclusion hold | BC-SL-079 | OD-30 | OD-30; SL:224-262 | H | E |
-| BC-1.05.007 | $ and $/h number formatting | BC-SL-082 | byte-exact | SL:601-636 | H | E |
+| BC-1.05.007 | $, $/h and ⛏ number formatting | BC-SL-082 | byte-exact | SL:601-636 | H | E |
 | BC-1.05.008 | Cost colouring goldens (21 seeded sessions) | BC-SL-101 | byte-exact | SL:601-625; P3r4 §1.1 | H | E |
-| BC-1.05.009 | record_cost write contract (exact JSON format) | BC-SL-102 | OD-30 | OD-30; SL:224-237, 245-246 | H | E |
+| BC-1.05.009 | record_cost write contract (exact JSON format) | BC-SL-102 | OD-30, OD-166 | OD-30; SL:224-237, 245-246 | H | E |
 
 ### S1.06 — Session caches (writer E)
 
@@ -224,7 +224,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
 |---|---|---|---|---|---|---|
 | BC-1.07.001 | `--subagent` in argv selects the subagent renderer before main | BC-SL-097 | byte-exact | SL:1240-1241; OD-155 | H | A2 |
-| BC-1.07.002 | `statusline.subagent.enabled` off switch (default true = legacy) | new (OD-155) | OD-155 off switch | OD-155; D15 | H | A2 |
+| BC-1.07.002 | `statusline.subagent.enabled` off switch (default true = legacy) | new (OD-155) | byte-exact (disabled half = OD-155 off switch, new behavior — see BC-INDEX parity-class notes) | OD-155; D15 | H | A2 |
 | BC-1.07.003 | Subagent stdin is total — unparseable or non-object input renders zero rows | BC-SL-097 | byte-exact | SL:928-936 | H | A2 |
 | BC-1.07.004 | One default-JSON line per eligible task; zero bytes for zero rows | BC-SL-097 | byte-exact | SL:888-936 | H | A2 |
 | BC-1.07.005 | Status glyph, name-fallback chain, and settled-status suffix | BC-SL-097 | byte-exact | SL:884-886, 893-896, 922-923 | H | A2 |

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T15:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "e457c30"
+input-hash: "0144844"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:754-763)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/10/12"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/10/12", "1.3.1 2026-11-18: pass-5 remediation ADV-P5-C2-20 (kv.cells cap rationale aligned to the ratified registry row) and ADV-P5-C2-12 (host +/-Inf pinned as EC-010/EC-011)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,8 +41,11 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 1. `kv_raw = m.get("vllm:kv_cache_usage_perc")`, `hs_raw = m.get("dgx_kv:host_hit_share")`.
 2. Config: `statusline.kv.cells` 4 (T-048, derived: ceiling quarters keep 85-96 % steady,
    review #15; OD-162 range: Int 1..100 — the cell formula is defined for C ≥ 1 and
-   C = 0 divides by zero; the 100 cap is a labeled judgment on line width, architect to
-   ratify), `statusline.kv.host_yellow_pct` 5 (T-049, measured: THRESHOLDS §8 (SL:746);
+   C = 0 divides by zero; the 100 cap is a labeled judgment call: it caps the O(cells)
+   render work and visible-width blowup far beyond any terminal used with the status
+   line, keeping the 25 ms p95 budget — ratified in interface-definitions.md,
+   `statusline.kv.cells` row, pass-5 ADV-P5-C2-20),
+   `statusline.kv.host_yellow_pct` 5 (T-049, measured: THRESHOLDS §8 (SL:746);
    §8b is the TTFT rule, SL:790),
    `statusline.kv.host_shown_pct` 0.5 (T-050, derived: at or below 0.5 the `.0f` value
    would print `0%`; OD-57 E-0).
@@ -78,6 +81,8 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 | EC-007 | host 0.0500001 | yellow, ` ↺host 5%` |
 | EC-008 | host NaN | no suffix, cyan |
 | EC-009 | kv absent or a string | no segment |
+| EC-010 | host +Inf | warn and suffix both fire (`inf > 5`, `inf > 0.5`): yellow ` ↺host inf%` (ADV-P5-C2-12) |
+| EC-011 | host -Inf | no warn (`-inf > 5` false), no suffix (`-inf > 0.5` false): cyan, no suffix (ADV-P5-C2-12) |
 
 ## Canonical Test Vectors
 

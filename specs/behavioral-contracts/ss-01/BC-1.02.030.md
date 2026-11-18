@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f94cef6"
+input-hash: "5867379"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,7 +20,9 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-008, the no-rl_ts vector) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set id OD-160; 2026-11-17T12:00:00Z"
+  - "pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set id OD-160; 2026-11-18T03:00:00Z"
+  - "1.3 pass-5 remediation (ADV-P5-B10): PC4 gains the reroute-all carve-out — SL:489 short-circuits to rl = {}, so a malformed window is never touched and nothing raises (oracle-verified); new EC-010 pins the malformed-window-under-reroute-all case; 2026-11-18T05:42:56Z"
+  - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +64,10 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
    insertion order, floats in Python `repr`) of the whole cache object, byte-exact (S5.02).
 4. The returned value replaces `d["rate_limits"]` for the limits widget (BC-1.02.009..012). A returned window value
    that is truthy and not an object (string, non-empty list, non-zero number, `true`) makes the limits loop raise at
-   SL:503 (CP-S09) → whole stdout is `\e[90mstatusline degraded\e[0m\n`, with the cache write of step 1 already done.
+   SL:503 (CP-S09) → whole stdout is `\e[90mstatusline degraded\e[0m\n`, with the cache write of step 1 already
+   done — **unless** reroute-all is in effect (BC-1.02.009): SL:489 then binds `rl = {}` without evaluating
+   `d["rate_limits"]` (short-circuited conditional, oracle-verified 2026-11-17), so the malformed window is never
+   touched and nothing raises; the widget is hidden.
 
 ## Invariants
 
@@ -83,6 +88,7 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
 | EC-007 | reroute-all (`backends[0].model_prefixes` contains bare `claude`) | still written to the cache; widget hidden |
 | EC-008 | foreign cache with `rl` but no `rl_ts` (foreign-cache shape, **OD-160**: Go stores only non-empty rl dicts with `rl_ts`, SL:305-308) | hidden (`ts` defaults to 0) |
 | EC-009 | cache `rl_ts` in the future | shown |
+| EC-010 | malformed window under reroute-all (stdin `{"five_hour": "x"}`, `backends[0].model_prefixes` contains bare `claude`) | still written to the cache (PC1); no raise and no degrade — SL:489 binds `rl = {}` and the limits loop never sees the malformed value; widget hidden (extends EC-007 to malformed windows; PC4) |
 
 ## Canonical Test Vectors
 

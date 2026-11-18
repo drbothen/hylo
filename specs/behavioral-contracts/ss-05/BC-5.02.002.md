@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.2"
+version: "1.1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "6f823ef"
+input-hash: "2d3a15f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -21,6 +21,8 @@ introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D30: generator output format stated as space-separated, matching the print snippet"
+  - '2026-11-18T23:40:00Z (1.1.3) ADV-P5 D16 disposed: row-51 generator literal re-evaluated under CPython 3.11.7 — the committed literal ''{"t":"\\\\/\\\""}'' decodes to src text containing the \\/ escape (value \\/\", len 14, matching the table column), so the finding''s premise (escape never exercised) is REJECTED; comment clarified only (51 row: src text escapes spelled out)'
+  - "1.1.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — 1.1.3 entry requoted single-quoted (the row-51 generator-literal escapes terminated the double-quoted scalar); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -121,7 +123,7 @@ sources = [
     '{"t":"\\u001f"}',                 # 48 escaped U+001F
     '{"t":"' + U(0x2028) + U(0x2029) + '"}',  # 49 raw U+2028 U+2029
     '{"t":"<script>&amp;</script>"}',  # 50 no HTML escaping
-    '{"t":"\\\\/\\""}',                # 51 \/ decodes to /
+    '{"t":"\\\\/\\""}',                # 51 \/ escape decodes to / (src text \\,\/,\" -> value \/" "; len 14)
     '{"t":"/"}',                       # 52 / not escaped
     '{"' + U(0xE9) + '":{"' + U(0x1F600) + '":"' + U(0x4E2D) + '"}}',  # 53
     '{"a":{"b":{"c":{"d":[[],{},""]}}}}', '"just a string"', '[1,"a",null]',

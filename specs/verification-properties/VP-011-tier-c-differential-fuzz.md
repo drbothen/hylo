@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:00:00Z
+timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "0477f88"
+input-hash: "29e561f"
 traces_to: prd.md
 source_bc: BC-6.04.003
 bcs: [BC-6.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — property reclassified from liveness to safety (bounded-budget observation: every observed divergence carries a closed-set exclusion id); BC-6.04.003:65-67 domain filter (seeded proc_start, no numeric sids) enforced in the generator; the generator seed is logged for reproduction (A2-26)", "1.4 2026-11-18: ADV-P4 pass-4 fix — RK-2 disposition recounted from the taxonomy's declared ranges: 47 catalogued crash paths (CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4+17+7+3+11+5), agreeing with gene-transfusion-assessment.md; foreign-cache shapes are OD-160, not a CP family"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — property reclassified from liveness to safety (bounded-budget observation: every observed divergence carries a closed-set exclusion id); BC-6.04.003:65-67 domain filter (seeded proc_start, no numeric sids) enforced in the generator; the generator seed is logged for reproduction (A2-26)", "1.4 2026-11-18: ADV-P4 pass-4 fix — RK-2 disposition recounted from the taxonomy's declared ranges: 47 catalogued crash paths (CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4+17+7+3+11+5), agreeing with gene-transfusion-assessment.md; foreign-cache shapes are OD-160, not a CP family", "1.5 2026-11-18T23:45:00Z: ADV-P5 fix (A2-09, plan call 17) — resolved the VP-011↔VP-012 contradiction: Tier C generators exclude every ruled-class input BY CONSTRUCTION (each constraint named after its closed-set id and table-tested in that id's rider table); any observed divergence fails; isClosedExclusion runtime classifier removed; per-case machinery stays in VP-012"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,8 +36,11 @@ removal_reason: null
 
 A nightly, non-gating differential fuzz drives random valid inputs (stdin
 templates, settings, metrics modes, clock steps) to both the oracle and the Go port and
-compares stepwise stdout bytes and exit codes; within the fuzz budget every observed
-divergence carries an id from the closed exclusion set. Budget 0 skips (PR legs); the
+compares stepwise stdout bytes and exit codes; the generators exclude every ruled-class
+input BY CONSTRUCTION — each exclusion domain's generator constraint is named after its
+closed-set id and table-tested in that id's rider table — so any observed divergence is
+a failure and the harness cannot excuse one (no runtime classifier, plan call 17,
+ADV-P5-A2-09; per-case machinery stays in VP-012). Budget 0 skips (PR legs); the
 nightly workflow sets `HYLO_PARITY_FUZZSECONDS=1800` (30 minutes per OS, OD-149).
 
 ## Source Contract
@@ -81,10 +84,14 @@ func TestParityTierC_DiffFuzz(t *testing.T) {
     gen := RandomValidCaseGenerator(seed)
     for run := 0; run < budgetRuns(); run++ {
         cs := gen.Next()
-        if !inTierCDomain(cs) { // BC-6.04.003:65-67: seeded proc_start, no numeric sids
+        if !inTierCDomain(cs) { // BC-6.04.003:65-67: seeded proc_start, no numeric sids;
+            // per closed-set id, the ruled classes are OUT OF THE GENERATOR GRAMMAR
+            // by construction (od-160 shapes, OD-166 magnitudes, ...), each constraint
+            // table-tested in that id's rider table (plan call 17) — no runtime
+            // classifier: isClosedExclusion is gone.
             continue
         }
-        if diverged(RunOracle(cs), RunGoPort(cs)) && !isClosedExclusion(cs) {
+        if diverged(RunOracle(cs), RunGoPort(cs)) {
             t.Fatalf("unexplained divergence in %s (seed %d)", cs.ID, seed)
         }
     }

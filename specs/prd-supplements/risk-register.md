@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T01:38:15Z
 phase: 1b
 inputs: [architecture-feasibility-report.md, prd.md, prd-supplements/nfr-catalog.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "671bb97"
+input-hash: "ee407e8"
 traces_to: prd.md
 ---
 
@@ -30,7 +30,7 @@ traces_to: prd.md
 | R-005 | Purity-annotation drift across BC files | Documentation consistency | closed (remediated) | LOW | Per-BC Purity Classification sections annotated during Pass 3 — 154/154 on disk (recount per pass-4 A19; re-verified 2026-11-17, CA-07; count includes the eight OD-155 subagent contracts and BC-5.01.007); module-level boundary carried in the ARCH-00 purity table | n.a. | ARCH-00 purity table |
 | R-006 | RK-5: HYLO_TEST_NOW stderr warning leaking outside the harness | Operational (determinism) | closed (spec decision) | LOW | Env seam set: HYLO_TEST_NOW is a harness hook, not a setting (AD-10); reserved names are never warned as unknown keys (BC-2.01.001 postcondition 6) | n.a. | ARCH-03 / AD-10 |
 | R-007 | RK-6: inert key `statusline.window_age.ps_timeout_s` confusing the config surface | Operational (config surface) | closed (owner ruling) | LOW | Key removed from the registry by OD-147 (owner, 2026-11-16); setting it now draws only the unknown-setting stderr warning, is ignored, and never changes the output or exit status (BC-2.01.001 PC-6, VP-015) — there is no unknown-key config-error class | n.a. | ARCH-02 key registry (OD-147) |
-| R-008 | Transcript-borne overflow skip (OD-156, extended D4-EX-2) diverges cache bytes from legacy: on the offending refresh legacy degrades sticky and saves nothing, while hylo skips the line (OD-167: and drops the in-flight turn) and saves the rest | Correctness (parity) | open (accepted by ruling) | MEDIUM | Named exclusion: the D4-EX-2 W-predicate family gains a numeric-overflow predicate with table tests (BC-1.03.018/.019 extension; triggers CP-O06..O09 in error-taxonomy.md); Tier A expects the diff and cites the entry | NFR-003 | ARCH-04 cache writers / ARCH-07 exclusion machinery |
+| R-008 | Transcript-borne overflow skip (OD-156, extended D4-EX-2) diverges cache bytes from legacy: on the offending refresh legacy degrades sticky and saves nothing, while hylo skips the line (OD-167: and drops the in-flight turn) and saves the rest | Correctness (parity) | open (accepted by ruling) | MEDIUM | Named exclusion: the D4-EX-2 W-predicate family gains a numeric-overflow predicate with table tests (BC-1.03.018/.019 extension; triggers CP-O06..O08 in error-taxonomy.md — CP-O09 is the save-time no-write case, no divergence, temp-file id; pass-5 A21); Tier A expects the diff and cites the entry | NFR-003 | ARCH-04 cache writers / ARCH-07 exclusion machinery |
 
 ## Gate Notes
 

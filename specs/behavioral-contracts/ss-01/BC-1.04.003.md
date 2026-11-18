@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "76b3a2d"
+input-hash: "0144844"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:329-350)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)", "2026-11-18 (v1.3.2) pass-4 remediation ADV-P4-C2-13 (config key statusline.sparkline.preempt_marker_above; independence from queue.yellow), ADV-P4-C2-14 (output-neutrality qualified by points <= history_cap), ADV-P4-C2-15 (EC-008 KeyError degrade outcome)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (history_cap range; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)", "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-13/14/15 (preempt_marker_above config key + queue.yellow independence; output-neutrality qualified by points <= history_cap; EC-008 KeyError degrade outcome)", "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (EC-008 KeyError scoped to hist[-1] + OD-160 tag) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and design call 16 (history_cap range 1..1000; preempt_marker_above Float >= 0)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,10 +44,16 @@ at the last 32 points.
    `statusline.sparkline.min_gap_s` 2 (T-008, derived: guards a TTL < 2 s), 
    `statusline.sparkline.history_cap` 32 (T-009, derived: bounds the cache for short TTLs;
    rationale accepted OD-57 E-0, kept as keys per OD-55). OD-162 range for
-   `history_cap`: Int ≥ 1 — the saved slice generalizes as `hist[-cap:]` for cap ≥ 1,
-   but cap 0 is a number-range config error because Python `hist[-0:]` returns the
-   whole list (SL:350), not an empty one. `statusline.sparkline.preempt_marker_above`
-   Int 0, range `>= 0` (T-107; ADV-P4-C2-13 — see PC4).
+   `history_cap`: Int 1..1000 — the upper bound 1000 is a labeled judgment call
+   (A13/NFR-005: bounds the session-cache memory and the `hist[-cap:]` copy cost far
+   beyond any TTL the status line admits; pass-5 call 16); the saved slice generalizes
+   as `hist[-cap:]` for cap ≥ 1, but cap 0 is a number-range config error because
+   Python `hist[-0:]` returns the whole list (SL:350), not an empty one.
+   `statusline.sparkline.preempt_marker_above`
+   Float 0, range `>= 0` (T-107; ADV-P4-C2-13 — see PC4; Float, not Int, because it
+   compares the per-second rate `dgx_preempt:rate5m` whose historical rule was
+   `> 0.01/s` (SL:737-738), which no non-zero Int can express — pass-5 call 16,
+   ADV-P5-C2-11).
 
 ## Postconditions
 
@@ -62,9 +68,12 @@ at the last 32 points.
    in the sample; then, if `v` is still absent and `dgx_tokens:gen_rate5m` is present,
    `v` ← that value (so `v` lands after `f`); then `p=1` if
    `sample.get("dgx_preempt:rate5m", 0) > statusline.sparkline.preempt_marker_above`
-   (T-107; config key `statusline.sparkline.preempt_marker_above`, Int, default 0, range
-   `>= 0`: the `p` marker shows when preempt > value, default 0 reproducing legacy's
-   hard-coded `> 0` — P20. The marker is independent of the `statusline.queue.yellow`
+   (T-107; config key `statusline.sparkline.preempt_marker_above`, Float, default 0,
+   range `>= 0`: the `p` marker shows when preempt > value, default 0 reproducing
+   legacy's hard-coded `> 0` — P20; Float, not Int, because the compared series
+   `dgx_preempt:rate5m` is a per-second rate whose historical rule was `> 0.01/s`
+   (SL:737-738), which no non-zero Int can express — pass-5 call 16, ADV-P5-C2-11. The
+   marker is independent of the `statusline.queue.yellow`
    Bool (OD-175): `queue.yellow=false` suppresses the queue segment's yellow colour but
    the `p` marker still plots, ADV-P4-C2-13).
 5. The cache stores `hist[-cap:]` (cap = `statusline.sparkline.history_cap`, 32); the
@@ -92,7 +101,7 @@ at the last 32 points.
 | EC-005 | Only `gen_rate5m` 12.5, ttft 2.0, preempt 0.01 | `{"t": 1310.0, "f": 2.0, "v": 12.5, "p": 1}` |
 | EC-006 | Preempt `NaN` | no `p` (`nan > 0` false) |
 | EC-007 | 40 points within 90 s, then one appended | 41 returned, 32 saved |
-| EC-008 | Point is a string or number | normalized to `{}`, `t` default 0 → dropped unless `now < 90`; a `{}` point kept when `now < 90` makes `hist[-1]["t"]` raise KeyError at the gap check (SL:336-337) → degraded line (ADV-P4-C2-15) |
+| EC-008 | Point is a string or number | normalized to `{}`, `t` default 0 → dropped unless `now < 90`; a `{}` point raises KeyError at the gap check ONLY when it is the newest kept point — `hist[-1]` is `{}` makes `hist[-1]["t"]` raise (SL:337) → degraded line (ADV-P4-C2-15); a kept `{}` followed by a newer kept point (e.g. `[{}, {"t": now-1}]`) prunes without raising (ADV-P5-C2-09). String/number points are foreign-cache shapes (hylo's and legacy's writers always write dicts): out of byte-parity scope, P3 r2 ruling (b), foreign-cache class carries exclusion id **OD-160**, as EC-009 |
 | EC-009 | Point is `[[0]]`-shaped (list of length 1) | IndexError → degraded (CP-C05, foreign cache; out of byte-parity scope, P3 r2 ruling (b); foreign-cache class carries named exclusion id **OD-160**) |
 
 ## Canonical Test Vectors
@@ -110,6 +119,7 @@ at the last 32 points.
 |--------|----------|-------------|
 | VP-030, VP-031 | Saved history length ≤ 32 and every saved point satisfies `now - t < 90` or is the new point | Go property test (testing/quick) |
 | VP-030, VP-031 | Point key order equals legacy for every subset of the four series | manual (table over 16 subsets) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008/EC-009 foreign-cache crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped (ADV-P5-C2-17) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -118,7 +128,7 @@ at the last 32 points.
 | Source | legacy/dgx_statusline.py:get_sample (SL:329-350); _norm_pt (SL:652-656); SPARK_MAX_AGE/HIST_MIN_GAP (SL:83-84) |
 | Legacy contract | BC-SL-042 (P3 base) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007, DI-012 (foreign-cache shapes OD-160 under the named-deviation rule) |
 | Decisions | OD-55, OD-57 E-0 (T-007/T-008/T-009) |
 | Architecture Module | `internal/statusline/sample.go` |
 | Stories | TBD |

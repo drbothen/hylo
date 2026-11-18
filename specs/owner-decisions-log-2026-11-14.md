@@ -163,3 +163,11 @@
 | OD-173 | (a) The lane-pill words become config keys `statusline.pill.label_local` (default `DGX`), `statusline.pill.label_cloud` (default `ANTH`), `statusline.pill.label_unknown` (default `?`). Drop the D7 citation. Range: non-empty, no control bytes, display width 1..16 (judgment call: keeps the pill short). | rules ADV-P4-B16 |
 | OD-174 | (a) Rename `cost.basis_min_shown_usd` to `statusline.cost.display_floor_usd`; delete the disclaimers. | rules ADV-P4-B21 |
 | OD-175 | (a) `statusline.queue.yellow` is ratified as a P1 Bool key, default `true` = legacy rule (yellow when queue > 0 or preempt > 0); `false` = never yellow. Replace the phantom "2026-11-18 owner ruling" citation with OD-175. | rules ADV-P4-D26 |
+
+<!-- Phase-1d pass-5 remediation rulings by the owner, 2026-11-18 (owner chose the recommended option each time; next free OD-181) -->
+
+| OD-176 | (a) Convergence keeps the full VSDD standard: every finding of every severity is fixed each pass, and convergence needs three consecutive passes with only cosmetic findings. No severity gate, no scope freeze. | process question after pass 5 |
+| OD-177 | (a) Refines OD-171 to libc semantics on every OS: `TZ` unset → OS zone; `TZ` empty or unparseable → UTC. | rules ADV-P5-A2-06, D23 |
+| OD-178 | (a) A seventh D4-EX-3 class **Text** covers composite-shape, pill-label, glyph and empty-text errors, with exact reason strings in the vocabulary and its own table test `TestD4EX3_Text`. Canonical D4-EX-3 tests become `TestD4EX3_Boolean`, `_Enum`, `_URL`, `_Number`, `_Text`. | rules ADV-P5-D05, A06 |
+| OD-179 | (a) The reroute-all markers become the List key `statusline.lane.reroute_all_prefixes` (default `["claude", "claude-"]`, legacy). Range: every entry non-empty, no control bytes. | rules ADV-P5-B09 |
+| OD-180 | (a) A metrics URL with userinfo reproduces legacy: no sample (the dead rung); no exclusion id. | rules ADV-P5-C2-03 |
