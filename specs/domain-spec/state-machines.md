@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "state-machines"
-version: "1.3"
+version: "1.5"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T20:45:00Z
+timestamp: 2026-11-18T02:41:14Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r8.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "7a8eda6"
+input-hash: "1d0cf11"
 traces_to: L2-INDEX.md
 ---
 
@@ -54,12 +54,23 @@ Pass-through destinations acquire connections on demand under the same per-lane 
 ## SM-04 Status line render ladder
 
 Evaluation order per refresh mirrors the PRD error taxonomy (E-CLI-001 outranks
-E-CFG-001): **(1) unknown-flag line (OD-112)** — checked first; **(2) config-error
+E-CFG-001): **(1) unknown-flag line (OD-112)** — checked first among render-ladder
+rungs (the `--subagent` mode-routing check precedes all flag handling; see the
+carve-out below); **(2) config-error
 line (D4-EX-3, OD-102)** — checked at step 0, before any render; **(3) render
 success, else the degraded one-line fallback**. Terminal for that refresh: every
-refresh starts fresh; the ladder always ends exit 0 with at least one line (DI-008).
+refresh starts fresh; the ladder always ends exit 0 with at least one line (DI-008) —
+except in the `--subagent` agent-panel mode (carve-out below).
 Legacy conflated the config-error and unknown-flag conditions — both surfaced as
 crash/import paths; hylo splits them into distinct rungs (DECIDED).
+
+Carve-out — `--subagent` agent-panel mode (OD-155): membership of `--subagent`
+anywhere in `argv[1:]` routes to the agent-panel renderer before any flag handling,
+including the unknown-flag check (legacy SL:1240-1241; BC-1.07.001). Inside that mode the
+ladder does not apply: the output is JSON lines or zero bytes — zero tasks
+(BC-1.07.004 PC6), unparseable stdin (BC-1.07.003), enabled=false (BC-1.07.002 PC2)
+and config errors (OD-168: zero bytes on stdout, diagnostic on stderr) each print
+nothing on stdout — always exit 0.
 
 ## SM-05 Backend health freshness ladder
 

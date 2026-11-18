@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.1"
+version: "1.0.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a501997"
+input-hash: "392ed99"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main_subagent (SL:928-936)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: non-English term replaced with 'short-circuit' (ADV-P3-C22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,7 +80,7 @@ degraded line and never to a crash (DI-008 rung: silent emptiness).
 | stdin `"5"` | zero bytes, exit 0 | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`): `main_subagent` absorb semantics from
-SL:929-933; falsy-tasks短路 from `render_subagent_rows` SL:890-891 (`d.get("tasks") or []`).
+SL:929-933; falsy-tasks short-circuit from `render_subagent_rows` SL:890-891 (`d.get("tasks") or []`).
 
 ## Verification Properties
 

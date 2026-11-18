@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "96bb153"
+input-hash: "ac3dc50"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B02): file-read encoding pinned to OD-159 (Go reads files as UTF-8 on all OSes, named deviation); the LANG rationale replaced; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,8 +45,15 @@ error occurs. It never invokes the git binary.
    BC-1.02.003, only when the git segment is enabled, BC-1.02.005). The legacy
    `directory or os.getcwd()` fallback (SL:373) is unreachable from rendering; the Go side
    keeps it behind the `Env.Cwd` seam (design §2.2).
-2. The filesystem is read through the `Env.Files` seam; text decoding is strict UTF-8 (the
-   oracle runs with `LANG=en_US.UTF-8`, BC-6.01.002, so its locale encoding is UTF-8).
+2. The filesystem is read through the `Env.Files` seam; text decoding is strict UTF-8 on
+   every OS as a **named deviation** — exclusion id **OD-159** ("Go reads files as UTF-8 on all
+   OSes"): legacy's `open()` has no encoding argument (SL:380-381, 385-386), so on Windows the
+   CPython oracle decodes with the ANSI code page (LANG has no effect there; the BC-6.01.002
+   shim reconfigures only stdin/stdout), e.g. the vector `ref: refs/heads/\xff\xfe` decodes to
+   the two code points U+00FF U+00FE (UTF-8 bytes `\xc3\xbf\xc3\xbe`) on the Windows oracle
+   instead of erroring. Windows-oracle goldens for non-ASCII or
+   invalid-UTF-8 HEAD/`.git` content therefore carry the OD-159 exclusion and are regenerated
+   on the Windows CI leg (EC-012); POSIX goldens are unaffected.
 
 ## Postconditions
 
@@ -117,6 +125,7 @@ temp root `<T>` that has no repository above it.
 | VP-028 | Walk terminates for every start path (strictly shorter `d` each step until `dirname(d)==d`) | table test + reasoning |
 | VP-028 | No write syscalls during the walk | fake FileSystem test |
 | VP-028 | Results equal the oracle on the 10-layout table (pass-3 #3) on all three OSes | table test against CPython goldens |
+| VP-012 | The named deviation this contract defines — exclusion id `OD-159` (Go reads files as UTF-8 on all OSes; Windows HEAD/`.git` decoding) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-159` entry and its riding table test `TestGitTextReads_OD159_StrictUTF8`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability
 
@@ -127,7 +136,7 @@ temp root `<T>` that has no repository above it.
 | Parity class | byte-exact (no exclusion-list entry) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
-| Owner decisions | D5 (cross-platform, no shelling out to git), OD-104 (oracle CPython 3.11) |
+| Owner decisions | D5 (cross-platform, no shelling out to git), OD-104 (oracle CPython 3.11), OD-159 (files read as UTF-8 on all OSes — Windows HEAD/`.git` decoding cases) |
 | Config keys | none directly (enable/TTL in BC-1.02.005) |
 | Architecture Module | `internal/statusline/git.go` (design §2.2) |
 | Stories | TBD |
@@ -151,6 +160,7 @@ TBD — branch segment story
 ## VP Anchors (Recommended)
 
 - VP-028 — walk termination and read-only property
+- VP-012 — exclusion-closure cover for the named deviation `OD-159`
 
 ---
 

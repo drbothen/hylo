@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.8"
+version: "0.2.10"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:58:00Z
+timestamp: 2026-11-18T02:11:24Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "8099cac"
+input-hash: "e37f41f"
 traces_to: domain-spec/L2-INDEX.md
 supplements:
   - prd-supplements/interface-definitions.md
@@ -38,11 +38,13 @@ supplements:
 > **Integration stage (3 of 3).** Stage 1 produced the subsystem breakdown and the
 > authoritative allocation (`behavioral-contracts/BC-ALLOCATION.md`); stage 2 wrote all
 > BC files (verified against the register: 138 at stage 2; seven contracts added by
-> OD-132..OD-145 bring the total to 145; frontmatter carries legacy_id,
-> parity_class, confidence); stage 3 built `behavioral-contracts/BC-INDEX.md`,
-> reconciled cross-group differences, and fills the sections below. The BC files and
-> `BC-INDEX.md` are the contract detail; this document indexes them. Revised 2026-11-15
-> by the owner rulings OD-132..OD-145 on §10 (seven contracts added; 145 total).
+> OD-132..OD-145 and eight by OD-155 — the S1.07 subagent family — bring the total to
+> 153; frontmatter carries legacy_id, parity_class, confidence); stage 3 built
+> `behavioral-contracts/BC-INDEX.md`, reconciled cross-group differences, and fills the
+> sections below. The BC files and `BC-INDEX.md` are the contract detail; this document
+> indexes them. Revised 2026-11-15 by the owner rulings OD-132..OD-145 on §10 (seven
+> contracts added) and 2026-11-17 by OD-155 (eight subagent contracts; 153 total);
+> 2026-11-18 pass-3 remediation added BC-5.01.007 (ADV-P3-D08; 154 total).
 >
 > **Scope ruling (OD-115).** The brief and L2 spec are product-level; this PRD specifies
 > **P1 (`hylo statusline`) only**. Later phases enter via Feature Mode.
@@ -108,11 +110,11 @@ Owner-approved breakdown (2026-11-15; OD-131). BC numbering:
 
 | Subsystem | Name | Priority | Governing L2 (CAP / DI) | BCs this cycle |
 |-----------|------|----------|------------------------|----------------|
-| S1 | Status Line | CRITICAL | CAP-009, CAP-010, CAP-011; DI-007, DI-008 | 93 |
+| S1 | Status Line | CRITICAL | CAP-009, CAP-010, CAP-011; DI-007, DI-008 | 101 |
 | S2 | Configuration | HIGH | CAP-015; DI-010, DI-008 | 13 |
 | S3 | Platform | HIGH | CAP-009 (render path support); DI-008 | 3 |
 | S4 | CLI | MEDIUM | CAP-009, CAP-015; DI-008 | 3 |
-| S5 | Pyfmt | CRITICAL | Enables CAP-009 byte parity (OD-103; `internal/pyfmt`) | 19 |
+| S5 | Pyfmt | CRITICAL | Enables CAP-009 byte parity (OD-103; `internal/pyfmt`) | 20 |
 | S6 | Parity Harness | HIGH | CAP-009 (parity verification); DI-012 machinery; D4 exit criterion | 14 |
 | S7 | Exporter | — | CAP-008 | **Reserved — no BCs this cycle (P2)** |
 | S8 | Proxy And Routing | — | CAP-001..005 | **Reserved — no BCs this cycle (P3)** |
@@ -121,7 +123,7 @@ Owner-approved breakdown (2026-11-15; OD-131). BC numbering:
 | S11 | UIs | — | CAP-016; DI-016 (web + TUI) | **Reserved — no BCs this cycle (P4/P6)** |
 | S12 | Multi-Backend | — | CAP-018 | **Reserved — no BCs this cycle (P6)** |
 
-**Total new BCs: 145** (101 mapped from legacy BC-SL-001..103 + 44 new contracts; see
+**Total new BCs: 154** (108 mapped from legacy BC-SL-001..103 + 46 new contracts; see
 `behavioral-contracts/BC-ALLOCATION.md` for the authoritative mapping). Priority labels
 amended by OD-135: S1 and S5 are module-critical — the P1 exit gate for both is
 **line coverage >= 95%**; the >= 95% mutation kill rate is the Phase 6 target, not a P1
@@ -132,8 +134,8 @@ OD-140/OD-141).
 **Scope amendment (OD-155, owner 2026-11-17; supersedes OD-14):** `--subagent` and the
 custom agent-panel rows (legacy BC-SL-097) are **in P1 scope**, ported with a config off
 switch. S1 renders the agent-panel rows and S4 dispatch recognizes `--subagent` (the
-flag-error ladder applies to every other flag); the additional BC rows are inserted into
-Section 2 and BC-INDEX by the pass-2 remediation burst.
+flag-error ladder applies to every other flag); the additional contracts are
+BC-1.07.001..008, listed in Section 2.1 (S1.07) and BC-INDEX.
 
 ## 2. Behavioral Contracts Index
 
@@ -213,7 +215,7 @@ Section 2 and BC-INDEX by the pass-2 remediation burst.
 | [BC-1.03.012](behavioral-contracts/ss-01/BC-1.03.012.md) | Short + long line completes over two refreshes | BC-SL-066 | P0 |
 | [BC-1.03.013](behavioral-contracts/ss-01/BC-1.03.013.md) | Mix cache sid sanitized per code point | BC-SL-070 | P0 |
 | [BC-1.03.014](behavioral-contracts/ss-01/BC-1.03.014.md) | text/thinking block value types | BC-SL-072 | P0 |
-| [BC-1.03.015](behavioral-contracts/ss-01/BC-1.03.015.md) | transcript_path type semantics (int = fd) | BC-SL-088 | P0 |
+| [BC-1.03.015](behavioral-contracts/ss-01/BC-1.03.015.md) | transcript_path type semantics (truthy int → no transcript, no descriptor I/O) | BC-SL-088 | P0 |
 | [BC-1.03.016](behavioral-contracts/ss-01/BC-1.03.016.md) | Turn-machine exhaustive table (20 rows) | BC-SL-094 | P0 |
 | [BC-1.03.017](behavioral-contracts/ss-01/BC-1.03.017.md) | Turn identity ignores seen_ids | BC-SL-095 | P0 |
 | [BC-1.03.018](behavioral-contracts/ss-01/BC-1.03.018.md) | D4-EX-2 wrong-shape line W-predicates (skip, no partial mutation) | BC-SL-098 | P0 |
@@ -258,7 +260,7 @@ Section 2 and BC-INDEX by the pass-2 remediation burst.
 | [BC-1.05.005](behavioral-contracts/ss-01/BC-1.05.005.md) | cost_thresholds p75/p95 percentiles | BC-SL-029 | P0 |
 | [BC-1.05.006](behavioral-contracts/ss-01/BC-1.05.006.md) | Numeric sid keyed by string form — throttle and self-exclusion hold | BC-SL-079 | P0 |
 | [BC-1.05.007](behavioral-contracts/ss-01/BC-1.05.007.md) | $ and $/h number formatting | BC-SL-082 | P0 |
-| [BC-1.05.008](behavioral-contracts/ss-01/BC-1.05.008.md) | Cost colouring goldens (20 seeded sessions) | BC-SL-101 | P0 |
+| [BC-1.05.008](behavioral-contracts/ss-01/BC-1.05.008.md) | Cost colouring goldens (21 seeded sessions) | BC-SL-101 | P0 |
 | [BC-1.05.009](behavioral-contracts/ss-01/BC-1.05.009.md) | record_cost write contract (exact JSON format) | BC-SL-102 | P0 |
 
 #### S1.06 Session caches (writer group E)
@@ -279,7 +281,7 @@ Section 2 and BC-INDEX by the pass-2 remediation burst.
 | [BC-1.07.005](behavioral-contracts/ss-01/BC-1.07.005.md) | Status glyph, name-fallback chain, and settled-status suffix | BC-SL-097 | P0 |
 | [BC-1.07.006](behavioral-contracts/ss-01/BC-1.07.006.md) | Model segment carries the model-prefix lane tag | BC-SL-097 | P0 |
 | [BC-1.07.007](behavioral-contracts/ss-01/BC-1.07.007.md) | Token segment (_fmt_tokens) and running-only elapsed clock | BC-SL-097 | P0 |
-| [BC-1.07.008](behavioral-contracts/ss-01/BC-1.07.008.md) | CP-A01..A03 degrade to the 29-byte line, exit 0 | BC-SL-097 | P0 |
+| [BC-1.07.008](behavioral-contracts/ss-01/BC-1.07.008.md) | CP-A01..A05 degrade to the 29-byte line, exit 0 | BC-SL-097 | P0 |
 
 ### 2.2 S2 — Configuration (CAP-015)
 
@@ -348,6 +350,7 @@ Section 2 and BC-INDEX by the pass-2 remediation burst.
 | [BC-5.01.004](behavioral-contracts/ss-05/BC-5.01.004.md) | pyfmt.D: {:d} decimal formatting with width and zero-pad | new | P0 |
 | [BC-5.01.005](behavioral-contracts/ss-05/BC-5.01.005.md) | pyfmt.Repr: CPython float repr (shortest round-trip, .0 suffix, inf/nan spellings) | new | P0 |
 | [BC-5.01.006](behavioral-contracts/ss-05/BC-5.01.006.md) | pyfmt.MaxSeq: Python max() over a sequence with first-maximal-wins NaN order | new | P0 |
+| [BC-5.01.007](behavioral-contracts/ss-05/BC-5.01.007.md) | Mixed int/float Num semantics: float(int) ErrOverflow bound, true division, exact comparison, Max/Min exact ties | new | P0 |
 
 #### S5.02 JSON byte semantics (writer group G)
 
@@ -429,7 +432,7 @@ S7 exporter (P2), S8 proxy & routing (P3), S9 ledger (P3, D7), S10 launcher/hook
 
 | Verb | Output | Exit | Contract |
 |---|---|---|---|
-| `hylo statusline` | 1 or 2 rendered lines on stdout (LF-joined); faults degrade to the 29-byte grey line, never blank | always 0 | BC-4.01.001, BC-1.01.001/.003 |
+| `hylo statusline` | 1 or 2 rendered lines on stdout (LF-joined); faults degrade to the 29-byte grey line, never blank. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004) | always 0 | BC-4.01.001, BC-1.01.001/.003 |
 | `hylo version` | `hylo <version>` (build info fallback, then `dev`) | 0 | BC-4.01.003 |
 | `hylo config validate` | `hylo: config ok` or plain reason lines | 0 / 1 | BC-2.03.001 |
 | `hylo config path` | config, cache and state paths, one per line, fixed labels/order (OD-132) | 0 | BC-2.03.002 |
@@ -474,7 +477,7 @@ the supplement.
 | ID | Requirement | Target | Validation | Contract |
 |---|---|---|---|---|
 | NFR-001 | Render latency, steady state | p95 <= 25 ms on the owner's Mac over the fixture corpus, excluding the metrics HTTP wait (OD-117). Measured legacy baseline 2026-11-15: median 84.5 ms, p90 101 ms (~25 ms interpreter start removed by the port) | per-OS timing report; gate binds only with `HYLO_TIMING_GATE=1` | BC-6.04.002 |
-| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02) produce >= 1 output byte and exit 0 | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
+| NFR-002 | Never-blank, exit-0 rendering | 100% of fault-injection and crash-path triggers (CP-S01..S17, CP-T01..T07, CP-N01/N02, CP-O01..O05, CP-O10/O11, CP-A01..A05) produce >= 1 output byte and exit 0. Carve-out (OD-155): in `--subagent` mode zero stdout bytes is a legitimate outcome (renderer off, zero eligible rows, unparseable input, config error per OD-168; BC-1.07.002/.003/.004); the subagent crash-path degrades still land on the 29-byte line | fault-injection table tests | BC-1.01.001, BC-1.01.002, register per BC |
 | NFR-003 | Byte parity (D4 exit criterion) | 0 unexplained stdout/exit diffs over the corpus; every explained diff rides a named exclusion entry with its own table test | parity harness per step: stdout bytes + exit code + named caches | BC-6.03.002, BC-6.03.004, DI-012 |
 | NFR-004 | Cross-platform (D5) | CI green on ubuntu-24.04, macos-15 (arm64), windows-2025 for every change; Go 1.26.x; -race clean on the Linux and macOS legs (windows-2025 leg runs without -race, as ARCH-08 defines the matrix) | CI matrix | BC-6.04.001 |
 | NFR-005 | Memory/CPU envelope | bounded state, legacy caps only — the list is exhaustive: 256-id usage dedup (SL:1153), 32-point histories (SL:350), 512 KB read step (SL:952), 90 s history age cap (`SPARK_MAX_AGE`, SL:83, BC-1.04.003); no cap outside this list exists in legacy and none may be invented (P13, ADV-P2-A20) | table tests | BC-1.03.003/.005, BC-1.04.002, BC-1.04.003 |
@@ -490,7 +493,7 @@ the supplement.
 | Code | Surface | Observable | Exit | Contract |
 |---|---|---|---|---|
 | E-REN-001 | Panic guard (any crash path) | `\e[90mstatusline degraded\e[0m\n` (29 bytes: `1b 5b 39 30 6d` + `statusline degraded` + `1b 5b 30 6d 0a`) | 0 | BC-1.01.001 |
-| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*; incl. the OD-156 overflow family CP-O, below) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015 |
+| E-REN-002 | Typed degrade (OverflowError/ValueError/NaN per CP-*: CP-S01..S17, CP-N01/N02, the OD-156 Surface 1 family CP-O01..O05 and CP-O10/O11, the Surface 3 subagent family CP-A01..A05; Surface 2 transcript CP-O06..O09 resolve to the D4-EX-2 skip, not a line degrade) | same 29-byte line; earlier side-effect writes are kept | 0 | BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
 | E-CFG-001 | D4-EX-3 config error (six classes, register closed: number-range, number-grammar, enum, URL — OD-114; boolean — OD-140; theme/SGR — OD-134) | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`, first error in registry order; full list to stderr; no cache writes | 0 | BC-2.02.001..006, BC-2.01.003/.005 |
 | E-CLI-001 | Unknown flag on `statusline` | `\e[90mhylo: unknown flag <flag>\e[0m\n` (first flag, no colon after "flag"); stderr detail per flag; precedes config errors | 0 | BC-4.01.002 |
 | E-CLI-002 | Usage error (non-statusline verbs) | golden usage text on stderr | 2 | BC-4.01.001, BC-2.03.001 |
@@ -553,13 +556,14 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 | BC-1.04.001..021 | CAP-009, CAP-010 | `internal/statusline` (row 2, metrics client) | P0 | table tests + fake-server integration |
 | BC-1.05.001..009 | CAP-011, CAP-009 | `internal/statusline` + `internal/cost` (cost history, colors) | P0 | seeded goldens, table tests |
 | BC-1.06.001..002 | CAP-009 | `internal/statusline` (cache store) | P0 | table tests, temp-file exclusion test |
+| BC-1.07.001..008 | CAP-009 | `internal/statusline` (subagent agent-panel rows) | P0 | oracle-pinned table tests, fault-injection (CP-A) |
 | BC-2.01.001..005 | CAP-015 | `internal/config` | P0/P1 | build-time table tests |
 | BC-2.02.001..006 | CAP-015 | `internal/config` | P0 | D4-EX-3 class tests |
 | BC-2.03.001..002 | CAP-015 | `cmd/hylo` | P1/P2 | CLI integration tests |
 | BC-3.01.001 | CAP-009 | `internal/platform` | P0 | per-OS table tests |
 | BC-3.02.001..002 | CAP-009 | `internal/platform` | P0 | per-OS probe tests (D4-EX-1/OD-76 tables) |
 | BC-4.01.001..003 | CAP-009, CAP-015 | `cmd/hylo` | P0/P2 | CLI integration, usage golden |
-| BC-5.01.001..006 | CAP-009 (enabler, OD-103) | `internal/pyfmt` (num) | P0 | CPython oracle tables + fuzz |
+| BC-5.01.001..007 | CAP-009 (enabler, OD-103) | `internal/pyfmt` (num) | P0 | CPython oracle tables + fuzz |
 | BC-5.02.001..006 | CAP-009 (enabler) | `internal/pyfmt` (json) | P0 | oracle tables (63-case dump oracle) + fuzz |
 | BC-5.03.001..004 | CAP-009 (enabler) | `internal/pyfmt` (str) | P0 | Go property test (testing/quick) + oracle tables |
 | BC-5.04.001..003 | CAP-009 (enabler) | `internal/pyfmt` (time) | P0 | oracle tables, TZ-matrix tests |
@@ -619,11 +623,12 @@ cycle relies on:
 - **ASM-006 — Timeout ruling.** OD-56 replaces the per-socket timeout with a total fetch
   deadline (BC-1.04.001); output-identical on the corpus — validated.
 - **ASM-007 — Agent-panel surface (OD-155).** `--subagent` and the custom agent-panel rows
-  are portable in P1 behind a config off switch (OD-155, superseding OD-14); the argv
-  surface and agent-panel row behavior are as tested on the running client (2.1.322) —
-  validated (owner ruling of 2026-11-17).
+  are portable in P1 behind a config off switch (OD-155, superseding OD-14); compatibility
+  with the Claude Code 2.1.326 `subagentStatusLine` payload (vs the 2.1.322 contract
+  legacy parsed) is assumed (ASSUMP-107-1, BC-1.07.001/.002 PC-2) — open (disclosed): to
+  be verified by a capture before Phase 3.
 
-The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-007).
+The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-008).
 
 ## 10. Open Questions
 

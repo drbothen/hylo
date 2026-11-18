@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-18T05:30:00Z
+timestamp: 2026-11-18T09:15:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.02.001.md, behavioral-contracts/ss-01/BC-1.02.007.md, behavioral-contracts/ss-01/BC-1.02.013.md, behavioral-contracts/ss-01/BC-1.02.020.md, behavioral-contracts/ss-01/BC-1.02.030.md, behavioral-contracts/ss-01/BC-1.07.006.md, prd-supplements/test-vectors.md]
 input-hash: "8bffcb0"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T05:30:00Z: subagent lane-pill startswith leg added — BC-1.07.006 rides the shared prefix rule (adv-p2 sync SC-07)"]
+modified: ["1.1 2026-11-18T05:30:00Z: subagent lane-pill startswith leg added — BC-1.07.006 rides the shared prefix rule (adv-p2 sync SC-07)", "1.2 2026-11-18T09:15:00Z: ADV-P3 fix (A2-23) — invariant-verified claim recast per OD-158: mutation kill rate is a Phase 6 objective, non-gating in P1"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,7 +54,8 @@ token format; pick eq threshold 0.005; effective_rl sequence with sticky CP-S09.
   in BC-COMPONENT-MAP.md); plus BC-1.07.006 — the subagent model segment's lane pill
   applies the identical startswith prefix rule against `backends[0].model_prefixes`
   (v1.1, adv-p2 sync SC-07).
-- **Invariant verified:** OD-135 CRITICAL tier (S1 >= 95% mutation kill target);
+- **Invariant verified:** OD-135 CRITICAL tier (S1 coverage >= 95%; the mutation
+  kill-rate target is a Phase 6 objective and does not gate P1 — OD-158);
   NFR-003 byte parity on the whole row-1 surface.
 
 ## Property Class and Verification Method

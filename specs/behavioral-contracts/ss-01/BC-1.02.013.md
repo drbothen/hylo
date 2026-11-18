@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "af5956f"
+input-hash: "5a6f410"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:effective_rl (SL:298-312)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-005, EC-006, and the no-ts / empty-rl vectors) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,8 +81,8 @@ Notation: `T = 1800000000.0` is the injected clock.
 | EC-002 | stdin `rate_limits: [1]` | absent; not stored |
 | EC-003 | cache age 1799.999 s | cached value used |
 | EC-004 | cache age exactly 1800 s | None (strict `<`) |
-| EC-005 | cache has `rl` but no `rl_ts` | ts 0 → stale → None |
-| EC-006 | cached `rl` is `{}` | returned (object); renders nothing |
+| EC-005 | cache has `rl` but no `rl_ts` (foreign-cache shape, **OD-160**: Go stores only non-empty rl dicts with `rl_ts`, SL:305-308) | ts 0 → stale → None |
+| EC-006 | cached `rl` is `{}` (foreign-cache shape, **OD-160**: `effective_rl` stores only non-empty dicts) | returned (object); renders nothing |
 | EC-007 | cached `rl_ts` in the future | negative age → used |
 | EC-008 | cached `rl_ts` a string **while cached `rl` is an object** (the `isinstance(rl, dict) and` short-circuit at SL:312: with a non-object `rl` and a string `rl_ts` the result is None and there is no crash) | foreign-cache vector (CP-C02, BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n` (`\e` = 0x1B), exit 0; Go's foreign-cache behavior is a documented known difference (ruling Q-b, P3r2 ruling b) |
 | EC-009 | no `session_id` | shared `statusline-nosession.json` |
@@ -101,8 +102,8 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 | that cache, stdin absent, `T+1800` | None | edge-case |
 | no cache, stdin absent | None | edge-case |
 | no cache, stdin `[1]` | None; no write | edge-case |
-| cache `{"rl": {"a": 1}}` (no ts) | None | edge-case |
-| cache `{"rl": {}, "rl_ts": T}` | `{}` | edge-case |
+| cache `{"rl": {"a": 1}}` (no ts; foreign-cache shape, **OD-160**) | None | edge-case |
+| cache `{"rl": {}, "rl_ts": T}` (foreign-cache shape, **OD-160**) | `{}` | edge-case |
 | cache `{"proc_start": 1.5, "rl": {"old": 1}, "rl_ts": 1.0, "zz": 2}`, stdin `{"seven_day": {"used_percentage": 44}}`, `T` | cache bytes `{"proc_start": 1.5, "rl": {"seven_day": {"used_percentage": 44}}, "rl_ts": 1800000000.0, "zz": 2}` | edge-case |
 | cache `{"rl": {"a": 1}, "rl_ts": "x"}`, stdin absent | TypeError → full run prints the guard line, exit 0 (foreign-cache vector, CP-C02 — EC-008; ruling Q-b) | error |
 
@@ -120,7 +121,7 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 |-------|-------|
 | Source | Source: legacy/dgx_statusline.py:effective_rl (SL:298-312); RL_KEEP SL:85; call site main SL:1214-1216 |
 | Legacy contract | BC-SL-018 |
-| Parity class | byte-exact (no exclusion-list entry; temp-file handling belongs to BC-6.03.003) |
+| Parity class | byte-exact for Go-authored caches; hand-edited-cache vectors carry exclusion **OD-160** (foreign-cache shapes, ruling Q-b); temp-file handling belongs to BC-6.03.003 |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-007 (no ledger read: smoothing uses only stdin + own cache), DI-008 |
 | Owner decisions | OD-57 E-A (1800 s rationale), OD-101 (cache dir), OD-110 (temp-file entry) |

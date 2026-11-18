@@ -2,17 +2,17 @@
 artifact_type: bc-index
 document_type: bc-index
 level: L3
-version: "0.2.2"
+version: "0.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T02:00:00Z
+timestamp: 2026-11-18T02:11:24Z
 phase: 1a
 stage: "3 of 3 (integration)"
 origin: greenfield
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.1"
+modified: "0.2.4"
 extracted_from: "behavioral-contracts/ss-01..ss-06 frontmatter and H1 headings (generated; do not hand-edit rows)"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -22,12 +22,12 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "5d0123c"
+input-hash: "c9cfc9a"
 traces_to: ../prd.md
 
 ---
 
-# BC-INDEX: hylo P1 behavioral contracts (all 153, stage 3)
+# BC-INDEX: hylo P1 behavioral contracts (all 154, stage 3)
 
 > **Generated index.** One row per behavioral-contract file, built from each file's
 > frontmatter and H1 heading (bc_h1_is_title_source_of_truth: the title column is the
@@ -35,8 +35,8 @@ traces_to: ../prd.md
 > (including writer groups and primary sources) is `BC-ALLOCATION.md`; per-contract
 > detail is in the linked file. All rows are status draft at stage 3.
 >
-> **Totals.** 153 contracts: 101 in S1, 13 in S2, 3 in S3, 3 in S4, 19 in S5, 14 in S6.
-> 108 mapped from legacy BC-SL-001..103 (incl. the BC-SL-097 fan-out), 45 new; the two
+> **Totals.** 154 contracts: 101 in S1, 13 in S2, 3 in S3, 3 in S4, 20 in S5, 14 in S6.
+> 108 mapped from legacy BC-SL-001..103 (incl. the BC-SL-097 fan-out), 46 new; the two
 > accounting exceptions are in the table below.
 >
 > Revision note (2026-11-15, OD-132..OD-145): +7 contracts (BC-2.02.006 boolean class;
@@ -44,6 +44,9 @@ traces_to: ../prd.md
 >
 > Revision note (2026-11-17, OD-155): +8 contracts, new group S1.07 (subagent panel
 > rows; BC-SL-097 restored to scope from OD-14 OOS); titles are the file H1s verbatim.
+>
+> Revision note (2026-11-18, pass-3 remediation sync): +1 contract, BC-5.01.007
+> (ADV-P3-D08); titles are the file H1s verbatim.
 
 ### S1.01 — Input/output contract
 
@@ -113,7 +116,7 @@ traces_to: ../prd.md
 | BC-1.03.012 | Short + long line completes over two refreshes | S1.03 | BC-SL-066 | byte-exact | H | draft | [BC-1.03.012](ss-01/BC-1.03.012.md) |
 | BC-1.03.013 | Mix cache sid sanitized per code point | S1.03 | BC-SL-070 | byte-exact | H | draft | [BC-1.03.013](ss-01/BC-1.03.013.md) |
 | BC-1.03.014 | text/thinking block value types | S1.03 | BC-SL-072 | byte-exact | H | draft | [BC-1.03.014](ss-01/BC-1.03.014.md) |
-| BC-1.03.015 | transcript_path type semantics (int = fd) | S1.03 | BC-SL-088 | byte-exact | M | draft | [BC-1.03.015](ss-01/BC-1.03.015.md) |
+| BC-1.03.015 | transcript_path type semantics (truthy int → no transcript, no descriptor I/O) | S1.03 | BC-SL-088 | byte-exact | M | draft | [BC-1.03.015](ss-01/BC-1.03.015.md) |
 | BC-1.03.016 | Turn-machine exhaustive table (20 rows) | S1.03 | BC-SL-094 | byte-exact | H | draft | [BC-1.03.016](ss-01/BC-1.03.016.md) |
 | BC-1.03.017 | Turn identity ignores seen_ids | S1.03 | BC-SL-095 | byte-exact | H | draft | [BC-1.03.017](ss-01/BC-1.03.017.md) |
 | BC-1.03.018 | D4-EX-2 wrong-shape line W-predicates (skip, no partial mutation) | S1.03 | BC-SL-098 | D4-EX-2 | M | draft | [BC-1.03.018](ss-01/BC-1.03.018.md) |
@@ -158,7 +161,7 @@ traces_to: ../prd.md
 | BC-1.05.005 | cost_thresholds p75/p95 percentiles | S1.05 | BC-SL-029 | byte-exact | H | draft | [BC-1.05.005](ss-01/BC-1.05.005.md) |
 | BC-1.05.006 | Numeric sid keyed by string form — throttle and self-exclusion hold | S1.05 | BC-SL-079 | OD-30 | H | draft | [BC-1.05.006](ss-01/BC-1.05.006.md) |
 | BC-1.05.007 | $ and $/h number formatting | S1.05 | BC-SL-082 | byte-exact | H | draft | [BC-1.05.007](ss-01/BC-1.05.007.md) |
-| BC-1.05.008 | Cost colouring goldens (20 seeded sessions) | S1.05 | BC-SL-101 | byte-exact | H | draft | [BC-1.05.008](ss-01/BC-1.05.008.md) |
+| BC-1.05.008 | Cost colouring goldens (21 seeded sessions) | S1.05 | BC-SL-101 | byte-exact | H | draft | [BC-1.05.008](ss-01/BC-1.05.008.md) |
 | BC-1.05.009 | record_cost write contract (exact JSON format) | S1.05 | BC-SL-102 | OD-30 | H | draft | [BC-1.05.009](ss-01/BC-1.05.009.md) |
 
 ### S1.06 — Session caches
@@ -179,7 +182,7 @@ traces_to: ../prd.md
 | BC-1.07.005 | Status glyph, name-fallback chain, and settled-status suffix | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.005](ss-01/BC-1.07.005.md) |
 | BC-1.07.006 | Model segment carries the model-prefix lane tag | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.006](ss-01/BC-1.07.006.md) |
 | BC-1.07.007 | Token segment (_fmt_tokens) and running-only elapsed clock | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.007](ss-01/BC-1.07.007.md) |
-| BC-1.07.008 | CP-A01..A03 degrade to the 29-byte line, exit 0 | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.008](ss-01/BC-1.07.008.md) |
+| BC-1.07.008 | CP-A01..A05 degrade to the 29-byte line, exit 0 | S1.07 | BC-SL-097 | byte-exact | H | draft | [BC-1.07.008](ss-01/BC-1.07.008.md) |
 
 ### S2.01 — Schema + resolution
 
@@ -240,6 +243,7 @@ traces_to: ../prd.md
 | BC-5.01.004 | pyfmt.D: {:d} decimal formatting with width and zero-pad | S5.01 | new | n.a. | — | draft | [BC-5.01.004](ss-05/BC-5.01.004.md) |
 | BC-5.01.005 | pyfmt.Repr: CPython float repr (shortest round-trip, .0 suffix, inf/nan spellings) | S5.01 | new | n.a. | — | draft | [BC-5.01.005](ss-05/BC-5.01.005.md) |
 | BC-5.01.006 | pyfmt.MaxSeq: Python max() over a sequence with first-maximal-wins NaN order | S5.01 | new | n.a. | — | draft | [BC-5.01.006](ss-05/BC-5.01.006.md) |
+| BC-5.01.007 | Mixed int/float Num semantics: float(int) ErrOverflow bound, true division, exact comparison, Max/Min exact ties | S5.01 | new | n.a. | — | draft | [BC-5.01.007](ss-05/BC-5.01.007.md) |
 
 ### S5.02 — JSON byte semantics
 

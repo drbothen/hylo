@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
-input-hash: "9d55c35"
+input-hash: "b5ce211"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces json.dump cache-file bytes; ruling (b) P3r2 §0)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D10+D12: Dumps scoped to include the subagent stdout json.dumps (SL:924, BC-1.07.004); encoder failure on 4300-digit ints = typed ErrValue and legacy no-write"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,11 +35,12 @@ removal_reason: null
 
 ## Description
 
-`pyfmt.Dumps(v Value) []byte` (json.go, design IM-03) reproduces CPython `json.dump`
+`pyfmt.Dumps(v Value) ([]byte, error)` (json.go, design IM-03) reproduces CPython `json.dump`
 defaults byte for byte over an ordered `Value`: separators `", "` and `": "`, ensure_ascii
 escaping, `NaN`/`Infinity` tokens, float repr per BC-5.01.005, int-versus-float preserved,
-insertion order — for the four cache files (session, mix, git, cost-history). Go structs
-with `encoding/json` are banned for caches: they reorder keys and reformat floats (ruling
+insertion order — for the four cache files (session, mix, git, cost-history) AND the
+subagent stdout line (`json.dumps` at SL:924, BC-1.07.004's NDJSON wire; ADV-P3-D10).
+Go structs with `encoding/json` are banned for caches: they reorder keys and reformat floats (ruling
 (b), P3r2 §0). Helper-level contract per OD-141.
 
 ## Preconditions
@@ -60,6 +62,12 @@ with `encoding/json` are banned for caches: they reorder keys and reformat float
    marshal path exists for the four caches (D15: no second encoder).
 4. Equal to CPython for the generated cache-value table (realistic cache shapes loaded,
    mutated, emitted) under the pinned oracle (OD-104).
+5. **Encoder failure** (ADV-P3-D12): an int past the 4,300-digit encoder limit (accumulated
+   token sums can reach it; SL:202-203 raises `ValueError` there) returns typed `ErrValue`
+   and the calling cache writer performs the legacy no-write — error swallowed, the
+   partial temp file leaks exactly as legacy's does (covered by the temp-file exclusion
+   class) and the previous cache file is left untouched. `Dumps` never writes a partial
+   destination itself (it returns bytes; the writer owns the file).
 
 ## Invariants
 

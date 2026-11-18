@@ -1,13 +1,13 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.6"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-18T04:00:00Z
+timestamp: 2026-11-18T02:27:55Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "81b9fd0"
+input-hash: "cff06c0"
 traces_to: ../prd.md
 deployment_topology: single-service
 ---
@@ -40,13 +40,14 @@ deployment_topology: single-service
 | Story decomposition inputs | ARCH-03 + ARCH-02 + BC-COMPONENT-MAP.md |
 | Verification plan for a module | ARCH-00 purity table + owning section + prd-supplements/test-vectors.md |
 | Harness implementation | ARCH-07 + prd-supplements/nfr-catalog.md (timing) |
-| Risk register / mitigations | ../prd-supplements/risk-register.md (R-001..R-007, OD-152) |
+| Risk register / mitigations | ../prd-supplements/risk-register.md (R-001..R-008, OD-152) |
 | P1-exit vs later phases | ARCH-09 + docs/PLAN.md phases |
 
 ## Subsystem Registry (canonical; Policy 6)
 
-> BC frontmatter `subsystem:` and stories use the Name column verbatim. The PRD's
-> S1-S12 numbering is the alias key.
+> Rule (pass-3 A13, matching on-disk practice 154/154): BC frontmatter `subsystem:`
+> carries the **SS-ID** (e.g. `"SS-01"`); stories and prose refer to subsystems by the
+> **Name column** (e.g. "Status Line"). The PRD's S1-S12 numbering is the alias key.
 
 | SS ID | Name | Alias | Architecture Doc | Implementing Modules | Phase |
 |-------|------|-------|-----------------|---------------------|-------|
@@ -111,8 +112,10 @@ verification-feasibility assessments that Pass 2 formalized.
 
 ## Verification Properties (Pass 2 cross-reference)
 
-Catalog: `../verification-properties/VP-INDEX.md` — 40 VPs covering all 153 BCs
-(machine-checked, rebuilt 2026-11-18 after the pass-2 fixes). By class: invariant 32,
+Catalog: `../verification-properties/VP-INDEX.md` — 40 VPs covering all 154 BCs
+(machine-checked, rebuilt 2026-11-18T02:27:55Z after the pass-3 sync: BC-5.01.007 added
+to VP-023's `bcs:`, VP-012 v1.4 rider names aligned to the rider BCs; by-class and
+by-method totals unchanged from v1.5). By class: invariant 32,
 safety 7, performance 1. By primary method: unit/table 20, property/fuzz 12, golden 3,
 parity 2, static analysis 1, measured 1, CI observation 1 (regenerated 2026-11-18 per
 CA-02 and SC-05, matching the VP-INDEX Totals; VP-011's body class reads "safety, not

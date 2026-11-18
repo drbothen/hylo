@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "e6c7bec"
+input-hash: "778d7e4"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_sessions/percentiles ranges, OD-162)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_sessions/percentiles ranges; OD-162)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (foreign-history overflow EC-011) + ADV-P3-C2-02 (OD-160 on EC-010) + ADV-P3-C2-07 (percentile ordering rule)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,9 +57,13 @@ qualifying sessions exist (cold start).
    because with an empty qualifying list Python indexes `v[int(0.75 × −1)]` = `v[0]`
    of `[]` and raises IndexError, SL:257-261); `statusline.cost.rate_min_api_ms` =
    `{cc: 300000, other: 1800000}` (T-023); `statusline.cost.percentiles` = (0.75, 0.95)
-   (T-024; OD-162 range: each a finite Float in [0, 1] — q > 1 overflows the index
+   (T-024; OD-162 range, ordering leg completed by owner ruling 2026-11-18, ADV-P3-C2-07:
+   each a finite Float in [0, 1] — q > 1 overflows the index
    (`int(q × (n−1)) ≥ n` → IndexError) and q < 0 wraps into Python negative indexing,
-   so both are number-range config errors; p75 ≤ p95 ratified by the architect).
+   so both are number-range config errors — and the pair must be **ascending with
+   equality allowed**: first (yellow) <= second (red); a descending pair such as
+   (0.95, 0.75) is a number-range config error (D4-EX-3 class). Stated as the range
+   rule for the architect to carry into interface-definitions.md).
 
 ## Postconditions
 
@@ -97,13 +101,14 @@ qualifying sessions exist (cold start).
 | EC-007 | backfill entry with api 1,000,000 | dollar list only (other gate 1,800,000) |
 | EC-008 | entry usd `Infinity` | counted; sorts last |
 | EC-009 | entry usd `NaN` (only writable by the backfill tool, BC-BF-012, or by hand) | Ruled OD-138: pin legacy byte-for-byte; the expected bytes come from the CPython 3.11 oracle (frozen clock, temp HOME, synthetic history; oracle run 2026-11-15). For the 10-session cc history [`sess-00`=NaN, `sess-01..09` = 90.0…10.0] (file order) with `ts = now - 3600`, `api_ms = 400000`, `src = cc`, `now = 1794615009.0`: sorted order `[NaN, 10, …, 90]` and thresholds `((60.0, 80.0), (540.0, 720.0))`. For file order [`10.0 … 90.0`, NaN]: sorted `[10, …, 90, NaN]` and thresholds `((70.0, 90.0), (630.0, 810.0))`. The outcome is deterministic per exact file order (Python `sorted` stability); Go must reproduce it per order, table-tested over both pinned histories |
-| EC-010 | corrupt shapes (top level, `sessions` or entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10: out of parity scope (P3r2 ruling b) |
+| EC-010 | corrupt shapes (top level, `sessions` or entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10: out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule) |
+| EC-011 | foreign history holds an exact-int `usd` >= 2**1024 recorded by legacy `record_cost` (SL:234-237) or by hand | any later refresh on the lane whose qualifying entry passes the API-time gate raises OverflowError at `usd / (api / 3.6e6)` (SL:255; no try in `cost_thresholds`) → degraded line on **every** qualifying refresh for up to the 30 d window (ADV-P3-C2-01); foreign-history class (exclusion id **OD-160**): hylo's writer never writes it (OD-166, BC-1.05.004), so this is a Go table test, not a parity obligation |
 
 ## Canonical Test Vectors
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| BC-1.05.008 20-session seed, lane anth, sid `sess-self`, now 1794615009.0 | `((24.0, 30.0), (20.0, 26.0))` (16 dollar values, 14 rates) | happy-path |
+| BC-1.05.008 21-key seed, lane anth, sid `sess-self`, now 1794615009.0 | `((24.0, 30.0), (20.0, 26.0))` (16 dollar values, 14 rates) | happy-path |
 | same seed, lane dgx | `(None, None)` | edge-case |
 | 10 `cc` sessions, rates [5, 8, 11, 14, 17, 19, 20, 23, 26, 40] at 1 h | `((20.0, 26.0), (20.0, 26.0))` | edge-case |
 | 12 dollar entries usd 10…21, no rate-eligible entries | `((18.0, 20.0), None)` | edge-case |
@@ -114,7 +119,7 @@ qualifying sessions exist (cold start).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-021 | p75 ≤ p95 whenever a pair is returned (finite inputs) | Go property test (testing/quick) |
+| VP-021 | p75 ≤ p95 whenever a pair is returned (finite inputs) — guaranteed by the ascending-config rule (ADV-P3-C2-07) | Go property test (testing/quick) |
 | VP-021 | Go index equals `int(q*(n-1))` computed by CPython for n in 1..10,000 | manual (generated table) |
 
 ## Traceability

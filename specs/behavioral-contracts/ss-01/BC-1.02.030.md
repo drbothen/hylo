@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, owner-decisions-log-2026-11-14.md]
-input-hash: "db7abf8"
+input-hash: "8e89a06"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-008, the no-rl_ts vector) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,7 +80,7 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
 | EC-005 | `{five_hour: 0, seven_day: {…}}` | saved verbatim; `0` counts as an absent window |
 | EC-006 | `{seven_day: {}}` | saved; widget hidden (no percentage) |
 | EC-007 | reroute-all (`backends[0].model_prefixes` contains bare `claude`) | still written to the cache; widget hidden |
-| EC-008 | foreign cache with `rl` but no `rl_ts` | hidden (`ts` defaults to 0) |
+| EC-008 | foreign cache with `rl` but no `rl_ts` (foreign-cache shape, **OD-160**: Go stores only non-empty rl dicts with `rl_ts`, SL:305-308) | hidden (`ts` defaults to 0) |
 | EC-009 | cache `rl_ts` in the future | shown |
 
 ## Canonical Test Vectors
@@ -104,7 +105,7 @@ content (no trailing newline).
 | recover: 0 `{"five_hour": [1]}`, then 5 good | degraded, then `7d44% ->4h17m` with `"rl_ts": 1794600005.0` | edge-case |
 | 0, `{"five_hour": true}` | degraded; cache `{"rl": {"five_hour": true}, "rl_ts": 1794600000.0}` | error |
 | 0, good with reroute-all | hidden; cache written as in row 1 | edge-case |
-| cache `{"rl": good}` (no `rl_ts`), absent | hidden | edge-case |
+| cache `{"rl": good}` (no `rl_ts`; foreign-cache shape, **OD-160**), absent | hidden | edge-case |
 | cache `{"rl": good, "rl_ts": 1794600500.0}`, t = 0, absent | `7d44% ->4h18m` | edge-case |
 
 Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 2026-11-15 by running the legacy
@@ -128,7 +129,7 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 | Source | legacy/dgx_statusline.py:effective_rl (SL:298-312); call site legacy/dgx_statusline.py:main (SL:1216); crash site legacy/dgx_statusline.py:render_lane (SL:502-503) |
 | Legacy contract | BC-SL-093 (deep pass-3 round 2 §A3) |
 | Config keys | `statusline.limits.keep_s` (T-010), `paths.cache_dir` (OD-101), `backends[0].model_prefixes` (OD-123) |
-| Parity | byte-exact for stdout and cache content. Go temp-file cleanup on a failed replace (legacy leaks the temp file) is the OD-110 temp-file exclusion entry (owned by BC-1.06.002 with its own table tests), applied to the cache-directory comparison only; it does not affect any vector here |
+| Parity | byte-exact for stdout and cache content authored by Go; hand-edited-cache vectors carry exclusion **OD-160** (foreign-cache shapes, ruling Q-b). Go temp-file cleanup on a failed replace (legacy leaks the temp file) is the OD-110 temp-file exclusion entry (owned by BC-1.06.002 with its own table tests), applied to the cache-directory comparison only; it does not affect any vector here |
 
 ## Related BCs (Recommended)
 

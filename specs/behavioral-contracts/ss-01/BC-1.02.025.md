@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r5.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "b17aa1c"
+input-hash: "5a51d58"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,12 +60,12 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
    a JSON integer beyond float64 range (e.g. 10³⁰⁹), which is uncaught here and runs into the catalogued
    crash path → guard line (OD-156). Every other failure mode returns `?` or a string.
 2. NaN fails both comparisons and prints `nan`; `+inf` passes `>= 1e6` and prints `infM`; `-inf` prints `-inf`.
-3. Valid ranges (Policy 20, OD-162): legacy bakes both thresholds (1000 `>=` → k;
-   1e6 `>=` → M; T-042) and defines no config override, so the valid range of
-   `statusline.units.tokens` is its registered default only; any other value is a
-   number-range config error (BC-2.02.003, OD-162). Assumed range for architect
-   registration: units.tokens = {`k`/`M`} (registered default). Byte parity (vectors) is
-   obligated at the defaults.
+3. Valid ranges (Policy 20, OD-162): `statusline.units.tokens` is a unit-selector key whose
+   non-default behavior cannot be defined from legacy — the thresholds (1000 `>=` → k;
+   1e6 `>=` → M; T-042) are baked into the single derivable semantics — so per OD-162's test
+   its valid range is its registered default only; any other value is a number-range config
+   error (BC-2.02.003, OD-162). Range for architect registration: units.tokens = {`k`/`M`}
+   (registered default). Byte parity (vectors) is obligated at the defaults.
 
 ## Edge Cases
 

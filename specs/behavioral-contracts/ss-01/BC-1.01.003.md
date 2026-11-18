@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "b07796d"
+input-hash: "7ba340a"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P1 (catalog lists this BC)"]
+modified: ["1.3.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P1 (catalog lists this BC)", "1.3.2 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B03/B15/B10): VP anchor names VP-040 P1; PC5 source lines corrected (project label is SL:460-462); ARCH-03 anchor normalized to #statusline-width"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,9 +52,10 @@ separator `SEP`.
 3. Each row is `SEP.join(segments)` with `SEP` = `\e[2m · \e[0m` (default `statusline.theme` separator, OD-113).
 4. Rows are trimmed (BC-1.01.006) only after the row-2 decision and only when `cols > 0`.
 5. No `\r` is emitted by the renderer itself (LF only on every OS). Carve-out: input-derived text is emitted
-   verbatim, so it can carry CR or LF bytes to stdout — a stdin `display_name`/`id`/project label containing
-   `"a\rb"` or `"a\nb"` adds those bytes to the row (SL:442, 453, 1234), and a git branch whose HEAD file held a CR
-   is read in text mode with universal newlines and comes back with an LF inside (SL:385-386).
+   verbatim, so it can carry CR or LF bytes to stdout — a stdin `display_name`/`id` (SL:442-443) or project label
+   (SL:460-462) containing `"a\rb"` or `"a\nb"` adds those bytes to the row at the single print (SL:1234), and a
+   git branch whose HEAD file held a CR is read in text mode with universal newlines and comes back with an LF
+   inside (SL:385-386).
 
 ## Invariants
 
@@ -127,7 +128,7 @@ COLUMNS=72 -> widths [61, 56], 642 bytes (P3r2 §A1; BC-1.01.010).
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#statusline-output` — internal/statusline/statusline.go (rows, LF join, width rule) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#statusline-width` — internal/statusline/statusline.go (rows, LF join, width rule) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 
@@ -135,7 +136,8 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-027 — row-count predicate
+- VP-040 P1 — for-all row-count/LF-termination over (rows, cols) and inputs (VP-027 retains the fixed breakpoint
+  matrix; ADV-P3-B03)
 
 ---
 

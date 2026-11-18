@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.1"
+version: "1.0.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "507dbd5"
+input-hash: "4fda64d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ dispatch (SL:1240-1241)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,9 +56,12 @@ not flag parsing, and it precedes every other mode decision.
    main render (`main()`) never executes, and no session cache is read or written (DI-007 — no ledger,
    transcript or metrics access in this mode).
 2. If `--subagent` is absent: the main render runs (BC-1.01.001 path); `--subagent` has no effect on it.
-3. Substrings and suffixed forms (`--subagent=1`, `-subagent`, `hylo --subagent`) match only the exact
-   element form; `--subagent=x` is NOT a match.
-4. Position is irrelevant: `--subagent` matches at any index of `argv[1:]`.
+3. Match rule: only the exact element `--subagent` matches; substring, prefixed, or suffixed
+   spellings (`--subagent=1`, `-subagent`, `subagent`) are NOT matches, and no element of
+   `argv[1:]` is parsed beyond this membership test.
+4. Position is irrelevant: `--subagent` matches at any index of `argv[1:]`, including after a
+   `--` separator and alongside any other flags — membership in `argv[1:]` is the whole rule
+   (adv-p3 owner ruling on ADV-P3-A01/D05: routing is legacy parity, SL:1240).
 
 ## Invariants
 
@@ -73,8 +76,9 @@ not flag parsing, and it precedes every other mode decision.
 |----|-------------|-------------------|
 | EC-001 | `--subagent` given twice | Single routing decision; behavior identical to one occurrence |
 | EC-002 | `--subagent` together with other unknown flags | Still routes to the subagent renderer; unknown flags are not validated in this mode |
-| EC-003 | Empty argv (no args at all) | Main render (BC-1.01.001) |
+| EC-003 | `--subagent` after a `--` separator (`hylo statusline -- --subagent`) | Routes to the subagent renderer: membership in `argv[1:]` holds at any index (ADV-P3-A01/D05 ruling); BC-4.01.002's "positional data" reading is superseded for this occurrence |
 | EC-004 | Launcher wiring | `claude-dgx` launches `hylo statusline --subagent` (legacy L:176 wired `--subagent`); the captured CC stdin payload must be verified per ASSUMP-107-1 before Phase 3 |
+| EC-005 | Empty argv (no args at all) | Main render (BC-1.01.001) |
 
 ## Canonical Test Vectors
 
@@ -83,6 +87,7 @@ not flag parsing, and it precedes every other mode decision.
 | `argv = ["statusline", "--subagent"]`, stdin `{"tasks":[]}` | exit 0, zero bytes on stdout (renderer ran; main did not) | happy-path |
 | `argv = ["statusline"]`, stdin main-contract JSON | main render bytes (BC-1.01.001 row 1), no subagent renderer | happy-path |
 | `argv = ["statusline", "--subagent=1"]` | NOT routed in legacy (membership test fails); main render runs; under Go this argv reaches BC-4.01.002's unknown-flag line, exit 0 (OD-112) | edge-case |
+| `argv = ["statusline", "--", "--subagent"]`, stdin `{"tasks":[]}` | routed to the subagent renderer (membership at index 2): zero bytes on stdout, exit 0 (ADV-P3-A01/D05 ruling) | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`): membership semantics read directly from
 SL:1240-1241 (`"--subagent" in sys.argv[1:]`); routing order from SL:1239-1244.
@@ -99,22 +104,22 @@ SL:1240-1241 (`"--subagent" in sys.argv[1:]`); routing order from SL:1239-1244.
 |-------|-------|
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-007 (no ledger access in this mode), DI-008 (exit 0 under the guard) |
-| Architecture Module | `internal/statusline` (new subagent entry file; architect to place — design §2.2 `statusline.go` currently ignores arguments) |
+| Architecture Module | `internal/statusline/subagent.go` (placed by ARCH-03:133-135; hosts BC-1.07.001..008, dispatched per ARCH-01) |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py: `__main__` dispatch (SL:1240-1241); launcher `claude-dgx:176` |
 | Legacy contract | BC-SL-097 (P3r2 §A7; P3r4 §7.3; restored to scope OD-155) |
-| Decisions | OD-155 (supersedes OD-14 a), OD-112 (handoff), D4 (byte parity), tension T8 (design §8) |
+| Decisions | OD-155 (supersedes OD-14 a), adv-p3 routing ruling on ADV-P3-A01/D05 (membership is the whole rule), OD-112 (handoff), D4 (byte parity), tension T8 (design §8) |
 
 ## Related BCs (Recommended)
 
 - BC-1.07.003 — composes with (stdin ingestion inside the renderer)
 - BC-1.07.004 — composes with (output framing)
 - BC-1.07.008 — related to (faults inside the renderer end in the 29-byte line)
-- BC-4.01.002 — related to (must drop `--subagent` from its unknown-flag set per OD-155)
+- BC-4.01.002 — related to (per the ADV-P3-A01/D05 ruling it must defer to membership routing: an occurrence after `--` or beside other flags routes here, superseding its EC-004 "positional data" reading)
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md` — second entry point; new module/file placement TBD by architect
+- `architecture/ARCH-03-statusline.md` — `subagent.go` hosts the OD-155 agent-panel contracts (ARCH-03:133-135); second entry point dispatched per ARCH-01
 
 ## Story Anchor (Recommended)
 

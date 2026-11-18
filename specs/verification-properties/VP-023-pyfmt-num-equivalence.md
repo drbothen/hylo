@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T02:24:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.01.001.md, behavioral-contracts/ss-05/BC-5.01.002.md, behavioral-contracts/ss-05/BC-5.01.003.md, behavioral-contracts/ss-05/BC-5.01.004.md, behavioral-contracts/ss-05/BC-5.01.005.md, behavioral-contracts/ss-05/BC-5.01.006.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d0824da"
+input-hash: "277425f"
 traces_to: prd.md
 source_bc: BC-5.01.001
-bcs: [BC-5.01.001, BC-5.01.002, BC-5.01.003, BC-5.01.004, BC-5.01.005, BC-5.01.006]
+bcs: [BC-5.01.001, BC-5.01.002, BC-5.01.003, BC-5.01.004, BC-5.01.005, BC-5.01.006, BC-5.01.007]
 module: internal/pyfmt (num.go)
 proof_method: property-test (testing/quick)
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — divmod identity corrected to a == b*FloorDiv(a,b) + Mod(a,b), float-approximate (A2-10)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — divmod identity corrected to a == b*FloorDiv(a,b) + Mod(a,b), float-approximate (A2-10)", "1.3 2026-11-18T02:24:00Z: ADV-P3 sync — BC-5.01.007 added (mixed int/float Num semantics: NumToF/TrueDiv/NumCmp cite this VP)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +50,9 @@ duration-format sites (OD-137).
   format incl. -0; nan/inf/-inf spellings.
 - **Partial coverage:** BC-5.01.002 (ParseInt/ParseFloat grammar), BC-5.01.003
   (divmod/typed NaN/Overflow, Max/Min NaN order), BC-5.01.004 (D), BC-5.01.005 (Repr),
-  BC-5.01.006 (MaxSeq).
+  BC-5.01.006 (MaxSeq), BC-5.01.007 (mixed int/float Num semantics — NumToF
+  ErrOverflow bound, TrueDiv exact-once rounding, NumCmp exact comparison, Max/Min
+  exact ties; its Verification Properties table cites this VP).
 - **Invariant verified:** NFR-003 substrate (banned Go stdlib codecs on protocol
   inputs); AD-04 (CPython-generated tables, banned stdlib on protocol inputs);
   FMA-sensitivity disposed by `// pyfmt: no-fuse` sites run on arm64 (IM-10/PR-15).

@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:00:00Z
+timestamp: 2026-11-18T09:23:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, behavioral-contracts/ss-01/BC-1.06.001.md, behavioral-contracts/ss-01/BC-1.06.002.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
 input-hash: "6386364"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: dropped BC-1.03.002 from bcs — VP-018 verifies none of its properties (reset predicate, zero-save, 16-key order)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — OD-163: a save removes only its own temp file, no directory-wide sweep (concurrency ruling for ADV-P2-A03/A2-15); load-failure wording aligned with VP-020 (the next save overwrites the file — A2-03); swallow/retry and cleanup-timing wording reconciled with the skeleton (A2-28)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: dropped BC-1.03.002 from bcs — VP-018 verifies none of its properties (reset predicate, zero-save, 16-key order)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — OD-163: a save removes only its own temp file, no directory-wide sweep (concurrency ruling for ADV-P2-A03/A2-15); load-failure wording aligned with VP-020 (the next save overwrites the file — A2-03); swallow/retry and cleanup-timing wording reconciled with the skeleton (A2-28)", "1.4 2026-11-18T09:23:00Z: ADV-P3 fix (A2-25) — retry scope pinned: the rename-retry arm is Windows-only (sharing violations are the named Windows fs difference); on POSIX a failed rename reports failure immediately, matching legacy"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +50,9 @@ exactly `renameRetryLimit = 2` times, then reports failure to the caller by erro
 return — it is the caller (the render effect) that swallows it, per the DI-008 safe
 ladder (named constant, not config:
 internal durability knob of a named fs difference, no parity-visible behavior — legacy
-has no retry at all, IM-17/OD-110); and a load never raises — an unreadable or
+has no retry at all, IM-17/OD-110; the retry arm is Windows-only — sharing
+violations are the named Windows fs difference, and on POSIX a failed rename
+reports failure immediately, matching legacy); and a load never raises — an unreadable or
 malformed cache file loads as an empty object, the load itself leaves the file on disk
 untouched, and the next successful save overwrites it with regenerated content
 (legacy behaviour; the cost-history statement is VP-020's).

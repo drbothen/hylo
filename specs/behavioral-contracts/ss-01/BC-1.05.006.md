@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -119,6 +119,7 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 |--------|----------|-------------|
 | VP-020 | For any non-string hashable sid with no transcript present, Go output equals legacy output for `str_form(sid)` as a string sid (with a transcript legacy degrades on the numeric sid, CP-S14) | manual (paired oracle runs) |
 | VP-020 | No Go-written cost history contains a duplicate key | Go property test (testing/quick) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-30` (numeric sid keyed by string form; one key per sid) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-30` entry and its riding table test `TestCacheSwap_OD30_DuplicateKeyTail`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability
 
@@ -154,6 +155,7 @@ S-N.MM — cost history (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-020 — string-form equivalence
+- VP-012 — exclusion-closure cover for the named deviation `OD-30`
 
 
 #### Source Evidence

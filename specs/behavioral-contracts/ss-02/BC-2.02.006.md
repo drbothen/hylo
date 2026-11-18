@@ -1,15 +1,15 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "5e6f522"
+input-hash: "4638cd2"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; grammar from OD-05 as pinned in BC-2.01.005)"
@@ -20,7 +20,8 @@ parity_class: "D4-EX-3"
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D07: P1 Bool set completed with queue.yellow (P1 ruling, amending joins-in-P4) and subagent.enabled"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,8 +47,10 @@ additional classes.
 ## Preconditions
 
 1. Resolution per BC-2.01.001; the value is the raw env string of a `Bool` key (P1 bool
-   keys enumerated in BC-2.01.005 postcondition 1: `statusline.sparkline.enabled` and
-   `statusline.git.enabled` — the complete P1 set; `statusline.queue.yellow` joins in P4).
+   keys enumerated in BC-2.01.005 postcondition 1: `statusline.sparkline.enabled`,
+   `statusline.git.enabled`, `statusline.queue.yellow` (P1 per the 2026-11-18 owner
+   ruling; ADV-P3-D07, amending the earlier "joins in P4") and
+   `statusline.subagent.enabled` (OD-155) — the complete P1 set).
 2. Rendering context per BC-2.02.001 (D4-EX-3 line, exit 0, stderr detail, no cache writes).
 
 ## Postconditions

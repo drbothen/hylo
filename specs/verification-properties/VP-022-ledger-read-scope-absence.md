@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:12:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-04-data-files.md, architecture/ARCH-09-reserved-boundaries.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
 input-hash: "2938a6f"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — source_bc re-anchored off BC-1.06.001 (C05); allowed path set gains the git widget's .git/HEAD ancestor-walk reads (A2-06)", "1.3 2026-11-18T09:12:00Z: ADV-P3 fixes — non-vacuity claim narrowed honestly: the wrapper observes only Env.Files-routed opens, direct os.Open coverage delegated to the AST/imports lint leg (A2-12); Linux /proc probe reads added to the allowed set (A2-12); reflection leg recast as naming-only; catalog propagation note for the BC-1.06.001 / BC-1.01.004 index rows (A2-13); property label pinned for VP-table rows (C2-12)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -39,16 +39,25 @@ has no ledger member, no statusline/cost package code opens `paths.ledger`, and 
 live per-request inputs are only stdin, the transcript, the metrics store, and its own
 caches — plus the git widget's reads of `.git` (directory, or worktree/submodule
 pointer file) and of the resolved gitdir's `HEAD`, walked up the ancestor chain of the
-project dir (legacy SL:369-389); these are part of the allowed set. Enforcement is by
-construction (the `Env` seam set) and is verified **non-vacuously**: a
-recording-filesystem test asserts that every file path opened during a full render over
+project dir (legacy SL:369-389) — and, on Linux, the native process probe's read-only
+`/proc/<pid>/...` opens (⌂ gate, VP-033); these are part of the allowed set.
+Enforcement is by construction (the `Env` seam set) and is verified **non-vacuously**
+within an honestly stated seam scope: a
+recording-filesystem test asserts that every file path opened **through the
+`Env.Files` seam** during a full render over
 the fault table belongs to the allowed statusline path set (transcript, session caches,
 mix/git/metrics caches, cost history, git-widget `.git`/`HEAD` reads up the ancestor
-walk) and that no opened path matches the D7 ledger language — an assertion that fails
-if any code path opens anything else. The REVISIT
+walk, Linux `/proc` probe reads) and that no opened path matches the D7 ledger
+language. The wrapper does not see a direct `os.Open` inside the package — that
+residual is covered by the compile-time AST/imports lint (leg (c) below), so the
+combination, not the wrapper alone, is the enforcement claim. The REVISIT
 flag (OD-125) applies: at P7's ledger redesign, allowing ledger-backed widgets would
 amend DI-007 and add a BC7←BC4 dependency; this VP is annotated for that revisit and
 would be modified, not silently widened.
+
+Property label (C2-12, for VP-table rows): "the status line never reads the ledger
+(DI-007) — recording-Env absence + AST lint"; BC-1.04.001 VP-table rows must carry
+this label, not a fetch-parity property.
 
 ## Source Contract
 
@@ -69,12 +78,15 @@ would be modified, not silently widened.
 
 - **Class:** invariant (an absence property — the strongest form is structural).
 - **Method:** static analysis + code review: (a) runtime — a recording-filesystem
-  `Env.Files` wrapper records every path opened during a full render over the fault
-  table and asserts membership in the allowed statusline path set and zero matches for
-  the ledger file name (fails on any extra open — non-vacuous); (b) compile-time —
-  the `Env` struct admits no ledger member (reflection check); (c) a CI import/grep
+  `Env.Files` wrapper records every path opened **through the seam** during a full
+  render over the fault table and asserts membership in the allowed statusline path
+  set and zero matches for the ledger file name (fails on any extra seam-routed open;
+  direct `os.Open` visibility is leg (c)'s job — A2-12); (b) compile-time —
+  the `Env` struct admits no ledger member (naming-only reflection check over field
+  names, not a type theorem); (c) a compile-time AST/imports
   lint asserting `internal/statusline` and `internal/cost` reference no ledger package
-  or file language — to be carried as a hygiene leg in the ARCH-08 / cicd-setup lint
+  or file language AND perform no direct `os.Open`/`os.Create` outside the Env seam
+  implementation — to be carried as a hygiene leg in the ARCH-08 / cicd-setup lint
   job (currently gofmt + vet only; see Propagation note); (d) architecture
   conformance at adversarial review.
 - **Honesty:** absence verified by construction + audit, not runtime proof; the P1

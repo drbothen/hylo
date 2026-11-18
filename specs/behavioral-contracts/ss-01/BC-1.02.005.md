@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5245403"
+input-hash: "886cb5f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_segment (SL:399-413)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-005 null, EC-006, EC-008) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -83,10 +84,10 @@ Notation: `\e` is the byte 0x1B; `T` = the injected clock (`HYLO_TEST_NOW` /
 | EC-002 | cache age 5.001 s and HEAD changed | recompute; new branch shown; cache rewritten with the new `ts` |
 | EC-003 | cache `{"ts": T}` (no `branch` key) | recompute |
 | EC-004 | cache file not JSON | treated as `{}` → recompute |
-| EC-005 | cached `branch` `""` or `null` | no segment until the TTL expires |
-| EC-006 | cached `branch` `5` (non-string) | segment `\e[90m⎇ 5\e[0m` |
+| EC-005 | cached `branch` `""` (Go-authorable) or `null` (foreign-cache shape, **OD-160**: Go table test, not byte-parity) | no segment until the TTL expires |
+| EC-006 | cached `branch` `5` (non-string; foreign-cache shape, **OD-160**) | segment `\e[90m⎇ 5\e[0m` |
 | EC-007 | cached `ts` in the future (clock moved back) | negative age → fresh; cached branch kept until `now > ts + ttl_s` |
-| EC-008 | cached `ts` `true` | counts as 1 → stale → recompute |
+| EC-008 | cached `ts` `true` (foreign-cache shape, **OD-160**) | counts as 1 → stale → recompute |
 | EC-009 | cached `ts` a string (`"x"`) | foreign-cache vector (CP-C08, BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0; Go's foreign-cache behavior is a documented known difference (ruling Q-b, P3r2 ruling b) — not byte-compared |
 | EC-010 | cache file holds a JSON array (`[1,2]`) | foreign-cache vector (CP-C08): unreachable on Go-authored caches; legacy AttributeError → guard line, exit 0; Go's foreign-cache behavior is a documented known difference (ruling Q-b, P3r2 ruling b) — not byte-compared |
 | EC-011 | `HYLO_STATUSLINE_GIT_ENABLED=no` | disabled under hylo's typed bool (OD-05); legacy `DGX_SL_GIT` disabled only on `"0"`. Config-layer difference only; harness cases translate settings (BC-6.02.003); invalid values are D4-EX-3 Boolean class (BC-2.02.001) |
@@ -122,7 +123,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 |-------|-------|
 | Source | Source: legacy/dgx_statusline.py:git_segment (SL:399-413; allocation cites SL:405-411); GIT_TTL SL:99; GIT_ON SL:77; call site SL:454-457 |
 | Legacy contract | BC-SL-010 |
-| Parity class | byte-exact (no exclusion-list entry; temp-file handling belongs to BC-6.03.003) |
+| Parity class | byte-exact for Go-authored caches; hand-edited-cache vectors carry exclusion **OD-160** (foreign-cache shapes, ruling Q-b); temp-file handling belongs to BC-6.03.003 |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-101 (cache dir), OD-05 (typed bool, no `DGX_*`), OD-110 (temp-file exclusion is cache-only) |

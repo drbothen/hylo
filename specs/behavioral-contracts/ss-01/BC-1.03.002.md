@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T18:40:00Z
+timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c2f799c"
+input-hash: "44590c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1016-1040)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: EC-008/009 float+negative cached-size classification (OD-160); dropped uncited DI-012 (ADV-P2-C09/C11)"]
+modified: ["1.2.1 2026-11-17: EC-008/009 float+negative cached-size classification (OD-160); dropped uncited DI-012 (ADV-P2-C09/C11)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C13/C18): float cached size classified per path (equality path never seeks), DI-012 cited for the OD-160 legs"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,7 +84,7 @@ no-new-bytes test.
 | EC-005 | Cache file is not JSON / unreadable | loads as `{}` → off 0 → behaves as first run |
 | EC-006 | `size == off == 0` (empty transcript, no cache) | zeros returned, no cache file created |
 | EC-007 | Cached `size` is a non-number (foreign cache) | foreign-cache crash class CP-C (ruling b): out of byte-parity scope; not specified here |
-| EC-008 | Cached `size` is a float (foreign cache) | `fh.seek(float)` raises `TypeError` (oracle-verified), uncaught by the OSError-only handler (SL:1053) → legacy degraded refresh, no save; foreign-cache class (ruling b, exclusion id `OD-160`); hylo degrades likewise, out of byte-parity scope |
+| EC-008 | Cached `size` is a float (foreign cache) | path-dependent (SL:1027-1043): a float equal to the file size (cached `39.0`, file 39 B) hits `size == off` and returns the cached values with **no seek and no crash** (39 == 39.0, oracle-verified); a file that **grew** (`size > off`) reaches `fh.seek(off)` and the float raises `TypeError` (oracle-verified), uncaught by the OSError-only handler (SL:1053) → legacy degraded refresh, no save; a file that **shrank** (`size < off`) or a missing key with `off > 0` takes the reset path (postcondition 3) and re-parses from 0 with no crash. foreign-cache class (ruling b, exclusion id `OD-160`); hylo replicates the classification and degrades only on the grow path, out of byte-parity scope |
 | EC-009 | Cached `size` is negative (foreign cache) | `size < off` false, `seek(negative)` raises `OSError` (oracle-verified), caught at SL:1053 → return without write; nothing is saved, so the parse makes no progress on every later refresh; foreign-cache class (ruling b, exclusion id `OD-160`) |
 
 ## Canonical Test Vectors
@@ -114,7 +114,7 @@ legacy oracle (CPython 3.11).
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009 |
-| L2 Domain Invariants | DI-007, DI-008 |
+| L2 Domain Invariants | DI-007, DI-008; DI-012 (the OD-160 foreign-cache legs are named, tested deviations) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1016-1040), write at SL:1150-1153 |
 | Legacy contract | BC-SL-031 (pass-3 base; confirmed pass-3 r1: reset precedes the size test, reset clears id memory) |
 | Parity class | byte-exact (mix cache compared by name, ruling b) |

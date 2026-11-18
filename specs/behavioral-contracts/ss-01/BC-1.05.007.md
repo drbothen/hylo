@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "a429b91"
+input-hash: "94a0403"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-636)"
@@ -23,7 +23,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O10/CP-O11 overflow crash paths; ruling OD-156; OD-166 record guard cross-ref)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,6 +61,22 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
    `>= 300000` gate, but NaN `r` is reachable: `usd` = +Inf with `api_ms` = +Inf
    passes the gate and Inf/Inf = NaN → grey ` $nan/h` (SL:622-625).
 5. No thousands separators, no exponent form: `1e16` → `10000000000000000.00`.
+6. Catalogued stdin-borne overflow crash paths (ruling **OD-156**, taxonomy **CP-O10/**
+   **CP-O11**; Oracle threshold verified on CPython 3.11.7, 2026-11-18: an exact int
+   converts/formats iff |n| < 2**1024 - 2**970, and raises OverflowError at
+   |n| >= 2**1024 - 2**970 — the int rounded to the halfway point between DBL_MAX and
+   2**1024 overflows):
+   - **CP-O10** — an exact stdin int `usd` with |usd| >= 2**1024 - 2**970 (309 digits,
+      within the JSON 4,300-digit limit) raises OverflowError at the `f"{usd:.2f}"`
+      format (SL:616) → the render degrades (BC-1.01.001), exit 0. Per OD-166 such a
+      `usd` is not recorded into the cost history (BC-1.05.004), so no later refresh
+      is poisoned.
+   - **CP-O11** — an exact stdin int `api_ms` that passes the `>= 300000` gate with
+      |api_ms| >= 2**1024 - 2**970 raises OverflowError at `usd / (api_ms / 3.6e6)`
+      (SL:623) → degraded line. The gate comparison itself is exact (no error).
+   The SL:255 threshold crash over a giant recorded entry then only arises from
+   **foreign history** (hand-edited or legacy-written; exclusion id **OD-160**,
+   BC-1.05.005 EC-011), never from hylo's own writer.
 
 ## Invariants
 
@@ -83,6 +99,8 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 | EC-008 | usd 1e16, api 600000 | `$10000000000000000.00`, ` $60000000000000000.0/h` |
 | EC-009 | api +inf | `r = 0.0` → ` $0.0/h` |
 | EC-010 | usd +inf, api +inf | ` $nan/h`, grey (NaN rate: Inf/Inf at SL:622-625) |
+| EC-011 | usd = 2**1024 (309-digit exact stdin int) | OverflowError at `f"{usd:.2f}"` (SL:616) → degraded line (CP-O10, OD-156); boundary: magnitude 2**1024 - 2**970 raises; magnitude 2**1024 - 2**970 - 1 formats (rounds to DBL_MAX) as CPython `format(2**1024 - 2**970 - 1, ".2f")` (ADV-P3-C2-01) |
+| EC-012 | usd 1.0, api_ms = 2**1024 (309-digit exact int, passes gate) | OverflowError at `usd / (api_ms / 3.6e6)` (SL:623) → degraded line (CP-O11, OD-156); not recorded (OD-166) |
 
 ## Canonical Test Vectors
 
@@ -93,6 +111,8 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 | usd 13.99, api 600,000 | `$13.99`, ` $83.9/h` (r = 83.94000000000001) | edge-case |
 | usd 1e16, api 600,000, cold start, lane anth | `\e[33m$10000000000000000.00\e[0m\e[90m $60000000000000000.0/h\e[0m` | edge-case |
 | usd NaN | no segment | error |
+| usd = 2**1024 - 2**970 (boundary, exact int) | degraded line (CP-O10); one unit smaller formats as `format(2**1024 - 2**970 - 1, ".2f")` = the DBL_MAX expansion | edge-case |
+| usd 1.0, api_ms = 2**1024 - 2**970 (exact int) | degraded line (CP-O11 at SL:623) | error |
 
 ## Verification Properties
 

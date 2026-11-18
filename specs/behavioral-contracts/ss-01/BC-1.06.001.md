@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs:
   - prd.md
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "903180b"
+input-hash: "bf3ec3e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:load_cache/save_cache (SL:190-206)"
@@ -28,7 +28,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -107,6 +107,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 | EC-008 | Windows, sid with a character invalid in file names (`:` `*` `?` `"` `<` `>` `\|`) | save fails silently, nothing persists (same class as BC-1.06.002); expected from Win32 file-name rules, **not executed** (pin on the windows-2025 CI leg); kept as-is per OD-03 ("revisit only if Windows complains; real ids are UUIDs") |
 | EC-009 | Windows sharing violation on rename | 2-3 short retries, then swallow (design IM-17) |
 | EC-010 | Mid-write dump failure (accumulator int above the 4,300-digit conversion limit, BC-1.03.006 EC-009) | no write — the target keeps its previous bytes (reproduced from legacy, oracle-verified); legacy leaves a partial temp behind, hylo removes its own temp (OD-163); difference confined to the cache-dir listing (OD-110 class), stdout identical |
+| EC-011 | Sid with lone surrogates in the session-cache name (ADV-P3-C21): Python encodes file names with the filesystem encoding's `surrogateescape` handler — U+DC80..U+DCFF become the single raw bytes 0x80..0xFF; any other lone surrogate raises `UnicodeEncodeError`, which the bare `except Exception` swallows (no session cache, and a load of such a name returns `{}`) | legacy: the cache is named under the raw-byte form (U+DC80..DCFF) or not written (other surrogates). hylo: the sid is carried as UTF-8/WTF-8 — a lone surrogate encodes as its 3-byte WTF-8 sequence, so the file name differs byte-for-byte from legacy's raw-byte form; difference confined to synthetic ids (OD-03: real ids are UUIDs) |
 
 ## Canonical Test Vectors
 

@@ -1,17 +1,17 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T13:05:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "bc396c7"
+input-hash: "a20fec3"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -22,7 +22,7 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-016 added"]
+modified: ["1.2.2 2026-11-18: ADV-P3 remediation D07 — P1 Bool set completed with queue.yellow and subagent.enabled"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +52,9 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    `true`, `1`, `yes` → true and `false`, `0`, `no` → false. Any other value (including
    `""`, `TRUE`, `on`, ` 1`) yields `<key>=<value> (not a boolean (true|false|1|0|yes|no))`.
    P1 bool keys: `statusline.sparkline.enabled` (legacy `DGX_SL_SPARK`, SL:76),
-   `statusline.git.enabled` (legacy `DGX_SL_GIT`, SL:77). Legacy treated every value except
+   `statusline.git.enabled` (legacy `DGX_SL_GIT`, SL:77),
+   `statusline.queue.yellow` (P1 per the 2026-11-18 owner ruling, ADV-P3-D07) and
+   `statusline.subagent.enabled` (OD-155; default true). Legacy treated every value except
    `"0"` as on; values legacy accepted that are outside this grammar are D4-EX-3 boolean-class
    cases (BC-2.02.001, test `TestConfigError_D4EX3_Boolean`).
 2. **List:** the value is split on `,`; each item is stripped with Python `str.strip()`

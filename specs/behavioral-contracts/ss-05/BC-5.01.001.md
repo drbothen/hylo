@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "249c67a"
+input-hash: "27f5d0f"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython round()/format() used at legacy/dgx_statusline.py SL:1171, 234 and the .Nf sites)"
@@ -19,7 +19,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D10: _fmt_tokens .Nf site SL:882-885 added to served sites"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -115,7 +116,7 @@ All values verified 2026-11-15 against CPython 3.11.7 (`round`, `format`).
 | L2 Domain Invariants | DI-012 |
 | Architecture Module | `internal/pyfmt/num.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/num.go (Round/RoundN/F) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
-| Source | New contract. OD-103 (one `internal/pyfmt` package, four files); design IM-05, IM-06; pitfalls PR-01, PR-02. Legacy call sites it serves: SL:1171 (`round`), SL:234 (`round(usd, 4)`), `.Nf` sites SL:435-437, 479, 522, 599, 616, 625, 635, 700, 741, 761-762, 778-783, 795, 813-819, 857, 870-873 |
+| Source | New contract. OD-103 (one `internal/pyfmt` package, four files); design IM-05, IM-06; pitfalls PR-01, PR-02. Legacy call sites it serves: SL:1171 (`round`), SL:234 (`round(usd, 4)`), `.Nf` sites SL:435-437, 479, 522, 599, 616, 625, 635, 700, 741, 761-762, 778-783, 795, 813-819, 857, 870-873, 882-885 (`_fmt_tokens`, the subagent token segment; ADV-P3-D10) |
 
 ## Related BCs (Recommended)
 

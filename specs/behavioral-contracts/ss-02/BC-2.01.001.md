@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - domain-spec/invariants.md
-input-hash: "fc78dac"
+input-hash: "4e7ba29"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444)"
@@ -24,7 +24,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D07+D37: all-defaults vector gains queue.false/subagent.true; reserved names extended with HYLO_TIMING_GATE and HYLO_PARITY_FUZZSECONDS"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,7 +80,11 @@ happens once per process, before any side effect.
    and is ignored silently. Reserved names, never warned and never config keys: `HYLO_CONFIG` (config path
    override, BC-2.03.002), `HYLO_TEST_NOW` (harness clock hook, design §3.2; a malformed
    value is ignored with one stderr warning and the real clock is used — BC-6.01.003,
-   ADV-P1-D22 spec choice), `HYLO_PARITY_PYTHON` (harness interpreter setting, OD-104).
+   ADV-P1-D22 spec choice), `HYLO_PARITY_PYTHON` (harness interpreter setting, OD-104),
+   `HYLO_TIMING_GATE` (harness timing-gate setting, BC-6.04.002) and
+   `HYLO_PARITY_FUZZSECONDS` (harness fuzz-duration setting, BC-6.04.003) — the latter
+   two added so inherited harness settings do not draw the unknown-setting warning and
+   are collision-checked (ADV-P3-D37 / ADV-P3-A20).
 7. If any key fails validation, `Load` returns every failing key (registry order) and the
    caller renders per BC-2.02.001 (statusline) or BC-2.03.001 (validate).
 
@@ -109,7 +114,7 @@ happens once per process, before any side effect.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| env `{}` | ttl_s 4, rows 2, sparkline.enabled true, sparkline.trace `rate`, git.enabled true, `backends[0].metrics_url` `http://192.0.2.10:8428`, `backends[0].model_prefixes` `[claude-sonnet]`, `paths.cache_dir` = platform cache dir (OD-101) | happy-path |
+| env `{}` | ttl_s 4, rows 2, sparkline.enabled true, sparkline.trace `rate`, git.enabled true, queue.yellow false, subagent.enabled true, `backends[0].metrics_url` `http://192.0.2.10:8428`, `backends[0].model_prefixes` `[claude-sonnet]`, `paths.cache_dir` = platform cache dir (OD-101) | happy-path |
 | env `{HYLO_STATUSLINE_TELEMETRY_TTL_S: "10"}` | ttl_s 10; others default | happy-path |
 | env `{DGX_SL_ROWS: "2.0", DGX_SL_TRACE: "kv"}` | rows 2, trace `rate` (legacy names ignored) | edge-case |
 | env `{HYLO_STATUSLINE_ROWS: "x"}` | `Load` error `statusline.rows=x (not an integer)` | error |

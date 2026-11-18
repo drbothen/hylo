@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "bounded-contexts"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T21:57:00Z
+timestamp: 2026-11-18T01:55:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "475819c"
+input-hash: "26c038a"
 traces_to: L2-INDEX.md
 ---
 
@@ -29,7 +29,7 @@ traces_to: L2-INDEX.md
 | BC4 | Observability Ledger | The 13-event append-only record; attribution; correlation limits | P3 | ledger event, attribution, near-key |
 | BC5 | Metrics Exposition | Ledger + hook log → 28 metric names; rebuild semantics | P2 | rebuild, accumulator, exposition |
 | BC6 | Live Inspection | Web/TUI over one live event feed; live + in-memory ring buffer only — exact `flow_id` correlation, no ledger-backed history until P7 (OD-122); in-memory redaction | P4 | flow view, live feed, redaction |
-| BC7 | Session Cockpit (status line) | Two-row render from stdin/transcript/metrics/caches; degraded ladder | P1 | widget, pill, thermometer, freshness ladder, degraded line |
+| BC7 | Session Cockpit (status line) | Two-row render from stdin/transcript/metrics/caches, plus the `--subagent` agent-panel rows (OD-155; JSON lines or zero bytes in that mode); degraded ladder | P1 | widget, pill, thermometer, freshness ladder, degraded line |
 | BC8 | Cost Accounting | Cost history, percentile colors, owned-hardware cost, backfill | P1 (backfill P6) | cost entry, percentile band, ⛏ |
 | BC9 | Turn Control | Stop-hook policing: language, fake stop, Kev oracle | P4 | fake stop, verdict, colon fake |
 | BC10 | Trust & Platform | CA lifecycle, doctor, per-OS platform services | P4 | trust root, doctor check |

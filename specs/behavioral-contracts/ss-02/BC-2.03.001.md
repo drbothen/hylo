@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "51f00c6"
+input-hash: "54c520c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -21,7 +21,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D16: validate stderr order aligned with statusline emission order (warnings then errors)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,10 +48,13 @@ when `config.Load` returns any error. The error set is identical to the set that
 
 1. **Valid config:** stdout is exactly `hylo: config ok\n`; stderr carries only
    unknown-setting warnings (BC-2.01.001 PC-6), if any; exit 0.
-2. **Invalid config:** stdout is empty; stderr carries one line per error in registry order,
-   in the same form as the statusline stderr detail,
+2. **Invalid config:** stdout is empty; stderr carries the unknown-setting warnings in
+   encounter order FOLLOWED by one line per error in registry order — the same
+   emission order as the statusline side (BC-2.01.002 pins the example: warning first,
+   then the fatal load error; ADV-P3-D16 aligning this file with it), in the same form as
+   the statusline stderr detail,
    `hylo: config error: <key>=<value> (<reason>) [from <ENVNAME>]\n` (value escaping and
-   reasons per BC-2.02.001, no SGR codes), followed by any unknown-setting warnings; exit 1.
+   reasons per BC-2.02.001, no SGR codes); exit 1.
 3. No stdin read, no cache read or write, no network request, no subprocess.
 4. Unknown-setting warnings alone never change the exit status.
 5. Extra arguments or flags (`hylo config validate --x`, `hylo config validate foo`): usage

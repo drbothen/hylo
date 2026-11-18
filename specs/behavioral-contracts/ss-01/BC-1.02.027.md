@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "1244d41"
+input-hash: "278b2ba"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B04): Refactoring Notes aligned with the superseding definition — pyfmt.Int(x float64) (Num, error), exact beyond int64 (BC-1.02.026 PC2, ARCH-06); 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -155,6 +156,8 @@ S-N.MM — filled by story-writer
 
 Resolved by OD-137: the two duration-format sites (`_hm` here and the window-age form,
 BC-1.02.028) keep byte-exact arbitrary-precision behavior using `math/big`. Design note on
-IM-07: `pyfmt.Int(x float64) (int64, error)` remains the typed fast path; the duration sites
-use the big-integer path when the minute count exceeds int64 (Python's `int()` of a finite
-float is unbounded). No exclusion entry exists for this gap.
+IM-07 (superseding definition per ARCH-06:78, BC-5.01.003:57 and BC-1.02.026 PC2; the int64
+sketch in error-taxonomy.md:120-124 is superseded): `pyfmt.Int(x float64) (Num, error)` is
+the typed path and is exact beyond int64 (`Num`); the duration sites call `Int` directly and
+reach for `math/big` only where Python's unbounded `int()` arithmetic demands it (exact
+integer floor division of huge float minutes). No exclusion entry exists for this gap.

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "4894c3c"
+input-hash: "718be36"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-001 added", "1.2.2 2026-11-17: pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-001 added", "1.2.2 2026-11-17: pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "1.2.3 2026-11-18: pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +59,13 @@ is visible to other sessions' thresholds in the same instant but never to its ow
 
 1. **Guard (no read, no write):** if `sid` is falsy (absent, null, `""`, `0`, `false`),
    or `lane` is not exactly `"dgx"` or `"anth"`, or `usd` is not a number (bool counts as
-   a number), return without touching the file (SL:226-227).
+   a number), return without touching the file (SL:226-227). Per ruling **OD-166**, the
+   guard also rejects a numeric `usd` (and the paired `api_ms`) whose float conversion
+   would overflow — an exact stdin int with magnitude >= 2**1024 - 2**970 — so an
+   unconvertible value is **not recorded** (exclusion id `OD-166`; legacy did record the
+   giant int via `round(usd, 4)` + `json.dump`, SL:234-237, poisoning later refreshes at
+   SL:255 — a foreign-history class path, BC-1.05.005 EC-011). The current refresh still
+   renders/degrades as ruled (BC-1.05.007 CP-O10/CP-O11).
 2. Otherwise load the history (BC-1.06.001 load: any error → `{}`), take
    `sessions = h.setdefault("sessions", {})` and `e = sessions.get(sid) or {}`
    (SL:228-230).
@@ -91,8 +97,9 @@ is visible to other sessions' thresholds in the same instant but never to its ow
 | EC-005 | `session_id` unhashable (non-empty list/object) | legacy `sessions.get(sid)` raises TypeError (CP-S15, SL:230) after the load, before any write → degraded line (BC-1.01.001); Go degrades at the same step |
 | EC-006 | numeric `session_id` | OD-30 known difference, see BC-1.05.006 |
 | EC-007 | entry `ts` missing | default 0 → throttle not applied → written |
-| EC-008 | corrupt history shapes (top level not an object; `sessions` or an entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10 foreign-cache crash paths: out of parity scope (P3r2 ruling b); the Go writer only ever writes legacy's exact format |
+| EC-008 | corrupt history shapes (top level not an object; `sessions` or an entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10 foreign-cache crash paths: out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); the Go writer only ever writes legacy's exact format |
 | EC-009 | `api_ms` = `"x"` | stored as `null` |
+| EC-010 | `usd` = 2**1024 (309-digit exact stdin int; numeric guard passes) | not recorded (OD-166 guard: magnitude >= 2**1024 - 2**970 cannot convert to float); file unchanged; the current refresh degrades via CP-O10 (BC-1.05.007); legacy did record it (ADV-P3-C2-01) |
 
 ## Canonical Test Vectors
 
@@ -104,6 +111,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | then sid `t`, usd 4.0 at now + 59.999 | file unchanged (usd 2.0) | edge-case |
 | then sid `t`, usd 4.0 at now + 60.000 | `{"sessions": {"t": {"lane": "anth", "usd": 4.0, "api_ms": 1000, "ts": 1794615069.0, "src": "cc"}}}` | edge-case |
 | sid `""`, or lane `zzz`, or usd `"3"` | no file written / file unchanged | error |
+| sid `t`, lane anth, usd = 2**1024 (exact int), api 1000 | file unchanged (OD-166 record guard) | edge-case |
 
 ## Verification Properties
 
@@ -112,6 +120,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 | VP-020 | Two refreshes less than record_throttle_s apart with a `cc` entry produce at most one write | Go property test (testing/quick) (fake clock + fake store) |
 | VP-020 | All non-target keys survive a write byte-identically | manual (cache-swap test, design §5.2) |
 | VP-001 | Corrupt cost history (CP-C09/C10, EC-008) still yields ≥1 stdout byte and exit 0 — out of parity scope, never-blank per DI-008 | fault-injection table (exhaustive CP-*) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008 foreign-cache crash shapes out of parity scope) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability
 
@@ -145,6 +154,7 @@ S-N.MM — cost history (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-020 — throttle; VP-001 — never-blank/exit-0 under CP-C09/C10 corrupt history
+- VP-012 — exclusion-closure cover for the named deviation `OD-160`
 
 
 #### Source Evidence

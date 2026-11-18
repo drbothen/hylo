@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T18:40:00Z
+timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c2f799c"
+input-hash: "44590c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094; REBUILD_EXCESS SL:968-972)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)"]
+modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,8 +45,9 @@ is never a rebuild because `pp` is null.
    calls in 120 transcripts: normal calls max 4,145 excess (99.9 % under 577), smallest rebuild 61,901; 20K sits
    about 5× above the worst normal call and 3× below the smallest rebuild; SL:968-971). **Valid range (OD-162):
    `>= 0`**, derived from legacy semantics — `X` is a token-excess comparison threshold against
-   `_w − max(0, prompt − pp)` (SL:1117): a negative X marks every call a rebuild; out-of-range values are
-   number-range config errors (S2 schema, OD-114).
+   `_w − max(0, prompt − pp)` (SL:1117): the excess is negative whenever context growth exceeds the write, so a
+   negative `X` would count ordinary growing calls (excess between `X` and 0) as rebuilds (ADV-P3-C16);
+   out-of-range values are number-range config errors (S2 schema, OD-114).
 
 ## Postconditions
 
@@ -74,6 +75,7 @@ is never a rebuild because `pp` is null.
 | EC-004 | Prompt shrank (growth clamped to 0), write 20,001 | rebuild |
 | EC-005 | Duplicate-id line with a large write | ignored (not counted) |
 | EC-006 | After `compact_boundary`, a 50,000 write | not a rebuild (`pp` null) |
+| EC-007 | Overflow at the rebuild check (CP-O07, ADV-P3-C03): a parse state carrying an int `tin` with a float `pp` (legal stored form, postcondition 6) meets a huge exact int write — \|value\| ≥ 2^1024 − 2^970 — in `_w − max(0, prompt − pp)`; a legacy-written cache always couples a float `pp` with a float `tin`, so its next huge-int line raises earlier at SL:1108 | Python raises `OverflowError` at SL:1117 (oracle-verified 2026-11-18: seed `tin` int 0, `pp` 5.0, one line with `cache_creation_input_tokens` 10^309); legacy degrades sticky; hylo skips the line (D4-EX-2 extension, ruling OD-156; this BC owns the SL:1117 site), `rb` and `pp` unchanged (BC-1.03.018) |
 
 ## Canonical Test Vectors
 
@@ -92,6 +94,15 @@ u0 = `{"input_tokens": 1000, "cache_read_input_tokens": 100000}`, u1 = `{"cache_
 | same with b write 20001, read 79999 | `"rb": 1`, `"pp": 100000` | edge-case |
 
 Pass-3 r1 pinned an equivalent 5-call scenario (`rb` 2, tin 501,502); the vectors above are an independent re-pin.
+
+CP-O07 vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18): seed cache exactly `{"size": 0, "res": 0, "conv": 0,
+"think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 5.0, "ids": [], "lr": null,
+"lu": null, "cur": null}`; transcript is the single line `{"type": "assistant", "message": {"content": "", "id": "y",
+"usage": {"cache_creation_input_tokens": 10^309}}}` (415 bytes with LF).
+
+| Input | Expected Output | Category |
+|-------|----------------|----------|
+| seed + the line above | legacy: `OverflowError` at SL:1117, degraded line, exit 0, cache keeps its seed bytes; hylo (D4-EX-2): cache exactly `{"size": 415, "res": 0, "conv": 0, "think": 0, "tin": 0, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 0, "rb": 0, "pp": 5.0, "ids": [], "lr": null, "lu": null, "cur": null}` | error |
 
 ## Verification Properties
 

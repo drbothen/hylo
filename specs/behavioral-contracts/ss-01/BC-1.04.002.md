@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "bc15a45"
+input-hash: "32eafc0"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-13"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-13", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-008)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -83,7 +83,7 @@ it is younger than KEEP_DEAD.
 | EC-005 | Cached path with no `ts` (after EC-004) | age `now - 9999`; sample none → `◌ DGX ?` |
 | EC-006 | TTL 0 | every refresh fetches |
 | EC-007 | Stored sample holds `NaN` | written as JSON `NaN`, read back by the Go loader (must accept `NaN`/`Infinity` tokens) |
-| EC-008 | Foreign/corrupt cache shapes (CP-C01..C10) | out of byte-parity scope (P3 r2 ruling (b)); Go writer never produces them |
+| EC-008 | Foreign/corrupt cache shapes (CP-C01..C10) | out of byte-parity scope (P3 r2 ruling (b)); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); Go writer never produces them |
 
 ## Canonical Test Vectors
 

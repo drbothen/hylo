@@ -147,3 +147,9 @@
 | OD-163 | (a) a save removes only the temp file it created when its write or rename fails (OD-110 as ruled); no sweeping of other temps | |
 | OD-164 | (a) int64 overflow and the Duration ceiling are D4-EX-3 number-range cases (covered by OD-114) | |
 | OD-165 | (a) `hylo config path` prints effective paths (overrides applied) | |
+
+<!-- Phase-1d pass-3 remediation rulings by the owner, 2026-11-18 (owner chose the recommended option each time; next free OD-169) -->
+
+| OD-166 | (a) a cost value (`usd` or `api_ms`) that cannot convert to float is not recorded in the cost history; the current refresh still degrades (OD-156); prevents a cross-session sticky crash | named deviation under OD-156 |
+| OD-167 | (a) a transcript-borne overflow skips the offending line AND drops the in-flight turn, so later lines parse normally (refines OD-156 / D4-EX-2) | |
+| OD-168 | (a) a config error in `--subagent` mode prints zero bytes on stdout and the error on stderr (the main status line still shows the D4-EX-3 line) | |

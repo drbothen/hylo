@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T09:10:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.02.001.md, prd-supplements/nfr-catalog.md]
 input-hash: "89fd12d"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-18T09:10:00Z: ADV-P3 fixes (A2-06) — provenance test asserts a non-zero computed fixture count and logs “N fixtures validated” (POL-11)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -68,9 +68,15 @@ committed-corpus provenance in-tree.
 
 ```go
 func TestCorpusHygiene(t *testing.T) {
+    n := 0
     for _, fx := range CommittedFixtures() {
         if !fx.ProvenanceSynthetic() { t.Fatalf("%s: not marked synthetic", fx.Path) }
+        n++
     }
+    if n == 0 { // POL-11 (A2-06): a mis-pathed fixture load must not pass green
+        t.Fatal("zero committed fixtures found — mis-pathed load passes nothing")
+    }
+    t.Logf("%d committed fixtures validated", n)
     if committedCapturesExist() { t.Fatal("captures/ content committed") }
 }
 ```

@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "ed02562"
+input-hash: "493ab23"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -22,7 +22,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D36: empty override = not present; trailing separator printed as given, OD-165 agreement held at Clean-ed granularity"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,7 +73,13 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
 3. Override paths (a)/(b) get `~` expansion (OD-61, BC-2.01.005) and are otherwise printed
    as given (not made absolute, not cleaned). Overrides are applied wherever they exist:
    `config:` (a)/(b) and `cache:` (`HYLO_PATHS_CACHE_DIR`); the state directory has no
-   override in P1 (OD-165).
+   override in P1 (OD-165). Edge discipline (ADV-P3-D36): an override that is set but
+   EMPTY (`HYLO_PATHS_CACHE_DIR=` or `HYLO_CONFIG=`) counts as not present — the (b)/(c)
+   fallback order proceeds as if the variable were unset (an empty override would
+   otherwise print an empty path). A trailing separator in an override is printed exactly
+   as given (`/tmp/x/` prints with the slash); this is a PRINT ordering only — OD-165's
+   "the status line and `config path` agree on the same directory" holds at
+   resolved-directory granularity (Clean-ed), not byte-for-byte on the printed string.
 4. If the base needed by a line is unset or empty (`HOME`/`APPDATA`/`LOCALAPPDATA`, or the
    home for a `~` override): that line prints `<label>: (unavailable)`, stderr carries
    `hylo: config path: cannot determine <label> directory (<VAR> unset)\n`, and the exit

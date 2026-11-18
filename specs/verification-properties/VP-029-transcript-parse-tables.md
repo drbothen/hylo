@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:16:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.001.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.03.007.md, behavioral-contracts/ss-01/BC-1.03.016.md, prd-supplements/test-vectors.md, prd-supplements/nfr-catalog.md]
 input-hash: "64e00bc"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:16:00Z: ADV-P3 fix (A2-18) — int-transcript_path property recast per OD-161/BC-1.03.015 PC3: truthy int means no transcript, no descriptor I/O (the fd-semantics wording predates the ruling)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,7 +40,8 @@ refreshes, bytes.splitlines + per-line json.loads consumption, usage dedup (memo
 256), usage accumulation across int/float/big-int, the 20,000-excess rebuild rule,
 compact_boundary resets, composition per block from json.dumps lengths, the last-turn
 rate machine, first-line usage, sanitized mix-cache sid, text/thinking block types,
-int-`transcript_path` fd semantics, the exhaustive 20-row turn machine (T13
+int-`transcript_path` means no transcript — hylo performs no descriptor I/O (OD-161,
+BC-1.03.015 PC3), the exhaustive 20-row turn machine (T13
 oracle-confirmed, OD-143), turn identity ignoring seen_ids, cur with t0-null/non-numeric
 out verbatim; the reset write-scope property (after the reset step `size == off`, the
 step performs zero `Save` calls — fake-`CacheStore` table, BC-1.03.002 row 2); plus the

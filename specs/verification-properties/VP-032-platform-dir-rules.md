@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T09:22:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, behavioral-contracts/ss-03/BC-3.01.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, owner-decisions-log-2026-11-14.md]
 input-hash: "65c2fc6"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P2 fix — skeleton applies each row's env/home seam and asserts Config/State dirs (A2-12)"]
+modified: ["1.1 2026-11-17: ADV-P2 fix — skeleton applies each row's env/home seam and asserts Config/State dirs (A2-12)", "1.2 2026-11-18T09:22:00Z: ADV-P3 fix (A2-25) — Windows resolution pinned: config = %APPDATA%\\hylo, cache/state = %LOCALAPPDATA%\\hylo\\{cache,state} per BC-3.01.001; LOCALAPPDATA/APPDATA empty ⇒ the EC-004 unavailable error, reported by hylo config path"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,7 +38,9 @@ Directory resolution is explicit per OS — never `os.UserCacheDir`: macOS/Linux
 `$XDG_CACHE_HOME/hylo` else `~/.cache/hylo` (and Config/State analogues honoring
 XDG_CONFIG_HOME/XDG_STATE_HOME); relative or empty `XDG_*` values are ignored (fall
 through to the default); Windows uses `%LOCALAPPDATA%\hylo\cache` and `...\hylo\state`
-subdirectories; `~` expands in path values (`~user` left as written); and
+subdirectories, with the config dir at `%APPDATA%\hylo` (OD-144); when `LOCALAPPDATA`
+or `APPDATA` is empty on Windows the resolver returns the unavailable error
+(EC-004) and `hylo config path` reports it; `~` expands in path values (`~user` left as written); and
 `hylo config path` prints config/cache/state in fixed order with fixed labels from
 this resolution.
 

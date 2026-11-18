@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T18:40:00Z
+timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c2f799c"
+input-hash: "44590c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1029-1034, 1096-1103, 1153)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified"]
+modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -88,6 +88,7 @@ refreshes as the last `dedup_memory` (256) ids recorded; within a single refresh
 | EC-005 | `msg_A`, 300 others, `msg_A` in the **same** refresh | ignored (in-refresh memory unbounded) |
 | EC-006 | Id present but `usage` absent | not recorded; a later line of that id with usage is counted |
 | EC-007 | Reset (BC-1.03.002) | memory cleared before parsing |
+| EC-008 | CP-O09 save path (co-owner with BC-1.03.006 PC5/EC-009; ADV-P3-C09): two distinct ids each count a 4,300-digit exact int `input_tokens` — int-only arithmetic, no float operand, so the CP-O06..O08 skip never trips | both usages counted exactly; at save the 4,301-digit accumulator exceeds CPython's int↔str limit, `json.dump` raises `ValueError` mid-write, `save_cache` swallows it: no cache write, previous bytes retained, re-failing every later refresh (not moot in hylo — hylo reproduces the no-write; OD-163 rules the temp) |
 
 ## Canonical Test Vectors
 

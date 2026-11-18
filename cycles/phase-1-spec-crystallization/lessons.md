@@ -17,6 +17,8 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   against the oracle interpreter at write time and record the interpreter
   version next to the vector; never copy expected values from prose or memory.
 
+(pre-D-448(b) exemption)
+
 ## L-PG-05 [process-gap] — Adapt plugin-template vocabulary to the target language
 
 - **Lesson:** (discovered 2026-11-17, ADV pass-1 remediation) Rust vocabulary
@@ -25,6 +27,8 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** Spec-producing steps that instantiate plugin templates include a
   target-language vocabulary check before the step completes; template trait and
   attribute names are translated to their target-language equivalents.
+
+(pre-D-448(b) exemption)
 
 ## L-PG-06 [process-gap] — Force an isolated HOME and cwd in every brief that may run the legacy oracle
 
@@ -35,6 +39,8 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   one probe away from pollution.
 - **Remedy:** Every agent brief that may run legacy forces an isolated HOME and
   cwd; oracle runs never point at the live prototype's data files.
+
+(pre-D-448(b) exemption)
 
 ## L-PG-07 [process-gap] — Measure oracle facts on the real program, end to end
 
@@ -47,6 +53,8 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   inferred from wrapper probes; when two probes disagree, re-measure on the
   real program before writing the number into a contract.
 
+(pre-D-448(b) exemption)
+
 ## L-PG-08 [process-gap] — Mint finding ids from one owner before parallel dispatch
 
 - **Lesson:** (discovered 2026-11-17, ADV pass-2 remediation) Parallel agents
@@ -55,3 +63,50 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** Finding ids are minted by one owner before parallel dispatch;
   parallel agents consume an id allocation, they do not create overlapping id
   spaces.
+
+(pre-D-448(b) exemption)
+
+## L-PG-09 [process-gap] — Write non-ASCII expected bytes as \uXXXX escapes and verify on disk
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-3 remediation) An escape-decoding
+  step turned valid \uXXXX escapes into raw characters in expected-output cells,
+  corrupting committed BC vectors.
+- **Remedy:** Non-ASCII expected bytes in vector cells are written as \uXXXX
+  escapes and a script verifies the on-disk bytes after every edit; expected
+  values are never decoded by hand or pasted as raw characters.
+
+**Closes:** D-448(b) codified (strand ADV-P3-D09 systemic escape-rendering corruption)
+
+## L-PG-10 [process-gap] — Run character-class scans as python scripts, not shell-wrapped grep
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-3 remediation) A non-English word
+  reached a committed spec because the orchestrator's character scan used
+  grep -P through a shell function wrapping ugrep, which silently matched
+  nothing.
+- **Remedy:** Character-class and non-English scans of committed specs run as
+  python scripts whose result is asserted on disk; a scan that can silently
+  degrade to zero matches is not a scan.
+
+**Closes:** D-448(b) codified (strand ADV-P3-A17 hygiene scan gap P14/P21)
+
+## L-PG-11 [process-gap] — Line-number facts in briefs must come from a numbered read
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-3 remediation) An orchestrator
+  brief stated a legacy line number from a misread excerpt (SL:1238 vs the
+  actual SL:1240) and agents propagated the wrong number into specs.
+- **Remedy:** Line facts in agent briefs come from a numbered read (awk or
+  sed -n with line numbers), never from prose excerpts; agents re-verify any
+  line fact they receive before writing it into a contract.
+
+**Closes:** D-448(b) codified (strands ADV-P3-A2-02 + ADV-P3-D05 legacy SL:1240 CLI-routing line facts)
+
+## L-PG-12 [process-gap] — Run the sync check after adding scope, before the next adversarial pass
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-3 remediation) Pass 3 regressed
+  (116 → 150 findings) because pass-2 remediation added new scope (OD-155
+  `--subagent` BCs, rulings OD-156..165) without a propagation check.
+- **Remedy:** After a remediation adds new scope, the sync check runs before
+  the next adversarial pass dispatches; scope added without propagation is the
+  documented root cause of trajectory regressions.
+
+**Closes:** D-448(b) codified (strands ADV-P3-D04 + ADV-P3-D07 + ADV-P3-D10 OD-155/OD-156..165 scope propagation)

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.1"
+version: "1.1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "9e0be15"
+input-hash: "88b1379"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows (SL:888-936)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)"]
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -32,10 +32,11 @@ removal_reason: null
 ## Description
 
 `render_subagent_rows` filters the `tasks` array to dict tasks carrying an `id` and emits exactly one
-`json.dumps` object per survivor — `{"id": "<task id>", "content": "<rendered row>"}` with CPython
+`json.dumps` object per survivor: `{"id": "<task id>", "content": "<rendered row>"}` with CPython
 default separators (`, ` and `: `) and `ensure_ascii=True` — one LF-terminated line per row in input
-order. Bits inside `content` are joined with the raw three-byte selector ` · ` (space, U+00B7, space;
-no SGR on the separator). Zero survivors produce zero output (no newline). The whole render completes
+order. Bits inside `content` are joined with the three-character selector space + U+00B7 + space
+(source-level UTF-8 `20 c2 b7 20`; on the wire json.dumps emits `\u00b7` — PC7; no SGR on the
+separator). Zero survivors produce zero output (no newline). The whole render completes
 before a single print, so a render fault never leaves partial rows on stdout.
 
 ## Preconditions
@@ -48,13 +49,18 @@ before a single print, so a render fault never leaves partial rows on stdout.
 
 1. Every task that is a `dict` and has key `id` yields exactly one output line; order preserved.
 2. Non-dict tasks and dict tasks without `id` yield no line (not even blank).
-3. Each line is `json.dumps({"id": task["id"], "content": bits_joined}, )` with defaults: property
-   order id-then-content, `, `/`: ` separators, `ensure_ascii=True` escaping (ESC→`\u001b`, »→`»`,
-   ·→`·`, ◨→`◨`, ✔→`✔`, é→`é`, lone surrogate→`\ud800`).
-4. The `id` is echoed verbatim (any JSON scalar type); it is not coerced to string before dumping.
+3. Each line is `json.dumps({"id": task["id"], "content": bits_joined})` with defaults: property
+   order id-then-content, `, `/`: ` separators, `ensure_ascii=True` — every non-ASCII character goes
+   on the wire as a `\uXXXX` escape (ESC→`\u001b`, U+00BB→`\u00bb`, U+00B7→`\u00b7`,
+   U+25E8→`\u25e8`, U+2714→`\u2714`, U+2718→`\u2718`, U+00E9→`\u00e9`, lone surrogate→`\ud800`);
+   ASCII text and SGR sequences pass through unescaped.
+4. The `id` is echoed verbatim — any JSON value (string, number, bool, null, array, object; the
+   array case is verified in the vectors below); it is not coerced to string before dumping.
 5. Lines are LF-terminated; the last line carries the terminating LF (print semantics).
 6. Zero eligible tasks: zero bytes, exit 0.
-7. The " · " joiner is the raw UTF-8 sequence `20 e2 80 a7 20`; no SGR codes wrap it.
+7. Between content bits the joiner is, at source level, the three characters space + U+00B7 + space
+   (UTF-8 `20 c2 b7 20`; U+00B7, NOT U+2027); on the json.dumps wire it is the 8 ASCII bytes
+   `20 5c 75 30 30 62 37 20` (that is, `" \u00b7 "`). No SGR codes wrap it.
 
 ## Invariants
 
@@ -79,19 +85,22 @@ before a single print, so a render fault never leaves partial rows on stdout.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| `{"tasks":[{"id":"a1","name":"explore","status":"running","model":"claude-sonnet-5-5","tokenCount":12345,"startTime":<now-125000>}]}`, `model_prefixes = [claude-sonnet]` | `{"id": "a1", "content": "\u001b[33m» explore\u001b[0m · \u001b[36m◨DGX\u001b[0m \u001b[90mclaude-sonnet-5-5\u001b[0m · \u001b[36m12.3k tok\u001b[0m · \u001b[90m02:05\u001b[0m"}` +LF, exit 0 | happy-path |
-| `{"tasks":[{"name":"noid"},{"id":"ok","status":"killed"},"str"]}` | one line, id `ok`, glyph ◍ grey, trail `killed` | edge-case |
+| `{"tasks":[{"id":"a1","name":"explore","status":"running","model":"claude-sonnet-5-5","tokenCount":12345,"startTime":<now-125000>}]}`, `model_prefixes = [claude-sonnet]` | `{"id": "a1", "content": "\u001b[33m\u00bb explore\u001b[0m \u00b7 \u001b[36m\u25e8DGX\u001b[0m \u001b[90mclaude-sonnet-5-5\u001b[0m \u00b7 \u001b[36m12.3k tok\u001b[0m \u00b7 \u001b[90m02:05\u001b[0m"}` +LF, exit 0 | happy-path |
+| `{"tasks":[{"name":"noid"},{"id":"ok","status":"killed"},"str"]}` | one line, id `ok`: `{"id": "ok", "content": "\u001b[90m\u25cd ?\u001b[0m \u00b7 \u001b[90mkilled\u001b[0m"}`, exit 0 (glyph fallback U+25CD grey; settled suffix) | edge-case |
 | `{"tasks":[]}` | zero bytes, exit 0 | happy-path |
-| `{"tasks":[{"id":"a9","name":"a\ud800b","status":"completed"}]}` | id `a9` line with `a\ud800b` escaped in content, exit 0 | edge-case |
+| `{"tasks":[{"id":"a9","name":"a\ud800b","status":"completed"}]}` | one line: `{"id": "a9", "content": "\u001b[32m\u2714 a\ud800b\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}`, exit 0 | edge-case |
+| `{"tasks":[{"id":["x"],"name":"n","status":"completed"}]}` | one line: `{"id": ["x"], "content": "\u001b[32m\u2714 n\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}` (id array echoed verbatim), exit 0 | edge-case |
 
-Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`, legacy module imported and exercised): rows
-1, 2, 4 byte-reproduced; default `json.dumps` separators confirmed (`{"id": "a1", "content": ...}`).
+Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`, legacy module imported and exercised; goldens
+re-derived escaped after the adv-p3 C01 escape-decoding incident): rows 1, 2, 4, 5 byte-reproduced;
+default `json.dumps` separators confirmed (`{"id": "a1", "content": ...}`); every non-ASCII wire
+character pasted above as its literal `\uXXXX` escape.
 
 ## Verification Properties
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-010 | Python-written NDJSON goldens match byte-for-byte: one `{"id": ..., "content": ...}` line per eligible task, CPython default separators, ensure_ascii=True, raw ` · ` selector, zero-survivors-produce-zero-bytes | Tier B golden comparison (Python oracle writes; Go matches) |
+| VP-010 | Python-written NDJSON goldens match byte-for-byte: one `{"id": ..., "content": ...}` line per eligible task, CPython default separators, ensure_ascii=True, U+00B7 selector (`\u00b7` on the wire), zero-survivors-produce-zero-bytes | Tier B golden comparison (Python oracle writes; Go matches) |
 
 ## Traceability
 

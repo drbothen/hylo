@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-16T00:00:00Z
+timestamp: 2026-11-18T09:21:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.01.001.md, behavioral-contracts/ss-02/BC-2.01.004.md, behavioral-contracts/ss-02/BC-2.01.005.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
 input-hash: "29b3f56"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P2 pass-2 fixes — the totality oracle now asserts the DI-010 substance: generated-invalid values must return a typed Error identifying the offending key (no silent fallback to the default); unknown HYLO_* must warn on stderr with unchanged exit status; DGX_*-only environments must yield the exact default config (A2-08)"]
+modified: ["1.1 2026-11-17: ADV-P2 pass-2 fixes — the totality oracle now asserts the DI-010 substance: generated-invalid values must return a typed Error identifying the offending key (no silent fallback to the default); unknown HYLO_* must warn on stderr with unchanged exit status; DGX_*-only environments must yield the exact default config (A2-08)", "1.2 2026-11-18T09:21:00Z: ADV-P3 fix (A2-25) — multi-invalid determinism pinned: with several invalid values the typed error identifies the FIRST invalid variable in registry order (BC-2.02.001); the generated-invalid assert relies on this"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -91,6 +91,9 @@ func TestLoad_TotalOverEnvironment(t *testing.T) {
                 t.Fatalf("invalid %s=%s silently accepted (got default-filled config)",
                     env.InvalidKey, env.InvalidValue)
             }
+            // A2-25: with several invalid values, the offending key is the FIRST
+            // invalid variable in registry order (BC-2.02.001); env.InvalidKey is
+            // pinned to that value by the generator.
             if err.Key != env.InvalidKey || err.EnvName != env.InvalidEnvName {
                 t.Fatalf("typed error does not identify the offending variable: %+v", err)
             }

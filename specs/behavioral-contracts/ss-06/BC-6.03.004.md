@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "14aaea0"
+input-hash: "db24750"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D06+D19+D20+D38: D4-EX-3 cache halves compared asymmetrically (oracle self-consistency + Go empty-listing) making Go-writes-no-caches satisfiable; OD-159/160/161 riders named; canonical entries gain package/scope and JSON expected files; EC-006 scope-conflict rule rewritten"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,9 +85,9 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    | `OD-76` | OD-76, OD-110 | native process probe on macOS/Linux (true start in a repeated DST hour; ⌂ where localized `ps` fails) | BC-3.02.002 |
    | `temp-file` | OD-110 | Go removes temp files legacy leaks (cache-file comparison only) | BC-6.03.003 (`TestCacheStore_TempFile_CleanupOnFailedReplace`) |
    | `cp-x03` | OD-136 | degraded-line write itself fails (stdout closed); Go swallows the error and exits 0 where legacy CP-X03 exits 1 | BC-1.01.001 EC-005 (dedicated table test, name provisional — architect (OD-145)) |
-   | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01) |
-   | `OD-160` | OD-160 | foreign-cache shapes in the cache directories | stories owning the cache-store verbs (SS-01) |
-   | `OD-161` | OD-161 | integer `transcript_path` → no transcript | stories owning the stdin path-field verbs (SS-01) |
+   | `OD-159` | OD-159 | Go reads files as UTF-8 on all OSes where legacy's encoding differs | stories owning the file-reading verbs (SS-01; rider: BC-1.03.001 PC-3 directional test, ADV-P3-D19) |
+   | `OD-160` | OD-160 | foreign-cache shapes in the cache directories | stories owning the cache-store verbs (SS-01; riders: BC-1.02.017 EC-010, BC-1.01.008 EC-011 directional tests, ADV-P3-D19) |
+   | `OD-161` | OD-161 | integer `transcript_path` → no transcript | stories owning the stdin path-field verbs (SS-01; rider: BC-1.03.015 PC-3 directional test, ADV-P3-D19) |
 
 ## Postconditions
 
@@ -111,14 +112,18 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 3. **Excluded comparison.** For an excluded case, the artifacts named by the entry's
    `scope` are compared to `expected_output_file` instead of the oracle: `temp-file`
    entries use `go-cache-listing`; D4-EX-3 config-error cases use `stdout` — scope
-   `stdout` means ONLY the stdout line and exit code are pinned to the expected file,
-   which exists because for the Boolean, Enum and URL classes legacy renders normally
-   and writes its caches (SL:73-77, 89, 186) — the caches themselves are NOT out of
-   scope; they are still compared to the oracle under the next bullet and
-   BC-6.03.002 PC-6 (ADV-P2-D05 disposition; a config-error run stops at step 0 on the
-   Go side, so the Go cache listing is empty and the comparison is against the legacy
-   caches as the oracle rendered them). The other ids use `stdout+caches` over the named
-   caches the case declares.
+   `stdout` means ONLY the stdout line and exit code are pinned to the expected file.
+   For the Boolean, Enum and URL classes legacy renders normally and writes its caches
+   (SL:73-77, 89, 186), while a config-error run stops at step 0 on the Go side and Go
+   writes NO caches. The cache halves are therefore compared ASYMMETRICALLY for these
+   cases (ADV-P3-D06 disposition, amending the ADV-P2-D05 wording "still compared to the
+   oracle under BC-6.03.002 PC-6"): the oracle's caches are compared against the oracle's
+   own previous refresh (self-consistency, asserting legacy really rendered and wrote),
+   and the Go side asserts the EMPTY-listing invariant of BC-2.02.001 PC-6 ("Go writes no
+   caches") instead of being compared to the oracle's listing. BC-6.03.002 PC-3's
+   set-equality requirement is waived for an excluded case by the entry itself — the
+   waiver is what the `scope: stdout` entry licenses. The other ids use
+   `stdout+caches` over the named caches the case declares.
    - Every artifact outside the scope is still compared to the oracle (BC-6.03.002).
    - A Go output that differs from the expected file fails with
      `parity: exclusion <id>/<case>: go output differs from <expected_output_file>`.
@@ -144,18 +149,18 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Entry `{"id": "D4-EX-2", "case": "transcript/cp-t*", ...}` | Run FAIL: glob in `case` (no blanket exclusions) |
+| EC-001 | Entry `{"id": "D4-EX-2", "case": "transcript/cp-t*", "expected_output_file": "...", "package": "...", "scope": "...", "table_test": "..."}` | Run FAIL: glob in `case` (no blanket exclusions) |
 | EC-002 | Entry with `id: "OD-99"` | Run FAIL: id not in the closed set |
 | EC-003 | Entry whose `table_test` names a deleted test | Run FAIL: table test missing |
 | EC-004 | Excluded case where Go output now equals the oracle | Passes against its expected file only if the expected file also equals that output. Otherwise FAIL; the entry must be revisited, never silently ignored |
 | EC-005 | `-update` (Tier B) run | Does not touch any `expected_output_file` of an exclusion entry |
-| EC-006 | Same case listed under two different ids (e.g. a macOS numeric-sid case that hits both OD-30 and OD-76's repeated-DST class) | Allowed. Each entry checked independently; scopes must not both claim stdout |
+| EC-006 | Same case listed under two different ids (e.g. a macOS numeric-sid case that hits both OD-30 and OD-76's repeated-DST class, both defaulting to `stdout+caches`) | Allowed. Each entry checked independently. Conflict rule: the entries' comparison halves must not DISAGREE on an artifact — two entries on one case must declare the same scope for the same artifact, or an explicitly narrower one (`stdout` inside `stdout+caches` is fine); disagreement on any claimed artifact fails the run (ADV-P3-D38: the former "must not both claim stdout" phrasing was wrong — the OD-30/OD-76 defaults themselves claim stdout+caches) |
 
 ## Canonical Test Vectors
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Entry `{"id": "D4-EX-3", "case": "config/ttl-nan", "expected_output_file": "config/ttl-nan/expected.stdout", "table_test": "TestConfigError_D4EX3_Number"}`; Go prints the expected config-error line; test passes | Report `D4-EX-3 config/ttl-nan TestConfigError_D4EX3_Number ok` | happy-path |
+| Entry `{"id": "D4-EX-3", "case": "config/ttl-nan", "expected_output_file": "config/ttl-nan/expected.json", "package": "internal/statusline", "scope": "stdout", "table_test": "TestConfigError_D4EX3_Number"}`; Go prints the expected config-error line; test passes | Report `D4-EX-3 config/ttl-nan TestConfigError_D4EX3_Number ok` | happy-path |
 | Entry for `temp-file` on `cache/sid-slash-temp` | Cache-listing scope only; stdout still compared to the oracle and equal | edge-case |
 | Entry with `"case": "transcript/*"` | Run FAIL before any case: `exclusion[3]: glob not allowed in case` | error |
 | Entry whose table test fails | Run FAIL: `parity: exclusion D4-EX-2/transcript/cp-t01: table test TestTranscript_D4EX2_T01 failed` | error |

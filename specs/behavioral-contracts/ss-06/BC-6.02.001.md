@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -14,7 +14,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "c6df6ee"
+input-hash: "761df32"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,7 +25,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D40: hostname/username pattern examples confirmed synthetic"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,8 +78,9 @@ together form the P1 success criterion (OD-107).
    - absolute home paths (`/Users/<name>`, `/home/<name>`, `C:\Users\<name>`) other than
      templated placeholders;
    - username and hostname patterns (macOS/Linux user or host names in paths or
-     `username@host` shapes, e.g. `/Users/<name>`, ` boxes.local`) other than templated
-     placeholders;
+     `username@host` shapes, e.g. `/Users/<name>`, ` boxes.local` — a synthetic example
+     shaped like the real pattern, confirmed not a real machine name; ADV-P3-D40)
+     other than templated placeholders;
    - e-mail addresses;
    - Claude-Session trailer lines or private session links.
    The legacy placeholder `192.0.2.10` passes. CI also runs gitleaks with

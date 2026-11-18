@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "514bbc2"
+input-hash: "6d885b3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,11 +60,11 @@ truncates each channel with `int(c * 255)`. The SGR form is `\e[38;2;R;G;Bm` (`t
 1. Blue is always 30 for finite inputs (p = 0.80 × 0.15 = 0.12, 0.12 × 255 truncated).
 2. Monotone hue: higher `pct` never gives a greener colour.
 3. Default values come from `statusline.theme.heat` (T-030, owner group B: aesthetic judgment call). Valid range
-   (Policy 20, OD-162): legacy bakes the triple — hue span 0.22, saturation 0.85, value 0.80 (SL:145-146) — and
-   defines no config override, so the valid range of `statusline.theme.heat` is the default triple only; any other
-   value is a number-range config error (BC-2.02.003). Assumed range for architect registration:
-   theme.heat = {(0.22, 0.85, 0.80)}. This keeps Postcondition 2's sectors `i` in {0, 1} valid for every admissible
-   input (h ≤ 0.22 < 1/3 for all pct).
+   (Policy 20, OD-162): no non-default semantics is derivable from legacy for this key — the triple (hue span 0.22,
+   saturation 0.85, value 0.80, SL:145-146) is baked and the sector guarantee in Postcondition 2 (`i` in {0, 1},
+   i.e. h ≤ 0.22 < 1/3 for all pct) is stated only for the default triple — so per OD-162's test the valid range of
+   `statusline.theme.heat` is the default triple only; any other value is a number-range config error
+   (BC-2.02.003). Range for architect registration: theme.heat = {(0.22, 0.85, 0.80)}.
 
 ## Edge Cases
 

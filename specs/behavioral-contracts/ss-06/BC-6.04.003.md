@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "92224da"
+input-hash: "ea5ce52"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,7 +25,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D04+D25+D31: --subagent family in generator domain; OS-scoped exclusions named (Windows naive timestamps, OD-159/160/161); provenance updated to OD-149 three-leg wording"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,9 +65,17 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
    - metrics replies in instant-vector form, values including NaN/±Inf;
    - settings inside the Go typed domain;
    - string session ids.
+   OS-scoped exclusions (ADV-P3-D25): generated cases with non-UTC naive timestamps do
+   not run on the Windows leg (BC-6.02.003 PC-8 / BC-5.04.002 Invariant 2), and the
+   OD-159/160/161 foreign-shape classes are out of the generator's domain (their
+   shapes are seeded by the dedicated directional tests, BC-6.03.004 riders).
    Inputs whose difference is owner-ruled are out of the generator's domain: D4-EX-2
    wrong-shape lines, D4-EX-3 out-of-domain settings, OD-30 numeric sids, and
-   D4-EX-1/OD-76 process probing (`proc_start` is always seeded).
+   D4-EX-1/OD-76 process probing (`proc_start` is always seeded). IN domain since
+   OD-155 (ADV-P3-D04/D25): the `--subagent` invocation family — generated cases
+   exercise `main_subagent` with agent-panel stdin shapes, run under the same
+   invocation rule as the goldens (BC-6.03.001) with the non-NDJSON
+   config-error/output surfaces staying out of Tier C (D4-EX-3 class).
 
 ## Postconditions
 
@@ -130,7 +139,7 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
 
 | Field | Value |
 |-------|-------|
-| Source | design §5.1 Tier C (random valid stdin/transcripts/metrics, both sides, diff; Linux nightly; not gating; run clean for an owner-picked number of nights before P1 is declared done), §5.5 (Tier C nightly on Linux, not gating), §7.2 RK-2; research Q3c (thousands of cases per nightly job, not `go test -fuzz`), P27, open question O5 (proposal 3 nights); OD-104 (oracle); OD-117 target (1) |
+| Source | design §5.1 Tier C (random valid stdin/transcripts/metrics, both sides, diff), §5.5, §7.2 RK-2; research Q3c (thousands of cases per nightly job, not `go test -fuzz`), P27; OD-104 (oracle); OD-117 target (1); per OD-149 the nightly Tier C differential runs on all THREE OS legs and is not gating; the "Linux nightly / owner-picked nights / 3 nights" wording is superseded (ADV-P3-D31) |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012, DI-008 |

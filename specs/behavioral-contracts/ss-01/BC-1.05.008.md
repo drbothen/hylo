@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "a53ab2d"
+input-hash: "5066fd5"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-625)"
@@ -24,7 +24,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-14 (seed count corrected to 21)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -33,11 +33,12 @@ removed: null
 removal_reason: null
 ---
 
-# Behavioral Contract BC-1.05.008: Cost colouring goldens (20 seeded sessions)
+# Behavioral Contract BC-1.05.008: Cost colouring goldens (21 seeded sessions)
 
 ## Description
 
-A fixed, synthetic 20-session cost history exercises every filter of the percentile
+A fixed, synthetic 21-key cost history (12 `s` sessions, 8 `g` filter probes and
+`sess-self`) exercises every filter of the percentile
 computation (lane, window edge, floor, type, rate gates, self-exclusion) and pins the
 exact cost-segment bytes for twelve cost values, including the two documented
 colour/number mismatches at the rate boundaries. Five extra scenarios pin cold start,
@@ -168,7 +169,7 @@ S-N.MM — cost colouring (filled by story-writer)
 
 #### Evidence Types Used
 
-- **inferred**: seeded 20-session goldens regenerated from CPython 3.11.7 (2026-11-15)
+- **inferred**: seeded 21-key goldens regenerated from CPython 3.11.7 (2026-11-15)
 
 #### Purity Classification
 

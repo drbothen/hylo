@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "1244d41"
+input-hash: "278b2ba"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B10): ARCH-03 anchor normalized to the stable #caches fragment; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -137,7 +138,7 @@ Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#statusline-effect-script` — internal/statusline/statusline.go (side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#caches` — internal/statusline/statusline.go (side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

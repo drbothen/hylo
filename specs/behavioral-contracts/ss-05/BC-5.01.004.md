@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "ef650a3"
+input-hash: "6caea15"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces the {:d}-family format spec used at legacy/dgx_statusline.py SL:1172, 525, 527, 548, 561, 829, 831)"
@@ -22,7 +22,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D15+D10+D33: countdown anchor corrected (no :3d in legacy, pads via :02d); SL:920 added; MinInt64 vector added and VP wording fixed"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -85,6 +86,7 @@ contract per OD-141.
 | `D(5, 2, false)` | `" 5"` | happy-path |
 | `D(-5, 3, true)` | `"-05"` | edge-case |
 | `D(0, 2, true)` | `"00"` | edge-case |
+| `D(-9223372036854775808, 0, false)` | `"-9223372036854775808"` (MinInt64: `|n|` overflows int64 magnitudes handled in unsigned form; sign never lost) | edge-case |
 
 Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle discipline).
 
@@ -93,13 +95,13 @@ Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle di
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-023 | D equals CPython for every (n, width, zeroPad) in the generated table | CPython oracle table |
-| VP-023 | Sign placement holds for every negative int64 minimum | Go property test (testing/quick) |
+| VP-023 | Sign placement holds for every negative int64 value, including the minimum -2^63 (digit derivation is magnitude-based, so the sign is never doubled or lost) | Go property test (testing/quick) |
 
 ## Traceability
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-141 (helper-level contract), OD-103; design IM-05 (`pyfmt.D`), consumers SL:1172, 525, 527, 548, 561, 829, 831 |
+| Source | new — OD-141 (helper-level contract), OD-103; design IM-05 (`pyfmt.D`), consumers SL:1172, 525, 527, 548, 561, 829, 831, 920 (subagent clock `:02d`; ADV-P3-D10) |
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
 | L2 Domain Invariants | DI-012 (byte parity machinery) |
@@ -110,7 +112,7 @@ Expectations generated from CPython 3.11 (`f"{n:0{w}d}"` forms; OD-104 oracle di
 
 - BC-5.01.001 — related to (the `f`-spec sibling `F`)
 - BC-5.02.005 — consumes Repr/Str alongside
-- BC-1.02.012 — consumer (countdown `{je:3d}` form, via BC-5.01.003 helpers)
+- BC-1.02.012 — consumer (countdown zero-pad form — legacy has no `:3d` spec; the countdown pads via `:02d`, SL:525/527, via BC-5.01.003 helpers; ADV-P3-D15)
 
 ## Architecture Anchors (Recommended)
 

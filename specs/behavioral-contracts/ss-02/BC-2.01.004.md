@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "d4063b6"
+input-hash: "42e090a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; key defaults trace to legacy/dgx_statusline.py SL:73-137 via the P4r7 B.2.1 threshold register)"
@@ -23,7 +23,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D37: build-time reserved EnvName list extended with HYLO_TIMING_GATE and HYLO_PARITY_FUZZSECONDS"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +76,8 @@ incomplete, whose default fails its own validation, or whose env name collides.
    (a) a required field is empty; (b) `RationaleCode` is outside the legend;
    (c) the default does not pass the key's own type + range validation; (d) two keys share an
    `EnvName`, or an `EnvName` equals a reserved name (`HYLO_CONFIG`, `HYLO_TEST_NOW`,
-   `HYLO_PARITY_PYTHON`) or `COLUMNS`; (e) a name ending in `_s` is not type `Seconds`, or
+   `HYLO_PARITY_PYTHON`, `HYLO_TIMING_GATE`, `HYLO_PARITY_FUZZSECONDS`; the last two added
+   per ADV-P3-D37/ADV-P3-A20) or `COLUMNS`; (e) a name ending in `_s` is not type `Seconds`, or
    `_ms` not a millisecond integer/float type; (f) a default differs from the legacy value
    recorded in the golden table `internal/config/testdata/legacy_defaults.golden` (key →
    legacy value → SL line), except the two documented exceptions in PC-4.

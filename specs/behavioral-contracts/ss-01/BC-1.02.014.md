@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cf1968b"
+input-hash: "476fd5f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B05/B07/B18): float_div converts the int operand to float first (OverflowError at the int->float threshold, double-rounded quotient); OD-162 justification reworded to its actual test; EC-004 tie wording fixed; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,7 +57,11 @@ Notation: `\e` is the byte 0x1B.
       whitespace and `_` digit separators accepted, BC-5.01.002; floats truncate toward
       zero; `true` → 1); a TypeError or ValueError (non-numeric string such as `"1e3"`,
       list, object, NaN) → return `?`.
-   2. `n >= 1,000,000` → F(n / 1e6, 1) + `M` (Python `'f'`, half-even on the binary value).
+   2. `n >= 1,000,000` → F(n / 1e6, 1) + `M` (Python `'f'`, half-even on the binary value). The
+      division is CPython `float_div`: an int operand is converted to float FIRST, so
+      `OverflowError` fires at the int→float threshold |n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸
+      (oracle-verified 2026-11-18, e.g. 10**310), and the quotient is the double-rounded
+      `float(n)/1e6`, not the correctly rounded exact quotient (EC-012).
    3. `n >= 10,000` → `n // 1000` + `k` (integer floor division; the k divisor is the SI
       1000, a named constant).
    4. else → decimal `n` (negative values exact, e.g. `-20000`).
@@ -66,12 +71,13 @@ Notation: `\e` is the byte 0x1B.
 
 1. Both counts are always shown together once either is non-zero (`▲0` or `▼0` possible).
 2. Rationale (D15, T-037, documented): keep row 1 narrow on big refactors (review #8.1).
-3. Valid ranges (Policy 20, OD-162): legacy bakes both thresholds (10,000 `>=` → k;
-   1,000,000 `>=` → M, SL:866-867) and defines no config override, so the valid range of
-   `statusline.units.lines` is its registered default only; any other value is a
-   number-range config error (BC-2.02.003, OD-162). Assumed range for architect
-   registration: units.lines = {`k`/`M`} (registered default). Byte parity (vectors) is
-   obligated at the defaults.
+3. Valid ranges (Policy 20, OD-162): `statusline.units.lines` is a unit-selector key whose
+   non-default behavior cannot be defined from legacy — the thresholds (10,000 `>=` → k;
+   1,000,000 `>=` → M, SL:866-867) are baked into the single derivable semantics, and no
+   alternative scheme is derivable from the legacy program — so per OD-162's test its valid
+   range is its registered default only; any other value is a number-range config error
+   (BC-2.02.003, OD-162). Range for architect registration: units.lines = {`k`/`M`}
+   (registered default). Byte parity (vectors) is obligated at the defaults.
 
 ## Edge Cases
 
@@ -80,7 +86,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-001 | 0/0, null/null, missing | no segment |
 | EC-002 | 9999 / 10000 | `9999` / `10k` |
 | EC-003 | 999999 / 1000000 | `999k` / `1.0M` |
-| EC-004 | 1,250,000 / 1,350,000 | `1.2M` / `1.4M` (half-even on exact ties) |
+| EC-004 | 1,250,000 / 1,350,000 | `1.2M` / `1.4M` (nearest rounding of the binary value; 1.35 is not a binary tie — it is 1.3500000000000000888, so `1.4` is plain nearest, not half-even) |
 | EC-005 | 12345.9 / 2.9 | `12k` / `2` (truncation) |
 | EC-006 | strings `"12"`, `" 42 "`, `"  -3\n"`, `"1_000"` | `12`, `42`, `-3`, `1000` |
 | EC-007 | `"1e3"`, `"abc"`, `[1]`, NaN | `?` (NaN is truthy, so `▲?/▼0` shows) |
@@ -88,8 +94,8 @@ Notation: `\e` is the byte 0x1B.
 | EC-009 | negative below threshold, e.g. -20000 | `-20000` (thresholds are `>=` on signed value) |
 | EC-010 | `cost` truthy non-object | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 |
 | EC-011 | ±Infinity | OverflowError not caught → guard line (BC-1.02.026, CP-S11) |
-| EC-012 | `total_lines_added` a JSON integer beyond int64 but within float64, e.g. int(1e300) | `int(n)` is exact (Python arbitrary precision); `n / 1e6` is the correctly rounded quotient (finite) → hylo renders it byte-exact via `math/big` (OD-156, extends OD-137; oracle: `format(int(1e300)/1e6, ".1f")` = the 298-character `……1056.0M` string) |
-| EC-013 | a JSON integer whose `M` quotient exceeds float64 range, e.g. 2·10³¹⁵ | `n / 1e6` raises OverflowError (result too large), uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156) |
+| EC-012 | `total_lines_added` a JSON integer beyond int64 but within float64, e.g. int(1e300) | `int(n)` is exact (Python arbitrary precision); `n / 1e6` converts `n` to float first (exact here) and rounds twice — the result is `float(n)/1e6`, not the correctly rounded exact quotient (e.g. n = 2**53+1 → 9007199254.740992, where the exact quotient rounds to …93; oracle-verified 2026-11-18) → hylo reproduces the oracle bytes by emulating the double rounding (OD-156, extends OD-137; oracle: `format(int(1e300)/1e6, ".1f")` = the 298-character `……1056.0M` string) |
+| EC-013 | a JSON integer beyond the int→float conversion threshold, e.g. 2·10³¹⁵ or 10**310 | `n / 1e6` raises OverflowError because the int operand cannot be converted to float (|n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸) — even though a 1e304 quotient would fit — uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156; oracle-verified 2026-11-18) |
 
 ## Canonical Test Vectors
 

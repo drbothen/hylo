@@ -1,10 +1,10 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:58:00Z
+timestamp: 2026-11-18T01:38:15Z
 phase: 1a
 inputs:
   - CLAUDE.md
@@ -12,7 +12,7 @@ inputs:
   - .factory/specs/research/domain-hybrid-routing-claude-code-2026-11-14.md
   - .factory/planning/market-intel.md
   - .factory/specs/owner-decisions-log-2026-11-14.md
-input-hash: "ab532c5"
+input-hash: "0b266af"
 traces_to: docs/PLAN.md
 ---
 

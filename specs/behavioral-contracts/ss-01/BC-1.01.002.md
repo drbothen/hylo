@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:21:12Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "0a39af3"
+input-hash: "278b2ba"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "consolidated pass-2 follow-up: transcript site re-measured end to end at 993/994 — equality with stdin, not 989/990 divergence, 2026-11-17T21:21:12Z"
+  - "pass-3 remediation (ADV-P3-B14/B16/B10): 4,300-digit int-literal edge case added; VP table cites VP-005/VP-006 (not VP-001); ARCH-03 anchor normalized to the stable #statusline-guard fragment; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,7 +50,9 @@ the guard (BC-1.01.001).
 1. If stdin parses (strict UTF-8, BC-1.01.008) as a JSON **object**, the decoded ordered object is the render input.
 2. Otherwise the render input is `{}`. This covers: empty stdin; whitespace only; malformed JSON; trailing garbage
    after a value; a UTF-8 BOM before `{`; invalid UTF-8 (BC-1.01.008); nesting deeper than the CPython 3.11 limit
-   at this call site; and a valid top-level array, string, number, `true`/`false` or `null`.
+   at this call site; an integer literal whose `int`/`str` conversion exceeds CPython 3.11's 4,300-digit limit
+   (json raises `ValueError`, caught at SL:1203-1204 — see EC-009); and a valid top-level array, string, number,
+   `true`/`false` or `null`.
 3. With `{}` the refresh renders the defaults (pill `◨ ?`, model `?`) and exits 0; it never degrades because of the
    decode result alone.
 4. Python `json` leniencies are kept when the object parses: `NaN`/`Infinity`/`-Infinity` tokens accepted; duplicate
@@ -74,6 +77,7 @@ the guard (BC-1.01.001).
 | EC-006 | Same with 993 nested arrays (total depth 994) | `{}` (CPython RecursionError at this call site) |
 | EC-007 | `{"model":{"display_name":"X","display_name":"Y"},"v":NaN}` | parses; model label `Y` |
 | EC-008 | `{"model":"x"}` (valid object, wrong inner type) | not this BC: degrades via BC-1.01.001 (CP-S01) |
+| EC-009 | an integer literal of 4,301 digits (over CPython 3.11's `sys.int_max_str_digits` = 4300; oracle-verified 2026-11-18: `json.loads` raises `ValueError` "Exceeds the limit (4300 digits)") | `ValueError` caught at SL:1203-1204 → `{}` → the 45-byte default line |
 
 Note on EC-005/006: the stdin depth limit pinned here (993 accepted / 994 rejected) equals the transcript
 `json.loads` limit (993 accepted / 994 rejected, BC-5.02.003) — both call sites sit at the same Python
@@ -98,6 +102,7 @@ Expected default line (45 bytes): `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?
 | `EF BB BF` + `{"model":{"id":"x"}}` | the 45-byte default line | edge-case |
 | object with 993 nested arrays (EC-006) | the 45-byte default line | edge-case |
 | `{"model":{"display_name":"X"}} trailing` | the 45-byte default line | error |
+| `{"model":{"display_name":"X"},"n":` + 4,301-digit decimal literal + `}` | the 45-byte default line (EC-009; integers up to 4,300 digits stay exact per PC4) | edge-case |
 
 All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`, `DGX_SL_GIT=0`).
 
@@ -105,8 +110,8 @@ All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-001, VP-005, VP-006 | For all byte strings, decode returns an object or `{}`, never an error to the caller | fuzz |
-| VP-001, VP-005, VP-006 | Go decode result equals CPython `json.load` (text, strict UTF-8) acceptance on the generated corpus | Tier C differential fuzz |
+| VP-005, VP-006 | For all byte strings, decode returns an object or `{}`, never an error to the caller | fuzz |
+| VP-005, VP-006 | Go decode result equals CPython `json.load` (text, strict UTF-8) acceptance on the generated corpus | Tier C differential fuzz |
 
 ## Traceability
 
@@ -129,7 +134,7 @@ All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#statusline-input` — internal/statusline/input.go (stdin decode, {} fallback) (stdin decode) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#statusline-guard` — internal/statusline/input.go (stdin decode, {} fallback; effect-script step 1) (stdin decode) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

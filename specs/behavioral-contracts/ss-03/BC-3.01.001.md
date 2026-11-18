@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
-input-hash: "af02e6d"
+input-hash: "b79ef38"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy CACHE_DIR at legacy/dgx_statusline.py SL:78)"
@@ -18,7 +18,8 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D17: default exceptions aligned with BC-2.01.004 PC-4 (two exceptions, OD-101 + OD-111)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,8 +63,10 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 
 ## Invariants
 
-1. The default of `paths.cache_dir` is the one explicit owner exception to D15's "defaults equal `legacy/` until
-   cutover" (OD-101); its registry rationale cites OD-101. Every other P1 default equals legacy.
+1. The default of `paths.cache_dir` is one of the TWO explicit owner exceptions to D15's "defaults equal
+   `legacy/` until cutover" (OD-101); its registry rationale cites OD-101. The other is
+   `backends[0].model_prefixes` (`claude-sonnet`, OD-111, BC-2.01.004 PC-4). Every other P1 default equals
+   legacy (ADV-P3-D17 alignment).
 2. The last path component is always the literal `hylo` (product name; a format constant, not config).
 3. The result depends only on the environment passed in (the function takes an env lookup, so tests inject it).
 

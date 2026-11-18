@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.1"
+version: "1.1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "37d34b7"
+input-hash: "54c520c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; --subagent is a valid P1 flag dispatched per BC-1.07.*, OD-155; legacy reference: the --subagent dispatch at legacy/dgx_statusline.py SL:1240-1241)"
@@ -22,7 +22,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D05+D28: EC-004 exempts --subagent anywhere in argv[1:] incl. after -- (OD-155, SL:1240); stderr suffix amended"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,7 +39,8 @@ removal_reason: null
 ## Description
 
 `hylo statusline` defines no other flags in P1 (`--subagent` is a VALID flag in P1, OD-155:
-it dispatches the subagent status line mode, BC-1.07.*). Any other flag-shaped argument makes
+it dispatches the subagent status line mode, BC-1.07.*). Any other flag-shaped argument (any argument other than `--subagent` and the `--`
+terminator) makes
 it print
 exactly one grey line `hylo: unknown flag <flag>` and exit 0, never a blank line and never a
 non-zero status (OD-112, same rule as D4-EX-3).
@@ -56,8 +58,9 @@ non-zero status (OD-112, same rule as D4-EX-3).
    argv order, where `<flag>` is the whole argument as given (including any `=value`),
    escaped by the BC-2.02.001 `<value>` rule (control bytes and invalid UTF-8 → `\xNN`).
 2. Exit status is 0.
-3. stderr receives `hylo: unknown flag <flag> (hylo statusline takes no flags)\n` for each
-   flag in argv order.
+3. stderr receives `hylo: unknown flag <flag> (--subagent is the only P1 flag)\n` for each
+   flag in argv order (suffix amended per ADV-P3-D28; the former "takes no flags" text is
+   false since OD-155).
 4. The check runs before configuration resolution: an unknown flag takes precedence over a
    config error (BC-2.02.001 is not printed). No stdin read is required, no cache file is
    read or written, no network request or subprocess runs.
@@ -80,7 +83,7 @@ non-zero status (OD-112, same rule as D4-EX-3).
 | EC-001 | `hylo statusline --subagent` | NOT this BC: `--subagent` is valid in P1 (OD-155), dispatched per BC-1.07.* |
 | EC-002 | `hylo statusline -h` | `\e[90mhylo: unknown flag -h\e[0m\n`, exit 0 |
 | EC-003 | `hylo statusline --config=x.yaml` | `\e[90mhylo: unknown flag --config=x.yaml\e[0m\n`, exit 0 (no config flag on statusline in P1) |
-| EC-004 | `hylo statusline -- --subagent` | positional `--subagent` after `--` is data for the normal render (BC-1.07.* governs the mode dispatch; an unknown flag after `--` is likewise positional), exit 0 |
+| EC-004 | `hylo statusline -- --subagent` | NOT a normal render: `--subagent` ANYWHERE in argv[1:] routes to the subagent mode before any flag handling, including after `--` (OD-155; legacy SL:1240 `"--subagent" in sys.argv[1:]`; ADV-P3-D05, aligning with BC-1.07.001 PC-4) |
 | EC-005 | `hylo statusline -` | normal render (`-` is positional), exit 0 |
 | EC-006 | `hylo statusline foo --a --b` | line names `--a`; stderr lists `--a` and `--b` |
 | EC-007 | `-h` plus `HYLO_STATUSLINE_TELEMETRY_TTL_S=nan` | unknown-flag line (precedence over the config error), exit 0 |

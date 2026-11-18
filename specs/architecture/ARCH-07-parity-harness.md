@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T02:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
@@ -94,8 +94,8 @@ input-hash: "089b35b"
 | Cache swap | `TestParityCacheSwap_FourCaches` |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
 | Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` |
-| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, cps01..cps17, cpt01..cpt07, cpn01, cpn02, cpo01..cpo09, cpa01..cpa03 |
-| Case contents | `stdin.json.tmpl`, `settings`, `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps.jsonl` (clock step + transcript appends per step) |
+| case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpn01, cpn02, cpo01..cpo11, cpa01..cpa05 |
+| Case contents | `stdin.json.tmpl`, `settings`, `argv` (one JSON array of string arguments passed to the built `hylo` binary verbatim; default `["statusline"]`; subagent-family rows carry the flag arrangements under test, e.g. `["statusline", "--", "--subagent"]` — pass-3 A03, OD-155/OD-168: the harness invokes the built binary with the case argv, superseding the earlier "invokes `hylo statusline` without flags" wording), `metrics.json` or mode (down/500/garbage), optional `seed/` cache seeds, `steps.jsonl` (clock step + transcript appends per step) |
 | Exclusions file | `internal/statusline/testdata/parity/exclusions.json` |
 | Tier B goldens | `internal/statusline/testdata/goldens/*.golden`, `*.windows.golden` |
 | Clock shim | `internal/statusline/testdata/pyhooks/sitecustomize.py` |

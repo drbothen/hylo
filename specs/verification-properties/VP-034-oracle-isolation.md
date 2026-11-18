@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:02:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.01.001.md, behavioral-contracts/ss-06/BC-6.01.002.md, behavioral-contracts/ss-06/BC-6.01.003.md, owner-decisions-log-2026-11-14.md]
 input-hash: "04658a4"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — per-OS child env: Windows TEMP/TMP + PYTHONUTF8/PYTHONIOENCODING pins; no literal temp paths (A2-17)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — per-OS child env: Windows TEMP/TMP + PYTHONUTF8/PYTHONIOENCODING pins; no literal temp paths (A2-17)", "1.3 2026-11-18T09:02:00Z: ADV-P3 fixes (A2-04) — Windows child env additionally pins USERPROFILE (and HOMEDRIVE/HOMEPATH) to the parity roots so ntpath.expanduser resolves caches inside the sandbox (CPython 3.8+ ntpath.expanduser reads USERPROFILE, ignores HOME), and preserves SYSTEMROOT (socket initialization); catalog note added: BC-1.01.004 → VP-034 is a stale pairing (A2-13)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,11 +40,19 @@ invocation uses `-s`, never `-I`/`-E` (`-I` would drop the sitecustomize clock s
 OD-109); the child environment is constructed from scratch — no `*_proxy` variables,
 no inherited GP-1..GP-6 variables, and per-OS temp/locale pins: on POSIX, fixed
 HOME/USERPROFILE, TMPDIR and `LANG=en_US.UTF-8`; on Windows, `TEMP` and `TMP` (which
-CPython reads instead of TMPDIR) pinned to the parity roots, and `PYTHONUTF8=1` plus
+CPython reads instead of TMPDIR) pinned to the parity roots, `USERPROFILE` (and
+`HOMEDRIVE`/`HOMEPATH`) pinned to the parity profile roots so
+`ntpath.expanduser` — which since CPython 3.8 reads USERPROFILE and ignores HOME —
+resolves caches inside the sandbox, `SYSTEMROOT` preserved (Windows socket
+initialization needs it), and `PYTHONUTF8=1` plus
 `PYTHONIOENCODING=utf-8` so oracle pipe/stdout bytes are UTF-8 regardless of the
 locale code page; and the
 canary test fails the harness if the shim did not load (BC-6.01.003), so a silently
 disabled clock shim cannot produce false-pass parity.
+
+Catalog note (A2-13): VP-034 carries no BC-1.01.004 anchor — oracle isolation does
+not verify visible width (that surface is VP-027/VP-040's). A rebuilt VP-INDEX must
+not restore a BC-1.01.004 → VP-034 pairing.
 
 ## Source Contract
 
@@ -86,6 +94,14 @@ func TestOracleEnv_FromScratch(t *testing.T) {
     if runtime.GOOS == "windows" {
         if env["TEMP"] != tmp || env["TMP"] != tmp { // CPython on Windows reads TEMP/TMP
             t.Fatal("Windows TEMP/TMP not pinned to the parity root")
+        }
+        vol := filepath.VolumeName(home) // A2-04: pin the profile triple so
+        homePath := strings.TrimPrefix(home, vol) // ntpath.expanduser stays in the sandbox
+        if env["USERPROFILE"] != home || env["HOMEDRIVE"] != vol || env["HOMEPATH"] != homePath {
+            t.Fatal("Windows profile pins (USERPROFILE/HOMEDRIVE/HOMEPATH) not the parity values")
+        }
+        if env["SYSTEMROOT"] == "" { // socket initialization breaks without it
+            t.Fatal("SYSTEMROOT not preserved in the child env")
         }
         if env["PYTHONUTF8"] != "1" || env["PYTHONIOENCODING"] != "utf-8" {
             t.Fatal("Windows pipe encoding not pinned to UTF-8 (locale code page) ")

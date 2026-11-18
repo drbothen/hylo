@@ -1,16 +1,16 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "ef650a3"
+input-hash: "6caea15"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python max(list) used at legacy/dgx_statusline.py SL:671)"
@@ -22,7 +22,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D33: NaN displacement wording fixed (a later finite element displaces a non-first NaN)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,8 +56,8 @@ resolved ADV-P2-D08): empty input returns typed `ErrValue` (PC-1); the ARCH-06 s
 2. Otherwise the result is `vals[0]`, replaced by `vals[i]` only when `vals[i] > current`
    (Python's first-maximal-wins order). Consequence for NaN: a NaN never compares greater
    (`nan > x` is false for every `x`, including NaN), so a NaN never displaces the current
-   value — it is kept only when it is `vals[0]` or when every later element also fails to
-   displace. A trailing or middle NaN therefore leaves an earlier finite winner in place
+   value — a NaN is the result only when it is `vals[0]` and no later element ever
+   compares greater (a later finite element DOES displace a non-first NaN, EC-003). A trailing or middle NaN therefore leaves an earlier finite winner in place
    (`max([1, nan, 2]) == 2`, `max([1, 2, nan]) == 2`, CPython 3.11 verified with
    `python3 -I`), exactly as Python decides it (pinned table).
 3. Same comparison semantics as `pyfmt.Max` applied left-fold, but always in Python's

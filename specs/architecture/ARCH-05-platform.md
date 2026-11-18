@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "platform"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T23:59:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -28,7 +28,12 @@ input-hash: "ea79506"
 | `proc_linux.go` | `/proc/<pid>/stat` after the last `)`; start = `btime` + ticks/`procUserHZ`, with `procUserHZ = 100` a named constant, not config: Linux procfs emits times in USER_HZ, a fixed kernel-ABI unit (= 100, independent of CONFIG_HZ) that equals the glibc `sysconf(_SC_CLK_TCK)`/`CLK_TCK` value on every supported kernel — Go's stdlib has no sysconf, and the constant reproduces that ABI rather than a tunable (ADV-P1-A18) |
 | `proc_windows.go` | `CreateToolhelp32Snapshot` + `GetProcessTimes`; PID-reuse guard (parent created before child) |
 | `proc_other.go` | `//go:build !darwin && !linux && !windows`: not found |
-| `fd_unix.go`, `fd_windows.go` | `StatFD(n int) (regular bool)` for the int-`transcript_path` = fd semantics (BC-1.03.015) |
+
+No descriptor helpers exist: OD-161 (pass-3 A06, superseding the "int `transcript_path`
+= fd semantics" reading) rules that an integer `transcript_path` means NO transcript
+with no descriptor I/O at all — the integer branch is a pure type switch in
+`internal/statusline` (`sl/transcript.go`), so `StatFD`/`fd_*.go` were removed from
+this section and BC-1.03.015 remapped (BC-COMPONENT-MAP).
 
 ### Decision: native per-OS ancestor probe replaces the ps subprocess (AD-07)
 
@@ -60,5 +65,6 @@ input-hash: "ea79506"
 
 ## Mapping
 
-BC-3.01.001 -> paths; BC-3.02.001/.002 -> proc; fd helpers serve BC-1.03.015. All
+BC-3.01.001 -> paths; BC-3.02.001/.002 -> proc. Integer-`transcript_path` handling
+needs no platform code (OD-161; see the note under Files). All
 per-OS edge differences are named in BC-3.02.002's register, not discovered at runtime.

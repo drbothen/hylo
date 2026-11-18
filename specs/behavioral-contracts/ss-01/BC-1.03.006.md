@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:21:12Z
+timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c2f799c"
+input-hash: "44590c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1104-1112)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register), 2026-11-17T21:21:41Z"]
+modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,23 +52,27 @@ totals are cumulative for the session and are **not** reset at compaction.
    `c_wr += _w`; `c_rd += _r`; `tout += u.output_tokens or 0`.
 3. Type rules (Python `Num` arithmetic, design IM-02): int + int = exact int (no overflow, no float64 rounding);
    anything + float = float (IEEE 754 double); `true` = 1, `false` = 0 (falsy → int 0); NaN propagates; negative
-   values are added as-is. **Exception (overflow, CP-O06):** when an int operand whose magnitude exceeds the
-   float64 maximum (DBL_MAX ≈ 1.7976e308; JSON admits ints up to 4,300 digits) meets a float operand, Python
-   raises `OverflowError` ("int too large to convert to float"; oracle-verified 2026-11-17 for `+`, `−`, `×`, `÷`)
-   instead of producing a float — e.g. `input_tokens: 1.5` accumulated onto a 310-digit `cache_creation_input_tokens`
-   (SL:1108), or a float `tin` plus a huge int. Legacy degrades (crash path CP-O06, BC-1.03.018); hylo **skips the
-   line** (owner ruling OD-156, extending D4-EX-2 like ruling Q-c; exclusion id `OD-156`), covered by dedicated Go
+   values are added as-is. **Exception (overflow, CP-O06):** when an int operand with magnitude at or above
+   2^1024 − 2^970 meets a float operand, Python raises `OverflowError` ("int too large to convert to float";
+   oracle-verified 2026-11-17 for `+`, `−`, `×`, `÷`) instead of producing a float — DBL_MAX ≈ 1.7976e308 itself
+   and every smaller magnitude converts silently, so a bare \|int\| > DBL_MAX predicate skips lines legacy processes
+   (ADV-P3-C07; JSON admits ints up to 4,300 digits) — e.g. `input_tokens: 1.5` accumulated onto a 310-digit
+   `cache_creation_input_tokens` (SL:1108), or a float `tin` plus a huge int. Legacy degrades (crash path CP-O06,
+   BC-1.03.018); hylo **skips the line** (owner rulings OD-156/Q-c: the CP-O entries ride the extended `D4-EX-2`
+   id and cite OD-156; the closed exclusion-id set has no `OD-156` id — ADV-P3-C08), covered by dedicated Go
    table tests.
 4. The cache stores each total in Python `json.dump` form: ints as decimal digits of any length **up to the CPython
    int↔str conversion limit (`sys.get_int_max_str_digits()` = 4,300; oracle-verified 2026-11-17)**, floats as `repr`
    (`1.5`, `2.0`, `1e+16`), `NaN`/`Infinity` as bare tokens.
-5. **Digit-limit save failure (EC-009):** when any serialized accumulator exceeds 4,300 decimal digits (e.g. two
+5. **Digit-limit save failure (EC-009, CP-O09):** when any serialized accumulator exceeds 4,300 decimal digits (e.g. two
    counted 4,300-digit `input_tokens` summing to 4,301 digits, oracle-verified), CPython `json.dump` raises
    `ValueError` mid-write (after partial content has reached the stream); `save_cache` swallows it, so the mix cache
    is **not written** and keeps its previous bytes, and the failure repeats every refresh while the totals stay
-   above the limit. hylo reproduces the **no-write** observable; the temp-file disposition is ruled by OD-163
-   (BC-1.06.001 EC-010).
-5. A `compact_boundary` line does not change these totals (BC-1.03.008).
+   above the limit. **Not moot in hylo (ADV-P3-C09):** the CP-O06..O08 skip rule requires an int to meet a float,
+   but two exact ints add without ever touching a float, so nothing is skipped; hylo counts both lines exactly
+   (EC-002) and reproduces the **no-write** observable and the re-failing parse on every later refresh; the
+   temp-file disposition is ruled by OD-163 (BC-1.06.001 EC-010).
+6. A `compact_boundary` line does not change these totals (BC-1.03.008).
 
 ## Invariants
 
@@ -87,8 +91,8 @@ totals are cumulative for the session and are **not** reset at compaction.
 | EC-006 | `input_tokens: -5` | `tin` -5 |
 | EC-007 | `output_tokens: 2.0` | `tout` 2.0 (float persists in the cache) |
 | EC-008 | `input_tokens: "5"` (truthy string) | CP-T04: line skipped under D4-EX-2 (BC-1.03.018), not accumulated |
-| EC-009 | Accumulator crosses 4,301 decimal digits (two counted 4,300-digit `input_tokens`) | `json.dump` raises `ValueError` mid-write (CPython int↔str limit 4,300, oracle-verified); no cache write, previous cache bytes retained (postcondition 5; temp disposition per OD-163) |
-| EC-010 | Huge int (e.g. 310-digit `cache_creation_input_tokens`) meets a float operand (`input_tokens: 1.5`, or a float `tin`) | Python raises `OverflowError` at SL:1108 (oracle-verified); legacy degrades (CP-O06, sticky); hylo skips the line per OD-156, totals unchanged |
+| EC-009 | Accumulator crosses 4,301 decimal digits (two counted 4,300-digit `input_tokens`, int-only — no float operand, so no CP-O06..O08 skip: not moot) | `json.dump` raises `ValueError` mid-write (CPython int↔str limit 4,300, oracle-verified with 19 bytes already streamed); no cache write, previous cache bytes retained (postcondition 5; temp disposition per OD-163); hylo reproduces the no-write |
+| EC-010 | Huge int (e.g. 310-digit `cache_creation_input_tokens`) meets a float operand (`input_tokens: 1.5`, or a float `tin`) | Python raises `OverflowError` at SL:1108 (oracle-verified; bound 2^1024 − 2^970, ADV-P3-C07); legacy degrades (CP-O06, sticky); hylo skips the line per OD-156, totals unchanged |
 
 ## Canonical Test Vectors
 
@@ -103,6 +107,7 @@ Expected bytes are the complete cache files, re-pinned 2026-11-15 with the legac
 | usage `{"input_tokens": NaN}` | `{"size": 93, …, "tin": NaN, …, "c_in": NaN, "rb": 0, "pp": NaN, …}` | edge-case |
 | usage `{"output_tokens": 2.0}` | `{"size": 94, …, "tin": 0, "tout": 2.0, …, "c_in": 0, "rb": 0, "pp": 0, …}` | edge-case |
 | usage `{"input_tokens": null}` | `{"size": 94, …, "tin": 0, …, "pp": 0, …}` | error |
+| CP-O06 (lines `x` then `y`, distinct ids): `x` = `{"input_tokens": 5}`; `y` = `{"input_tokens": 1.5, "cache_creation_input_tokens": 10^309}` (310 digits, ≥ 2^1024 − 2^970). Legacy: `OverflowError` at SL:1108, degraded line, cache not saved (oracle-verified 2026-11-18) | hylo (OD-156): `y` skipped, `x` counted — cache exactly `{"size": 527, "res": 0, "conv": 0, "think": 0, "tin": 5, "tout": 0, "c_wr": 0, "c_rd": 0, "mixv6": 1, "c_in": 5, "rb": 0, "pp": 5, "ids": ["x"], "lr": null, "lu": null, "cur": null}` (base bytes pinned from legacy on the `x`-only transcript, `"size"` 91 + 436 deleted bytes per BC-1.03.018 PC4) | error |
 
 (`…` elides keys equal to the first row's values; key order is always the 16-key sequence of BC-1.03.002.)
 
@@ -118,7 +123,7 @@ Expected bytes are the complete cache files, re-pinned 2026-11-15 with the legac
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-009, CAP-011 (token totals feed cost/tokens widgets) |
-| L2 Domain Invariants | DI-007 |
+| L2 Domain Invariants | DI-007; DI-012 (the OD-156/D4-EX-2 skip and the CP-O09 no-write are named, tested deviations) |
 | Source | legacy/dgx_statusline.py:_mix_counts (SL:1104-1112) |
 | Legacy contract | BC-SL-035 (base; pinned pass-3 r1: float usage accepted) |
 | Parity class | byte-exact |

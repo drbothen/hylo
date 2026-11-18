@@ -1,10 +1,10 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.2"
+version: "1.3"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
@@ -47,13 +47,13 @@ Triggers: `pull_request`, `push` to `main`, `workflow_dispatch`, and `schedule`
 | Job | Matrix | Timeout | What it does |
 |---|---|---|---|
 | `lint (gofmt + vet)` | ubuntu-24.04 | 10 min | `gofmt -l .` fails on any unformatted file; `go vet ./...` |
-| `test (ubuntu-24.04)` / `(macos-15)` / `(windows-2025)` | 3 OSes (BC-6.04.001) | 30 min | `go test -race -count=1 ./...` — `-race` on Linux/macOS only, per ARCH-08 |
+| `test (ubuntu-24.04)` / `(macos-15)` / `(windows-2025)` | 3 OSes (BC-6.04.001) | 30 min | setup-python runs FIRST and exports `HYLO_PARITY_PYTHON` before `go test -race -count=1 ./...` (pass-3 D22: GitHub always sets `CI=true`, and Tier A lives inside the plain test step, so the interpreter must exist before `go test`, never after; `-race` on Linux/macOS only, per ARCH-08) |
 | `gitleaks (full history)` | ubuntu-24.04 | 10 min | `gitleaks detect --log-opts="--all"` (fetch-depth 0) **plus** the category pattern scan |
 | `locate harness packages` (probe) | ubuntu-24.04 | 5 min | emits `parity`/`statusline` outputs gating the placeholder jobs |
 | `parity tier A (live corpus)` | 3 OSes | 45 min | placeholder; skipped until `internal/parity` exists |
 | `parity tier B (committed goldens)` | 3 OSes | 30 min | placeholder; no Python needed (goldens committed; Windows included) |
 | `parity tier C (nightly differential fuzz)` | 3 OSes | 60 min | schedule-only; `HYLO_PARITY_FUZZSECONDS=1800` = 30 min/OS (OD-149); non-gating |
-| `timing report (non-gating)` | 3 OSes | 15 min | placeholder for the BC-6.04.002 report; `HYLO_TIMING_GATE` intentionally unset (OD-117: gate binds only where the owner opts in) |
+| `timing report (non-gating)` | 3 OSes | 15 min | runs `go test ./internal/parity -run '^TestTiming$' -count=1` once `internal/parity` exists (pass-3 D39 wiring; upload the report as a workflow artifact); `HYLO_TIMING_GATE` intentionally unset (OD-117: gate binds only where the owner opts in). Positive coverage (pass-3 A16): the job fails unless it prints `timing: N cases timed > 0` with `N >= 1` — an activated timing job reporting on zero cases must not pass |
 
 Harness-placeholder semantics: job-level `if` reads `needs.probe.outputs.*`
 (hashFiles() is not allowed in job-level `if` — actionlint-enforced); a skipped
@@ -79,7 +79,8 @@ fail when it checked nothing. Per job, the required line is:
 | `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); PR-side `t.Skip` is fine only because the job is non-gating |
 | exclusion machinery / canary | `exclusions: M entries validated against the closed set` | `M` ≠ file entry count, or the file is missing |
 | `lint` / `test` / `govulncheck` | `go: K files scanned` + `go test: N tests run, S skipped` (test jobs) | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` or `N == 0` fails; an all-skip suite is reported via `S` and investigated, not accepted (ADV-P2-A15) |
-| gitleaks + category pattern scan | `hygiene: K files scanned, H hits` | `K == 0` (scan ran over nothing) |
+| gitleaks + category pattern scan | `hygiene: K files scanned, H hits` | `K == 0` (scan ran over nothing) or `H > 0` (any flagged hit fails the job — pass-3 A18: "found hits" is a failure, never an accepted pass) |
+| `timing report` (pass-3 A16/D39) | `timing: N cases timed > 0` | `N == 0` (an activated timing job reporting on zero cases must not pass) |
 
 Additionally: a skipped required check must not count as a pass — the parity/timing
 placeholders stay out of `required_status_checks` until they can execute (Phase 3), and
@@ -91,7 +92,10 @@ Category pattern scan (policy 21 / NFR-006): after gitleaks, a `git grep -E` pas
 flags private-IP literals (10/8, 192.168/16, 172.16–31/12, with a
 `(^|[^0-9])` boundary guard so long dotted-number chains do not false-positive),
 POSIX/Windows home paths, and personal emails; GitHub no-reply identities and
-`example` domains are exempt. Regexes verified against positive and negative
+`example` domains are exempt. Categories added pass-3 (A17, closing the gap to the
+CLAUDE.md hygiene set): personal/infra hostnames, usernames, session links and
+UUIDs (Claude-session links included), and "Claude" in product/binary/logo names.
+Regexes verified against positive and negative
 fixtures before landing.
 
 ## Release (`release.yml`)
@@ -104,6 +108,11 @@ falls back to the VCS stamp, then `dev`; BC-4.01.003). Targets: `linux/amd64`,
 `hylo_<os>_<arch>[.exe]`. SHA-256 checksums in `SHA256SUMS`. Publishes via `gh
 release create --generate-notes` — no third-party release action. Release context
 (D12/AD-11): GitHub Releases now; Homebrew tap / Scoop / `go install` are follow-ups.
+Untested-target disclosure (pass-3 A28): the CI test matrix exercises `linux/amd64`
+(ubuntu), `darwin/arm64` (macos-15) and `windows/amd64` (windows-2025); the release
+targets `linux/arm64` and `darwin/amd64` are cross-compiled but never test-exercised
+in CI — a disclosed gap, accepted for P1 because the FMA-sensitive arm64 sites
+(ARCH-06) are compiled identically per-GOOS and are exercised on `darwin/arm64`.
 
 ## Security (`security.yml`)
 

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "ca9ed6a"
+input-hash: "db24750"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -23,7 +23,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D06: PC-3 waiver for scope-stdout exclusion entries cross-referenced"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -69,7 +70,10 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
 3. **Named caches.** Let `N_py` and `N_go` be the names of regular files directly in
    each cache dir, after removing mkstemp temp names (BC-6.03.003).
    - `N_py` must equal `N_go` as sets. A cache file present on one side only is a
-     failure that names the file.
+     failure that names the file. WAIVER: for a case carrying an exclusion entry with
+     `scope: stdout`, this set-equality is replaced by the asymmetric comparison
+     licensed by that entry (oracle self-consistency + Go empty-listing assertion,
+     BC-6.03.004 PC-3; ADV-P3-D06). No waiver exists for unlisted cases.
    - For every name in the set, the file contents must be byte-equal.
 4. **stderr ignored.** Neither side's stderr takes part in the comparison. A legacy
    traceback, or a Go diagnostic, never makes a step fail by itself. It is kept in the

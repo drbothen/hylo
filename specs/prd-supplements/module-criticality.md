@@ -1,14 +1,14 @@
 ---
 document_type: module-criticality
 level: ops
-version: "1.5"
+version: "1.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T05:30:00Z
+timestamp: 2026-11-18T01:38:15Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "0d3a902"
+input-hash: "c2ae96e"
 traces_to: prd.md
 ---
 
@@ -52,7 +52,7 @@ rulings OD-155..OD-165 are settled constraints for this schedule.
 
 | Module | Path | Tier | Rationale | Kill Rate Target | VP Count |
 |--------|------|------|-----------|-----------------|----------|
-| Status Line (S1) | `internal/statusline` | CRITICAL | carries all 93 render/parser/widget/store contracts; byte-exact parity is the D4 definition of done; every CP-* crash path lives here | >= 95% | 20 (VP-001, -003, -005, -007, -008, -013, -014, -018, -019, -021, -022, -027, -028, -029, -030, -031, -036, -038, -039, -040) |
+| Status Line (S1) | `internal/statusline` | CRITICAL | carries all 101 render/parser/widget/store/subagent-panel contracts; byte-exact parity is the D4 definition of done; every CP-* crash path lives here | >= 95% | 20 (VP-001, -003, -005, -007, -008, -013, -014, -018, -019, -021, -022, -027, -028, -029, -030, -031, -036, -038, -039, -040) |
 | Cost History (SS-01, inherited S1) | `internal/cost` | CRITICAL (inherits S1) | split is architectural only (feasibility report decision log); its bytes are owner-visible history pinned by cost goldens | >= 95% | 3 (VP-018, -020, -021; VP-018/VP-021 span statusline and cost) |
 | Configuration (S2) | `internal/config` | HIGH | typed domain and D4-EX-3 classes gate every settings interpretation; mutants shift error bytes/exit paths | >= 90% | 3 (VP-015, -016, -017) |
 | Platform (S3) | `internal/platform` | HIGH | wrong dirs/probes corrupt caches and window age; per-OS divergence is subtle | >= 90% | 3 (VP-014, -032, -033) |

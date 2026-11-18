@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:24:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.02.004.md, behavioral-contracts/ss-01/BC-1.06.001.md, behavioral-contracts/ss-01/BC-1.05.009.md, behavioral-contracts/ss-01/BC-1.04.020.md, behavioral-contracts/ss-01/BC-1.03.002.md, owner-decisions-log-2026-11-14.md]
 input-hash: "fc30fec"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:24:00Z: ADV-P3 fix (A2-19) — BC-1.02.005/BC-1.02.013 brought into the body: the session-family swap legs carry the rate-limit cache shape (BC-1.02.005) and the session-state field discipline (BC-1.02.013) through both directions, so frontmatter bcs and Source Contract now agree"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -39,7 +39,10 @@ history): a file written by the Python oracle is loaded by Go into the identical
 ordered `pyfmt.Value` and vice versa; and a full refresh run by one side against the
 other's seeded caches yields byte-identical cache files afterwards. Key order is
 inheritance-preserved (BC-1.04.020), int/float distinction survives (api_ms stays int,
-BC-1.05.009), and NaN usd bytes match the oracle pin (OD-138).
+BC-1.05.009), and NaN usd bytes match the oracle pin (OD-138). The session-family
+swap legs carry the rate-limit cache shape (BC-1.02.005) and the session-state
+field discipline (BC-1.02.013) through both directions — the seeded caches exercise
+the fields those contracts own, which is what their frontmatter routing claims.
 
 ## Source Contract
 
@@ -47,7 +50,9 @@ BC-1.05.009), and NaN usd bytes match the oracle pin (OD-138).
   reverse, all four caches.
 - **Partial coverage:** BC-1.06.001 (load/save never-raise), BC-1.05.009 (record_cost
   exact JSON format), BC-1.04.020 (pinned sequence and cache key order), BC-1.03.002
-  (mix cache name/reset rules), BC-1.02.030 (effective_rl writes).
+  (mix cache name/reset rules), BC-1.02.030 (effective_rl writes), BC-1.02.005
+  (rate-limit cache shape through the session-family legs), BC-1.02.013
+  (session-state field discipline through the session-family legs).
 - **Invariant verified:** DI-012 (byte-exact interchange is the parity substrate);
   AD-08 (byte-exact writers over ordered Value).
 

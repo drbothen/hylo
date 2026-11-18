@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - BC-ALLOCATION.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "8b13223"
+input-hash: "fea6dfc"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -24,7 +24,8 @@ parity_class: D4-EX-3
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D18+D32: subagent-mode config error = zero bytes stdout + stderr detail + exit 0 (OD-168); [from ENVNAME] rule covers indexed entries and defaults layer"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -76,8 +77,12 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 5. **Exit status is 0** (DI-008: never blank, never non-zero).
 6. **stderr** receives one line per error, in registry order:
    `hylo: config error: <key>=<value> (<reason>) [from <ENVNAME>]\n`, where `<ENVNAME>` is
-   the `HYLO_*` variable that supplied the value (`EnvName(key)`, BC-2.01.004). stderr is not
-   part of the parity comparison; it is asserted by Go table tests only.
+   the `HYLO_*` variable that actually supplied the value: `EnvName(key)` for scalar keys;
+   for array keys the indexed indexed-entry form BC-2.01.002 pins (lowest extra index,
+   tie-broken by registry field order, e.g. `HYLO_BACKENDS_1_METRICS_URL` — the `EnvName`
+   of the key alone does not fit these entries, ADV-P3-D32); no `[from ...]` suffix when
+   the failing value came from the defaults layer. stderr is not part of the parity
+   comparison; it is asserted by Go table tests only.
 7. **No side effects:** no file under the cache directory (`paths.cache_dir`, OD-101) is
    created, modified, renamed or deleted, and the directory itself is not created; no
    metrics HTTP request is sent; no `git` read and no process-ancestry probe runs; the
@@ -117,6 +122,15 @@ character` maps to the URL class when raised by BC-2.02.005 and to the theme cla
 raised by BC-2.01.003. A seventh class needs an owner decision.
 
 (In the table `\|` is a literal `|`.)
+
+8. **Subagent mode (OD-155/OD-168):** when the invocation carries `--subagent` anywhere in
+   argv[1:] (BC-4.01.002), a config error writes **zero bytes to stdout** — the grey
+   config-error line is not NDJSON and never reaches the agent panel (BC-1.07.004 wire
+   grammar) — while stderr still receives the per-error detail lines of PC 6 and the exit
+   status stays 0 (OD-168; ADV-P3-D18; legacy's `main_subagent` analog crashes at import
+   with blank stdout and exit 1 — the exit status is an approved deviation per DI-008).
+   Precedence is unchanged: an unknown flag still wins before config resolution
+   (BC-4.01.002 PC-4).
 
 ## Invariants
 

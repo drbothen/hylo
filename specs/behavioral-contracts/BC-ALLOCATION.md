@@ -2,10 +2,10 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.2.3"
+version: "0.2.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:58:00Z
+timestamp: 2026-11-18T02:11:24Z
 phase: 1a
 stage: "1 of 3 (allocation only — individual BC files are created in stage 2 by the writer groups)"
 origin: greenfield
@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.3"
+modified: "0.2.5"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "e493096"
+input-hash: "eefb77f"
 traces_to: ../prd.md
 ---
 
@@ -164,7 +164,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-1.03.012 | Short + long line completes over two refreshes | BC-SL-066 | byte-exact | SL:1041-1052 | H | C |
 | BC-1.03.013 | Mix cache sid sanitized per code point | BC-SL-070 | byte-exact | SL:1017 | H | C |
 | BC-1.03.014 | text/thinking block value types | BC-SL-072 | byte-exact | SL:1120-1149 | H | C |
-| BC-1.03.015 | transcript_path type semantics (int = fd) | BC-SL-088 | byte-exact | SL:1010-1015 | M | C |
+| BC-1.03.015 | transcript_path type semantics (truthy int → no transcript, no descriptor I/O) | BC-SL-088 | byte-exact | SL:1010-1015 | M | C |
 | BC-1.03.016 | Turn-machine exhaustive table (20 rows) | BC-SL-094 | byte-exact | SL:1064-1087 | H | C |
 | BC-1.03.017 | Turn identity ignores seen_ids | BC-SL-095 | byte-exact | SL:1064-1087 | H | C |
 | BC-1.03.018 | D4-EX-2 wrong-shape line W-predicates (skip, no partial mutation) | BC-SL-098 | D4-EX-2 | D4-EX-2; SL:1060-1063 | M | C |
@@ -209,7 +209,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-1.05.005 | cost_thresholds p75/p95 percentiles | BC-SL-029 | byte-exact | SL:240-262 | H | E |
 | BC-1.05.006 | Numeric sid keyed by string form — throttle and self-exclusion hold | BC-SL-079 | OD-30 | OD-30; SL:224-262 | H | E |
 | BC-1.05.007 | $ and $/h number formatting | BC-SL-082 | byte-exact | SL:601-636 | H | E |
-| BC-1.05.008 | Cost colouring goldens (20 seeded sessions) | BC-SL-101 | byte-exact | SL:601-625; P3r4 §1.1 | H | E |
+| BC-1.05.008 | Cost colouring goldens (21 seeded sessions) | BC-SL-101 | byte-exact | SL:601-625; P3r4 §1.1 | H | E |
 | BC-1.05.009 | record_cost write contract (exact JSON format) | BC-SL-102 | OD-30 | OD-30; SL:224-237, 245-246 | H | E |
 
 ### S1.06 — Session caches (writer E)
@@ -230,7 +230,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-1.07.005 | Status glyph, name-fallback chain, and settled-status suffix | BC-SL-097 | byte-exact | SL:884-886, 893-896, 922-923 | H | A2 |
 | BC-1.07.006 | Model segment carries the model-prefix lane tag | BC-SL-097 | byte-exact | SL:898-907 | H | A2 |
 | BC-1.07.007 | Token segment (_fmt_tokens) and running-only elapsed clock | BC-SL-097 | byte-exact | SL:909-921, 876-885; PR-15 | H | A2 |
-| BC-1.07.008 | CP-A01..A03 degrade to the 29-byte line, exit 0 | BC-SL-097 | byte-exact | SL:1242-1245; CP-A01..A03; OD-156 "like O2" | H | A2 |
+| BC-1.07.008 | CP-A01..A05 degrade to the 29-byte line, exit 0 | BC-SL-097 | byte-exact | SL:1242-1245; CP-A01..A05; OD-156 "like O2" | H | A2 |
 
 ### S2.01 — Schema + resolution (writer F)
 
@@ -291,6 +291,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 | BC-5.01.004 | pyfmt.D: {:d} decimal formatting with width and zero-pad | new | n.a. | OD-141; design IM-05 | — | G |
 | BC-5.01.005 | pyfmt.Repr: CPython float repr (shortest round-trip, .0 suffix, inf/nan spellings) | new | n.a. | OD-141; design IM-03/05, PR-07/08 | — | G |
 | BC-5.01.006 | pyfmt.MaxSeq: Python max() over a sequence with first-maximal-wins NaN order | new | n.a. | OD-141; design IM-09, PR-04 | — | G |
+| BC-5.01.007 | Mixed int/float Num semantics: float(int) ErrOverflow bound, true division, exact comparison, Max/Min exact ties | new | n.a. | ADV-P3-D08; OD-141; design IM-07/08/09 | — | G |
 
 ### S5.02 — JSON byte semantics (writer G)
 
@@ -380,7 +381,7 @@ Per subsystem / section:
 | S3.01 per-OS paths | G | 1 | 0 | 1 |
 | S3.02 process start | G | 2 | 2 | 0 |
 | S4.01 dispatch | F | 3 | 0 | 3 |
-| S5.01 numbers/rounding | G | 6 | 0 | 6 |
+| S5.01 numbers/rounding | G | 7 | 0 | 7 |
 | S5.02 JSON byte semantics | G | 6 | 3 (071, 096, 067) | 3 |
 | S5.03 code-point string ops | G | 4 | 0 | 4 |
 | S5.04 time semantics | G | 3 | 1 (069) | 2 |
@@ -388,9 +389,9 @@ Per subsystem / section:
 | S6.02 fixture corpus | H | 4 | 0 | 4 |
 | S6.03 comparison + exclusions | H | 4 | 1 (089) | 3 |
 | S6.04 CI matrix + timing | H | 3 | 0 | 3 |
-| **Total** | | **153** | **108** | **45** |
+| **Total** | | **154** | **108** | **46** |
 
-Per writer group: A 10 · B1 15 · B2 15 · C 21 · D 21 · E 11 · F 16 · G 22 · H 14 · A2 8 (OD-155, 2026-11-17) = **153**
+Per writer group: A 10 · B1 15 · B2 15 · C 21 · D 21 · E 11 · F 16 · G 23 · H 14 · A2 8 (OD-155, 2026-11-17) = **154**
 (after the OD-141/OD-140 additions of 2026-11-15; stage-2 baseline was F 15 · G 16 · H 14
 = **138**).
 
@@ -558,10 +559,11 @@ was renumbered, retitled or removed, and the 138 stage-2 rows stand as allocated
 - **Added BC-5.01.004, BC-5.01.005, BC-5.01.006, BC-5.02.005, BC-5.02.006, BC-5.04.003**
   (OD-141): helper-level contracts for the six pyfmt helpers `D`, `Repr`, `Str`, `Dumps`,
   `MaxSeq`, `TimeFloat` in their design §2.6 homes (num / json / time); S5 coverage
-  rises to 19. Cycle total: **153 BCs** (108 mapped from legacy + 45 new; amended
+  rises to 19. Cycle total: **154 BCs** (108 mapped from legacy + 46 new; amended
   2026-11-18, sync-check SC-04: rebalanced after the eight OD-155 BC-1.07.* additions —
   seven restored BC-SL-097 rows plus one new-contract off-switch row; the stage-3 total
-  was 145 = 101 + 44).
+  was 145 = 101 + 44; 2026-11-18 pass-3 remediation added BC-5.01.007, ADV-P3-D08,
+  S5 coverage now 20).
 - **OD-135** (no row change): S1 and S5 are module-critical (coverage >= 95%) per
   `prd-supplements/module-criticality.md`; prd.md §1.6 amended accordingly (amends the
   OD-131 priority labels).

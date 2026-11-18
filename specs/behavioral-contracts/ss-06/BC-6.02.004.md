@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "31c4e22"
+input-hash: "ea5ce52"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D21: swap coverage check stated per direction, matching EC-004 and the vector"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,8 +74,10 @@ makes it necessary.
 3. **Coverage.** The corpus contains at least one py→go and one go→py case in which
    each of the four cache files exists at the swap boundary. The harness asserts this
    by listing the copied file names and failing with
-   `parity: swap coverage missing <cache>` if any of the four is absent in both
-   directions.
+   `parity: swap coverage missing <cache>` — the check runs PER DIRECTION: each of the
+   four named caches must exist in the py→go corpus AND in the go→py corpus separately
+   (ADV-P3-D21; "absent in both directions" was ambiguous wording). EC-004's directional
+   failure inherits this per-direction reading.
 4. **Seeded variants.** The swap set also includes these seeds (design §5.2):
    - the BC-SL-101 20-session `cost-history.json`;
    - legacy `[t, v]` history points and `rl`/`rl_ts` in the session cache;

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "a110b90"
+input-hash: "c3336e3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B17): EC-010 states the numeric precondition — the SL:559 OverflowError fires only when win_start is numeric; otherwise the huge exact timer text renders with no degrade; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,7 +85,7 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
 | EC-007 | `win_start` = `true` (only reachable through a hand-edited cache `proc_start`) | treated as epoch second 1; at now = 1794600000 renders `⌂20770d19h` |
 | EC-008 | stdin has no `session_id` | acquisition is skipped (SL:1229), `win_start = None` → no suffix |
 | EC-009 | FMA contraction of `(now - win_start)*1000 - dur` | forbidden; tests for this site run on arm64 (macos-15 runner), where fusion is detectable (design IM-10) |
-| EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer beyond float64 range, e.g. 10³⁰⁹ | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int) → guard line (stdin-borne render overflow, OD-156); oracle-verified 2026-11-17 |
+| EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer beyond float64 range, e.g. 10³⁰⁹, **with `win_start` numeric** (the SL:559 subtraction is reached) | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int; oracle-verified 2026-11-18). With a *non-numeric* `win_start` the gate block is skipped and legacy renders the exact huge `_hm(10**309)` timer text (integer arithmetic only) with no degrade — PC1's "timer shown" plus numeric `win_start` is what reaches the crash site |
 
 ## Canonical Test Vectors
 

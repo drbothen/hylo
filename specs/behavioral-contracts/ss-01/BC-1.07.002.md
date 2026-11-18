@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.1"
+version: "1.0.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "c28cb1e"
+input-hash: "f70be5b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "new contract (OD-155 config off switch; no legacy counterpart)"
@@ -18,7 +18,7 @@ parity_class: OD-155 off switch
 confidence: H
 lifecycle_status: active
 introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)"]
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,6 +54,11 @@ treats omitted rows as "keep the default body").
 3. The key affects only the subagent entry point (BC-1.07.001 routing); the main render is unaffected.
 4. With the switch off, no cache write, no env read other than config resolution, and no ledger access
    occurs (DI-007).
+5. Config-resolution error while routed to the subagent entry (any invalid value, e.g. an invalid
+   boolean spelling): stdout receives ZERO bytes and the `hylo: config error: <key>=<value> (<reason>)`
+   diagnostic goes to stderr (OD-168); the grey config-error line of BC-2.02.001 is NOT printed in this
+   mode because it is not NDJSON and would corrupt the agent-panel row stream. Exit code 0 carries over
+   from the D4-EX-3 contract (OD-168 rules the byte routing, not the exit path).
 
 ## Invariants
 
@@ -61,8 +66,9 @@ treats omitted rows as "keep the default body").
    is purely subtractive.
 2. The default lives in the `internal/config` schema with its rationale (D15: config over code); no
    hard-coded toggle in logic.
-3. Boolean grammar errors are config errors (D4-EX-3 line, BC-2.02.001), not silent disables (DI-012:
-   every deviation is named and tested; an unparseable value must not masquerade as `false`).
+3. Boolean grammar errors are config errors (BC-2.02.001 class, D4-EX-3), not silent disables (DI-012:
+   an unparseable value must not masquerade as `false`); in this mode the diagnostic is rerouted to
+   stderr with zero stdout bytes (OD-168).
 
 ## Edge Cases
 
@@ -71,7 +77,7 @@ treats omitted rows as "keep the default body").
 | EC-001 | Key absent | Defaults to `true` (= legacy; backward compatibility with recorded parity fixtures) |
 | EC-002 | `enabled = false` with well-formed tasks on stdin | Zero bytes, exit 0; CC shows its default row bodies |
 | EC-003 | `enabled = false` with malformed stdin | Still zero bytes, exit 0 (config check precedes any stdin parse) |
-| EC-004 | Invalid boolean spelling | D4-EX-3 config-error line per BC-2.02.001, exit 0 — NOT a fallback to true or false |
+| EC-004 | Invalid boolean spelling | Config error (D4-EX-3 class, BC-2.02.001 format): stdout receives zero bytes; the `hylo: config error: <key>=<value> (<reason>)` diagnostic goes to stderr; exit 0 — NOT a fallback to true or false (OD-168) |
 
 ## Canonical Test Vectors
 
@@ -80,7 +86,7 @@ treats omitted rows as "keep the default body").
 | defaults, stdin `{"tasks":[{"id":"a1","name":"explore","status":"running","model":"claude-sonnet-5-5","tokenCount":12345,"startTime":<now-125000>}]}`
  | BC-1.07.004 pinned row bytes, exit 0 | happy-path |
 | `statusline.subagent.enabled = false`, same stdin | zero bytes, exit 0 | edge-case |
-| `statusline.subagent.enabled = "yes"` (grammar-valid Python-ish truthy is NOT accepted unless the boolean grammar says so) | per BC-2.02.00x boolean grammar; never a silent disable | error |
+| `statusline.subagent.enabled = "yes"` (grammar-valid Python-ish truthy is NOT accepted unless the boolean grammar says so) | zero bytes on stdout; `hylo: config error: statusline.subagent.enabled=yes (boolean expected)` on stderr; exit 0 (OD-168; format per BC-2.02.001) | error |
 
 Verified 2026-11-18 against CPython 3.11.7 for the legacy (enabled) half of each vector; the disabled
 half has no legacy counterpart and is pinned by this contract alone (OD-155).
@@ -102,13 +108,14 @@ half has no legacy counterpart and is pinned by this contract alone (OD-155).
 | Stories | TBD (filled by story-writer) |
 | Source | new contract; OD-155 row in `specs/owner-decisions-log-2026-11-14.md` |
 | Legacy contract | none (OD-155 addition; legacy had no toggle) |
-| Decisions | OD-155 (supersedes OD-14 a), D15 (config over code), DI-012 |
+| Decisions | OD-155 (supersedes OD-14 a), D15 (config over code), DI-012; adv-p3: OD-168 config-error byte routing (ADV-P3-D18) |
 
 ## Related BCs (Recommended)
 
 - BC-1.07.001 — composes with (checked at routing, before stdin work)
 - BC-1.07.004 — related to (disabled output differs from the empty-tasks output only in stdin tolerance, EC-003)
 - BC-2.01.001 — related to (key + default + rationale in the schema)
+- BC-2.02.001 — related to (D4-EX-3 diagnostic format; in this mode rerouted to stderr per OD-168)
 
 ## Architecture Anchors (Recommended)
 

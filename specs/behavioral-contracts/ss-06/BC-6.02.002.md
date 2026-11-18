@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "14aaea0"
+input-hash: "db24750"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D24: captured stdin snapshots spliced byte-level (no re-serialization); parse-required captures are build errors"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,6 +64,14 @@ are compared after every step (BC-6.03.002).
 2. Paths inside each `stdin` snapshot (`transcript_path`, `workspace.project_dir`,
    `cwd`) are rewritten by the harness to the per-case temp tree before use. The
    project directory is materialized with the same basename as the captured one.
+   **Byte fidelity of the rewritten snapshot (ADV-P3-D24):** the harness performs a
+   surgical, byte-level splice — only the path substring occurrences inside the captured
+   JSON text are replaced (lengths adjusted); the snapshot is NOT parsed and
+   re-serialized. Big-int literals, `NaN`/`Infinity` tokens, duplicate keys, key order
+   and the original escaping are thereby preserved verbatim, satisfying the OD-107
+   byte-parity-on-real-inputs criterion. If a capture ever requires more than a
+   substring splice (paths split by JSON escapes), the case is a harness build error,
+   not a silent rewrite.
 
 ## Postconditions
 

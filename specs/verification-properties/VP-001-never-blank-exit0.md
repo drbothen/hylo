@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:05:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-00-overview.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.001.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, prd-supplements/error-taxonomy.md, owner-decisions-log-2026-11-14.md]
 input-hash: "bbb0fcf"
@@ -12,14 +12,13 @@ traces_to: prd.md
 source_bc: BC-1.01.001
 bcs: [BC-1.01.001, BC-1.01.002, BC-1.02.020, BC-1.02.026, BC-1.02.027, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.05.004, BC-1.06.001, BC-1.07.008]
 module: internal/statusline (guard), cmd/hylo
-proof_method: manual
-feasibility: feasible
+proof_method: manualfeasibility: feasible
 verification_lock: false
 proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — CP-O01..O09 (OD-156) in catalogue; added the any-stdin/panic fuzz leg with the exactly-29-bytes degraded assert (BC-1.01.001 anchoring); added the --subagent fault legs (BC-1.07.008)", "1.3 2026-11-18T09:05:00Z: ADV-P3 fixes (A2-07) — FaultInjectionTable comment names the CP-A01..A03 subagent fault rows; fuzz leg asserts the promised output-set membership ({render, 29-byte line, subagent JSON lines, zero bytes}) instead of only exit-0/non-blank, with OD-168 placing a subagent config error at zero bytes"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,8 +64,10 @@ partial row output preceding the line.
   (BC-1.05.004 EC-008; in coverage for never-blank/exit-0 even though out of parity
   scope), asserting `len(stdout) >= 1 && exit == 0` and, for degraded rows, the exact
   29 bytes; plus a CI-seeded fuzz leg (`FuzzDegradedLadder`) over arbitrary stdin and
-  entry/argv shapes asserting exit 0 and stdout ∈ {normal render bytes, 29-byte
-  degraded line, subagent JSON lines or zero bytes} — the any-stdin leg BC-1.01.001
+  entry/argv shapes asserting exit 0 and the promised output-set membership —
+  stdout ∈ {normal render bytes, 29-byte degraded line, subagent JSON lines, zero
+  bytes}; a subagent config error is zero bytes (OD-168) and the degraded line never
+  appears via the parse path — the any-stdin leg BC-1.01.001
   anchors (formerly attributed to Tier C; it is this in-tree fuzz, and Tier C's
   VP-011 hunt).
 - **Honesty (iron law):** testable-only. This is an empirical property over an
@@ -83,13 +84,15 @@ partial row output preceding the line.
 
 ```go
 func TestDegradedLadder_AllTriggers(t *testing.T) {
-    for _, tc := range FaultInjectionTable { // one row per CP-S01..S17, T01..T07, N01, N02, O01..O09, CP-C09/C10 + panic rows
-        stdout, _, exit := runStatusline(tc.Env, tc.Stdin, tc.Files)
+    for _, tc := range FaultInjectionTable { // one row per CP-S01..S17, T01..T07, N01, N02,
+        // O01..O09, CP-C09/C10, CP-A01..A03 (subagent entry faults, BC-1.07.008) + panic rows
+        stdout, _, exit := runStatusline(tc.Env, tc.Stdin, tc.Files) // tc.Env carries the entry mode
         if exit != 0 { t.Fatalf("%s: exit = %d, want 0", tc.ID, exit) }
-        if len(stdout) == 0 { t.Fatalf("%s: blank stdout", tc.ID) }
-        if tc.WantDegraded && stdout != degradedLine { // exactly 29 bytes
+        if !tc.Subagent && len(stdout) == 0 { t.Fatalf("%s: blank stdout", tc.ID) }
+        if tc.WantDegraded && !tc.Subagent && stdout != degradedLine { // exactly 29 bytes
             t.Fatalf("%s: degraded row emitted %d bytes, want the 29-byte line", tc.ID, len(stdout))
         }
+        assertPromisedOutputSet(t, tc.ID, tc.Subagent, stdout) // membership, both entries
     }
 }
 
@@ -98,7 +101,27 @@ func FuzzDegradedLadder(f *testing.F) { // BC-1.01.001 any-stdin leg; CI-seeded,
         stdout, _, exit := runStatuslineEntry(stdin, subagent)
         if exit != 0 { t.Fatalf("exit = %d, want 0", exit) }
         if !subagent && len(stdout) == 0 { t.Fatal("blank stdout on main entry") }
+        assertPromisedOutputSet(t, "fuzz", subagent, stdout) // membership, not just non-blank
     })
+}
+
+// assertPromisedOutputSet: stdout ∈ {normal render bytes, 29-byte degraded line,
+// subagent JSON lines, zero bytes} — OD-168 puts a subagent CONFIG error at zero
+// bytes; the degraded line never appears via the parse path.
+func assertPromisedOutputSet(t *testing.T, id string, subagent bool, stdout string) {
+    t.Helper()
+    if subagent { // rows or zero bytes; never the degraded line via the parse path
+        if len(stdout) > 0 && !isNDJSONRows(stdout) {
+            t.Fatalf("%s: subagent stdout outside the output set (%d bytes)", id, len(stdout))
+        }
+        if stdout == degradedLine {
+            t.Fatalf("%s: degraded line emitted via the parse path", id)
+        }
+        return
+    }
+    if len(stdout) == 0 || !(stdout == degradedLine || isRenderBytes(stdout)) {
+        t.Fatalf("%s: stdout outside the promised output set", id)
+    }
 }
 ```
 

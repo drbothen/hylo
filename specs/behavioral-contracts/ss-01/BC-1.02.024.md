@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-15T18:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r5.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "3b3305d"
+input-hash: "10cc296"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "pass-3 remediation (ADV-P3-B06): VP-028 grid centered on the rem = 0.9 x length boundary (544320 s for 7 d), not 0.10 x length; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,7 +95,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For REM in a ±5 s grid around `0.10 × length` boundary and P in 0..100, Go colour equals oracle colour | generated table vs oracle |
+| VP-028 | For REM in a ±5 s grid around the `rem = 0.9 × length` boundary (544320 s for 7 d; 16200 s for 5 h) and P in 0..100, Go colour equals oracle colour | generated table vs oracle |
 
 ## Traceability
 

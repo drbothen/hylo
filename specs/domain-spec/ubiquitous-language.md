@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "ubiquitous-language"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-17T21:57:00Z
+timestamp: 2026-11-18T01:55:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md]
-input-hash: "8ad23a2"
+input-hash: "6d19052"
 traces_to: L2-INDEX.md
 ---
 
@@ -36,7 +36,7 @@ traces_to: L2-INDEX.md
 | **Near-key** | Composite correlation key `(session, path, model_req, req_bytes)` ±1 s — ambiguous on client retries | LEGACY-OBSERVED (P2r4 §3.3) |
 | **Flow / flow_id** | One request + outcomes; exact correlation via the internal event stream only | DECIDED OD-25 |
 | **Ledger** | The append-only JSONL of 13 legacy-named events (D7-frozen) | DECIDED D7 |
-| **Degraded line / ladder** | One-line output, exit 0, for any fault (DI-008); the degraded line itself is exactly 29 bytes (BC-1.01.001) — the config-error and unknown-flag rungs render longer lines | LEGACY-OBSERVED + DECIDED OD-102 |
+| **Degraded line / ladder** | One-line output, exit 0, for any fault (DI-008); the degraded line itself is exactly 29 bytes (BC-1.01.001) — the config-error and unknown-flag rungs render longer lines. Carve-out: the `--subagent` agent-panel mode (OD-155) prints JSON lines or zero bytes — never the ladder; a config error there yields zero bytes on stdout with the diagnostic on stderr (OD-168) | LEGACY-OBSERVED + DECIDED OD-102/OD-155/OD-168 |
 | **Config-error line** | `hylo: config error: <key>=<value> (<reason>)`, exit 0 (D4-EX-3) | DECIDED OD-102 |
 | **Widget** | One status line visual element with rule-level tests | LEGACY-OBSERVED (STATUSLINE-WIDGETS) |
 | **Freshness ladder** | fresh/stale/dead + serving-down (SM-05) | LEGACY-OBSERVED |

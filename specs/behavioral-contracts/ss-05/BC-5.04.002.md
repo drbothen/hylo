@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md, owner-decisions-log-2026-11-14.md]
-input-hash: "7b1498e"
+input-hash: "8414169"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; ports CPython datetime._mktime behind naive .timestamp() at legacy/dgx_statusline.py SL:983)"
@@ -19,7 +19,8 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D02+D13: LocalToUnix returns (int64, error) with ErrValue per ARCH-06 canon; range-end oracle rows restricted to Linux/macOS (Windows MSVC localtime_s OSError)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -32,8 +33,8 @@ removal_reason: null
 
 ## Description
 
-`pyfmt.LocalToUnix(loc *time.Location, wall time.Time) (float64, bool)` (ADV-P2-D08: BC side aligned with the
-reconciled ARCH-06 row) converts a naive local wall time to Unix seconds exactly as CPython
+`pyfmt.LocalToUnix(loc *time.Location, wall time.Time) (int64, error)` (ADV-P3-D02: aligned with the ARCH-06
+canon row) converts a naive local wall time to Unix seconds exactly as CPython
 3.11's `datetime._mktime` (fold = 0) does, including which instant it picks in a DST gap or a repeated hour. Go's
 `time.Date` picks differently (in gaps when the wall read as UTC precedes the transition, in overlaps when it is at
 or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; pitfall PR-14).
@@ -56,8 +57,10 @@ or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; p
 3. **Gap:** returns the instant as if the pre-transition offset still applied (the later candidate), e.g. Chicago
    `02:30` on the spring-forward day → `03:30` CDT.
 4. **Range:** if any `local(u)` breakdown (including the `u1 - 86400` probe) falls outside years 1..9999, the
-   function returns `(u, false)` (ADV-P2-D08: the ARCH-06 row returns `(float64, bool)`, not an error; CPython's
-   "year N is out of range" `ValueError` maps to `ok = false`, which `_iso_ts` maps to None).
+   function returns a typed `ErrValue` (ADV-P3-D02: the ARCH-06 canon row returns `(int64, error)` with `ErrValue`,
+   not a bool; CPython's "year N is out of range" `ValueError` maps to `ErrValue`, which `_iso_ts` maps to None).
+   Oracle-side, range-end rows are pinned on Linux and macOS only (see Invariant 2: on Windows the naive
+   conversion surfaces MSVC `localtime_s` `OSError`, ADV-P3-D13).
 5. Pure for a fixed `loc` and zone database.
 
 ## Invariants
@@ -67,7 +70,10 @@ or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; p
    ignores `TZ`, so the harness injects the zone explicitly (research P19). Oracle-side symmetric restriction
    (ADV-P2-D02 disposition): naive-timestamp parity cases under non-UTC zones run on Linux and macOS only
    (BC-6.02.003 PC-8) — CPython on Windows resolves naive timestamps through the MS CRT, which does not accept
-   IANA zone names, so there is no Windows oracle value to differ from.
+   IANA zone names, so there is no Windows oracle value to differ from. Range-end rows specifically (year 1 and
+   year 9999 probes, and any negative-wall probe) run on Linux and macOS only: on Windows the naive
+   `.timestamp()` path goes through MSVC `localtime_s`, which raises `OSError` (not `ValueError`) there, so the
+   POSIX-only "out of range → `ErrValue`" mapping has no Windows oracle (ADV-P3-D13).
 3. `time/tzdata` is embedded so a zone always loads; `time.LoadLocation` still prefers the system database, so the
    oracle (system tzdata) and Go read the same data on a given runner. Goldens are restricted to transitions that are
    identical across tzdata releases in use (labeled assumption; a tzdata mismatch shows up as a golden failure, never
@@ -86,8 +92,8 @@ or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; p
 | EC-004 | Berlin `2026-10-25 02:30:00` (repeated hour, east of UTC) | `1792888200` (first, CEST); Go `time.Date` picks the second |
 | EC-005 | Berlin `2026-03-29 02:30:00` (gap) | `1774747800` (= 03:30 CEST) |
 | EC-006 | Lord_Howe `2026-04-05 01:45:00` (30-minute overlap) | `1775313900` (first) |
-| EC-007 | UTC `0001-01-01 23:59:59` | `ok = false` (the −24 h probe reaches year 0) |
-| EC-008 | Kiritimati (UTC+14) `9999-12-31 23:59:59` | `ok = false` (`local(t)` reaches year 10000) |
+| EC-007 | UTC `0001-01-01 23:59:59` | `ErrValue` (the −24 h probe reaches year 0) |
+| EC-008 | Kiritimati (UTC+14) `9999-12-31 23:59:59` | `ErrValue` (`local(t)` reaches year 10000) |
 
 ## Canonical Test Vectors
 
@@ -99,7 +105,7 @@ or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; p
 | America/Chicago, `2026-11-01 01:30:00` | `1793514600` | edge-case |
 | America/Chicago, `2026-03-08 02:30:00` | `1772958600` | edge-case |
 | UTC, `0001-01-02 00:00:00` | `-62135510400` | edge-case |
-| UTC, `0001-01-01 00:00:00` | `ok = false` | error |
+| UTC, `0001-01-01 00:00:00` | `ErrValue` | error |
 
 All rows verified 2026-11-15 against CPython 3.11.7 (`datetime(...).timestamp()` for naive values, fold 0 and 1,
 under the named `TZ`).

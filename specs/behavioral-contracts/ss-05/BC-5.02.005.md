@@ -1,15 +1,15 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "436e0ba"
+input-hash: "d8623bf"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python str() of values used at legacy/dgx_statusline.py SL:442, 453; BC-SL-058)"
@@ -20,7 +20,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D34+D10: dict repr key/value separator stated; subagent str() sites SL:896/908/922 added"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +51,7 @@ floats, so every `str()` site routes through this helper. Helper-level contract 
 3. int/float → Python repr spelling (BC-5.01.005): `str(1794615009.0)` = `1794615009.0`;
    `str(1e16)` = `1e+16`; non-finite: `nan`/`inf`/`-inf`.
 4. list/dict → Python repr of the container: `str([1, "a"])` is `[1, 'a']` — single quotes,
-   comma+space separators, repr of each element. Containers nest. **Element string quoting
+   comma+space separators, and each key is followed by `': '` before its value (dict item separator, ADV-P3-D34). Containers nest. **Element string quoting
    (CPython `repr(str)` rules, CPython 3.11 verified with `python3 -I`):** the element is
    wrapped in single quotes unless it contains `'` and not `"`, in which case it is wrapped
    in double quotes (`Str(["it's"])` is `["it's"]`); if it contains both quote characters it
@@ -106,7 +107,7 @@ Expectations generated from CPython 3.11 (OD-104 oracle discipline).
 
 | Field | Value |
 |-------|-------|
-| Source | new — OD-141 (helper-level contract), OD-103; design IM-05; consumer: model label str() site SL:442, 453 (BC-1.02.021) |
+| Source | new — OD-141 (helper-level contract), OD-103; design IM-05; consumers: model label str() site SL:442, 453 (BC-1.02.021) plus the subagent str() sites SL:896 (`name` f-string), SL:908 (`model`), SL:922 (`status` suffix) (ADV-P3-D10) |
 | Parity / exclusion | n.a. (byte-exact helper) |
 | L2 Capability | CAP-009 (enabler, OD-103) |
 | L2 Domain Invariants | DI-012 (byte parity machinery) |

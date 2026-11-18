@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "data-files"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
@@ -31,7 +31,7 @@ tests):
 |---|---|---|
 | `statusline-<raw-sid>.json` | effective_rl / get_sample / proc_start session state | `json.dump` byte defaults (IM-03); raw sid per OD-03 |
 | Mix cache (exact name format is the legacy-shared named constant owned by BC-1.03.002) | mix cache: `cur`, `mixv6` reset marker | same; sanitized per code point (BC-1.03.013) |
-| `git-<sha1[:16]>.json` | branch/segment cache, 5 s TTL | same |
+| `statusline-git-<sha1[:16]>.json` | branch/segment cache, 5 s TTL | same |
 | `cost-history.json` | session cost history, status-line-owned (OD-124) | same; `record_cost` throttle strict `<` |
 
 ### Decision: Go is byte-exact cache writer and reader across Python/Go swaps (AD-08)

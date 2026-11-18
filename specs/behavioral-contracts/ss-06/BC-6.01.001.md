@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "a46f633"
+input-hash: "7367722"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -24,7 +24,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D04+D26: oracle argv allows --subagent for the subagent corpus family (OD-155 supersedes OD-14); Architecture Module anchor corrected to internal/parity"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,9 +74,13 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
    into the Tier B golden metadata when goldens are regenerated (BC-6.03.001; design
    risk RK-4). It is also printed once per Tier A run.
 5. **Exact argv for every oracle refresh:**
-   `[<value>, "-s", <abs>/legacy/dgx_statusline.py]`. Nothing else is passed: no other
-   interpreter flags, no `-X` options, no script arguments. In particular `--subagent`
-   is never passed (OD-14).
+   `[<value>, "-s", <abs>/legacy/dgx_statusline.py]` for every main-render case. Nothing
+   else is passed: no other interpreter flags, no `-X` options. One script argument is
+   allowed for the subagent corpus family (ADV-P3-D04, per OD-155 which supersedes
+   OD-14): cases whose id carries the `-sub` family suffix are refreshed with
+   `[<value>, "-s", <abs>/legacy/dgx_statusline.py, "--subagent"]`, exercising the
+   `main_subagent` path (SL:1240) exactly as the Go side does. No other script arguments
+   are permitted.
 6. **Unset locally means skip; unset in CI means fail.** If the setting is unset and the
    CI marker `CI=true` is absent, Tier A skips with
    `parity: HYLO_PARITY_PYTHON unset; Tier A (live differential) skipped`. Tier B still
@@ -128,7 +133,7 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | `internal/statusline` parity harness (`*_parity_test.go`) (BC-COMPONENT-MAP: internal/parity/oracle.go (explicit interpreter, -s) — ARCH-07) |
+| Architecture Module | `internal/parity` parity harness (`*_parity_test.go`) (BC-COMPONENT-MAP: internal/parity/oracle.go (explicit interpreter, -s) — ARCH-07; ADV-P3-D26) |
 | Stories | TBD (filled by story-writer) |
 
 > Capability anchor rationale (OD-153): the parity harness is verification machinery whose sole purpose is proving CAP-009 byte parity (the D4 exit criterion), governed by DI-012.

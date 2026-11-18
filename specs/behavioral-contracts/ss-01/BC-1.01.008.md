@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T23:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "315bc06"
+input-hash: "6655cbb"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg", "1.2.3 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B13/B10): vector table merged (blank line removed); ARCH-03 anchor normalized to #statusline-guard"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -88,7 +88,6 @@ Config: defaults, `HYLO_STATUSLINE_ROWS=1`, git disabled, COLUMNS unset, empty c
 | `{"model":{"id":"A` `FF` `B"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m\n` (45 bytes) | error |
 | `{"model":{"display_name":"\ud800"}}` | `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 | edge-case |
 | `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` | degraded 29 bytes; `statusline-s1.json` written with exactly `rl`, `rl_ts` before the fault (window-start probe pinned: harness fake `ps` with no `claude` ancestor, BC-3.02.002 case I4 — no `proc_start` key) | edge-case |
-
 | `{"model":{"display_name":["\ud800"]}}` (list -> `repr`) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m['\ud800']\e[0m\n` (the six ASCII characters `\ud800` inside quotes; no degrade) | edge-case |
 | `{"x\ud800":1,"model":{"display_name":"Z"}}` (surrogate in an unrendered key) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mZ\e[0m\n` | edge-case |
 
@@ -124,7 +123,7 @@ Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#statusline-io-encoding` — internal/statusline/input.go (strict UTF-8 stdio) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#statusline-guard` — internal/statusline/input.go (strict UTF-8 stdio; CP-S17 ends in the guard) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

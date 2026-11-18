@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:08:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.02.002.md, behavioral-contracts/ss-06/BC-6.02.003.md, behavioral-contracts/ss-06/BC-6.03.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
 input-hash: "bdc53a7"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — exclusion ids respelled to the BC form and closed set extended to ten ids (A2-02); subagent corpus family added (BC-1.07.002 enabled=true parity rows, BC-1.07.007 _fmt_tokens dense grid)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — exclusion ids respelled to the BC form and closed set extended to ten ids (A2-02); subagent corpus family added (BC-1.07.002 enabled=true parity rows, BC-1.07.007 _fmt_tokens dense grid)", "1.3 2026-11-18T09:08:00Z: ADV-P3 fixes — corpus leg asserts a non-zero computed case count and logs “N cases validated” (POL-11, A2-06); “93 contracts” count claim re-anchored honestly (A2-20)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,8 +50,9 @@ unexplained diffs is the D4 exit criterion (OD-117 target 1). The corpus carries
 - **Primary BC:** BC-6.03.002 — Comparison = stdout bytes + exit code per step; named
   caches byte-for-byte by file name; stderr never compared.
 - **Partial coverage:** BC-6.02.002 (stdin-sequence replay, clock stepped per refresh),
-  BC-6.02.003 (case model), and collectively every byte-exact-class S1 contract
-  (93 contracts, see the VP-INDEX coverage table).
+  BC-6.02.003 (case model), and collectively the byte-exact-class SS-01 contracts the
+  VP-INDEX coverage table routes to this tier (68 BCs carry `parity_class: byte-exact`
+  by file grep; each is exercised by its corpus family, not by this VP file alone).
 - **Invariant verified:** DI-012 (changes only via named tested deviations); NFR-003.
 
 ## Property Class and Verification Method
@@ -72,12 +73,18 @@ unexplained diffs is the D4 exit criterion (OD-117 target 1). The corpus carries
 
 ```go
 func TestParityTierA_Corpus(t *testing.T) {
+    n := 0
     for _, cs := range LoadCases("internal/statusline/testdata/parity/cases") {
         pyOut := RunOracle(cs)                       // CPython 3.11.x, clock shim, -s
         goOut := RunGoPort(cs)                       // in-process + built binary subset
         CompareStepwise(t, cs, pyOut, goOut)         // stdout bytes + exit per step
         CompareNamedCaches(t, cs, pyOut.Caches, goOut.Caches) // byte-for-byte, minus exclusions
+        n++
     }
+    if n == 0 { // POL-11 (A2-06): an empty/mis-pathed corpus must not pass green
+        t.Fatal("zero parity cases loaded — mis-pathed corpus passes nothing")
+    }
+    t.Logf("%d parity cases validated", n)
 }
 ```
 

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:45:00Z
+timestamp: 2026-11-17T22:00:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "92224da"
+input-hash: "2455829"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,6 +26,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
+  - "patch bump: case.json schema gains optional argv (+ subagent case family) per ARCH-07, sync-check SC-03, 2026-11-17T22:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,7 +58,7 @@ directory.
    - `stdin.json.tmpl`, a JSON template whose placeholders (`{{.CaseDir}}`,
      `{{.ProjectDir}}`, `{{.Transcript}}`) are replaced with absolute per-case paths;
    - `case.json`, with
-     `{now, tz?, columns?, settings, metrics, seed?, transcript?, steps?}`;
+     `{now, tz?, columns?, argv?, settings, metrics, seed?, transcript?, steps?}`;
    - optionally `metrics.json`, a canned VictoriaMetrics `/api/v1/query` instant-vector
      reply;
    - optionally `seed/`, files copied verbatim into each side's cache directory before
@@ -71,6 +72,14 @@ directory.
 3. `metrics` is `"canned"` (serve `metrics.json`) or one of `"down"` (closed listener),
    `"500"` (HTTP 500) or `"garbage"` (non-JSON body). Timeout-based "slow" modes are not
    allowed (research Q3b: the legacy 1.5 s timeout makes them flaky).
+4. `argv` is an optional JSON array of strings appended after `hylo statusline` when the
+   harness invokes the built Go binary; default `[]` (a plain `hylo statusline`; ARCH-07
+   records the same arrangement as the full binary argv, default `["statusline"]`).
+   Subagent-family cases (id suffix `-sub`, ARCH-07 case grammar) carry the flag
+   arrangements under test, e.g. `["--", "--subagent"]` (pass-3 A03; OD-155/OD-168). The
+   oracle gets the same argv appended after the legacy script path (BC-6.01.001, which
+   spells out the resulting oracle argv: a single `--subagent` script argument for
+   `-sub` cases).
 
 ## Postconditions
 
@@ -166,7 +175,7 @@ directory.
 
 | Field | Value |
 |-------|-------|
-| Source | design §5.2 case model (`stdin.json.tmpl`, settings declared once and translated, `metrics.json` or mode `down`/`500`/`garbage`, optional cache seed, transcript generator spec, `steps`; out-of-domain setting legal only in a D4-EX-3 case); design §3.2 (metrics, process start, cache dir seams); research Q3b; OD-05; OD-111; OD-123 (`backends[0].*` keys); legacy provenance `legacy/dgx_statusline.py` SL:73-79, 92, 444 (env reads), SL:273-275 (`proc_start` short-circuit), SL:405-406 (git cache key) |
+| Source | design §5.2 case model (`stdin.json.tmpl`, settings declared once and translated, `metrics.json` or mode `down`/`500`/`garbage`, optional cache seed, transcript generator spec, `steps`; out-of-domain setting legal only in a D4-EX-3 case); design §3.2 (metrics, process start, cache dir seams); research Q3b; OD-05; OD-111; OD-123 (`backends[0].*` keys); legacy provenance `legacy/dgx_statusline.py` SL:73-79, 92, 444 (env reads), SL:273-275 (`proc_start` short-circuit), SL:405-406 (git cache key); ARCH-07 case model `argv` field and `subagent` case family (sync-check SC-03, pass-3 A03, OD-155/OD-168) |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |

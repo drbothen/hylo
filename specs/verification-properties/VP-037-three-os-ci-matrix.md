@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:11:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.001.md, prd-supplements/nfr-catalog.md]
 input-hash: "00083a4"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:11:00Z: ADV-P3 fixes — “Windows runs Tier B without Python” corrected: setup-python installs the oracle on all three legs and Tier A runs on all three (BC-6.04.001, A2-10); POL-11 positive-coverage gate added to the sketch: every harness step asserts a computed “N … validated” count > 0 (A2-06)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,10 +36,11 @@ removal_reason: null
 
 Every change runs the full matrix — ubuntu-24.04, macos-15 (arm64), windows-2025 — on
 Go 1.26.x with `CGO_ENABLED=0` builds, `-race` on Linux and macOS legs, Tier A corpus
-(interpreter path from setup-python, OD-108), Tier B goldens (Windows runs Tier B
-without Python), gitleaks + category scan, and the printed timing report. The resolved
+(interpreter path from setup-python, OD-108) on all three legs, Tier B goldens, gitleaks + category scan, and the printed timing report. The resolved
 Python patch version is recorded in Tier B golden metadata (RK-4). Non-zero harness
-exits never occur inside `hylo` (E-HAR-001 is the harness process).
+exits never occur inside `hylo` (E-HAR-001 is the harness process). Positive coverage
+(POL-11): every regression-detector step asserts a computed “N cases/goldens/entries
+validated” count > 0 before passing.
 
 ## Source Contract
 
@@ -74,6 +75,9 @@ exits never occur inside `hylo` (E-HAR-001 is the harness process).
 matrix: [ubuntu-24.04, macos-15, windows-2025]
 steps: [lint, test(-race on linux/mac), setup-python-3.11 → HYLO_PARITY_PYTHON,
         tierA, tierB, gitleaks, timing-report]
+# setup-python + Tier A run on all three legs (BC-6.04.001, A2-10).
+# POL-11 positive coverage: every harness step fails if its computed
+# "N cases/goldens/entries validated" count is zero (A2-06).
 ```
 
 ## Named Tests (OD-145 table where applicable)

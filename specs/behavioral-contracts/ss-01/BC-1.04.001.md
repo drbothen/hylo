@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T02:11:24Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "f95b636"
+input-hash: "086f082"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-08/09/13/14"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-08/09/13/14", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-04/05/10 (redirect loop detection; OverflowError catch; 1e400; key identity)", "1.3.2 2026-11-18: sync — Verification Properties row relabeled; VP-022 (partial: network edge only) now states its own property (the status line never reads the ledger, DI-007) instead of VP-030's differential-equivalence text"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,12 +55,23 @@ is byte 0x1B.
    HTTP redirects exactly as urllib's default `HTTPRedirectHandler` (active because
    `build_opener(ProxyHandler({}))` keeps it, SL:168-171) — a 301/302/303/307/308 is
    followed by GET and the **final** body is parsed; other statuses are not redirected.
-   Pinned limits (CPython 3.11.7 `urllib.request.HTTPRedirectHandler`): at most 10
-   redirects (`max_redirections = 10`); at most 4 follower visits to the same URL
-   (`max_repeats = 4`); a redirect target whose scheme is not `http`, `https`, `ftp` or
-   empty (inherit) makes urllib raise `HTTPError`. Go must reproduce all three refusal
-   modes the way urllib does — the fetch fails to "no sample" (outer `except Exception`,
-   SL:186) — and must never parse the refused 3xx body.
+   Pinned loop detection (CPython 3.11.7 `HTTPRedirectHandler.http_error_302`, verified
+   from the 3.11.7 stdlib source on 2026-11-18): urllib keeps a per-request
+   `redirect_dict` keyed by **distinct redirect-target URL** (the initial URL is never a
+   key) and, before following a response's `Location`, refuses iff
+   `visited.get(newurl, 0) >= max_repeats (= 4)` **or** `len(visited) >= max_redirections
+   (= 10)`; the target's count increments only after the decision to follow. The cap is
+   therefore NOT a hop counter: at most 10 distinct targets, each followed at most 4
+   times (worst case 40 hops). A chain such as A→B→A→B…→C whose intermediate targets are
+   pairwise distinct is **followed** by urllib even at 11+ hops, and must be followed by
+   hylo; a Go `CheckRedirect` that counts hops refuses it (sample vs no sample). Scheme
+   guard: a target whose scheme is not `http`, `https`, `ftp` or empty (inherit) makes
+   urllib raise `HTTPError`. Normative Go rule: emulate `redirect_dict` exactly — in
+   `CheckRedirect`, before following the response whose `Location` is `L`, fail the
+   request (return an error, not `ErrUseLastResponse`) iff `count[L] >= 4 || len(count)
+   >= 10`; otherwise `count[L]++` and follow. Hylo must reproduce every refusal mode the
+   way urllib does — the fetch fails to "no sample" (outer `except Exception`, SL:186) —
+   and must never parse the refused 3xx body.
 2. Proxy environment variables are ignored for this request (legacy `ProxyHandler({})`,
    SL:168; Go `Transport{Proxy: nil}`).
 3. Result is **no sample** (Go: nil; legacy `None`) when: the status is outside 200-299;
@@ -74,7 +85,14 @@ is byte 0x1B.
    - `val = float(s["value"][1])` with the Python float grammar (BC-5.01.002). On
      `KeyError`, `ValueError` or `IndexError` that series is skipped. A `TypeError`
      (e.g. `value` is a number, `value[1]` is `null`) is **not** caught per series and
-     aborts the whole fetch (no sample).
+     aborts the whole fetch (no sample). So is an `OverflowError`: Python's `json.loads`
+     decodes an integer literal at arbitrary precision, and a JSON integer with
+     |value| >= 2**1024 - 2**970 (oracle-verified on CPython 3.11.7, 2026-11-18) raises
+     `float(int)` outside the per-series catch (SL:177-180) and aborts the whole fetch
+     (no sample, outer `except Exception` SL:186). A JSON **float** literal is not
+     subject to that conversion — `1e400` is decoded by `json.loads` itself to +Inf and
+     kept. A Go float64 decode maps both literal forms to +/-Inf, so it must
+     special-case the oversize integer literal to stay differential-equivalent.
    - `name == "up"` is rewritten to `"up:" + s["metric"].get("job", "")`; a non-string
      `job` makes the concatenation raise `TypeError` — both sites sit outside the
      per-series catch (SL:182-185) — and aborts the whole fetch (no sample).
@@ -84,7 +102,15 @@ is byte 0x1B.
      aborts the whole fetch, while an empty list/dict name is falsy and the series is
      skipped. The hashable non-strings `1`, `1.0` and `true` collide under first-wins
      (`True == 1`, equal hash; `1.0 == 1`) and round-trip through the JSON cache write
-     as strings.
+     as strings. Key identity is Python hash/eq, not text: the string `"5"` and the int
+     `5` are **distinct** dict keys, and `json.dump` writes both as the JSON text
+     `"5"` (a duplicate-key object, SL:203); a `json.load` of that object keeps the
+     **last** one. And the JSON constant `NaN` decodes to one shared float object, so
+     two series whose `__name__` is `NaN` collide through dict identity and first-wins
+     keeps the first (oracle-verified 2026-11-18). A Go `map[string]float64` model
+     diverges on both counts under the VP-030 differential; hylo must carry the
+     Python key identity (typed hash/eq key plus the shared-NaN sentinel) through the
+     session-cache round trip (BC-1.04.020).
 5. The function never raises; the render path continues with the result.
 
 ## Invariants
@@ -116,6 +142,10 @@ is byte 0x1B.
 | EC-015 | body `not json`; `[1,2]`; `{"status":"error"}`; `result` = `{}` or `"ab"` | no sample |
 | EC-016 | body with UTF-8 BOM | accepted (bytes-mode decode) |
 | EC-017 | connection refused / timeout | no sample |
+| EC-018 | `value[1]` = a 309-digit integer literal (>= 2**1024, e.g. 10**308 as a bare JSON int) | `float(int)` raises OverflowError outside the per-series catch (SL:177-180, 186) → **no sample**; a bare float literal `1e400` next to it is kept as +Inf (ADV-P3-C2-05) |
+| EC-019 | `value[1]` = `1e400` (bare JSON float literal) | `json.loads` decodes it to +Inf; `float(+Inf)` = +Inf → series stored (`{"x": +Inf}`) |
+| EC-020 | two series, `__name__` = string `"5"` and int `5` | both stored (distinct keys, insertion order); `json.dump` emits two `"5"` keys; the cache reload keeps the **last** (ADV-P3-C2-10) |
+| EC-021 | two series, both `__name__` = `NaN` | one shared NaN object → dict identity collides → first wins (ADV-P3-C2-10) |
 
 ## Canonical Test Vectors
 
@@ -124,13 +154,17 @@ is byte 0x1B.
 | `{"status":"success","data":{"result":[{"metric":{"__name__":"vllm:num_requests_running"},"value":[1,"3"]},{"metric":{"__name__":"up","job":"vllm"},"value":[1,"1"]},{"metric":{"__name__":"up","job":"lmcache"},"value":[1,"0"]}]}}` | `{"vllm:num_requests_running": 3.0, "up:vllm": 1.0, "up:lmcache": 0.0}` (this order) | happy-path |
 | result with `"NaN"`, `"+Inf"`, `"1e400"` for x, y, z | `{"x": NaN, "y": +Inf, "z": +Inf}` | edge-case |
 | result `[{"metric":{"__name__":"y"},"value":[1,"7"]},{"metric":{"__name__":"x"},"value":5}]` | no sample | error |
+| result `[{"metric":{"__name__":"x"},"value":[1,1e400]}]` | `{"x": +Inf}` | edge-case |
+| result `[{"metric":{"__name__":"y"},"value":[1,"7"]},{"metric":{"__name__":"x"},"value":[1,1000000000...(309 digits)]}]` | no sample (integer-literal OverflowError, ADV-P3-C2-05) | error |
+| result `[{ "__name__": "5", "value":[1,"1"]}, { "__name__": 5, "value":[1,"2"]}]` | two keys stored; after a cache round trip one `"5"` key remains holding `2.0` | edge-case |
 | HTTP 500 with a valid body | no sample | error |
 
 ## Verification Properties
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030, VP-022 (partial: network edge only) | For any response bytes, the Go fetch returns the same map (keys, order, float bits) or "no sample" as legacy | fuzz (Tier C differential) + table |
+| VP-030 | For any response bytes, the Go fetch returns the same map (keys incl. Python key identity per PC4 — distinct `"5"`/`5`, shared NaN; order; float bits) or "no sample" as legacy | fuzz (Tier C differential) + table |
+| VP-022 (partial: network edge only) | The status line never reads the ledger (DI-007): the metrics fetch reads only the VictoriaMetrics HTTP response at the network edge — no ledger/file reads in the render path | static analysis (read-scope absence) |
 | VP-030 | The function never panics or returns an error to the caller | fuzz |
 | VP-030 | Request URL bytes equal legacy's for the default query | manual (golden) |
 

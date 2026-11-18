@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -48,7 +48,12 @@ flowchart LR
 ```
 
 - Race detector on Linux and macOS; the resolved Python patch version is recorded in
-  Tier B golden metadata (RK-4).
+  Tier B golden metadata (RK-4). Ordering (pass-3 D22): GitHub Actions always sets
+  `CI=true`, and Tier A runs live inside the plain `go test ./...` step — so every
+  `test` job installs setup-python and exports `HYLO_PARITY_PYTHON` BEFORE the
+  `go test` step; the plain test step never discovers the interpreter afterwards.
+  Alternatively a leg may exclude the Tier A selector from the plain step, but env-first
+  is the designed default.
 - **Timing (NFR-001, BC-6.04.002):** every leg prints the per-OS report — per corpus
   case, 1 discarded warm-up + **20 timed runs**, samples sorted per case, nearest-rank
   p95 = **19th of the 20 sorted samples** (per nfr-catalog.md; with 5 samples the
@@ -77,7 +82,13 @@ flowchart LR
     standing in for coverage is investigated, not accepted — ADV-P2-A15). The skeleton-era
     empty-module guard prints `go: 0 Go files — guard path, NOT a vet/test pass` and is
     removed once Phase 3 lands sources (after which `K == 0` fails).
-  - Pattern scan: `hygiene: K files scanned, H hits`.
+  - Pattern scan: `hygiene: K files scanned, H hits` — fails if `K == 0` (scan ran over
+    nothing) AND if `H > 0` (a found hit is a failure, pass-3 A18), so the scan cannot
+    pass while flagging hygiene terms.
+  - Timing report (pass-3 A16/D39): the timing job executes the in-tree timing test
+    (`go test ./internal/parity -run '^TestTiming$' -count=1`, `par/timing.go`) and
+    prints `timing: N cases timed > 0` — fails if `N == 0` (an activated job reporting
+    on zero cases must not pass).
   A skipped required check must never stand in for a pass: probe-gated placeholder jobs
   are added to branch protection's required set only when they can execute (Phase 3),
   and from then on every activation of the job must satisfy its coverage line —

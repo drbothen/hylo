@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:58:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "df3c65b"
+input-hash: "ffd4947"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,9 +19,10 @@ confidence: M
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + sync-check SC-08: Decode call snippets pinned to the 3-arg signature with the transcript budget, 2026-11-17T21:58:00Z"
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
-  - "consolidated pass-2 follow-up: transcript-site depth boundary re-measured end to end at 993/994 (989/990 recipe not reproducible end to end), 2026-11-17T21:21:12Z"
+  - "2026-11-17T21:21:12Z consolidated pass-2 follow-up: transcript-site depth boundary re-measured end to end at 993/994 (989/990 recipe not reproducible end to end)"
+  - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-17T21:58:00Z patch bump + sync-check SC-08: Decode call snippets pinned to the 3-arg signature with the transcript budget"
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D01+D11: boundary restated as TOTAL nesting depth (formula L = 999 minus F frames, F = 6); recipe re-derived, largest accepted d = 992 = L-1 (total 993); third stdin site main_subagent SL:930 pinned 993/994, over-limit = zero bytes stdout"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,24 +66,30 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
    → error.
 6. **Objects:** duplicate keys keep the **last** value at the **first** key's position (BC-5.02.004).
 7. **Depth:** nesting beyond the CPython recursion budget at the legacy call site → error (RecursionError) → skipped.
-   The boundary is a single limit `L`: depth `L` is accepted and depth `L + 1` is rejected — there is no gap. Go uses
-   a named constant equal to `L`, with a "why not config" comment; Go's own 10,000-level limit must not apply. At
-   this call site (`_mix_counts`, SL:1061) the pinned boundary is **L = 993 accepted / 994 rejected** for total
-   nesting depth, measured 2026-11-17 end to end with the recorded recipe (below) under CPython 3.11.7, default
-   recursion limit 1000. The stdin text-mode call site measures the same 993 accepted / 994 rejected
-   (BC-1.01.002): both sites sit at the same Python frame depth (`<module>→main→json.load→loads` vs
-   `<module>→main→_mix_counts→loads`). `Decode` therefore takes the recursion budget as a per-call-site
-   parameter — it is never a package global — and each call site's value must be measured end to end, not
-   inferred from another site.
+   The boundary is a single limit `L`: total nesting depth `L` is accepted and total depth `L + 1` is rejected — there is
+   no gap. **Total nesting depth counts the outermost container as depth 1** (ADV-P3-D01 disposition: every statement of
+   this boundary is in total-depth terms). The formula is `L = 999 − F`, where `F` is the number of Python frames on the
+   interpreter stack between the program entry and `json.scanner`'s recursive parse call at that site (`F = 6` for each of
+   the three stdin-adjacent call sites below). Go uses a named constant equal to `L`, with a "why not config" comment;
+   Go's own 10,000-level limit must not apply. At this call site (`_mix_counts`, SL:1061) the pinned boundary is
+   **L = 993 accepted / 994 rejected** for total nesting depth, measured 2026-11-18 end to end with the recorded recipe
+   (below) under CPython 3.11.7, default recursion limit 1000. The stdin text-mode call site (BC-1.01.002) and the
+   `main_subagent` stdin call site (`json.load(sys.stdin)`, SL:930; ADV-P3-D11) measure the same **993 accepted / 994
+   rejected** — all three sites sit at `F = 6` Python frames (`<module>→main→…→json.load/loads→decode→raw_decode`).
+   `Decode` therefore takes the recursion budget as a per-call-site parameter — it is never a package global — and each
+   call site's value must be measured end to end, not inferred from another site.
    **Measurement recipe (how L was pinned):** run the REAL legacy program end to end — `HOME` and cwd pointed
    at fresh temp directories so `legacy/dgx_statusline.py` never touches the real cache — with the transcript
    file holding the single line
    `{"type":"assistant","message":{"id":"m1","usage":{"input_tokens":7}},"x":` + `"["·d + "]"·d` + `}`
-   plus a trailing `\n`. Acceptance is observable in the mix cache: the largest accepted d leaves
-   `tin = 7` (counted); d + 1 is skipped (`tin = 0`). Bisect d; the largest accepted d is `L`
-   (reproduced: 993 accepted, 994 rejected). End-to-end invocation is required: the budget is per call site,
-   and importing `_mix_counts` through a runner frame instead of the program's own `main` shifts the measured
-   boundary.
+   plus a trailing `\n`. The `d` nested arrays sit inside the outer object, so the line's **total nesting depth is
+   d + 1**. Acceptance is observable in the mix cache: the largest accepted d leaves `tin = 7` (counted); a larger d is
+   skipped (`tin = 0`). Bisect d; the largest accepted d is `L − 1` — **reproduced 2026-11-18: d = 992 accepted
+   (total depth 993), d = 993 rejected (total depth 994)**. End-to-end invocation is required: the budget is per call
+   site, and importing `_mix_counts` through a runner frame instead of the program's own `main` shifts the measured
+   boundary. For the `main_subagent` site the same boundary is observed on stdout: stdin nested to total depth 993
+   under `"tasks":[…]` renders a row (90 bytes); total depth 994 yields **zero bytes** (the swallowed `json.load`
+   exception leaves `d = {}`, which renders no rows).
 
 ## Invariants
 
@@ -105,7 +112,7 @@ nesting depth, so it is not used (design IM-01; pitfall PR-09).
 | EC-007 | `"a\x01b"` (raw control char) | error |
 | EC-008 | 4,301-digit integer literal | error (ValueError) → skipped |
 | EC-009 | `{"a":1} x` | error (extra data) |
-| EC-010 | Total nesting depth 993 / 994 (`L` / `L + 1`) | accepted / error (RecursionError → skipped) |
+| EC-010 | Total nesting depth 993 / 994 (`L` / `L + 1`) per the PC-7 recipe (recipe `d` = 992 / 993) | accepted / error (RecursionError → skipped) |
 
 ## Canonical Test Vectors
 
@@ -142,6 +149,7 @@ All rows verified 2026-11-15 against CPython 3.11.7 `json.loads(bytes)`.
 ## Related BCs (Recommended)
 
 - BC-1.03.004 — consumed by (`bytes.splitlines` + per-line `json.loads`)
+- BC-1.07.003 — related to (the `main_subagent` stdin site: same boundary, over-limit → zero bytes stdout, ADV-P3-D11)
 - BC-5.02.004 — composes with (the decoded Value model)
 - BC-5.03.002 — depends on (`SplitLinesBytes`)
 - BC-1.03.018 — related to (D4-EX-2 handles wrong-shape lines that decode fine)

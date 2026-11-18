@@ -1,15 +1,15 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.2"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-18T08:00:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "fa75fe8"
+input-hash: "c3b4cd1"
 ---
 
 # DTU Assessment: hylo P1 (status line)
@@ -18,14 +18,15 @@ input-hash: "fa75fe8"
 
 | Metric | Value |
 |--------|-------|
-| External dependencies identified | 4 |
+| External dependencies identified | 5 |
 | DTU clones recommended | 0 |
 | Total clone story points | 0 (≈1 pt of fake-extension work folded into existing harness stories) |
 | Estimated Wave 1 capacity needed | 0 points |
 
 **Verdict: `DTU_REQUIRED: false`.** P1 has exactly one network edge (the metrics query
-API, ARCH-03) and three non-network external contracts (statusLine stdin, git state,
-process tables). All four are reproducible at seam level with fakes the parity harness
+API, ARCH-03) and four non-network external contracts (statusLine stdin, the
+`subagentStatusLine` agent-panel stdin, git state, process tables). All five are
+reproducible at seam level with fakes the parity harness
 already mandates — and the Tier A differential design actively requires the httptest
 fake, because the legacy oracle must hit the *same* fake in-process through the
 `DGX_SL_*` settings translation (ARCH-07). A Docker-packaged clone cannot serve the
@@ -42,8 +43,9 @@ carries their boundaries.
 
 | # | Service | Protocol | Fidelity | DTU? | Justification |
 |---|---------|----------|----------|------|---------------|
-| 1 | Prometheus-compatible metrics query API (VictoriaMetrics) | HTTP GET `/api/v1/query` | L2 | No | Stateless request/response; entire boundary = a handful of response envelopes. Existing httptest fake (ARCH-07) + OD-130 vectors suffice; a Docker clone cannot serve the in-process legacy oracle in Tier A. |
-| 2 | Claude Code statusLine stdin JSON | One JSON object on stdin per render | L3 (decode semantics only) | No | Not a network service — an upstream push contract. Its clone *is* the harness corpus (`stdin.json.tmpl` cases). Decode edges carry 93 S1 BCs and are already corpus-pinned. |
+| 1 | Prometheus-compatible metrics query API (VictoriaMetrics) | HTTP GET `/api/v1/query` | L2 | No | Stateless request/response; entire boundary = a handful of response envelopes. Existing httptest fake (ARCH-07) plus the register's sample-string extension rows (defensive-parse ratification is P6 per OD-157, not P1 — pass-3 A2-16 removes the stale OD-130-as-P1 vectors); a Docker clone cannot serve the in-process legacy oracle in Tier A. |
+| 2 | Claude Code statusLine stdin JSON | One JSON object on stdin per render | L3 (decode semantics only) | No | Not a network service — an upstream push contract. Its clone *is* the harness corpus (`stdin.json.tmpl` cases). Decode edges carry 101 S1 BCs and are already corpus-pinned. |
+| 5 | Claude Code `subagentStatusLine` agent-panel stdin (OD-155) | One JSON object on stdin per panel render: `{"columns": N, "tasks": [{id, name, agentType, status, description, label, startTime, model, tokenCount, ...}]}` | L3 (decode + per-task render semantics, BC-1.07.003..008) | No | Not a network service — a SECOND upstream push contract, separate from the statusLine stdin (added pass-3 A2-16). Its clone is the `subagent`-family harness corpus rows (`argv` field + `stdin.json.tmpl`, ARCH-07). Compatibility with the 2.1.326 payload is ASSUMP-107-1, still to be verified by a capture before Phase 3. |
 
 ### Outbound Operations (Product → External)
 
@@ -78,10 +80,11 @@ None identified — P1 emits no telemetry. The P2 exporter and its separate orac
 
 | # | Service | Category | Fidelity | DTU? | Points | Justification |
 |---|---------|----------|----------|------|--------|---------------|
-| 1 | Metrics query API (VictoriaMetrics) | Inbound | L2 | No | ≈0.5 | Envelope-matched httptest fake; extend with OD-130 vectors (rows 2–4, 8–9 of the register) |
+| 1 | Metrics query API (VictoriaMetrics) | Inbound | L2 | No | ≈0.5 | Envelope-matched httptest fake; extension rows are the register's sample-string/error-envelope modes (defensive-parse ratification is P6 per OD-157 — no stale OD-130-as-P1 vectors, pass-3 A2-16) |
 | 2 | Claude Code statusLine stdin | Inbound | L3 (decode) | No | ≈0.5 | Fixture corpus is the clone; add one `unknown-future-field` variant |
 | 3 | git repository state | Enrichment/lookup (local) | L1 | No | 0 | Seeded `.git` trees behind `Files`/`Cwd` seams; already scheduled |
 | 4 | Per-OS process tables | Enrichment/lookup (local) | L1 | No | 0 | `ProcStarter` recording fake + `TestWindowAge_D4EX1_Windows`; already scheduled |
+| 5 | Claude Code `subagentStatusLine` agent-panel stdin | Inbound | L3 (decode + render) | No | ≈0.5 | Second stdin push contract (OD-155); cloned by the `subagent`-family corpus rows with the new `argv` field (ARCH-07); BC-1.07.001..008 + ASSUMP-107-1 capture pending |
 
 ## Boundary Reproduction Register (what each fake must pin)
 
@@ -173,9 +176,9 @@ replaces it; environment overrides are already contractual:
 ## Clone Development Approach
 
 No Docker-packaged clones are developed this cycle. The register above is the clone
-specification by reference: each fake's extension vectors (OD-130 sample strings,
+specification by reference: each fake's extension vectors (the sample-string,
 deadline-hang and error-envelope modes for #1; the `unknown-future-field` stdin variant
-for #2) are delivered as harness stories under `internal/parity` /
+for #2; the `subagent`-family rows with the `argv` field for #5) are delivered as harness stories under `internal/parity` /
 `internal/statusline/testdata/` per AD-13 fixture co-location, not as separate clone
 stories. Should a later cycle (P2 exporter scrape path, P3 proxy surface) introduce an
 externally hosted dependency that cannot be seam-faked without losing oracle

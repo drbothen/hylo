@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T03:00:00Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "1244d41"
+input-hash: "278b2ba"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P4"]
+modified: ["1.2.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-040 P4", "1.2.2 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B03): VP anchor names VP-040 P4 instead of VP-027"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -124,7 +124,8 @@ TBD — status line frame (design step S2)
 
 ## VP Anchors (Recommended)
 
-- VP-027 — COLUMNS grammar parity
+- VP-040 P4 — for-all term_cols grammar differential vs CPython `int()`-or-0 (VP-027 retains the breakpoint
+  matrix; ADV-P3-B03)
 
 ---
 

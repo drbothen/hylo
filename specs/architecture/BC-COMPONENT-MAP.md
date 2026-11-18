@@ -1,17 +1,17 @@
 ---
 document_type: bc-component-map
 level: L3
-version: "1.1"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-18T08:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "7bda328"
+input-hash: "85f3ed2"
 traces_to: ../prd.md
 ---
 
-# BC-COMPONENT-MAP: hylo P1 (153/153)
+# BC-COMPONENT-MAP: hylo P1 (154/154)
 
 > One row per behavioral contract: component home (package/file) + governing ARCH
 > section. Homes follow the design doc §8 mapping under the new BC ids; titles here are
@@ -90,7 +90,7 @@ traces_to: ../prd.md
 | BC-1.03.012 | sl/transcript.go (two-refresh completion) | ARCH-03 |
 | BC-1.03.013 | sl/mixcache.go (sid sanitize) | ARCH-03 |
 | BC-1.03.014 | sl/transcript_mix.go (block value types) | ARCH-03 |
-| BC-1.03.015 | sl/transcript.go + plat/fd_*.go (int = fd) | ARCH-03, ARCH-05 |
+| BC-1.03.015 | sl/transcript.go (int = no transcript, OD-161; no descriptor I/O) | ARCH-03 |
 | BC-1.03.016 | sl/transcript_turn.go (20-row table) | ARCH-03 |
 | BC-1.03.017 | sl/transcript_turn.go (turn identity) | ARCH-03 |
 | BC-1.03.018 | sl/transcript_wshape.go (W-predicates) | ARCH-03 |
@@ -149,7 +149,7 @@ traces_to: ../prd.md
 
 | BC | Component | ARCH |
 |---|---|---|
-| BC-1.07.001 | sl/subagent.go (`--subagent` argv routing) | ARCH-03, ARCH-01 |
+| BC-1.07.001 | cmd/hylo + sl/subagent.go (`--subagent` argv routing per ARCH-01 `runStatuslineSubagent`; panel body) | ARCH-03, ARCH-01 |
 | BC-1.07.002 | sl/subagent.go (enabled off switch, default true) | ARCH-03 |
 | BC-1.07.003 | sl/subagent.go (total stdin: unparseable ⇒ zero rows) | ARCH-03 |
 | BC-1.07.004 | sl/subagent.go (one line per eligible task) | ARCH-03 |
@@ -192,7 +192,7 @@ traces_to: ../prd.md
 | BC-4.01.002 | cmd/hylo/statusline.go (unknown-flag scan) | ARCH-01 |
 | BC-4.01.003 | cmd/hylo/version.go | ARCH-01 |
 
-## S5 — Pyfmt (19)
+## S5 — Pyfmt (20)
 
 | BC | Component | ARCH |
 |---|---|---|
@@ -202,6 +202,7 @@ traces_to: ../prd.md
 | BC-5.01.004 | py/num.go (D) | ARCH-06 |
 | BC-5.01.005 | py/num.go (Repr) | ARCH-06 |
 | BC-5.01.006 | py/num.go (MaxSeq) | ARCH-06 |
+| BC-5.01.007 | py/num.go (NumToF/TrueDiv/NumCmp) | ARCH-06 |
 | BC-5.02.001 | py/json.go (dumps length rules) | ARCH-06 |
 | BC-5.02.002 | py/json.go (63-case oracle) | ARCH-06 |
 | BC-5.02.003 | py/json.go (loads bytes acceptance) | ARCH-06 |
@@ -237,7 +238,8 @@ traces_to: ../prd.md
 
 ## Coverage
 
-101 + 13 + 3 + 3 + 19 + 14 = **153/153**. Every row names exactly one primary component
-home and at least one ARCH section; two-row exceptions: BC-1.03.015 (sl + plat),
-BC-6.04.001 (par + ARCH-08 workflow). No BC unmapped; no component without a BC set
+101 + 13 + 3 + 3 + 20 + 14 = **154/154**. Every row names exactly one primary component
+home and at least one ARCH section; two-row exception: BC-6.04.001 (par + ARCH-08
+workflow; BC-1.03.015 collapsed to sl-only when OD-161 removed the fd helpers, pass-3
+A06). No BC unmapped; no component without a BC set
 except theme.go (serves BC-2.01.003 via cfg) and env.go seams (serve BC-1.01.009).

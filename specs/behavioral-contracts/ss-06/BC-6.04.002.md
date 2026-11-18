@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -12,7 +12,7 @@ inputs:
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "f1e293b"
+input-hash: "7af0edb"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -23,7 +23,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation A04: canonical gate parameters 1 warm-up + 20 runs per case, nearest-rank p95 = 19th sample, binding per case, no pooling; test target moved to internal/parity"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,17 +54,19 @@ removes.
 2. Metrics come from the fake VictoriaMetrics on loopback (BC-6.02.003). The fake VM
    records, per request, the server-side handling time from request receipt to
    response flush.
-3. The timing run is a separate test target (`go test -run TestTiming ./internal/statusline`
-   or a dedicated tool). It is not part of the Tier A/B parity verdict.
+3. The timing run is a separate test target (`go test -run TestTiming ./internal/parity`
+   or a dedicated tool; home `internal/parity` per BC-COMPONENT-MAP par/timing.go,
+   ADV-P3-A04). It is not part of the Tier A/B parity verdict.
 
 ## Postconditions
 
 1. **Measurement.**
-   - For each corpus step the harness runs 1 warm-up (rationale, convention: absorbs
-     the first-execution page-cache and oracle-start cost so it does not skew the timed
-     runs) and then `R = 5` timed executions (rationale, labeled judgment call: five
-     samples per step keep the three-OS nightly matrix affordable while nearest-rank
-     p95 stays computable; not a measured optimum).
+   - CANONICAL GATE PARAMETERS (ADV-P3-A04, aligned with nfr-catalog NFR-001 rows and
+     ARCH-08/cicd-setup): for each corpus CASE the harness runs 1 warm-up (rationale,
+     convention: absorbs the first-execution page-cache and oracle-start cost so it does
+     not skew the timed runs) and then 20 timed executions (nearest-rank p95 = the 19th
+     ordered sample, BINDING per case — per case, never pooled across cases or steps).
+     The former R = 5 pooled-times formulation was wrong and is superseded.
    - Render time per execution = process wall time (exec start to exit) minus the fake
      VM's server-side handling time for requests made during that execution.
    - Loopback connect and transfer time stays counted against hylo, which is the
@@ -74,7 +77,9 @@ removes.
    - `median`, `p90`, `p95` and `max` in milliseconds with 0.1 ms resolution;
    - the CPython oracle median measured the same way, for reference. Interpreter
      start-up is included on the Python side.
-   Percentiles use the nearest-rank method on the pooled per-execution render times.
+   Percentiles use the nearest-rank method COMPUTED PER CASE on that case's 20
+   per-execution render times (no pooling across cases; nearest-rank p95 = the 19th
+   ordered sample; ADV-P3-A04).
 3. **Gate only on the owner's target.**
    - When the harness setting `HYLO_TIMING_GATE=1` is present, `p95 > 25.0 ms` fails
      with `timing: p95 <p95> ms > 25 ms target (OD-117, judgment call)`. The owner sets

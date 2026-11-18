@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "44590c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1009-1015)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-17: lone-surrogate path encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -74,6 +74,7 @@ transcript-fed widget (composition, token totals, the row-2 last-turn segment) i
 | EC-006 | regular file removed between the regular-file check and the size read | no-transcript state (OS error caught) |
 | EC-007 | regular file of size 0 with no mix cache | **not** this BC: the file exists, so BC-1.03.002 runs (size == offset 0, cached zeros returned, no write) |
 | EC-008 | `session_id` is a number and `transcript_path` is missing | no-transcript state; no degrade, because the sid is only read after the file checks |
+| EC-009 | Path str with lone surrogates (ADV-P3-C21): Python encodes paths with the filesystem encoding's `surrogateescape` handler — U+DC80..U+DCFF become the single raw bytes 0x80..0xFF and any other lone surrogate raises `UnicodeEncodeError`, which `os.path.isfile` swallows (`ValueError` → `False`, no-transcript state) | legacy: a U+DC80..DCFF path is probed under its raw-byte name (parsed if that file exists); other lone surrogates → no-transcript state. hylo: JSON strings carry UTF-8; a lone surrogate is encoded as its 3-byte WTF-8 sequence and never as a surrogateescape byte, so a U+DC80..DCFF name denotes a different file than legacy's single raw byte (no-transcript in practice; real transcript paths are UTF-8, OD-03) |
 
 ## Canonical Test Vectors
 

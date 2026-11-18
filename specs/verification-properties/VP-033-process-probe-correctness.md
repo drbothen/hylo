@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:19:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, behavioral-contracts/ss-03/BC-3.02.001.md, behavioral-contracts/ss-03/BC-3.02.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
 input-hash: "2ed5662"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:19:00Z: ADV-P3 fix (A2-24) — fake-chain seam made explicit: the skeleton probes read the injected pid chain through the production reader seam, never the real OS"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -76,7 +76,9 @@ func TestFindAncestor_RuleRegister(t *testing.T) {
     for _, tc := range FakePIDChains { // WantStart is the pre-truncated expectation;
         // chains include raw values like 100.7 whose expectation is 100.0, so an
         // implementation that skips truncation fails here.
-        start, ok := FindAncestor(tc.PID, tc.Name, 6)
+        probe := newFakeProbe(tc.Chain) // A2-24 fake-chain seam: the probe reads the
+        // injected pid chain via the same reader seam production uses, never the OS
+        start, ok := probe.FindAncestor(tc.PID, tc.Name, 6)
         if ok != tc.WantOK || (ok && start != tc.WantStart) {
             t.Fatalf("%s: ok=%v start=%v want=%v", tc.Name, ok, start, tc.WantStart)
         }

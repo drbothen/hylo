@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
@@ -37,20 +37,39 @@ type EnvVars interface {
 // run dispatches on verb; unknown verb or bad args => usage.golden on stderr, exit 2.
 func run(args []string, env EnvVars, stdin io.Reader, stdout, stderr io.Writer) int
 func runStatusline(env EnvVars, stdin io.Reader, stdout, stderr io.Writer) int // always 0
-func runVersion(stdout io.Writer) int                                         // 0
-func runConfigValidate(env EnvVars, stdout, stderr io.Writer) int              // 0 | 1
-func runConfigPath(args []string, env EnvVars, stdout, stderr io.Writer) int   // 0 | 2
+
+// runStatuslineSubagent is the OD-155 subagent panel entry point (BC-1.07.001,
+// pass-3 A02). It receives the FULL statusline argument slice — routing matches the
+// exact element "--subagent" anywhere in it, at any index, including after a bare
+// "--" terminator. Resolves config itself (OD-168: config IS loaded on the subagent
+// path); on config error: ZERO bytes on stdout, the error line on stderr, exit 0.
+func runStatuslineSubagent(args []string, env EnvVars, stdin io.Reader, stdout, stderr io.Writer) int
+
+func runVersion(stdout io.Writer) int                                        // 0
+func runConfigValidate(env EnvVars, stdout, stderr io.Writer) int             // 0 | 1
+func runConfigPath(args []string, env EnvVars, stdout, stderr io.Writer) int  // 0 | 2
 ```
 
 Dispatch order is contractual (BC-4.01.001, BC-4.01.002, interface-definitions.md):
 verb parse -> for `statusline` only: exact-match `--subagent` routing -> unknown-flag
 scan -> `statusline.Main` -> exit 0. The exact argument `--subagent` selects the
 subagent panel renderer before any flag or config processing (OD-155, superseding
-OD-14; BC-1.07.001..008): when it is an element of argv, the panel produces all stdout
-and the main render never runs; the panel is gated by `statusline.subagent.enabled`
-(default true = legacy, BC-1.07.002). Otherwise `statusline` takes no flags in P1:
-any argument starting with `-` (except a bare `-`, which is positional, and a bare
-`--`, after which arguments are ignored) renders
+OD-14; BC-1.07.001..008): when it is an element of args — at ANY index, including
+after a bare `--` (pass-3 A01 ruling restatement: the flag is matched on the whole
+argv tail, so `hylo statusline -- --subagent` routes to the panel, superseding the
+BC-4.01.002 EC-004 "positional data" reading) — `runStatuslineSubagent` produces all
+stdout and the main render never runs; the unknown-flag scan never runs either.
+Config on the subagent path (OD-168, pass-3 A02): the subagent entry point resolves
+config itself before evaluating the panel gate — the panel needs
+`statusline.subagent.enabled` (BC-1.07.002) and `backends[0].model_prefixes`
+(BC-1.07.006) — so a config error in `--subagent` mode prints ZERO bytes on stdout
+(NDJSON-only surface) and the E-CFG-001 detail line on stderr, exit 0; the grey
+stdout config-error line never applies in `--subagent` mode. With valid config the
+panel is gated by `statusline.subagent.enabled` (default true = legacy,
+BC-1.07.002; disabled = zero bytes, exit 0). Otherwise `statusline` takes no flags in
+P1: any argument starting with `-` (except a bare `-`, which is positional, and a
+bare `--`, which ends only the flag SCAN — trailing arguments are ignored by the scan
+but still visible to `--subagent` routing, which precedes it) renders
 `\e[90mhylo: unknown flag <flag>\e[0m\n`, exit 0, **checked before config resolution**
 (OD-112; E-CLI-001 outranks E-CFG-001). Stdlib `flag` with `ExitOnError` is banned on
 this path — it would exit 2 with a blank line (design doc tension T8; resolved by
@@ -70,7 +89,9 @@ OD-112: adapt or hand-roll the scan).
 - **Rationale:** one closed table (error-taxonomy.md) is testable exhaustively; a global
   rule cannot express validate's non-zero.
 - **Consequences:** `runStatusline` literally cannot propagate an error code; the guard
-  owns the degraded line; `cp-x03` (degraded-write failure) still exits 0 (OD-136).
+  owns the degraded line; `cp-x03` (degraded-write failure) still exits 0 (OD-136); in
+  `--subagent` mode a config error likewise exits 0 with zero stdout bytes (OD-168),
+  so the panel surface stays NDJSON-only (pass-3 A02).
 - **Verification feasibility:** all exits are stdout/exit-code byte tables — **testable
   only** (CLI shell), pinned by golden files and per-verb table tests; the pure pieces
   they call are covered under their own sections.
@@ -78,7 +99,7 @@ OD-112: adapt or hand-roll the scan).
 ### Decision: version string chain
 
 **Context/decision:** `hylo version` prints `hylo <version>`; version injected at build
-via `-ldfs -X`, falling back to VCS stamp, then `dev` (BC-4.01.003; D12 releases tag it).
+via `-ldflags -X`, falling back to VCS stamp, then `dev` (BC-4.01.003; D12 releases tag it).
 **Rationale:** keeps reproducible builds (design doc §6.7); **feasibility:** pure table
 test on the chain, with the stamp itself testable-only.
 
@@ -95,6 +116,7 @@ disagree with actual use. Paths are computed by `platform`, never assembled here
 
 - BC-4.01.001 -> `run`/`runStatusline`; BC-4.01.002 -> flag scan; BC-4.01.003 ->
   `runVersion`; BC-2.03.001 -> `runConfigValidate` (reuses `config.Load` errors verbatim);
-  BC-2.03.002 -> `runConfigPath`.
+  BC-2.03.002 -> `runConfigPath`; BC-1.07.001 -> `runStatuslineSubagent` (argv routing +
+  self-contained config resolution per OD-168, panel body per ARCH-03 `subagent.go`).
 - Criticality MEDIUM (>= 80% kill rate, module-criticality.md). Every rule above gets a
   table test; usage.golden pins the usage text byte-for-byte.

@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:17:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.04.002.md, behavioral-contracts/ss-01/BC-1.04.004.md, behavioral-contracts/ss-01/BC-1.04.009.md, behavioral-contracts/ss-01/BC-1.04.014.md, behavioral-contracts/ss-01/BC-1.04.020.md, prd-supplements/test-vectors.md]
 input-hash: "d3d6afe"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — OD-130 not verified in P1; P1 asserts legacy ±Inf behavior per BC-1.04.014 (OD-157, A2-01)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — OD-130 not verified in P1; P1 asserts legacy ±Inf behavior per BC-1.04.014 (OD-157, A2-01)", "1.3 2026-11-18T09:17:00Z: ADV-P3 fix (C2-08) — the legs the BC VP-tables route here now exist in this document: testing/quick for-all leg (BC-1.04.002/004/006/007/009/013/017/021 invariants) and Tier C differential-fuzz rows (BC-1.04.001 fetch/redirect sampling, BC-1.04.009 sparkline scale), with skeleton"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +59,15 @@ mismatch quirk.
 - **Class:** invariant.
 - **Method:** unit/table test — the 11-step get_sample sequence table, TTL/KEEP_DEAD
   transition matrices, freshness-ladder rows, sparkline glyph/color/scale tables, NaN/inf
-  fault rows.
+  fault rows; PLUS the legs the BC VP-tables route here (C2-08): testing/quick
+  for-all legs for the row-2 invariants marked "property proof" in
+  BC-1.04.002/004/006/007/009/013/017/021 (TTL/freshness monotonicity, redirect
+  visited-cap sampling behaviour, cells caps, sparkline scale bounds, TTFT
+  rounding bands, idle-age ordering, power-format invariants — each property's
+  oracle is that BC's canonical table), and Tier C differential-fuzz rows for the
+  surfaces marked "fuzz" in BC-1.04.001 (fetch/redirect sampling) and BC-1.04.009
+  (sparkline scale), budgeted by `HYLO_PARITY_FUZZSECONDS`, same oracle discipline
+  as VP-011.
 - **Honesty:** testable-only; the 1.5 s timeout and first-wins semantics are
   fake-server integration rows.
 
@@ -70,6 +78,8 @@ mismatch quirk.
 | Sequence table | Go test, 11 canonical steps | yes | get_sample pinned sequence |
 | Segment tables | Go test | yes | all row-2 segments x freshness states |
 | Fault rows | Go test (httptest fake) | yes | down/500/garbage/±Inf metrics |
+| Property legs | `testing/quick`, *quick.Config with Values | sized | BC-1.04.002/004/006/007/009/013/017/021 for-all rows |
+| Differential fuzz | parity harness, `HYLO_PARITY_FUZZSECONDS` | budget-bounded | BC-1.04.001, BC-1.04.009 |
 
 ## Proof Harness Skeleton
 
@@ -80,6 +90,19 @@ func TestGetSample_Pinned11StepSequence(t *testing.T) {
         if got != s.Want { t.Fatalf("step %d: %+v", s.ID, got) }
     }
 }
+
+func TestRow2Props_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here by the BCs
+    cfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
+        args[0].Elem().Set(genRow2State(r)) // generated TTL/freshness/sparkline states
+    }}
+    if err := quick.Check(func(st row2State) bool {
+        return row2InvariantsHold(st) // TTL monotonicity, ladder ordering, scale bounds
+    }, cfg); err != nil {
+        t.Fatalf("row-2 invariant violated: %v", err)
+    }
+}
+// BC-1.04.001 / BC-1.04.009 fuzz rows ride TestParityTierC_DiffFuzz under
+// internal/parity (HYLO_PARITY_FUZZSECONDS budget, VP-011 oracle discipline).
 ```
 
 ## Named Tests (OD-145 table where applicable)

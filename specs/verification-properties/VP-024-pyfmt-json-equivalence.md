@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-17T20:00:00Z
+timestamp: 2026-11-18T09:13:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.02.001.md, behavioral-contracts/ss-05/BC-5.02.002.md, behavioral-contracts/ss-05/BC-5.02.004.md, behavioral-contracts/ss-05/BC-5.02.005.md, behavioral-contracts/ss-05/BC-5.02.006.md, owner-decisions-log-2026-11-14.md]
 input-hash: "588ae19"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:13:00Z: ADV-P3 fixes (A2-08) — both fuzz skeletons call the 3-arg Decode(b, mode, per-site budget); the single-variable multi-value assignment (again := pyfmt.Decode(...)) fixed to the two-value form; pyfmtDefaultBudget free constant removed in favour of the call-site budget rule of VP-006"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,7 +80,9 @@ strings surviving lone surrogates); `Str` reproduces Python str() of values
 ```go
 func FuzzDumpsLenAgreesWithDumps(f *testing.F) {
     f.Fuzz(func(t *testing.T, b []byte) { // primitives only: fuzz bytes, decode
-        v, err := pyfmt.Decode(b, pyfmt.ModeBytes, pyfmtDefaultBudget)
+        // jsonSiteBudget = the json call-site budget per VP-006's per-call-site rule;
+        // defined at the call site, never a package-level free constant (A2-08).
+        v, err := pyfmt.Decode(b, pyfmt.ModeBytes, jsonSiteBudget)
         if err != nil { return } // undecodable bytes: length invariant vacuous
         if pyfmt.DumpsLen(v) != len(pyfmt.Dumps(v)) {
             t.Fatal("DumpsLen/Dumps drift")
@@ -90,11 +92,12 @@ func FuzzDumpsLenAgreesWithDumps(f *testing.F) {
 
 func FuzzJSONRoundTrip(f *testing.F) {
     f.Fuzz(func(t *testing.T, b []byte) {
-        v, err := pyfmt.Decode(b, pyfmt.ModeBytes, pyfmtDefaultBudget)
+        v, err := pyfmt.Decode(b, pyfmt.ModeBytes, jsonSiteBudget)
         if err != nil { return }
-        again := pyfmt.Decode(pyfmt.Dumps(v), pyfmt.ModeBytes, pyfmtDefaultBudget)
+        d, err := pyfmt.Decode(pyfmt.Dumps(v), pyfmt.ModeBytes, jsonSiteBudget) // 3-arg, two-value
+        if err != nil { t.Fatal("Dumps output must re-decode") }
         // NaN-aware equality: compare byte spellings, never v == v on NaN
-        if !bytes.Equal(pyfmt.Dumps(again.MustValue()), pyfmt.Dumps(v)) {
+        if !bytes.Equal(pyfmt.Dumps(d), pyfmt.Dumps(v)) {
             t.Fatal("round-trip drift")
         }
     })

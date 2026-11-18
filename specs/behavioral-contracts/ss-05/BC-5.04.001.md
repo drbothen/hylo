@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cd1eea3"
+input-hash: "c3fc33e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,8 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D13: POSIX-only ValueError claim qualified (Windows MSVC localtime_s raises OSError); range-end oracle rows restricted to Linux/macOS"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -56,9 +57,12 @@ Transcript timestamps feed the last-turn rate machine through `_iso_ts(s)` =
    → None.
 6. **Result:** aware value → `(total microseconds since the epoch) / 1e6` as one correctly rounded division; naive
    value → `float64(LocalToUnix(loc, wall seconds)) + float64(µs) / 1e6` (CPython C `datetime_timestamp` arithmetic).
-   Leading/trailing whitespace → None. Any failure → `(0, false)`; no other error kind escapes (P3r8 R-3: only
-   `ValueError` occurs).
-7. **Range ends:** naive values whose `LocalToUnix` probes leave years 1..9999 → None (TZ-dependent): naive
+   Leading/trailing whitespace → None. Any failure → `(0, false)`; no other error kind escapes on POSIX (P3r8 R-3:
+   only `ValueError` occurs there). On Windows the underlying naive conversion goes through MSVC `localtime_s`,
+   which raises `OSError` (not `ValueError`) outside the representable range — the helper maps every failure kind
+   to `(0, false)` all the same; the range-end oracle rows are pinned on Linux and macOS only (ADV-P3-D13).
+7. **Range ends** (Linux/macOS oracle rows only — on Windows MSVC `localtime_s` raises `OSError`, ADV-P3-D13):
+   naive values whose `LocalToUnix` probes leave years 1..9999 → None (TZ-dependent): naive
    `0001-01-01T*` → None in every zone; naive `9999-12-31T23:59:59` → float under UTC but None under UTC+14.
 
 ## Invariants

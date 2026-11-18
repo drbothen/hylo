@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.4.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T21:21:12Z
+timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "da302c2"
+input-hash: "476fd5f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -19,6 +19,8 @@ confidence: H
 lifecycle_status: active
 introduced: v0.1.0
 modified: ["consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01", "consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"]
+modified:
+  - "pass-3 remediation (ADV-P3-B07): PC3-PC5 parametrize on cells/plain_max/red_from, so Inv 3 now gives them real ranges (cells int >= 1; plain_max/red_from any finite number); only units.context stays default-only; 2026-11-18T02:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -76,14 +78,18 @@ Notation: `\e` is the byte 0x1B.
 
 1. Exactly 10 cells (with the default `cells`); filled count is in 0..10.
 2. The cell colours depend only on cell index, never on `pct`.
-3. Valid ranges (Policy 20, OD-162): legacy bakes every value this widget reads —
-   `statusline.context.cells` (10), `statusline.context.plain_max` (50 `>`),
-   `statusline.context.red_from` (85 `>=`), `statusline.units.context` (`1e6 → M`, else
-   `K`) — and defines no override for any of them, so each key's valid range is its
-   default only; any other value is a number-range config error (BC-2.02.003, OD-162).
-   Assumed ranges for architect registration: cells = {10}, plain_max = {50},
-   red_from = {85}, units.context = {`K`}. Byte parity (vectors, VP sweeps) is obligated
-   at the defaults.
+3. Valid ranges (Policy 20, OD-162): PC3-PC5 define this widget's behavior for **any**
+   `cells`/`plain_max`/`red_from` (`d = 100/n`, `min(Int(pct/d + 0.5), n)`, the loop over
+   `n` cells, the `pct > plain_max` / `pct >= red_from` comparisons), so those keys get
+   real ranges: `statusline.context.cells` = integer ≥ 1 (n = 0 would divide by zero);
+   `statusline.context.plain_max` and `statusline.context.red_from` = any finite JSON
+   number (compared against the clamped [0, 100] pct). Any out-of-range value is a
+   number-range config error (BC-2.02.003, OD-162). For architect registration:
+   cells = int ≥ 1, plain_max = finite number, red_from = finite number. By contrast,
+   `statusline.units.context` (`1e6 → M`, else `K`) has no derivable non-default
+   semantics from legacy — OD-162's test for default-only — so its valid range is its
+   registered default only; any other value is a number-range config error. Byte parity
+   (vectors, VP sweeps) is obligated at the defaults.
 4. Rationale (D15, design T-027..T-029): 10 cells half-up (review #5.2: half-even gave
    45 % → 4 cells but 55 % → 6); 50 / 85 thresholds (85 % leaves ~117K tokens before the
    ~967K auto-compact of a 1M window, review #5.1; documented); M/K are SI units

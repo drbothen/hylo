@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T11:45:00Z
+timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs:
   - domain-spec/L2-INDEX.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "d5e09c6"
+input-hash: "0d819d5"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,7 +25,8 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-18T01:42:00Z ADV-P3 remediation D23+D10: shim contract lists the UTF-8/newline stdio reconfigure duty with a gating canary leg; tenth clock read SL:889 added to stepped read sites"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +51,10 @@ oracle case runs, that the shim actually took effect.
 ## Preconditions
 
 1. The shim file is `internal/statusline/testdata/pyhooks/sitecustomize.py`. It is
-   stdlib-only, about 10 lines, and lives outside `legacy/` (D10).
+   stdlib-only, about 10 lines, and lives outside `legacy/` (D10). Besides the clock
+   patches it performs the stdio reconfiguration assigned in BC-6.01.002 PC-4:
+   `sys.stdin` and `sys.stdout` are reconfigured to UTF-8 strict with `newline="\n"`
+   on import (ADV-P3-D23; relied on by BC-6.03.002 EC-006).
 2. The oracle runs with `-s` and the env of BC-6.01.002, which sets `PYTHONPATH` to the
    shim directory and `HYLO_TEST_NOW` to the step instant.
 3. `HYLO_TEST_NOW` is a decimal string produced by the harness with
@@ -72,7 +76,8 @@ oracle case runs, that the shim actually took effect.
 2. **Stepped per refresh.** For step `k` of a case the harness sets
    `HYLO_TEST_NOW = now_k` for both the oracle and Go runs of that step.
    - Within one oracle process every `time.time()` read returns `now_k`. The read sites
-     are SL:231, 243, 304, 322, 408, 499, 558, 825 and 826.
+     are SL:231, 243, 304, 322, 408, 499, 558, 825, 826 and 889 (the last: the subagent
+     renderer's `now_ms`, ADV-P3-D10; it only runs under `--subagent` cases).
    - Between steps the value changes only by the case's step schedule (BC-6.02.002,
      BC-6.02.003).
 3. **Go side.** The in-process render receives `Env.Now = now_k`. The built binary
@@ -89,6 +94,12 @@ oracle case runs, that the shim actually took effect.
    - Stdout must equal exactly `1794615009.5\n`.
    - On any other output the run fails, not skips, with
      `parity: clock shim not loaded (OD-109 canary): got "<stdout>"`. No oracle case runs.
+   - A second canary leg proves the stdio duty (ADV-P3-D23): the harness feeds the probe
+     a non-ASCII byte through stdin and reads stdout as raw bytes; with the shim loaded,
+     a `\r\n`-free, UTF-8-strict round trip is observed (the probe prints the decoded
+     code point back, UTF-8-encoded, `newline="\n"`). Failure leg message:
+     `parity: stdio shim not loaded (ADV-P3-D23 canary): got "<raw bytes>"`. No oracle
+     case runs on failure.
 5. **Canary negative control.** A table test runs the same canary probe with `-I`
    instead of `-s`, and separately with `PYTHONPATH` removed. Each must be reported as
    "shim not loaded". This proves the canary can discriminate.

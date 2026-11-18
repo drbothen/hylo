@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "e457c30"
+input-hash: "9ae073d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main (SL:1217-1227)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-13 (request count counts redirect hops)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,7 +93,7 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Fake-metrics request count = 1 iff `rows >= 2` and the TTL has elapsed, independent of `cols` | Go property test (testing/quick) (ROWS × COLUMNS matrix) |
+| VP-030 | Fake-metrics request count = 1 initial GET (plus one request per redirect hop the pinned urllib loop detection accepts, BC-1.04.001 PC1/Invariant 1) iff `rows >= 2` and the TTL has elapsed, independent of `cols` | Go property test (testing/quick) (ROWS × COLUMNS matrix) |
 
 ## Traceability
 

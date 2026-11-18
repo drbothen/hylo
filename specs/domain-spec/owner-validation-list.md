@@ -2,13 +2,13 @@
 document_type: spec-open-questions
 level: L2
 section: "owner-validation-list"
-version: "1.1"
+version: "1.2"
 status: resolved
 producer: business-analyst
-timestamp: 2026-11-17T11:35:43Z
+timestamp: 2026-11-18T01:55:00Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "8090c61"
+input-hash: "1999450"
 traces_to: L2-INDEX.md
 ---
 
@@ -211,8 +211,10 @@ pass-through too, same never-couple rule; no eager upstream connect anywhere.
 **Resolution (2026-11-15): ADOPTED WITH OWNER AMENDMENT — OD-130.** Treat
 +Inf/-Inf telemetry samples as unknown, like a stale sample (defensive parse). A real
 capture of one metrics response from the owner's backend (read-only) is taken only
-after the owner confirms the backend soak has been scored; until then the defensive
-rule stands.
+after the owner confirms the backend soak has been scored. **Amended by OD-157:
+OD-130 applies only from P6 — P1 keeps legacy ±Inf behaviour (parity per BC-1.04.014:
++Inf degrades the sample, -Inf clamps to the U+2581 light-shade glyph); the defensive
+rule stands from the P6 switch on (SM-05).**
 
 - `+Inf`/`-Inf` samples in the metrics response: VictoriaMetrics documentation says
   NaN is dropped; Inf handling is open (CP-N02). Proposed: pin with the owner

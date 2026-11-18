@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T01:00:00Z
+timestamp: 2026-11-18T07:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
@@ -73,11 +73,15 @@ error and exits 0 (OD-136); CP-X04 (signals) is out of scope.
 **Typed crash-path register (normative dispositions live in the owning BCs).** The
 script's Degrade? column names the CP families; the full trigger tables are
 error-taxonomy.md. Families: CP-S01..S17 (row-1/interaction), CP-T01..T07 (transcript
-machine), CP-N01/N02 (row-2 telemetry), **CP-O01..O09** (OD-156 numeric-overflow family:
+machine), CP-N01/N02 (row-2 telemetry), **CP-O01..O11** (OD-156 numeric-overflow family:
 CP-O01..O05 stdin/metrics-borne at render → E-REN-002, the 29-byte line, exit 0, earlier
 writes kept; CP-O06..O08 transcript-borne → the offending line is skipped whole under the
-extended D4-EX-2 discipline, no sticky state; CP-O09 moot in hylo), and **CP-A01..A03**
-(subagent panel, BC-1.07.008: typed degrades to the 29-byte line, exit 0).
+extended D4-EX-2 discipline, no sticky state; CP-O09 moot in hylo; CP-O10/O11
+cost-segment stdin-borne overflow — a huge stdin int in `usd`/`api_ms` hitting float
+conversion at render, same E-REN-002 disposition, owners BC-1.05.007/.002 — pass-3
+C2-01), and **CP-A01..A05** (subagent panel, BC-1.07.008: typed degrades to the 29-byte
+line, exit 0; CP-A04/A05 = huge-int `tokenCount`/`startTime` OverflowError paths added
+by the pass-3 ruling, owners BC-1.07.007/.008).
 
 ## Interfaces (design doc §2.2, reused as the contract)
 
@@ -134,6 +138,31 @@ cannot occur (IM-14). File families: `guard.go`, `input.go`, `statusline.go`,
 `subagent.go` hosts the OD-155 agent-panel contracts BC-1.07.001..008, dispatched per
 ARCH-01; `statusline.go` hosts
 the frame-level contracts BC-1.01.003/.009 and BC-1.04.013, ADV-P1-A20).
+
+## Fragment anchors (pass-3 B10/C15; stable targets for BC-body fragment links)
+
+BC bodies link fragments like `architecture/ARCH-03-statusline.md#lane`; the twelve
+anchors below are the complete, closed set — new BC fragment links must target one of
+these.
+
+<a id="lane"></a>
+<a id="git"></a>
+<a id="context"></a>
+<a id="limits"></a>
+<a id="session"></a>
+<a id="statusline-width"></a>
+<a id="statusline-guard"></a>
+<a id="transcript"></a>
+<a id="telemetry"></a>
+<a id="cost"></a>
+<a id="caches"></a>
+<a id="subagent"></a>
+
+| Anchor | Target |
+|---|---|
+| `#lane`, `#git`, `#context`, `#limits`, `#session`, `#statusline-width` | row-1 widget file families (`lane.go`, `git.go`, `context.go`, `limits.go`, `session.go`, `width.go`) in the Interfaces paragraph |
+| `#transcript`, `#telemetry`, `#cost`, `#caches`, `#subagent` | `transcript*.go`/`mixcache.go`, `telemetry.go`/`row2.go`/`sample.go`, `cost.go` + `internal/cost`, `cache.go` (ARCH-04), `subagent.go` |
+| `#statusline-guard` | the 29-byte degraded-line guard (`guard.go`, BC-1.01.001) |
 
 ## Mapping
 

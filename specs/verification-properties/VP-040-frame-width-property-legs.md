@@ -1,10 +1,10 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
-timestamp: 2026-11-18T02:00:00Z
+timestamp: 2026-11-18T09:03:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md]
 input-hash: "aa4ce18"
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: []
+modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -88,20 +88,34 @@ this VP delivers the quantified legs:
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Property test | `testing/quick` | sized, shrinking | P1, P2, P5, P6, P7 |
+| Property test | `testing/quick` | sized (quick does not shrink) | P1, P2, P5, P6, P7 |
 | Tier C differential fuzz | parity harness | `HYLO_PARITY_FUZZSECONDS` | P3, P4 |
 
 ## Proof Harness Skeleton
 
 ```go
 func TestFrameProp_All(t *testing.T) {
-    quick.Check(func(segs []string, cols int) bool {
-        out := renderFrame(segs, cols) // generator: LF/CR-free, SEP-free text
+    // A2-05: custom generators via Values (a nil config would use defaults);
+    // testing/quick does not shrink — failures print the counterexample as-is.
+    segCfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
+        args[0].Elem().SetString(genSEPFreeText(r)) // LF/CR-free, SEP-free segments
+    }}
+    if err := quick.Check(func(text string, cols int) bool {
+        segs := splitSegments(text) // SEP-free by construction
+        out := renderFrame(segs, cols)
         return framePropMatches(out, segs, cols) // P1/P5/P6/P7 model
-    }, nil)
-    quick.Check(func(a, b string) bool {
+    }, segCfg); err != nil {
+        t.Fatalf("P1/P5/P6/P7 violated: %v", err)
+    }
+    pairCfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
+        args[0].Elem().SetString(genSGRBearing(r)) // P2: SGR runs + astral + WTF-8
+        args[1].Elem().SetString(genSGRBearing(r))
+    }}
+    if err := quick.Check(func(a, b string) bool {
         return visible(a+b) == visible(a)+visible(b) // P2, split guards
-    }, nil)
+    }, pairCfg); err != nil {
+        t.Fatalf("P2 violated: %v", err)
+    }
 }
 // P3/P4: TestParityTierC_DiffFuzz rows under internal/parity (oracle-bound).
 ```
@@ -115,7 +129,7 @@ func TestFrameProp_All(t *testing.T) {
 
 | Factor | Assessment | Notes |
 |--------|-----------|-------|
-| Input space size | Infinite (generators), sized/shrunk | quick shrink keeps failures reproducible |
+| Input space size | Infinite (generators), sized | failures print the counterexample directly (quick does not shrink) |
 | Proof complexity | Low–medium | structural models are small; oracle rows reuse ARCH-07 |
 | Tool support | Full | stdlib testing/quick; no new dependency |
 | Estimated proof time | Days | generator authoring + model re-derivation |

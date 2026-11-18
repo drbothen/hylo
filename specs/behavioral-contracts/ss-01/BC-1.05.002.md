@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T01:45:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "e5f0d55"
+input-hash: "0c6d617"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:617-625)"
@@ -25,7 +25,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11a (zero recorded rates)"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11a (zero recorded rates)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O11 overflow at SL:623; OD-166 record guard) + ADV-P3-C2-11 (EC-005 pinned pair)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,6 +65,11 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
    is inside the colour; `F` is Python `.1f` (BC-1.05.007).
 4. Otherwise (`api_ms` absent, null, non-number, NaN, or `< burn_min_api_ms`) nothing is
    appended.
+5. Catalogued stdin-borne overflow (OD-156, CP-O11, carried by BC-1.05.007): an exact
+   stdin int `api_ms` that passes the gate with magnitude >= 2**1024 - 2**970 raises
+   OverflowError at `usd / (api_ms / 3.6e6)` (SL:623) → degraded line. Per ruling
+   **OD-166** that `api_ms` (and the paired `usd`) is then **not recorded** in the cost
+   history (BC-1.05.004 guard); the current refresh still degrades.
 
 ## Invariants
 
@@ -82,7 +87,8 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 | EC-002 | `api_ms` = 300000 exactly | shown (inclusive); usd 1.0 → ` $12.0/h` |
 | EC-003 | `api_ms` = `true` | 1 < 300000 → no `$/h` |
 | EC-004 | `api_ms` = NaN | `NaN >= 300000` false → no `$/h` |
-| EC-005 | `api_ms` = +inf | `r = 0.0` → `\e[90m $0.0/h\e[0m` at cold start; with a pair, grey (a recorded rate can be 0.0 — a stored `api_ms` of Infinity passes the gate and yields rate 0.0, SL:235, 255 — and 0.0 < any positive p75) |
+| EC-005 | `api_ms` = +inf | `r = 0.0` → `\e[90m $0.0/h\e[0m` at cold start; with a pair the colour is grey **iff the lane's p75 > 0.0** (pin a positive-p75 pair, e.g. (20.0, 26.0), for the grey expectation); if at least 75% of the lane's qualifying rates are 0.0 then p75 = 0.0 and `0.0 >= p75` holds → yellow (or red when also >= p95). Recorded 0.0 rates exist: a stored `api_ms` of Infinity passes the gate and yields rate 0.0, SL:235, 255 (ADV-P3-C2-11) |
+| EC-009 | `api_ms` = 2**1024 (309-digit exact int, passes gate) | OverflowError at SL:623 → degraded line (CP-O11, OD-156); the unconvertible `api_ms`/`usd` pair is not recorded (OD-166, BC-1.05.004) |
 | EC-006 | usd = +inf, api 600000 | `$inf/h`; cold start → `\e[90m $inf/h\e[0m` |
 | EC-007 | usd 0.5 (grey `$`), api 600000, `th_rate` (20.0, 26.0) | `\e[90m $3.0/h\e[0m` (3.0 < 20) — rate still shown |
 | EC-008 | `th_usd` present, `th_rate` None (12 dollar entries, no rate entries) | `$` coloured, `$/h` grey |
@@ -96,6 +102,8 @@ yellow at or above the rate p75, otherwise grey; at cold start it is always grey
 | usd 20.0, api 3600000, th_rate (20.0, 26.0) | `\e[97m$20.00\e[0m\e[33m $20.0/h\e[0m` (p75 inclusive) | edge-case |
 | usd 26.0, api 299999 | `\e[33m$26.00\e[0m` (no rate) | edge-case |
 | api_ms `"600000"` (string) | no `$/h` | error |
+| api_ms +inf, th_rate (0.0, 0.0) | `\e[33m $0.0/h\e[0m` yellow (0.0 >= p75 = 0.0; ADV-P3-C2-11) | edge-case |
+| api_ms = 2**1024 - 2**970 (exact int, boundary) | degraded line (CP-O11 at SL:623) | error |
 
 ## Verification Properties
 
