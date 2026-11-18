@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.8"
+version: "1.3.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "3c34a21"
+input-hash: "07b2c4e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -34,8 +34,9 @@ modified:
   - "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-011 CP-O10/CP-O11 degrades ride the never-blank ladder)"
   - "1.3.5 2026-11-18: pass-9 remediation ADV-P9-C2-03 cross-reference: the EC-011 threshold citation now points at BC-1.05.004 PC4 (skip moved to the write step)"
   - "1.3.6 2026-11-18: pass-10 remediation ADV-P10-C2-06 (PC4 names the registered key statusline.cost.percentiles beside its (0.75, 0.95) literals, Pre 3 — the literals spell the default) + ADV-P10-C2-12 sibling sweep (PC3's 3.6e6 ms-per-hour factor carries the unit-constant note, BC-1.05.002 Pre 4)"
-  - "1.3.8 2026-11-21T09:00:00Z: pass-11 residual — the Pre 3 defaults re-spelled to the env spellings {\"cc\":300000,\"other\":1800000} (T-023) and [0.75,0.95] (T-024; PC4's default statement follows), matching the interface-definitions.md Default cells exactly (pass-11 A09/call 4); no behavioral change"
   - "1.3.7 2026-11-18: pass-10 remediation ADV-P10-C2-11 reciprocity (VP-001 row added to Verification Properties for the history-borne CP-O10/CP-O11 overflow degrade legs, EC-011; VP Anchors entry; VP-001 bcs: synced in the same burst, residual sweep)"
+  - "1.3.8 2026-11-21T09:00:00Z: pass-11 residual — the Pre 3 defaults re-spelled to the env spellings {\"cc\":300000,\"other\":1800000} (T-023) and [0.75,0.95] (T-024; PC4's default statement follows), matching the interface-definitions.md Default cells exactly (pass-11 A09/call 4); no behavioral change"
+  - "1.3.9 2026-11-21T10:00:00Z: pass-12 remediation ADV-P12-C2-09 (modified list restored to ascending version order — the 1.3.8 entry had been inserted before 1.3.7; no behavioral change)"
 deprecated: null
 deprecated_by: null
 replacement: null

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "4f0152c"
+input-hash: "36b9416"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; defaults taken from legacy/dgx_statusline.py SL:127-134)"
@@ -23,6 +23,7 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-20T18:30:00Z (1.3): ADV-P9 remediation D08 — PC-3 separator rule gains the Text-class `invalid UTF-8` rejection (value not valid UTF-8; on Windows a WTF-8 value with a lone surrogate; minted in BC-2.02.001, mirrored byte for byte in error-taxonomy), reached before the control-byte class check"
+  - "2026-11-22T00:00:00Z (1.3.1): ADV-P12 remediation D08 (orchestrator call 8) - PC-3: the Windows WTF-8 lone-surrogate leg is removed from the env path - platform.EnvVars reads the UTF-16 environment through Go's standard decoding substituting U+FFFD (BC-2.01.001 PC-6), so the invalid-UTF-8 reason is reachable from POSIX byte values only"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,9 +78,13 @@ during parity.
    error-taxonomy Reason Vocabulary.
 3. `statusline.theme.separator` is free text, but any byte 0x00-0x1F or 0x7F yields
    `<key>=<value> (control character)` (it would break the one-line output), and a value
-   that is not valid UTF-8 (on Windows: a WTF-8 value with a lone surrogate) yields the
+   that is not valid UTF-8 yields the
    Text-class reason `invalid UTF-8` (BC-2.02.001 vocabulary, minted pass-9 D08 /
-   orchestrator call 14) before the control-byte check's class is reached. The separator
+   orchestrator call 14) before the control-byte check's class is reached. On Windows a
+   lone surrogate cannot occur on the env path: `platform.EnvVars` reads the UTF-16
+   environment through Go's standard decoding, substituting U+FFFD (BC-2.01.001 PC-6,
+   pass-12 call 8), so the `invalid UTF-8` reason is reachable from POSIX byte values
+   only. The separator
    is always composed as `dim + separator + reset` using the configured `dim` and `reset`.
 4. Widgets read these values from config only; no SGR literal for these roles remains in
    widget logic (D15).

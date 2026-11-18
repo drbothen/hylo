@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "9f30697"
+input-hash: "57d2ef2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -25,6 +25,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D10 (orchestrator call 16) — all OD-76 D1-D4 vectors are Go table tests; no D1-D4 case is a parity corpus case (corpus stays UTC-only): PC preamble, Inv 2, CTV note and VP row respelled; Pre-3 states the fake-PATH machinery has no P1 consumer (kept for the validator rejection rule and later phases)"
   - "2026-11-20T18:30:00Z (1.3.1): ADV-P9 remediation D01+D02 (orchestrator call 7) — rider-test closure respelled: exclusions.json carries NO OD-76 entry (no corpus case exercises the id); PC preamble states the I1-I6 rows run in the same dedicated Go table tests against the pinned legacy column (no parity vehicle); Inv 2 and the VP row restated"
   - "2026-11-21T07:00:00Z (1.3.2): ADV-P11 remediation D01 sibling (orchestrator call 2) — the fake-PATH machinery's status updated from 'no P1 consumer' to its FIRST P1 consumer: the canonical temp-file case cache-003 declares the subprocess-fake table (fake ps on the conditional fake PATH, Go ProcStarter fake); the OD-76 D1-D4 vectors remain Go table tests only"
+  - "2026-11-22T00:00:00Z (1.3.3): ADV-P12 remediation D02 sibling (orchestrator call 2, superseding pass-11 call 2) — Pre-3's cache-003 note respelled: NO fake process table and NO fake ps in any parity case — cache-003 declares the conditional fake PATH with an EMPTY bin directory (oracle ps subprocess raises FileNotFoundError; Go child at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0, zero probes); the fake ps of this contract's table exists only in the Go table tests"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,15 +50,18 @@ named exclusion entry for "OD-76 + the native process probe on macOS/Linux"); D4
    BC-3.02.001 postcondition 1 applies identically on both sides).
 2. An ancestor within 6 levels is the client process.
 3. For parity tests the legacy side runs with a fake `ps` on the harness-constructed
-   `PATH` — the constant `<case>/bin`, admitted by BC-6.01.002's conditional `PATH` bullet
-   when the case declares a subprocess-fake table — and the Go side with a fake
+   `PATH` — the constant `<case>/bin`, admitted by BC-6.01.002's conditional `PATH` bullet —
+   and the Go side with a fake
    `ProcStarter` describing the same process (same pid chain, same true start instant).
    These cases run UNSEEDED (no cached `proc_start`) by design; BC-3.02.001 Invariant 4
    applies to ordinary render-parity cases, not to this difference table
-   (ADV-P1-D05 resolution). Updated pass-11 D01 / orchestrator call 2: the canonical
-   `temp-file` case `cache-003` now DECLARES a subprocess-fake table (the fake `ps` of
-   this contract on the conditional fake `PATH`; Go uses a `ProcStarter` fake), so the
-   conditional fake-`PATH` machinery of BC-6.01.002 has its FIRST P1 consumer; the
+   (ADV-P1-D05 resolution). Updated pass-12 call 2 (superseding pass-11 call 2): the canonical
+   `temp-file` case `cache-003` is the conditional fake-`PATH` machinery of BC-6.01.002's
+   FIRST P1 consumer — with an EMPTY `bin` directory there is NO fake `ps`: legacy's
+   `ps` subprocess raises `FileNotFoundError` and `claude_window_start` returns None,
+   and the hylo child runs at `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0` (zero probes).
+   The fake `ps` of this contract exists only in the GO TABLE TESTS below, never in a
+   parity case; the
    OD-76 D1-D4 vectors remain Go table tests only. The machinery is also kept for the
    validator's rejection rule (BC-6.02.003 PC-6) and later phases.
 

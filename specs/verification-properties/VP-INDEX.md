@@ -2,13 +2,13 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.23"
+version: "1.25"
 status: draft
 producer: architect
-timestamp: 2026-11-21T15:00:00Z
+timestamp: 2026-11-22T00:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
-input-hash: "e954932"
+input-hash: "991f44c"
 traces_to: ../architecture/ARCH-INDEX.md
 lifecycle_status: active
 introduced: "1.0"
@@ -35,6 +35,8 @@ modified:
   - "1.21 2026-11-21T12:00:00Z: pass-10 sync (agent 4) — ADV-P10-A2-04: the VP-008 catalog Name cell gains the qualifier 'with the ruled PC2 exceptions' (VP-008 v1.5, pass-8 A2-03, added it to the file title; the index had lagged). Agent 3's pass-10 VP-001 bcs: delta landed on disk mid-burst and is synced: VP-001 gains eleven co-owner BCs (BC-1.02.006/.011/.012/.014/.017/.029, BC-1.04.001/.004/.005, BC-1.05.002/.003; ADV-P10-C2-11/B03), the eleven coverage-map rows gain VP-001, and the scripted recount reads 281 directed bcs: edges, 0 forward-only. Agent 4's own pass-10 edits (VP-028 statement, VP-022 statement, VP-030 generator) change no bcs: frontmatter. The count-propagation hook's stale-count citations are historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative), not live counts — live counts agree at 41 VPs / 154 BCs (STATE.md last_amended line; SC-32 precedent: history entries are provenance, not rewritten)"
   - "1.22 2026-11-21T14:00:00Z: pass-10 residual sweep (product-owner) — VP-001 bcs: gains the two C2-11 reciprocity co-owners BC-1.02.025 (the CP-O04 owner, EC-010) and BC-1.05.005 (the history-borne CP-O10/O11 raise in cost_thresholds, EC-011), both BC-body VP-001 rows + VP Anchors verified on disk in the same burst; the two coverage-map rows gain VP-001; the scripted recount over all 41 VP files reads 283 directed bcs: edges, 0 forward-only, reverse-only residue exactly the standing 3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions; the count-propagation hook's VP/BC count citations remain historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative — SC-32 precedent), live counts agree at 41 VPs / 154 BCs"
   - "1.23 2026-11-21T15:00:00Z: pass-11 residual sweep (product-owner) — VP-001 bcs: and VP-012 bcs: gain BC-1.04.018 (that contract's VP-table rows route its OD-160 legs to both: the never-blank OverflowError degrade leg to VP-001's fault-injection ladder and the OD-160 closure citation to VP-012; ADV-P11-C2-02 reciprocity), the two Source Contract sections name the rows, and the BC-1.04.018 coverage-map row gains VP-001, VP-012; scripted recount over all 41 VP files reads 285 directed bcs: edges, 0 forward-only, standing residue unchanged. (Stamp 15:00Z, not the sweep's 09:00Z default, solely to keep this file's modified[] ascending after the 1.22 14:00Z entry — SC-27 precedent.)"
+  - "1.24 2026-11-21T23:30:00Z: pass-12 agent-4 end-sync — VP-039 title synced to the bit-exact H1 (A2-12); agent 3's pass-12 bcs: deltas synced from all 41 VP files (C2-02): VP-001 gains BC-1.04.009, VP-012 gains BC-1.04.009 and BC-1.04.014, the two map rows gain the ids; scripted recount 288 directed VP→BC bcs: edges, 154/154 BCs, the burst's one TRANSIENT forward-only edge (VP-012 in BC-1.04.014) RESOLVED on end-of-burst re-check"
+  - "1.25 2026-11-22T00:00:00Z: pass-12 residual (item 1) — VP-001 bcs: gains BC-1.05.001 (that contract's VP-table row routes its stdin-borne CP-O10 overflow leg, PC5 + EC-009, to the never-blank ladder; ADV-P12-C2-07), the Source Contract partial-coverage sentence in VP-001 names the leg, the BC-1.05.001 coverage-map row gains VP-001 appended, and the scripted recount over all 41 VP files reads 289 directed VP→BC bcs: edges, 0 forward-only, standing residue unchanged"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -113,7 +115,7 @@ modified:
 | VP-036 | VP-036-render-latency-p95.md | Render latency p95 <= 25 ms on the owner's Mac target (measured) | performance | measured | internal/statusline (hot path), CI timing report | BC-6.04.002 | ARCH-08 |
 | VP-037 | VP-037-three-os-ci-matrix.md | Three-OS CI matrix per change; race-clean Linux/macOS | invariant | CI observation | CI workflow (ARCH-08), in-tree corpus test | BC-6.04.001 | ARCH-08 |
 | VP-038 | VP-038-splitlines-bytes-differential.md | SplitLinesBytes equals CPython bytes.splitlines (keepends=False) — corner-table pinned, fuzz self-oracle | invariant | property/fuzz | internal/pyfmt (str.go) | BC-1.03.004 | ARCH-03/ARCH-06 |
-| VP-039 | VP-039-elapsed-clock-ulp-agreement.md | Elapsed-clock float computations agree at ulp level across fusion regimes | invariant | unit/table | internal/statusline (subagent elapsed clock) | BC-1.07.007 | ARCH-03 |
+| VP-039 | VP-039-elapsed-clock-ulp-agreement.md | Elapsed-clock float computations match CPython-derived goldens bit-exactly across fusion regimes | invariant | unit/table | internal/statusline (subagent elapsed clock) | BC-1.07.007 | ARCH-03 |
 | VP-040 | VP-040-frame-width-property-legs.md | Frame, width, and trim — for-all property and Tier C differential legs (BC-1.01.003..007) | invariant | property/fuzz | internal/statusline (width.go, guard frame, term_cols) | BC-1.01.004 | ARCH-03 |
 | VP-041 | VP-041-row1-property-legs.md | Row-1 widget family — for-all property, differential, and lint/syscall legs (S1.02) | invariant | property/fuzz | internal/statusline (row-1 file families) | BC-1.02.001 | ARCH-03 |
 ## BC Coverage Map (154/154; VP ids per BC)
@@ -206,12 +208,12 @@ modified:
 | BC-1.04.006 | VP-030 |
 | BC-1.04.007 | VP-030 |
 | BC-1.04.008 | VP-030 |
-| BC-1.04.009 | VP-030 |
+| BC-1.04.009 | VP-030, VP-001, VP-012 |
 | BC-1.04.010 | VP-030 |
 | BC-1.04.011 | VP-030 |
 | BC-1.04.012 | VP-030 |
 | BC-1.04.013 | VP-030 |
-| BC-1.04.014 | VP-001, VP-030 |
+| BC-1.04.014 | VP-001, VP-030, VP-012 |
 | BC-1.04.015 | VP-001, VP-030 |
 | BC-1.04.016 | VP-001, VP-030 |
 | BC-1.04.017 | VP-030 |
@@ -224,7 +226,7 @@ modified:
 
 | BC | VPs |
 |---|---|
-| BC-1.05.001 | VP-021 |
+| BC-1.05.001 | VP-021, VP-001 |
 | BC-1.05.002 | VP-001, VP-021 |
 | BC-1.05.003 | VP-001, VP-021 |
 | BC-1.05.004 | VP-001, VP-012, VP-020 |
@@ -359,7 +361,7 @@ the for-all fuzz; the reciprocal BC-body VP-table row delivered in BC-1.07.001
 v1.0.7), VP-012 gains BC-1.03.002/.005/.014/.016 and VP-013 gains
 BC-1.03.014/.016 (reciprocal BC-body VP-table rows verified on disk, ADV-P8-C03);
 the five map rows gain the ids; the 1.18 TRANSIENT forward-only edge VP-024 in
-BC-1.05.009 is RESOLVED (BC-1.05.009 v1.3.3 delivered the VP-024 VP-table row)).
+BC-1.05.009 is RESOLVED (BC-1.05.009 v1.3.3 delivered the VP-024 VP-table row)). Pass-12 agent-4 end-sync 2026-11-21T23:30:00Z, scripted over all 41 VP files × 154 BC bodies: 288 directed VP→BC `bcs:` edges — agent 3's pass-12 `bcs:` deltas (C2-02) landed on disk mid-burst and are synced here: VP-001's `bcs:` gains BC-1.04.009, VP-012's gains BC-1.04.009 and BC-1.04.014 (VP-001's BC-1.04.014 edge was already recorded at pass-11), and the two map rows gain the appended ids (BC-1.04.009: VP-001, VP-012 after VP-030; BC-1.04.014: VP-012 appended). The burst's one TRANSIENT forward-only edge, VP-012 in BC-1.04.014 (v1.18 precedent), is RESOLVED on re-check at burst end: BC-1.04.014's VP table delivered the reciprocal row mid-burst, and the re-run union reads 288 directed VP→BC `bcs:` edges, 0 forward-only. Pass-12 residual recount 2026-11-22T00:00:00Z, scripted over all 41 VP files: VP-001's `bcs:` gains BC-1.05.001 (that contract's VP-table row routes its stdin-borne CP-O10 overflow leg, PC5 + EC-009, to the never-blank ladder; ADV-P12-C2-07), the BC-1.05.001 map row gains VP-001 appended, and the recount reads 289 directed VP→BC `bcs:` edges, 0 forward-only — standing residue unchanged.
 Standing residuals otherwise unchanged: exactly 3 reverse-only VP-table residuals plus the 3
 removal-note citations and the 2 VP-041 scope-split contrast mentions enumerated
 below — the lists are therefore exactly the residue). Design references, not

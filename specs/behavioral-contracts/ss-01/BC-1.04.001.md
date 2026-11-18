@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.12"
+version: "1.3.13"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "6cae513"
+input-hash: "8e34faf"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
@@ -32,6 +32,7 @@ modified:
   - "2026-11-18 (v1.3.10) pass-9 remediation ADV-P9-C2-01 (interim skip = status 100 only; 101/102/103 final → HTTPError → no sample even with a 200 behind them; EC-025), ADV-P9-C2-02 (urlsplit sanitization before scheme guard and quote: leading C0/space stripped, TAB/CR/LF deleted anywhere, scheme lowercased; oracle: /a<TAB>b → /ab, <VT>/foo → /foo, HTTP:// hop followed), ADV-P9-C2-07 (Host = URL netloc as written, percent-unquoted, port only when written), ADV-P9-C2-06 (ARCH-03 citations as section anchors, line labels dropped)"
   - "2026-11-18 (v1.3.11) pass-10 remediation ADV-P10-C2-01 (the two guard-first passages reordered: loop-key normalization and the normative Go step list now put the urlsplit sanitization BEFORE the scheme guard, matching the scheme-guard paragraph and the stdlib parse-sanitize-guard order; the normative Go rule respelled to the minimal net.Conn HTTP/1.1 client driving the hops itself — no http.Client/CheckRedirect in the path, the pass-5 recipe noted as superseded), ADV-P10-C2-08 (PC1 one INITIAL GET plus the Inv 1 hops — a loop re-keys A, so a literal single-request assertion fails), ADV-P10-C2-11 (VP-001 row added for the metrics-borne CP-N03 leg, EC-013)"
   - "2026-11-18 (v1.3.12) pass-11 remediation ADV-P11-C2-05 (the portless Host explanation now credits Request.host — set by Request._parse's _splithost plus unquote and added by do_request_ — instead of putrequest's urlsplit-netloc branch, which skip_host makes unreachable once Host is in the headers; wire output unchanged), ADV-P11-C2-08 (resp.read() site SL:172 → SL:171, matching ARCH-03)"
+  - "2026-11-18 (v1.3.13) pass-12 remediation ADV-P12-C2-03 (the request target drops only the text after the LAST '#' — urllib's _splittag is url.rpartition('#') — then _splithost forms the selector; a path '#' survives the wire: Location /a#b gives GET /a#b; pinned for the initial selector and every redirect hop; oracle-verified CPython 3.11.7)"
 
 deprecated: null
 deprecated_by: null
@@ -212,9 +213,14 @@ is byte 0x1B.
    dropped too — `urlunsplit` adds `#` only when the fragment is non-empty — so `/x#`
    and `/x` are ONE key; parameters and a NON-EMPTY fragment are kept as part of the
    key — the fragment is a LOOP-KEY component only: the next GET splits it off, since
-   urllib's `Request` strips the fragment from the wire target (oracle:
-   `Request('http://h:8428/p?x=1#frag').selector` = `/p?x=1`, CPython 3.11.7,
-   2026-11-18), so a request line never carries `#frag` (ADV-P7-C2-08); ADV-P6-C2-11),
+   urllib's `Request` drops only the text after the LAST `#` (`_splittag` =
+   `url.rpartition('#')`), then `_splithost` forms the selector — a URL whose path
+   carries a further `#` KEEPS it on the wire: `Location: /a#b#c` produces the request
+   line `GET /a#b HTTP/1.1` (oracle: `Request('http://h:8428/p?x=1#frag').selector` =
+   `/p?x=1` and `Request('http://192.0.2.1:8428/a#b#c').selector` = `/a#b`, CPython
+   3.11.7, 2026-11-18; the same last-# rule forms the INITIAL selector for a metrics URL
+   that carries `#`, which BC-2.02.005 approves at load time — ADV-P12-C2-03), so a
+   request line never carries the text after the LAST `#` (ADV-P7-C2-08); ADV-P6-C2-11),
    percent-encoding of non-ASCII
    and special bytes (`quote(newurl, encoding="iso-8859-1", safe=string.punctuation)` —
    the `safe` set is ALL ASCII punctuation, not the default `'/'`; read with the default
@@ -253,8 +259,9 @@ is byte 0x1B.
    `quote(..., "iso-8859-1", safe=string.punctuation)` → `urljoin`), then consult the
    `redirect_dict` emulation — refuse (no sample, and never parse the refused 3xx body)
    iff `count[normalized] >= 4 || len(count) >= 10`, otherwise `count[normalized]++` and
-   issue the next GET (its request target drops the fragment; only the loop key keeps
-   it). Only this structure reproduces the empty-`Location` self-redirect,
+   issue the next GET (its request target drops only the text after the LAST `#` — the
+   same `_splittag`/`_splithost` rule as the initial selector, so a path `#` stays on
+   the wire; only the loop key keeps the full fragment text, ADV-P12-C2-03). Only this structure reproduces the empty-`Location` self-redirect,
    the urllib-normalized key and the non-http(s)-target no-sample guard — redirect
    machinery sees none of them (an `http.Client`'s `CheckRedirect` is skipped on an
    empty `Location` and cannot rewrite the target). Hylo must reproduce every refusal

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -32,6 +32,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.2.5): ADV-P10 remediation D09 (orchestrator call 8) — the floor leg installs exactly go-version: 1.26.0 (the go.mod floor), not 1.26.x: with the toolchain line a floating 1.26.x could resolve to the same patch as the default legs, leaving the floor never tested"
   - "2026-11-21T07:00:00Z (1.2.6): ADV-P11 remediation D03 (H1 sync after the ADV-P10-D09 pin) + D04 (orchestrator call 16) + A07 (call 8) — H1/Description/CTV/VP-row now say the Go 1.26.0 FLOOR leg (the body pinned exactly 1.26.0 in 1.2.5; index titles synced); PC-3 gains the lint-job steps ARCH-08 runs (pinned staticcheck, govulncheck as a required check); PC-3's test step references BC-6.01.001 PC-7's oracle build tag for the plain/oracle test-step split"
   - "2026-11-21T09:00:00Z (1.2.7): pass-11 residual — PC-3 step 6 respelled to the ORACLE_TESTS -run/-skip pattern (BC-6.01.001 PC-7; ARCH-07 OD-145 binding), removing the minted `oracle` build tag; PC-3 item 4 and the Description state the two-ref scan `--log-opts=\"main factory-artifacts\"` with the scanned-commit count compared against `git rev-list --count main factory-artifacts` (ARCH-08 hygiene bullet); EC-004 respelled 'old commit of either ref'; the VP-table row says the gitleaks two-ref scan step"
+  - "2026-11-22T00:00:00Z (1.2.8): ADV-P12 remediation A02/D04/D16 (orchestrator call 1) + A06 (call 5) + D15 — PC-4 and the Description respelled to the FULL-HISTORY scan `--log-opts=\"--all\"` after checkout with fetch-depth: 0 (--all includes HEAD, so a PR run scans the PR head and every fetched ref; scanned-commit count asserted equal to `git rev-list --count --all`; matches the CLAUDE.md pre-push command; supersedes the two-ref scan of 1.2.7); EC-004 and the VP-table row follow; PC-3 restructured per call 5: gofmt -l and govulncheck run ONCE in the ubuntu lint job, go vet and staticcheck on every OS leg, setup-python ONLY in the ORACLE_TESTS jobs (Tier A, timing, nightly fuzz; each -runs its own member(s) and prints the resolved CPython patch, PC-6), plain legs install none; D15: the Tier B goldens / exclusion-table / corpus-hygiene sentence now attaches to the plain -skip step; Source row: Go 1.26.0 floor leg (D16)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,10 +52,12 @@ operating system images, plus one extra Linux leg on the Go 1.26.0 floor:
 - macos-15 (arm64), which detects floating-point contraction (FMA) mismatches;
 - windows-2025.
 
-On all three OSes the parity tiers A and B run against a CPython 3.11 oracle, installed
-by setup-python and passed by absolute path. The race detector runs on Linux and macOS.
-gitleaks scans exactly the two named refs `main` and `factory-artifacts`
-(`--log-opts="main factory-artifacts"`; ARCH-08 hygiene bullet). The workflow is gating: any red leg blocks the change.
+On all three OSes the plain test legs install no interpreter; the parity tiers A and B
+run in the jobs that execute an `ORACLE_TESTS` member, each of which installs a
+CPython 3.11 oracle by setup-python and passes it by absolute path (PC-3). The race
+detector runs on Linux and macOS. gitleaks scans the full history — every fetched ref
+plus HEAD — with `--log-opts="--all"` (ARCH-08 hygiene bullet; pass-12 call 1), so a
+pull request's own commits are scanned before merge. The workflow is gating: any red leg blocks the change.
 
 ## Preconditions
 
@@ -72,43 +75,49 @@ gitleaks scans exactly the two named refs `main` and `factory-artifacts`
    floor `go.mod` declares, NOT `1.26.x` (which would install the newest 1.26 patch and,
    with the `toolchain` line of Pre-2, could resolve to the same patch as the default
    legs, leaving the floor never tested — ADV-P10-D09, orchestrator call 8).
-3. **Steps per leg, in order:**
-   1. `gofmt -l .`, which must print nothing;
-   2. `go vet ./...`;
-   3. `staticcheck ./...` at the version ARCH-08's lint job pins (pass-11 D04: the
-      lint job's checker is part of the check suite this BC drives a test of);
-   4. `govulncheck ./...`, promoted to a required check (ARCH-08; a finding blocks the
-      change like any red leg);
-   5. the parity toolchain FIRST: `actions/setup-python` installs CPython 3.11 on the
-      leg BEFORE any `go test`. Its reported absolute interpreter path is exported as
-      `HYLO_PARITY_PYTHON` (OD-108), with `CI=true`, so Tier A cannot skip
-      (BC-6.01.001 PC-6) when the test step below runs it — setup-python must precede
-      `go test ./...` or every leg fails (ADV-P4-D08, aligning this BC with ARCH-08's
+3. **Steps per leg, in order (pass-12 call 5 structure):**
+   1. `go vet ./...` on every OS leg (per-OS build tags, P18);
+   2. `staticcheck ./...` on every OS leg, at the version ARCH-08's lint job pins
+      (pass-11 D04: the lint job's checker is part of the check suite this BC drives a
+      test of);
+   3. `go test ./...`, split by the ORACLE_TESTS pattern (BC-6.01.001 PC-7; the
+      ARCH-07 OD-145 binding; pass-12 call 6): the plain test
+      step, the coverage job and the release job pass `-skip "$ORACLE_TESTS"` and
+      exclude exactly that set; this plain run
+      includes the Tier B goldens (BC-6.03.001), the exclusion
+      table tests (BC-6.03.004) and the corpus hygiene test (BC-6.02.001). Linux and
+      macOS add `-race`; Windows runs without it.
+   4. The ORACLE_TESTS jobs are separate from the plain legs: the dedicated Tier A
+      job, the timing job (BC-6.04.002) and the nightly fuzz job each install
+      CPython 3.11 by `actions/setup-python` BEFORE their `go test` and each runs its
+      own member(s) with `-run`. In the Tier A job the interpreter's reported absolute
+      path is exported as `HYLO_PARITY_PYTHON` (OD-108), with `CI=true`, so Tier A
+      cannot skip (BC-6.01.001 PC-6) — setup-python must precede
+      `go test ./...` or the job fails (ADV-P4-D08, aligning this BC with ARCH-08's
       corrected order). The clock-shim canary runs first (BC-6.01.003), then the
       OD-185 oracle self-check: the harness measures the resolved oracle's JSON depth
       boundaries and `unicodedata.unidata_version` (constants measured on 3.11.7,
         floating 3.11.x install) and fails closed on any mismatch, printing the
       resolved version (BC-6.01.001 PC-4).
-   6. `go test ./...`, split by the ORACLE_TESTS pattern (BC-6.01.001 PC-7; the
-      ARCH-07 OD-145 binding; pass-11 residual): the dedicated Tier A job runs
-      `go test -run "$ORACLE_TESTS" ./...`, compiling and
-      running exactly the oracle-dependent set (Tier A live differential with
-      `HYLO_PARITY_PYTHON` set, the shim canary, the four-cache swap); the plain test
-      step, the coverage job and the release job pass `-skip "$ORACLE_TESTS"` and
-      exclude exactly that set. The run
-      includes the Tier B goldens (BC-6.03.001), the exclusion
-      table tests (BC-6.03.004) and the corpus hygiene test (BC-6.02.001). Linux and
-      macOS add `-race`; Windows runs without it.
+   5. `gofmt -l .` (which must print nothing) and `govulncheck ./...` run ONCE, in the
+      ubuntu lint job — not per leg (ARCH-08; pass-12 call 5). `govulncheck` is a
+      required check (a finding blocks the change like any red leg).
 4. **gitleaks.** One job checks out with `fetch-depth: 0` and runs a pinned,
-   checksum-verified gitleaks binary over the two named refs exactly —
-   `--log-opts="main factory-artifacts"` (ARCH-08 hygiene bullet) — and the
-   scanned-commit count is compared with `git rev-list --count main factory-artifacts`
-   (rev-set equality: a shallow or narrowed scan cannot pass). A finding fails
-   the workflow.
+   checksum-verified gitleaks binary over the full history —
+   `--log-opts="--all"` (ARCH-08 hygiene bullet; pass-12 call 1): `--all` includes
+   HEAD, so on a `pull_request` run the PR's own commits and every fetched ref
+   (factory-artifacts included) are scanned before merge; the former two-ref scan
+   (`--log-opts="main factory-artifacts"`) missed a PR's own commits and depended on
+   bare branch names that checkout does not create. Positive coverage: the
+   scanned-commit count is asserted equal to `git rev-list --count --all` (the same
+   rev set by construction). The command matches the CLAUDE.md pre-push command. A
+   finding fails the workflow.
 5. **Gating.** The workflow passes only if every leg and job passes. No leg is
    `continue-on-error`.
-6. **Python patch recorded.** Each OS leg prints the resolved CPython patch version
-   from the BC-6.01.001 probe, so a patch drift is visible in the logs (RK-4).
+6. **Python patch recorded.** Each job that installs an interpreter (the ORACLE_TESTS
+   jobs of PC-3 step 4) prints the resolved CPython patch version
+   from the BC-6.01.001 probe, so a patch drift is visible in the logs (RK-4); the
+   plain test legs install no interpreter and print none (pass-12 call 5).
 
 ## Invariants
 
@@ -125,7 +134,7 @@ gitleaks scans exactly the two named refs `main` and `factory-artifacts`
 | EC-001 | A float expression in Go is fused (FMA) on arm64 and shifts a heat colour | macos-15 leg fails Tier A/B; the Linux amd64 legs may pass. The arm64 leg is the gate (PR-15) |
 | EC-002 | Windows leg with `-race` | Not run; Windows runs plain `go test` |
 | EC-003 | setup-python yields 3.11.x where x differs from the golden metadata | Tier B still compares against committed (Python-written) goldens; the patch is printed; a resulting diff fails the leg and is reviewed (RK-4) |
-| EC-004 | gitleaks finds a secret in an old commit of either ref | Workflow fails (scan covers exactly the two named refs) |
+| EC-004 | gitleaks finds a secret in an old commit reachable from any fetched ref or the PR head | Workflow fails (the `--all` scan covers every fetched ref plus HEAD) |
 | EC-005 | `gofmt -l .` lists a file | Leg fails at step 1 |
 
 ## Canonical Test Vectors
@@ -140,7 +149,7 @@ gitleaks scans exactly the two named refs `main` and `factory-artifacts`
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-037, VP-035 | The workflow file pins exactly the three OS labels, includes the Go 1.26.0 floor leg, `-race` on Linux/macOS, and the gitleaks two-ref scan step | manual review + a repository test that parses `ci.yml` |
+| VP-037, VP-035 | The workflow file pins exactly the three OS labels, includes the Go 1.26.0 floor leg, `-race` on Linux/macOS, and the gitleaks full-history (`--all`) scan step | manual review + a repository test that parses `ci.yml` |
 | VP-037, VP-035 | Every CI parity run uses an absolute interpreter path with `CI=true` | CI log check + BC-6.01.001 tests |
 | VP-010 | Go output matches the committed Tier B goldens byte-for-byte on every CI OS — the property the three-OS matrix (windows-2025 golden leg) exists to enforce | `TestParityTierB_Goldens` on all CI legs |
 
@@ -148,7 +157,7 @@ gitleaks scans exactly the two named refs `main` and `factory-artifacts`
 
 | Field | Value |
 |-------|-------|
-| Source | design §5.5 (ubuntu-24.04, macos-15 arm64 PR-15 FMA detector, windows-2025 for every change; Go 1.26.x leg; setup-python CPython 3.11 on all three OSes; `-race` on Linux and macOS; Tier C nightly not gating; gitleaks `--log-opts="--all"`); CLAUDE.md (CI on all three OSes for every change; pre-push gitleaks command); D5; OD-104, OD-108; research Q7 (pinned OS labels, `-race` on Linux/macOS only, gitleaks binary with `fetch-depth: 0`) |
+| Source | design §5.5 (ubuntu-24.04, macos-15 arm64 PR-15 FMA detector, windows-2025 for every change; Go 1.26.0 floor leg, aligned with the body's PC-2 pin — pass-12 D16; setup-python CPython 3.11 in the ORACLE_TESTS jobs, pass-12 call 5; `-race` on Linux and macOS; Tier C nightly not gating; gitleaks `--log-opts="--all"`, pass-12 call 1); CLAUDE.md (CI on all three OSes for every change; pre-push gitleaks command); D5; OD-104, OD-108; research Q7 (pinned OS labels, `-race` on Linux/macOS only, gitleaks binary with `fetch-depth: 0`) |
 | Parity class | n.a. (harness machinery) |
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-012 |

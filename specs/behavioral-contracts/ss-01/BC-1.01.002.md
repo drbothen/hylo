@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "a99539e"
+input-hash: "7ea5e4f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,7 @@ modified:
   - "1.2.4 pass-4 remediation (ADV-P4-B11 + ADV-P4-A2-16 sibling): VP-001 removed from VP Anchors; EC-006 states the L+1 observable explicitly (default line, not the degraded line); 2026-11-18T03:00:00Z"
   - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.2.6 pass-6 remediation (ADV-P6-B13): PC4 pins the JSON whitespace set to the four CPython characters (space, tab, LF, CR; FF/VT/NBSP yield {} — oracle-verified) and adds EC-010; 2026-11-19T04:00:00Z"
+  - "1.2.7 pass-12 remediation (ADV-P12-B02): Architecture Anchors re-anchored from #statusline-guard (target guard.go) to the input.go family anchor #input — the anchor target now matches the BC's own module; no behavioral change; 2026-11-23T00:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -140,7 +141,7 @@ All rows verified 2026-11-15 on CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#statusline-guard` — internal/statusline/input.go (stdin decode, {} fallback; effect-script step 1) (stdin decode) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#input` — internal/statusline/input.go (stdin decode, {} fallback; effect-script step 1) (stdin decode) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

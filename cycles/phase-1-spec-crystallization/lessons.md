@@ -506,3 +506,40 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   exists, the call assigns the decision to one agent or escalates it before dispatch, never "X or Y".
 
 **Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-46 [process-gap] — Security-gate and harness-wiring binding calls are checked against the CI event model before issue
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-12 burst) An orchestrator binding call was wrong twice in one
+  pass: pass-11 call 7's two-ref gitleaks scan missed commits reachable only from a PR, and pass-11 call 2
+  named a Go fake that the built binary cannot receive.
+- **Remedy:** A binding call that changes a security gate or harness wiring is checked against the CI event
+  model and the built-binary env contract before it is issued, not discovered broken by the next pass.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-47 [process-gap] — Fix briefs grep every sibling that states a changed rule
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-12 burst) Nine pass-12 findings were pass-11 fixes applied in
+  one file but not its siblings — the rule was restated in each sibling, and only one copy was updated.
+- **Remedy:** A fix brief requires grepping every sibling that states the changed rule and applying the same
+  fix there before the agent reports done; the orchestrator's sibling grep is part of acceptance.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-48 [process-gap] — New ids and anchors are minted centrally before the burst
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-12 burst) Parallel agents again minted different names for one
+  new thing — rival CP-C ids and a rival ARCH-03 anchor slug — that later passes must reconcile.
+- **Remedy:** Every new id and anchor is minted centrally in the remediation plan before the burst; agents
+  consume the allocation and never mint their own names.
+
+**Closes:** recorded as a Drift Item in STATE.md
+
+## L-PG-49 [process-gap] — Escape-bearing text is written by script and verified
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-12 burst) A fix agent's edit turned a JSON escape sequence into
+  the literal emoji it encodes (BC-1.07.004) — a bare editor edit decoded the escape instead of writing it.
+- **Remedy:** Text bearing escape sequences is written with a script, never a bare edit, and the on-disk bytes
+  are verified against the intended escape afterward.
+
+**Closes:** recorded as a Drift Item in STATE.md

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "platform"
-version: "1.10"
+version: "1.11"
 status: draft
 producer: architect
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-22T06:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "380f3f1"
+input-hash: "8cd1924"
 
 ---
 
@@ -51,7 +51,12 @@ Path-value encoding for syscalls (pass-6 orchestrator call 16, ADV-P6-B05): ever
 the OS on Windows is encoded WTF-8 → UTF-16 by `internal/platform` itself, keeping lone surrogates as single 16-bit
 units — never Go's native U+FFFD substitution — so a path whose name contains a lone surrogate stats the same
 directory CPython's wide-string call does (POSIX keeps the `surrogateescape` byte mapping, BC-1.02.004
-EC-013/EC-014). Table-tested on Windows CI.
+EC-013/EC-014). Table-tested on Windows CI. Env-value READING is the other seam and
+does not share this rule (pass-12 residual, call 8 / ruling D08): `platform.EnvVars`
+on Windows reads the environment through Go's standard UTF-16 decoding, which
+substitutes U+FFFD for an unpaired surrogate (documented `unicode/utf16` behavior),
+so a lone surrogate in a Windows ENV VALUE never reaches `config.Load`'s validator
+as invalid UTF-8 — the WTF-8 preservation above is the path-value rule only.
 
 No descriptor helpers exist: OD-161 (pass-3 A06, superseding the "int `transcript_path`
 = fd semantics" reading) rules that an integer `transcript_path` means NO transcript

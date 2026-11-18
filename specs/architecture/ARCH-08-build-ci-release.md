@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.12"
+version: "1.13"
 status: draft
 producer: architect
-timestamp: 2026-11-20T22:00:00Z
+timestamp: 2026-11-21T18:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "380f3f1"
+input-hash: "8cd1924"
 
 ---
 
@@ -49,17 +49,15 @@ input-hash: "380f3f1"
 
 ```mermaid
 flowchart LR
-    PR["pull_request / push"] --> L["lint: gofmt, vet, staticcheck"]
-    L --> M{"matrix:<br/>ubuntu-24.04 / macos-15 (arm64) / windows-2025"}
-    M -->|"ubuntu-24.04 leg ONLY<br/>(ADV-P9-A16: the macOS/Windows test legs<br/>install NO interpreter — text below)"| PY["setup-python 3.11.x (floating latest patch, OD-104/OD-185;<br/>harness self-checks measured constants, fail closed on drift) -> absolute path -> HYLO_PARITY_PYTHON<br/>(pass-5 A04: setup-python precedes go generate, so the<br/>staleness step never falls back to PATH Python, OD-104)"]
-    PY --> GEN["go generate ./... staleness check: git diff --exit-code (OD-170)<br/>ubuntu-24.04 ONLY — the Windows Tier B leg needs no Python (goldens committed)"]
-    GEN --> T["go test -race (Linux/macOS) -count=1 ./... — Tier A EXCLUDED (pass-6 A12); setup-python BEFORE go test/generate (pass-3 D22, pass-4 D08)"]
-    M -->|"macos-15 / windows-2025 legs"| T
-    T --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
-    TB --> HL["gitleaks --log-opts=main factory-artifacts (two-ref set, ADV-P11-A04) + category pattern scan"]
+    PR["pull_request / push"] --> L["lint JOB (ubuntu-24.04): gofmt -l . + govulncheck<br/>(each ONCE, in the ubuntu lint job — pass-12 call 5)"]
+    L --> M{"test matrix — FOUR required legs (pass-12 call 5):<br/>ubuntu-24.04 / macos-15 (arm64) / windows-2025<br/>(Go from go.mod's toolchain line)<br/>+ ubuntu FLOOR leg, go-version: 1.26.0 (ADV-P10-D09)"}
+    M -->|"vet + staticcheck run on EVERY OS leg<br/>(per-OS build tags, P18); the plain test legs<br/>install NO interpreter (pass-12 call 5)"| T["go test -race (Linux/macOS) -count=1 ./...<br/>— oracle-dependent tests EXCLUDED via -skip $ORACLE_TESTS (pass-6 A12;<br/>FIVE members, ARCH-07)"]
+    T --> TB["Tier B goldens (no Python: committed)"]
+    TB --> HL["gitleaks detect --log-opts=--all after checkout with fetch-depth: 0<br/>(rev set corrected pass-12 call 1) + category pattern scan"]
     HL --> J["report timing per leg, non-gating (OD-117)"]
+    PYA["dedicated tier A JOB (ubuntu leg; placeholder until Phase 3):<br/>setup-python 3.11.x (floating latest patch, OD-104/OD-185; harness self-checks measured<br/>constants, fail closed on drift) -> absolute path -> HYLO_PARITY_PYTHON (pass-5 A04:<br/>interpreter precedes go generate) -> OD-170 staleness check: go generate ./... +<br/>git diff --exit-code (moves INTO this job, pass-12 call 5 — the plain test legs install<br/>no interpreter) -> -run $ORACLE_TESTS, the ONE authoritative run (pass-6 A12);<br/>prints the resolved CPython patch (pass-12 call 5)"]
     COVJOB["coverage JOB (ubuntu-24.04, pass-7 A07; runs on EVERY PR — never probe-gated<br/>on internal/parity, ADV-P9-A04):<br/>go test -coverpkg=./internal/... over IN-PROCESS tests; oracle-dependent tests excluded<br/>via the ORACLE_TESTS pattern (ARCH-07, ADV-P11-A07);<br/>checks each gated package that EXISTS — prints `coverage: G of 3 gated packages present`;<br/>>= 95 percent statement coverage (Go's figure; the OD-158 gate name "line coverage"<br/>denotes it, ADV-P11-A03), S1/S5 packages (OD-158)"] --> REQ["required check-run `coverage`"]
-    Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz, non-gating"]
+    Nightly["schedule nightly (3 OSes, OD-149)"] --> TC["Tier C differential fuzz JOB — installs Python and -runs its ORACLE_TESTS member<br/>(pass-12 call 6; resolved patch printed), non-gating"]
 ```
 
 - Race detector on Linux and macOS; the resolved Python patch version is recorded in
@@ -71,10 +69,17 @@ flowchart LR
   the corpus never
   executes under the test job's tighter 30-minute cap: one run, one timeout. The
   pass-3 "Tier A runs live inside the plain `go test` step" ordering rationale is
-  superseded (pass-7 A08): setup-python + the `HYLO_PARITY_PYTHON` export survive only
-  where a Python consumer remains — the ubuntu staleness step (OD-170), the dedicated
-  Tier A job, and nightly Tier C; legs without a Python consumer (macOS/Windows test
-  legs, release job) install no interpreter.
+  superseded (pass-7 A08). INTERPRETER PLACEMENT (pass-12 call 5, superseding the
+  pass-7 "ubuntu staleness step" placement): setup-python + the
+  `HYLO_PARITY_PYTHON` export survive ONLY in jobs that -run an ORACLE_TESTS member —
+  the dedicated Tier A job (whose ubuntu leg ALSO runs the OD-170 staleness step,
+  which moves out of the plain test leg), the timing job, and nightly Tier C — and
+  each of those three prints the resolved CPython patch (BC-6.04.001 PC-6 / BC-6.04.002
+  PC-2). Legs without a Python consumer — all FOUR plain test legs (ubuntu, macos-15,
+  windows-2025, and the ubuntu go-version 1.26.0 floor leg), the coverage job and the
+  release job — install no interpreter. `go vet` and `staticcheck` run on every OS leg
+  (per-OS build tags, P18); `gofmt -l` and `govulncheck` run once, in the ubuntu lint
+  job.
   Pin: setup-python installs **3.11.x** (python-version: '3.11', the latest patch —
   OD-104 stands; the pass-5 exact-3.11.7 pin is WITHDRAWN by OD-185, pass-6 A02).
   Because the measured constants (JSON depth limits, Unicode 14.0 tables) were taken on
@@ -87,23 +92,29 @@ flowchart LR
   and printing the resolved version — and Tier B golden metadata records the resolved
   patch (RK-4); a moved boundary fails the staleness check loudly instead of flapping
   silently on patch drift.
-- **ORACLE_TESTS selector (ADV-P11-A07, pass-11 orchestrator call 8): ONE named
+- **ORACLE_TESTS selector (ADV-P11-A07, pass-11 orchestrator call 8; member set
+  corrected pass-12 call 6): ONE named
   mechanism defines the oracle-dependent test set — the harness pattern constant
-  `ORACLE_TESTS = ^(TestParityTierA_Corpus|TestParityCanary_ShimLoaded|TestParityCacheSwap_FourCaches)$`
+  `ORACLE_TESTS = ^(TestParityTierA_Corpus|TestParityCanary_ShimLoaded|TestParityCacheSwap_FourCaches|TestParityTierC_DiffFuzz|TestTiming)$`
   (single home: ARCH-07's OD-145 name table). Every test needing the resolved Python
-  oracle is a member — the three named today; a new oracle-dependent test EXTENDS the
+  oracle is a member — the FIVE named today (`TestParityTierC_DiffFuzz` drives both
+  sides; `TestTiming` must report the CPython oracle median, BC-6.04.002 PC-2); a new
+  oracle-dependent test EXTENDS the
   pattern rather than inventing a second mechanism. The plain test step, the coverage
   job and the release job pass `-skip $ORACLE_TESTS` (they install no interpreter;
   BC-6.01.001's fail-closed interpreter rule would otherwise go red under `CI=true`),
-  and the dedicated Tier A job runs the same pattern via `-run $ORACLE_TESTS` — the one
-  authoritative oracle-dependent run.
+  and the three Python-installing jobs each -run their own member(s) — the dedicated
+  Tier A job (`TestParityTierA_Corpus` + `TestParityCanary_ShimLoaded` +
+  `TestParityCacheSwap_FourCaches`), the timing job (`TestTiming`), and the nightly
+  fuzz job (`TestParityTierC_DiffFuzz`).
 - **Generated-table staleness (OD-170):** the staleness step runs `go generate ./...` and then
   `git diff --exit-code` over the generated paths (Unicode 14.0 class tables and the
   pyfmt oracle tables, ARCH-06); any diff fails the leg — a stale committed table can
-  never pass CI. It runs on ubuntu-24.04 ONLY (pass-5 A04): the generators are
-  `testdata/gen/*.py` under the pinned oracle, and confining the step to ubuntu keeps
-  Python off the Windows leg's critical path — Windows consumes committed Tier B
-  goldens, which need no interpreter.
+  never pass CI. It runs on ubuntu-24.04, INSIDE the dedicated Tier A job's ubuntu leg
+  (placement corrected pass-12 call 5 — the plain test legs install no interpreter, so
+  the step rides the one ubuntu job that already resolves the oracle; the earlier
+  "ubuntu test leg" placement was the pass-5 A04 structure). The generators are
+  `testdata/gen/*.py` under the pinned oracle.
 - **Coverage gate (OD-158, pass-4 A13; restructured pass-7 A07, orchestrator call 12; gate
   scope per OD-193 and Tier A exclusion per pass-8 orchestrator call 1; every-PR scope and
   Tier A rationale per ADV-P9-A04/A07):**
@@ -154,13 +165,13 @@ flowchart LR
   case, 1 discarded warm-up + **20 timed runs**, samples sorted per case, nearest-rank
   p95 = **19th of the 20 sorted samples** (per nfr-catalog.md; with 5 samples the
   statistic degenerates to the maximum), p95 computed **per case** and binding per case,
-  no pooling; fake-VM handling time subtracted. Sampling unit (ADV-P11-A11): ONE timed
-  run executes the case's WHOLE step sequence end to end — a single-refresh case is one
-  process invocation, a multi-step case sums the per-invocation wall times (exec start
-  to exit each) across the sequence's invocations, a `--subagent` case is its single
-  panel invocation — matching BC-6.04.002's per-execution process-wall-time model with
-  the fake-VM server-side handling time subtracted for requests made during those
-  invocations. Between the 21 runs the case temp tree is RE-LAID from the committed
+  no pooling; fake-VM handling time subtracted. SAMPLING UNIT (pass-12 call 4,
+  superseding ADV-P11-A11's whole-sequence model; follows NFR-001 "render latency" and
+  BC-6.04.002 PC-1 "never pooled across cases or steps"): ONE timed sample = ONE
+  invocation of hylo (one render). A multi-step case is replayed from its committed
+  seeds 1 warm-up + 20 times; EACH STEP IS TIMED ON ITS OWN, giving a 20-sample series
+  per (case, step); the nearest-rank p95 is computed AND GATED per (case, step). No
+  summing over steps. Between the 21 runs the case temp tree is RE-LAID from the committed
   seeds (seed caches, transcript base, clock base) — no cache or seed state carries
   across runs, so all 20 samples measure the same workload; within a run, later
   refreshes see earlier refreshes' cache writes, which is the production shape legacy
@@ -173,11 +184,16 @@ flowchart LR
   exactly one case, and its transcript must exceed 512 KB (the corpus validator checks
   both) — and the report prints one line whenever the exemption is used.
 - **Public-repo hygiene (policy 21, NFR-006):** committed fixtures synthetic-only;
-  real inputs replayed from git-ignored `captures/`; gitleaks scanning the SAME two-ref
-  set the comparison counts — `--log-opts="main factory-artifacts"` (ADV-P11-A04; with
-  `fetch-depth: 0` a `--all` scan also covers the PR merge ref, other remote branches
-  and tags, so the scanned count diverges from the compared count on essentially every
-  PR) — plus the category pattern scan; `TestCorpusHygiene` in-tree.
+  real inputs replayed from git-ignored `captures/`; the CI secret scan is
+  `gitleaks detect --source . --log-opts="--all"` after checkout with
+  `fetch-depth: 0` (rev set corrected pass-12 call 1, superseding ADV-P11-A04's
+  two-ref set: the two-ref scan missed a pull request's own commits — reachable from
+  neither `main` nor `factory-artifacts` on a PR run — and depended on bare branch
+  names that checkout does not always create as locals; `--all` includes HEAD, so a
+  PR run scans the PR head and every fetched ref, factory-artifacts included).
+  Positive coverage: the scanned-commit count equals `git rev-list --count --all`
+  (same rev set by construction). Matches the CLAUDE.md pre-push command; plus the
+  category pattern scan; `TestCorpusHygiene` in-tree.
   The factory-artifacts branch is scanned by a scheduled (nightly) and manually
   dispatchable job running ON `main` that checks out the `factory-artifacts` ref and
   runs the category pattern scan over that checked-out tree — a push trigger on that
@@ -223,15 +239,15 @@ flowchart LR
     nothing) AND if `H > 0` (a found hit is a failure, pass-3 A18), so the scan cannot
     pass while flagging hygiene terms.
   - Gitleaks (secret scan; ADV-P9-A05; positive comparison ADV-P10-A05; rev-set
-    equality ADV-P11-A04): `gitleaks: N
+    equality ADV-P11-A04, corrected pass-12 call 1): `gitleaks: N
     commits scanned` — fails if `N == 0` AND if `N` differs from
-    `git rev-list --count` over the SAME two refs the scan names (`main` and
-    `factory-artifacts`; the scan's `--log-opts` names exactly those two refs, so the
-    scanned rev set EQUALS the compared rev set by construction); a shallow or narrowed
+    `git rev-list --count --all` (the scan's `--log-opts="--all"` and the counter
+    name the SAME rev set by construction — HEAD plus every fetched ref, so a PR
+    run's own commits are inside both); a shallow or narrowed
     scan still
     covers at least one commit and exits 0, so the zero-check alone cannot detect it —
-    the scanned count is COMPARED with the rev count across main +
-    factory-artifacts (fetch-depth 0).
+    the scanned count is COMPARED with the rev count across `--all`
+    (fetch-depth: 0).
   - Coverage gate (pass-5 A16; fail scope per pass-8 orchestrator call 1; presence scope
     per ADV-P9-A04; manifest census ADV-P10-A04/A06; manifest growth + skeleton-era
     scope ADV-P11-A02): `coverage: G of 3 gated packages
@@ -250,7 +266,10 @@ flowchart LR
   - Generated-table staleness (pass-5 A16): `generate: N generated paths checked,
     D regenerated` — fails if `N == 0` (a tree with zero `go:generate` directives
     checks nothing and must not pass) and if `D > 0`.
-  - Timing report (pass-3 A16/D39; manifest ADV-P10-A04): the timing job executes the in-tree timing test
+  - Timing report (pass-3 A16/D39; manifest ADV-P10-A04; interpreter placement pass-12
+    call 5): the timing job INSTALLS PYTHON — it -runs the ORACLE_TESTS member
+    `TestTiming`, whose report must include the CPython oracle median (BC-6.04.002
+    PC-2) — and prints the resolved CPython patch. It executes the in-tree timing test
     (`go test ./internal/parity -run '^TestTiming$' -count=1`, `par/timing.go`) and
     prints `timing: N cases timed > 0` — fails if `N == 0` (an activated job reporting
     on zero cases must not pass), AND if `N` differs from the COMMITTED expected case

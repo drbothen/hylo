@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T21:00:00Z
+timestamp: 2026-11-22T04:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-03/BC-3.02.001.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4f6b4b0"
+input-hash: "25305fd"
 traces_to: prd.md
 source_bc: BC-3.02.001
 bcs: [BC-3.02.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-19T18:00:00Z: pass-7 fix (A2-05) — the riding test name is respelled everywhere to the settled TestWindowAge_D4EX1_Windows_AncestorFound (VP-012 v1.13 and BC-6.03.004's delegation), replacing the formerly called-settled TestWindowAge_D4EX1_Windows; the concrete member renders the ⌂ suffix, which requires the fake ProcStarter to return a start (EC-008)", "1.3 2026-11-18T17:50:00Z: pass-10 fix (A2-07) — the ruled ⌂ bytes anchored: pinned by the BC-3.02.001 / BC-1.02.017 canonical vector tables, with the rider's expected output those tables' expected column (the sketch's tc.WantSuffix), no longer an unanchored phrase; the 'macOS/Linux probe behaviour is not touched' clause given legs — macOS/Linux native-probe rendering rides the Tier A corpus parity (VP-009) and the per-OS probe postconditions (VP-033), and VP-012's machinery prevents broadening (property statement and method bullet)", "1.4 2026-11-18T21:00:00Z: pass-11 fix (A2-04) — the bound's legs corrected: the probe is NOT exercised in parity on any OS (parity flows through seeded proc_start cases, VP-033), so the macOS/Linux probe differences ride the closed-set exclusion id OD-76 (OD-110) with its own table tests, not the Tier A corpus parity; the former 'rides the Tier A corpus parity (VP-009)' leg was vacuous (the 1.3 history entry keeps its as-of-pass-10 figures)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-19T18:00:00Z: pass-7 fix (A2-05) — the riding test name is respelled everywhere to the settled TestWindowAge_D4EX1_Windows_AncestorFound (VP-012 v1.13 and BC-6.03.004's delegation), replacing the formerly called-settled TestWindowAge_D4EX1_Windows; the concrete member renders the ⌂ suffix, which requires the fake ProcStarter to return a start (EC-008)", "1.3 2026-11-18T17:50:00Z: pass-10 fix (A2-07) — the ruled ⌂ bytes anchored: pinned by the BC-3.02.001 / BC-1.02.017 canonical vector tables, with the rider's expected output those tables' expected column (the sketch's tc.WantSuffix), no longer an unanchored phrase; the 'macOS/Linux probe behaviour is not touched' clause given legs — macOS/Linux native-probe rendering rides the Tier A corpus parity (VP-009) and the per-OS probe postconditions (VP-033), and VP-012's machinery prevents broadening (property statement and method bullet)", "1.4 2026-11-18T21:00:00Z: pass-11 fix (A2-04) — the bound's legs corrected: the probe is NOT exercised in parity on any OS (parity flows through seeded proc_start cases, VP-033), so the macOS/Linux probe differences ride the closed-set exclusion id OD-76 (OD-110) with its own table tests, not the Tier A corpus parity; the former 'rides the Tier A corpus parity (VP-009)' leg was vacuous (the 1.3 history entry keeps its as-of-pass-10 figures)", "1.5 2026-11-22T04:00:00Z: pass-12 residual (item 5, call 2) — the bound's census restated: every corpus case either seeds `proc_start` or is `cache-003` (unseeded, no probe on either side — empty PATH bin oracle-side, HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 hylo-side); the former 'parity flows through seeded proc_start cases' phrasing implied no case is unseeded"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,13 +42,19 @@ the ruled bytes are pinned by the canonical vector tables of BC-3.02.001 and
 BC-1.02.017, and the rider's expected output is those tables' expected column, surfaced
 in the sketch as `tc.WantSuffix` (A2-07: formerly an unanchored phrase). macOS/Linux
 probe behaviour is outside this exclusion's scope, and that bound has legs: the probe
-is NOT exercised in parity on any OS — parity flows through seeded `proc_start` cases
-(VP-033) — so the macOS/Linux probe differences are carried by the closed-set
+is NOT exercised in parity on any OS — every corpus case either seeds `proc_start`
+(no probe; the seed answers the window start, VP-033) or is `cache-003`, which seeds
+no `proc_start` and probes on NEITHER side (pass-12 residual, call 2: the oracle
+child's conditional `PATH=<case>/bin` is an EMPTY bin, so legacy's
+`subprocess.run(["ps", ...])` raises FileNotFoundError and `claude_window_start`
+returns None; the hylo child gets `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0`, so
+`FindAncestor` makes zero probes and returns not-found, BC-3.02.001 — at most
+`max_depth` probes; ARCH-07) — so the macOS/Linux probe differences are carried by the closed-set
 exclusion id `OD-76` (OD-110: true start in the repeated DST hour; ⌂ where legacy's
 localized `ps` fails) with its own table tests, the per-OS probe rules are
 table-covered by VP-033, and VP-012's machinery prevents the exclusion set from
 broadening (A2-04: the former "rides the Tier A corpus parity (VP-009)" leg was
-vacuous — the seeded cases never invoke the native probe).
+vacuous — no parity case invokes the native probe, seeded or `cache-003`).
 
 ## Source Contract
 

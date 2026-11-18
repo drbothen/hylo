@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-21T23:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.02.001.md, behavioral-contracts/ss-01/BC-1.02.004.md, behavioral-contracts/ss-01/BC-1.02.016.md, behavioral-contracts/ss-01/BC-1.02.018.md, behavioral-contracts/ss-01/BC-1.02.019.md, behavioral-contracts/ss-01/BC-1.02.021.md, behavioral-contracts/ss-01/BC-1.02.022.md, behavioral-contracts/ss-01/BC-1.02.023.md, behavioral-contracts/ss-01/BC-1.02.025.md, behavioral-contracts/ss-01/BC-1.02.027.md, behavioral-contracts/ss-01/BC-1.02.028.md, prd-supplements/test-vectors.md]
-input-hash: "c25da45"
+input-hash: "0f3a64e"
 traces_to: prd.md
 source_bc: BC-1.02.001
 bcs: [BC-1.02.001, BC-1.02.004, BC-1.02.016, BC-1.02.018, BC-1.02.019, BC-1.02.021, BC-1.02.022, BC-1.02.023, BC-1.02.025, BC-1.02.027, BC-1.02.028, BC-1.02.002, BC-1.02.003, BC-1.02.006, BC-1.02.007, BC-1.02.009, BC-1.02.010, BC-1.02.013, BC-1.02.015]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.0 2026-11-18T15:05:00Z: created — ADV-P4 fix (B03, plan item 18): S1.02 for-all property legs split from VP-028, exactly as VP-040 was split from VP-027 in pass 3; VP-028 keeps the bounded golden tables", "1.1 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-04, B08, A2-08) — the four BC-routed legs now exist as properties: P-i BC-1.02.019 dense-grid triple equality over [-10, 110] (arm64 generated table vs CPython oracle), P-j BC-1.02.025 float64 token-format fuzz, P-k BC-1.02.027 _hm fuzz, P-l BC-1.02.028 win_ms fuzz in [300000, 1e12]; P-b and P-g oracles restated as LIVE pinned-CPython calls per generated input (ARCH-07 recipe) — a static pinned table cannot oracle random inputs (A2-08)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (B01/call 10, A2-16: eight properties P-m..P-t added for the ADV-P6-B01 BCs (bcs: and the generator table extended); P-g's live-oracle half moves to the Tier C harness (VP-038 discipline); P-h has no oracle half)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-11) — P-b's live `_hm` oracle half moves to the Tier C harness with P-g's (pass-6 A2-16 left it behind): the Generators table row no longer claims a live in-tree oracle call, the Method quick-set lists the structural halves only, and the Tier C Proof Method row gains P-b", "1.4 2026-11-20T12:00:00Z: pass-8 residual sweep (task 5) — P-o width formula corrected to 10 + 1 + len(number text) + 1 + len(denominator text) (the middle 1 is the %; BC-1.02.006 PC7/VP row)", "1.5 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-13, ADV-P9-A2-14, ADV-P9-B06; orchestrator call 3) — P-b gains its missing precondition (the API suffix exists only inside the timer segment, which renders only when dur > 60000, SL:540/SL:551-553; the generator draws dur > 60000); P-t restricted to absent-or-finite timers in NON-DEGRADING renders (CP-S12/S13/O05 carved out: predicate holds, render degrades, no segment); the Method bullet now names the P-i generated-table leg, which previously appeared only in the Proof Method table"]
+modified: ["1.0 2026-11-18T15:05:00Z: created — ADV-P4 fix (B03, plan item 18): S1.02 for-all property legs split from VP-028, exactly as VP-040 was split from VP-027 in pass 3; VP-028 keeps the bounded golden tables", "1.1 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-04, B08, A2-08) — the four BC-routed legs now exist as properties: P-i BC-1.02.019 dense-grid triple equality over [-10, 110] (arm64 generated table vs CPython oracle), P-j BC-1.02.025 float64 token-format fuzz, P-k BC-1.02.027 _hm fuzz, P-l BC-1.02.028 win_ms fuzz in [300000, 1e12]; P-b and P-g oracles restated as LIVE pinned-CPython calls per generated input (ARCH-07 recipe) — a static pinned table cannot oracle random inputs (A2-08)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (B01/call 10, A2-16: eight properties P-m..P-t added for the ADV-P6-B01 BCs (bcs: and the generator table extended); P-g's live-oracle half moves to the Tier C harness (VP-038 discipline); P-h has no oracle half)", "1.3 2026-11-19T18:00:00Z: pass-7 fix (A2-11) — P-b's live `_hm` oracle half moves to the Tier C harness with P-g's (pass-6 A2-16 left it behind): the Generators table row no longer claims a live in-tree oracle call, the Method quick-set lists the structural halves only, and the Tier C Proof Method row gains P-b", "1.4 2026-11-20T12:00:00Z: pass-8 residual sweep (task 5) — P-o width formula corrected to 10 + 1 + len(number text) + 1 + len(denominator text) (the middle 1 is the %; BC-1.02.006 PC7/VP row)", "1.5 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-13, ADV-P9-A2-14, ADV-P9-B06; orchestrator call 3) — P-b gains its missing precondition (the API suffix exists only inside the timer segment, which renders only when dur > 60000, SL:540/SL:551-553; the generator draws dur > 60000); P-t restricted to absent-or-finite timers in NON-DEGRADING renders (CP-S12/S13/O05 carved out: predicate holds, render degrades, no segment); the Method bullet now names the P-i generated-table leg, which previously appeared only in the Proof Method table", "1.6 2026-11-21T23:00:00Z: pass-12 fix (ADV-P12-B03, routed) — P-r quantifier restricted to FINITE resets: the generator excludes NaN (NaN is numeric, NaN <= now is False so the window stays reported, yet NaN > now is False too), matching BC-1.02.010 Inv 1's carved-out exception and the BC-1.02.012 EC-010 shown-absolute-bands disposition; statement bullet and Generators row updated"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,8 +73,12 @@ delivers the quantified legs:
   itself is oracle-pinned by the committed tables).
 - **P-q (BC-1.02.009, ADV-P6-B01):** when `reroute_all` matches, row 1 contains no
   limits segment, for any generated stdin.
-- **P-r (BC-1.02.010, ADV-P6-B01):** for a numeric reset, the window segment is shown
-  only if `reset > now` (shown ⇒ reset > now), over generated (reset, now) pairs.
+- **P-r (BC-1.02.010, ADV-P6-B01):** for a FINITE numeric reset, the window segment is
+  shown only if `reset > now` (shown ⇒ reset > now), over generated (reset, now) pairs.
+  NaN resets are CARVED OUT of the quantifier (pass-12 ADV-P12-B03): NaN is numeric,
+  `NaN <= now` is False so the window stays reported, yet `NaN > now` is also False —
+  the shown-absolute-bands disposition BC-1.02.012 EC-010 pins (BC-1.02.010 Inv 1's
+  carved-out exception), not a property violation.
 - **P-s (BC-1.02.013, ADV-P6-B01):** a cached `used` value is displayed only when its
   age < `keep_s`, for generated (now, cached_at, keep_s) triples.
 - **P-t (BC-1.02.015, ADV-P6-B01):** for generated ABSENT or FINITE numeric timers in
@@ -148,7 +152,7 @@ delivers the quantified legs:
 | P-o | finite pct in [0,100] around each k·10 boundary ± ulp | structural: re-derive floor(pct/10+0.5) clamp and the width sum |
 | P-p | non-negative int triples incl. zero parts and max-int parts | structural: re-derive via pyfmt.Round (oracle-pinned by the committed tables) |
 | P-q | generated stdin objects with reroute_all prefix sets on/off | structural: limits-segment absence predicate |
-| P-r | (reset, now) pairs spanning reset < now, == now, > now | structural: shown ⇒ reset > now |
+| P-r | finite (reset, now) pairs spanning reset < now, == now, > now; NaN resets excluded (BC-1.02.012 EC-010 disposition, pass-12 B03) | structural: shown ⇒ reset > now over finite resets |
 | P-s | (now, cached_at, keep_s) triples around the keep_s edge | structural: age < keep_s display predicate |
 | P-t | absent or finite numeric timers around 60000 ± ulp; renders constrained to non-degrading dispositions (CP-S12/S13/O05 renders carved out, pass-9 call 3) | structural: presence iff number && > 60000, over absent/finite dur in non-degrading renders |
 

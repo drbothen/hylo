@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.4"
+version: "1.4.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "ab38ca7"
+input-hash: "7bee76c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:sparkline (SL:659-690)"
@@ -25,6 +25,7 @@ modified:
   - "1.4.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names statusline.sparkline.points and PC5/PC6 name the statusline.sparkline.colors members beside their default literals)"
   - "1.4.3 2026-11-18: pass-10 remediation ADV-P10-C2-06 (PC3 names the registered key statusline.sparkline.scale beside its fixed-top-k 1.0 literal, Pre 2 — the literal spells the default)"
   - "1.4.4 2026-11-18: pass-11 remediation ADV-P11-C2-04 (Pre 1 lists the cached-path foreign-hist crash sites — dict/number/null hist TypeError at the SL:664 slice, short-list-point IndexError at SL:655 via SL:664, plotted giant exact int OverflowError at SL:674, non-numeric plotted value TypeError at SL:671/674; EC-011 added; OD-160 class)"
+  - "1.4.5 2026-11-18: pass-12 remediation ADV-P12-C2-01 (giant-int OverflowError bound signed positive — value >= 2**1024 - 2**970; EC-012 added: a negative giant renders the lowest glyph, oracle-verified) + ADV-P12-C2-02 (VP-012 exclusion-closure and VP-001 never-blank rows for the OD-160/EC-011 cached-path degrade legs) + ADV-P12-C2-05 (Description and the VP-030 row generalize the plotted window to statusline.sparkline.points, default 12)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,8 +38,9 @@ removal_reason: null
 
 ## Description
 
-The sparkline plots the configured trace (box rate, KV fraction or TTFT) from the last 12
-history points — sliced first (`hist[-12:]`), then filtered to those carrying the key —
+The sparkline plots the configured trace (box rate, KV fraction or TTFT) from the last
+`statusline.sparkline.points` history points (default 12) — sliced first (`hist[-N:]`),
+then filtered to those carrying the key —
 zero-anchored, with a fading cyan trail, an amber cell for
 points marked with preemptions, and a bright head cell. Fewer than two plottable points
 yield an empty string. Notation: `\e` is byte 0x1B.
@@ -52,8 +54,10 @@ yield an empty string. Notation: `\e` is byte 0x1B.
    (BC-1.04.014's disposition; foreign-cache class, exclusion id **OD-160**): a dict,
    number or null `hist` fails at `hist[-N:]` (SL:664, TypeError; a dict slice is
    unhashable in CPython 3.11); a list point shorter than 2 elements raises
-   IndexError inside `_norm_pt` (SL:655 via SL:664); a plotted giant exact int raises
-   OverflowError (SL:674); a non-numeric plotted value raises TypeError
+   IndexError inside `_norm_pt` (SL:655 via SL:664); a plotted giant exact int with
+   value >= 2**1024 - 2**970 raises
+   OverflowError (SL:674; positive only — a NEGATIVE giant does not raise, it draws the
+   lowest glyph, EC-012, ADV-P12-C2-01); a non-numeric plotted value raises TypeError
    (SL:671/SL:674).
 2. Config: `statusline.sparkline.trace` enum `rate|kv|ttft` → key `v|k|f` (legacy
    `TRACE_KEYS`; unknown values are a config error in Go, BC-2.02.004, D4-EX-3);
@@ -113,7 +117,8 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | EC-008 | `ttft` trace, `f` [0.02, 0.05] (floor 0.1) | `▂▅` |
 | EC-009 | idx at top 7: v/top*7 = 0.49 / 0.5 / 2.5 | glyph 0 / 1 / 3 (half-up) |
 | EC-010 | Legacy `DGX_SL_TRACE=mine` (or any unknown trace) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.004); legacy fell back to `rate`. OD-105 exclusion entry `D4-EX-3`, dedicated test `TestD4EX3_Enum` |
-| EC-011 | Cached-path foreign `hist` shapes (Pre 1; exclusion id **OD-160**): `hist` a dict/number/null; a stored point a list shorter than 2 elements; a plotted point's value a giant exact int (magnitude >= 2**1024 - 2**970) or a non-numeric scalar | TypeError at the `hist[-N:]` slice (SL:664; a dict slice is unhashable in CPython 3.11) / IndexError inside `_norm_pt` (SL:655 via SL:664) / OverflowError (SL:674) / TypeError (SL:671/SL:674) — each → errDegraded, same top-level-guard disposition as BC-1.04.014 (ADV-P11-C2-04) |
+| EC-011 | Cached-path foreign `hist` shapes (Pre 1; exclusion id **OD-160**): `hist` a dict/number/null; a stored point a list shorter than 2 elements; a plotted point's value a giant exact int (value >= 2**1024 - 2**970, positive only — EC-012) or a non-numeric scalar | TypeError at the `hist[-N:]` slice (SL:664; a dict slice is unhashable in CPython 3.11) / IndexError inside `_norm_pt` (SL:655 via SL:664) / OverflowError (SL:674) / TypeError (SL:671/SL:674) — each → errDegraded, same top-level-guard disposition as BC-1.04.014 (ADV-P11-C2-04) |
+| EC-012 | A plotted point's value a NEGATIVE giant exact int (<= -(2**1024 - 2**970); foreign-cache vector family, byte-parity-covered — both sides render) | renders, no crash: `max(v, 0.0)` compares the int to the float exactly and returns the float `0.0` (oracle: `max(-(2**1024), 0.0)` = `0.0`, CPython 3.11.7) and the SL:671 window top ignores the negative too, so `idx` = 0 → the lowest glyph; `v` [-(2**1024), 2] is byte-equal to EC-004's `[-5, 2]` (ADV-P12-C2-01) |
 
 ## Canonical Test Vectors
 
@@ -122,14 +127,17 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | `v` [100, 100.3, 101, 99, 200, 0, 0.5, 50] | `\e[38;2;38;93;104m▅\e[38;2;43;106;118m▅\e[38;2;49;119;133m▅\e[38;2;54;131;147m▄\e[38;2;59;144;161m█\e[38;2;64;157;175m▁\e[38;2;70;170;190m▁\e[38;2;140;235;255m▃\e[0m` | happy-path |
 | `v` [1..12] | `\e[38;2;38;93;104m▂\e[38;2;41;101;113m▂\e[38;2;44;108;121m▃\e[38;2;47;116;130m▃\e[38;2;51;124;138m▄\e[38;2;54;131;147m▅\e[38;2;57;139;155m▅\e[38;2;60;147;164m▆\e[38;2;63;154;172m▆\e[38;2;66;162;181m▇\e[38;2;70;170;190m▇\e[38;2;140;235;255m█\e[0m` | happy-path |
 | `v` [0.2, 0.6] | `\e[38;2;38;93;104m▂\e[38;2;140;235;255m▅\e[0m` | edge-case |
+| `v` [-(2**1024), 2] | `\e[38;2;38;93;104m▁\e[38;2;140;235;255m█\e[0m` — byte-equal to EC-004's `[-5, 2]` shape (negative giant: `max(v, 0.0)` returns the float `0.0`, ADV-P12-C2-01) | edge-case |
 | `v` [5] | `""` | error |
 
 ## Verification Properties
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-030 | Glyph count = the number of the last 12 history points carrying the key (slice first, then filter), when ≥ 2, else empty | Go property test (testing/quick) |
+| VP-030 | Glyph count = the number of the last `statusline.sparkline.points` history points (default 12) carrying the key (slice first, then filter), when ≥ 2, else empty | Go property test (testing/quick) |
 | VP-030 | Byte equality with legacy over random finite histories | fuzz (Tier C) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (Pre 1/EC-011 cached-path foreign-hist crash shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P12-C2-02) | property test (VP-012, go test) |
+| VP-001 | The promised output set holds on the cached-path foreign-hist degrade legs (Pre 1, EC-011): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P12-C2-02) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
@@ -138,7 +146,7 @@ yield an empty string. Notation: `\e` is byte 0x1B.
 | Source | legacy/dgx_statusline.py:sparkline (SL:659-690); TRACE_KEYS/_SPARK_FIXED/_SPARK_FLOOR (SL:644-649); SPARK (SL:136); SPARK_PTS (SL:82); TRACE (SL:89) |
 | Legacy contract | BC-SL-048 (P3 base; r1 color table via BC-SL-073) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008, DI-012 (unknown-trace D4-EX-3 deviation) |
+| L2 Domain Invariants | DI-008, DI-012 (unknown-trace D4-EX-3 deviation; cached-path foreign-hist crash shapes Pre 1/EC-011/EC-012 under the OD-160 named-deviation rule) |
 | Decisions | OD-02 (glyph keys), OD-113 (theme), OD-114 (enum range), OD-57 E-B (T-046 presentation judgment) |
 | Architecture Module | `internal/statusline/sparkline.go` |
 | Stories | TBD |
@@ -161,6 +169,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — sparkline equivalence
+- VP-012 — OD-160 exclusion-closure citation (Pre 1/EC-011; ADV-P12-C2-02)
+- VP-001 — never-blank/exit-0 ladder; the cached-path foreign-hist degrade legs (EC-011) ride it (ADV-P12-C2-02)
 
 ---
 

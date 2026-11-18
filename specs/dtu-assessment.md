@@ -1,16 +1,17 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.12"
+version: "1.13"
 status: draft
 producer: architect
-timestamp: 2026-11-19T22:00:00Z
+timestamp: 2026-11-22T05:00:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "bb6b82d"
+input-hash: "3354552"
 modified:
+  - "1.13 2026-11-22T05:00:00Z: pass-12 residual (item 5, call 2) — Integration Surface Inventory row #4's justification restated: the ProcStarter seam fake is confined to Go table tests; no parity case fakes the probe (platform-family cases seed `proc_start`, and the unseeded `cache-003` probes on neither side — empty PATH bin oracle-side, HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 hylo-side, ARCH-07)"
   - "1.12 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-17, orchestrator call 5) — inventory row #2's decode-edge count corrected: 72 S1 BCs (all 101 S1 contracts less the 21 transcript S1.03 contracts of row #6 and the 8 subagent S1.07 contracts of row #5, which carry their own inventory rows), replacing '101 S1 BCs'; frontmatter: the 1.11 entry's inner double quotes repaired to single quotes so the modified list parses (YAML repair, orchestrator call 5); no history entry lost"
   - "1.11 2026-11-20T12:00:00Z: pass-8 residual sweep (task 8) — the parity fakes respelled: 'httptest fake' referred to Go's net/http/httptest package, which hylo never uses; the fakes are raw net.Listener listeners (ARCH-03 test seam, ARCH-07 parity fake)"
   - "1.10 2026-11-19T22:00:00Z: pass-8 fix (ADV-P8-A2-12, orchestrator call 19) — the ASSUMP-107-1 owner-capture due date respelled to OD-192's settled claim, before Phase 2 writes the S1.07 stories (replacing 'before Phase 3') in the Integration Surface Inventory row #5, the Dependency Summary row #5 and the Boundary Reproduction Register row #5; the transcript 2.x-schema capture rows (#6, inventory and Dependency Summary) re-anchored to the same assumption discipline as ASSUMP-107-1 with the OD-192 date, removing the stale 'before Phase 3'"
@@ -83,7 +84,7 @@ None identified — P1 emits no telemetry. The P2 exporter and its separate orac
 | # | Service | Protocol | Fidelity | DTU? | Justification |
 |---|---------|----------|----------|------|---------------|
 | 3 | git repository state | Filesystem reads: `.git` dir-or-file walk and HEAD (BC-1.02.004) — **not a subprocess** in the ported design; `Env.FileSystem`/`Cwd` seams, ARCH-03 | L1 | No | Static content behind a well-known layout; clone = a seeded directory tree (happy, shallow `.git` file, detached HEAD, missing/ corrupt `.git`) driving the `Files`/`Cwd` fakes. Real git used only in Tier A platform-family cases. |
-| 4 | Per-OS process tables (window-age probe) | `ProcStarter.WindowStart() (float64, ok)` over `platform.FindAncestor` (ARCH-03; D4-EX-1) | L1 | No | Docker cannot faithfully clone host process tables on macOS/Windows anyway; the seam fake plus `TestWindowAge_D4EX1_Windows_AncestorFound` and platform-family parity cases is the only faithful approach. |
+| 4 | Per-OS process tables (window-age probe) | `ProcStarter.WindowStart() (float64, ok)` over `platform.FindAncestor` (ARCH-03; D4-EX-1) | L1 | No | Docker cannot faithfully clone host process tables on macOS/Windows anyway; the seam fake (confined to Go table tests — no parity case fakes the probe: platform-family cases seed `proc_start`, and the unseeded `cache-003` probes on neither side, ARCH-07) plus `TestWindowAge_D4EX1_Windows_AncestorFound` is the only faithful approach. |
 
 ## Dependency Summary
 

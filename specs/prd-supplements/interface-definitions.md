@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-interface-definitions
 level: L3
-version: "1.18"
+version: "1.19"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T03:00:00Z
+timestamp: 2026-11-21T14:30:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "69dbef0"
+input-hash: "6807344"
 modified:
   - "1.11 2026-11-19T02:00:00Z: pass-5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] → [base, span] and law restated as base + span·i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
   - "1.12 2026-11-19T06:00:00Z: pass-6 remediation — glyph width rule restated in legacy's render width (code points; OD-184); `statusline.cache.rename_retry_delay_ms` registered (OD-186); default-only keys given exact env spellings (A13); Text-class reason strings for List-entry violations and non-theme control bytes (A14); subagent token ascending-pair check fire-at and D4-EX-3 naming rule (A19); rationale codes aligned to the owning BCs (B07); stale glyphs-never-named sentence fixed (B15); metrics_url row notes the OD-181 plain-http parity scope"
@@ -18,6 +18,7 @@ modified:
   - "1.16 2026-11-21T00:30:00Z: pass-10 remediation — `--config` no longer called a Global flag (config path is the only accepting verb; A17); stale not-yet-on-disk note dropped from the `paths.cache_dir` row, the error-taxonomy mirror having landed (A15); consumer columns completed: `statusline.pill.label_local` gains BC-1.04.004 (Precondition 3), `statusline.labels.vllm_down`/`lmcache_down` rescoped to the direct consumer BC-1.04.005, glyph-family consumer column gains BC-1.04.018 (sess_rate) and BC-1.04.019 (ttft) (C2-07)"
   - "1.17 2026-11-21T02:00:00Z: pass-10 residual sweep — `statusline.rows` Range cell states the BC-1.01.005 PC-4 rule (the row-2 comparison is exact, not clamped; a negative COLUMNS overflow clamped to math.MinInt64 is NOT output-equivalent, counter-case narrow_cols = MinInt64 — B04 sibling sweep); a BC-amendment citation respelled from a line pointer to the entry id (BC-1.07.005's modified 1.1.2 entry, C02)"
   - "1.18 2026-11-21T03:00:00Z: pass-11 remediation — stdin objects-read list rebuilt from every `.get(` on the stdin document and its sub-objects in legacy (fields legacy never reads removed: `rate_limits.windows`/`.spend_limit`, `workspace.repo.*`, `version`, `output_style.name`, `pr.kind`, `prompt_cache.last_miss_cause`/`miss_causes`; reads legacy makes added: `workspace.project_dir`, `prompt_cache.hit_ratio`, `rate_limits.five_hour`/`seven_day`, `cost.total_lines_added`/`removed`, `total_api_duration_ms`, `total_cost_usd` — A01/call 5); Default cells of `reroute_all_prefixes`, `cost.percentiles`, `limits.projected_bands`/`absolute_bands`, `cost.rate_min_api_ms` re-spelled to the env spellings `claude,claude-` / `[0.75,0.95]` / `[80,100]` / `[70,90]` / `{\"cc\":300000,\"other\":1800000}` (A09/call 4); `absolute_bands` cite corrected SL:520 → SL:521 (D17); `theme.separator` Range cell gains the measured built-in-literal collision caveat (`/`, `[`, `]`; SL:537/596, SL:1195-1196 — B05, with BC-1.01.006 Inv 1 widened the same pass); nine OD-194 label keys `statusline.labels.old/rate/queue/kv/host/tps/max/idle/na` registered with env names per `EnvName` and consumer BCs"
+  - "1.19 2026-11-21T14:30:00Z: pass-12 remediation — `--subagent` output-contract applicability corrected: the CP-A01..A05 degrade ladder DOES apply in subagent mode (29-byte line; legacy `main_subagent` catches only stdin faults) while the happy path and the stdout config-error line do not (C01); `statusline.window_age.max_depth` Range cell gains the `0..1000` validation bound (A11/call 3); `statusline.theme.separator` collision caveat enumeration completed with the four built-in DIM-wrapped runs (B05); no behavioral change"
 traces_to: prd.md
 ---
 
@@ -136,9 +137,15 @@ rejected, VP-006). `columns` is carried but never trims subagent rows (BC-1.07.0
   <rendered row>}` — with CPython default separators (`, ` and `: `) and
   `ensure_ascii=True` (pure ASCII wire; every non-ASCII character as a `\uXXXX` escape);
   zero eligible tasks → zero bytes, exit 0; a subagent-mode config error → zero stdout
-  bytes with ALL reason lines on stderr (OD-168). The MAIN-mode outcomes above (1-2 line
-  happy path, degraded ladder, config-error line, unknown-flag line) do not apply in this
-  mode (BC-1.07.002/.003/.004; row schema and zero-byte cases: BC-1.07.004; pass-9 A01).
+  bytes with ALL reason lines on stderr (OD-168). Applicability of the MAIN-mode outcomes
+  above in this mode (corrected pass-12 C01): the typed crash-path degrade ladder DOES
+  apply — a CP-A01..A05 renderer fault reaches the guard and the whole stdout is exactly
+  the 29-byte degraded line (legacy `main_subagent` catches only stdin faults, SL:929-932,
+  and the guard prints at SL:1243-1244; BC-1.07.008 PC1-PC6, error-taxonomy Surface 3) —
+  while the 1-2 line happy path does not (NDJSON rows instead) and a config error emits
+  zero stdout bytes (above). Stdin read/decode faults are caught inside `main_subagent`
+  itself and absorbed to `{}` (BC-1.07.002/.003/.004; row schema and zero-byte cases:
+  BC-1.07.004; pass-9 A01).
 - Side-effect order on a degrade: legacy order preserved; earlier writes kept (BC-1.01.009).
 
 ## HYLO_* Key Schema (P1 subset)
@@ -232,7 +239,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.pill.label_local` | Text | `DGX` | non-empty, no control bytes, display width 1..16 (judgment call: keeps the pill short; OD-173); the marker word of the dead-backend rung `◌ <label_local> ?` too (OD-189, pass-7 C2-07) | OWNER (OD-173) | BC-1.02.001, BC-1.04.004 (Precondition 3, dead-marker word), BC-1.07.006 |
 | `statusline.pill.label_cloud` | Text | `ANTH` | non-empty, no control bytes, display width 1..16 (as above; OD-173) | OWNER (OD-173) | BC-1.02.001, BC-1.07.006 |
 | `statusline.pill.label_unknown` | Text | `?` | non-empty, no control bytes, display width 1..16 (as above; OD-173) | OWNER (OD-173) | BC-1.02.001 |
-| `statusline.theme.separator` | Text | ` · ` (U+00B7) | free text, no control bytes (control byte = config error, BC-2.01.003 PC-3). MEASURED collision caveat (pass-11 B05): a value whose wrapped bytes `DIM + value + RESET` occur inside a built-in segment — measured built-in exact literals: `/` (lines segment, SL:537), `[` and `]` (token brackets, SL:596) — makes trim_to_fit's `SEP in row` test (SL:1195) true at that inner position, so the rsplit cut (SL:1196) lands inside the built-in segment; admissible, the rendered outcome pinned by the BC-1.01.006 Inv 1 caveat (widened the same pass) | DOC (OD-113) | BC-2.01.003 |
+| `statusline.theme.separator` | Text | ` · ` (U+00B7) | free text, no control bytes (control byte = config error, BC-2.01.003 PC-3). MEASURED collision caveat (pass-11 B05; enumeration completed pass-12 B05): a value whose wrapped bytes `DIM + value + RESET` occur inside a built-in segment — measured built-in exact literals: `/` (lines segment, SL:537), `[` and `]` (token brackets, SL:596) — or inside any built-in DIM-wrapped run: the denominator `{DIM}/…M{RESET}` (SL:435-436, e.g. `/1.0M`, `/200K`), the API-duration suffix `·1m` (SL:553), the window-age suffix `(~5s old)` (SL:700), the telemetry run `↺host 30%` (SL:762) — makes trim_to_fit's `SEP in row` test (SL:1195) true at that inner position, so the rsplit cut (SL:1196) lands inside the built-in segment; admissible, the rendered outcome pinned by the BC-1.01.006 PC1/Inv 1 caveat (widened the same pass) | DOC (OD-113) | BC-2.01.003 |
 | `statusline.window_age.process_name` | Text | `claude` | non-empty, no control bytes; exact basename match (Windows `.exe` stripped) | OWNER (OD-133) | BC-3.02.001/.002 |
 | `statusline.sparkline.trace` | Enum | `rate` | `rate\|kv\|ttft` (legacy `mine` retired) | DOC | BC-2.02.004, BC-1.04.009 (consumer; pass-9 C2-10) |
 | `statusline.context.cells` | Int | 10 | `1..100` — upper bound 100 is a labeled judgment call (J), same rationale as `kv.cells`: caps O(cells) render work and visible-width blowup within the 25 ms p95 budget; the T-codes justify the DEFAULT, not the bound (BC-1.02.006 PC3-PC5 define the widget for any cell count; pass-4 B09 aligns the bound with `kv.cells`). An out-of-range value is a config error, never a clamp (pass-5 B15/call 16) | J (T-027..T-029) | BC-1.02.006 |
@@ -299,7 +306,7 @@ Representative keys (families enumerated in design §2.4; amended by OD-113, OD-
 | `statusline.power.wall_red_w` | Watts (Int) | 1520 | any Int (band comparison) | Dv (T-053) | BC-1.04.011 |
 | `statusline.power.wall_yellow_w` | Watts (Int) | 1280 | any Int (band comparison) | Dv (T-053) | BC-1.04.011 |
 | `statusline.window_age.min_margin_ms` | Milliseconds (Int) | 300000 | any Int (margin comparison) | OWNER (T-040, owner request) | BC-1.02.017 |
-| `statusline.window_age.max_depth` | Int | 6 | any Int (ancestor-walk cap) | DOC (T-025) | BC-3.02.001 |
+| `statusline.window_age.max_depth` | Int | 6 | `0..1000` (ancestor-walk cap; 0 = no ancestor walk — `FindAncestor` makes zero probes and returns not-found; upper bound 1000 mirrors `statusline.sparkline.history_cap`'s validation bound, labeled judgment call; range added pass-12 A11/call 3) | DOC (T-025) | BC-3.02.001 |
 | `statusline.kv.host_shown_pct` | Float | 0.5 | finite Float (display gate) | Dv (T-050) | BC-1.04.007 |
 | `statusline.kv.host_yellow_pct` | Float | 5 | finite Float (band threshold, THRESHOLDS §8 SL:746) | M (T-049) | BC-1.04.007 |
 | `statusline.sparkline.enabled` | Bool | true | both booleans defined: `false` hides the sparkline (legacy `DGX_SL_SPARK != "0"`) | DOC | BC-1.04.008, BC-2.01.005 |

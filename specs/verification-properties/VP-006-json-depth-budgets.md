@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.13"
+version: "1.14"
 status: draft
 producer: architect
-timestamp: 2026-11-18T21:00:00Z
+timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.01.002.md, behavioral-contracts/ss-05/BC-5.02.003.md, behavioral-contracts/ss-01/BC-1.03.004.md, prd-supplements/nfr-catalog.md]
-input-hash: "bdd7c3f"
+input-hash: "a2006ec"
 traces_to: prd.md
 source_bc: BC-5.02.003
 bcs: [BC-5.02.003, BC-5.02.004, BC-1.01.002, BC-1.03.004, BC-1.07.003, BC-6.01.001]
@@ -20,7 +20,8 @@ proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
 modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — per-site table states both protocol sites at 993/994 (measured end to end on legacy 2026-11-17, superseding the 989/990 direct-probe figure); cache-load sites declared unmeasured/open, due before Phase 3 (A2-13); proof_file_hash field added (A2-29)", "1.3 2026-11-17: pass-2 follow-up — ADV-P2-A07 closed: governing formula limit = 999 − Python frames from <module> down to json.raw_decode recorded; all eight loader sites stated (stdin/transcript 993/994, session cache 991/992 and git cache 990/991 measured; get_sample, claude_window_start, mix cache and the cost-history loaders derived from equal chain depth); per-site measurement recipe added; harness asserts limit/limit+1 at every site", "1.4 2026-11-18T09:07:00Z: ADV-P3 fixes — main_subagent depth row added: same 6-frame chain as stdin, 993/994, over-limit input renders zero bytes (BC-1.07.003), not the degraded line (A2-22); line-number citations to BC-5.02.003 stripped in favor of content anchors (anchor drift, ADV-P3-D29)", "1.5 2026-11-18T14:38:00Z: ADV-P4 fixes — recipe observable corrected per BC-1.01.002: depth L+1 decodes to {} and renders the 45-byte default line, not the degraded line (A2-16); subagent chain re-labelled <module> → main_subagent (legacy calls main_subagent from <module>, SL:1240-1241); BC-1.07.003 added to bcs: to match the body's row (A2-11)", "1.6 2026-11-18T23:45:00Z: ADV-P5 fix (A2-05) — metrics-reply decode site added to the per-site table and harness: main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames, 992 accepted / 993 rejected — MEASURED end to end (localhost HTTP reply carrying a nested list under an ignored metric key, isolated HOME/cwd per run, python3 -I, 2026-11-18), confirming the 7-frame derivation; BC-5.02.004 names metrics replies pyfmt.Value decodes, so a Go budget drift here is now detected", "1.7 2026-11-19T03:00:00Z: ADV-P5 residual fix — the ModeText cache-loader citation's line-number pointer replaced with the ARCH-04 heading fragment anchor (anchor-drift lesson, ADV-P3-D29)", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-17, OD-185: harness budgets are pinned literals (subagent row added; BC-5.02.004 in bcs:); production call sites reference named per-site constants; OD-185 oracle self-check leg re-measures the flip depths on the resolved 3.11.x oracle, fails closed, prints the resolved version)", "1.9 2026-11-19T18:00:00Z: pass-7 fixes (D04/call 7, A2-21) — the OD-185 self-check leg states BC-6.01.001 v1.2.4's ONE end-to-end definition and its measured constants (stdin decode 993 accepted / 994 rejected; session-cache save 991 writes / 992 skips; subagent wire 991 renders; unicodedata.unidata_version 14.0.0; CPython 3.11.7, default recursion limit 1000) instead of the skeleton's old helper-scope pair; Partial-coverage bullet names BC-5.02.004 and BC-1.07.003, matching bcs:", "1.10 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-29) — bcs: gains BC-6.01.001, whose PC-4 states this VP pins the same measured self-check constants (reciprocity preferred over exception-listing, SC-13/SC-14 convention); no property or table change", "1.11 2026-11-20T12:00:00Z: pass-9 fix (A2-10) — the 'wrong budget at a production call site is a detected defect' claim given a mechanism that can fail: the harness table pins the SHARED production per-site constant symbols (not literal copies), so a drifted constant fails the pin row / ±1 boundary rows against the measured literals; the former all-literal rows compared two copies of the same number and could never fail; detection limits stated honestly — no end-to-end observable exists for the five derived sites, whose budgets are detected by the shared-symbol pin against the measured peer's flip (equal-chain-depth derivation, BC-5.02.003)", "1.12 2026-11-18T17:50:00Z: pass-10 fix (A2-05) — the 'wrong budget at a production call site is detected' claim given a mechanism that can fail ON GO: a call-site lint leg (TestDecode_CallSiteLint, AST scan via go/parser, the same offline mechanism as VP-012's test-registry correspondence) asserts each production pyfmt.Decode call site passes its OWN named per-site constant — the shared-symbol pin alone could not detect a mix-cache site passing BudgetStdin (993 instead of 991), and the OD-185 self-check runs on the Python oracle; the statement's honesty paragraph and Proof Method table state the two-leg detection (symbol pin + call-site lint)",
-  "1.13 2026-11-18T21:00:00Z: pass-11 fix (B08, call 15) — the OD-185 oracle self-check gains the normpath-NUL probe: posixpath.normpath('a\\0b') and ntpath.normpath('a\\0b') must both KEEP the NUL (orchestrator-measured on CPython 3.11.7: both return 'a\\x00b'); a pre-gh-106242 CPython silently drops it, hollowing BC-1.02.022's PC3 `a\\0b` vector and EC-006; probe leg added to the self-check prose and the TestOracleSelfCheck_MeasuredConstants skeleton (BC-6.01.001's self-check definition carries the same probe, owner-agent 8)"]
+  "1.13 2026-11-18T21:00:00Z: pass-11 fix (B08, call 15) — the OD-185 oracle self-check gains the normpath-NUL probe: posixpath.normpath('a\\0b') and ntpath.normpath('a\\0b') must both KEEP the NUL (orchestrator-measured on CPython 3.11.7: both return 'a\\x00b'); a pre-gh-106242 CPython silently drops it, hollowing BC-1.02.022's PC3 `a\\0b` vector and EC-006; probe leg added to the self-check prose and the TestOracleSelfCheck_MeasuredConstants skeleton (BC-6.01.001's self-check definition carries the same probe, owner-agent 8)",
+  "1.14 2026-11-21T12:00:00Z: pass-12 fix (A2-08, P11) — the call-site lint leg carries a POSITIVE-COVERAGE assertion: the lint asserts its computed site count equals the TEN-ROW call-site table (ten sites), fatal on zero sites — a mis-pathed AST scan found zero sites and passed green while checking nothing; the Proof Method row and the skeleton state the pin"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,7 +107,10 @@ isolated HOME and cwd per run, ADV-P5-A2-05, measured 992/993 on 2026-11-18.
   measured flip, and the call-site lint (AST scan, skeleton below) proves each
   production call site passes its OWN named constant — the pin alone cannot detect
   a mix-cache site passing `BudgetStdin` (993 instead of 991), and the OD-185
-  self-check runs on the Python oracle, not on Go. No separate end-to-end depth leg
+  self-check runs on the Python oracle, not on Go. The lint leg carries a
+  positive-coverage assertion (A2-08, P11): it fatally asserts its computed site
+  count equals the ten-row call-site table above — a mis-pathed AST scan that finds
+  zero sites fails instead of passing green. No separate end-to-end depth leg
   exists for the derived sites, open since pass-2 and stated here.
   OD-185 + pass-7 D04: the harness self-checks the pinned constants
   against the resolved 3.11.x oracle at start, by BC-6.01.001's ONE end-to-end
@@ -127,7 +131,7 @@ isolated HOME and cwd per run, ADV-P5-A2-05, measured 992/993 on 2026-11-18.
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
 | Boundary tables | Go test | yes — ±1 around each budget | both modes |
-| Call-site lint (AST) | `go test ./internal/pyfmt -run TestDecode_CallSiteLint` | yes — finite call-site set | every production `pyfmt.Decode` call site passes its own named per-site constant (A2-05) |
+| Call-site lint (AST) | `go test ./internal/pyfmt -run TestDecode_CallSiteLint` | yes — finite call-site set | every production `pyfmt.Decode` call site passes its own named per-site constant (A2-05); computed site count pinned to the ten-row table, fatal on zero (A2-08) |
 | Fuzz | `go test -fuzz` | bounded runs | nested-input robustness below budget |
 
 ## Proof Harness Skeleton
@@ -170,7 +174,11 @@ func TestDecode_CallSiteLint(t *testing.T) { // pass-10 A2-05: the pin rows prov
     // mechanism as VP-012's test-registry correspondence) and asserts each call's
     // budget argument is the named per-site constant its row declares; a literal or
     // a foreign package's constant fails the leg.
-    for _, site := range DecodeCallSites() { // (pkg, ident) pairs mirroring the row table
+    sites := DecodeCallSites() // (pkg, ident) pairs mirroring the row table
+    if len(sites) != 10 { // A2-08 (P11): a mis-pathed AST scan finds zero sites and
+        t.Fatalf("call-site lint found %d sites, want the table's ten", len(sites)) // passes green
+    }
+    for _, site := range sites {
         if got := CallSiteBudgetIdent(site); got != site.BudgetConst {
             t.Fatalf("%s: budget argument %q, want the named constant %q", site.Name, got, site.BudgetConst)
         }

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.7"
+version: "1.7.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "500ea15"
+input-hash: "dcd71fd"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,8 @@ modified:
   - "1.5 pass-6 remediation (OD-184 wording + B16): Inv 2 glyph length respelled to the OD-184 canon (exactly 1 code point, measured in legacy's render width); history labels version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
   - "1.6 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
   - "1.7 pass-11 remediation (ADV-P11-B06): PC2.3's dim token brackets pinned as named format constants, not config (D15; the theme separator governs inter-segment separators, not intra-segment markup); no behavioral change; 2026-11-21T12:00:00Z"
+  - "1.7.1 pass-12 remediation (ADV-P12-B01; orchestrator call 12): EC-009 and its vector row re-tagged as the OD-160 foreign-cache vector CP-C06 — a non-numeric cached tin is a hand-edited-cache shape only (transcript-borne usage fields die at SL:1108), not a byte-parity leg; CP-C06 allocated by the product-owner from the formerly reserved id, rows built by the architect in error-taxonomy; no behavioral change; 2026-11-23T00:00:00Z"
+  - "1.7.2 pass-12 residual sweep (orchestrator pass-12 residual register alignment): EC-009, its vector row and the 1.7.1 note renumber CP-C11 to CP-C06 per the orchestrator ruling that the formerly reserved id is ALLOCATED, keeping the register label CP-C01..C10 true; no behavioral change; 2026-11-23T14:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,7 +95,7 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
 | EC-006 | `tout` = `None` with `tin > 0` | `↓0` |
 | EC-007 | `rb = 1.5` | `↻2` (half-even `.0f`) |
 | EC-008 | `mix` of length 7 (no `c_in`, no `rb`) | only `✍`/`⟳` can be inner parts; no `↻` |
-| EC-009 | `tin` a non-numeric truthy value with numeric `tout` | legacy raises TypeError at SL:586 → degraded line; whether S1.03 can deliver such a value is governed by the S1.03 contracts (D4-EX-2 skips wrong-shape lines) |
+| EC-009 | `tin` a non-numeric truthy value with numeric `tout` | foreign-cache vector (**OD-160**, **CP-C06**): a non-numeric `tin` cannot arrive from a transcript (a string or list usage field raises TypeError back at step 2, SL:1108 — a D4-EX-2 skip); the only legacy source is a hand-edited mix cache, whose early return (SL:1039-1040) hands back the cached `tin`; legacy TypeError at SL:586 → degraded line, exit 0; Go's foreign-cache behavior carries exclusion **OD-160** (ruling Q-b) — Go table test, not byte-compared |
 
 ## Canonical Test Vectors
 
@@ -108,7 +110,7 @@ Input is `mix` (indices 3,4,5,6,8,9 = tin, tout, c_wr, c_rd, c_in, rb); output i
 | tin 2500, tout 999500, c_rd 2500, rb 1.5 | `\e[90m↑\e[0m\e[97m2k\e[0m\e[90m ↓\e[0m\e[97m1000k\e[0m \e[2m\e[33m↻2\e[0m` | edge-case (no promotion, half-even) |
 | tin NaN, tout 10 | `\e[90m↑\e[0m\e[97mnan\e[0m\e[90m ↓\e[0m\e[97m10\e[0m` | edge-case |
 | tin 0, tout 0 | segment absent | edge-case |
-| tin `"x"`, tout 5 | whole stdout = `\e[90mstatusline degraded\e[0m\n` (legacy oracle) | error |
+| tin `"x"`, tout 5 | whole stdout = `\e[90mstatusline degraded\e[0m\n` (foreign-cache vector, CP-C06 — see EC-009; exclusion **OD-160**, ruling Q-b; not a byte-parity leg) | error |
 
 Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-104).
 

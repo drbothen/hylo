@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - domain-spec/invariants.md
-input-hash: "00d1068"
+input-hash: "7768430"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444, 902-903)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.2.7): ADV-P8 remediation D18 — PC-6 pins the unknown-setting warning ORDER: ascending byte-lexicographic by variable name (deterministic spec choice; Go map iteration is unordered), so the BC-2.03.001 same-order cross-reference resolves"
   - "2026-11-20T18:30:00Z (1.2.8): ADV-P9 remediation D06+A12+D07 — carve-out notes per-key backend errors sort after all registry keys (index then field name, BC-2.01.002); the platform seam paragraph states internal/platform as the SINGLE HOME of EnvVars (cmd/hylo and statusline consume it, ARCH-00); PC-2 keys default-only Text/List empty values to the Text-class non-empty reason (checks run first, BC-2.01.005 PC-7)"
   - "2026-11-21T07:00:00Z (1.2.9): ADV-P11 remediation D13 (orchestrator call 16) — PC-5 states that an unknown-flag run never reaches resolution: config.Load is not called at all (BC-4.01.002 PC-4), so stderr on such a run carries no unknown-setting warning"
+  - "2026-11-22T00:00:00Z (1.3.0): ADV-P12 remediation D08 (orchestrator call 8) - the Platform-seam passage states the Windows environment decode: platform.EnvVars reads the UTF-16 environment through Go's standard decoding, which substitutes U+FFFD for an unpaired surrogate (documented unicode/utf16 behavior; not oracle-measured), pinned by a table test - a lone surrogate cannot reach the Windows env path"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -111,7 +112,11 @@ happens once per process, before any side effect.
    and is ignored silently. **Platform seam (ADV-P5-D25):** the case semantics live behind
    `internal/platform` (build-tag confined per D5): `platform.EnvVars` is a
    case-preserving view over the process environment whose lookup folds case on Windows
-   and is byte-exact on POSIX. `config.Load` receives the environment ONLY through that
+   and is byte-exact on POSIX. On Windows `EnvVars` reads the environment through Go's
+   standard UTF-16 decoding, which substitutes U+FFFD for an unpaired surrogate
+   (documented `unicode/utf16` behavior; not oracle-measured; pass-12 call 8) — a table
+   test pins the substitution, so a lone surrogate cannot reach the Windows env path.
+   `config.Load` receives the environment ONLY through that
    seam — never over a raw injected Go map, whose native lookup is case-sensitive — and
    the Windows folding rule is exercised on every OS by a table test against the seam's
    injected test double (feed both casings through the fold; no Windows CI leg is needed

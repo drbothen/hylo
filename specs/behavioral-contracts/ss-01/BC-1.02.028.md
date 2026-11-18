@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.6"
+version: "1.6.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "df5fc95"
+input-hash: "fbbf0f3"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,7 @@ modified:
   - "1.4 pass-6 remediation (ADV-P6-B08): the timer and window-age glyphs are named as the registry keys statusline.glyphs.timer / window_age instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
   - "1.5 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
   - "1.6 pass-11 remediation (ADV-P11-B09): EC-004 wording fixed — exactly 104 days renders `104d00h` (interpreter-verified divmod arithmetic, CPython 3.11.7); the S = 9,000,000 s vector (104 d 4 h) renders `104d04h`; no behavioral change; 2026-11-21T12:00:00Z"
+  - "1.6.1 pass-12 remediation (ADV-P12-B07): EC-004 self-contradictory wording fixed — `104d04h` carries the zero-padded `:02d` hour, so the 'with no padding' clause is gone; no behavioral change; 2026-11-23T00:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,7 +71,7 @@ renders `_hm(win_ms)` (`<m>m` or `<h>h<mm>m`).
 | EC-001 | now − start = 86399 s | `23h59m` |
 | EC-002 | now − start = 86400 s | `1d00h` |
 | EC-003 | now − start = 7200 s | `2h00m` |
-| EC-004 | Exactly 104 days (now − start = 104·86400 s) | `104d00h` (hours zero-padded; contrast the vector row S = 9,000,000 s = 104 d 4 h, which renders `104d04h` with no padding) |
+| EC-004 | Exactly 104 days (now − start = 104·86400 s) | `104d00h` (hours zero-padded to two digits: the vector row S = 9,000,000 s = 104 d 4 h renders `104d04h` — the `:02d` hour zero-pad, not an unpadded `104d4h`) |
 | EC-005 | `win_start = true` at now = 1794600000 (hand-edited-cache shape, **OD-160**; cf. BC-1.02.017 EC-007) | `20770d19h` |
 | EC-006 | `win_ms = +inf` (win_start `-Infinity`; hand-edited-cache shape, **OD-160**) | degraded |
 | EC-007 | Very large finite `win_ms` (minutes beyond int64) | byte-exact big integers via `math/big` at this site (OD-137), same resolution as BC-1.02.027 EC-005; no exclusion entry |

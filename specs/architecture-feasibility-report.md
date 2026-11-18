@@ -1,25 +1,27 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.13"
+version: "1.14"
 status: approved
 producer: architect
-timestamp: 2026-11-21T00:00:00Z
-modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change", "1.13 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A09) — both 'AD-03 overlay decision' cells respelled per R-001: the AD-03 decision — the in-memory overlay option was rejected (AD-03 rejected the overlay option; the old cells misdescribed it as an overlay decision)"]
+timestamp: 2026-11-21T20:00:00Z
+modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change", "1.13 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A09) — both 'AD-03 overlay decision' cells respelled per R-001: the AD-03 decision — the in-memory overlay option was rejected (AD-03 rejected the overlay option; the old cells misdescribed it as an overlay decision)", "1.14 2026-11-21T20:00:00Z: pass-12 fix (A2-13) — prd_version re-pinned 0.1 → 0.2.22 (tracks prd.md) and the settled-rulings range widened OD-115..OD-149 → OD-115..OD-194 with the re-pin disclosed in the intro"]
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "7766305"
+input-hash: "9532395"
 traces_to: prd.md
-prd_version: "0.1"
+prd_version: "0.2.22"
 
 ---
 
 # Architecture Feasibility Report
 
-Architect review of the L3 PRD (`prd.md` v0.1, 145 BCs, subsystem breakdown S1-S6 active
+Architect review of the L3 PRD (`prd.md` v0.2.22, 145 BCs at v0.1 review time, subsystem
+breakdown S1-S6 active
 / S7-S12 reserved) for subsystem-grouping feasibility. Scope: NFR coherence, integration
-feasibility, purity-boundary alignment, verifiability. Owner rulings OD-115..OD-149 are
-treated as settled and were not reopened.
+feasibility, purity-boundary alignment, verifiability. Owner rulings OD-115..OD-194 are
+treated as settled and were not reopened (re-pinned from the review-time OD-115..OD-149
+range, pass-12 A2-13; the body tracks the amended PRD through pass 9 and this pass).
 
 ## Executive Summary
 
@@ -52,8 +54,7 @@ unchanged.)*
 | §1.2 (OD-107) | BC-2.01.001 | P1 config = `HYLO_*` env over built-in defaults only | Registry closed; seven error classes closed (OD-114/134/140; seventh Text class OD-178 — pass-6 A2-08) | feasible | Resolution totality VP-015/VP-016/VP-017 |
 | §8 (ruling b) | BC-1.06.001/.002, BC-6.02.004 | Go is byte-exact cache writer/reader across Python/Go swaps, four caches | Byte-exact writers over ordered `pyfmt.Value`; atomic write + Windows retry (AD-08). BC-1.06.001 rides the `temp-file` class (OD-110) for the OD-163 own-temp-cleanup divergence — payload bytes stay byte-exact | risky | Swap-parity tier VP-019; failed-replace semantics pinned by the AD-03 decision — the in-memory overlay option was rejected |
 | §1.6 S3 | BC-3.02.001/.002 | Native per-OS ancestor probe replaces `ps` | Build-tag-confined `internal/platform`; x/sys sole runtime dep (AD-07) | feasible | Probe register VP-033; D4-EX-1 bound VP-014; OQ-3 measurement deferred by design |
-| §2.5 (OD-103) | BC-5.01..5.04 | Python-semantics formatting (half-even, WTF-8, `_mktime`, 4,300-digit grammar) | One sink package `internal/pyfmt`, four files, CPython-generated tables (AD-04) | feasible | Equivalence VPs VP-023..026; `math/big` at the ruled duration-format sites (OD-137,
-extended to the `_fmt_lines` lines/thresholds path by OD-156 — pass-4 A2-15) |
+| §2.5 (OD-103) | BC-5.01..5.04 | Python-semantics formatting (half-even, WTF-8, `_mktime`, 4,300-digit grammar) | One sink package `internal/pyfmt`, four files, CPython-generated tables (AD-04) | feasible | Equivalence VPs VP-023..026; `math/big` at the ruled duration-format sites (OD-137, extended to the `_fmt_lines` lines/thresholds path by OD-156 — pass-4 A2-15) |
 | §8 DI-012 | BC-6.03.004 | Closed, glob-free exclusion set; new class needs owner decision | Exclusion machinery fails closed (AD-09) | feasible | VP-012 property test; `cp-x03` rides the closed set (OD-136) |
 
 ## Subsystem Grouping Assessment

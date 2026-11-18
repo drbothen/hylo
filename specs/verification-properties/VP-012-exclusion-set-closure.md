@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.22"
+version: "1.23"
 status: draft
 producer: architect
-timestamp: 2026-11-20T12:00:00Z
+timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.004.md, behavioral-contracts/ss-06/BC-6.03.003.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "859167e"
+input-hash: "40439d3"
 traces_to: prd.md
 source_bc: BC-6.03.004
-bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017, BC-1.04.018]
+bcs: [BC-6.03.004, BC-6.03.003, BC-1.06.002, BC-3.02.001, BC-3.02.002, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.002, BC-1.03.005, BC-1.03.014, BC-1.03.016, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-1.01.001, BC-1.02.004, BC-1.03.015, BC-1.05.004, BC-1.04.003, BC-1.04.002, BC-1.04.001, BC-1.05.005, BC-1.05.006, BC-1.05.009, BC-1.06.001, BC-1.02.017, BC-1.04.018, BC-1.04.009, BC-1.04.014]
 module: internal/parity
 proof_method: mutation-test (fail-closed catalogue)
 feasibility: feasible
@@ -42,6 +42,7 @@ modified:
   - "1.20 2026-11-20T12:00:00Z: pass-9 fix (C2-04) — bcs: gains BC-1.05.009 (second OD-30 register contract beside BC-1.05.006; its body register row and Named Tests entry already named it — the frontmatter map row was the missing reciprocity); VP-INDEX coverage map synced in the same burst by the index owner; the 1.19 entry's lost closing quote restored (call 5 YAML repair)"
   - "1.21 2026-11-18T17:50:00Z: pass-10 fixes (A2-06, A2-10) — scope review stated honestly as a MANUAL obligation: the closure check verifies id membership, uniqueness, test existence and expected-file match, not that each entry's case lies inside its id's declared scope (OD-166 'and nothing else' / OD-181 transport are predicated by the rulings and BC bodies, not by an oracle; no structure mutant can attach a valid id to an out-of-scope case) — property statement and Honesty bullet state it (A2-06); the rider-existence leg additionally asserts RiderRegister()'s keys equal the twelve-element closed set (length + per-id presence — a register missing an id would silently skip that id's check) (A2-10)"
   - "1.22 2026-11-21T09:00:00Z: pass-11 residual — bcs: gains BC-1.04.018 (its VP-table row routes the OD-160 exclusion to this closure check, citation carrier only, no riding test of its own; ADV-P11-C2-02), the Source Contract citation-carriers sentence names it; VP-INDEX map and recount synced in the same burst"
+  - "1.23 2026-11-21T12:00:00Z: pass-12 fixes (A2-03, C2-02) — the rider register is MULTI-VALUED and the check asserts EVERY registered test (A2-03): a closed id may register several rider tests — D4-EX-3 registers the five TestD4EX3_{Number,Boolean,URL,Enum,Text} class members and OD-160 registers directional tests plus the dedicated test — so deleting four of the five D4-EX-3 class tables reds the check (the former single 'canonical rider test' wording and the id→one-rider skeleton let the deletions pass); skeleton's RiderRegister models id → set of (package, test) pairs, keys still asserted equal to the closed set; bcs: gains BC-1.04.009 and BC-1.04.014 (OD-160-tagged foreign-hist crash shapes on EC-011 and EC-008..EC-010 respectively; citation carriers only, no riding test of their own — the entry is validated by the closure check's existing OD-160 member and TestForeignCacheShape_OD160_Vectors; ADV-P12-C2-02), the Source Contract citation-carriers sentence names both; VP-INDEX map and recount synced in the same burst"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,14 +82,17 @@ the rulings and the BC bodies, not by an oracle; no mutant can attach a valid id
 an out-of-scope case, because scope is a predicate over the case's semantics, not
 its parsed structure — a valid id on an out-of-scope case passes the machinery and
 is caught only by review against the OD-169/OD-181 declarations. The closure
-check is rider-complete (against a register whose keys are asserted equal to the
+check is rider-complete (against a MULTI-VALUED register whose keys are asserted equal to the
 twelve-element closed set — A2-10: a register missing an id would silently skip
 that id's existence check): besides walking the entries, it verifies that EVERY
-closed-set id's canonical rider test exists in its declared package — whether or
+registered rider test of every closed-set id exists in its declared package — a
+register entry is a SET of (package, test) pairs and every listed test must exist
+(A2-03: D4-EX-3 registers the five TestD4EX3_{Number,Boolean,URL,Enum,Text} class
+members, OD-160 the directional tests plus the dedicated test) — whether or
 not any parity case currently carries that id — so deleting
 `TestMetricsClient_OD181_TransportTable` (OD-181, whose parity cases are plain
-http only) or `TestD4EX3_Text` (D4-EX-3's Go-table-test-only member, which backs
-no parity entry) reds the check. The mutation leg guards a NON-EMPTY mutant
+http only), `TestD4EX3_Text` (D4-EX-3's Go-table-test-only member, which backs
+no parity entry), or three of the five D4-EX-3 class tables reds the check. The mutation leg guards a NON-EMPTY mutant
 catalogue: an empty catalogue fails the leg instead of passing while checking
 nothing.
 
@@ -142,7 +146,14 @@ nothing.
   BC-1.04.018 (OD-160 tag on the PC-1 foreign exact-giant-int `lr[0]` mix-cache shape;
   citation carrier only, no riding test of its own — the entry is validated by the
   closure check's existing OD-160 member and the riding test
-  `TestForeignCacheShape_OD160_Vectors`; ADV-P11-C2-02, pass-11 residual).
+  `TestForeignCacheShape_OD160_Vectors`; ADV-P11-C2-02, pass-11 residual),
+  BC-1.04.009 (OD-160 tag on the Pre-1/EC-011 cached-path foreign-`hist` crash
+  shapes — dict/number/null `hist` slice TypeError, short-list-point IndexError,
+  plotted giant exact int OverflowError, non-numeric plotted value TypeError) and
+  BC-1.04.014 (OD-160 tags on EC-008..EC-010, the same crash classes at the
+  sparkline's own normalize ladder) — citation carriers only, no riding test of
+  their own; the entry is validated by the closure check's existing OD-160 member
+  and `TestForeignCacheShape_OD160_Vectors` (ADV-P12-C2-02, pass-12 residual).
 - **Invariant verified:** DI-012 (no blanket exclusions; every exclusion carries its
   own table tests); OD-105/OD-110; AD-09 (machinery fails closed).
 
@@ -219,9 +230,16 @@ func TestParityExclusions_ClosedSet(t *testing.T) {
             t.Fatalf("rider register missing closed id %s", id)
         }
     }
-    for id, rider := range RiderRegister() { // from the BC-6.03.004 register
-        if !TableTestExistsIn(rider.Package, rider.Test) {
-            t.Fatalf("closed id %s: rider test %s missing from %s", id, rider.Test, rider.Package)
+    for id, riders := range RiderRegister() { // from the BC-6.03.004 register
+        // A2-03: the register is MULTI-VALUED — an id maps to a SET of (package,
+        // test) pairs and EVERY listed test must exist (D4-EX-3 → the five
+        // TestD4EX3_{Number,Boolean,URL,Enum,Text} class members; OD-160 → the
+        // directional tests plus the dedicated test). The former id→one-rider
+        // model let four of five D4-EX-3 class tables be deleted and pass.
+        for _, rider := range riders {
+            if !TableTestExistsIn(rider.Package, rider.Test) {
+                t.Fatalf("closed id %s: rider test %s missing from %s", id, rider.Test, rider.Package)
+            }
         }
     }
     t.Logf("%d exclusion entries validated, %d rider tests present", len(seen), len(RiderRegister()))

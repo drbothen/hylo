@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.15"
+version: "1.16"
 status: draft
 producer: architect
-timestamp: 2026-11-21T09:00:00Z
+timestamp: 2026-11-21T18:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "08c9ad1"
+input-hash: "739b0bc"
 
 ---
 
@@ -76,13 +76,13 @@ follows because every cache write sits inside `Render`'s step script.
 |---|---|---|---|
 | 0 | config resolved by `Main` (precondition; D4-EX-3 before any write) | `config.Load` (in `Main`) | config-error line |
 | 1 | stdin decode (`pyfmt.Decode`, ModeText) | stdin | no — invalid => `{}` (BC-1.01.002/.008) |
-| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010); Windows: a naive timestamp on/before 1970-01-01 or from year ≥ 3001 makes MSVC `localtime_s` raise OSError out of `_iso_ts` (which catches only ValueError) and DEGRADES the whole line (CP-T09; BC-5.04.001 v1.2.3, owner call 8; pass-6 C01 — Windows test vectors derived from the pre-call-8 BCs assert the wrong outcome) |
+| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-O09 no-write save (the int-to-string breach at the save reproduces legacy's no-write, BC-1.01.009 step 2 — pass-12 B06); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010); Windows: a naive timestamp on/before 1970-01-01 or from year ≥ 3001 makes MSVC `localtime_s` raise OSError out of `_iso_ts` (which catches only ValueError) and DEGRADES the whole line (CP-T09; BC-5.04.001 v1.2.3, owner call 8; pass-6 C01 — Windows test vectors derived from the pre-call-8 BCs assert the wrong outcome) |
 | 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no |
 | 4 | get_sample when ROWS >= 2: fetch, then session-cache write | `Metrics`, `Cache`, `Now` | no |
 | 5 | row-2 render (width rule) | pure | CP-N01/N02/N03 |
 | 6 | window start (may write `proc_start`) | `Proc`, `Cache` | no |
 | 7a | lane badge/model/project; git segment (git-cache write) | `Files`, `Cache`, `Cwd` | CP-S01..S04 |
-| 7b | thermometer/composition/cache-hit/limits/lines/timer/⌂/tokens | pure | CP-S05..S13 |
+| 7b | thermometer/composition/cache-hit/limits/lines/timer/⌂/tokens | pure | CP-S05..S13; stdin/metrics-borne OD-156 overflow CP-O01..O05 (E-REN-002) — column widened pass-12 B06 to match BC-1.01.009 step 7b and BC-1.01.001's guarded-site list |
 | 7c | record_cost (write), then cost_thresholds | `internal/cost` via `Cache` | CP-S15; unconvertible `usd`/`api_ms` is not recorded (OD-166) — Go skips the record where legacy persisted the raw int, the ruled write-divergence exclusion `OD-166`; history-borne CP-O10/O11 raise HERE in `cost_thresholds` (SL:255; site correction per pass-4 B14, propagated pass-5 A09), owner BC-1.05.005 EC-011 — the bearer (the cost-history cache persisted the value earlier) is unchanged |
 | 7d | $, $/h, ⛏ (pure) | pure | CP-O10/O11/O12 (E-REN-002) — O10/O11 disposition only: the history-borne raise sits in step 7c, so the SL:616/623 render sites are unreachable for history-borne values (pass-4 B14); CP-O12 (pass-9 call 4) raises HERE at render on the local lane (SL:633, owner BC-1.02.029, co-owner BC-1.05.003) |
 | 8 | trim, surrogate check, single stdout write | stdout | CP-S17 after all writes |
@@ -278,9 +278,19 @@ type MetricsClient interface {
     // the second hop on that is the CURRENT hop's URL, not the first request's
     // (pass-6 C2-02, call 4; supersedes the "redirects to the original URL" rule).
     // An empty fragment is dropped by urlunsplit, so /x# and /x are one loop key.
-    // A NON-empty fragment never reaches the wire either: the next GET's request
-    // line drops it (urllib's Request splits it off, _splittag) — the loop KEY
-    // keeps a non-empty fragment, the REQUEST does not (pass-7 C2-08, call 9).
+    // A NON-empty fragment never reaches the wire beyond its LAST segment: urllib's
+    // Request splits the URL with _splittag = rpartition('#') — ONLY the text after
+    // the LAST '#' is dropped (orchestrator-measured on CPython 3.11.7:
+    // Request('http://192.0.2.1:8428/a#b#c').selector is '/a#b';
+    // quote(..., safe=string.punctuation) keeps '#'), then _splithost shapes the
+    // selector — so a redirect Location '/a#b#c' yields the request line
+    // 'GET /a#b HTTP/1.1' — the loop KEY keeps the full fragment text, the REQUEST
+    // keeps everything before the last '#' (pass-7 C2-08, call 9; last-'#' selector
+    // semantics pinned pass-12 call 13). THE SAME RULE decides the INITIAL selector
+    // for a configured metrics URL that contains '#' (BC-2.02.005 admits exactly
+    // one): selector = URL text up to the last '#', then _splithost — not a
+    // first-# split (urlsplit / Go url.Parse give 'GET /a', a different hop key
+    // and a different wire request).
     // After urlunparse, normalize quote(url, encoding="iso-8859-1",
     // safe=string.punctuation), then urljoin (verified in CPython 3.11.7 source).
     // Hop rules are urllib's visited-set/max_repeats/max_redirections limits — 37 is
@@ -337,9 +347,12 @@ the frame-level contracts BC-1.01.003/.009 and BC-1.04.013, ADV-P1-A20).
 
 ## Fragment anchors (pass-3 B10/C15; stable targets for BC-body fragment links)
 
-BC bodies link fragments like `architecture/ARCH-03-statusline.md#lane`; the twelve
+BC bodies link fragments like `architecture/ARCH-03-statusline.md#lane`; the fourteen
 anchors below are the complete, closed set — new BC fragment links must target one of
-these. Practice note (pass-5 C2-14, call 19): BC bodies additionally link the
+these (twelve plus the pass-12 additions `#input` and `#statusline-frame` for the
+`input.go` and `statusline.go` file families, orchestrator call 17 — BC-1.01.002,
+BC-1.01.008, BC-1.01.003 and BC-1.01.009 re-anchor to them). Practice note (pass-5
+C2-14, call 19): BC bodies additionally link the
 auto-generated heading slugs of this section (`#effect-step-script-…`,
 `#interfaces-design-doc-22-…`); those resolve and are recognized targets. The ONLY
 banned form is the bare line-number pointer (`ARCH-03:NNN`) — never an anchor, always
@@ -352,6 +365,8 @@ drifts; line-number pointers in BC bodies are replaced by fragment anchors on si
 <a id="session"></a>
 <a id="statusline-width"></a>
 <a id="statusline-guard"></a>
+<a id="input"></a>
+<a id="statusline-frame"></a>
 <a id="transcript"></a>
 <a id="telemetry"></a>
 <a id="cost"></a>
@@ -363,6 +378,8 @@ drifts; line-number pointers in BC bodies are replaced by fragment anchors on si
 | `#lane`, `#git`, `#context`, `#limits`, `#session`, `#statusline-width` | row-1 widget file families (`lane.go`, `git.go`, `context.go`, `limits.go`, `session.go`, `width.go`) in the Interfaces paragraph |
 | `#transcript`, `#telemetry`, `#cost`, `#caches`, `#subagent` | `transcript*.go`/`mixcache.go`, `telemetry.go`/`row2.go`/`sample.go`, `cost.go` + `internal/cost`, `cache.go` (ARCH-04), `subagent.go` |
 | `#statusline-guard` | the 29-byte degraded-line guard (`guard.go`, BC-1.01.001) |
+| `#input` | the stdin-decode file family (`input.go` — stdin decode/guard contracts, BC-1.01.002, BC-1.01.008; pass-12 call 17) |
+| `#statusline-frame` | the frame-level contracts (`statusline.go` — row rendering/LF join and side-effect order, BC-1.01.003, BC-1.01.009, BC-1.04.013; pass-12 call 17) |
 
 ## Mapping
 

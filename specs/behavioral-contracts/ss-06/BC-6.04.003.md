@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "1162cba"
+input-hash: "70bf910"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -27,11 +27,12 @@ introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D04+D25+D31: --subagent family in generator domain; OS-scoped exclusions named (Windows naive timestamps, OD-159/160/161); provenance updated to OD-149 three-leg wording"
-  - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - promotion target path restored to the OD-148 corpus root internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
+  - "2026-11-18T22:00:00Z (1.2.3): pass-4 correction (item 10) - promotion target path restored to the OD-148 corpus root internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
   - "2026-11-19T00:25:00Z (1.2.4) ADV-P5 remediation D10+D30 — Windows skip removed per OD-171/OD-177 (naive-timestamp cases run on all three legs; BC-5.04.001 OSError rule cited); HYLO_PARITY_FUZZSECONDS named as this contract's harness budget with the 0/unset-fails-on-schedule semantics (D30)"
-  - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
-  - "1.2.6 2026-11-19T17:00:00Z: ADV-P7 remediation D06 + D16 (orchestrator call 8) - the MSVC OSError rule applies at EVERY MSVC call in the local-to-UTC conversion (probes t, u1, u1-86400, u2), not only range-end extremes; new crash id CP-T09 named (Windows MSVC localtime domain OSError on a naive transcript timestamp; append-only, CP-T08 retired); Tier C out-of-domain list gains the OD-166 huge-int usd/api_ms divergence and the D4-EX-2 transcript-overflow extension; Inv 3 restated: entries are path-keyed, generated cases are covered by the PC-3 domain exclusion plus the rider register"
-  - "1.2.7 2026-11-21T07:00:00Z: ADV-P11 remediation D06 (orchestrator call 13) - the CP-T09 note states the working domain once and consistently with BC-5.04.001/BC-5.04.002: LEFT-CLOSED [1970-01-02T00:00:00 local wall, year 3001) - under the parity pin TZ=UTC the boundary wall gives probe u1 - 86400 = 0, inside MSVC's domain (re-measured 2026-11-18, CPython 3.11.7), so the boundary instant itself renders"
+  - "2026-11-19T02:00:00Z (1.2.5): sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
+  - "2026-11-19T17:00:00Z (1.2.6): ADV-P7 remediation D06 + D16 (orchestrator call 8) - the MSVC OSError rule applies at EVERY MSVC call in the local-to-UTC conversion (probes t, u1, u1-86400, u2), not only range-end extremes; new crash id CP-T09 named (Windows MSVC localtime domain OSError on a naive transcript timestamp; append-only, CP-T08 retired); Tier C out-of-domain list gains the OD-166 huge-int usd/api_ms divergence and the D4-EX-2 transcript-overflow extension; Inv 3 restated: entries are path-keyed, generated cases are covered by the PC-3 domain exclusion plus the rider register"
+  - "2026-11-21T07:00:00Z (1.2.7): ADV-P11 remediation D06 (orchestrator call 13) - the CP-T09 note states the working domain once and consistently with BC-5.04.001/BC-5.04.002: LEFT-CLOSED [1970-01-02T00:00:00 local wall, year 3001) - under the parity pin TZ=UTC the boundary wall gives probe u1 - 86400 = 0, inside MSVC's domain (re-measured 2026-11-18, CPython 3.11.7), so the boundary instant itself renders"
+  - "2026-11-22T00:00:00Z (1.2.8): ADV-P12 remediation D11 — PC-6: `clean` requires 0 divergences AND at least 1 completed case per OS leg; a leg whose budget expires before any sequence completes records `empty`, is not clean, and does not count toward the OD-149 exit gate (EC-005's partial-sequence discard otherwise let a zero-case run report clean); EC-002 amended and a CTV row added; history stamp 1.2.5-1.2.7 normalized to the date-leading form (POLICY 14 leg 3; no behavioral change)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -121,7 +122,9 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
    - A divergence marks the nightly run failed and visible.
    - It never blocks pushes or pull requests: it is not a required status check and
      not part of `ci.yml`.
-6. **Exit criterion input.** The run summary records, per OS leg, `clean` (0 divergences) or
+6. **Exit criterion input.** The run summary records, per OS leg, `clean` (0 divergences
+   AND at least 1 completed case; pass-12 D11), `empty` (the budget expired before any
+   sequence completed — not clean), or
    `divergent: <count>`. Per OD-149 the P1 exit gate is satisfied by ONE clean nightly
    run on all three OSes with the 30-minute per-OS budget; no multi-night streak is
    required (this discharges the earlier "N consecutive nights" open question).
@@ -144,7 +147,7 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | Generated stdin triggers an uncaught Python exception (oracle prints `statusline degraded`) and Go renders a row | Divergence reported with the seed; artifact uploaded (P27 class) |
-| EC-002 | Night with 0 divergences | Summary `clean`; satisfies the OD-149 exit gate (ONE clean nightly run on all three OSes — no N-night streak, ADV-P2-D04) |
+| EC-002 | Night with 0 divergences and at least 1 completed case | Summary `clean`; satisfies the OD-149 exit gate (ONE clean nightly run on all three OSes — no N-night streak, ADV-P2-D04) |
 | EC-003 | Oracle canary fails on the nightly runner | Run fails before generating cases; the night does not count as clean |
 | EC-004 | Generator emits a numeric `session_id` (bug in the domain filter) | The comparator reports an OD-30-class difference without an entry. That is a generator bug: fixed in the generator, not by adding an exclusion |
 | EC-005 | Time budget reached mid-sequence | The partial sequence is discarded, not counted; the case count reflects completed cases |
@@ -155,6 +158,7 @@ change. It is part of the P1 exit gate: ONE clean nightly run on all three OSes,
 |-------|----------------|----------|
 | Nightly run, seed `0x1d2c…` (printed), 4,000 cases, no differences | Summary `clean`, count 4000, seed printed | happy-path |
 | Local re-run with `-tierc.seed=<that seed>` | Identical first N cases (verified by a hash of the generated case bytes) | edge-case |
+| Nightly OS leg whose budget expires before any sequence completes | Summary `empty` for that leg; NOT clean; the night does not count toward the OD-149 exit gate (pass-12 D11) | edge-case |
 | Case where Go prints `▲31/▼4` and the oracle prints `statusline degraded` | Divergence, artifact `tierc-<seed>-<index>/` uploaded; nightly marked failed; no PR blocked | error |
 
 ## Verification Properties

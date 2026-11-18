@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:45:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "e81b9f5"
+input-hash: "8bfff5a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy URL handling at legacy/dgx_statusline.py SL:73, SL:165-187)"
@@ -26,6 +26,7 @@ modified:
   - "2026-11-19T04:40:00Z (1.2.1): ADV-P6 remediation D19 — PC-4 pins the empty-host test: Go's u.Host after net/url.Parse (a port-only form http://:8428 has Host == :8428, is accepted, and builds a query URL with an empty hostname), resolving the Hostname()-vs-Host ambiguity"
   - "2026-11-19T17:45:00Z: ADV-P7 remediation D23 - Inv 1 and the VP row aligned to PC-4: acceptance is a non-empty u.Host; port-only http://:8428 qualifies with Hostname() empty"
   - "2026-11-20T12:00:00Z (1.2.3): ADV-P8 residual sweep — Inv 2 drops the Go `Transport{Proxy: nil}` residue: the metrics client is a minimal HTTP/1.1 client over net.Conn with no proxy machinery at all (BC-1.04.001 PC1/PC2); wording only"
+  - "2026-11-22T00:00:00Z (1.2.4): ADV-P12 remediation D09 - the URL class admits the pass-8 D17 index-neq-0 rule: checks render with the backend's dotted field path (backends[1].metrics_url=... for a HYLO_BACKENDS_1_METRICS_URL value), and Pre-1 admits the variable for any created index, not only index 0"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -46,13 +47,18 @@ rejects such values at load with the config-error line — approved deviation **
 
 ## Preconditions
 
-1. `HYLO_BACKENDS_0_METRICS_URL` is present (BC-2.01.001). Absent → default
+1. A metrics-URL variable for the entry is present — `HYLO_BACKENDS_0_METRICS_URL` for
+   index 0, `HYLO_BACKENDS_<I>_METRICS_URL` for an index ≠ 0 entry (pass-8 D17; BC-2.01.002
+   PC-4/PC-5). Absent → default
    `http://192.0.2.10:8428` (legacy SL:73).
 
 ## Postconditions
 
 Checks run in this order; the first failing one produces the error (rendered per
-BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
+BC-2.02.001 with `<key>` = the backend's dotted field path — `backends[0].metrics_url`
+for index 0; by the pass-8 D17 rule an index ≠ 0 `<FIELD>` value is validated by this
+same class and renders as `backends[1].metrics_url=… (scheme must be http or https)`
+for a backend created by `HYLO_BACKENDS_1_METRICS_URL`, pass-12 D09):
 
 1. The value contains a byte 0x00-0x1F or 0x7F → `(control character)`.
 2. The scheme — the text before the first `://`, compared case-insensitively — is absent or

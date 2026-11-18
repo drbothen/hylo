@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "fc9529b"
+input-hash: "2fda8ad"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -30,8 +30,9 @@ modified:
   - "2026-11-19T00:12:00Z (1.2.4) ADV-P5 remediation D02+D03 — step `now` parsed once to float64 (Python float()) and never round-tripped through time.Time ns; stdin.bin path rewrites splice JSON-escaped paths only inside JSON string values (BC-6.02.003 PC-1 rule)"
   - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
   - "1.2.6 2026-11-20T18:30:00Z: ADV-P9 remediation D12 (orchestrator call 8) — new Pre-3 cache-seeding rule: a replay starts fresh and the harness seeds a fixed synthetic proc_start exactly as corpus cases do under BC-6.02.003 PC-6; a replay never consults the machine's real process tree (real captures have a truthy session_id and no proc_start, so the OD-107 real-input criterion is met by stdin/clock/transcript bytes)"
-  - "1.2.7 2026-11-21T06:00:00Z: ADV-P10 remediation D04 (orchestrator call 4) — Pre-3 seeding generalized to the EVERY-SID rule: the harness seeds a fixed synthetic proc_start for every session_id that any step's stdin of the capture uses (a step may change the sid mid-sequence, e.g. /clear), and the case-load validator rejects a capture whose step introduces a sid it cannot seed; EC-005 aligned; no replay ever consults the real process tree"
-  - "1.2.8 2026-11-21T07:00:00Z: ADV-P11 remediation D16 + D01 (orchestrator calls 2, 16) — Pre-2's capture path rewrite gains workspace.current_dir (legacy's fallback chain ws.get(project_dir) or ws.get(current_dir) or cwd, SL:452), closing the real-.git hermeticity hole; the splice is pinned to the JSON-ESCAPED form so uniformly backslash-escaped Windows paths are the normal contiguous case, and the build-error branch is reserved for a genuinely non-contiguous occurrence; Pre-3 cites the declared-fake-table admission branch (BC-6.02.003 PC-6) for a capture sid whose target stays unseeded"
+  - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D04 (orchestrator call 4) — Pre-3 seeding generalized to the EVERY-SID rule: the harness seeds a fixed synthetic proc_start for every session_id that any step's stdin of the capture uses (a step may change the sid mid-sequence, e.g. /clear), and the case-load validator rejects a capture whose step introduces a sid it cannot seed; EC-005 aligned; no replay ever consults the real process tree"
+  - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation D16 + D01 (orchestrator calls 2, 16) — Pre-2's capture path rewrite gains workspace.current_dir (legacy's fallback chain ws.get(project_dir) or ws.get(current_dir) or cwd, SL:452), closing the real-.git hermeticity hole; the splice is pinned to the JSON-ESCAPED form so uniformly backslash-escaped Windows paths are the normal contiguous case, and the build-error branch is reserved for a genuinely non-contiguous occurrence; Pre-3 cites the declared-fake-table admission branch (BC-6.02.003 PC-6) for a capture sid whose target stays unseeded"
+  - "2026-11-22T00:00:00Z (1.2.9): ADV-P12 remediation D02 (orchestrator call 2) — Pre-3's admission branch respelled: the capture declares the conditional fake PATH (EMPTY bin directory; the oracle's ps subprocess raises FileNotFoundError; the Go child runs at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0, zero probes), so no fake ps serves either side (pass-12 call 2 supersedes pass-11 call 2); history stamps 1.2.7/1.2.8 normalized to the date-leading form (POLICY 14 leg 3)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -115,10 +116,12 @@ are compared after every step (BC-6.03.002).
    synthetic `proc_start` for every `session_id` that any step's stdin of the capture
    uses (a step's stdin may change the sid mid-sequence, e.g. `/clear`), and the
    case-load validator rejects a capture whose step introduces a sid it cannot seed —
-   unless the capture declares the fake process table, the admission branch of
+   unless the capture declares the conditional fake `PATH` (an EMPTY `bin` directory on
+   the oracle's `PATH`, with the Go child at `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0`),
+   the admission branch of
    BC-6.02.003 PC-6's hermeticity rule, in which case the target stays intentionally
-   unseeded and the fake `ps` serves both sides (the canonical `temp-file` case;
-   pass-11 call 2).
+   unseeded and neither side probes (the canonical `temp-file` case;
+   pass-12 call 2).
    The OD-107 real-input criterion is met by the stdin, clock and transcript bytes; the
    process tree is synthetic by construction, identically on both sides.
 

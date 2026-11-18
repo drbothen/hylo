@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -14,7 +14,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "57fce79"
+input-hash: "e847e97"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -32,6 +32,7 @@ modified:
   - "1.2.4 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - "2026-11-21T07:00:00Z (1.2.5): ADV-P11 remediation D09 (orchestrator call 16) — PC-4 gains the positive-coverage clause per ARCH-08 (K == 0 fails): the hygiene test fails unless it scanned K > 0 files in total, so renamed or emptied scan roots cannot pass the gate silently"
   - "2026-11-21T09:00:00Z (1.2.6): pass-11 residual — PC-4 tail and the Related BCs line state the two-ref CI scan: `--log-opts=\"main factory-artifacts\"` with the scanned-commit count compared against `git rev-list --count main factory-artifacts` (ARCH-08 hygiene bullet; BC-6.04.001)"
+  - "2026-11-22T00:00:00Z (1.2.7): ADV-P12 remediation A02 sibling propagation (orchestrator call 1) — PC-4 tail and the Related BCs line follow BC-6.04.001 PC-4 to the FULL-HISTORY scan `--log-opts=\"--all\"` with the count compared against `git rev-list --count --all` (supersedes the two-ref scan of 1.2.6)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -100,10 +101,11 @@ together form the P1 success criterion (OD-107).
    The legacy placeholder `192.0.2.10` passes. Positive coverage (ARCH-08, pass-11
    D09): the test fails unless it scanned `K > 0` files in total — the scan-report
    tally is asserted, so renamed, moved or emptied scan roots fail the gate instead of
-   passing with zero files scanned (`K == 0` fails). CI also runs gitleaks over the two
-   named refs exactly — `--log-opts="main factory-artifacts"` — with the scanned-commit
-   count compared against `git rev-list --count main factory-artifacts`
-   (ARCH-08 hygiene bullet; BC-6.04.001).
+   passing with zero files scanned (`K == 0` fails). CI also runs gitleaks over the
+   full history — every fetched ref plus HEAD — `--log-opts="--all"` (pass-12 call 1,
+   superseding the former two-ref scan) — with the scanned-commit
+   count compared against `git rev-list --count --all`
+   (ARCH-08 hygiene bullet; BC-6.04.001 PC-4).
 5. **Goldens contain no machine paths.** Paths are templated into a per-case temp tree
    at run time (BC-6.02.003), so committed goldens contain only basenames (e.g.
    `home-lab`).
@@ -159,7 +161,7 @@ together form the P1 success criterion (OD-107).
 
 - BC-6.02.002 — composes with: captured sessions replayed as stdin sequences
 - BC-6.02.003 — composes with: case model shared by both corpora
-- BC-6.04.001 — related to: gitleaks in CI over the named refs `main` and `factory-artifacts` (`--log-opts="main factory-artifacts"`)
+- BC-6.04.001 — related to: gitleaks in CI over every fetched ref plus HEAD (`--log-opts="--all"`, pass-12 call 1)
 
 ## Architecture Anchors (Recommended)
 

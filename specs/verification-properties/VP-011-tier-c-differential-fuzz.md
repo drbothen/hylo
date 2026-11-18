@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.10"
+version: "1.11"
 status: draft
 producer: architect
-timestamp: 2026-11-18T21:00:00Z
+timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d5b90bb"
+input-hash: "8077479"
 traces_to: prd.md
 source_bc: BC-6.04.003
 bcs: [BC-6.04.003]
@@ -20,7 +20,8 @@ proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
 modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: SC-07 — Primary-BC line synced to BC-6.04.003 H1 (OD-149 all-OS wording)", "1.3 2026-11-17: ADV-P2 pass-2 fixes — property reclassified from liveness to safety (bounded-budget observation: every observed divergence carries a closed-set exclusion id); BC-6.04.003:65-67 domain filter (seeded proc_start, no numeric sids) enforced in the generator; the generator seed is logged for reproduction (A2-26)", "1.4 2026-11-18: ADV-P4 pass-4 fix — RK-2 disposition recounted from the taxonomy's declared ranges: 47 catalogued crash paths (CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05 = 4+17+7+3+11+5), agreeing with gene-transfusion-assessment.md; foreign-cache shapes are OD-160, not a CP family", "1.5 2026-11-18T23:45:00Z: ADV-P5 fix (A2-09, plan call 17) — resolved the VP-011↔VP-012 contradiction: Tier C generators exclude every ruled-class input BY CONSTRUCTION (each constraint named after its closed-set id and table-tested in that id's rider table); any observed divergence fails; isClosedExclusion runtime classifier removed; per-case machinery stays in VP-012", "1.6 2026-11-19T12:00:00Z: pass-6 fixes (A2-11: stale every-divergence-carries-an-id passage respelled to the 1.5 rule (generator exclusion by construction); compared-case counter with a zero-comparison red (P11))", "1.7 2026-11-19T20:00:00Z: sync-check adv-p7 closure (SC-30) — live Partial-coverage recount mirrors the pass-7 register: 48 paths (4+17+8+3+11+5), CP-T09 minted / CP-T08 retired; the 1.4 history entry keeps its as-of-pass-4 figures", "1.8 2026-11-19T22:00:00Z: pass-8 fix (ADV-P8-A2-18) - the statement names the OD-190 Windows-oracle stdio normalization normatively (oracle-side stdout CRLF->LF before stepwise byte comparison on Windows, named openly per VP-009's Tier A wording), closing the sibling gap where Tier C ran the oracle on Windows without naming the normalization VP-009 names openly", "1.9 2026-11-20T12:00:00Z: pass-9 fix (orchestrator call 4) — live Partial-coverage recount mirrors the pass-9 register: 49 paths (4+17+8+3+12+5), CP-O12 minted (cost-pick equivalence overflow: exact-int tot at/above the int→float bound entering tot * dgx_mtok, SL:626/633, BC-1.02.029); the 1.4 and 1.7 history entries keep their as-of-pass figures",
-  "1.10 2026-11-18T21:00:00Z: pass-11 fix (A2-02/OD-190 call 1) — the normalization applied literally, matching VP-009's respelled Tier A wording: the COMPARATOR converts the ORACLE's stdout CRLF to LF openly, before the byte comparison; hylo's bytes are never converted; the clock shim does no newline reconfigure (the former 'named harness step, never a hidden shim' phrasing was ambiguous against BC-6.03.002 EC-006's 'never normalized' referee language)"]
+  "1.10 2026-11-18T21:00:00Z: pass-11 fix (A2-02/OD-190 call 1) — the normalization applied literally, matching VP-009's respelled Tier A wording: the COMPARATOR converts the ORACLE's stdout CRLF to LF openly, before the byte comparison; hylo's bytes are never converted; the clock shim does no newline reconfigure (the former 'named harness step, never a hidden shim' phrasing was ambiguous against BC-6.03.002 EC-006's 'never normalized' referee language)",
+  "1.11 2026-11-21T12:00:00Z: pass-12 fix (A2-04) — the comparison scope widened to the FULL BC-6.03.002 comparator, per BC-6.04.003 PC-3/Inv 1: stepwise stdout bytes, exit codes AND every named cache file byte-for-byte by file name (temp names filtered, BC-6.03.003) — the former 'stdout bytes and exit codes' scope read looser than Tier A and contradicted cache-only differentials routed to Tier C (VP-024's BC-1.05.009 Dumps leg, whose only observable is a cache file); there is no separate, looser comparison"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,7 +38,10 @@ removal_reason: null
 
 A nightly, non-gating differential fuzz drives random valid inputs (stdin
 templates, settings, metrics modes, clock steps) to both the oracle and the Go port and
-compares stepwise stdout bytes and exit codes; the generators exclude every ruled-class
+compares each step with the FULL BC-6.03.002 comparator — stepwise stdout bytes, exit
+codes AND every named cache file byte-for-byte by file name, temp names filtered
+(BC-6.03.003) — the same comparison Tier A uses; there is no separate, looser
+comparison (BC-6.04.003 PC-3/Inv 1); the generators exclude every ruled-class
 input BY CONSTRUCTION — each exclusion domain's generator constraint is named after its
 closed-set id and table-tested in that id's rider table — so any observed divergence is
 a failure and the harness cannot excuse one (no runtime classifier, plan call 17,
@@ -62,7 +66,10 @@ comparator step applied to the oracle side only.
   49-path catalogue may have missed — error-taxonomy.md as of pass 9: CP-X01..X04,
   CP-S01..S17, CP-T01..T09 (CP-T08 retired; T family 8), CP-N01..N03, CP-O01..O12,
   CP-A01..A05 = 4+17+8+3+12+5; the foreign-cache
-  shapes ride exclusion id OD-160 and are not a CP family in the register).
+  shapes ride exclusion id OD-160 and are not a CP family in the register). Because
+  the comparator observes named caches too (A2-04), cache-only differentials route
+  here consistently — e.g. VP-024's BC-1.05.009 cost-history `Dumps` leg, whose only
+  observable is a cache file.
 - **Invariant verified:** DI-012 extension — any fuzz-found diff must resolve to an
   explained deviation or a defect; it can never silently broaden the exclusion list
   (glob-free machinery, VP-012).
@@ -105,7 +112,8 @@ func TestParityTierC_DiffFuzz(t *testing.T) {
             // classifier: isClosedExclusion is gone.
             continue
         }
-        if diverged(RunOracle(cs), RunGoPort(cs)) {
+        if diverged(RunOracle(cs), RunGoPort(cs)) { // full BC-6.03.002 comparator:
+            // stdout bytes, exit codes, named caches byte-for-byte (A2-04)
             t.Fatalf("unexplained divergence in %s (seed %d)", cs.ID, seed)
         }
         compared++

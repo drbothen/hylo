@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.14"
+version: "1.2.15"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "1162cba"
+input-hash: "70bf910"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -39,6 +39,7 @@ modified:
   - "2026-11-20T18:30:00Z (1.2.12): ADV-P9 remediation D01+D12 (orchestrator calls 7+8) — PC-8 tail: exclusions.json carries NO OD-76 entry at all (rider-test closure); PC-6/PC-8 binding to the capture-replay seeding rule of BC-6.02.002 stated"
   - "2026-11-21T06:00:00Z (1.2.13): ADV-P10 remediation D01+D02+D04 (orchestrator calls 1, 2, 4) — PC-5 gains the run-time injection rule (DGX_SL_VM_URL / HYLO_BACKENDS_0_METRICS_URL always injected, case value wins on the Go side); PC-4 states the one subagent-family rule (id of the form subagent-<nnn>[-<variant>], argv [\"--subagent\"] for exactly that family; the erroneous '-sub shorthand' notation removed here and from the 1.2.9 entry); PC-6/PC-7 gain the every-sid seeding rule (fixed synthetic proc_start for EVERY session id any step's stdin uses; validator rejects a case whose step introduces an unseedable sid; no replay ever consults the real process tree)"
   - "2026-11-21T07:00:00Z (1.2.14): ADV-P11 remediation D02 (orchestrator call 3) + D01 (call 2) — PC-5: a case metrics URL wins on BOTH sides (oracle DGX_SL_VM_URL and hylo HYLO_BACKENDS_0_METRICS_URL get the same value), and the validator admits it only as a placeholder resolving to the fake server, optionally with a path suffix — one value per key, no non-fake URL (the 1.5 s timeout ban holds); PC-6: the canonical temp-file case cache-003 is named as the fake-table branch's first P1 consumer, its session-cache target intentionally unseeded"
+  - "2026-11-22T00:00:00Z (1.2.15): ADV-P12 remediation D02 propagation (orchestrator call 2, superseding pass-11 call 2) - PC-6 hermeticity rule: the admission branch is the conditional fake PATH (EMPTY bin directory), not a fake process table; the cache-003 paragraph states the two-sided no-probe design (oracle FileNotFoundError at SL:293-294; Go child at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -167,8 +168,10 @@ directory.
    - A seeded `proc_start` in `statusline-<sid>.json` makes both sides skip the process
      probe (SL:273-275). Hermeticity rule (ADV-P2-D12 disposition; every-sid rule
      ADV-P10-D04, orchestrator call 4): the harness REJECTS a case that has an unseeded
-     `proc_start` together with a truthy `session_id` unless the case declares the fake
-     process table (BC-3.02.002) — without a seed, legacy's `ps` subprocess falls back
+     `proc_start` together with a truthy `session_id` unless the case declares the
+     conditional fake `PATH` (an EMPTY `bin` directory; BC-6.01.002 PC-1; there is NO
+     fake process table, pass-12 call 2) — without a seed or the empty-dir `PATH`,
+     legacy's `ps` subprocess falls back
      to `os.defpath` (SL:280) and runs the runner's real `ps`, and Go's native probe
      reads the runner's real process tree, so the case would be machine-dependent. The
      seeding covers EVERY session id a case or capture uses: the harness seeds a fixed
@@ -180,7 +183,11 @@ directory.
      `../x`): its session-cache target stays INTENTIONALLY unseeded — seeding
      `statusline-../x.json` would create the directory `statusline-..`, legacy's
      `os.replace` would then succeed and no temp file would leak, defeating the case
-     (pass-11 call 2) — and the declared fake table satisfies the rule without a seed.
+     (pass-12 call 2) — and the declared empty-dir fake `PATH` satisfies the rule
+     without a seed: the oracle's `ps` subprocess raises `FileNotFoundError` on the
+     empty directory (caught at SL:293-294, no probe), and the Go child runs at
+     `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0` (zero probes), so neither side reads the
+     real process tree.
 7. **Steps.** When `steps` is absent, the case is a single refresh at `now`. Otherwise
    each step may set `dt` (seconds added to the previous instant) or an absolute
    `now`, `append` (generator lines appended to the transcript), `stdin` (a replacement

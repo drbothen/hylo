@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.16"
+version: "1.18"
 status: draft
 producer: product-owner
-timestamp: 2026-11-21T03:00:00Z
+timestamp: 2026-11-21T14:10:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "69dbef0"
+input-hash: "6807344"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
@@ -22,6 +22,8 @@ modified:
   - "1.14 2026-11-20T18:00:00Z: pass-9 remediation — CP-O12 minted (cost-pick equivalence: exact-int sum of two sub-bound tokens overflows at tot * dgx_mtok, SL:626/633; Surface 1 render-time degrade like CP-O04; owner BC-1.02.029, co-owner BC-1.05.003), register 48 → 49 paths (O family 11 → 12), E-REN-002 family list and carrier set completed (call 4/B03); Text-class reason `invalid UTF-8` mirrored byte for byte from BC-2.02.001 (D08); E-NET-001 dead rung states it follows `statusline.theme.red` and `statusline.glyphs.degraded` (A14); no behavioral change"
   - "1.15 2026-11-21T00:30:00Z: pass-10 remediation — path-grammar reason `not an absolute path` (minted pass-9 A11, BC-2.01.005 PC-3) added to the reason table and the E-CFG-001 reconciliation sentence (A07); numeric-range vocabulary sentence fixed to the six strings above (A14); stale minting-source-of-record note removed from `invalid UTF-8` (A15); CP-O08 owner set corrected to BC-1.03.010 (EC-009) and BC-1.03.018 (PC3) (C06); CP-A01..A03 site cells cite the raise sites SL:891/894/906, matching the CP-A04/A05 rows and BC-1.07.008 (C09); CP-C10 within-step order claim qualified — the current session's own src-cc entry faults at the SL:232 throttle check before save_cache (B05); CP-S disposition anchor names the BC-1.03.x outliers CP-S14 (BC-1.03.013 PC3) and CP-S16 (BC-1.03.015 PC5) (C10); no behavioral change"
   - "1.16 2026-11-21T03:00:00Z: pass-11 remediation — new CP-S table defines the six range-only stdin type-confusion ids with (id, site, owner BC/EC): CP-S02 (SL:446, BC-1.02.001 EC-007), CP-S03 (SL:452, BC-1.02.003 EC-006), CP-S04 (SL:405/460, BC-1.02.003 EC-006), CP-S05 (SL:419, BC-1.02.006 EC-008), CP-S08 (SL:477, BC-1.02.008 EC-006), CP-S10 (SL:535, BC-1.02.014 EC-010) (B01/call 14; the owning ECs gain the id names in the same burst); E-REN-002 carrier list gains BC-1.02.003 and BC-1.02.008 (B07); no behavioral change"
+  - "1.17 2026-11-21T14:10:00Z: pass-12 remediation — E-REN-002 carrier set restated as DERIVED (every owner BC of a degrade-disposition register row, walked against each owner BC's EC text; 36 carriers; hand-maintenance discontinued) (A01/call 11); foreign-cache family allocates the formerly reserved CP-C06 (mix-cache non-numeric cached tin, SL:586, BC-1.02.018 EC-009) and CP-C07 (non-numeric cached count bucket at sum(counts[:3]), SL:1181, BC-1.02.007) with OD-160 tags (B01/call 12); no behavioral change"
+  - "1.18 2026-11-23T14:00:00Z: pass-12 residual sweep — the invalid-UTF-8 minting row mirrors BC-2.02.001 1.3.4: the reason is reachable from POSIX byte values only, on Windows platform.EnvVars substitutes U+FFFD (call 8); CP-A04/A05 triggers bounded to 309..4300-digit decimal literals (call 15); no behavioral change"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -49,7 +51,7 @@ modified:
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.01.008, BC-1.02.001, BC-1.02.003 (EC-006; CP-S03/S04; pass-11 B07), BC-1.02.006, BC-1.02.008 (EC-006; CP-S08; pass-11 B07), BC-1.02.011, BC-1.02.012, BC-1.02.014, BC-1.02.017, BC-1.02.020, BC-1.02.025, BC-1.02.026/.027, BC-1.02.029 (CP-O12 owner; pass-9 call 4), BC-1.02.030, BC-1.03.015, BC-1.04.001, BC-1.04.004, BC-1.04.005 (CP-N03 carriers; pass-7 A14), BC-1.05.003 (CP-O12 co-owner), BC-1.05.007, BC-1.07.007/.008, BC-5.04.001 (CP-T09) |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade). Carrier set DEFINED as every owner BC of a degrade-disposition row in this register (X/S/T/N/O/A rows whose disposition is the typed 29-byte degrade; the hand-maintained list is discontinued — pass-12 A01/call 11); the derived set, walked against each owner BC's EC text (36 carriers): BC-1.01.001 (CP-S01; BC-1.01.002 EC-008 delegates: "degrades via BC-1.01.001"), BC-1.01.008 (CP-S17), BC-1.02.001 (CP-S02), BC-1.02.003 (CP-S03/S04), BC-1.02.006 (CP-S05/S06/S07, CP-O01), BC-1.02.008 (CP-S08), BC-1.02.010 (CP-S09), BC-1.02.011 (CP-O02), BC-1.02.012 (CP-O02), BC-1.02.013 (CP-S09), BC-1.02.014 (CP-S10/S11, CP-O03), BC-1.02.015 (CP-S12), BC-1.02.016 (CP-S13), BC-1.02.017 (CP-O05), BC-1.02.020 (CP-S06/S07, CP-O01), BC-1.02.025 (CP-O04), BC-1.02.026 (CP-S11), BC-1.02.027 (CP-S12/S13), BC-1.02.029 (CP-O12 owner), BC-1.02.030 (CP-S09 sticky sequence), BC-1.03.013 (CP-S14), BC-1.03.015 (CP-S16), BC-1.04.001/.004/.005 (CP-N03), BC-1.04.014 (CP-N02), BC-1.04.015 (CP-N01), BC-1.05.002 (CP-O11 co-owner), BC-1.05.003 (CP-O12 co-owner), BC-1.05.004 (CP-S15), BC-1.05.005 (CP-O10/O11 history bearer), BC-1.05.007 (CP-O10/O11 stdin bearer), BC-1.07.006 (CP-A03), BC-1.07.007 (CP-A04/A05), BC-1.07.008 (CP-A01/A02/A03), BC-5.04.001 (CP-T09) |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
@@ -94,7 +96,7 @@ checked before E-CFG-001.
 | `unknown value (<v1>\|<v2>\|...)` | enum | BC-2.02.004 |
 | `scheme must be http or https` / `not a URL` / `missing host` | URL | BC-2.02.005 |
 | `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) / Text (OD-178: control bytes in non-theme free-text keys and List entries — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; a control byte in a `statusline.lane.reroute_all_prefixes` entry instead yields the OD-179 List-entry reason of BC-2.01.004 PC-9; pass-6 A14) | BC-2.02.005, BC-2.01.003, BC-2.01.005 |
-| `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; on Windows a WTF-8 value with a lone surrogate; minted in BC-2.02.001 pass-9 D08 and mirrored here byte for byte) | BC-2.02.001, BC-2.01.005 |
+| `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; reachable from POSIX byte values only — on Windows `platform.EnvVars` decodes the UTF-16 environment with Go's standard U+FFFD substitution, so a lone surrogate cannot occur on the env path (BC-2.01.001 PC-6, pass-12 call 8); minted in BC-2.02.001 pass-9 D08 and mirrored here byte for byte) | BC-2.02.001, BC-2.01.005 |
 | `expected non-empty control-free text in every entry` | Text (List-entry violations, e.g. `statusline.lane.reroute_all_prefixes` empty or control-byte entry; OD-179 range + OD-178 class; pass-6 A14) | BC-2.01.004 |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `expected JSON <shape>` (`<shape>` = e.g. `array of 2 numbers`, `object {cc,other} of integers`) | Text (composite shape; OD-178) | BC-2.01.005 |
@@ -239,8 +241,8 @@ and a huge exact int raises uncaught OverflowError at the two conversions below 
 | CP-A01 | subagent renderer task loop (SL:891) | BC-1.07.008 | `tasks` truthy and not iterable (number, `true`) — TypeError at the `for task in tasks` step |
 | CP-A02 | subagent glyph lookup (SL:894) | BC-1.07.008 | a task's `status` unhashable (list/object) — TypeError at `_SUB_GLYPH.get(status, ...)` |
 | CP-A03 | subagent prefix consult (SL:906) | BC-1.07.008, BC-1.07.006 | a task's `model` truthy and not a str while the configured prefix list is consulted — AttributeError at `startswith` |
-| CP-A04 | subagent token segment `_fmt_tokens` (SL:878) | BC-1.07.007 | a huge exact int `tokenCount` passes the `isinstance`/`> 0` gate and raises OverflowError at `float(n)`; the helper catches only TypeError/ValueError, so the render degrades |
-| CP-A05 | subagent elapsed clock (SL:919) | BC-1.07.007 | a huge exact int `startTime` raises OverflowError at `now_ms - start` |
+| CP-A04 | subagent token segment `_fmt_tokens` (SL:878) | BC-1.07.007 | a huge exact int `tokenCount` — a 309..4300-digit decimal literal (call 15: below 309 digits `float(n)` cannot overflow; at 4301+ digits the JSON decode itself raises ValueError, so the value never reaches the segment) — passes the `isinstance`/`> 0` gate and raises OverflowError at `float(n)`; the helper catches only TypeError/ValueError, so the render degrades |
+| CP-A05 | subagent elapsed clock (SL:919) | BC-1.07.007 | a huge exact int `startTime` (same 309..4300-digit literal window as CP-A04) raises OverflowError at `now_ms - start` |
 
 Notes: OD-163 rules that a save removes only its own temp file (owns the CP-O09 partial
 temp); OD-160 (`foreign-cache shapes`, ruling Q-b) is the exclusion id for foreign-form
@@ -271,8 +273,10 @@ crash register**, which counts the X/S/T/N/O/A families only (CP-X01..X04, CP-S0
 CP-T01..T07 + T09, CP-N01..N03, CP-O01..O12, CP-A01..A05 = 4 + 17 + 8 + 3 + 12 + 5 = 49;
 the T family counts 8 live ids — **CP-T08 is a RETIRED id** (withdrawn; the id is never
 reused, per append-only numbering — pass-7 call 8/B03); the
-C register is a separate, ninth register. **CP-C06 and CP-C07 are reserved**: minted by
-the OD-160 closed-set label "CP-C01..C10" but not cited by any live BC or VP.
+C register is a separate, ninth register. **CP-C06 and CP-C07 were reserved** ids within
+the OD-160 closed-set label "CP-C01..C10" and are ALLOCATED by pass-12 B01/call 12 to the
+two uncatalogued foreign-cache crash triggers below; no reserved C ids remain, and the
+append-only range stays 01..10.
 
 | Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
 |-----------|------------------|--------------|---------|
@@ -281,8 +285,8 @@ the OD-160 closed-set label "CP-C01..C10" but not cited by any live BC or VP.
 | CP-C03 | metrics sample, rows >= 2 (SL:1217-1218) | BC-1.01.009 | wrong-shape metrics fetch result restored from the session cache |
 | CP-C04 | metrics sample, rows >= 2 (SL:1217-1218) | BC-1.01.009 | wrong-shape `up` flag (`up: false` bearer) restored from the session cache |
 | CP-C05 | sparkline history shaping (BC-1.04.003 EC-009) | BC-1.04.003 | a history Point is `[[0]]`-shaped (list of length 1) — IndexError |
-| CP-C06 | — | reserved | not cited by any live BC/VP; reserved within the foreign-cache family (OD-160) |
-| CP-C07 | — | reserved | not cited by any live BC/VP; reserved within the foreign-cache family (OD-160) |
+| CP-C06 | mix-cache `tin` consult (SL:586) | BC-1.02.018 (EC-009) | hand-edited/foreign mix cache holds a non-numeric `tin`: the SL:1039-1040 early return hands back the cached value and the render format raises (OD-160 vector — a non-numeric `tin` cannot reach SL:586 from a transcript, because `tin += _i + _w + _r` raises TypeError back at step 2 when a usage field is a string or list, SL:1108; pass-12 B01/call 12); Go table test, not byte-parity |
+| CP-C07 | composition tail `sum(counts[:3])` (SL:1181) | BC-1.02.007 | hand-edited/foreign mix cache holds a non-numeric per-model count bucket — the sum raises TypeError (uncatalogued sibling of the CP-C06 shape; OD-160 vector, Go table test, not byte-parity; pass-12 B01/call 12) |
 | CP-C08 | badge/model/project, git segment (SL:441-462, 411) | BC-1.02.005, BC-1.01.009 | git cache foreign forms: cached `ts` a string (`"x"`) — TypeError; top-level JSON array (`[1,2]`) — AttributeError |
 | CP-C09 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | corrupt cost history: top level not an object, or `sessions`/an entry not an object |
 | CP-C10 | `record_cost` / cost-threshold step (SL:606-607) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | cost-history entry `ts` non-numeric; within-step order exception: when the faulting entry is only consulted in the `cost_thresholds` scan (SL:246), the record_cost write lands first, then the fault (BC-1.01.009). Counter-case (pass-10 B05): the CURRENT session's own history entry with `src` `cc` and a non-numeric `ts` faults in record_cost's own throttle check (`now - e.get("ts", 0)`, SL:232) before save_cache (SL:237) — nothing is written that step |

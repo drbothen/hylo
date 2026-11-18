@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.3"
+version: "1.4.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "3ccf4f1"
+input-hash: "8bfff5a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -33,6 +33,7 @@ modified:
   - "2026-11-20T18:30:00Z (1.4.1): ADV-P9 remediation A11+D18+D08+D07 (orchestrator calls 13+15+14+14) — PC-3: paths.cache_dir MUST resolve absolute (relative value = config error `not an absolute path`, path-grammar family, OD-144 rationale) and a set-but-empty HOME/USERPROFILE is home-unknown (BC-2.03.002 PC-4 consistent); PC-6 mints the Text-class `invalid UTF-8` pre-check (six reason strings); PC-7 states the Text-class-checks-first order for default-only Text/List keys with exact bytes"
   - "2026-11-21T06:00:00Z (1.4.2): ADV-P10 remediation D08 — three legacy citations corrected against legacy/dgx_statusline.py: fade formula SL:683 → SL:682 (SL:683 is the RGB scaling), _fmt_lines whole-thousands `184k` SL:860 → SL:859 (SL:860 is `return str(n)`), token millions `88.0M` SL:871 → SL:870 (the .1f}M spelling; SL:871 is the k branch)"
   - "2026-11-21T07:00:00Z (1.4.3): ADV-P11 remediation D12 (orchestrator call 16) — PC-6's control-byte rule states the ANY-TEXT verdict: a control byte in an any-text key value (e.g. statusline.telemetry.query) yields the same Text-class reason 'control character' (its only bounds are the control-byte bound and valid UTF-8; the empty string stays in range); sibling A09/D08 respell — PC-5 band defaults to strict-JSON env spellings [80,100] and [70,90]"
+  - "2026-11-22T00:00:00Z (1.4.4): ADV-P12 remediation D06 (orchestrator call 9) + D07 (call 10) + D12 — PC-2 List: strip-then-validate order STATED (Python str.strip() FIRST, then control-byte/emptiness checks on the stripped item; legacy-identical; applies to limits.windows and reroute-all entries too); PC-3: the ~-expansion home source is platform.HomeDir(env) — a relative HOME (macOS/Linux) or relative USERPROFILE (Windows) is treated as UNSET (BC-3.01.001 PC-2 kind discipline), yielding 'home directory unknown' (with a relative home, ~/c reports home-unknown, never 'not an absolute path'); PC-3 absoluteness gains the per-OS filepath.IsAbs rule (Windows: \\foo and C:foo are relative), propagated from BC-3.01.001 PC-3 / BC-2.03.002 PC-3"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,14 +72,19 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    `"0"` as on; values legacy accepted that are outside this grammar are D4-EX-3 boolean-class
    cases (BC-2.02.001, test `TestD4EX3_Boolean`).
 2. **List:** the value is split on `,`; each item is stripped with Python `str.strip()`
-   semantics (`pyfmt.Strip`, OD-103); empty items are dropped; order and duplicates are kept.
+   semantics (`pyfmt.Strip`, OD-103) FIRST, then validated on the STRIPPED item (control
+   bytes, emptiness — check order stated pass-12 call 9: strip-then-validate,
+   legacy-identical; a value ending in a tab is accepted because the tab is stripped,
+   while check-first would raise `control character`). Empty items are dropped; order
+   and duplicates are kept.
    `""` → empty list (valid). This reproduces legacy SL:444-445 for
-   `backends[0].model_prefixes`. Items are otherwise validated only by the PC-6
+   `backends[0].model_prefixes`. Stripped items are otherwise validated only by the PC-6
    control-free check (pass-8 D04: a control byte in an item is the Text-class
    `control character` error, OD-178/pass-6 A14); where the registry declares a
    key-specific entry range — `statusline.lane.reroute_all_prefixes` (BC-2.01.004 PC-9,
    reason `expected non-empty control-free text in every entry`) — that range supersedes
-   for the key's entries. No other item validation in P1.
+   for the key's entries. No other item validation in P1. The same strip-then-validate
+   order applies to `statusline.limits.windows` and to reroute-all entries.
 3. **Path:** a value equal to `~`, or starting with `~/` (or `~\` on Windows), has that `~`
    replaced by the user home directory (`HOME` on macOS/Linux, `USERPROFILE` on Windows);
    `~user` forms are left literal; other values are used as given. Absoluteness
@@ -88,7 +94,16 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
    E-CFG-001 per the Reason-Vocabulary note in BC-2.02.006; a relative value would
    resolve against Claude Code's per-project cwd and split caches and cost history, the
    same reason relative `XDG_*` values are rejected, OD-144; the registry row is
-   interface-definitions `paths.cache_dir`). A set-but-empty `HOME`/`USERPROFILE` during
+   interface-definitions `paths.cache_dir`). Absoluteness is `filepath.IsAbs` semantics
+   computed in `internal/platform` per OS (Windows: drive + root or UNC; `\foo` and
+   `C:foo` are relative) — the same per-OS rule BC-3.01.001 PC-3 and BC-2.03.002 PC-3
+   state (propagated pass-12 D12). The home source for `~` expansion is
+   `platform.HomeDir(env)` (the BC-3.01.001 PC-2 seam): a RELATIVE `HOME` (macOS/Linux)
+   or relative `USERPROFILE` (Windows) is treated as UNSET — the same kind discipline as
+   the base directories (BC-3.01.001 PC-2, pass-12 call 10) — yielding
+   `<key>=<value> (home directory unknown)`; with a relative home,
+   `HYLO_PATHS_CACHE_DIR=~/c` reports `home directory unknown`, never
+   `not an absolute path`. A set-but-empty `HOME`/`USERPROFILE` during
    `~` expansion is treated as unavailable — it yields
    `<key>=<value> (home directory unknown)`, consistent with BC-2.03.002 PC-4
    (ADV-P9-D18). `""` yields
@@ -179,11 +194,14 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      (`expected non-empty control-free text in every entry`) supersedes for the key's
      entries.
    - **Invalid UTF-8 (pass-9 D08 / orchestrator call 14):** a Text, glyph, label or
-     separator value whose bytes are not valid UTF-8 (on Windows: a WTF-8 value with a
-     lone surrogate) yields the Text-class reason `invalid UTF-8` (BC-2.02.001
+     separator value whose bytes are not valid UTF-8 yields the Text-class reason
+     `invalid UTF-8` (BC-2.02.001
      vocabulary, mirrored byte for byte in error-taxonomy), checked BEFORE the
      non-empty/control-byte bounds above so no width or code-point count is taken on
-     invalid input.
+     invalid input. On Windows a lone surrogate cannot occur on the env path:
+     `platform.EnvVars` reads the UTF-16 environment through Go's standard decoding,
+     substituting U+FFFD for an unpaired surrogate (BC-2.01.001 PC-6, pass-12 call 8),
+     so this reason is reachable from POSIX byte values only.
    All six reason strings of this PC ride the Text class (OD-178) on the E-CFG-001
    surface.
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.9"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "8e07087"
+input-hash: "01bf7d2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows (SL:888-936)"
@@ -29,6 +29,8 @@ modified:
   - "1.1.7 2026-11-19T20:00:00Z: pass-7 remediation (ADV-P7-C02/C14, OD-190) — PC3 escape list completed with the CPython short escapes \\b and \\f (orchestrator-verified json.dumps emissions; ADV-P7-C02); vector-row prose pseudo-escape replaced with the em dash (ADV-P7-C14); PC5 states OD-190 LF-on-every-OS with the Windows oracle normalization declared beside PYTHONIOENCODING=utf-8"
   - "1.1.8 2026-11-20T12:30:00Z: pass-8 residual sweep (OD-192) — ASSUMP-107-1 capture deadline respelled: before Phase 2 writes the S1.07 stories, not before Phase 3"
   - "1.1.9 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C06) — the string-token vector's raw token restored to the \u0041 JSON escape so the input token and its output differ (the decoded input and output were identical, a vacuous pair); PC4 example respelled to match; oracle-checked"
+  - "1.2.0 2026-11-23T12:00:00Z: pass-12 remediation (ADV-P12-C05/C07/C08/C09) — PC3 states the astral surrogate-pair escape (U+1F9EA example, 12 escape characters; the BMP-only example list retained); PC7 re-anchors the joiner's control-byte range owner to BC-2.01.005 PC-6 (OD-178), formerly BC-2.01.003 PC-3; PC4 oracle provenance respelled without an install path (ADV-P12-C08); the string-token CTV row respells the escape spelling as 6-byte with the literal escape shown"
+  - "1.2.1 pass-12 residual sweep (orchestrator pass-12 residual call 1): PC3's astral example holds the 12-character ASCII escape spelling of the U+1F9EA surrogate pair instead of the literal emoji, so the wire-format example is itself ASCII-readable; no behavioral change; 2026-11-23T14:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,8 +63,11 @@ before a single print, so a render fault never leaves partial rows on stdout.
 2. Non-dict tasks and dict tasks without `id` yield no line (not even blank).
 3. Each line is `json.dumps({"id": task["id"], "content": bits_joined})` with defaults: property
    order id-then-content, `, `/`: ` separators, `ensure_ascii=True` — every non-ASCII character goes
-   on the wire as a `\uXXXX` escape (ESC→`\u001b`, U+00BB→`\u00bb`, U+00B7→`\u00b7`,
-   U+25E8→`\u25e8`, U+2714→`\u2714`, U+2718→`\u2718`, U+00E9→`\u00e9`, lone surrogate→`\ud800`);
+   on the wire escaped — a BMP code point as one `\uXXXX` escape (ESC→`\u001b`, U+00BB→`\u00bb`, U+00B7→`\u00b7`,
+   U+25E8→`\u25e8`, U+2714→`\u2714`, U+2718→`\u2718`, U+00E9→`\u00e9`, lone surrogate→`\ud800`); a non-BMP
+   (astral) code point is a SURROGATE PAIR of two `\uXXXX` escapes — e.g. U+1F9EA escapes as the
+   12 characters `\ud83e\uddea` (BC-5.02.001 states the pair; BC-1.07.005 EC-006's emoji ride this;
+   oracle-measured 2026-11-18 on CPython 3.11.7, the oracle interpreter);
    ASCII **printable** characters pass through unescaped; ASCII **control** characters are escaped
    (ESC — including the ESC that opens an SGR sequence — as `\u001b`, plus short escapes `\b`, `\f`,
    `\n`, `\t`, `\r` and `\uXXXX` for the rest, e.g. BEL→`\u0007`; ADV-P7-C02: CPython's `ensure_ascii`
@@ -74,8 +79,8 @@ before a single print, so a render fault never leaves partial rows on stdout.
    decodes stdin and re-dumps — not a byte-for-byte token copy): any JSON value (string, number, bool,
    null, array, object; the array case is verified in the vectors below) is dumped from its decoded
    form, so raw-token spellings do not survive — `1.50`→`1.5`, `1E2`→`100.0`, `"\u0041"`→`"A"`,
-   duplicate object keys collapse (last-wins kept — oracle-verified 2026-11-18,
-   `/opt/homebrew/anaconda3/bin/python3 -I` 3.11.7); it is not coerced to string before dumping. The
+   duplicate object keys collapse (last-wins kept — oracle-verified 2026-11-18 on
+   CPython 3.11.7 (the oracle interpreter)); it is not coerced to string before dumping. The
    dump runs under the per-site encoder recursion budget measured for the SL:924 site — measured
    budget, see BC-5.02.006.
 5. Lines are LF-terminated on every OS (OD-190: UTF-8 + LF everywhere; the Windows parity oracle's
@@ -83,7 +88,8 @@ before a single print, so a render fault never leaves partial rows on stdout.
    the shim); the last line carries the terminating LF (print semantics).
 6. Zero eligible tasks: zero bytes, exit 0.
 7. Between content bits the joiner is the configured `statusline.subagent.joiner` (D15; Text key
-   registered in the BC-2.01.004 registry, free text with no control bytes, BC-2.01.003 PC-3), whose
+   registered in the BC-2.01.004 registry, free text with no control bytes; control-byte errors are raised by the Text-class grammar,
+   BC-2.01.005 PC-6 (OD-178) — ADV-P12-C05 re-anchored the range owner from BC-2.01.003 PC-3), whose
    default is, at source level, the three characters space + U+00B7 + space
    (UTF-8 `20 c2 b7 20`; U+00B7, NOT U+2027); on the json.dumps wire the default renders as the 8
    ASCII bytes `20 5c 75 30 30 62 37 20` (that is, `" \u00b7 "`). No SGR codes wrap it.
@@ -116,7 +122,7 @@ before a single print, so a render fault never leaves partial rows on stdout.
 | `{"tasks":[]}` | zero bytes, exit 0 | happy-path |
 | `{"tasks":[{"id":"a9","name":"a\ud800b","status":"completed"}]}` | one line: `{"id": "a9", "content": "\u001b[32m\u2714 a\ud800b\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}`, exit 0 | edge-case |
 | `{"tasks":[{"id":["x"],"name":"n","status":"completed"}]}` | one line: `{"id": ["x"], "content": "\u001b[32m\u2714 n\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}` (id array echoed from its decoded value), exit 0 | edge-case |
-| `{"tasks":[{"id": 1.50, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": 1E2, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": "\u0041", "name":"n","status":"completed"}]}` (ADV-P9-C06: the raw stdin token is the 7-byte JSON escape spelling, so the input token and its re-serialized output differ; oracle pass-9 2026-11-18) | one line each: `{"id": 1.5, ...}`, `{"id": 100.0, ...}`, `{"id": "A", ...}` — decoded value re-serialized, not the raw token (oracle-verified 2026-11-18; pass-9 re-run: stdin "\u0041" echoes as "A") | edge-case |
+| `{"tasks":[{"id": 1.50, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": 1E2, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": "\u0041", "name":"n","status":"completed"}]}` (ADV-P9-C06: the raw stdin token is the 6-byte JSON escape spelling `A`, so the input token and its re-serialized output differ; oracle pass-9 2026-11-18) | one line each: `{"id": 1.5, ...}`, `{"id": 100.0, ...}`, `{"id": "A", ...}` — decoded value re-serialized, not the raw token (oracle-verified 2026-11-18; pass-9 re-run: stdin "\u0041" echoes as "A") | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`, legacy module imported and exercised; goldens
 re-derived escaped after the adv-p3 C01 escape-decoding incident): rows 1, 2, 4, 5 byte-reproduced;

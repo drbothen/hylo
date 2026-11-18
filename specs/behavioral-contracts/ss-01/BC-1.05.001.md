@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T15:00:00Z
+timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "00b8bf3"
+input-hash: "a863ef5"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-616)"
@@ -25,7 +25,9 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_usd/cold_yellow_usd ranges, OD-162)"]
+modified:
+  - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05 (min_usd/cold_yellow_usd ranges, OD-162)"
+  - "1.3.1 2026-11-18: pass-12 remediation ADV-P12-C2-07 (stdin-borne CP-O10 overflow leg restated from BC-1.05.007's carriage: PC5 + EC-009 + DI-008 lifted into the L2 row + VP-001 row; oracle-verified CPython 3.11.7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -76,6 +78,13 @@ itself is BC-1.05.007; the percentile computation is BC-1.05.005.
    is the last row-1 part (SL:636) and is joined to the previous part by the row
    separator.
 4. Both comparisons are `>=` (inclusive); the grey test is strict `<`.
+5. Catalogued stdin-borne overflow (OD-156, CP-O10, carried by BC-1.05.007): an exact
+   stdin int `usd` with value >= 2**1024 - 2**970 (the only sign Pre 1 admits; the
+   conversion itself is sign-agnostic) passes Pre 1's numeric guard and the PC1 colour
+   tests (int-to-float comparisons are exact and cannot overflow; recorded per the OD-166
+   guard, BC-1.05.004 PC4 — file unchanged), then raises OverflowError at the `.2f`
+   format (SL:616, "int too large to convert to float"; oracle-verified CPython 3.11.7,
+   2026-11-18) → degraded line (BC-1.01.001) (ADV-P12-C2-07).
 
 ## Invariants
 
@@ -97,6 +106,7 @@ itself is BC-1.05.007; the percentile computation is BC-1.05.005.
 | EC-006 | lane None (no prefixes, or empty `model.id`) | no record, no thresholds; cold-start colours (`26.0` → `\e[33m$26.00\e[0m`) |
 | EC-007 | usd exactly p75 / p95 | yellow / red (inclusive) |
 | EC-008 | usd < 1 while a pair exists | grey regardless of the pair |
+| EC-009 | `total_cost_usd` = 2**1024 - 2**970 (309-digit exact int, passes Pre 1 and the colour tests) | OverflowError at the `.2f` format (SL:616) → degraded line (CP-O10, OD-156; carried by BC-1.05.007; the OD-166 guard writes no history entry, BC-1.05.004 PC4) (ADV-P12-C2-07) |
 
 ## Canonical Test Vectors
 
@@ -118,13 +128,14 @@ Thresholds pinned from the BC-1.05.008 seed: `th_usd = (24.0, 30.0)`.
 |--------|----------|-------------|
 | VP-021 | For every finite usd > 0 and pair p75 ≤ p95, the colour equals the three-way rule above | Go property test (testing/quick vs the oracle table) |
 | VP-021 | The `$` part bytes equal legacy on the BC-1.05.008 goldens | manual (golden table test) |
+| VP-001 | The promised output set holds on the stdin-borne CP-O10 overflow degrade leg (EC-009): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P12-C2-07) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
 
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011 (cost accounting), CAP-009 |
-| L2 Domain Invariants | DI-007 (status line inputs are stdin, transcript, metrics, its own caches) |
+| L2 Domain Invariants | DI-007 (status line inputs are stdin, transcript, metrics, its own caches), DI-008 (the EC-009 CP-O10 degrade rides the never-blank ladder: 29-byte line, exit 0; ADV-P12-C2-07) |
 | Architecture Module | `internal/statusline` cost.go (design §2.3; BC-COMPONENT-MAP: internal/statusline/cost.go ($ percentile colors) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-616); constants COST_MIN_USD, COST_FALLBACK_YELLOW (SL:219, 221) |
@@ -153,6 +164,7 @@ S-N.MM — cost segment (filled by story-writer)
 ## VP Anchors (Recommended)
 
 - VP-021 — `$` colour rule
+- VP-001 — never-blank/exit-0 ladder; the EC-009 CP-O10 overflow leg rides it (ADV-P12-C2-07)
 
 
 #### Source Evidence

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-20T12:00:00Z
+timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.02.001.md, behavioral-contracts/ss-02/BC-2.02.002.md, behavioral-contracts/ss-02/BC-2.02.003.md, behavioral-contracts/ss-02/BC-2.02.004.md, behavioral-contracts/ss-02/BC-2.02.005.md, behavioral-contracts/ss-02/BC-2.02.006.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "de189fd"
+input-hash: "4b7262c"
 traces_to: prd.md
 source_bc: BC-2.02.001
 bcs: [BC-2.01.002, BC-2.01.003, BC-2.01.005, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-2.03.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go", "1.3 2026-11-18: ADV-P4 pass-4 fix (D22) — test names canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}: the Number table covers both number-range and number-grammar rows; no Theme member (theme settings are rejected by the corpus validator, BC-6.02.003 EC-007)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-03, A2-25) — class register is seven with the OD-178 Text class (composite-shape, pill-label, runtime glyph-rule, empty-text; own table TestD4EX3_Text, exact reason strings in the taxonomy vocabulary); BC-2.01.003's two homeless legs carried here: TestTheme_DefaultGolden (SL:127-134 golden table) and TestTheme_SGREscapeFree (quick property over accepted values) — legs, not a D4-EX-3 class table; FirstErrorRegistryOrder expects a PINED literal instead of the function under test, so a consistently wrong order can no longer pass", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-08, A2-03: seven-class count propagated (Proof Method table, feasibility); TestTheme_SGREscapeFree captures the quick.Check error, generates accepted-grammar values, builds expected bytes by append)", "1.6 2026-11-19T18:00:00Z: pass-7 fix (A2-09) — theme-REJECTION leg added (BC-2.01.003 EC-002/EC-003 and the canonical cyan vector): TestTheme_RejectionLines pins the exact one-line config-error bytes (reason 'not an SGR parameter list', value escaped) for malformed SGR values and ESC-bearing values, closing the route to no VP test; the theme legs remain BC-2.01.003 legs, not a D4-EX-3 class table", "1.7 2026-11-20T08:00:00Z: pass-8 fixes (A2-08, A2-07, A2-16) — the config-error stdout norm qualified for the subagent entry: in --subagent mode a config error writes ZERO stdout bytes, diagnostics on stderr, exit still 0 (OD-168, BC-2.02.001 PC-8); the BC-2.02.001 for-all rows gained matching property legs (env-map property: stdout is the config-error line or not, one LF ending \e[0m\n; iff-leg vs config validate non-zero exit) in statement, Method, Proof Method and a FuzzConfigErrorEnvMaps sketch; Named Tests adds TestTheme_RejectionLines — three theme legs", "1.8 2026-11-20T12:00:00Z: pass-9 fixes (A2-07, A2-20) — the exactly-one-of-the-seven antecedent narrowed to values whose reason carries a dedicated class contract: the path-grammar and backends-cardinality reasons ride the same E-CFG-001 surface while belonging to none of the seven classes ('not additional classes', BC-2.02.006 register discipline); the former 'ride the class register' wording contradicted the statement's own antecedent; FuzzConfigErrorEnvMaps derives the env map from a byte blob — Go fuzzing has no map parameter type (A2-20)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go", "1.3 2026-11-18: ADV-P4 pass-4 fix (D22) — test names canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}: the Number table covers both number-range and number-grammar rows; no Theme member (theme settings are rejected by the corpus validator, BC-6.02.003 EC-007)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-03, A2-25) — class register is seven with the OD-178 Text class (composite-shape, pill-label, runtime glyph-rule, empty-text; own table TestD4EX3_Text, exact reason strings in the taxonomy vocabulary); BC-2.01.003's two homeless legs carried here: TestTheme_DefaultGolden (SL:127-134 golden table) and TestTheme_SGREscapeFree (quick property over accepted values) — legs, not a D4-EX-3 class table; FirstErrorRegistryOrder expects a PINED literal instead of the function under test, so a consistently wrong order can no longer pass", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-08, A2-03: seven-class count propagated (Proof Method table, feasibility); TestTheme_SGREscapeFree captures the quick.Check error, generates accepted-grammar values, builds expected bytes by append)", "1.6 2026-11-19T18:00:00Z: pass-7 fix (A2-09) — theme-REJECTION leg added (BC-2.01.003 EC-002/EC-003 and the canonical cyan vector): TestTheme_RejectionLines pins the exact one-line config-error bytes (reason 'not an SGR parameter list', value escaped) for malformed SGR values and ESC-bearing values, closing the route to no VP test; the theme legs remain BC-2.01.003 legs, not a D4-EX-3 class table", "1.7 2026-11-20T08:00:00Z: pass-8 fixes (A2-08, A2-07, A2-16) — the config-error stdout norm qualified for the subagent entry: in --subagent mode a config error writes ZERO stdout bytes, diagnostics on stderr, exit still 0 (OD-168, BC-2.02.001 PC-8); the BC-2.02.001 for-all rows gained matching property legs (env-map property: stdout is the config-error line or not, one LF ending \e[0m\n; iff-leg vs config validate non-zero exit) in statement, Method, Proof Method and a FuzzConfigErrorEnvMaps sketch; Named Tests adds TestTheme_RejectionLines — three theme legs", "1.8 2026-11-20T12:00:00Z: pass-9 fixes (A2-07, A2-20) — the exactly-one-of-the-seven antecedent narrowed to values whose reason carries a dedicated class contract: the path-grammar and backends-cardinality reasons ride the same E-CFG-001 surface while belonging to none of the seven classes ('not additional classes', BC-2.02.006 register discipline); the former 'ride the class register' wording contradicted the statement's own antecedent; FuzzConfigErrorEnvMaps derives the env map from a byte blob — Go fuzzing has no map parameter type (A2-20)", "1.9 2026-11-21T12:00:00Z: pass-12 fix (A2-17) — the first for-all env-map norm was TAUTOLOGICAL ('stdout is either the config-error line or not' can never fail): the operative rule stated — IF the config-error line is printed, it is exactly one LF-terminated line ending \\e[0m\\n — said in the statement, the sketch comment and consistent with the BC-2.02.001 for-all row"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,8 +47,10 @@ no cache files — all of this in the MAIN entry. In `--subagent` mode a config 
 writes ZERO stdout bytes — the grey line is not NDJSON and never reaches the agent
 panel (BC-1.07.004 wire grammar) — while stderr still receives the per-error detail
 lines and the exit status stays 0 (OD-168, BC-2.02.001 PC-8). Two for-all norms are
-owned here (ADV-P8-A2-07, BC-2.02.001 rows): for every env map, main-entry stdout is
-either the config-error line — exactly one LF, ending `\e[0m\n` — or not; and the
+owned here (ADV-P8-A2-07, BC-2.02.001 rows): for every env map, IF the main entry
+prints the config-error line, it is exactly one LF-terminated line ending
+`\e[0m\n` (A2-17: the former "either the config-error line or not" phrasing can
+never fail — the operative one-line rule is the conditional); and the
 statusline prints the config-error line IFF `config validate` exits non-zero. The Text class (OD-178) covers the composite-shape
 (`expected JSON <shape>`), pill-label, runtime glyph-rule (value not exactly
 1 code point / 1 column) and empty-text errors, with exact reason strings in the
@@ -168,8 +170,9 @@ func TestTheme_SGREscapeFree(t *testing.T) { // BC-2.01.003 leg: any ACCEPTED SG
 }
 
 func FuzzConfigErrorEnvMaps(f *testing.F) { // BC-2.02.001 for-all rows (ADV-P8-A2-07):
-    // for every env map, main-entry stdout is either the config-error line (exactly
-    // one LF, ending in `\e[0m\n`) or not; and the line prints IFF `config validate`
+    // for every env map, IF main-entry stdout prints the config-error line, it is
+    // exactly one LF-terminated line ending \e[0m\n (A2-17: the operative rule —
+    // one LF, ending in `\e[0m\n`); and the line prints IFF `config validate`
     // exits non-zero on the same variables. Subagent carve-out (ADV-P8-A2-08, OD-168):
     // a config error in --subagent mode writes ZERO stdout bytes — diagnostic on stderr.
     f.Fuzz(func(t *testing.T, envBlob []byte) { // A2-20: Go fuzzing supports only

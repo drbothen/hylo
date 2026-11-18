@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -32,6 +32,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.2.5): ADV-P10 remediation D02 (orchestrator call 2) — PC-5 states the one subagent-family rule: an id of the form subagent-<nnn>[-<variant>] is the only shape that receives argv [\"--subagent\"]; the erroneous 'older -sub shorthand' notation removed (there is no -sub suffix rule)"
   - "2026-11-21T07:00:00Z (1.2.6): ADV-P11 remediation A07 (orchestrator call 8) + B08 (call 15) — new PC-7 defines the oracle-dependent test set by ONE named mechanism, the build tag oracle (//go:build oracle) on every test needing the Python oracle (Tier A corpus, shim canary, four-cache swap, any other); plain test step, coverage and release exclude exactly that set; PC-4's self-check probe adds the normpath NUL-retention probe (posixpath.normpath('a\\0b') and ntpath.normpath('a\\0b') both keep the NUL, returning 'a\\x00b', orchestrator-measured CPython 3.11.7), grounding BC-1.02.022"
   - "2026-11-21T09:00:00Z (1.2.7): pass-11 residual (orchestrator call, binding) — PC-7 respelled from the minted `oracle` build tag to the single ORACLE_TESTS -run/-skip pattern of the ARCH-07 OD-145 table (plain test/coverage/release pass `-skip $ORACLE_TESTS`; the dedicated Tier A job runs `-run $ORACLE_TESTS`; a new oracle-dependent test extends the pattern); no member change — the same three named tests"
+  - "2026-11-22T00:00:00Z (1.2.8): ADV-P12 remediation A08 BC half (orchestrator call 6) — PC-7's ORACLE_TESTS membership completed: TestParityTierC_DiffFuzz (drives both sides) and TestTiming (reports the CPython oracle median, BC-6.04.002 PC-2) join the three pass-11 members, pattern constant now five alternates; the Tier A job, the timing job and the nightly fuzz job each install Python and -run their own member(s); plain test/coverage/release keep -skip over the whole pattern"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -127,16 +128,19 @@ because each one stops `PYTHONPATH`/`site` from loading the clock shim (BC-6.01.
    CI marker `CI=true` is absent, Tier A skips with
    `parity: HYLO_PARITY_PYTHON unset; Tier A (live differential) skipped`. Tier B still
    runs without Python. If the setting is unset and `CI=true` is present, Tier A fails.
-7. **Oracle-dependent test set: one named mechanism (ADV-P11-A07, orchestrator call 8; pass-11 residual respell to the ARCH-07 OD-145 binding).**
+7. **Oracle-dependent test set: one named mechanism (ADV-P11-A07, orchestrator call 8; pass-11 residual respell to the ARCH-07 OD-145 binding; membership completed pass-12 call 6).**
    The oracle-dependent test set — the Tier A corpus suite
    (`TestParityTierA_Corpus`), the clock-shim canary (`TestParityCanary_ShimLoaded`,
-   BC-6.01.003), the four-cache swap (`TestParityCacheSwap_FourCaches`, BC-6.02.004) and
-   any other oracle-dependent test — is selected by ONE named mechanism, the
+   BC-6.01.003), the four-cache swap (`TestParityCacheSwap_FourCaches`, BC-6.02.004),
+   the Tier C differential fuzz (`TestParityTierC_DiffFuzz`, BC-6.04.003) and the
+   timing target (`TestTiming`, BC-6.04.002, which reports the CPython oracle
+   median) — is selected by ONE named mechanism, the
    `ORACLE_TESTS` pattern constant
-   (`^(TestParityTierA_Corpus|TestParityCanary_ShimLoaded|TestParityCacheSwap_FourCaches)$`,
+   (`^(TestParityTierA_Corpus|TestParityCanary_ShimLoaded|TestParityCacheSwap_FourCaches|TestParityTierC_DiffFuzz|TestTiming)$`,
    ARCH-07 OD-145 table): the plain test step, the coverage job and the release job pass
    `-skip $ORACLE_TESTS` and therefore exclude exactly that set, while the dedicated
-   Tier A job compiles and runs the set with `-run $ORACLE_TESTS`. The interpreter rules
+   Tier A job, the timing job and the nightly fuzz job each install Python and
+   `-run` their own member(s) (pass-12 call 6; BC-6.04.001 PC-3). The interpreter rules
    above are unchanged inside an oracle-bearing run (unset locally skips per PC-6; unset
    with `CI=true` fails per PC-6). There is no second selector mechanism and no build
    tag: a new oracle-dependent test extends the `ORACLE_TESTS` pattern, never a second

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-21T18:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.002.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "5c40b99"
+input-hash: "69629d3"
 traces_to: prd.md
 source_bc: BC-6.04.002
 bcs: [BC-6.04.002]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — sampling aligned to NFR-001: 20 runs per case, p95 = 19th sorted, binds per case, no pooling (A2-27)", "1.3 2026-11-18T09:20:00Z: ADV-P3 fixes (A2-09) — skeleton drops Go-named arguments (positional call with comments); gate computation excludes the >512 KB oversize fixture, which is timed and reported but exempt from the gate", "1.4 2026-11-18T15:02:00Z: ADV-P4 fix (A2-19) — the >512 KB fixture exemption made conditional per product-brief: the exception applies only when the fixture misses the p95 target; if it meets the budget it is gated like every case", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (OD-187, A2-21: the >512 KB exemption is conditional (fires only on a miss, reported); the gate fails on zero measured cases)", "1.6 2026-11-19T18:00:00Z: pass-7 fix (A2-18/OD-191) — the exempt >512 KB fixture gets a CEILING: exempt from the 25 ms target but the gate fails if its p95 exceeds 100 ms (labeled judgment call: 4x the target, well under the refresh interval), so the leg can no longer never fail; fixture identification by validated case flag timing_exempt: large-transcript (exactly one case, transcript > 512 KB) named beside the exemption"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — sampling aligned to NFR-001: 20 runs per case, p95 = 19th sorted, binds per case, no pooling (A2-27)", "1.3 2026-11-18T09:20:00Z: ADV-P3 fixes (A2-09) — skeleton drops Go-named arguments (positional call with comments); gate computation excludes the >512 KB oversize fixture, which is timed and reported but exempt from the gate", "1.4 2026-11-18T15:02:00Z: ADV-P4 fix (A2-19) — the >512 KB fixture exemption made conditional per product-brief: the exception applies only when the fixture misses the p95 target; if it meets the budget it is gated like every case", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (OD-187, A2-21: the >512 KB exemption is conditional (fires only on a miss, reported); the gate fails on zero measured cases)", "1.6 2026-11-19T18:00:00Z: pass-7 fix (A2-18/OD-191) — the exempt >512 KB fixture gets a CEILING: exempt from the 25 ms target but the gate fails if its p95 exceeds 100 ms (labeled judgment call: 4x the target, well under the refresh interval), so the leg can no longer never fail; fixture identification by validated case flag timing_exempt: large-transcript (exactly one case, transcript > 512 KB) named beside the exemption", "1.7 2026-11-21T18:30:00Z: pass-12 fixes (A2-11, A2-10 sibling) — Source Contract quotes the current BC-6.04.002 title with the '(large-transcript exemption: 100 ms ceiling)' suffix (BC-INDEX S6.04 row); the oversize-fixture shorthand '>512 KB-line' respelled to the pinned byte threshold (transcript exceeding 524,288 bytes = 512 KiB, however many lines) in statement, flag condition and sketch"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,12 +41,15 @@ Sampling discipline is per **case** (NFR-001): each case gets 1 warm-up + 20 tim
 runs; the case's 20 samples are sorted and the nearest-rank p95 is the 19th sample;
 the gate **binds per case** — every case's p95 must meet the budget, with no pooling
 across the corpus (pooling would hide a slow case behind fast ones). One STATED,
-CONDITIONAL exception (the brief's speed judgment call, OD-187): the >512 KB-line
-fixture is exempt from the binding gate ONLY WHEN that fixture misses the 25 ms
+CONDITIONAL exception (the brief's speed judgment call, OD-187): the large-transcript
+fixture — the one corpus case whose transcript exceeds 524,288 bytes (512 KiB),
+however many lines it holds — is exempt from the binding gate ONLY WHEN that fixture
+misses the 25 ms
 target — if it meets the budget it is gated like every case — and its exemption is
 REPORTED in the gate output when it fires. The exempt fixture is NOT unbounded
 (OD-191): it is identified by a validated case flag (`timing_exempt:
-large-transcript` — exactly one case, and its transcript must exceed 512 KB), and
+large-transcript` — exactly one case, and its transcript must exceed 524,288
+bytes), and
 the gate FAILS if its p95 exceeds 100 ms (labeled judgment call: 4x the target,
 well under the refresh interval). The exemption is
 authored as an exception, not implied by a conditional that could never fire
@@ -58,7 +61,7 @@ passes nothing.
 ## Source Contract
 
 - **Primary BC:** BC-6.04.002 — Per-OS timing report; p95 <= 25 ms binds on the
-  owner's Mac target.
+  owner's Mac target (large-transcript exemption: 100 ms ceiling).
 - **Partial coverage:** NFR-001 (measurement method + baseline provenance 2026-11-15).
 - **Invariant verified:** none (performance budget, not a logical property); the
   off-hot-path placement of the metrics fetch is enforced by the BC-6.02.003 case
@@ -94,7 +97,7 @@ func TestTimingReport_PerOS(t *testing.T) {
     if gatingEnabled() {
         // OD-187/OD-191: the oversize fixture is identified by a validated case
         // flag (timing_exempt: large-transcript — exactly one case, transcript
-        // > 512 KB). Its exemption is CONDITIONAL — it fires only when the
+        // > 524,288 bytes). Its exemption is CONDITIONAL — it fires only when the
         // fixture MISSES the 25 ms target, and its use is reported — and it has
         // a CEILING: 100 ms (judgment call: 4x the target, well under the
         // refresh interval), so this leg can fail.

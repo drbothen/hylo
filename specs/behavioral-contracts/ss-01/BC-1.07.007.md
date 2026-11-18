@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.0"
+version: "1.1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "0191254"
+input-hash: "55afa1e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_tokens + token/elapsed branches (SL:909-921, 876-885)"
@@ -30,6 +30,8 @@ modified:
   - "1.0.8 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C01) — Infinity-row expected content re-pinned to the pure-ASCII wire form with the glyphs escaped (oracle byte-exact) + CTV byte-notation note added"
   - "1.0.9 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
   - "1.1.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C01/C02) — CTV Expected Output column uniform pure-ASCII wire notation, ESC spelled as the ensure_ascii escape; the Infinity row's raw U+2714/U+00B7 replaced by their escapes (oracle re-run 2026-11-18); frontmatter modified list repaired to block style"
+  - "1.1.1 2026-11-23T12:00:00Z: pass-12 remediation (ADV-P12-C02/C06/C08) — Description/PC6/PC7 bound the CP-A04/A05 trigger envelope to 309..4300-digit decimal literals (4,301+ digits raise ValueError at the stdin json.load, absorbed to {} per BC-1.07.003, zero bytes; oracle-measured on CPython 3.11.7, the oracle interpreter); the k_from/m_from rationale restated as the helper's own unit-boundary convention, the approved-mockup docstring cite returned to _fmt_tok_c (SL:864); oracle provenance respelled without an install path"
+  - "1.1.2 pass-12 residual sweep (orchestrator pass-12 residual call 4): the VP-039 closure row and the decisions-list entry state VP-039's operative claim (elapsed-clock floats match CPython-derived goldens bit-exactly), retiring the retired ulp-tolerance reading; no behavioral change; 2026-11-23T14:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -44,8 +46,11 @@ removal_reason: null
 
 Two conditional bits close the row. Tokens: a positive numeric `tokenCount` renders
 `<CYAN><_fmt_tokens(tok)> tok<RESET>` with `_fmt_tokens` = `.0f` below 1000, `.1f`k to 999,999, `.2f`M
-above (compact tokens approved mockup). The "?" fallback is reached only on TypeError/ValueError
-coercions; a huge int (|n| >= 2**1024 - 2**970) raises OverflowError at `float(n)`, which the helper
+above (display unit-boundary convention: the thresholds are where the K and M units switch — legacy
+records no rationale for this helper at SL:876-885; the approved-mockup docstring belongs to
+`_fmt_tok_c`, SL:864, a different helper). The "?" fallback is reached only on TypeError/ValueError
+coercions; a huge int (|n| >= 2**1024 - 2**970 — the trigger envelope is bounded to 309..4300-digit
+decimal literals, ADV-P12-C02) raises OverflowError at `float(n)`, which the helper
 does not catch, degrading via the guard (CP-A04, BC-1.07.008). Clock: only a `running` row with
 numeric `startTime > 0` gets `MM:SS` elapsed (`max(now_ms - start, 0)/1000`, minute-second split) — a
 settled row's clock must not keep counting (review #21.2), a huge-int `startTime` overflows the same
@@ -78,9 +83,14 @@ per product, operation order preserved; FMA detector test on darwin/arm64 only, 
 5. Non-numeric `tokenCount`/`startTime` (string, null, list, dict) → the bit is silently omitted.
 6. Huge-int `tokenCount` (value > 0, |n| >= 2**1024 - 2**970): passes the gate, raises OverflowError
    at `_fmt_tokens`'s `float(n)` (SL:878); the helper catches only TypeError/ValueError, so the fault
-   propagates to the guard — the degraded line (CP-A04, BC-1.07.008).
+   propagates to the guard — the degraded line (CP-A04, BC-1.07.008). The trigger envelope is bounded
+   to 309..4300-digit decimal literals (ADV-P12-C02, oracle-measured 2026-11-18 on CPython 3.11.7, the
+   oracle interpreter): a literal of 308 digits or fewer sits below the gate, and a literal of 4,301+
+   digits exceeds CPython's `sys.int_max_str_digits` = 4300, so `json.load` at SL:930 raises ValueError
+   at the stdin decode — absorbed to `{}` per BC-1.07.003, stdout zero bytes, NOT the degraded line.
 7. Huge-int `startTime` (running, value > 0, |n| >= 2**1024 - 2**970): raises OverflowError at
-   `now_ms - start` (SL:919) — the degraded line (CP-A05, BC-1.07.008).
+   `now_ms - start` (SL:919) — the degraded line (CP-A05, BC-1.07.008); same 309..4300-digit literal
+   envelope as PC6 (longer literals fail the stdin decode instead, BC-1.07.003).
 
 ## Invariants
 
@@ -140,7 +150,7 @@ Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`): every cell above repr
 999.5 → `1000` and True → `1` quirks and the `02:05` split at 125 s; the overflow threshold confirmed
 empirically — `float(2**1024 - 2**970)` raises OverflowError, `float(2**1024 - 2**970 - 1)` converts
 (CP-A04/A05, adv-p3). The Infinity rows (EC-010/EC-011) were re-pinned 2026-11-18 through
-`render_subagent_rows` under `/opt/homebrew/anaconda3/bin/python3 -I` 3.11.7 with an isolated HOME
+`render_subagent_rows` under CPython 3.11.7 (the oracle interpreter) with an isolated HOME
 (ADV-P7-C04) — `infM tok` and the `00:00` clamp reproduced byte-for-byte.
 
 ## Verification Properties
@@ -148,7 +158,7 @@ empirically — `float(2**1024 - 2**970)` raises OverflowError, `float(2**1024 -
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-009 | `_fmt_tokens` equals CPython format over a dense grid incl. threshold boundaries (rides the Tier A T-family corpus rows) | manual corpus comparison (Tier A) |
-| VP-039 | PR-15: fused vs unfused elapsed-clock floats agree at ulp level on arm64; rendered MM:SS byte-identical across regimes | FMA detector test, darwin/arm64 only (CONV-ABS-77) |
+| VP-039 | PR-15: fused vs unfused elapsed-clock floats match CPython-derived goldens bit-exactly (VP-039 1.4); rendered MM:SS byte-identical across regimes | FMA detector test, darwin/arm64 only (CONV-ABS-77) |
 | VP-001 | The promised output set holds under the fault ladder incl. the subagent regime: render output, the 29-byte degraded line, subagent JSON rows or zero bytes — never blank, exit 0 (CP-A04/A05 legs ride this ladder) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
 
 ## Traceability
@@ -182,7 +192,7 @@ TBD — filled by story-writer
 ## VP Anchors (Recommended)
 
 - VP-009 (T-family `_fmt_tokens` dense grid)
-- VP-039 (PR-15 fused/unfused clock ulp agreement)
+- VP-039 (PR-15 fused/unfused elapsed clock, bit-exact against CPython-derived goldens)
 - VP-001 (never-blank/exit-0 ladder; the CP-A04/A05 legs of this contract ride it)
 
 ---

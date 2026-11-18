@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -25,8 +25,9 @@ modified:
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.3.2 pass-7 remediation (ADV-P7-B06/B12): reroute-all control and markers respelled to the OD-179 config key `statusline.lane.reroute_all_prefixes` (PC3, EC-007, EC-010, Config-keys row); history labels version-prefixed; no behavioral change; 2026-11-19T07:00:00Z"
   - "1.3.3 pass-8 remediation (ADV-P8-B01, orchestrator call 5): reroute-all trigger restated in the membership form of BC-1.02.009 PC1 — any configured model prefix, trailing `*` stripped, member of `statusline.lane.reroute_all_prefixes` (PC3, EC-007, EC-010); EC-010 states the default-`model_prefixes=claude-sonnet` degrade (oracle 2026-11-17); Config-keys row lists `backends[0].model_prefixes` beside the marker key; 2026-11-19T08:00:00Z"
-  - "1.3.5 pass-11 residual: the PC3 membership-set default re-spelled to the env spelling `claude,claude-` (legacy display form kept as the citation), matching BC-1.02.009 and the interface-definitions.md Default cell; no behavioral change; 2026-11-21T09:00:00Z"
   - "1.3.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
+  - "1.3.5 pass-11 residual: the PC3 membership-set default re-spelled to the env spelling `claude,claude-` (legacy display form kept as the citation), matching BC-1.02.009 and the interface-definitions.md Default cell; no behavioral change; 2026-11-21T09:00:00Z"
+  - "1.3.6 pass-12 remediation (ADV-P12-B08): the 1.3.4/1.3.5 history entries reordered ascending (1.3.5 preceded 1.3.4 was inverted); entry text unchanged; no behavioral change; 2026-11-23T00:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null

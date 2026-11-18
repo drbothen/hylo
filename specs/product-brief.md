@@ -1,10 +1,10 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T10:05:25Z
+timestamp: 2026-11-19T10:05:25Z
 phase: 1a
 inputs:
   - CLAUDE.md
@@ -12,7 +12,7 @@ inputs:
   - .factory/specs/research/domain-hybrid-routing-claude-code-2026-11-14.md
   - .factory/planning/market-intel.md
   - .factory/specs/owner-decisions-log-2026-11-14.md
-input-hash: "12f4419"
+input-hash: "64f7f9d"
 traces_to: docs/PLAN.md
 ---
 
@@ -86,9 +86,10 @@ Notes:
   the definition of done for P1–P3.
 - Speed: a labeled JUDGMENT CALL (target ≈3× faster; a static binary removes interpreter
   start). CI reports per-OS timing, but the target binds only on the owner's Mac. The one
-  exception is stated here and in the spec: the >512 KB-line fixture is exempt from the
-  25 ms p95 target, but its p95 must stay under 100 ms (OD-191; 4× the target, well under
-  the refresh interval).
+  exception is stated here and in the spec: the large-transcript fixture — the one corpus
+  case whose transcript exceeds 524,288 bytes (512 KiB), however many lines it holds — is
+  exempt from the 25 ms p95 target, but its p95 must stay under 100 ms (OD-191; 4× the
+  target, well under the refresh interval).
 - Cutover: "0 rollbacks" is a labeled judgment call; PLAN P5 keeps the Python prototype
   runnable for 2 weeks as the rollback path.
 - What P1 success means: byte parity on the owner's real recorded inputs plus the synthetic

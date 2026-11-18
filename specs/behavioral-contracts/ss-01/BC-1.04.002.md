@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.8"
+version: "1.3.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "73d2913"
+input-hash: "a86ee16"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -28,6 +28,7 @@ modified:
   - "1.3.6 2026-11-18: pass-7 remediation ADV-P7-C2-06 (Invariant 1 crash sites corrected and completed: the IndexError is _norm_pt SL:655 for any short list point via the SL:335 comprehension, hist[-1] is always a dict post-normalization, and the TypeError sites SL:324/325/336 are named) + ADV-P7-C2-03 (VP-012 closure row for OD-160/EC-008)"
   - "1.3.7 2026-11-18: pass-8 remediation ADV-P8-C2-04 (Invariant 1 crash-site list completed for good — five TypeError sites: the SL:356 fetch-failure ts subtraction and the SL:335 non-iterable-hist comprehension added to the three previously named; the SL:324 non-object consult fault noted)"
   - "1.3.8 2026-11-18: pass-10 remediation ADV-P10-C2-02 (Invariant 1 names the OverflowError class on the three subtraction sites SL:325/336/356 — an exact JSON integer of magnitude >= 2**1024 - 2**970 passes c.get/p.get and the exact SL:324 comparison but raises at float - <huge int>; oracle-verified CPython 3.11.7; same OD-160 class)"
+  - "1.3.9 2026-11-18: pass-12 remediation ADV-P12-C2-08 (the 9999 cached-path sentinel and the 0 fallbacks carry the P20 named-constant / why-not-config note, PC1) + ADV-P12-C2-05 (PC3's saved slice generalized to hist[-cap:] under statusline.sparkline.history_cap, default 32, matching BC-1.04.003 PC5)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,10 +64,18 @@ it is younger than KEEP_DEAD.
 1. **Cached path** — if `c.get("fetch_ts", 0) > now - ttl` (strict): no fetch, no write;
    return `(c.get("sample"), now - c.get("ts", 9999), bool(c.get("up")), c.get("hist", []))`.
    `hist` is returned raw (legacy `[t, v]` list points are not normalized here).
+   The literal defaults in this state machine — the cached-path `9999` (this PC and
+   Invariant 1's SL:325 site) and the `0` fallbacks (`fetch_ts` here, `ts` in PC4's
+   SL:356 age, `t` in the SL:336 age filter) — are parity sentinels emulating legacy's
+   literals: named constants in hylo with a "why not config" comment (P20). They shape
+   displayed behaviour rather than tune it — a foreign sample with no `ts` renders the
+   age `now − 9999` (EC-005) — so they are not config keys (ADV-P12-C2-08).
 2. **Fetch path** — otherwise call BC-1.04.001 once; `entry` = copy of `c` with key
    `sess_state` deleted if present.
 3. **Success** (non-empty sample): build history per BC-1.04.003; append/overwrite keys
-   `fetch_ts=now, up=true, ts=now, sample=<sample>, hist=<hist[-32:]>`; save; return
+   `fetch_ts=now, up=true, ts=now, sample=<sample>, hist=<hist[-cap:]>` (`cap` =
+   `statusline.sparkline.history_cap`, default 32 — BC-1.04.003 PC5, ADV-P12-C2-05);
+   save; return
    `(sample, 0.0, true, hist)` (the returned `hist` is the uncapped list).
 4. **Failure**: set `entry.fetch_ts=now`, `entry.up=false` (old `ts`, `sample`, `hist`
    kept verbatim); save; `age = now - c.get("ts", 0)`; return
@@ -115,7 +124,7 @@ it is younger than KEEP_DEAD.
 | EC-002 | Failed fetch, age exactly 300 | `(none, 300.0, false, [])` (`< 300` false) |
 | EC-003 | Cached path 2 s after EC-002 | `(sample, 302.0, false, hist)` → stale row with `(~302s old)` |
 | EC-004 | First-ever failed fetch, empty file | file becomes `{"fetch_ts": 1000.0, "up": false}`; returns `(none, 1000.0, false, [])` (age `now - 0`) |
-| EC-005 | Cached path with no `ts` (after EC-004) | age `now - 9999`; sample none → `◌ DGX ?` |
+| EC-005 | Cached path with no `ts` (after EC-004) | age `now - 9999` (the PC1 parity sentinel, P20 note); sample none → `◌ DGX ?` |
 | EC-006 | TTL 0 | every refresh fetches |
 | EC-007 | Stored sample holds `NaN` | written as JSON `NaN`, read back by the Go loader (must accept `NaN`/`Infinity` tokens) |
 | EC-008 | Foreign/corrupt cache shapes (CP-C01..C10) | out of byte-parity scope (P3 r2 ruling (b)); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); Go writer never produces them |

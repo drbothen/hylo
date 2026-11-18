@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "97409c7"
+input-hash: "8dd801c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:477-479)"
@@ -21,6 +21,7 @@ introduced: v0.1.0
 modified:
   - "1.2 pass-5 remediation (ADV-P5-B03): the cache-hit glyph is named as the registry key statusline.glyphs.cache_hit (default U+267B) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
   - "1.3 pass-11 remediation (ADV-P11-B01): EC-006 names the taxonomy id CP-S08 with its faithful trigger and raise site (SL:477), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change; 2026-11-21T12:00:00Z"
+  - "1.3.1 pass-12 remediation (ADV-P12-B04): Invariant 2 carves negative zero out of the 0%..100% range claim — hr = -0.0 renders -0% (BC-1.02.023 PC2/EC-005); no behavioral change; 2026-11-23T00:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,7 +58,9 @@ Notation: `\e` is the byte 0x1B.
 ## Invariants
 
 1. Independent of lane, model and prefixes.
-2. Output range `0%`..`100%` for finite input; NaN/inf handled by BC-1.02.023.
+2. Output range `0%`..`100%` for finite input, negative zero excepted: `hr = -0.0`
+   renders `-0%` (kept by `max(-0.0, 0.0)`; BC-1.02.023 PC2 and EC-005 pin the spelling);
+   NaN/inf handled by BC-1.02.023.
 
 ## Edge Cases
 

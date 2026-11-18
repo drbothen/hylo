@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-18T18:00:00Z
+timestamp: 2026-11-21T18:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "d8c2892"
+input-hash: "f34b208"
 
 ---
 
@@ -62,8 +62,11 @@ func runConfigPath(args []string, env EnvVars, stdout, stderr io.Writer) int  //
 Dispatch order is contractual (BC-4.01.001, BC-4.01.002, interface-definitions.md):
 verb parse -> for `statusline` only: exact-match `--subagent` routing -> unknown-flag
 scan -> `statusline.Main` -> exit 0. The exact argument `--subagent` selects the
-subagent panel renderer before any flag or config processing (OD-155, superseding
-OD-14; BC-1.07.001..008): when it is an element of args — at ANY index, including
+subagent panel renderer before the unknown-flag scan and the MAIN config step (OD-155,
+superseding
+OD-14; BC-1.07.001..008; pass-12 A10 wording — the subagent path then resolves config
+ITSELF before evaluating the panel gate, OD-168, below, so "before any config
+processing" would be false): when it is an element of args — at ANY index, including
 after a bare `--` (pass-3 A01 ruling restatement: the flag is matched on the whole
 argv tail, so `hylo statusline -- --subagent` routes to the panel, superseding the
 BC-4.01.002 EC-004 "positional data" reading) — `runStatuslineSubagent` produces all

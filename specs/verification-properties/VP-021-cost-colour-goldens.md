@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T18:00:00Z
+timestamp: 2026-11-21T22:30:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.001.md, behavioral-contracts/ss-01/BC-1.05.002.md, behavioral-contracts/ss-01/BC-1.05.003.md, behavioral-contracts/ss-01/BC-1.05.005.md, behavioral-contracts/ss-01/BC-1.05.007.md, behavioral-contracts/ss-01/BC-1.05.008.md]
-input-hash: "0ae0d90"
+input-hash: "b49f33e"
 traces_to: prd.md
 source_bc: BC-1.05.008
 bcs: [BC-1.05.001, BC-1.05.002, BC-1.05.003, BC-1.05.005, BC-1.05.007, BC-1.05.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))", "1.4 2026-11-19T18:00:00Z: pass-7 fix (A2-14) — the quick leg's quantifier is the filtered population (SL:240-262): recorded sid/lane, 30-day window, rates length >= COST_MIN_N (= 10), $1 gate on the goldens side; the COST_MIN_N cold-start case (no threshold, no colour) is pinned as a table leg, so a correct implementation no longer false-fails on arbitrary-length rates", "1.5 2026-11-20T18:00:00Z: pass-11 fix (A2-03, orchestrator call 10) — the percentile property derived from BC-1.05.005 exactly: the quantifier runs over qualified HISTORY ENTRIES building TWO lists (dollar list per PC1/PC2 — the $ colour thresholds come from THIS list, not the rate list; rate list further gated by PC3's per-src api_ms need, cc 300000 vs other 1800000); PC1's self-exclusion (k == sid skipped) replaces the 'single recorded sid' misstatement; the NaN finite restriction (EC-009, Python sorted with a NaN is non-monotone) carried normatively in the Method, not only a sketch comment; skeleton generator rewritten to entries → two lists", "1.6 2026-11-21T09:00:00Z: pass-11 residual — the Method paragraph's corrupted glyph line (a stray wrench emoji) repaired to its clause text '⛏ basis and $/h'; no other change"]
+modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))", "1.4 2026-11-19T18:00:00Z: pass-7 fix (A2-14) — the quick leg's quantifier is the filtered population (SL:240-262): recorded sid/lane, 30-day window, rates length >= COST_MIN_N (= 10), $1 gate on the goldens side; the COST_MIN_N cold-start case (no threshold, no colour) is pinned as a table leg, so a correct implementation no longer false-fails on arbitrary-length rates", "1.5 2026-11-20T18:00:00Z: pass-11 fix (A2-03, orchestrator call 10) — the percentile property derived from BC-1.05.005 exactly: the quantifier runs over qualified HISTORY ENTRIES building TWO lists (dollar list per PC1/PC2 — the $ colour thresholds come from THIS list, not the rate list; rate list further gated by PC3's per-src api_ms need, cc 300000 vs other 1800000); PC1's self-exclusion (k == sid skipped) replaces the 'single recorded sid' misstatement; the NaN finite restriction (EC-009, Python sorted with a NaN is non-monotone) carried normatively in the Method, not only a sketch comment; skeleton generator rewritten to entries → two lists", "1.6 2026-11-21T09:00:00Z: pass-11 residual — the Method paragraph's corrupted glyph line (a stray wrench emoji) repaired to its clause text '⛏ basis and $/h'; no other change", "1.7 2026-11-21T22:30:00Z: pass-12 fix (A2-19, sketch only) — the quick.Values filler assigns each argument its SIGNATURE type: args[0]/[2] take assembled thresholds structs, args[1]/[3] take the underlying []float64 lists (a scalar percentile float was assigned to the []float64 parameters)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -128,10 +128,14 @@ func TestCostProps_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
         // NaN-bearing histories are pinned table legs ordered per exact file
         // order (OD-138).
         h := genQualifiedHistories(r, costMinN)
-        args[0] = reflect.ValueOf(derivePercentile(h.Usd, 0.75))  // usd pair
-        args[1] = reflect.ValueOf(derivePercentile(h.Usd, 0.95))
-        args[2] = reflect.ValueOf(derivePercentile(h.Rate, 0.75)) // rate pair
-        args[3] = reflect.ValueOf(derivePercentile(h.Rate, 0.95))
+        // A2-19: each arg's TYPE must match the property signature — a scalar
+        // percentile float does not fit a []float64 (or thresholds) parameter.
+        usdPair := thresholds{p75: derivePercentile(h.Usd, 0.75), p95: derivePercentile(h.Usd, 0.95)}  // usd pair
+        ratePair := thresholds{p75: derivePercentile(h.Rate, 0.75), p95: derivePercentile(h.Rate, 0.95)} // rate pair
+        args[0] = reflect.ValueOf(usdPair)
+        args[1] = reflect.ValueOf(h.Usd)   // the []float64 the percentiles derive from
+        args[2] = reflect.ValueOf(ratePair)
+        args[3] = reflect.ValueOf(h.Rate)
         args[4] = reflect.ValueOf(h)
     }}
     if err := quick.Check(func(usTh thresholds, usd []float64, rateTh thresholds, rate []float64, h histories) bool {

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-21T00:00:00Z
+timestamp: 2026-11-22T01:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.02.001.md, prd-supplements/nfr-catalog.md]
-input-hash: "845b5aa"
+input-hash: "d07f731"
 traces_to: prd.md
 source_bc: BC-6.02.001
 bcs: [BC-6.02.001, BC-6.04.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:10:00Z: ADV-P3 fixes (A2-06) — provenance test asserts a non-zero computed fixture count and logs “N fixtures validated” (POL-11)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (A2-27, A2-21: the provenance walk covers every committed testdata tree (statusline/config/pyfmt/cmd-hylo); planted-canary self-test for the scan leg)", "1.3 2026-11-21T00:00:00Z: pass-9 fix (ADV-P9-A2-11) — the planted-canary self-test now plants one canary per hygiene category the scan claims (IP, username, home path, hostname, email, token shape), each required to be flagged (VP-022's one-planted-violation-per-rule standard); all values synthetic and obviously fake (RFC 5737 TEST-NET-1, example.invalid)", "1.4 2026-11-21T09:00:00Z: pass-11 residual — the Property Statement's scan leg states the two-ref rev set: the CI gitleaks scan names exactly `main` and `factory-artifacts` (`--log-opts=\"main factory-artifacts\"`), its scanned-commit count compared with `git rev-list --count main factory-artifacts` (ARCH-08 hygiene bullet)"]
+modified: ["1.1 2026-11-18T09:10:00Z: ADV-P3 fixes (A2-06) — provenance test asserts a non-zero computed fixture count and logs “N fixtures validated” (POL-11)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (A2-27, A2-21: the provenance walk covers every committed testdata tree (statusline/config/pyfmt/cmd-hylo); planted-canary self-test for the scan leg)", "1.3 2026-11-21T00:00:00Z: pass-9 fix (ADV-P9-A2-11) — the planted-canary self-test now plants one canary per hygiene category the scan claims (IP, username, home path, hostname, email, token shape), each required to be flagged (VP-022's one-planted-violation-per-rule standard); all values synthetic and obviously fake (RFC 5737 TEST-NET-1, example.invalid)", "1.4 2026-11-21T09:00:00Z: pass-11 residual — the Property Statement's scan leg states the two-ref rev set: the CI gitleaks scan names exactly `main` and `factory-artifacts` (`--log-opts=\"main factory-artifacts\"`), its scanned-commit count compared with `git rev-list --count main factory-artifacts` (ARCH-08 hygiene bullet)", "1.5 2026-11-22T01:00:00Z: pass-12 residual (item 2, call 1) — the two-ref rev-set wording in the Property Statement is superseded (pass-12 call 1 supersedes pass-11 call 7): the CI scan is `gitleaks detect --source . --log-opts=\"--all\"` after checkout with `fetch-depth: 0`, its scanned-commit count equal to `git rev-list --count --all`; the 1.4 history entry above is provenance, not live text"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -38,10 +38,11 @@ Every committed fixture in every committed testdata tree —
 `internal/statusline/testdata/`, `internal/config/`, `internal/pyfmt/testdata/` and
 `cmd/hylo/` (A2-27) — is synthetic; the
 owner's real inputs exist only as git-ignored copies under `captures/` (OD-107) and are
-never committed; the CI gitleaks scan names exactly the refs `main` and
-`factory-artifacts` (`--log-opts="main factory-artifacts"`, its scanned-commit count
-compared with `git rev-list --count main factory-artifacts`; ARCH-08 hygiene bullet)
-plus the category
+never committed; the CI gitleaks scan runs `gitleaks detect --source .
+--log-opts="--all"` after checkout with `fetch-depth: 0`, so its scanned-commit
+count equals `git rev-list --count --all` (same rev set by construction — `--all`
+includes HEAD, so a pull-request run scans the PR head and every fetched ref;
+ARCH-08 hygiene bullet) plus the category
 pattern scan are clean on every push and CI leg. `TestCorpusHygiene` enforces the
 committed-corpus provenance in-tree.
 

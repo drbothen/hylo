@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-20T12:00:00Z
+timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-01/BC-1.03.018.md, behavioral-contracts/ss-01/BC-1.03.019.md, behavioral-contracts/ss-01/BC-1.03.020.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "fb00f0a"
+input-hash: "42784ad"
 traces_to: prd.md
 source_bc: BC-1.03.019
 bcs: [BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.014, BC-1.03.016]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T14:15:00Z: ADV-P4 fixes — W-predicate sharpened per OD-167: a numeric-overflow skip (CP-O06..O08) also drops the in-flight turn (cur → null); the ruled drop is part of the expected post-skip state, not a mutation-on-skip violation (A2-03); skeleton test renamed to the canonical rider name TestMixCache_OD32_WrongShapeTables (BC-1.03.020 register, A2-14)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (A2-07, C06: the OD-32 reader rule stated with BOTH conditions (numeric t0 AND non-numeric out); bcs: gains BC-1.03.006/.007/.010)", "1.3 2026-11-20T08:00:00Z: pass-8 fixes (A2-10, A2-07, C03) — the table composition stated precisely: the canonical 21 BC-1.03.019 rows (predate OD-156/OD-167, no CP-O rows) PLUS the dedicated CP-O06..O08 vector/turn-drop legs owned by BC-1.03.006/.007/.010, each row's oracle its owning contract's pin; the two BC-1.03.018 for-all rows gained matching property legs (generated-W-line bit-identical state preservation, testing/quick; delete-the-line equivalence fuzz with the PC4(b) cur-null adjustment); Partial coverage and bcs: gain the hylo-only D4-EX-2 vector carriers BC-1.03.014 (single-line CP-T06, BASE size 70/81) and BC-1.03.016 (T15)", "1.4 2026-11-20T12:00:00Z: pass-9 fixes (A2-02, A2-03, A2-08) — the generated-W-line quick leg states the post-line state EQUALS the pre-line state except as BC-1.03.018 PC2 rules (the consumed-span offset advances; CP-O06..O08 drop `cur` to null, `lr`/`lu` unchanged) — the former unconditional bit-identical claim failed every overflow W-line; the delete-the-line oracle adjusted per PC4(a) AND PC4(b): hylo's `size` = legacy's plus each deleted line's consumed bytes and terminator (PC4(a)), plus the PC4(b) cur-null adjustment; the Partial-coverage bullet's 'delivered by this VP's 21-row table' contradiction with the statement's 'contain no CP-O rows' removed (dedicated rows OUTSIDE the canonical 21)"]
+modified: ["1.1 2026-11-18T14:15:00Z: ADV-P4 fixes — W-predicate sharpened per OD-167: a numeric-overflow skip (CP-O06..O08) also drops the in-flight turn (cur → null); the ruled drop is part of the expected post-skip state, not a mutation-on-skip violation (A2-03); skeleton test renamed to the canonical rider name TestMixCache_OD32_WrongShapeTables (BC-1.03.020 register, A2-14)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (A2-07, C06: the OD-32 reader rule stated with BOTH conditions (numeric t0 AND non-numeric out); bcs: gains BC-1.03.006/.007/.010)", "1.3 2026-11-20T08:00:00Z: pass-8 fixes (A2-10, A2-07, C03) — the table composition stated precisely: the canonical 21 BC-1.03.019 rows (predate OD-156/OD-167, no CP-O rows) PLUS the dedicated CP-O06..O08 vector/turn-drop legs owned by BC-1.03.006/.007/.010, each row's oracle its owning contract's pin; the two BC-1.03.018 for-all rows gained matching property legs (generated-W-line bit-identical state preservation, testing/quick; delete-the-line equivalence fuzz with the PC4(b) cur-null adjustment); Partial coverage and bcs: gain the hylo-only D4-EX-2 vector carriers BC-1.03.014 (single-line CP-T06, BASE size 70/81) and BC-1.03.016 (T15)", "1.4 2026-11-20T12:00:00Z: pass-9 fixes (A2-02, A2-03, A2-08) — the generated-W-line quick leg states the post-line state EQUALS the pre-line state except as BC-1.03.018 PC2 rules (the consumed-span offset advances; CP-O06..O08 drop `cur` to null, `lr`/`lu` unchanged) — the former unconditional bit-identical claim failed every overflow W-line; the delete-the-line oracle adjusted per PC4(a) AND PC4(b): hylo's `size` = legacy's plus each deleted line's consumed bytes and terminator (PC4(a)), plus the PC4(b) cur-null adjustment; the Partial-coverage bullet's 'delivered by this VP's 21-row table' contradiction with the statement's 'contain no CP-O rows' removed (dedicated rows OUTSIDE the canonical 21)", "1.5 2026-11-21T12:00:00Z: pass-12 fix (A2-16) — the delete-the-line oracle DISAMBIGUATED: it is hylo's own parser run on the transcript with the W-line deleted (ParseWithWPPredicates after DeleteWLines — an in-tree METAMORPHIC oracle, exactly as VP-029 spells), never a CPython run; said in the statement, the Proof Method row and the sketch comment"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,8 +54,10 @@ skips CP-O06..O08 the in-flight turn is dropped — `cur` → null, `lr`/`lu` un
 (OD-167) — while every other tracked variable is bit-identical (Go property test,
 testing/quick); and
 on random transcripts with injected W-lines, DELETE-THE-LINE EQUIVALENCE holds —
-the post-skip state equals the oracle run on the transcript with the W-line
-deleted, adjusted per PC4(a) AND PC4(b) (A2-03): hylo's `size` equals the
+the post-skip state equals the deletion oracle — HYLO'S OWN PARSER run on the
+transcript with the W-line deleted, an in-tree metamorphic oracle and never a
+CPython run (A2-16; spelled the same way as VP-029) —
+adjusted per PC4(a) AND PC4(b) (A2-03): hylo's `size` equals the
 deletion oracle's plus each deleted line's full consumed span (the line's bytes
 plus its terminator, PC4(a)), and at each overflow skip the post-skip state
 additionally includes `cur` → null (the open turn discarded, never finished,
@@ -97,7 +99,7 @@ every input that contains a W-line.
 |--------|------|----------|----------|
 | Table test | Go test, `internal/statusline` | yes — 21 canonical rows + the owned CP-O06..O08 vector legs | every wrong-shape class + poisoned-cache rule |
 | Generated-W-line property | Go property test (testing/quick) | generated W-lines per CP | state-after = state-before modulo PC2 (offset advance; CP-O06..O08 `cur` → null) |
-| Delete-the-line equivalence fuzz | `go test -fuzz` | random transcripts, injected W-lines | post-skip state = deletion oracle, adjusted per PC4(a)+(b) |
+| Delete-the-line equivalence fuzz | `go test -fuzz` | random transcripts, injected W-lines | post-skip state = in-tree deletion oracle (hylo parser on the transformed transcript, metamorphic — A2-16), adjusted per PC4(a)+(b) |
 
 ## Proof Harness Skeleton
 
@@ -133,7 +135,8 @@ func FuzzWrongShape_DeleteLineEquivalence(f *testing.F) { // BC-1.03.018 for-all
     // includes cur -> null (the open turn discarded, OD-167).
     f.Fuzz(func(t *testing.T, transcript []byte) {
         got := ParseWithWPPredicates(transcript)
-        want := ParseWithWPPredicates(DeleteWLines(transcript)) // deletion oracle, state-adjusted
+        want := ParseWithWPPredicates(DeleteWLines(transcript)) // in-tree deletion oracle — hylo's own
+        // parser on the transformed transcript (metamorphic; A2-16), state-adjusted
         if !CachesEqualModuloPC4(got, want) { // PC4(a): size += each deleted line's
             // consumed bytes + terminator; PC4(b): the OD-167 cur-null at overflow skips
             t.Fatal("delete-the-line equivalence violated (modulo the PC4(a)+(b) adjustments)")

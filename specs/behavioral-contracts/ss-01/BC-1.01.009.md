@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.12"
+version: "1.3.14"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "8885139"
+input-hash: "7ea5e4f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -31,6 +31,8 @@ modified:
   - "1.3.10 pass-8 remediation (ADV-P8-B06/B07/B11): step 7c distinguishes the foreign-cache fault order — CP-C09 raises inside record_cost BEFORE its write (SL:229/230 ahead of SL:237, nothing written), CP-C10 after it (error-taxonomy rows 277-278); EC-001's mix-cache write condition made exact — at least one complete new line readable, shrunk file resets and re-reads, unchanged or no-complete-line returns without saving (SL:1035-1040, 1055-1057); VP-022 added to VP Anchors (was only in the VP table); 2026-11-19T08:00:00Z"
   - "1.3.11 pass-9 remediation (ADV-P9-B07 + orchestrator call 4): step 4 Write cell admits the fresh-verdict no-write leg (a cached verdict with fetch_ts > now − TTL returns at SL:325 and writes nothing); step 7d and overflow footnote ² register the transcript-borne cost-pick equivalence overflow CP-O12 (tin/tout each below the int→float bound, their exact-int sum at or above it enters tot * dgx_mtok at SL:633 — owner BC-1.02.029 EC-009), crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
   - "1.3.12 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B05): CP-C10's within-step order made site-dependent — the cost_thresholds site faults after the record_cost write as before, but the record_cost throttle-check site (own entry src:\"cc\" with a non-numeric ts, SL:232) raises before save_cache (SL:237) and writes nothing; step 7c cell, footnote 1, PC2 and the VP-008 row qualified accordingly"
+  - "1.3.13 pass-12 remediation (ADV-P12-B02): Architecture Anchors re-anchored from #caches (target cache.go, ARCH-04) to the statusline.go frame-family anchor #statusline-frame; no behavioral change; 2026-11-23T00:00:00Z"
+  - "1.3.14 pass-12 residual sweep (orchestrator pass-12 residual calls 3+8): Architecture Anchors respelled to #statusline-frame, the anchor ARCH-03 actually defines; the lone-surrogate display-name vector restates its window-start pin per the corrected cache-003 design (every corpus case seeds proc_start or is cache-003, no probe on either side, no fake process table); no behavioral change; 2026-11-23T14:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -134,7 +136,7 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
 | stdin `{}`, rows 2, metrics URL at a closed port, empty cache | 2-row output (BC-1.01.003); cache dir afterwards holds only `statusline-nosession.json` = `{"fetch_ts": <now>, "up": false}` | happy-path |
 | Cache seeded `statusline-s9.json` = `{"proc_start": 900.0}`; git repo dir with `.git/HEAD` = `ref: refs/heads/main`; stdin `{"session_id":"s9","model":{"id":"claude-sonnet-x","display_name":"S"},"workspace":{"project_dir":"<repo>"},"context_window":{"used_percentage":NaN},"cost":{"total_cost_usd":1.5}}`; rows 1; prefixes `claude-sonnet` | degraded 29 bytes; afterwards `statusline-git-<sha1(dir)[:16]>.json` = `{"ts": <now>, "branch": "main"}` exists, `statusline-s9.json` unchanged, **no** `cost-history.json` | edge-case |
 | Same stdin with `used_percentage` 40 | renders; `cost-history.json` now exists | happy-path |
-| `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}`, rows 1 | degraded; `statusline-s1.json` holds exactly `rl` and `rl_ts` (probe pinned: harness fake `ps`, no `claude` ancestor — BC-3.02.002 case I4 — so no `proc_start` key) | error |
+| `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}`, rows 1 | degraded; `statusline-s1.json` holds exactly the seeded `proc_start`, `rl` and `rl_ts` (corpus regime, BC-3.02.001 Inv 4: every corpus case seeds `proc_start` or is `cache-003` — no probe on either side — so the cached value short-circuits the window-start consult) | error |
 | Multi-step case (BC-6.02.002): compare every named cache file after every step | identical per-step cache bytes Python vs Go | edge-case |
 
 Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<now>` is `HYLO_TEST_NOW`).
@@ -171,7 +173,7 @@ Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<
 
 ## Architecture Anchors (Recommended)
 
-- `architecture/ARCH-03-statusline.md#caches` — internal/statusline/statusline.go (side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
+- `architecture/ARCH-03-statusline.md#statusline-frame` — internal/statusline/statusline.go (side-effect order) (BC-COMPONENT-MAP: ARCH-03 (ARCH-03-statusline.md))
 
 ## Story Anchor (Recommended)
 

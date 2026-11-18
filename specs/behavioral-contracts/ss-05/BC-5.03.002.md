@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T03:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "bebcc79"
+input-hash: "a8776a1"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces str.strip/rstrip/rsplit and bytes.splitlines used in legacy/dgx_statusline.py)"
@@ -23,6 +23,7 @@ modified:
   - "2026-11-18T03:00:00Z VP citation reconciliation: SplitLinesBytes row re-homed from VP-025 to VP-038 (pass-2 mint; VP-038 partial-coverage note)"
   - '2026-11-18T23:50:00Z (1.2.3) ADV-P5 D26 — EC-002 notation: NEL spelled as the \u0085 code-point escape, disambiguated from the BC-5.01.002 raw-byte \xNN convention'
   - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — 1.2.3 entry requoted single-quoted (the raw-byte escape spellings are not YAML double-quoted-scalar escapes); no behavioral change"
+  - "2026-11-22T00:00:00Z (1.2.5): ADV-P12 remediation D06 sibling (orchestrator call 9) - PC-1 ties the Strip primitive to the consumer order: strip FIRST, then control-byte/emptiness validation on the stripped item (BC-2.01.005 PC-2)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,7 +53,9 @@ signature row (`RSplit1(s, sep string) []string`) is reconciled.
 1. **Strip(s)** removes leading and trailing code points for which Python `str.isspace()` is true — exactly these 29:
    U+0009-U+000D, U+001C-U+001F, U+0020, U+0085, U+00A0, U+1680, U+2000-U+200A, U+2028, U+2029, U+202F, U+205F,
    U+3000. U+200B (zero-width space) and U+FEFF are **not** stripped. (This set differs from the `int()`/`float()`
-   whitespace set, which excludes U+001C-U+001F, BC-5.01.002.)
+   whitespace set, which excludes U+001C-U+001F, BC-5.01.002.) In the List consumer the
+   strip is applied FIRST and validation (control bytes, emptiness) runs on the STRIPPED
+   item (BC-2.01.005 PC-2, pass-12 call 9).
 2. **RStrip(s, chars)** removes trailing code points that are members of `chars` (a set, not a suffix):
    `RStrip("claude-sonnet**", "*")` = `claude-sonnet`, `RStrip("***", "*")` = `""`, `RStrip("a*b*", "*")` = `a*b`.
 3. **RSplit1(s, sep)** returns `[head, tail]` split at the **last** occurrence of `sep`, or `[s]` when `sep` does not

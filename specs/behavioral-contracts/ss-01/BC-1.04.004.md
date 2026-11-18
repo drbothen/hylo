@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md]
-input-hash: "ab38ca7"
+input-hash: "7bee76c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry (SL:693-702)"
@@ -23,6 +23,7 @@ modified:
   - "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (dead-marker word sourced to statusline.pill.label_local per OD-189, glyph named glyphs.degraded) + ADV-P7-C2-14 BC side (CP-N03 canonical vector row added; the sole-key AttributeError raise type oracle-verified)"
   - "2026-11-18 (v1.2.3) pass-10 remediation ADV-P10-C2-11 (VP-001 row added to Verification Properties for the metrics-borne CP-N03 sole-key degrade leg; VP Anchors entry)"
   - "2026-11-18 (v1.2.4) pass-11 OD-194 consumer (PC2 names statusline.labels.old beside its default; the (~/s/) scaffolding around the word carries the named-format-constant note)"
+  - "2026-11-18 (v1.2.5) pass-12 remediation ADV-P12-C2-06 (Invariant 3's dict-sample failure list completed: the OD-160 exact-giant-int lr[0] OverflowError at the SL:778-779 .0f render format, BC-1.04.018 PC-1, and the foreign cached-sample value shapes, e.g. a string vllm:num_requests_running ValueError at the SL:741 .0f format, BC-1.04.006's segment; both oracle-verified CPython 3.11.7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -74,7 +75,14 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
    (BC-1.04.014, BC-1.04.015) plus the non-string-key site of BC-1.04.001 EC-013: a
    numeric sample key ahead of every `vllm:` key degrades in `serving_state` (SL:717;
    metrics-borne degrade, crash id **CP-N03**);
-   after the session-cache write it returns as string `"5"` and no longer degrades.
+   after the session-cache write it returns as string `"5"` and no longer degrades; the
+   OD-160 exact-giant-int `lr[0]` OverflowError at the `f"{x:.0f}"` render format
+   (SL:778-779 inside `render_telemetry_fields`, BC-1.04.018 PC-1; both signs —
+   oracle-verified CPython 3.11.7); and the foreign cached-sample VALUE shapes (OD-160,
+   BC-1.04.002 EC-008): a sample value whose render site formats a non-number — e.g. a
+   string `vllm:num_requests_running` reaches the `r{r:.0f}·q{q:.0f}` format and raises
+   ValueError (SL:741, "Unknown format code 'f' for object of type 'str'",
+   oracle-verified CPython 3.11.7; segment contract BC-1.04.006) (ADV-P12-C2-06).
 
 ## Edge Cases
 

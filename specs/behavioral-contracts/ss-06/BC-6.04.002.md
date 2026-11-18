@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - product-brief.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "0d02138"
+input-hash: "637b4b1"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,10 +25,11 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation A04: canonical gate parameters 1 warm-up + 20 runs per case, nearest-rank p95 = 19th sample, binding per case, no pooling; test target moved to internal/parity"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D23 - gate binds on EVERY case p95 (worst case named); VP-036 de-pooled; unreachable EC-005 low-sample note withdrawn"
-  - "1.2.3 2026-11-19T17:00:00Z: ADV-P7 remediation A02/OD-191/D26 (orchestrator call 3) - PC-3 gains the conditional large-transcript exemption: exactly one validated case flag timing_exempt: large-transcript (transcript must exceed 512 KB), exempt from the 25 ms target only when it misses it, ceiling 100 ms (OD-191), and exactly one report line whenever the exemption is used; PC-1 states the 20-timed-runs rationale (smallest round count with an interior nearest-rank p95, fixed n, CI-budget judgment call). ARCH-08 and PRD NFR-001 to copy"
+  - "2026-11-18T01:42:01Z (1.2.2): ADV-P4 remediation D23 - gate binds on EVERY case p95 (worst case named); VP-036 de-pooled; unreachable EC-005 low-sample note withdrawn"
+  - "2026-11-19T17:00:00Z (1.2.3): ADV-P7 remediation A02/OD-191/D26 (orchestrator call 3) - PC-3 gains the conditional large-transcript exemption: exactly one validated case flag timing_exempt: large-transcript (transcript must exceed 512 KB), exempt from the 25 ms target only when it misses it, ceiling 100 ms (OD-191), and exactly one report line whenever the exemption is used; PC-1 states the 20-timed-runs rationale (smallest round count with an interior nearest-rank p95, fixed n, CI-budget judgment call). ARCH-08 and PRD NFR-001 to copy"
   - "2026-11-19T21:00:00Z (1.2.4): ADV-P8 remediation D19 (orchestrator call 17) — timing_exempt size condition pinned in bytes: 512 KB = more than 524,288 bytes (512 KiB, the read_cap_bytes default); report shorthand unchanged"
   - "2026-11-20T18:30:00Z (1.2.5): ADV-P9 remediation D19 (P7) — H1 enriched with the PC-3 large-transcript exemption (100 ms ceiling): 'Per-OS timing report; p95 <= 25 ms binds on the owner's Mac target (large-transcript exemption: 100 ms ceiling)'; BC-INDEX and BC-ALLOCATION title columns synced; prd.md's row is out of this burst's file set"
+  - "2026-11-22T00:00:00Z (1.2.6): ADV-P12 remediation A07 (orchestrator call 4) + A08 BC half (call 6) — PC-1 states the TIMING UNIT: one timed sample = ONE invocation of hylo (one render); a multi-step case is replayed from its committed seeds 1 warm-up + 20 times, each step timed on its own, giving a 20-sample series per (case, step); p95 computed and gated per (case, step); no summing over steps; PC-2 percentiles, PC-3 gate, EC-005 and the VP-036 row respelled per (case, step); Pre-3: TestTiming is an ORACLE_TESTS member — the plain steps skip it and the dedicated timing job installs CPython 3.11, -runs it, and prints the resolved patch (BC-6.04.001 PC-3/PC-6); history stamps 1.2.2/1.2.3 normalized to the date-leading form (POLICY 14 leg 3; no behavioral change)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,16 +61,29 @@ removes.
    response flush.
 3. The timing run is a separate test target (`go test -run TestTiming ./internal/parity`
    or a dedicated tool; home `internal/parity` per BC-COMPONENT-MAP par/timing.go,
-   ADV-P3-A04). It is not part of the Tier A/B parity verdict.
+   ADV-P3-A04). It is not part of the Tier A/B parity verdict. `TestTiming` is a MEMBER
+   of the `ORACLE_TESTS` pattern (pass-12 call 6; BC-6.04.001 PC-3 step 3/4 — it must
+   report "the CPython oracle median", PC-2 below, so it needs the oracle): the plain
+   test, coverage and release steps skip it, and the dedicated timing job installs
+   CPython 3.11 by setup-python before its `go test -run TestTiming` and prints the
+   resolved CPython patch (BC-6.04.001 PC-6).
 
 ## Postconditions
 
 1. **Measurement.**
+   - TIMING UNIT (pass-12 call 4, following NFR-001 "render latency" and PC-3's
+     "never pooled across cases or steps"): one timed sample is ONE invocation of
+     hylo — one render. A multi-step case is replayed from its committed seeds
+     1 warm-up + 20 times; each step is timed on its own, giving a 20-sample series
+     per (case, step); the nearest-rank p95 is computed and gated per (case, step).
+     No summing over steps: a multi-step wall-clock total is never compared against
+     the per-render target.
    - CANONICAL GATE PARAMETERS (ADV-P3-A04, aligned with nfr-catalog NFR-001 rows and
      ARCH-08/cicd-setup): for each corpus CASE the harness runs 1 warm-up (rationale,
      convention: absorbs the first-execution page-cache and oracle-start cost so it does
      not skew the timed runs) and then 20 timed executions (nearest-rank p95 = the 19th
-     ordered sample, BINDING per case — per case, never pooled across cases or steps).
+     ordered sample, BINDING per (case, step) — never pooled across cases or summed
+     over steps).
      The former R = 5 pooled-times formulation was wrong and is superseded.
      Rationale for 20 (pass-7 D26, labeled judgment call): 20 is the smallest round
      sample count whose nearest-rank p95 is an interior order statistic (the 19th of
@@ -87,13 +101,13 @@ removes.
    - `median`, `p90`, `p95` and `max` in milliseconds with 0.1 ms resolution;
    - the CPython oracle median measured the same way, for reference. Interpreter
      start-up is included on the Python side.
-   Percentiles use the nearest-rank method COMPUTED PER CASE on that case's 20
-   per-execution render times (no pooling across cases; nearest-rank p95 = the 19th
+   Percentiles use the nearest-rank method COMPUTED PER (CASE, STEP) on that pair's 20
+   per-invocation render times (no pooling across cases or steps; nearest-rank p95 = the 19th
    ordered sample; ADV-P3-A04).
 3. **Gate only on the owner's target.**
    - When the harness setting `HYLO_TIMING_GATE=1` is present, the gate evaluates
-     EVERY case's per-case p95 (each from that case's own 20 timed runs; design call 14,
-     ADV-P4-D23): if ANY case's p95 > 25.0 ms, the gate fails with
+     EVERY (case, step) p95 (each from that pair's own 20 timed runs; design call 14,
+     ADV-P4-D23; pass-12 call 4): if ANY (case, step) p95 > 25.0 ms, the gate fails with
      `timing: p95 <p95> ms > 25 ms target (OD-117, judgment call)` naming the worst
      case. The owner sets
      this setting on the macOS arm64 machine; it is a harness setting, not a D15 key.
@@ -136,7 +150,7 @@ removes.
 | EC-002 | Owner Mac with `HYLO_TIMING_GATE=1`, p95 = 25.0 ms | Pass (the gate is `> 25.0`) |
 | EC-003 | Owner Mac with `HYLO_TIMING_GATE=1`, p95 = 25.1 ms | FAIL with the OD-117 message |
 | EC-004 | Case with metrics mode `down` (closed listener) | No server-side time to subtract. The connect-refused time (sub-millisecond on loopback) is counted against hylo |
-| EC-005 | Tiny corpus subset (few cases) | Unreachable-condition note withdrawn (ADV-P4-D23): every case runs exactly 1 warm-up + 20 timed runs, so the per-case sample count is fixed at 20 by construction and "fewer than 20 total samples" cannot occur; the report lists each case's own `n = 20` |
+| EC-005 | Tiny corpus subset (few cases) | Unreachable-condition note withdrawn (ADV-P4-D23): every case runs exactly 1 warm-up + 20 timed runs, so the per-(case, step) sample count is fixed at 20 by construction and "fewer than 20 total samples" cannot occur; the report lists each (case, step)'s own `n = 20` |
 
 ## Canonical Test Vectors
 
@@ -150,7 +164,7 @@ removes.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-036 | Nearest-rank p95 is computed correctly over each case's OWN 20 samples (per case, never pooled; ADV-P4-D23) | table test on the percentile helper |
+| VP-036 | Nearest-rank p95 is computed correctly over each (case, step)'s OWN 20 samples (per case and step, never pooled or summed; ADV-P4-D23, pass-12 call 4) | table test on the percentile helper |
 | VP-036 | The gate fails iff `HYLO_TIMING_GATE=1` and ANY case's p95 > 25.0 ms | table test |
 
 ## Traceability

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "a9458b8"
+input-hash: "d2b884d"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -34,6 +34,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D24 — stdio canary fixture respelled a non-ASCII code point (U+0664, UTF-8 D9 A4) and the probe script specified (testdata/clock_shim/stdio_canary.py, name per OD-145 delegation)"
   - "2026-11-20T18:30:00Z (1.2.7): ADV-P9 remediation D11 — the stdio canary's claim narrowed to what it can detect (POSIX leg observes but cannot detect a lost shim under the pinned UTF-8 locale; measured: even LC_ALL=C + PYTHONCOERCECLOCALE=0 round-trips U+0664 as UTF-8 on the reference build); PC-5 gains the Windows LF negative control (shim absent, normal builder env, raw bytes must contain CR LF)"
   - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation A2-02 sibling (orchestrator call 1, OD-190 applied literally) — the shim's stdio duty is ENCODING only: sys.stdin/sys.stdout reconfigured to UTF-8 strict, NO newline reconfigure (the former newline=\\n claim withdrawn); Pre-1 cites the comparator's open CRLF→LF conversion (BC-6.03.002 PC-1/EC-006) as the Windows-leg LF disposition, and the canary's \\r\\n-free observation is scoped to the POSIX leg"
+  - "2026-11-22T00:00:00Z (1.2.9): ADV-P12 remediation D13 - PC-1's mktime/strptime note respelled: no parity case reaches the parse (a seeded proc_start short-circuits at SL:273-275; cache-003's empty fake PATH raises FileNotFoundError at the ps call SL:280-281, caught SL:293-294, before the parse), dissolving the stale 'which the seeded proc_start bypasses' wording"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -95,8 +96,12 @@ oracle case runs, that the shim actually took effect.
    - `time.gmtime()` with no argument or `None` returns `<real gmtime>(N)`;
    - `time.strftime(fmt)` with no tuple returns `<real strftime>(fmt, <real localtime>(N))`.
    Calls that pass an explicit argument are forwarded unchanged. `time.mktime` and
-   `time.strptime` are not patched: they run only on the `ps` path (SL:286), which the
-   seeded `proc_start` bypasses (design §3.2).
+   `time.strptime` are not patched: no parity case reaches the parse — a seeded
+   `proc_start` short-circuits before the walk (SL:273-275), and `cache-003`'s empty
+   fake `PATH` raises `FileNotFoundError` at the `ps` call (SL:280-281), caught at
+   SL:293-294, before the parse (design §3.2; pass-12 D13 — the former "which the
+   seeded `proc_start` bypasses" wording predates the cache-003 case and the path is
+   deterministic under the UTC pin either way).
 2. **Stepped per refresh.** For step `k` of a case the harness sets
    `HYLO_TEST_NOW = now_k` for both the oracle and Go runs of that step.
    - Within one oracle process every `time.time()` read returns `now_k`. The read sites

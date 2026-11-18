@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -12,7 +12,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "520a653"
+input-hash: "2fda8ad"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -38,6 +38,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.3.2): ADV-P8 remediation A2-05+D14 — OD-160 register riders corrected to the on-disk-verified anchors BC-1.02.017 EC-004..006 and BC-1.01.008 PC3 (the former EC-010/EC-011 pointed at the CP-O05 overflow row and a nonexistent row); PC-3 float-accepted enumeration respelled as the union of the float-accepted values in the BC-2.02.002/003 exclusion case lists AND edge cases (1e400 is BC-2.02.002 EC-004, not a named case)"
   - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D01 (orchestrator call 7) — rider-test closure pinned: NO exclusions.json entry exists for OD-76 or D4-EX-1 (no corpus case can exercise either id); register rows and a post-table note respelled; EC-006's example respelled to an OD-30 + D4-EX-2 pair (the former OD-76 repeated-DST corpus case is impossible under the UTC-only corpus)"
   - "2026-11-21T06:00:00Z (1.3.4): ADV-P10 remediation D07 (orchestrator call 7) — example corpus ids flattened to the ARCH-07 grammar's flat cases/<case-id>/ form with <family>-<nnn>[-<variant>] ids: config/ttl-nan → cfgerr-001, cache/sid-slash-temp → cache-003, transcript/cp-t01 → cpt01-001, EC-001's glob respelled cpt01-* (EC and CTV examples only; no schema change)"
+  - "2026-11-22T00:00:00Z (1.3.5): ADV-P12 remediation D01 (orchestrator call 2) — the D4-EX-1 row and the rider-test-closure paragraph restated per the corrected cache-003 design: every corpus case either seeds proc_start or is cache-003 (empty fake PATH raises FileNotFoundError on the oracle; Go child at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 — no probe on either side); the former 'every corpus case seeds proc_start' universal is dissolved"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -95,7 +96,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
    | `id` | Approved by | Scope of the exclusion | Contract that defines the expected behavior |
    |---|---|---|---|
-   | `D4-EX-1` | D4-EX-1 | ⌂ on Windows (fake probe returns a start); NO `exclusions.json` entry exists (every corpus case seeds `proc_start`, BC-3.02.001 Invariant 4): rider-test closure, ADV-P9-D01 | BC-3.02.001 (`TestWindowAge_D4EX1_Windows*`) |
+   | `D4-EX-1` | D4-EX-1 | ⌂ on Windows (fake probe returns a start); NO `exclusions.json` entry exists (every corpus case either seeds `proc_start` or is `cache-003`, which probes on neither side, BC-3.02.001 Invariant 4): rider-test closure, ADV-P9-D01 | BC-3.02.001 (`TestWindowAge_D4EX1_Windows*`) |
    | `D4-EX-2` | D4-EX-2, OD-21/OD-32 | wrong-shape transcript lines skipped | BC-1.03.018/019/020 (21 BC-SL-099 rows + BC-SL-100/103 rows) |
    | `D4-EX-3` | D4-EX-3, OD-102/OD-114 | config-error line | BC-2.02.001..006 (`TestD4EX3_{Number,Boolean,URL,Enum,Text}` + `config validate`; no Theme member — theme settings are rejected by the corpus validator, BC-6.02.003 PC-3/EC-007, so no Theme D4-EX-3 case can exist; by the same no-legacy-equivalent rule `TestD4EX3_Text` is a GO TABLE TEST ONLY and backs no parity exclusion entry — Text keys (glyphs, labels, suffix) have no legacy analog; ADV-P6-D14, orchestrator call 1; ADV-P4-D22) |
    | `OD-30` | OD-30, OD-110 | numeric sid: one string-form cost-history key | BC-1.05.006, BC-1.05.009 |
@@ -110,8 +111,12 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
 
    ADV-P9-D01 / orchestrator call 7 (rider-test closure): NO committed `exclusions.json`
    entry exists for `OD-76` or `D4-EX-1` — no corpus case can exercise either id (the
-   corpus is UTC-only, so a repeated-DST case cannot exist, and every corpus case seeds
-   `proc_start`, BC-3.02.001 Invariant 4, so no unseeded-probe or Windows ⌂ case exists
+   corpus is UTC-only, so a repeated-DST case cannot exist, and every corpus case either
+   seeds
+   `proc_start` or is the `temp-file` case `cache-003`, whose oracle raises
+   `FileNotFoundError` on the empty fake `PATH` and whose Go child runs at
+   `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0` — no probe on either side, BC-3.02.001
+   Invariant 4 — so no unseeded-probe or Windows ⌂ case exists
    either). Each of the two ids is closed by its rider test alone — the dedicated Go table
    tests of BC-3.02.002 and BC-3.02.001. PC-1's `case`-existence requirement applies only
    when an entry is minted; a future phase that adds such a case mints the entry then. The

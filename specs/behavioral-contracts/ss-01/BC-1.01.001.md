@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.2"
+version: "1.4.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -28,8 +28,10 @@ modified:
   - "1.3.8 pass-6 remediation (ADV-P6-B11): PC3 guarded-site list now names the subagent crash family CP-A01..A05 (matching PC1's --subagent coverage and EC-007); no behavioral change; 2026-11-19T04:00:00Z"
   - "1.3.9 pass-7 remediation (ADV-P7-B03/B04/B09): PC3 guarded-site list gains the Windows MSVC localtime-domain OSError (CP-T09, ErrLocaltimeDomain — `_iso_ts` catches only ValueError, SL:984) per orchestrator call 8, and the CP-N03 anchor is corrected to BC-1.04.004/.005 (ADV-P7-B04; ARCH-03/error-taxonomy owners); EC-005 names the canonical test TestCPX03_WriteFailureExit0 (ADV-P7-B09); input-hash refreshed; no behavioral change; 2026-11-19T07:00:00Z"
   - "1.4 pass-9 remediation (orchestrator call 4 / ADV-P9-B03): PC3 guarded-site overflow list extended with CP-O12 (cost-pick equivalence overflow at the SL:633 multiply; owner BC-1.02.029 EC-009) — crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
-  - "1.4.2 pass-11 residual (OD-190 applied literally): Inv 2 respelled — the Windows LF comes from the comparator's open CRLF→LF conversion of the ORACLE's stdout before the byte comparison; hylo's bytes are never converted and the shim does no newline reconfigure; no behavioral change; 2026-11-21T09:00:00Z"
   - "1.4.1 pass-11 remediation (ADV-P11-B04): PC3's CP-N anchor corrected — only CP-N03 belongs to BC-1.04.004/.005; CP-N01 and CP-N02 credited to their H1 owners BC-1.04.015 and BC-1.04.014 (matching the Related BCs line); the pass-9 label 1.3.10 respelled 1.4 so the patch sequence stays monotonic past nine (POLICY 14 leg 3); no behavioral change; 2026-11-21T12:00:00Z"
+  - "1.4.2 pass-11 residual (OD-190 applied literally): Inv 2 respelled — the Windows LF comes from the comparator's open CRLF→LF conversion of the ORACLE's stdout before the byte comparison; hylo's bytes are never converted and the shim does no newline reconfigure; no behavioral change; 2026-11-21T12:30:00Z (re-dated ascending in 1.4.3: its original 09:00Z stamp predated 1.4.1's)"
+  - "1.4.3 pass-12 remediation (ADV-P12-B08): the 1.4.1/1.4.2 history entries reordered ascending (1.4.2 was listed before 1.4.1) and the 1.4.2 stamp re-dated ascending per the pass-5 B14 precedent; no behavioral change; 2026-11-23T00:00:00Z"
+  - "1.4.4 pass-12 residual sweep (orchestrator pass-12 residual call 8): the lone-surrogate display-name vector restates its window-start pin per the corrected cache-003 design (every corpus case seeds proc_start or is cache-003, no probe on either side, no fake process table); no behavioral change; 2026-11-23T14:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -112,7 +114,7 @@ Config: defaults with `HYLO_STATUSLINE_ROWS=1`, `HYLO_STATUSLINE_GIT_ENABLED=0`,
 |-------|----------------|----------|
 | stdin `{"model":{"display_name":"Opus 5.5"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mOpus 5.5\e[0m\n`, exit 0 (no degrade) | happy-path |
 | stdin `{"model":"x"}` (CP-S01: `.get` on a str) | exactly `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 | error |
-| stdin `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` (JSON escape, CP-S17) | degraded 29 bytes, exit 0; `statusline-s1.json` exists holding exactly `rl`/`rl_ts` (written before the fault). Window-start probe pinned: the harness fake `ps` describes no `claude` ancestor (BC-3.02.002 case I4), so the probe returns None and writes no `proc_start` key; without that fake the vector additionally admits a trailing `proc_start` key and is not byte-pinned | edge-case |
+| stdin `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` (JSON escape, CP-S17) | degraded 29 bytes, exit 0; `statusline-s1.json` exists holding exactly `rl`/`rl_ts` (the seeded `proc_start` plus `rl`/`rl_ts`, the latter written before the fault). Window-start consult pinned by the corpus regime (BC-3.02.001 Inv 4, BC-6.03.004 D4-EX-1): every corpus case seeds `proc_start` or is `cache-003` (no probe on either side) — this case seeds `proc_start`, so the cached value short-circuits the consult and the cache content stays byte-pinned | edge-case |
 | injected panic in a widget (Go unit test) | degraded 29 bytes, exit 0 | error |
 
 Verified 2026-11-15 against CPython 3.11.7 (`LANG=en_US.UTF-8`, `DGX_SL_ROWS=1`, `DGX_SL_GIT=0`): rows 1-3 above.

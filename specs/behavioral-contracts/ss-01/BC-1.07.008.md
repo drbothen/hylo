@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T20:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "42f7ced"
+input-hash: "8733b0f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ guard over main_subagent (SL:1242-1245; sites SL:891, 894, 906, 878, 919)"
@@ -31,6 +31,7 @@ modified:
   - "1.1.9 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
   - "1.2.0 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02) — frontmatter modified list repaired to block style (lost closing quote restored); no behavioral change"
   - "1.2.1 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C11, ADV-P10-C12) — Legacy-contract row states the register has been 49 paths since pass-9 CP-O12 (was stale at 48); PC6 wording fixed so the 29 degraded bytes include the LF the hex listing already shows"
+  - "1.2.2 2026-11-23T12:00:00Z: pass-12 remediation (ADV-P12-C02) — PC4/PC5 bound the CP-A04/A05 trigger envelope to 309..4300-digit decimal literals: 4,301+-digit literals raise ValueError at the stdin json.load (SL:930), absorbed to {} per BC-1.07.003, stdout zero bytes, not the degraded line (oracle-measured on CPython 3.11.7, the oracle interpreter)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -68,9 +69,14 @@ after a complete render, no partial row output precedes the line.
    line, exit 0. Hylo reads the key through internal/config, never the legacy env (OD-05, ASM-003).
 4. CP-A04 — a task's `tokenCount` a huge int (passes the isinstance/(>0) gate; |n| >= 2**1024 -
    2**970): OverflowError (`int too large to convert to float`) at `_fmt_tokens`'s `float(n)` (SL:878);
-   the helper's except list covers only TypeError/ValueError → degraded line, exit 0.
+   the helper's except list covers only TypeError/ValueError → degraded line, exit 0. The trigger
+   envelope is bounded to 309..4300-digit decimal literals (ADV-P12-C02, oracle-measured 2026-11-18 on
+   CPython 3.11.7, the oracle interpreter): a literal of 4,301+ digits exceeds CPython's
+   `sys.int_max_str_digits` = 4300, so `json.load` at SL:930 raises ValueError at the stdin decode —
+   absorbed to `{}` per BC-1.07.003, stdout zero bytes, NOT the degraded line.
 5. CP-A05 — a task's `startTime` a huge int (running row, passes the isinstance/(>0) gate):
-   OverflowError at `now_ms - start` (SL:919) → degraded line, exit 0.
+   OverflowError at `now_ms - start` (SL:919) → degraded line, exit 0; same 309..4300-digit literal
+   envelope as PC4.
 6. stdout is exactly the 29 degraded bytes, LF included (hex `1b 5b 39 30 6d` +
    `statusline degraded` + `1b 5b 30 6d 0a` — the trailing `0a` is that LF); no partial rows, no JSON.
    Exit code 0.

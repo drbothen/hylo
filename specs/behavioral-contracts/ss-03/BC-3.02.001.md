@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2468d95"
+input-hash: "2f2548f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -24,6 +24,7 @@ modified:
   - "2026-11-19T01:10:00Z (1.2.3) ADV-P5 remediation D22 — chain-poison refinement: after a PID-reuse guard rejection the walk keeps climbing but accepts no match at or above the rejected level (a stranger's claude can no longer produce a wrong home marker); match-before-rejection legs pinned"
   - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D09 (orchestrator call 15) — walk rule realigned to the ARCH-05 binding terminate rule: a PID-reuse guard rejection TERMINATES the walk with result None (no climb to the depth cap, no post-rejection probes); table legs respelled (match before rejection; rejection terminates); supersedes the pass-4 D06 walk-continues wording"
   - "2026-11-20T18:30:00Z (1.3.1): ADV-P9 remediation D02+D01 (orchestrator call 7) — Inv 4 respelled: NO unseeded corpus case exists (pass-8 D10 aligned); the probe is exercised by the dedicated Go table tests with a fake process table, never by parity cases; EC-008 states the D4-EX-1 rider-test closure (NO exclusions.json entry)"
+  - "2026-11-22T00:00:00Z (1.3.2): ADV-P12 remediation D01 (orchestrator call 2, superseding pass-11 call 2) — Inv 4 and EC-008 restated: every corpus case either seeds proc_start or is cache-003, which probes on NEITHER side (oracle: empty fake PATH raises FileNotFoundError at the ps call, caught SL:293-294; hylo: HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0, zero probes); the load-time rejection's admission branch is the conditional fake PATH, whose only committed declarer is cache-003; the former 'no P1 corpus case declares the fake process table' universal dissolved"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -102,15 +103,19 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
    (returned at the match); guard rejection terminates the walk (None, no further
    probes).
 3. The probe never degrades the status line (never-raise helper, design IM-15).
-4. Parity runs never depend on a native value: EVERY corpus case seeds `proc_start` on both sides (design
-   §8 row 023 "T, seeded"); native values have no oracle and NO unseeded corpus case exists (ADV-P9-D02,
-   orchestrator call 7, aligning this invariant with pass-8 D10: no P1 corpus case declares the fake process
-   table, so the load-time rejection below leaves no exception in practice). The probe is exercised by the
+4. Parity runs never depend on a native value: EVERY corpus case either seeds `proc_start` on both sides (design
+   §8 row 023 "T, seeded") or is the `temp-file` case `cache-003`, which probes on NEITHER side (pass-12
+   call 2: the oracle child's conditional fake `PATH` is an EMPTY `bin` directory, so the
+   `ps` subprocess raises `FileNotFoundError` (SL:280-281) caught at SL:293-294 and `claude_window_start`
+   returns None, while the hylo child runs at `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0`, so `FindAncestor`
+   makes zero probes and returns not-found; BC-6.01.002 PC-1). Native values have no oracle. The probe is
+   exercised by the
    dedicated Go table tests with a fake process table — the BC-3.02.002 difference table
    (`TestWindowStart_OD76_*`) and the Windows `TestWindowAge_D4EX1_Windows*` legs — never by parity cases. The
    harness rejection remains in force at case-load time (ADV-P2-D12 disposition): a case with an unseeded
-   `proc_start` and a truthy `session_id` is rejected unless it declares the fake process table
-   (BC-6.02.003 PC-6) — and since no P1 case declares one, every committed case seeds.
+   `proc_start` and a truthy `session_id` is rejected unless it declares the conditional fake `PATH`
+   (BC-6.02.003 PC-6) — and the only committed case that declares one is `cache-003`, whose Go side needs
+   no probe.
 
 ## Edge Cases
 
@@ -123,7 +128,7 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
 | EC-005 | Matching ancestor at depth 6 | Found |
 | EC-006 | Chain reaches ppid 1 before a match | None, nothing written |
 | EC-007 | Ancestor named `Claude` or `claude.exe` on macOS/Linux | No match (case-sensitive; `.exe` strip is Windows-only) |
-| EC-008 | **Windows**, ancestor `claude.exe` found | Go returns its start and `⌂` can show; legacy has no `ps` on Windows, catches `FileNotFoundError`, and never shows `⌂`. Approved deviation **D4-EX-1** (D4, design §5.4): OD-105 named difference entry `D4-EX-1`, dedicated table tests `TestWindowAge_D4EX1_Windows*` with a fake `ProcStarter` that returns a start; each excluded case matches its own expected output file. ADV-P9-D01 / orchestrator call 7: NO `exclusions.json` entry exists for `D4-EX-1` — every corpus case seeds `proc_start`, so no Windows ⌂ case can exist; the id is closed by the rider test alone (BC-6.03.004) |
+| EC-008 | **Windows**, ancestor `claude.exe` found | Go returns its start and `⌂` can show; legacy has no `ps` on Windows, catches `FileNotFoundError`, and never shows `⌂`. Approved deviation **D4-EX-1** (D4, design §5.4): OD-105 named difference entry `D4-EX-1`, dedicated table tests `TestWindowAge_D4EX1_Windows*` with a fake `ProcStarter` that returns a start; each excluded case matches its own expected output file. ADV-P9-D01 / orchestrator call 7: NO `exclusions.json` entry exists for `D4-EX-1` — every corpus case either seeds `proc_start` or is `cache-003` (no probe on either side), so no Windows ⌂ case can exist; the id is closed by the rider test alone (BC-6.03.004) |
 | EC-009 | Sub-second start (e.g. 1794615009.734) | Stored `1794615009.0` |
 | EC-010 | Session cache file is a JSON non-object (e.g. `[]`) | Unreachable here: `effective_rl` degrades first (CP-C01, P3r1 §A7) |
 

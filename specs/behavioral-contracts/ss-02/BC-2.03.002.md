@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.8"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "f60a5ff"
+input-hash: "1c27d7d"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.2.6): ADV-P8 remediation D01 — the three directory resolvers carry the env seam everywhere in this file: ConfigDir(env EnvVars), CacheDir(env EnvVars), StateDir(env EnvVars), matching BC-3.01.001 and ARCH-05"
   - "2026-11-21T06:00:00Z (1.2.7): ADV-P10 remediation D03 (orchestrator call 3) — the pass-9 A11 absoluteness rule propagated to its sibling: a RELATIVE HYLO_PATHS_CACHE_DIR reports the same config error as the status line's grammar (not an absolute path; cache: (unavailable), stderr detail, exit 1 — new EC-012); absoluteness is filepath.IsAbs semantics computed in internal/platform per OS (Windows: drive + root or UNC); HYLO_CONFIG is reserved for P4 and printed as given, no absoluteness check (PC-3/PC-5 scope note)"
   - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation D07 — PC-3's absoluteness scope note names the registry key as paths.cache_dir (the statusline. prefix spelled at :84 was a mis-anchor; the env name HYLO_PATHS_CACHE_DIR only fits paths.cache_dir)"
+  - "2026-11-22T00:00:00Z (1.2.9): ADV-P12 remediation D07 (orchestrator call 10) — PC-4 gains the relative-home disposition: a relative HOME (macOS/Linux) or USERPROFILE (Windows) counts as UNSET for a ~ override (BC-2.01.005 PC-3 / BC-3.01.001 PC-2 kind discipline), so HYLO_CONFIG=~/alt.yaml reports the config: line unavailable with the <VAR> unset detail and never prints a cwd-relative path; HYLO_PATHS_CACHE_DIR=~/c reports 'home directory unknown'"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -111,7 +112,13 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
    PER unavailable line — if all three lines are unavailable, stderr carries three detail
    lines in label order (config, cache, state) (ADV-P1-D13). `<VAR>` is the unset base of
    that line: `HOME` (macOS/Linux), `APPDATA`/`LOCALAPPDATA` (Windows), and for a `~`
-   override on Windows `USERPROFILE` (OD-61).
+   override on Windows `USERPROFILE` (OD-61). A RELATIVE `HOME` (macOS/Linux) or
+   relative `USERPROFILE` (Windows) counts as UNSET for a `~` override — the same home
+   source and kind discipline as BC-2.01.005 PC-3 / BC-3.01.001 PC-2 (pass-12 call 10) —
+   so `HYLO_CONFIG=~/alt.yaml` with a relative home reports the `config:` line
+   unavailable with the `<VAR> unset` detail; it never prints a cwd-relative path, and
+   `HYLO_PATHS_CACHE_DIR=~/c` reports `home directory unknown` (never
+   `not an absolute path`).
 5. The files are not opened, stat'ed or created; `HYLO_*` CONFIG-VALUE settings are not
    validated — an invalid number, boolean, URL or Text value anywhere in the registry does
    not affect this command (the resolved config is never loaded here). The exceptions are

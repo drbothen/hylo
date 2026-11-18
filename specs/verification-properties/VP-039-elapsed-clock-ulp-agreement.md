@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-19T12:00:00Z
+timestamp: 2026-11-21T19:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.07.007.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c323b21"
+input-hash: "8c23d55"
 traces_to: prd.md
 source_bc: BC-1.07.007
 bcs: [BC-1.07.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:01:00Z: ADV-P3 fixes (A2-03) — computation restated to legacy exactly: elapsed = max(now_ms - start, 0)/1000 with now_ms = time.time()*1000 (SL:889, 919; the 0.001-multiply form was wrong); fusion site named as time*1000 - start; oracle corrected from test-local helper agreement to bit-exact comparison against CPython-derived goldens, with the explicit float64() conversion the BC requires forbidding FMA contraction on EVERY arm64 target (darwin, linux, windows — not only darwin/arm64)", "1.2 2026-11-18T14:32:00Z: ADV-P4 fix (A2-09) — build constraint split and made valid: the golden-parity test carries NO build tag (pure float64 comparison, runs on every CI leg including amd64); only the fusion-regime detector is `//go:build arm64` with the comment on its own line; the grid now draws (start, now) pairs at wall-clock epoch-ms magnitude (~1.7e12) with deltas in the ulp neighbourhoods of MM:SS boundaries — the regime the FMA guard protects", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-14, A2-13: golden-parity compares float64 BITS (bit-exact leg) with mmss as the rendered leg; the detector gains the production-vs-unfused bit-exact assertion and its own imports)"]
+modified: ["1.1 2026-11-18T09:01:00Z: ADV-P3 fixes (A2-03) — computation restated to legacy exactly: elapsed = max(now_ms - start, 0)/1000 with now_ms = time.time()*1000 (SL:889, 919; the 0.001-multiply form was wrong); fusion site named as time*1000 - start; oracle corrected from test-local helper agreement to bit-exact comparison against CPython-derived goldens, with the explicit float64() conversion the BC requires forbidding FMA contraction on EVERY arm64 target (darwin, linux, windows — not only darwin/arm64)", "1.2 2026-11-18T14:32:00Z: ADV-P4 fix (A2-09) — build constraint split and made valid: the golden-parity test carries NO build tag (pure float64 comparison, runs on every CI leg including amd64); only the fusion-regime detector is `//go:build arm64` with the comment on its own line; the grid now draws (start, now) pairs at wall-clock epoch-ms magnitude (~1.7e12) with deltas in the ulp neighbourhoods of MM:SS boundaries — the regime the FMA guard protects", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-14, A2-13: golden-parity compares float64 BITS (bit-exact leg) with mmss as the rendered leg; the detector gains the production-vs-unfused bit-exact assertion and its own imports)", "1.4 2026-11-21T19:10:00Z: pass-12 fix (A2-12) — H1 retitled to a bit-exact claim ('match CPython-derived goldens bit-exactly'), retiring the tolerance-reading 'agree at ulp level'; the Property Statement was already the bit-exact contract (not a tolerance claim) and is unchanged"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -30,7 +30,7 @@ removed: null
 removal_reason: null
 ---
 
-# VP-039: Elapsed-clock float computations agree at ulp level across fusion regimes
+# VP-039: Elapsed-clock float computations match CPython-derived goldens bit-exactly across fusion regimes
 
 ## Property Statement
 

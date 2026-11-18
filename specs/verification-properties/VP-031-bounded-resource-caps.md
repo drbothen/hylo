@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T22:00:00Z
+timestamp: 2026-11-21T21:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.04.003.md, prd-supplements/nfr-catalog.md]
-input-hash: "020303d"
+input-hash: "5d46a72"
 traces_to: prd.md
 source_bc: BC-1.03.005
 bcs: [BC-1.03.003, BC-1.03.005, BC-1.04.003]
@@ -26,6 +26,7 @@ modified:
   - "1.4 2026-11-19T22:00:00Z: pass-8 fix (ADV-P8-C2-08, orchestrator call 12) - the testing/quick for-all leg BC-1.04.003's VP-table routes here jointly with VP-030 now exists in this document, stated normatively: for every generated history state, saved length <= 32 and every saved point satisfies now - t < 90 or is the new point; Method bullet, Proof Method table and skeleton updated"
   - "1.5 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-05, orchestrator call 3; ADV-P9-A2-04 side) — the pass-8 joint-routing claim corrected: the BC-1.04.003 testing/quick row is VP-030's ALONE (the BC de-cited VP-031 in pass 8); what BC-1.04.003 routes HERE is the 16-subset point key-order table (VP-030, VP-031), which this document now delivers; the duplicated cap/age for-all removed from this document (VP-030 states it, success-path-qualified); frontmatter converted to a block list and the 1.3 entry's lost closing quote repaired (YAML repair, orchestrator call 5); no history entry lost"
   - "1.6 2026-11-20T18:00:00Z: pass-11 fix (C2-01, orchestrator call 12) — the gen_rate5m fallback `v` is inserted AFTER `k` and `f` (SL:344-345), correcting the statement's buried parenthetical and the SL:333-343 citation (builder SL:338-347); the point key-order table now includes the 8 fallback-v subsets (24 rows total, primary and fallback `v` mutually exclusive) in statement, Method bullet, Proof Method table and skeleton"
+  - "1.7 2026-11-21T21:00:00Z: pass-12 fix (A2-15, P20) — the fourth cap key statusline.sparkline.max_age_s annotated like its siblings (Float(seconds), default 90, finite > 0, interface-definitions registry row, owner BC-1.04.003); the sketch's static-check comment respelled to 'the registry's CAP set is exactly these four keys — a subset filter over the full config registry'"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -48,7 +49,8 @@ mix-cache writer, SL:1153), the 32-point metric histories (config key
 PC-10; legacy `hist[-32:]`, SL:350), the 512 KB transcript read step (config key
 `statusline.transcript.read_cap_bytes`, Int(bytes), default 524288,
 BC-2.01.004 PC-10; legacy `_READ_CAP = 524288`, SL:952), and the 90 s history age cap
-(config key `statusline.sparkline.max_age_s`, 90,
+(config key `statusline.sparkline.max_age_s`, Float(seconds), default 90, finite > 0,
+interface-definitions registry row, owner BC-1.04.003;
 T-007; legacy `SPARK_MAX_AGE = 90.0`, SL:83) — the fourth cap is age-based, pruning
 history points older than 90 s (BC-1.04.003). The "memory-256 mix cache" is that same
 256-id dedup list seen from the
@@ -147,7 +149,8 @@ func TestCaps_LegacyIdentical(t *testing.T) { // defaults equal legacy (A2-06)
     // not package constants; the boundary rows below run at default AND at
     // non-default values, asserting the SAME eviction discipline at any magnitude.
     // no turn-identity window constant exists; a static registry check asserts
-    // the registry set is exactly these four caps (NFR-005).
+    // the registry's CAP set is exactly these four keys (NFR-005) — a subset
+    // filter over the full config registry, not a claim about the whole registry.
 }
 
 func TestPointKeyOrder_SeriesSubsets(t *testing.T) { // pass-9 ADV-P9-A2-05: BC-1.04.003 manual row

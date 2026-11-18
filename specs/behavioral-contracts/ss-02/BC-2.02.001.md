@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "f8d0d71"
+input-hash: "b61608c"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -34,6 +34,8 @@ modified:
   - "2026-11-19T21:00:00Z (1.3.1): ADV-P8 remediation D04+D05+D17 + A2-07 BC rows - `control character` row example corrected (the reroute-all entry range supersedes: a reroute entry yields `expected non-empty control-free text in every entry` per BC-2.01.004 PC-9, so the List-entry example is a model_prefixes item); Text-class minting list drops BC-2.02.003 (number-grammar only); `expected ...` count five -> six; PC-6 [from] tie-break pinned for Windows case twins (byte-exact supplied-name comparison, winner's spelling printed) and index != 0 P1-field values ruled validated per class (per-key error precedes the structural cardinality error); VP-table for-all env-map legs annotated as carried by VP-016 (pass-8 call 12)"
   - "2026-11-20T18:30:00Z (1.3.2): ADV-P9 remediation D20+D06+D05+D08 (orchestrator calls 15+14+9+14) — repeated word 'indexed indexed-entry' fixed; PC-6 [from] provenance respelled (a per-key backends error names the variable that carried the rejected value; the lowest-extra-index tie-break applies to the structural cardinality error); the p75<=p95 pair restated INTRA-key on the one composite key cost.percentiles (error names the whole key with its full JSON value, following error-taxonomy); Text-class reason `invalid UTF-8` minted (Text, glyph, label or separator value not valid UTF-8; Windows WTF-8 lone surrogate), mirrored byte for byte in error-taxonomy"
   - "2026-11-21T06:00:00Z (1.3.3): ADV-P10 remediation D06+A07 (orchestrator calls 6+17) — PC-3 gains the default-layer <value> rule: when no variable supplied the failing value, <value> is the default's env spelling per the interface-definitions Default column (e.g. m_from's 1000000, not 1000000.0/1e+06) and PC-6 omits [from <ENVNAME>]; ascending-pair CTV text pins the example; the path-grammar reason `not an absolute path` (minted pass-9 A11) added to the exact-strings table"
+  - "2026-11-22T00:00:00Z (1.3.4): ADV-P12 remediation D08 (orchestrator call 8) - the invalid-UTF-8 vocabulary row scopes the Windows leg: a lone surrogate cannot occur on the Windows env path (platform.EnvVars decodes UTF-16 with Go's standard U+FFFD substitution, BC-2.01.001 PC-6); the reason is reachable from POSIX byte values only"
+  - "1.3.5 pass-12 residual sweep (orchestrator pass-12 residual call 5): the VP-016 for-all row states the operative rule (if the config-error line is printed it is exactly one LF-terminated line) instead of the tautological either/or, consistent with VP-016 1.9 (A2-17); no behavioral change; 2026-11-23T14:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -135,7 +137,7 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 | `missing host` | URL | BC-2.02.005 |
 | `control character` | URL / theme / Text | BC-2.02.005 (URL class), BC-2.01.003 (theme class), BC-2.01.005 (TEXT class: a control byte in a non-theme free-text key or List item — e.g. `statusline.subagent.joiner` or a `backends[0].model_prefixes` item; a `statusline.lane.reroute_all_prefixes` entry instead yields `expected non-empty control-free text in every entry`, BC-2.01.004 PC-9 superseding per pass-8 D04; OD-178, pass-6 A14) |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
-| `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; on Windows a WTF-8 value with a lone surrogate; minted pass-9 D08 / orchestrator call 14, mirrored byte for byte in error-taxonomy) | BC-2.02.001 (this table), BC-2.01.005, BC-2.01.003 (separator) |
+| `invalid UTF-8` | Text (a Text, glyph, label or separator value that is not valid UTF-8; reachable from POSIX byte values only — on Windows `platform.EnvVars` decodes the UTF-16 environment with Go's standard U+FFFD substitution, so a lone surrogate cannot occur on the env path, BC-2.01.001 PC-6, pass-12 call 8; minted pass-9 D08 / orchestrator call 14, mirrored byte for byte in error-taxonomy) | BC-2.02.001 (this table), BC-2.01.005, BC-2.01.003 (separator) |
 | `empty path` | path | BC-2.01.005 |
 | `not an absolute path` | path | BC-2.01.005 (PC-3: a relative `paths.cache_dir` value; minted pass-9 A11 at BC-2.01.005, synced here per ADV-P10-A07) |
 | `home directory unknown` | path | BC-2.01.005 |
@@ -261,7 +263,7 @@ every registered numeric-range miss in P1 has exactly one reason string.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-016, VP-012 (frontmatter closure) | For every env map, stdout is either the config-error line (exactly one LF, ending `\e[0m\n`) or not; exit is always 0. VP-016 carries this for-all env-map property leg per pass-8 call 12 (A2-07) | Go property test (testing/quick) (Go fuzz over env maps) |
+| VP-016, VP-012 (frontmatter closure) | For every env map, IF the config-error line is printed, it is exactly one LF-terminated line (ending `\e[0m\n`) and nothing further prints on stdout; exit is always 0 (operative rule per VP-016 1.9, A2-17 — the former either/or wording was tautological). VP-016 carries this for-all env-map property leg per pass-8 call 12 (A2-07) | Go property test (testing/quick) (Go fuzz over env maps) |
 | VP-016, VP-012 (frontmatter closure) | A config-error run leaves the cache directory byte-identical (snapshot before/after) | table test |
 | VP-016, VP-012 (frontmatter closure) | statusline prints the config-error line iff `config validate` exits non-zero. VP-016 carries this property leg per pass-8 call 12 (A2-07) | Go property test (testing/quick) |
 

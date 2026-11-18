@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.7"
+version: "1.0.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "7ad8a24"
+input-hash: "d267899"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "new contract (OD-155 config off switch; no legacy counterpart)"
@@ -27,6 +27,7 @@ modified:
   - "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
   - "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
   - "1.0.7 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02/C05) — frontmatter modified list repaired to block style (lost closing quote restored); enabled=false recast as ruled new behavior (OD-155), not a DI-012 named deviation, in Description, VP-005 row and Traceability — agrees with VP-005"
+  - "1.0.8 2026-11-23T12:00:00Z: pass-12 remediation (ADV-P12-C03) — PC5/Inv3/EC-004 state the plural diagnostic: each invalid key contributes one `hylo: config error: ...` line on stderr, the full list in registry order, not a single line (pass-5 A08 supplement correction propagated to the owning BC)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,8 +65,11 @@ treats omitted rows as "keep the default body").
 4. With the switch off, no cache write, no env read other than config resolution, and no ledger access
    occurs (DI-007).
 5. Config-resolution error while routed to the subagent entry (any invalid value, e.g. an invalid
-   boolean spelling): stdout receives ZERO bytes and the `hylo: config error: <key>=<value> (<reason>)`
-   diagnostic goes to stderr (OD-168); the grey config-error line of BC-2.02.001 is NOT printed in this
+   boolean spelling): stdout receives ZERO bytes and EACH invalid key contributes one
+   `hylo: config error: <key>=<value> (<reason>)` diagnostic line on stderr — all reason lines (the
+   full list, in registry order), not a single line (OD-168; the singular wording was corrected
+   pass-5 A08 in the supplements and is propagated here per ADV-P12-C03); the grey config-error line
+   of BC-2.02.001 is NOT printed in this
    mode because it is not NDJSON and would corrupt the agent-panel row stream. Exit code 0 carries over
    from the D4-EX-3 contract (OD-168 rules the byte routing, not the exit path).
 
@@ -76,8 +80,8 @@ treats omitted rows as "keep the default body").
 2. The default lives in the `internal/config` schema with its rationale (D15: config over code); no
    hard-coded toggle in logic.
 3. Boolean grammar errors are config errors (BC-2.02.001 class, D4-EX-3), not silent disables (DI-012:
-   an unparseable value must not masquerade as `false`); in this mode the diagnostic is rerouted to
-   stderr with zero stdout bytes (OD-168).
+   an unparseable value must not masquerade as `false`); in this mode the diagnostics are rerouted to
+   stderr (one line per invalid key, in registry order) with zero stdout bytes (OD-168).
 
 ## Edge Cases
 
@@ -86,7 +90,7 @@ treats omitted rows as "keep the default body").
 | EC-001 | Key absent | Defaults to `true` (= legacy; backward compatibility with recorded parity fixtures) |
 | EC-002 | `enabled = false` with well-formed tasks on stdin | Zero bytes, exit 0; CC shows its default row bodies |
 | EC-003 | `enabled = false` with malformed stdin | Still zero bytes, exit 0 (config check precedes any stdin parse) |
-| EC-004 | Invalid boolean spelling (e.g. `on`) | Config error (D4-EX-3 boolean class, BC-2.02.001 format; reason vocabulary entry `not a boolean (true\|false\|1\|0\|yes\|no)` byte-exact): stdout receives zero bytes; the `hylo: config error: <key>=<value> (<reason>) [from <ENVNAME>]` diagnostic goes to stderr; exit 0 — NOT a fallback to true or false (OD-168). Grammar-valid spellings (`yes`, `1`, `true`, …) resolve true and are NOT errors (BC-2.01.005: `true`, `1`, `yes` → true) |
+| EC-004 | Invalid boolean spelling (e.g. `on`) | Config error (D4-EX-3 boolean class, BC-2.02.001 format; reason vocabulary entry `not a boolean (true\|false\|1\|0\|yes\|no)` byte-exact): stdout receives zero bytes; the `hylo: config error: <key>=<value> (<reason>) [from <ENVNAME>]` diagnostic line goes to stderr (one line per invalid key, in registry order — a single invalid key prints exactly one; ADV-P12-C03); exit 0 — NOT a fallback to true or false (OD-168). Grammar-valid spellings (`yes`, `1`, `true`, …) resolve true and are NOT errors (BC-2.01.005: `true`, `1`, `yes` → true) |
 
 ## Canonical Test Vectors
 

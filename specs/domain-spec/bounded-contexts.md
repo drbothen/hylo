@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "bounded-contexts"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T08:15:29Z
+timestamp: 2026-11-21T08:15:29Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, docs/PLAN.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "4a28fa1"
+input-hash: "f916146"
 traces_to: L2-INDEX.md
 ---
 
@@ -32,7 +32,7 @@ traces_to: L2-INDEX.md
 | BC7 | Session Cockpit (status line) | Two-row render from stdin/transcript/metrics/caches, plus the `--subagent` agent-panel rows (OD-155; JSON rows, zero stdout bytes, or the 29-byte degraded line in that mode — BC-1.07.008); degraded ladder | P1 | widget, pill, thermometer, freshness ladder, degraded line |
 | BC8 | Cost Accounting | Cost history, percentile colors, owned-hardware cost, backfill | P1 (backfill P6) | cost entry, percentile band, ⛏ |
 | BC9 | Turn Control | Stop-hook policing: language, fake stop, Kev oracle | P4 | fake stop, verdict, colon fake |
-| BC10 | Trust & Platform | CA lifecycle, doctor, per-OS platform services | P4 | trust root, doctor check |
+| BC10 | Trust & Platform | CA lifecycle, doctor, per-OS platform services | P4 (per-OS platform services P1) | trust root, doctor check |
 
 ## Relations
 

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.17"
+version: "1.18"
 status: draft
 producer: architect
-timestamp: 2026-11-21T09:00:00Z
+timestamp: 2026-11-21T18:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "a83ec9b"
+input-hash: "7e0e51e"
 
 ---
 
@@ -83,12 +83,12 @@ input-hash: "a83ec9b"
   - POSIX oracle child: `HOME`, `USERPROFILE`, `TMPDIR`, `LANG`, `TZ`,
     `PYTHONPATH`, `HYLO_TEST_NOW`, `LOCAL_MODEL_PREFIXES`, `DGX_SL_VM_URL`
     (+ the OTHER `DGX_SL_*` keys
-    the case sets, + `COLUMNS` when declared, + `PATH` when a fake table is
-    declared).
+    the case sets, + `COLUMNS` when declared, + `PATH` when the fake-`PATH`
+    condition holds).
   - Windows oracle child: the POSIX set, plus `TMP`, `TEMP`, `SYSTEMROOT` and
     `PYTHONIOENCODING=utf-8` (OD-183; the same conditional additions apply: + the
-    other `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when a fake
-    table is declared).
+    other `DGX_SL_*` keys the case sets, + `COLUMNS` when declared, + `PATH` when the
+    fake-`PATH` condition holds).
   - POSIX Go child: `HOME`, `USERPROFILE`, `TMPDIR`, `XDG_CACHE_HOME`,
     `LOCALAPPDATA`, `HYLO_PATHS_CACHE_DIR`, `LANG`, `TZ`, `HYLO_TEST_NOW`,
     `HYLO_BACKENDS_0_MODEL_PREFIXES`, `HYLO_BACKENDS_0_METRICS_URL`
@@ -111,7 +111,7 @@ input-hash: "a83ec9b"
   suffix). BC-6.01.002's exact key sets and its CTVs copy that (a settings-`{}`
   CTV still expects the metrics keys present).
   `HOMEDRIVE`/`HOMEPATH` are NOT constructed keys on any OS (home is
-  `HOME`+`USERPROFILE`); no key set on any OS includes `PATH` unless the fake-table
+  `HOME`+`USERPROFILE`); no key set on any OS includes `PATH` unless the fake-`PATH`
   condition holds; `HOME` is present on BOTH OSes (Windows included) and
   `USERPROFILE` on BOTH OSES (POSIX included), always the same case-temp value —
   both are set because Python 3.8+ `expanduser` ignores `HOME` on Windows, and
@@ -134,16 +134,28 @@ input-hash: "a83ec9b"
   open CRLF→LF conversion of the ORACLE's stdout on the Windows legs, BEFORE the byte
   comparison (hylo's bytes are NEVER converted — hylo writes LF itself — and the shim
   does NO newline reconfigure). Conditional `PATH`: `PATH=<case>/bin`,
-  ONLY when the case declares a subprocess-fake table (the fake `ps` of BC-3.02.002);
-  the value is the harness constant, never the runner's `PATH`; cases without a fake
-  table get no `PATH` key (ADV-P1-D05 resolution) — with no `PATH` key, CPython's
+  ONLY when the case declares the fake-`PATH` condition — a subprocess-fake table
+  (the fake `ps` of BC-3.02.002) or the `cache-003` EMPTY-bin declaration (pass-12
+  call 2, below); the value is the harness constant, never the runner's `PATH`; cases
+  without the condition get no `PATH` key (ADV-P1-D05 resolution) — with no `PATH`
+  key, CPython's
   subprocess fallback searches `os.defpath` (`/bin:/usr/bin`, SL:280), which is why
-  the harness rejects an unseeded case with a truthy `session_id` unless a fake table
-  is declared (ADV-P2-D12; BC-6.02.003 PC-6). Consumer status (pass-8 D10 /
-  orchestrator call 16): NO P1 corpus case declares a subprocess-fake table — the
-  OD-76 D1-D4 vectors are Go table tests (BC-3.02.002) — so the conditional fake-`PATH`
-  machinery has no P1 consumer; it is kept for the validator's rejection rule
-  (BC-6.02.003 PC-6) and later phases (BC-6.01.002).
+  the harness rejects an unseeded case with a truthy `session_id` unless the
+  condition is declared (ADV-P2-D12; BC-6.02.003 PC-6). Consumer status (pass-8 D10 /
+  orchestrator call 16; corrected pass-12 call 2): the conditional fake-`PATH`
+  machinery's FIRST P1 consumer is `cache-003`, with an EMPTY `<case>/bin` directory
+  and NO fake process table — the oracle child's `subprocess.run(["ps", ...])` raises
+  FileNotFoundError, caught in legacy's handler (SL:293-294), so
+  `claude_window_start` returns None; the hylo child instead gets
+  `HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0`, so `FindAncestor` makes ZERO probes and
+  returns not-found (BC-3.02.001: at most `max_depth` probes). Both sides render no
+  window-age segment; NEITHER side reads the runner's real process tree; the
+  session-cache `proc_start` target stays unseeded, so the temp-file leak happens,
+  and legacy never reaches the SL:286-288 save, so the leak count stays "up to two".
+  Every other P1 corpus case seeds `proc_start`; no P1 case declares a fake `ps`
+  process table — the OD-76 D1-D4 vectors are Go table tests (BC-3.02.002). The
+  machinery is kept also for the validator's rejection rule (BC-6.02.003 PC-6) and
+  later phases (BC-6.01.002).
   Forbidden on both OSes: NO other `PYTHON*` variable except `PYTHONPATH` (EC-002: no
   `PYTHONUTF8` on either OS — BC-1.01.008 inv 2: `PYTHONUTF8=1` is NOT
   the parity mode; `PYTHONIOENCODING` appears on Windows only, as the OD-183
@@ -152,7 +164,12 @@ input-hash: "a83ec9b"
 - Clock shim `internal/statusline/testdata/pyhooks/sitecustomize.py` on `PYTHONPATH`
   freezes `time.time`/`strftime`/`localtime`/`gmtime` from `HYLO_TEST_NOW` (decimal
   string parsed by both sides), stepped between refreshes; canary test fails the harness
-  if the shim did not load (BC-6.01.003). Frozen-clock law (pass-5 D02, call 7): the
+  if the shim did not load (BC-6.01.003) — the canary's CLOCK leg is the gating
+  shim-loaded detector on every leg (BC-6.01.003 PC-4 first bullet); its STDIO leg is
+  an environment check of the end-to-end UTF-8 round trip under the builder env and
+  NOT a shim detector — it stays gating for the UTF-8 round trip only, its
+  "discriminates a missing shim" claims are withdrawn, and the PC-5 no-shim negative
+  control is dropped (pass-12 call 7). Frozen-clock law (pass-5 D02, call 7): the
   shim parses `HYLO_TEST_NOW` to a float64 exactly as Python `float()` (within the BC
   grammar) and that float IS the `time.time()` value everywhere — Go parses the value
   to float64 once and `Env.Now` returns it directly; it is never round-tripped through
@@ -195,7 +212,7 @@ input-hash: "a83ec9b"
 | Canary | `TestParityCanary_ShimLoaded` |
 | Exclusion machinery | `TestParityExclusions_ClosedSet` |
 | Cache swap | `TestParityCacheSwap_FourCaches` |
-| Oracle-dependent test selector | `ORACLE_TESTS` — the ONE named mechanism (ADV-P11-A07, pass-11 orchestrator call 8): pattern constant `^(TestParityTierA_Corpus\|TestParityCanary_ShimLoaded\|TestParityCacheSwap_FourCaches)$`; every test needing the resolved Python oracle is a member (a new oracle-dependent test extends the pattern, never a second mechanism); the plain test step, the coverage job and the release job pass `-skip $ORACLE_TESTS`, the dedicated Tier A job runs `-run $ORACLE_TESTS` |
+| Oracle-dependent test selector | `ORACLE_TESTS` — the ONE named mechanism (ADV-P11-A07, pass-11 orchestrator call 8; member set corrected pass-12 call 6): pattern constant `^(TestParityTierA_Corpus\|TestParityCanary_ShimLoaded\|TestParityCacheSwap_FourCaches\|TestParityTierC_DiffFuzz\|TestTiming)$` — FIVE members, every test that starts the resolved Python oracle (`TestParityTierC_DiffFuzz` drives both sides; `TestTiming` must report the CPython oracle median, BC-6.04.002 PC-2); a new oracle-dependent test extends the pattern, never a second mechanism; the plain test step, the coverage job and the release job pass `-skip $ORACLE_TESTS` (they install no interpreter), and the THREE Python-installing jobs each `-run` their own member(s): the dedicated Tier A job (`TestParityTierA_Corpus` + `TestParityCanary_ShimLoaded` + `TestParityCacheSwap_FourCaches`), the timing job (`TestTiming`), the nightly fuzz job (`TestParityTierC_DiffFuzz`) — each prints the resolved CPython patch (pass-12 call 5) |
 | Corpus hygiene | `TestCorpusHygiene` (settled, NFR-006) |
 | Case dirs | `internal/statusline/testdata/parity/cases/<case-id>/` (corpus root; OD-148, matching BC-6.02.001/.003, BC-6.04.003) |
 | case-id grammar | `<family>-<nnn>[-<variant>]`, families: frame, row1, transcript, row2, cost, cache, platform, cfgerr, swap, subagent, cps01..cps17, cpt01..cpt07, cpt09 (the Windows-only CP-T09 MSVC localtime-domain family, pass-8 orchestrator call 2 — cpt08 is retired and not reused), cpn01..cpn03, cpo01..cpo12, cpa01..cpa05. SUBAGENT FAMILY RULE (restated pass-10 orchestrator call 2, superseding the pass-7 `-sub` suffix spelling): a subagent case is a case of the `subagent` FAMILY — id `subagent-<nnn>[-<variant>]` — and the corpus validator gives argv `["--subagent"]` to exactly that family; there is NO `-sub` suffix rule (BC-6.01.001/BC-6.02.003/BC-6.03.001 state this one family rule) |
