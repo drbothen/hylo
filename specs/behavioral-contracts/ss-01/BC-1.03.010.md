@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "650b999"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_iso_ts, _finish_turn, _mix_counts (SL:954-996, 1064-1087)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: CP-O08 vector made self-contained (exact line templates, 100/467/160 B) and byte math re-pinned from the oracle — size 727 = 567 + 160 deleted, conv 3, cur null per OD-167 (was 656/conv 5/131 B; ADV-P4-C09)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C05/C02) — EC-009 pins the CP-O08 close-reached shortcuts (t0 null, out <= 0, span <= 0; SL:996 divide unreachable) with three oracle-run non-raising vectors; CP-O08 vector names the PC4(b) oracle explicitly"]
+modified: ["1.2.1 2026-11-17: EC-009 close-time overflow cross-ref (CP-T08, OD-156; ADV-P2-C01)", "1.2.2 2026-11-17: EC-009 overflow cited by taxonomy id CP-O08 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C06/C10/C17/C18): EC-009 redesigned per ruling OD-167 (closer skipped and in-flight turn dropped, no sticky state), finite ranges, CP-O08 canonical vector, DI-012 cited", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: CP-O08 vector made self-contained (exact line templates, 100/467/160 B) and byte math re-pinned from the oracle — size 727 = 567 + 160 deleted, conv 3, cur null per OD-167 (was 656/conv 5/131 B; ADV-P4-C09)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C05/C02) — EC-009 pins the CP-O08 close-reached shortcuts (t0 null, out <= 0, span <= 0; SL:996 divide unreachable) with three oracle-run non-raising vectors; CP-O08 vector names the PC4(b) oracle explicitly", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C01/C03) — Pre2 and EC-008 gain the Windows MSVC-domain naive-timestamp `ErrLocaltimeDomain` leg (whole line degrades; BC-5.04.001 PC6); PC2 and Inv2 pin Python `==` turn identity (no identity shortcut; NaN id opens a new turn per line) vs dedup's set-membership identity short-circuit, with the full-cache 420 B NaN-id oracle vector; VP table and VP Anchors gain the owned CP-O08 D4-EX-2 legs (VP-013 register, VP-012 closure; ADV-P6-C06)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,7 +45,11 @@ segment (BC-1.04.018).
 1. A decoded object line `e` (D4-EX-2 skips applied first, BC-1.03.018); `cur`, `lu`, `lr` from the cache (or
    null after reset).
 2. `t_line = FromISOFormat(e.timestamp with "Z" replaced by "+00:00")` (BC-5.04.001): a non-string or unparsable
-   timestamp gives null; a naive timestamp is local time (`Env.Loc`).
+   timestamp gives null; a naive timestamp is local time (`Env.Loc`). On Windows, a naive timestamp whose
+   `LocalToUnix` probe leaves MSVC's domain — on or before 1970-01-01, or year 3001 or later — raises
+   `ErrLocaltimeDomain` (distinct from the `ErrValue` that means null): the caller degrades the whole line,
+   reproducing legacy's uncaught `OSError` (SL:983-985 catches `ValueError` only; BC-5.04.001 PC6,
+   ADV-P5-D01/owner call 8; ADV-P6-C01).
 3. Config (D15): `statusline.turn.dim_below_out` = 200 tokens (T-055; documented: owner decision 2026-11-13 from a
    replay of 456 local-lane and 193 cloud-lane messages — shorter replies are latency-dominated, shown dimmed);
    `statusline.turn.floor_tps` = 15.0 (T-057; documented: the harness's per-agent decode floor);
@@ -60,7 +64,10 @@ segment (BC-1.04.018).
 
 1. **Untimed line** (`t_line` null): no turn-state change.
 2. **Timed assistant line with truthy `message.id`** (`m = e.message or {}`):
-   - if `cur` is non-empty and `cur.id == m.id`: `cur.t1 = t_line` (position of `t1` in `cur` kept);
+   - if `cur` is non-empty and `cur.id == m.id`: `cur.t1 = t_line` (position of `t1` in `cur` kept). The comparison
+     is Python `==` over the decoded values — **no identity shortcut** (SL:1074), so `NaN == NaN` is False and every
+     line with a decoded `NaN` id opens a **new turn** (ADV-P6-C03); this is the opposite of dedup membership, which
+     set membership short-circuits on the shared NaN object (BC-1.03.005 PC5(a));
    - else: `lr = finish(cur, lr)`; `cur = {"id": m.id, "t0": lu, "t1": t_line, "out": (m.usage or {}).output_tokens
      or 0}` (key order `id, t0, t1, out`).
 3. **Timed assistant line without a truthy id**: no change.
@@ -78,7 +85,10 @@ segment (BC-1.04.018).
 ## Invariants
 
 1. The turn step runs before the compaction check and before usage counting for the same line.
-2. Turn identity uses `cur.id` only, never the dedup memory (BC-1.03.017).
+2. Turn identity uses `cur.id` only, never the dedup memory (BC-1.03.017). The identity step is Python `==` on the
+   decoded values (SL:1074, no identity shortcut — a decoded `NaN` id compares unequal to itself, so each line of
+   that id opens a new turn), whereas dedup membership is set membership with an identity short-circuit on the
+   shared decoded `NaN` (BC-1.03.005 PC5(a); ADV-P6-C03).
 3. `finish` tests `cur`/`t0` before reading `out`, so a `t0`-null turn with a non-numeric `out` never fails
    (BC-1.03.021).
 4. A turn's `t0` is the `lu` at opening time; consecutive messages without a user line in between share `t0`.
@@ -94,7 +104,7 @@ segment (BC-1.04.018).
 | EC-005 | Out < 200 | rate shown dimmed: `[r, true]` (row T17) |
 | EC-006 | First line `output_tokens` NaN | `[NaN, false]` (row T16) |
 | EC-007 | Opening line with non-numeric `out` and `lu` set | legacy CP-T05 (crash at close); hylo skips the opening line (D4-EX-2, BC-1.03.018) |
-| EC-008 | Naive timestamp (`2026-11-14T10:00:00`) | interpreted in `Env.Loc` (BC-5.04.001) |
+| EC-008 | Naive timestamp (`2026-11-14T10:00:00`) | interpreted in `Env.Loc` (BC-5.04.001); on Windows, a naive value outside MSVC's domain (on or before 1970-01-01 or year 3001+, ADV-P6-C01) raises `ErrLocaltimeDomain` and the whole line degrades — legacy reproduced (BC-5.04.001 PC6) |
 | EC-009 | Closing a turn whose `out` is a huge int (magnitude ≥ 2^1024 − 2^970, ADV-P3-C07) with a float `span`: legacy raises `OverflowError` at SL:994/996 (oracle-verified). **The close is only reached when `t0` is non-null, `out > 0` and `span > 0`** (SL:991-994): a `t0`-null turn returns at SL:991, `out <= 0` (so a huge **negative** `out` never raises) and `span <= 0` return the previous `lr` before the stale-margin multiply (Python `or` short-circuit), and the SL:996 divide is unreachable for CP-O08 magnitudes because the SL:994 multiply raises first. A magnitude-only predicate would skip closers legacy processes cleanly — the three non-raising closers are pinned as canonical vectors below (ADV-P5-C05) | CP-O08: hylo skips the **closer** line **and drops the in-flight turn** (`cur` → null; `lr`, `lu` unchanged), so later lines parse normally — no sticky state (ruling OD-167; ARCH-03 `#transcript`); legacy instead keeps the bad turn open, so every later closer re-raises and totals freeze (BC-1.03.018) |
 
 ## Canonical Test Vectors
@@ -112,6 +122,7 @@ The exhaustive pinned table is BC-1.03.016 (20 rows). Representative rows (TZ=UT
 | Shortcut `t0` null (non-raising, ADV-P5-C05; TZ=UTC, compact `json.dumps` separators with LF, no prior user line so `lu`/`t0` are null): `A_big` id `A` usage `{'output_tokens': 10^309}` ts 10:00:02Z (453 B), `B10` id `B` usage `{'output_tokens': 300}` ts 10:00:10Z (146 B). Legacy closes `A_big`'s turn at SL:991 — **no raise**, renders normally (oracle-run 2026-11-18); hylo identical (byte-exact) | cache exactly `{'size': 599, 'res': 0, 'conv': 2, 'think': 0, 'tin': 0, 'tout': <10^309 + 300>, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 0, 'ids': ['A', 'B'], 'lr': null, 'lu': null, 'cur': {'id': 'B', 't0': null, 't1': 1794650410.0, 'out': 300}}` (`<10^309 + 300>` = the 310-digit power of ten followed by the digits `300`) | edge-case |
 | Shortcut `out <= 0` (non-raising, ADV-P5-C05; a huge **negative** `out` returns at SL:993 before the multiply): `U0` (92 B), `A2` id `A` usage `{'output_tokens': -10^309}` ts 10:00:02Z (454 B), `B10` id `B` usage `{'output_tokens': 300}` ts 10:00:10Z (146 B). Legacy closes cleanly (oracle-run 2026-11-18); hylo identical (byte-exact) | cache exactly `{'size': 692, 'res': 0, 'conv': 4, 'think': 0, 'tin': 0, 'tout': <-10^309 + 300>, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 0, 'ids': ['A', 'B'], 'lr': null, 'lu': 1794650400.0, 'cur': {'id': 'B', 't0': 1794650400.0, 't1': 1794650410.0, 'out': 300}}` | edge-case |
 | Shortcut `span <= 0` (non-raising, ADV-P5-C05; `t1 == t0` → span 0 returns at SL:993 before the multiply — the order `out <= 0 or span <= 0 or span > stale × out / floor` short-circuits): `U0` (92 B), `A2` id `A` usage `{'output_tokens': 10^309}` ts **10:00:00Z** (453 B, same second as `U0`), `B10` id `B` usage `{'output_tokens': 300}` ts 10:00:10Z (146 B). Legacy closes cleanly (oracle-run 2026-11-18); hylo identical (byte-exact) | cache exactly `{'size': 691, 'res': 0, 'conv': 4, 'think': 0, 'tin': 0, 'tout': <10^309 + 300>, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 0, 'ids': ['A', 'B'], 'lr': null, 'lu': 1794650400.0, 'cur': {'id': 'B', 't0': 1794650400.0, 't1': 1794650410.0, 'out': 300}}` | edge-case |
+| NaN-id turn identity (ADV-P6-C03; oracle-run 2026-11-18, `/opt/homebrew/anaconda3/bin/python3 -I` 3.11.7, isolated HOME): compact lines, TZ=UTC — `U0` (user, ts 10:00:00Z), then twice `{"type": "assistant", "message": {"id": NaN, "content": [{"type": "text", "text": "x"}], "usage": {"output_tokens": <out>}}, "timestamp": "<ts>"}` with (out 300, ts 10:00:02Z) and (out 900, ts 10:00:10Z); no closer; the 420 B file holds the three LF-terminated lines. Dedup: the second NaN line's id hits `seen_ids` **by identity** (shared `json.loads` NaN constant), so its usage is ignored (`tout` 300). Identity: `NaN == NaN` is False, so the second line opens a **new** turn — legacy finishes the first: `lr = [150.0, false]` (300 / 2.0 s span), `lu` = 1794650400.0, and the persisted `cur` is `{"id": NaN, "t0": 1794650400.0, "t1": 1794650410.0, "out": 900}` | cache exactly `{'size': 420, 'res': 0, 'conv': 4, 'think': 0, 'tin': 0, 'tout': 300, 'c_wr': 0, 'c_rd': 0, 'mixv6': 1, 'c_in': 0, 'rb': 0, 'pp': 0, 'ids': [NaN], 'lr': [150.0, false], 'lu': 1794650400.0, 'cur': {'id': NaN, 't0': 1794650400.0, 't1': 1794650410.0, 'out': 900}}` (full-cache oracle bytes, run 2026-11-18; `pp` 0 is the rebuild baseline after the counted NaN line). A port reusing the dedup key for turn identity writes `lr: null` / `out: 300` — the defect ADV-P6-C03 pins | error |
 
 ## Verification Properties
 
@@ -119,6 +130,8 @@ The exhaustive pinned table is BC-1.03.016 (20 rows). Representative rows (TZ=UT
 |--------|----------|-------------|
 | VP-029 | `finish` is pure and equals the CPython oracle for random `(out, t0, t1)` incl. NaN/inf | Go property test (testing/quick) vs oracle table |
 | VP-029 | Go and legacy turn state agree on random timed transcripts | fuzz (Tier C) |
+| VP-013 | The CP-O08 vector leg this contract owns is a D4-EX-2 wrong-shape leg: the closer skip leaves no partial mutation and (OD-167) drops the in-flight turn (register VP-013; ADV-P6-C06) | Go property/table test over the owned vector |
+| VP-012 | The CP-O08 exclusion entry this contract owns rides the D4-EX-2 closure check (BC-1.03.018 PC5 names this contract's vector rows among the dedicated tests) | repository test over `exclusions.json` |
 
 ## Traceability
 
@@ -153,6 +166,8 @@ S-TBD — turn machine
 ## VP Anchors (Recommended)
 
 - VP-029 — `finish` oracle parity
+- VP-013 — the owned CP-O08 D4-EX-2 leg (no partial mutation, OD-167 drop)
+- VP-012 — closure cover for the owned D4-EX-2 exclusion entry
 
 ---
 

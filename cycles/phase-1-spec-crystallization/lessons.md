@@ -167,6 +167,8 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   so no spec fact changed; agent briefs must name the interpreter path (CPython
   3.11.7, `python3 -I`) explicitly for every oracle run.
 
+**Closes:** D-448(b) codified (exhaustive oracle-interpreter-path-in-agent-briefs strand)
+
 ## L-PG-18 [process-gap] — One measurement per fact: one agent, end to end
 
 - **Lesson:** (discovered 2026-11-18, ADV pass-5 burst) Two agents measured the
@@ -177,6 +179,8 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   end on the real program; every other site consumes the pinned value instead of
   re-measuring.
 
+**Closes:** D-448(b) codified (exhaustive one-measurement-per-fact strand)
+
 ## L-PG-19 [process-gap] — Mint canonical lists centrally before parallel dispatch
 
 - **Lesson:** (discovered 2026-11-18, ADV pass-5 burst) Parallel agents minted
@@ -186,4 +190,41 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   are minted once, centrally, before dispatch; parallel agents receive the
   canonical list and mint nothing on their own.
 
-**Closes:** D-448(b) codified (pass-5 process strands: oracle interpreter path in briefs, duplicate parallel measurement, centrally minted glyph registries)
+**Closes:** D-448(b) codified (exhaustive centrally-minted-canonical-lists strand)
+
+## L-PG-20 [process-gap] — Verify every agent's changes on disk, regardless of its report
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-6 burst) Several agents returned
+  garbled or non-English reports, and one made zero edits while reporting
+  nothing usable; the reports alone were not a reliable record of what had
+  actually changed on disk.
+- **Remedy:** Every agent's changes are verified on disk by diff and a
+  non-English scan, regardless of what its report claims; the report is an
+  index to the diff, never the evidence itself.
+
+**Closes:** D-448(b) codified (exhaustive on-disk-verification-of-agent-changes strand)
+
+## L-PG-21 [process-gap] — Verify fix-agent rejections on disk like fixes
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-6 burst) A pass-5 fix agent
+  wrongly rejected a valid finding, ADV-P5-D16, judging it not a defect;
+  ADV-P6-D07 re-raised the same fact and the rejection was overturned.
+- **Remedy:** A rejection is a claim like a fix: it is verified on disk against
+  file content and the settled ODs before it is accepted, and an overturned
+  rejection is recorded so the finding is not re-litigated.
+
+**Closes:** D-448(b) codified (strands ADV-P5-D16 + ADV-P6-D07 fix rejections verified on disk)
+
+## L-PG-22 [process-gap] — VP Go sketches are non-normative illustration
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-6 burst) The Go blocks inside
+  verification properties could not be type-checked in the spec tree and
+  churned every pass — syntax and API-spelling defects were filed against them
+  repeatedly across passes.
+- **Remedy:** OD-182: each VP Go block is labelled "Illustrative sketch
+  (non-normative, not compiled; OD-182)"; normative VP content = property
+  statement, oracle, method, inputs, pass/fail rule. Sketch-only defects are
+  cosmetic; a property that is only clear from its sketch is a HIGH defect
+  against the statement.
+
+**Closes:** D-448(b) codified (exhaustive non-normative-VP-sketches-labelled strand)

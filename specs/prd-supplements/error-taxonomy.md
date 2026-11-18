@@ -1,20 +1,21 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.9"
+version: "1.10"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T06:25:00Z
+timestamp: 2026-11-19T06:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "cbbb005"
+input-hash: "4093cad"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
   - "1.7 2026-11-18: pass-5 remediation — seventh D4-EX-3 class Text (OD-178) with exact reason strings; CP-O06/O07 site widening per BC-1.03.018 (ADV-P4-C08); CP-O10/O11 bearer sites split stdin/history; CP-O09 divergence claim corrected (temp-file, not D4-EX-2; ADV-P5-A21); CP-N03 insertion-order wording (ADV-P5-C2-21)"
   - "1.8 2026-11-18: pass-5 residual sweep — glyph Text reason string matched byte for byte to the class contract vocabulary (expected exactly 1 code point and 1 display column); no behavioral change"
   - "1.9 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19/SC-20) — history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - "1.10 2026-11-19T06:00:00Z: pass-6 remediation — closed exclusion set extended to twelve ids (OD-181 metrics transport beyond plain http); `control character` reason extended to the Text class for non-theme free-text keys and List entries; new List-entry violation reason string; TestD4EX3_Text is a Go table test only, not a parity exclusion entry (beside the Theme note); E-REN-002 gains the CP-N03 carrier cites; CP-O10 history-bearer trigger narrowed to the SL:255 division only; no behavioral change (ADV-P6-A14/D14/C2-13; OD-181)"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -42,7 +43,7 @@ modified:
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05 and CP-O10/O11, and the Surface 3 subagent family CP-A01..A05 (the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05 and CP-O10/O11, and the Surface 3 subagent family CP-A01..A05 (the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade) — BC-1.02.026/.027, BC-1.02.020, BC-1.04.014/.015, BC-1.04.001, BC-1.04.005 (CP-N03 carriers; pass-6 C2-13), BC-1.03.015, BC-1.05.007, BC-1.07.007/.008 |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
@@ -79,10 +80,12 @@ checked before E-CFG-001.
 | `non-ASCII digit` | number-grammar | BC-2.02.003 |
 | `not a number` / `not an integer` | number-grammar | BC-2.02.003 |
 | `not finite` / `negative` / `must be > 0` / `out of range` | number-range | BC-2.02.002/.003 |
+| `ascending pair violated (k_from <= m_from)` | number-range (cross-key pair check, fired at `m_from`'s validation; pass-6 A19) | BC-2.01.004 |
 | `not a boolean (true\|false\|1\|0\|yes\|no)` | boolean | BC-2.01.005 |
 | `unknown value (<v1>\|<v2>\|...)` | enum | BC-2.02.004 |
 | `scheme must be http or https` / `not a URL` / `missing host` | URL | BC-2.02.005 |
-| `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) | BC-2.02.005, BC-2.01.003 |
+| `control character` | URL (BC-2.02.005) / theme (BC-2.01.003) / Text (OD-178: control bytes in non-theme free-text keys and List entries — e.g. `statusline.subagent.joiner`, a `statusline.lane.reroute_all_prefixes` entry; pass-6 A14) | BC-2.02.005, BC-2.01.003, BC-2.01.005 |
+| `expected non-empty control-free text in every entry` | Text (List-entry violations, e.g. `statusline.lane.reroute_all_prefixes` empty or control-byte entry; OD-179 range + OD-178 class; pass-6 A14) | BC-2.01.004 |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `expected JSON <shape>` (`<shape>` = e.g. `array of 2 numbers`, `object {cc,other} of integers`) | Text (composite shape; OD-178) | BC-2.01.005 |
 | `expected non-empty control-free text of display width 1..16` | Text (pill labels; OD-178) | BC-2.01.005 |
@@ -96,13 +99,17 @@ OD-140 + Text by OD-178) are the classes with dedicated class contracts and D4-E
 table tests. The canonical D4-EX-3 table tests are `TestD4EX3_Boolean`, `TestD4EX3_Enum`,
 `TestD4EX3_URL`, `TestD4EX3_Number` (range and grammar classes merged into one test;
 pass-4 D22) and `TestD4EX3_Text` (OD-178); there is no Theme member (theme settings are
-rejected by the corpus validator; pass-4 D22). The theme class keeps its dedicated class
+rejected by the corpus validator; pass-4 D22). Symmetrically, there is no `TestD4EX3_Text`
+parity exclusion entry: Text-family keys (glyphs, labels, suffix, composites) likewise have
+no legacy analog, so `TestD4EX3_Text` is a Go table test only, not a parity corpus case
+(pass-6 call 1). The theme class keeps its dedicated class
 contract BC-2.01.003. The vocabulary above also contains reasons raised under the same
 E-CFG-001 surface by other contracts: the path-grammar reasons (`empty path`,
 `home directory unknown`) come from BC-2.01.005 and the backends-cardinality reason from
 BC-2.01.002 — each maps to its raising contract, not to an eighth class;
 `control character` maps to the URL class when raised by BC-2.02.005 and to the theme
-class when raised by BC-2.01.003. The class register stays closed at seven.
+class when raised by BC-2.01.003, and to the Text class when raised for a non-theme
+free-text key or a List entry (BC-2.01.005; pass-6 A14). The class register stays closed at seven.
 
 ## Severity Definitions
 
@@ -132,7 +139,7 @@ degrading the whole render (ADV-P2-B01/C01 evidence).
 | CP-O03 | lines segment (SL:857) | BC-1.02.014 | huge int enters `n / 1e6` in `_fmt_lines` |
 | CP-O04 | token segment (SL:866) | BC-1.02.025 | huge int enters `float(n)` in `_fmt_tok_c` |
 | CP-O05 | window-age suffix (SL:558-559) | BC-1.02.017 | huge `total_duration_ms` enters `win_ms − dur` |
-| CP-O10 | cost segment (SL:616, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.005 (EC-011, history bearer) | huge exact int `usd` — stdin-borne it enters `f"{usd:.2f}"` at the render site (SL:616); history-borne it raises in `cost_thresholds` at SL:255 (the `usd / (api / 3.6e6)` division or the percentile math), NOT at SL:616 (pass-5 C2-10) |
+| CP-O10 | cost segment (SL:616, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.005 (EC-011, history bearer) | huge exact int `usd` — stdin-borne it enters `f"{usd:.2f}"` at the render site (SL:616); history-borne it raises at the `usd / (api / 3.6e6)` division in `cost_thresholds` (SL:255) only — the percentile math never raises (int-to-float comparisons and `sorted` cannot overflow; pass-6 C2-13) — NOT at SL:616 (pass-5 C2-10) |
 | CP-O11 | $/h burn-rate division (SL:622-623, stdin bearer) / `cost_thresholds` (SL:255, history bearer) | BC-1.05.007, BC-1.05.005 (EC-011, history bearer), BC-1.05.002 (EC-009, co-owner) | huge exact int `api_ms` — stdin-borne it enters `api_ms / 3.6e6` (SL:622-623); history-borne it raises at the `api / 3.6e6` division in `cost_thresholds` (SL:255) — including a huge positive recorded `api_ms` with a small `usd` (pass-5 C2-10) |
 
 CP-O10/O11 bearers (pass-4 B14/C2-10 anchor correction): SL:616 and SL:622-623 read the
@@ -208,11 +215,14 @@ foreign descriptors). The pass-3 rulings sharpen the register: **OD-166** - a co
 refresh still degrades per OD-156); **OD-167** - a transcript-borne overflow skips the
 line AND drops the in-flight turn; **OD-168** - a config error in `--subagent` mode
 emits zero bytes on stdout with the reason lines on stderr. The closed exclusion set counts
-eleven ids (D4-EX-1/2/3, OD-30, OD-76, `temp-file`, `cp-x03`, OD-159, OD-160, OD-161,
-OD-166): OD-169 added `OD-166` as a closed-set id of its own, scoped to cost-history bytes
+twelve ids (D4-EX-1/2/3, OD-30, OD-76, `temp-file`, `cp-x03`, OD-159, OD-160, OD-161,
+OD-166, OD-181): OD-169 added `OD-166` as a closed-set id of its own, scoped to cost-history bytes
 written after a refresh whose `usd` or `api_ms` could not convert to float and nothing
 else (own table test; VP-012 closure row), so the divergence no longer rides the
-extended D4-EX-2 id — the transcript extension still does.
+extended D4-EX-2 id — the transcript extension still does. The pass-6 ruling OD-181
+(2026-11-18) added `OD-181` "metrics transport beyond plain http", scoped to non-http(s)
+redirect targets (hylo: no sample) and https TLS trust-store differences (hylo: OS trust
+store); parity metrics cases use plain http only, and Go table tests pin hylo's behaviour.
 
 ## Foreign-cache crash family CP-C01..C10 (named exclusion OD-160)
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.4"
+version: "1.0.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "95d97cf"
+input-hash: "0d1940f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "new contract (OD-155 config off switch; no legacy counterpart)"
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: "new (OD-155)"
 parity_class: "byte-exact"
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)"]
+introduced: "0.1"
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null

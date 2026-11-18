@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "650b999"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1113-1119, 1094; REBUILD_EXCESS SL:968-972)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)", "1.2.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C10) — EC-007 names the OD-167 in-flight-turn drop; timestamped CP-O07 turn-drop vector added (`lr` observable: hylo null vs plain-deletion [50.0, true], oracle-run 2026-11-18); DI-012 lifted to the traceability row (sibling convention, ADV-P5-C10)"]
+modified: ["1.2.1 2026-11-17: rebuild_excess valid range >= 0 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-17: pass-3 remediation (ADV-P3-C03/C10/C16): corrected negative-X rationale, CP-O07 rebuild-check overflow edge case and canonical vector (owner of the SL:1117 site)", "1.2.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C10) — EC-007 names the OD-167 in-flight-turn drop; timestamped CP-O07 turn-drop vector added (`lr` observable: hylo null vs plain-deletion [50.0, true], oracle-run 2026-11-18); DI-012 lifted to the traceability row (sibling convention, ADV-P5-C10)", "1.2.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O07 D4-EX-2 legs (VP-013 register, VP-012 closure)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -111,6 +111,8 @@ CP-O07 vector (ADV-P3-C10; legacy legs oracle-verified 2026-11-18): seed cache e
 |--------|----------|-------------|
 | VP-029 | `rb` increments iff `pp ≠ null ∧ _w − max(0, prompt − pp) > X` | Go property test (testing/quick) |
 | VP-029 | `pp` after a counted call equals that call's prompt | Go property test (testing/quick) |
+| VP-013 | The CP-O07 vector leg this contract owns is a D4-EX-2 wrong-shape leg: the overflow skip leaves no partial mutation and (OD-167) drops the in-flight turn (register VP-013; ADV-P6-C06) | Go property/table test over the owned vector |
+| VP-012 | The CP-O07 exclusion entry this contract owns rides the D4-EX-2 closure check (BC-1.03.018 PC5 names this contract's vector rows among the dedicated tests) | repository test over `exclusions.json` |
 
 ## Traceability
 
@@ -142,6 +144,8 @@ S-TBD — transcript parser
 ## VP Anchors (Recommended)
 
 - VP-029 — rebuild predicate
+- VP-013 — the owned CP-O07 D4-EX-2 leg (no partial mutation, OD-167 drop)
+- VP-012 — closure cover for the owned D4-EX-2 exclusion entry
 
 ---
 

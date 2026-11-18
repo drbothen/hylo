@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "4f5dcbc"
+input-hash: "a99539e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,7 +19,8 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-4 remediation (ADV-P4-B03): float64-table and never-degrade for-all legs re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "1.2 pass-4 remediation (ADV-P4-B03): float64-table and never-degrade for-all legs re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "1.4 pass-6 remediation (ADV-P6-B08 + B16): the cache-hit glyph is named as the registry key statusline.glyphs.cache_hit instead of the wildcard statusline.glyphs.* (Config keys row), the sibling fix ADV-P5-B03 already applied to BC-1.02.008; history label version-prefixed; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -107,7 +108,7 @@ from this run (not listed in the legacy pass-3 rows).
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:477-479) |
 | Legacy contract | BC-SL-060 (deep pass-3 round 1, new) |
-| Config keys | `statusline.glyphs.*` (`♻`), `statusline.theme.*` (OD-113) |
+| Config keys | `statusline.glyphs.cache_hit` (`♻`), `statusline.theme.*` (OD-113) |
 | Parity | byte-exact (no exclusion entry) |
 
 ## Related BCs (Recommended)

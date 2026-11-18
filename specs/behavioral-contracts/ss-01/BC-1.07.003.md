@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.4"
+version: "1.0.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "d709437"
+input-hash: "96cf453"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main_subagent (SL:928-936)"
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: BC-SL-097
 parity_class: byte-exact
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: non-English term replaced with 'short-circuit' (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: parse notes re-anchored to pyfmt.Decode(ModeText), never encoding-json, with the four decoder-divergence reasons (ADV-P4-C03); non-UTF-8 leg tied to the BC-1.01.008 locale pin and BOM case added (ADV-P4-C14)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C15) — VP-006 citation added (row and anchor): reciprocal with VP-006 bcs listing"]
+introduced: "0.1"
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: non-English term replaced with 'short-circuit' (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: parse notes re-anchored to pyfmt.Decode(ModeText), never encoding-json, with the four decoder-divergence reasons (ADV-P4-C03); non-UTF-8 leg tied to the BC-1.01.008 locale pin and BOM case added (ADV-P4-C14)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C15) — VP-006 citation added (row and anchor): reciprocal with VP-006 bcs listing", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null

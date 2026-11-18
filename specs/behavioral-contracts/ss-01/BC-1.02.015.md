@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "587df2a"
+input-hash: "1580f27"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane._hm (SL:539-549, 563)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): the segment-presence for-all row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the timer glyph is named as the registry key statusline.glyphs.timer instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -107,8 +107,8 @@ start, so only the base segment appears).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | `_hm` equals CPython for ints and floats sampled at every k·60000 ± {0, 1, 0.5, 1 ulp} up to 1e8 | table test vs CPython goldens |
-| VP-028 | Segment present iff number and `> 60000` | property test |
+| VP-028 | `_hm` equals CPython for ints and floats sampled at every k·60000 ± {0, 1, 0.5, 1 ulp} up to 1e8 | table test vs CPython goldens — golden leg |
+| VP-041 | Segment present iff number and `> 60000` — for all renders | property test (for-all leg; VP-028 delivers the oracle legs) |
 
 ## Traceability
 
@@ -120,7 +120,7 @@ start, so only the base segment appears).
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-57 E-0 (derived rationales accepted, T-038), OD-103 (pyfmt FloorDiv/Int), OD-113 (theme), OD-02 (glyph ⏱) |
-| Config keys | `statusline.timer.min_ms` (60000), `statusline.glyphs.*`, `statusline.theme.*` |
+| Config keys | `statusline.timer.min_ms` (60000), `statusline.glyphs.timer` (⏱), `statusline.theme.*` |
 | Architecture Module | `internal/statusline/session.go` |
 | Stories | TBD |
 
@@ -141,7 +141,7 @@ TBD — session widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — `_hm` parity property
+- VP-041 — segment-presence for-all property (VP-028 retains the `_hm` golden leg)
 
 ---
 

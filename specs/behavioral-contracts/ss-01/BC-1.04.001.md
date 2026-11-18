@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T02:11:24Z
+timestamp: 2026-11-18T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md]
-input-hash: "bde7913"
+input-hash: "420933f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fetch_sample (SL:158-187)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: M
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-08/09/13/14", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-04/05/10 (redirect loop detection; OverflowError catch; 1e400; key identity)", "2026-11-18 (v1.3.2) sync — Verification Properties row relabeled; VP-022 (partial: network edge only) now states its own property (the status line never reads the ledger, DI-007) instead of VP-030's differential-equivalence text", "2026-11-18 (v1.3.3) pass-4 remediation ADV-P4-C2-01/02 (overflow vector >= 2**1024 - 2**970; metric wrapper on the two-key vector), ADV-P4-C2-07 (37-hop worst case; normalized redirect key; rebuilt chain example), ADV-P4-C2-08 (URI header fallback), ADV-P4-C2-09 (Accept-Encoding: identity / DisableCompression), ADV-P4-C2-12 (CP-N03 named on EC-013)", "2026-11-18 (v1.3.4) pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)", "2026-11-18 (v1.3.5) pass-5 remediation ADV-P5-C2-01/02 (manual redirect loop: unconditional ErrUseLastResponse, hylo-driven hops, empty-Location self-redirect, quote safe=string.punctuation, urlunparse round trip), ADV-P5-C2-03 (userinfo metrics URL: dead rung, OD-180), ADV-P5-C2-04 (VP-030 scoped to body bytes over well-formed HTTP)"]
+modified: ["2026-11-17 (v1.3) pass-2 remediation ADV-P2-C2-08/09/13/14", "2026-11-18 (v1.3.1) pass-3 remediation ADV-P3-C2-04/05/10 (redirect loop detection; OverflowError catch; 1e400; key identity)", "2026-11-18 (v1.3.2) sync — Verification Properties row relabeled; VP-022 (partial: network edge only) now states its own property (the status line never reads the ledger, DI-007) instead of VP-030's differential-equivalence text", "2026-11-18 (v1.3.3) pass-4 remediation ADV-P4-C2-01/02 (overflow vector >= 2**1024 - 2**970; metric wrapper on the two-key vector), ADV-P4-C2-07 (37-hop worst case; normalized redirect key; rebuilt chain example), ADV-P4-C2-08 (URI header fallback), ADV-P4-C2-09 (Accept-Encoding: identity / DisableCompression), ADV-P4-C2-12 (CP-N03 named on EC-013)", "2026-11-18 (v1.3.4) pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)", "2026-11-18 (v1.3.5) pass-5 remediation ADV-P5-C2-01/02 (manual redirect loop: unconditional ErrUseLastResponse, hylo-driven hops, empty-Location self-redirect, quote safe=string.punctuation, urlunparse round trip), ADV-P5-C2-03 (userinfo metrics URL: dead rung, OD-180), ADV-P5-C2-04 (VP-030 scoped to body bytes over well-formed HTTP)", "2026-11-18 (v1.3.6) pass-6 remediation ADV-P6-C2-02/05/06/07/08/11/12 (empty-Location target = urljoin at the requesting hop's URL; minimal net.Conn HTTP/1.1 client with urllib's exact header set/order and compat32 header-value spaces; fetch-site JSON depth measured 992 accepted / 993 rejected; ftp and TLS deviations named under exclusion id OD-181; empty-fragment key drop)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,13 +51,27 @@ is byte 0x1B.
 1. Exactly one HTTP GET is issued to
    `<url>/api/v1/query?query=<QUERY percent-encoded as Python quote(QUERY, safe='')>`
    (space as `%20`, never `+`; the encoded prefix is
-   `%7B__name__%3D~%22vllm%3Anum_requests_running%7C...`). Transport headers: hylo sends
-   what urllib sends — including `Accept-Encoding: identity` (oracle-verified against a
-   local listener, CPython 3.11.7, 2026-11-17) — and parses the response body raw, so the
-   Go transport sets `DisableCompression: true` (or equivalent): Go's default Transport
-   would otherwise send `Accept-Encoding: gzip` and silently decompress, letting Go parse
-   a compressed body into a sample where legacy, which never asked for compression, gets
-   none (ADV-P4-C2-09). Redirects: the Go client follows HTTP redirects exactly as
+   `%7B__name__%3D~%22vllm%3Anum_requests_running%7C...`). Transport: hylo's metrics
+   client is a MINIMAL HTTP/1.1 client over a `net.Conn` (plain http only; OD-181). It
+   sends exactly what urllib sends, byte for byte and in urllib's order — request line
+   `GET <selector> HTTP/1.1`, then `Accept-Encoding: identity`, `Host: <host:port>`,
+   `User-Agent: Python-urllib/3.11`, `Connection: close` — and nothing else (header
+   spelling and order verified from the CPython 3.11.7 stdlib source — `do_request_`
+   adds `Host` then the `addheaders` `User-agent`, `do_open` appends `Connection:
+   close` and title-cases, `putrequest` emits `Accept-Encoding: identity` before the
+   dict because `Host` is already present — and captured byte-for-byte against a local
+   listener, 2026-11-18; ADV-P6-C2-12). It parses the response body raw and never
+   decompresses (legacy asks for `identity`; Go's default Transport would send
+   `Accept-Encoding: gzip` and silently decompress — ADV-P4-C2-09). The minimal client
+   is required, not a style choice: Go's `net/http`/`textproto` (a) TRIMS header
+   values, while CPython's email compat32 keeps inner and trailing spaces, stripping
+   only CR/LF — a `Location: /x␠` value parses to `/x␠` (quoted `/x%20`), not `/x`
+   (oracle-verified CPython 3.11.7, 2026-11-18; ADV-P6-C2-05); (b) `url.Parse` rejects
+   a `%` not followed by two hex digits, which urllib passes through (`%` is in the
+   safe punctuation set); (c) an empty `Location` makes `http.Client` skip
+   `CheckRedirect` entirely. Status line and headers are therefore parsed exactly as
+   `http.client` does (compat32: values keep inner and trailing spaces; only CR/LF
+   stripped). Redirects: the Go client follows HTTP redirects exactly as
    urllib's default `HTTPRedirectHandler` (active because
    `build_opener(ProxyHandler({}))` keeps it, SL:168-171) — a 301/302/303/307/308 is
    followed by GET and the **final** body is parsed; other statuses are not redirected.
@@ -65,21 +79,35 @@ is byte 0x1B.
    on 2026-11-17): the target is the first `Location` header, falling back to the first
    `URI` header when `Location` is absent; a 30x carrying neither header is returned
    unhandled (HTTPError → no sample). A present-but-EMPTY `Location` is a real target:
-   `urljoin(full_url, "")` redirects to the original URL (query included), which thereby
-   becomes a keyed redirect target from then on (ADV-P5-C2-01). A redirect naming only
+   urllib computes `urljoin(req.full_url, "")`, where `req` is the request that
+   RECEIVED THIS 3XX — on hop 1 that is the original URL (query included), but from the
+   second hop on it is the CURRENT hop's URL B, not the original A (oracle:
+   `urljoin(B, "")` returns B exactly; ADV-P6-C2-02). From hop 2 on, B is both the loop
+   key and the next GET target (the ADV-P5-C2-01 keyed-target behavior follows from the
+   corrected rule). A redirect naming only
    `URI:` is therefore followed
    by legacy and must be followed by hylo; a client that reads only `Location` gets no
    sample where legacy gets one (ADV-P4-C2-08). Scheme guard: the scheme of the raw
    (pre-normalization) target must be `http`, `https`, `ftp` or empty (inherit); anything
-   else makes urllib raise `HTTPError` (→ no sample). Hylo rule (pass-5 call 14): the
-   manual loop follows only `http`/`https` targets after empty-scheme inheritance — an
-   `ftp:` or other non-http(s) target gives **no sample** (hylo implements no FTP
-   fallback; legacy's default-handler attempt fails into the outer `except Exception`,
-   SL:186). Target normalization (ADV-P4-C2-07; completed ADV-P5-C2-02): the
+   else makes urllib raise `HTTPError` (→ no sample). Hylo rule (exclusion id **OD-181**,
+   DI-012 closed set): the manual loop follows only `http`/`https` targets after
+   empty-scheme inheritance — an `ftp:` or other non-http(s) target gives **no
+   sample**. Legacy MAY produce a sample there: its default opener keeps
+   `FTPHandler`/`HTTPSHandler` (verified from `build_opener(ProxyHandler({})).handlers`,
+   CPython 3.11.7), so an `ftp:` redirect can be fetched by the FTPHandler — hylo
+   implements no FTP fallback; table tests pin hylo's behaviour, and parity cases use
+   plain http only (OD-181). TLS trust (an https metrics URL or an https redirect
+   target; OD-181): legacy CPython 3.11 verifies certificates against OpenSSL's default
+   store, hylo (Go `crypto/tls`) against the OS trust store (macOS/Windows) — a
+   certificate trusted by only one store yields a sample on one side and no sample on
+   the other; table tests pin hylo's behaviour (OS store), parity cases plain http.
+   Target normalization (ADV-P4-C2-07; completed ADV-P5-C2-02): the
    loop-detection key is the target AFTER the raw-header scheme check, the empty-path fix
    (netloc with no path → `/`), the `urlunparse` round trip (an empty query or empty
-   params component is dropped, so `/x?` and `/x` are ONE key; parameters and the
-   fragment are kept — the fragment stays part of the key), percent-encoding of non-ASCII
+   params component is dropped, so `/x?` and `/x` are ONE key; an EMPTY fragment is
+   dropped too — `urlunsplit` adds `#` only when the fragment is non-empty — so `/x#`
+   and `/x` are ONE key; parameters and a NON-EMPTY fragment are kept as part of the
+   key; ADV-P6-C2-11), percent-encoding of non-ASCII
    and special bytes (`quote(newurl, encoding="iso-8859-1", safe=string.punctuation)` —
    the `safe` set is ALL ASCII punctuation, not the default `'/'`; read with the default
    the rule would encode `:` and double-encode existing `%XX`, giving loop keys urllib
@@ -103,7 +131,9 @@ is byte 0x1B.
    `http.Client`'s automatic redirect machinery. The client's `CheckRedirect` returns
    `http.ErrUseLastResponse` unconditionally, so every 3xx response comes back to hylo
    unelevated, and hylo drives the hops itself in a loop it controls: pick the target
-   (`location` then `uri`; present-but-empty value = the original URL), apply the scheme
+   (`location` then `uri`; a present-but-empty value resolves as
+   `urljoin(<URL of the request that received this 3xx>, "")` — hop 1: the original URL
+   (query included); hop ≥ 2: the current hop's URL), apply the scheme
    guard, normalize (empty-path fix → `urlunparse` →
    `quote(..., "iso-8859-1", safe=string.punctuation)` → `urljoin`), then consult the
    `redirect_dict` emulation — refuse (no sample, and never parse the refused 3xx body)
@@ -123,7 +153,16 @@ is byte 0x1B.
    exclusion id; the URL still passes BC-2.02.005's load-time approval, BC-1.04.001
    fetches it to no sample).
 3. Result is **no sample** (Go: nil; legacy `None`) when: the status is outside 200-299;
-   the body is not decodable JSON (decoded as `json.loads(bytes)`, BC-5.02.003); the
+   the body is not decodable JSON (decoded as `json.loads(resp.read())` on BYTES =
+   bytes-mode acceptance (BOM/UTF-16/32 detection, BC-5.02.003); a multi-line metrics
+   body (newline/carriage-return bytes between tokens) is valid input here — the
+   BC-5.02.003 one-line precondition governs the stdin sites, not this one; the fetch
+   site's JSON nesting-depth limit is MEASURED per call site, never inferred: depth
+   **992 accepted / 993 rejected** on the production stack (F = 7 frames,
+   <module>→main→get_sample→fetch_sample→loads→decode→raw_decode; oracle-measured
+   2026-11-18 by running the real `dgx_statusline.py` as a subprocess with an isolated
+   HOME against a fake local metrics server, ADV-P6-C2-06) — a deeper body gives no
+   sample); the
    payload is not an object; `payload["status"] != "success"`; `data`/`result` is
    missing or of a wrong type; any series raises outside the per-series catch; or the
    resulting map is empty.
@@ -223,7 +262,7 @@ is byte 0x1B.
 | Source | legacy/dgx_statusline.py:fetch_sample (SL:158-187); QUERY (SL:102-123); VM_URL/HTTP_TIMEOUT (SL:73, 81) |
 | Legacy contract | BC-SL-040 (P3 base + r1 refinement; r5 verified, r8 coverage) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-007, DI-008, DI-012 (metrics-URL D4-EX-3 deviation, BC-2.02.005) |
+| L2 Domain Invariants | DI-007, DI-008, DI-012 (metrics-URL D4-EX-3 deviation, BC-2.02.005; ftp/TLS transport deviations named under exclusion id OD-181, ADV-P6-C2-07/08) |
 | Decisions | OD-123 (metrics URL under backends[0]), OD-56 (timeout = total deadline), OD-57 E-0 (T-005), D14 (proxy bypass is defense in depth) |
 | Architecture Module | `internal/statusline/telemetry.go` (design §2.2; listed in ARCH-03 §Interfaces, line 114) |
 | Stories | TBD (story-writer) |

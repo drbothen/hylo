@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-06/BC-6.03.001.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c581460"
+input-hash: "797a5b8"
 traces_to: prd.md
 source_bc: BC-6.03.001
 bcs: [BC-1.06.002, BC-6.03.001, BC-6.04.001, BC-1.07.004, BC-1.07.005, BC-1.07.006]
@@ -75,6 +75,7 @@ resolved Python patch version (RK-4).
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestParityTierB_Goldens(t *testing.T) {
     n := 0

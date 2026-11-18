@@ -2,13 +2,13 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.12"
+version: "1.15"
 status: draft
 producer: architect
-timestamp: 2026-11-19T01:00:00Z
+timestamp: 2026-11-19T16:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
-input-hash: "a832b1e"
+input-hash: "784a8a4"
 traces_to: ../architecture/ARCH-INDEX.md
 lifecycle_status: active
 introduced: "1.0"
@@ -24,6 +24,9 @@ modified:
   - "1.10 2026-11-18T23:45:00Z: ADV-P5 fix (A2-19) \u2014 coverage-map rows completed per the union definition: BC-1.01.009 gains VP-022 and BC-1.07.003 gains VP-006 (both in those VPs bcs: frontmatter); the residual prose no longer excludes them, it records the owed reciprocal BC-body rows"
   - "1.11 2026-11-19T01:00:00Z: SC-13/SC-14 closure (sync-check-adv-p5) \u2014 union-rule completion finished: BC-1.05.007 map row becomes VP-001, VP-021 and BC-1.07.007 becomes VP-001, VP-009, VP-039, matching VP-001 bcs: and those contracts' live BC-body rows (ADV-P5-A2-11/C15 reciprocals); VP-012 v1.10 gains BC-1.04.003 and BC-1.05.005 in bcs: (SC-14 reciprocity; ADV-P5-C2-17 closure citations) and the two corresponding map rows carry VP-012, so the Uncovered-BCs exception list is regenerated to exactly the re-run bijection residue (6 reverse-only edges: VP-022/BC-1.06.001, VP-024/BC-1.07.004, VP-034/BC-1.01.004 design references; VP-026 removal citations in BC-3.01.001, BC-6.01.002, BC-6.02.003); the stale VP-007/BC-1.01.009 exception is dropped \u2014 that body's removal note no longer cites VP-007 by ID"
   - "1.12 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) \u2014 the 1.6 pass-3-rebuild stamp re-dated ascending (it predated the preceding 1.5 adv-p2-sync entry); no behavioral change"
+  - "1.13 2026-11-19T12:00:00Z: pass-6 rebuild \u2014 coverage map regenerated: BC-1.02.002/.003/.006/.007/.009/.010/.013/.015 gain VP-041 (ADV-P6-B01, call 10); BC-1.03.006/.007/.010 gain VP-013 (C06); BC-5.02.004 gains VP-006 (A2-17); VP-012 closed set becomes TWELVE ids with OD-181; owed reciprocal BC-body rows enumerated in the residuals prose"
+  - "1.14 2026-11-19T14:00:00Z: pass-6 residual sweep \u2014 union re-machine-checked: 254 directed VP\u2192BC bcs: edges, 0 forward-only; pass-6 owed rows all delivered and disk-verified (BC-5.02.004's VP table gains VP-006; the eight BC-1.02.x VP-041 rows and three BC-1.03.x VP-013 rows verified on disk); map rows for BC-1.03.006/.007/.010 gain VP-012; VP-012 bcs: gains BC-1.03.006/.007/.010 (reciprocity over exception-listing); Uncovered-BCs exception list reduced to exactly the standing residue (3 design references + 3 removal-note citations)"
+  - "1.15 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-21) \u2014 reciprocity over exception-listing: VP-019 bcs: gains BC-1.01.009 (PC2 names the swap legs' Python-written history), VP-012 bcs: gains BC-1.06.001 (PC-1 cites the closure check), VP-018 bcs: gains BC-2.01.004 (PC-11 key cross-reference); the three corresponding map rows gain those VP ids and the union re-machine-checks at 257 directed bcs: edges, 0 forward-only, residue exactly the standing 3 design references + 3 removal-note citations; no catalog or class changes"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -119,7 +122,7 @@ modified:
 | BC-1.01.006 | VP-027, VP-040 |
 | BC-1.01.007 | VP-027, VP-040 |
 | BC-1.01.008 | VP-005 |
-| BC-1.01.009 | VP-008, VP-009, VP-022 |
+| BC-1.01.009 | VP-008, VP-009, VP-019, VP-022 |
 | BC-1.01.010 | VP-027 |
 
 ### S1.02 (30)
@@ -127,20 +130,20 @@ modified:
 | BC | VPs |
 |---|---|
 | BC-1.02.001 | VP-028, VP-041 |
-| BC-1.02.002 | VP-028 |
-| BC-1.02.003 | VP-028 |
+| BC-1.02.002 | VP-028, VP-041 |
+| BC-1.02.003 | VP-028, VP-041 |
 | BC-1.02.004 | VP-012, VP-028, VP-041 |
 | BC-1.02.005 | VP-019, VP-028 |
-| BC-1.02.006 | VP-028 |
-| BC-1.02.007 | VP-028 |
+| BC-1.02.006 | VP-028, VP-041 |
+| BC-1.02.007 | VP-028, VP-041 |
 | BC-1.02.008 | VP-028 |
-| BC-1.02.009 | VP-028 |
-| BC-1.02.010 | VP-028 |
+| BC-1.02.009 | VP-028, VP-041 |
+| BC-1.02.010 | VP-028, VP-041 |
 | BC-1.02.011 | VP-028 |
 | BC-1.02.012 | VP-028 |
-| BC-1.02.013 | VP-019, VP-028 |
+| BC-1.02.013 | VP-019, VP-028, VP-041 |
 | BC-1.02.014 | VP-028 |
-| BC-1.02.015 | VP-028 |
+| BC-1.02.015 | VP-028, VP-041 |
 | BC-1.02.016 | VP-028, VP-041 |
 | BC-1.02.017 | VP-028 |
 | BC-1.02.018 | VP-028, VP-041 |
@@ -166,11 +169,11 @@ modified:
 | BC-1.03.003 | VP-029, VP-031 |
 | BC-1.03.004 | VP-006, VP-029, VP-038 |
 | BC-1.03.005 | VP-029, VP-031 |
-| BC-1.03.006 | VP-029 |
-| BC-1.03.007 | VP-029 |
+| BC-1.03.006 | VP-013, VP-029, VP-012 |
+| BC-1.03.007 | VP-013, VP-029, VP-012 |
 | BC-1.03.008 | VP-029 |
 | BC-1.03.009 | VP-029 |
-| BC-1.03.010 | VP-029 |
+| BC-1.03.010 | VP-013, VP-029, VP-012 |
 | BC-1.03.011 | VP-029 |
 | BC-1.03.012 | VP-029 |
 | BC-1.03.013 | VP-029 |
@@ -227,7 +230,7 @@ modified:
 
 | BC | VPs |
 |---|---|
-| BC-1.06.001 | VP-001, VP-018, VP-019 |
+| BC-1.06.001 | VP-001, VP-012, VP-018, VP-019 |
 | BC-1.06.002 | VP-010, VP-012, VP-018 |
 
 ### S1.07 (8)
@@ -250,7 +253,7 @@ modified:
 | BC-2.01.001 | VP-015 |
 | BC-2.01.002 | VP-016, VP-017 |
 | BC-2.01.003 | VP-015, VP-016 |
-| BC-2.01.004 | VP-015 |
+| BC-2.01.004 | VP-015, VP-018 |
 | BC-2.01.005 | VP-015, VP-016 |
 | BC-2.02.001 | VP-012, VP-016 |
 | BC-2.02.002 | VP-012, VP-016 |
@@ -291,7 +294,7 @@ modified:
 | BC-5.02.001 | VP-024 |
 | BC-5.02.002 | VP-024 |
 | BC-5.02.003 | VP-006, VP-024 |
-| BC-5.02.004 | VP-024 |
+| BC-5.02.004 | VP-006, VP-024 |
 | BC-5.02.005 | VP-024 |
 | BC-5.02.006 | VP-024 |
 | BC-5.03.001 | VP-025 |
@@ -325,10 +328,10 @@ modified:
 
 None. 154/154 covered (union of VP `bcs:` frontmatter and VP anchors in the BC
 bodies' Verification Properties / VP Anchors sections; re-machine-checked
-2026-11-19T01:00:00Z after the SC-13/SC-14 closure: 239 directed VP→BC `bcs:`
-edges, 0 forward-only, exactly 6 reverse-only residuals — the enumerated list
-below, which is therefore exactly the residue). Design references, not
-citations (excluded by ruling):
+2026-11-19T16:00:00Z after the sync-check adv-p6 closure: 257 directed VP→BC `bcs:`
+edges, 0 forward-only, exactly 3 reverse-only VP-table residuals plus the 3
+removal-note citations enumerated below — the lists are therefore exactly the
+residue). Design references, not citations (excluded by ruling):
 VP-022 in BC-1.06.001 (mis-anchor note);
 VP-024 in BC-1.07.004 ("VP-024 family" encoder references);
 VP-034 in BC-1.01.004 (parenthetical isolation credit).
@@ -337,11 +340,22 @@ VP-026 in BC-3.01.001 (EC-010);
 VP-026 in BC-6.01.002 (PC text);
 VP-026 in BC-6.02.003 (PC text) —
 each records the OD-171 `posix-only` tag removal, and VP-026's `bcs:` correctly
-excludes those BCs. Closed in this version (SC-13 / SC-14): the BC-1.05.007 and
-BC-1.07.007 map rows now carry VP-001 per the union rule; VP-012 `bcs:` gains
-BC-1.04.003 and BC-1.05.005 (reciprocity preferred over exception-listing); the
+excludes those BCs. In this version (SC-21, sync-check adv-p6): VP-019 `bcs:`
+gains BC-1.01.009 (PC2 names the swap legs' Python-written cost history),
+VP-012 `bcs:` gains BC-1.06.001 (PC-1 cites the closure check), and VP-018
+`bcs:` gains BC-2.01.004 (PC-11 rename-retry key cross-reference) — reciprocity
+preferred over exception-listing, the SC-13/SC-14 convention — which is why
+those three edges no longer appear as residuals. Pass-6 owed reciprocal BC-body rows — all delivered and
+disk-verified 2026-11-19 (ADV-P6-B01/C06/A2-17): BC-1.02.002/.003/.006/.007/
+.009/.010/.013/.015 VP-table rows carry VP-041; BC-1.03.006/.007/.010 VP rows
+carry VP-013 and VP-012; BC-5.02.004's VP row carries VP-006 (its metrics-decode
+mode is pinned there). In this version: VP-012 `bcs:` gains BC-1.03.006/.007/.010
+(reciprocity preferred over exception-listing, SC-13/SC-14 convention), which is
+why those edges no longer appear as residuals. Historical closures (SC-13 /
+SC-14, v1.11): the BC-1.05.007 and BC-1.07.007 map rows gained VP-001 per the
+union rule; VP-012 `bcs:` gained BC-1.04.003 and BC-1.05.005; the
 ADV-P5-A2-19 owed reciprocal rows for BC-1.01.009 (VP-022) and BC-1.07.003
-(VP-006) are delivered; the former VP-007/BC-1.01.009 exception is dropped —
+(VP-006) were delivered; the former VP-007/BC-1.01.009 exception was dropped —
 that body's removal note no longer cites VP-007 by ID.
 
 ## Propagation

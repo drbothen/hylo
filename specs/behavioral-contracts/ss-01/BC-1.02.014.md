@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.1"
+version: "1.5.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "69ece43"
+input-hash: "5ecc7b2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -19,10 +19,11 @@ confidence: H
 lifecycle_status: active
 introduced: v0.1.0
 modified:
-  - "pass-3 remediation (ADV-P3-B05/B07/B18): float_div converts the int operand to float first (OverflowError at the int->float threshold, double-rounded quotient); OD-162 justification reworded to its actual test; EC-004 tie wording fixed; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B04): EC-013 names CP-O03; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
+  - "1.4.1 pass-3 remediation (ADV-P3-B05/B07/B18): float_div converts the int operand to float first (OverflowError at the int->float threshold, double-rounded quotient); OD-162 justification reworded to its actual test; EC-004 tie wording fixed; 2026-11-18T02:00:00Z"
+  - "1.4.2 pass-4 remediation (ADV-P4-B04): EC-013 names CP-O03; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
   - "1.5 pass-5 remediation (ADV-P5-B12/B05): units.lines thresholds cited at SL:856/858 (was the stale SL:866-867); EC-013 scoped to the positive side and notes a huge negative renders exactly via str(n) (SL:860, oracle-verified); 2026-11-18T05:42:56Z"
   - "1.5.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.5.2 pass-6 remediation (ADV-P6-B08): the lines arrows are named as the registry keys statusline.glyphs.lines_up / lines_down instead of the wildcard statusline.glyphs.* (Config keys row); 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -142,7 +143,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-103 (pyfmt ParseInt/Int/F), OD-113 (theme), OD-02 (glyphs), OD-156 (beyond-int64 ints via `math/big`; render overflow → crash path), OD-162 (valid range of `statusline.units.lines`) |
-| Config keys | `statusline.units.lines`, `statusline.glyphs.*` (▲ ▼), `statusline.theme.*` |
+| Config keys | `statusline.units.lines`, `statusline.glyphs.lines_up` (▲), `statusline.glyphs.lines_down` (▼), `statusline.theme.*` |
 | Architecture Module | `internal/statusline/session.go` |
 | Stories | TBD |
 

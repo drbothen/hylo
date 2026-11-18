@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -19,10 +19,11 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "consolidated pass-2 follow-up: transcript site re-measured end to end at 993/994 — equality with stdin, not 989/990 divergence, 2026-11-17T21:21:12Z"
-  - "pass-3 remediation (ADV-P3-B14/B16/B10): 4,300-digit int-literal edge case added; VP table cites VP-005/VP-006 (not VP-001); ARCH-03 anchor normalized to the stable #statusline-guard fragment; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B11 + ADV-P4-A2-16 sibling): VP-001 removed from VP Anchors; EC-006 states the L+1 observable explicitly (default line, not the degraded line); 2026-11-18T03:00:00Z"
+  - "1.2.2 consolidated pass-2 follow-up: transcript site re-measured end to end at 993/994 — equality with stdin, not 989/990 divergence, 2026-11-17T21:21:12Z"
+  - "1.2.3 pass-3 remediation (ADV-P3-B14/B16/B10): 4,300-digit int-literal edge case added; VP table cites VP-005/VP-006 (not VP-001); ARCH-03 anchor normalized to the stable #statusline-guard fragment; 2026-11-18T02:00:00Z"
+  - "1.2.4 pass-4 remediation (ADV-P4-B11 + ADV-P4-A2-16 sibling): VP-001 removed from VP Anchors; EC-006 states the L+1 observable explicitly (default line, not the degraded line); 2026-11-18T03:00:00Z"
   - "1.2.5 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.2.6 pass-6 remediation (ADV-P6-B13): PC4 pins the JSON whitespace set to the four CPython characters (space, tab, LF, CR; FF/VT/NBSP yield {} — oracle-verified) and adds EC-010; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,8 +59,11 @@ the guard (BC-1.01.001).
 3. With `{}` the refresh renders the defaults (pill `◨ ?`, model `?`) and exits 0; it never degrades because of the
    decode result alone.
 4. Python `json` leniencies are kept when the object parses: `NaN`/`Infinity`/`-Infinity` tokens accepted; duplicate
-   keys are last-wins at the first key's position; integers stay exact; leading/trailing whitespace (incl. newlines)
-   around the value is accepted (`pyfmt.Decode(ModeText)`, design IM-01, BC-5.02.004).
+   keys are last-wins at the first key's position; integers stay exact; leading/trailing whitespace around the
+   value is accepted from exactly the four-character JSON whitespace set — space (0x20), tab (0x09), LF (0x0A),
+   CR (0x0D) (CPython `json.decoder.WHITESPACE = '[ \t\n\r]*'`); any other byte that looks like blank space, e.g.
+   form feed (0x0C), vertical tab (0x0B) or NBSP (U+00A0), is *not* in the set and yields `{}` (EC-010)
+   (`pyfmt.Decode(ModeText)`, design IM-01, BC-5.02.004).
 
 ## Invariants
 

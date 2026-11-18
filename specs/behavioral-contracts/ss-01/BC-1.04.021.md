@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.3.1"
 status: draft
 producer: product-owner
-timestamp: 2026-11-17T12:00:00Z
+timestamp: 2026-11-18T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr.md]
-input-hash: "6567a53"
+input-hash: "ecb5ea9"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:337)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)"]
+modified: ["1.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.3.1 2026-11-18: pass-6 metadata alignment (ADV-P6-C2-15) — D22 sweep entry redated to the pass-4 burst date (2026-11-18) and timestamp raised above the last modified entry; no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.5"
+version: "1.1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "9ac83b1"
+input-hash: "5c0f944"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows model branch (SL:898-907)"
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: BC-SL-097
 parity_class: byte-exact
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)", "1.1.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C03/C06) — lane-tag square pinned to statusline.glyphs.lane (U+25E8) and words to statusline.pill.label_local/label_cloud (OD-173); theme.grey named for the model bit; refactoring note uses pyfmt.Strip, never TrimSpace (OD-170)"]
+introduced: "0.1"
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 byte rows (property leg rides VP-028)", "1.1.2 2026-11-18T05:30:00Z: VP-028 v1.1 extends its startswith prefix rule to this contract (adv-p2 sync SC-07); VP row/anchor wording synced", "1.1.3 2026-11-18T07:00:00Z: adv-p3 remediation: goldens re-derived ensure_ascii-escaped (ADV-P3-C01); str() rendering of truthy non-string models specified (ADV-P3-C14); pill bytes sourced from the shared theme/glyph config keys (ADV-P3-C05)", "1.1.4 2026-11-18T08:00:00Z: pass-4 remediation: pill SGR re-anchored to statusline.theme.cyan/magenta, defaults 36/35 = legacy CYAN/MAGENTA SL:906-907, not pill_local/pill_cloud (ADV-P4-C02); strip convention named pyfmt.Strip per BC-1.02.001 PC4 (ADV-P4-C15); stale pill-gate cite corrected (ADV-P4-C12)", "1.1.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C03/C06) — lane-tag square pinned to statusline.glyphs.lane (U+25E8) and words to statusline.pill.label_local/label_cloud (OD-173); theme.grey named for the model bit; refactoring note uses pyfmt.Strip, never TrimSpace (OD-170)", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null

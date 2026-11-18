@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.4"
+version: "1.1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "9ac83b1"
+input-hash: "5c0f944"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_subagent_rows (SL:888-936)"
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: BC-SL-097
 parity_class: byte-exact
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: joiner sourced from statusline.subagent.joiner (ADV-P4-C04); parse/emit notes re-anchored to pyfmt.Decode + ordered pyfmt.Value, never encoding-json (ADV-P4-C03)", "1.1.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C13) — killed row relabelled: explicit statusline.subagent.glyphs.killed map entry, not the glyph fallback (SL:845-846 vs SL:894)"]
+introduced: "0.1"
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 golden leg (arbitrary-array differential remains open)", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: every golden wire string re-derived from legacy and pasted ensure_ascii-escaped (ADV-P3-C01); id echo generalized to any JSON value (ADV-P3-C14); stray comma removed (ADV-P3-C22); joiner hex corrected to U+00B7", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: joiner sourced from statusline.subagent.joiner (ADV-P4-C04); parse/emit notes re-anchored to pyfmt.Decode + ordered pyfmt.Value, never encoding-json (ADV-P4-C03)", "1.1.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C13) — killed row relabelled: explicit statusline.subagent.glyphs.killed map entry, not the glyph fallback (SL:845-846 vs SL:894)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C04/C05) — PC4 rewrote the id echo as the decoded value re-serialized by pyfmt Dumps (raw tokens do not survive; float-id vector added; SL:924 dump runs under the measured per-site budget, see BC-5.02.006); PC3 corrected: ASCII controls, \" and \\ are escaped, the ESC inside an SGR sequence included", "1.1.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,9 +54,19 @@ before a single print, so a render fault never leaves partial rows on stdout.
    order id-then-content, `, `/`: ` separators, `ensure_ascii=True` — every non-ASCII character goes
    on the wire as a `\uXXXX` escape (ESC→`\u001b`, U+00BB→`\u00bb`, U+00B7→`\u00b7`,
    U+25E8→`\u25e8`, U+2714→`\u2714`, U+2718→`\u2718`, U+00E9→`\u00e9`, lone surrogate→`\ud800`);
-   ASCII text and SGR sequences pass through unescaped.
-4. The `id` is echoed verbatim — any JSON value (string, number, bool, null, array, object; the
-   array case is verified in the vectors below); it is not coerced to string before dumping.
+   ASCII **printable** characters pass through unescaped; ASCII **control** characters are escaped
+   (ESC — including the ESC that opens an SGR sequence — as `\u001b`, plus short escapes `\n`, `\t`,
+   `\r` and `\uXXXX` for the rest, e.g. BEL→`\u0007`), as are `\"` and `\\`
+   (ADV-P6-C05: an SGR sequence is NOT exempt — its ESC and any inner quotes/backslashes are escaped
+   like any other character).
+4. The `id` is the **decoded value re-serialized by `pyfmt` `Dumps`** (ADV-P6-C04; SL:924
+   decodes stdin and re-dumps — not a byte-for-byte token copy): any JSON value (string, number, bool,
+   null, array, object; the array case is verified in the vectors below) is dumped from its decoded
+   form, so raw-token spellings do not survive — `1.50`→`1.5`, `1E2`→`100.0`, `"A"`→`"A"`,
+   duplicate object keys collapse (last-wins kept — oracle-verified 2026-11-18,
+   `/opt/homebrew/anaconda3/bin/python3 -I` 3.11.7); it is not coerced to string before dumping. The
+   dump runs under the per-site encoder recursion budget measured for the SL:924 site — measured
+   budget, see BC-5.02.006.
 5. Lines are LF-terminated; the last line carries the terminating LF (print semantics).
 6. Zero eligible tasks: zero bytes, exit 0.
 7. Between content bits the joiner is the configured `statusline.subagent.joiner` (D15; Text key
@@ -91,7 +102,8 @@ before a single print, so a render fault never leaves partial rows on stdout.
 | `{"tasks":[{"name":"noid"},{"id":"ok","status":"killed"},"str"]}` | one line, id `ok`: `{"id": "ok", "content": "\u001b[90m\u25cd ?\u001b[0m \u00b7 \u001b[90mkilled\u001b[0m"}`, exit 0 (explicit killed glyph from `statusline.subagent.glyphs.killed` U+25CD grey, SL:845-846 — a map key, **not** the fallback; the fallback for unknown/missing statuses is the independent key `statusline.subagent.glyphs.unknown`, BC-1.07.005 PC1; settled suffix) | edge-case |
 | `{"tasks":[]}` | zero bytes, exit 0 | happy-path |
 | `{"tasks":[{"id":"a9","name":"a\ud800b","status":"completed"}]}` | one line: `{"id": "a9", "content": "\u001b[32m\u2714 a\ud800b\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}`, exit 0 | edge-case |
-| `{"tasks":[{"id":["x"],"name":"n","status":"completed"}]}` | one line: `{"id": ["x"], "content": "\u001b[32m\u2714 n\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}` (id array echoed verbatim), exit 0 | edge-case |
+| `{"tasks":[{"id":["x"],"name":"n","status":"completed"}]}` | one line: `{"id": ["x"], "content": "\u001b[32m\u2714 n\u001b[0m \u00b7 \u001b[90mcompleted\u001b[0m"}` (id array echoed from its decoded value), exit 0 | edge-case |
+| `{"tasks":[{"id": 1.50, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": 1E2, "name":"n","status":"completed"}]}` and `{"tasks":[{"id": "A", "name":"n","status":"completed"}]}` (ADV-P6-C04) | one line each: `{"id": 1.5, ...}`, `{"id": 100.0, ...}`, `{"id": "A", ...}` \u2014 decoded value re-serialized, not the raw token (oracle-verified 2026-11-18) | edge-case |
 
 Verified 2026-11-18 against CPython 3.11.7 (`python3 -I`, legacy module imported and exercised; goldens
 re-derived escaped after the adv-p3 C01 escape-decoding incident): rows 1, 2, 4, 5 byte-reproduced;

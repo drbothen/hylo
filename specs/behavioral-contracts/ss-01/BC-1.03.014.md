@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "650b999"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1120-1125, 1142-1145)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.3 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.1 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.2 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C09) — single-line error rows pinned to the all-zero BASE cache (sizes 70/81, shape oracle-checked 2026-11-18); wrong BC-1.03.019 T06+ cross-reference removed"]
+modified: ["1.3 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json", "1.3.1 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json", "1.3.2 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C09) — single-line error rows pinned to the all-zero BASE cache (sizes 70/81, shape oracle-checked 2026-11-18); wrong BC-1.03.019 T06+ cross-reference removed", "1.3.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C08) — vector preamble pins compact json.dumps separators (spaced default would give 77/88 B, ADV-P6-C08)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +75,10 @@ string counts code points; an object is ignored.
 
 ## Canonical Test Vectors
 
-One line `{"type": "assistant", "message": {"content": <list>}}`; result from the legacy oracle (re-pinned
+One line `{"type": "assistant", "message": {"content": <list>}}`, serialized with **compact `json.dumps`
+separators** (`, `/`: ` omitted — `separators=(",", ":")`; the pinned sizes hold only for the compact form: with
+Python's default spaced separators the text row would be 77 B and the thinking row 88 B, ADV-P6-C08); result from
+the legacy oracle (re-pinned
 2026-11-15), and the hylo expectation where they differ.
 
 | Input | Expected Output | Category |

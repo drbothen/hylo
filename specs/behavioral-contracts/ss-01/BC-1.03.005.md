@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "44590c6"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1029-1034, 1096-1103, 1153)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)"]
+modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02/C13) — dedup_memory range bounded to Int 1..65536 (upper bound labeled judgment call J, pass-5 A13/call 16, registry); PC5 qualifies duplicates-can-not-occur to caches hylo authored and carries foreign duplicate/non-list `ids` shapes as OD-160 table tests"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,10 +45,13 @@ refreshes as the last `dedup_memory` (256) ids recorded; within a single refresh
 3. `recent_ids` = cached `ids` list (or `[]` after a reset, BC-1.03.002); `seen` = the set of its elements, kept
    in sync during the refresh.
 4. `N = statusline.transcript.dedup_memory` (default 256; T-060, rationale: derived — ids of one message are
-   adjacent, so any N ≥ 1 covers refresh boundaries; 256 is margin; SL:1029-1032). **Valid range (OD-162):**
-   `>= 1`, derived from legacy semantics — the write stores `recent_ids[-N:]` (SL:1153): `N = 0` yields the Python
-   whole-list slice `ids[-0:]` (oracle-verified), defeating the cap; negative N truncates from the wrong end.
-   Out-of-range values are number-range config errors (S2 schema, OD-114).
+   adjacent, so any N ≥ 1 covers refresh boundaries; 256 is margin; SL:1029-1032). **Valid range (OD-162): Int
+   `1..65536`** — the lower bound is derived from legacy semantics: the write stores `recent_ids[-N:]` (SL:1153):
+   `N = 0` yields the Python whole-list slice `ids[-0:]` (oracle-verified), defeating the cap; negative N truncates
+   from the wrong end. The upper bound is a **labeled judgment call (J)** (A13 / NFR-005 / pass-5 call 16,
+   interface-definitions.md registry): a dedup memory of more than 64 Ki ids is a config error, not a runtime state
+   change (NFR-005: the legacy runtime cap list stays exhaustive). Out-of-range values are number-range config
+   errors (S2 schema, OD-114).
 
 ## Postconditions
 
@@ -59,8 +62,12 @@ refreshes as the last `dedup_memory` (256) ids recorded; within a single refresh
 3. Else if `u` is an object (id falsy: missing, null, `""`, `0`, `false`): counted; nothing recorded.
 4. If `u` is not an object (missing, null, number, string, array): nothing is counted or recorded (an array
    usage on an opening line is the CP-T03 shape, BC-1.03.018).
-5. The cache write stores `"ids": recent_ids[-N:]` (insertion order, oldest first; duplicates cannot occur).
-   Membership is Python set semantics over decoded values: hash first, then equality with an identity
+5. The cache write stores `"ids": recent_ids[-N:]` (insertion order, oldest first; duplicates cannot occur **in a
+   cache hylo authored** — a foreign cached `ids` that already contains duplicates is carried as is and still
+   dedupes correctly via `seen`; a foreign cached `ids` that is not a list, e.g. a string, is `list()`-split into
+   characters, which then act as ids; both shapes are foreign-cache vectors under exclusion id `OD-160`, Go table
+   tests — ADV-P6-C13). Membership is Python set semantics over decoded values: hash first, then equality with an
+   identity
    short-circuit. Oracle-verified 2026-11-17 (CPython 3.11.7): (a) every JSON-decoded `NaN` is the **same shared
    object** (`json.loads` returns one constant), so decoded NaN ids dedupe **by identity** despite `NaN != NaN`;
    two distinct NaN objects would not collide (id-based hashing) but the decoder never produces them; (b) the

@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:52:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.01.001.md, behavioral-contracts/ss-05/BC-5.01.002.md, behavioral-contracts/ss-05/BC-5.01.003.md, behavioral-contracts/ss-05/BC-5.01.004.md, behavioral-contracts/ss-05/BC-5.01.005.md, behavioral-contracts/ss-05/BC-5.01.006.md, owner-decisions-log-2026-11-14.md]
-input-hash: "7fcc32b"
+input-hash: "c8cbf4b"
 traces_to: prd.md
 source_bc: BC-5.01.001
 bcs: [BC-5.01.001, BC-5.01.002, BC-5.01.003, BC-5.01.004, BC-5.01.005, BC-5.01.006, BC-5.01.007, BC-2.02.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — divmod identity corrected to a == b*FloorDiv(a,b) + Mod(a,b), float-approximate (A2-10)", "1.3 2026-11-18T02:24:00Z: ADV-P3 sync — BC-5.01.007 added (mixed int/float Num semantics: NumToF/TrueDiv/NumCmp cite this VP)", "1.4 2026-11-18T14:52:00Z: ADV-P4 fixes — math/big site register corrected to THREE sites (A2-15): the two ruled duration-format sites (OD-137) plus _fmt_lines (OD-156), and the BC-5.01.007 helper set (NumToF/TrueDiv/NumCmp) named inside the closed helper set; OD-170 Unicode-table leg added: hylo carries its own Unicode 14.0 tables generated from CPython 3.11.7 unicodedata by a committed go-generate script, with a version constant (14.0.0) and a staleness test — pyfmt never consults Go's unicode package for the consulted classes (Nd decimal digits, printable, whitespace)", "1.5 2026-11-18: ADV-P4 pass-4 sync — BC-2.02.003 added to bcs (its Verification Properties table cites this VP for the pinned Nd-verdict tables leg, OD-170)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — divmod identity corrected to a == b*FloorDiv(a,b) + Mod(a,b), float-approximate (A2-10)", "1.3 2026-11-18T02:24:00Z: ADV-P3 sync — BC-5.01.007 added (mixed int/float Num semantics: NumToF/TrueDiv/NumCmp cite this VP)", "1.4 2026-11-18T14:52:00Z: ADV-P4 fixes — math/big site register corrected to THREE sites (A2-15): the two ruled duration-format sites (OD-137) plus _fmt_lines (OD-156), and the BC-5.01.007 helper set (NumToF/TrueDiv/NumCmp) named inside the closed helper set; OD-170 Unicode-table leg added: hylo carries its own Unicode 14.0 tables generated from CPython 3.11.7 unicodedata by a committed go-generate script, with a version constant (14.0.0) and a staleness test — pyfmt never consults Go's unicode package for the consulted classes (Nd decimal digits, printable, whitespace)", "1.5 2026-11-18: ADV-P4 pass-4 sync — BC-2.02.003 added to bcs (its Verification Properties table cites this VP for the pinned Nd-verdict tables leg, OD-170)", "1.6 2026-11-19T12:00:00Z: pass-6 fixes (OD-185: unidata_version fail-closed self-check leg against the resolved oracle, printing the resolved version)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -50,7 +50,10 @@ pyfmt consults — decimal-digit Nd, printable, whitespace — generated from CP
 3.11.7 `unicodedata` by a committed generator script run under `go generate`; pyfmt
 never consults Go's `unicode` package for these classes. A version constant
 (`14.0.0`) and a test pin the generated file to the oracle; CI fails if the generated
-file is stale. P6 may move to current Unicode.
+file is stale. OD-185: because CI resolves the latest 3.11.x patch, the harness
+self-checks `unicodedata.unidata_version` of the resolved oracle at start and fails
+closed on any mismatch, printing the resolved version (golden metadata records it,
+VP-010/RK-4). P6 may move to current Unicode.
 
 ## Source Contract
 
@@ -89,6 +92,7 @@ file is stale. P6 may move to current Unicode.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestNum_OracleTables(t *testing.T) {
     for _, row := range LoadGolden("testdata/num.golden") {
@@ -107,6 +111,11 @@ func TestUnicodeTables_PinnedToUnicodedata140(t *testing.T) { // OD-170 (A2-06 r
         if pyfmt.ConsultedClass(cp) != oracleUnicodedataClass(cp) {
             t.Fatalf("U+%04X: Go class != CPython 3.11.7 unicodedata oracle", cp)
         }
+    }
+    // OD-185 self-check leg: the resolved 3.11.x oracle's own unidata_version must
+    // equal the pinned constant — fail closed, printing the resolved version.
+    if uv := resolvedOracleUnidataVersion(); uv != "14.0.0" { // e.g. "3.11.9" resolves "14.0.0"
+        t.Fatalf("resolved oracle reports unidata_version %q, want 14.0.0 (OD-185 fail-closed self-check)", uv)
     }
 }
 ```

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "27f5d0f"
+input-hash: "f922b3a"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python dict/str semantics behind every cache and transcript value in legacy/dgx_statusline.py)"
@@ -21,6 +21,7 @@ introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D09: EC-003/EC-004 expected bytes as escape notation; notation anchor corrected to BC-5.02.001 PC-4"
+  - "2026-11-19T14:00:00Z pass-6 residual sweep (ADV-P6-A2-17 reciprocal) — Verification Properties gains VP-006: the metrics-reply decode site's per-site depth budget (992 accepted / 993 rejected, whole-body ModeBytes decode), whose bcs: already lists this contract"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -96,6 +97,7 @@ Rows verified 2026-11-15 against CPython 3.11.7 (`json.loads`, dict assignment/d
 |--------|----------|-------------|
 | VP-024 | For random op sequences (Set/Delete), member order equals a Python dict driven by the same ops | Go property test (testing/quick) vs oracle replay |
 | VP-024 | `Dumps(Decode(b))` equals `json.dumps(json.loads(b))` byte for byte | fuzz + oracle |
+| VP-006 | Metrics-reply decode site (whole body, `json.loads(resp.read())`, 7 frames): total nesting depth 992 accepted, 993 rejected — the per-site budget this contract's metrics-reply `pyfmt.Value` decodes run under | depth-budget harness, per-site table (measured localhost HTTP reply; BC-1.04.001 PC3) |
 
 ## Traceability
 

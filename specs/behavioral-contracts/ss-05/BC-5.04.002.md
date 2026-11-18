@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r4.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md, owner-decisions-log-2026-11-14.md]
-input-hash: "faa5879"
+input-hash: "6d9d55b"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; ports CPython datetime._mktime behind naive .timestamp() at legacy/dgx_statusline.py SL:983)"
@@ -22,6 +22,7 @@ modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D02+D13: LocalToUnix returns (int64, error) with ErrValue per ARCH-06 canon; range-end oracle rows restricted to Linux/macOS (Windows MSVC localtime_s OSError)"
   - "2026-11-18T23:55:00Z (1.2.4) ADV-P5 remediation D10 — Inv 2 Windows skip removed per OD-171/OD-177: parity cases run on all three OSes under the TZ=UTC pin; range-end VALUE rows stay Linux/macOS-pinned, and the Windows OSError leg is the BC-5.04.001 degrade rule"
+  - "2026-11-19T04:50:00Z (1.2.5) ADV-P6 remediation D06 / orchestrator call 2 — signature reconciled to the ARCH-06 canon: LocalToUnix(fields Naive, loc, msvcDomain bool) (int64, error); the distinct ErrLocaltimeDomain sentinel returned when msvcDomain is set and the instant lies outside MSVC localtime_s's domain (caller degrades); pure pyfmt, flag injected"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,11 +35,14 @@ removal_reason: null
 
 ## Description
 
-`pyfmt.LocalToUnix(loc *time.Location, wall time.Time) (int64, error)` (ADV-P3-D02: aligned with the ARCH-06
-canon row) converts a naive local wall time to Unix seconds exactly as CPython
+`pyfmt.LocalToUnix(fields Naive, loc *time.Location, msvcDomain bool) (int64, error)` (ADV-P3-D02; reconciled
+canon row ADV-P6-D06 / orchestrator call 2) converts a naive local wall time to Unix seconds exactly as CPython
 3.11's `datetime._mktime` (fold = 0) does, including which instant it picks in a DST gap or a repeated hour. Go's
 `time.Date` picks differently (in gaps when the wall read as UTC precedes the transition, in overlaps when it is at
-or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; pitfall PR-14).
+or after it; CONV-ABS-89), so it is never used for naive values (design IM-13; pitfall PR-14). With
+`msvcDomain = true` (statusline passes `platform.IsWindows()`; pure pyfmt imports no platform package), an
+instant outside MSVC `localtime_s`'s domain returns the distinct `ErrLocaltimeDomain` sentinel instead of
+`ErrValue` — the caller degrades on it (BC-5.04.001 PC-6).
 
 ## Preconditions
 

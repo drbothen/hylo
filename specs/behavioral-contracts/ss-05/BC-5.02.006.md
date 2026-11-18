@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T00:20:00Z
@@ -26,6 +26,7 @@ modified:
   - "2026-11-18T22:00:00Z (1.2.2) ADV-P4 remediation D17 — json.dump encoder depth boundary measured directly (python3 -I, temp dir): succeeds through depth 992, RecursionError from 993 at limit 1000 module scope; law limit−8, slope verified at 700/1000/1300; typed ErrDepth + legacy no-write pinned (PC-6, EC-007/008, CTV)"
   - "2026-11-18T23:30:00Z (1.2.3) ADV-P5 remediation D08+D17+D18 — encoder depth measured PER SITE (law: max total nesting = 993 − W, W = Python frames at the encode call; json.dump and json.dumps alike; slope 1 slot/frame verified W=3..9): session/mix save sites W=4 budget 989, record_cost/git sites W=5 budget 988 (both via render_lane); Dumps takes a depth budget and returns ErrDepth; save_cache anchor corrected to SL:308 invoked from main()'s render stack"
   - "2026-11-19T00:20:00Z (1.2.4) pass-5 sweep C end-to-end re-measurement (isolated temp HOME+cwd, real legacy) — PC-6 law restated: 995 − s (json.dump) / 994 − s (json.dumps), s = Python frames at the encode call inclusive; json.dump accepts one level more than json.dumps at equal stack; budgets session/mix saves 991 (measured flip: stdin rate_limits value 990 saves / 991 skips), record_cost/git 990, composition 991/990; mix/git/cost payloads flat so their encoder limits are unreachable from input; exposure window corrected to 991..992"
+  - "2026-11-19T03:45:00Z (1.2.5): ADV-P6 remediation D08 — PC-6 table gains the missing SL:924 row: subagent stdout json.dumps, chain <module>→main_subagent→render_subagent_rows, s = 3, budget 991; measured end to end this burst on real legacy with an isolated temp HOME+cwd and deeply nested task[\"id\"] chains (chain 990 = wire object 991 renders; chain 991 = stdin document 994 exceeds the stdin decoder limit 993 and is swallowed inside main_subagent — empty stdout, exit 0), so the wire budget is exactly attainable from stdin"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -93,6 +94,7 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
    | `git_segment` git-cache save | SL:411 (via `render_lane`, SL:455) | 5 | 990 (flat payload — unreachable from input) |
    | `_mix_counts` `json.dumps` (inner scalar SL:1140; tool_use input SL:1147) | `main→_mix_counts` | 3 | 991 |
    | `_mix_counts` `json.dumps` (tool_result list genexp, SL:1138) | `main→_mix_counts→genexp` | 4 | 990 |
+   | subagent stdout `json.dumps` (task-row wire line) | SL:924 (`<module>→main_subagent→render_subagent_rows`) | 3 | 991 (attainable from stdin: the echoed `task["id"]`) |
 
    Consequently legacy's `save_cache` call in `effective_rl` (SL:308) — reached from
    `main()`'s render stack — can fail with `RecursionError` on a stdin whose `rate_limits`
@@ -112,7 +114,16 @@ Go structs with `encoding/json` are banned for caches: they reorder keys and ref
    sides). The exposure is real and legacy-identical, and was measured end to end this
    burst (isolated temp HOME+cwd): a `rate_limits` nested to total value depth 991..992
    decodes fine and skips the write (value 990 — encoded document 991 — is the deepest
-   that still saves).
+   that still saves). **The SL:924 row was measured end to end this burst too
+   (ADV-P6-D08, isolated temp HOME+cwd, deeply nested `task["id"]` chains, real legacy
+   `--subagent` dispatch):** stdin `{"tasks":[{"id": <chain of d objects>}]}` renders
+   the task row while the dumped wire object nests ≤ 991 — chain depth 990 (wire
+   object 991, stdin document 993) renders; chain 991 (stdin document 994) exceeds the
+   stdin decoder limit 993 (BC-5.02.003), the `RecursionError` is swallowed inside
+   `main_subagent` (SL:929-931), and stdout is EMPTY at exit 0 — zero rows, not the
+   degraded line. The wire budget 991 at s = 3 is therefore exactly attainable from
+   stdin and is the boundary the row pins; a Go port that encoded only 990 levels at
+   this site would drop a row legacy renders.
 
 ## Invariants
 

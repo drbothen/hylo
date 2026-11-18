@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.009.md, behavioral-contracts/ss-05/BC-5.04.003.md, domain-spec/invariants.md]
-input-hash: "2650221"
+input-hash: "56aeb64"
 traces_to: prd.md
 source_bc: BC-5.04.003
 bcs: [BC-5.04.003]
@@ -74,6 +74,7 @@ sources are `Env` members; none is read behind `Render`'s back.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestRender_DeterministicUnderSeams(t *testing.T) {
     for _, env := range generatedEnvs(200) {

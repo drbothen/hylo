@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T06:25:00Z
+timestamp: 2026-11-18T12:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r7.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "ef6c3c1"
+input-hash: "0fc6561"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-636)"
@@ -23,7 +23,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O10/CP-O11 overflow crash paths; ruling OD-156; OD-166 record guard cross-ref)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-19 (H1 enriched with the ⛏ format per bc_h1_is_title_source_of_truth)", "1.3.3 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the stdin-borne CP-O10/O11 legs ride the never-blank ladder); no behavioral change"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-11b (reachable NaN rate)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-01 (CP-O10/CP-O11 overflow crash paths; ruling OD-156; OD-166 record guard cross-ref)", "1.3.2 2026-11-18: pass-5 remediation ADV-P5-C2-19 (H1 enriched with the ⛏ format per bc_h1_is_title_source_of_truth)", "1.3.3 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the stdin-borne CP-O10/O11 legs ride the never-blank ladder); no behavioral change", "1.3.4 2026-11-18: pass-6 remediation ADV-P6-C2-10 (DI-008 lifted into the L2 invariants row — the CP-O10/O11 legs degrade to the 29-byte line, exit 0)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -126,7 +126,7 @@ computed rate, and `⛏` with `.2f` of `eq`. Rounding is of the exact binary val
 | Field | Value |
 |-------|-------|
 | L2 Capability | CAP-011, CAP-009 |
-| L2 Domain Invariants | — |
+| L2 Domain Invariants | DI-008 (the stdin-borne CP-O10/CP-O11 overflow legs degrade to the shared 29-byte non-JSON line, exit 0 — the never-blank ladder; ADV-P6-C2-10) |
 | Architecture Module | `internal/pyfmt` num.go `F`; `internal/statusline` cost.go (BC-COMPONENT-MAP: internal/statusline/cost.go ($, $/h formats) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:601-636; formats at SL:616, 625, 635) |

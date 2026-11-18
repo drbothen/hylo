@@ -10,6 +10,8 @@ Finding progression across adversarial passes in this cycle.
 | 2 (phase-1d, 2026-11-17) | 116 (17 HIGH / 58 MEDIUM / 35 LOW / 6 COSMETIC) | −13 | NOT_CONVERGED — novelty MEDIUM; owner rulings OD-155..159 + fix burst next |
 | 3 (phase-1d, 2026-11-18) | 150 (36 HIGH / 61 MEDIUM / 48 LOW / 5 COSMETIC) | +34 | NOT_CONVERGED — **REGRESSION** (investigated before continuing, see below); novelty MEDIUM; owner questions + fix burst next |
 | 4 (phase-1d, 2026-11-17) | 133 (39 HIGH / 57 MEDIUM / 32 LOW / 5 COSMETIC) | −17 | NOT_CONVERGED — total down 17 but HIGH up 3 (36 → 39), many findings sibling-propagation; novelty MEDIUM-HIGH; owner rulings OD-169..175 + fix burst next |
+| 5 (phase-1d, 2026-11-18) | 148 (24 HIGH / 75 MEDIUM / 43 LOW / 6 COSMETIC) | +15 | NOT_CONVERGED — total +15 but HIGH down 15 (39 → 24), severity mass moved to MEDIUM (75); novelty MEDIUM; owner rulings OD-176..180 + fix burst next |
+| 6 (phase-1d, 2026-11-18) | 124 (27 HIGH / 52 MEDIUM / 38 LOW / 7 COSMETIC) | −24 | NOT_CONVERGED — largest total drop of the series (148 → 124) but HIGH ticked up 24 → 27; novelty MEDIUM; owner rulings OD-181..187 + fix burst next |
 
 ## Per-Pass Details
 
@@ -51,8 +53,6 @@ Finding progression across adversarial passes in this cycle.
 - Tags: owner-question and process-gap rows continue (ADV-P4-INDEX); 7 owner rulings minted (OD-169..OD-175), next free OD-176; closed exclusion set grows to 11 ids (OD-166 added).
 - Trajectory note: total down 17 (150 → 133) but HIGH up 3 (36 → 39). Many findings were sibling-propagation: fixed facts re-flagged at their sibling sites, not relapses of fixed findings; the HIGH concentration sits on the interface-definitions/registry closure (ADV-P4-A04/A05) and partial-fix propagation (ADV-P4-A2-03).
 - Verdict: NOT_CONVERGED. Next: owner rulings OD-169..175 + fix burst (8 parallel fix agents + 2 residual sweeps + OD-148 layout correction + 2 sync-fix agents), then pass 5.
-| 5 (phase-1d, 2026-11-18) | 148 (24 HIGH / 75 MEDIUM / 43 LOW / 6 COSMETIC) | +15 | NOT_CONVERGED — total +15 but HIGH down 15 (39 → 24), severity mass moved to MEDIUM (75); novelty MEDIUM; owner rulings OD-176..180 + fix burst next |
-
 ### Pass 5 — 2026-11-18 (phase-1d adversarial spec review)
 
 - Scope: full P1 spec package, re-reviewed as the same six fresh-context perimeters as passes 1-4. Verbatim reports: `adversarial-reviews/pass-5.md`; index: `adversarial-reviews/ADV-P5-INDEX.md`.
@@ -62,3 +62,12 @@ Finding progression across adversarial passes in this cycle.
 - Tags: 10 [owner-question], 5 [process-gap] (ADV-P5-INDEX row tags).
 - Trajectory note: total +15 vs pass 4 (133 → 148) while HIGH fell 39 → 24 — the series' first pass where total rose but HIGH fell sharply; the HIGH concentration moved out of the interface-definitions/registry closure that dominated pass 4.
 - Verdict: NOT_CONVERGED. Next: owner rulings OD-176..180 + fix burst (executed same burst; rulings incl. OD-176 keeping the full VSDD convergence standard), then pass 6.
+
+### Pass 6 — 2026-11-18 (phase-1d adversarial spec review)
+
+- Scope: full P1 spec package, re-reviewed as the same six fresh-context perimeters as passes 1-5. Verbatim reports: `adversarial-reviews/pass-6.md`; index: `adversarial-reviews/ADV-P6-INDEX.md`.
+- Perimeter counts: A 19, A2 30, B 16, C 17, C2 15, D 27.
+- Novelty: pass-level MEDIUM (index frontmatter; no per-perimeter novelty split recorded for this pass).
+- Tags: 7 [owner-question], 2 [process-gap] (ADV-P6-INDEX row tags).
+- Trajectory note: total −24 vs pass 5 (148 → 124), the largest total drop of the series, though HIGH ticked up 24 → 27; the drop follows the pass-5 remediation's widest-yet propagation (OD-176..180 scope, seventh D4-EX-3 class).
+- Verdict: NOT_CONVERGED. Next: owner rulings OD-181..187 + fix burst (executed same burst; OD-181 closes the exclusion set at 12 ids; OD-182 makes VP Go sketches non-normative; sync check adv-p6 PASS-WITH-FINDINGS, SC-21..28 closed), then pass 7.

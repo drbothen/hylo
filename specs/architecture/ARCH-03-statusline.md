@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T00:20:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "02e219e"
+input-hash: "0258ea6"
 
 ---
 
@@ -63,7 +63,7 @@ follows because every cache write sits inside `Render`'s step script.
 |---|---|---|---|
 | 0 | config resolved by `Main` (precondition; D4-EX-3 before any write) | `config.Load` (in `Main`) | config-error line |
 | 1 | stdin decode (`pyfmt.Decode`, ModeText) | stdin | no — invalid => `{}` (BC-1.01.002/.008) |
-| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010) |
+| 2 | transcript parse, then mix-cache write | `Files`, `Cache` | D4-EX-2 skip (wrong-shape lines); CP-O06..O08 overflow lines skipped whole, in-flight turn dropped (OD-167); CP-S14/S16 degrade sticky (non-string sid at `re.sub` SL:1017; bad `transcript_path` type SL:1010); Windows: a naive timestamp on/before 1970-01-01 or from year ≥ 3001 makes MSVC `localtime_s` raise OSError out of `_iso_ts` (which catches only ValueError) and DEGRADES the whole line (BC-5.04.001 v1.2.3, owner call 8; pass-6 C01 — Windows test vectors derived from the pre-call-8 BCs assert the wrong outcome) |
 | 3 | effective_rl (session-cache write iff non-empty rl dict) | `Cache`, `Now` | no |
 | 4 | get_sample when ROWS >= 2: fetch, then session-cache write | `Metrics`, `Cache`, `Now` | no |
 | 5 | row-2 render (width rule) | pure | CP-N01/N02/N03 |
@@ -90,8 +90,11 @@ extended D4-EX-2 discipline, no sticky state, and the in-flight turn is dropped
 (OD-167); CP-O09 reachable in hylo — two 4,300-digit ints accumulate without meeting a
 float and breach CPython's int-to-string limit at the save (ADV-P3-C09; not moot,
 disposition per the owning BC); CP-O10/O11
-cost-segment overflow — a huge exact int in `usd`/`api_ms` breaching int-to-string in
-`cost_thresholds` at SL:255 (step 7c; the SL:616/623 render sites are unreachable for
+cost-segment overflow — a huge exact int in `usd`/`api_ms` overflowing int→float
+conversion in the `cost_thresholds` division at SL:255 (`usd / (api / 3.6e6)`;
+OverflowError at \|n\| >= 2**1024−2**970 — an int-to-string reading is WRONG: an int
+over ~4,300 digits cannot even load, and the int-to-string breach at the save is
+CP-O09's site, not this one; pass-6 A06) (step 7c; the SL:616/623 render sites are unreachable for
 history-borne values because `cost_thresholds` raises first — pass-4 B14 site
 correction, propagated pass-5 A09), same E-REN-002 disposition, owner BC-1.05.005
 EC-011, bearer the cost-history cache), and **CP-A01..A05** (subagent panel, BC-1.07.008: typed degrades to the 29-byte
@@ -141,6 +144,7 @@ type Env struct {
     Proc    ProcStarter           // constructed by Main after step 0 from window_age.process_name + window_age.max_depth (pass-5 A11); fake in tests
     Files   FileSystem            // transcript and .git reads; os-backed by default
     Cwd     func() string         // git fallback when no project dir
+    Abs     func(p string) (string, error) // per-flavor absolute-path resolution served by internal/statusline (GetFullPathNameW on Windows), backing BC-1.02.004 EC-012 drive-relative "C:rel" resolution — a bare Cwd func() string cannot express it (pass-6 A18); never inside pure pyfmt (ARCH-06 scope note)
 }
 
 type EnvVars interface {
@@ -177,22 +181,39 @@ type CacheStore interface {
     Save(name string, v pyfmt.Value) error // reports the write outcome to the caller (ADV-P2-A25, VP-018); Render swallows it — DI-008 never-raise at the orchestrator
 }
 type MetricsClient interface {
-    // MANUAL REDIRECT LOOP (pass-5 C2-01, call 14): the transport's CheckRedirect
-    // returns http.ErrUseLastResponse and hylo drives the hops itself, so urllib's
-    // rules apply exactly: follow `location` then `uri` headers; an EMPTY Location
-    // redirects to the original URL (Go alone would treat it as absent, returning the
-    // 3xx as final — no sample); after urlunparse, normalize
-    // quote(url, encoding="iso-8859-1", safe=string.punctuation), then urljoin
-    // (verified in CPython 3.11.7 source); schemes outside http/https (ftp included)
-    // give NO sample. The hop budget is the pinned 37-hop cap (BC-1.04.001).
+    // MINIMAL HTTP/1.1 CLIENT OVER net.Conn, plain http only (pass-6 C2-02/C2-05,
+    // call 4; OD-181 limits parity to http): Go's net/http trims header values
+    // (textproto) and url.Parse rejects "%" without two hex digits, while urllib
+    // keeps both — so net/http cannot reproduce urllib's targets byte-exactly.
+    // The client sends exactly urllib's request headers (method GET, `Host`,
+    // `User-Agent: Python-urllib/3.11`, `Accept-Encoding: identity`,
+    // `Connection: close`, in urllib's order; verify against the CPython 3.11.7
+    // source) and parses status line and headers as http.client does (compat32:
+    // header values keep inner and trailing spaces, only CR/LF stripped).
+    // MANUAL REDIRECT LOOP: hylo drives the hops itself, so urllib's rules apply
+    // exactly: follow `location` then `uri` headers; a present-but-EMPTY Location
+    // resolves by urljoin(<URL of the request that received this 3xx>, "") — from
+    // the second hop on that is the CURRENT hop's URL, not the first request's
+    // (pass-6 C2-02, call 4; supersedes the "redirects to the original URL" rule).
+    // An empty fragment is dropped by urlunsplit, so /x# and /x are one loop key.
+    // After urlunparse, normalize quote(url, encoding="iso-8859-1",
+    // safe=string.punctuation), then urljoin (verified in CPython 3.11.7 source).
+    // Hop rules are urllib's visited-set/max_repeats/max_redirections limits — 37 is
+    // the worst-case chain length, NOT a hop budget (pass-6 C2-03, call 4;
+    // BC-1.04.001). Schemes outside http/https give NO sample — the ruled closed-set
+    // exclusion OD-181, "metrics transport beyond plain http" (non-http(s) redirect
+    // targets included; parity cases use plain http only).
     // UserInfo (pass-5 C2-03 ruling OD-180): a metrics URL with userinfo reproduces
     // legacy — NO sample (urllib puts u:p@host into HTTPConnection's host, DNS fails,
     // the dead rung); no exclusion id.
-    // Total deadline, Proxy: nil. Transport MUST set DisableCompression: true
-    // (ADV-P4-C2-09): urllib sends Accept-Encoding: identity and parses raw bytes,
-    // while Go's default http.Transport adds gzip and transparently decompresses —
-    // a gzip response legacy never asked for would give Go a sample where legacy
-    // gets none, a spurious VP-030 divergence.
+    // Total deadline, Proxy: nil. Raw bytes in, no transparent decompression (urllib
+    // sends Accept-Encoding: identity and parses the body raw; an auto-gzip response
+    // legacy never asked for would give Go a sample where legacy gets none, a
+    // spurious VP-030 divergence — the net.Conn design has no auto-gzip by
+    // construction, superseding the DisableCompression transport note).
+    // Reply decode: pyfmt.Decode(b, ModeBytes, depthMetricsReply = 992) (pass-6 A07,
+    // call 5 — legacy fetch_sample calls json.loads(resp.read()) on bytes, SL:171,
+    // so BOM/UTF-16/32 detection applies; BC-5.02.004).
     Query(ctx context.Context, promql string) ([]byte, error)
 }
 type ProcStarter interface {

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.1"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -19,10 +19,10 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-3 remediation (ADV-P3-B04): Refactoring Notes aligned with the superseding definition — pyfmt.Int(x float64) (Num, error), exact beyond int64 (BC-1.02.026 PC2, ARCH-06); 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B05/B03): EC-006 and its vector row tagged OD-160 (hand-edited-cache shape); _hm fuzz leg re-anchored to VP-041; 2026-11-18T03:00:00Z"
-  - "1.4 pass-5 remediation (ADV-P5-B07): DI-012 cited alongside DI-008 (the OD-160-tagged win_start = -Infinity vector); parity row acknowledges the OD-160 ride instead of \"no exclusion entry\"; 2026-11-18T05:42:56Z"
+  - "1.3 pass-3 remediation (ADV-P3-B04): Refactoring Notes aligned with the superseding definition — pyfmt.Int(x float64) (Num, error), exact beyond int64 (BC-1.02.026 PC2, ARCH-06); 2026-11-18T02:00:00Z"
+  - "1.4 pass-4 remediation (ADV-P4-B05/B03): EC-006 and its vector row tagged OD-160 (hand-edited-cache shape); _hm fuzz leg re-anchored to VP-041; 2026-11-18T03:00:00Z"
   - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-18/SC-20) — the ARCH-06 line pointer replaced with the stable #pyfmt-num fragment anchor; pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.5 pass-6 remediation (ADV-P6-B09): the stale line-pointer cross-reference into error-taxonomy.md (the 'superseded int64 sketch') removed; the supersession now cites the taxonomy's own stale-in-both-directions declaration; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -161,8 +161,10 @@ S-N.MM — filled by story-writer
 Resolved by OD-137: the two duration-format sites (`_hm` here and the window-age form,
 BC-1.02.028) keep byte-exact arbitrary-precision behavior using `math/big`. Design note on
 IM-07 (superseding definition per architecture/ARCH-06-pyfmt.md#pyfmt-num, BC-5.01.003:57
-and BC-1.02.026 PC2; the int64
-sketch in error-taxonomy.md:120-124 is superseded): `pyfmt.Int(x float64) (Num, error)` is
+and BC-1.02.026 PC2; the former "superseded int64 sketch" line reference into
+error-taxonomy.md was retired pass-6 ADV-P6-B09 — the sketch is gone and the taxonomy's
+own register declares the cross-reference stale in both directions, see its Surface-1
+exception row): `pyfmt.Int(x float64) (Num, error)` is
 the typed path and is exact beyond int64 (`Num`); the duration sites call `Int` directly and
 reach for `math/big` only where Python's unbounded `int()` arithmetic demands it (exact
 integer floor division of huge float minutes). No exclusion entry exists for this gap.

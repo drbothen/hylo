@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "2e2abee"
+input-hash: "e8682ae"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,8 +19,9 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-4 remediation (ADV-P4-B15/B03): the two-character in label is the Text key statusline.labels.input, not a glyphs member (OD-02); for-all bracket-rule leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "1.3 pass-4 remediation (ADV-P4-B15/B03): the two-character in label is the Text key statusline.labels.input, not a glyphs member (OD-02); for-all bracket-rule leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
   - "1.4 pass-5 remediation (ADV-P5-B04): glyphs named per key with the orchestrator-call-2 renames — statusline.glyphs.reroute → cache_read (U+27F3, SL:594), statusline.glyphs.stale → cache_rebuild (U+21BB, SL:598-599); not shipped, no alias; 2026-11-18T05:42:56Z"
+  - "1.5 pass-6 remediation (OD-184 wording + B16): Inv 2 glyph length respelled to the OD-184 canon (exactly 1 code point, measured in legacy's render width); history labels version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -69,7 +70,8 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
 2. Glyphs `↑ ✍ ⟳ ↓ ↻` are legacy defaults of the registry keys `statusline.glyphs.tokens_up` (U+2191),
    `statusline.glyphs.write` (U+270D), `statusline.glyphs.cache_read` (U+27F3; legacy cache-reads marker, SL:594),
    `statusline.glyphs.tokens_down` (U+2193) and `statusline.glyphs.cache_rebuild` (U+21BB; legacy cache-rebuilds
-   marker, SL:598-599), each exactly 1 code point and 1 column
+   marker, SL:598-599), each exactly 1 code point, measured in legacy's render width — code points, the count
+   legacy's layout uses (OD-184)
    (OD-02); the two-character `in` label is **not** a glyph member — it is the Text key
    `statusline.labels.input` (default `in`); colours are `statusline.theme.*` (OD-113).
 3. Compact units follow `statusline.units.tokens` (T-042: 1000 / 1e6, `>=`; approved mockup, review #10 revisit).

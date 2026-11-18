@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.7"
+version: "1.3.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -26,6 +26,7 @@ modified:
   - "1.3.5 pass-5 remediation (ADV-P5-B01): step table brought level with ARCH-03 and error-taxonomy — step 2 gains D4-EX-2 skip + CP-O06..O08/CP-O09, step 5 gains CP-N03, step 7b gains CP-O01..O05, step 7c gains the OD-166 not-recorded divergence, step 7d degrade CP-O10/O11 (was \"no\"); footnote 2 added; PC2 carries the OD-166 write-divergence note; Decisions row adds OD-156/OD-166; 2026-11-18T05:42:56Z"
   - "1.3.6 pass-5 residual sweep (ADV-P5-B14/A09/A2-19): history re-dated ascending (the pass-4 stamps predated pass-3's); the CP-O10/O11 bearer split added to steps 7c/7d and footnote 2; VP-022 row added to Verification Properties; 2026-11-18T06:25:00Z"
   - "1.3.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17) — EC-005 row respelled to the OD-178 canon (five canonical tests incl. TestD4EX3_Text; register closed at seven); no behavioral change"
+  - "1.3.8 pass-6 remediation (ADV-P6-B04, orchestrator call 11): PC2 names the history-borne CP-O10/O11 raise as a second within-step exception (record_cost write of step 7c persists; reachable via a Python-written history, VP-019 swap — not foreign-shaped); VP-008 row aligned; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,7 +88,11 @@ steps stays on disk and no later write happens, so a degraded refresh leaves the
 
 2. A degrade at step k leaves the writes of steps 1..k-1 exactly as written and performs none of steps k..8. (For
    the out-of-scope foreign-cache classes¹ this holds at step granularity with one within-step exception: a CP-C10
-   fault in `cost_thresholds` happens after step 7c's own record_cost write. Separately, the ruled OD-166 write
+   fault in `cost_thresholds` happens after step 7c's own record_cost write. The same within-step exception holds
+   for the **history-borne** CP-O10/O11 degrade — reachable without any foreign cache shape, through a
+   Python-written cost history (VP-019 swap) or the mix cache: the raise in `cost_thresholds` at SL:255 happens
+   after step 7c's own record_cost write (SL:606-607), so the cost-history write of step 7c persists although the
+   degrade is raised inside step 7c (BC-1.05.005 EC-011). Separately, the ruled OD-166 write
    divergence applies within step 7c before any degrade: an unconvertible cost value is not recorded, so step 7c
    writes nothing where legacy wrote; the later 7d degrade's write-set is unaffected.)
 3. Each write uses legacy's exact file format and in-file key order (BC-1.06.001; key order inherited from earlier
@@ -129,7 +134,7 @@ Rows 1-4 verified 2026-11-15 on CPython 3.11.7 (live clock; under the harness `<
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-008 | For every CP site k, the set of files written equals the writes of steps < k | table test over CP-S/CP-N triggers (multi-step harness, design §5.3) |
+| VP-008 | For every CP site k, the set of files written equals the writes of steps < k (within-step exceptions per PC2: CP-C10 and history-borne CP-O10/O11 in step 7c write their own step's cost history before the raise) | table test over CP-S/CP-N triggers (multi-step harness, design §5.3) |
 | VP-009 | Per-step cache bytes match legacy across the corpus | Tier A differential |
 | VP-022 | The status line's read scope contains no ledger access (DI-007): every `Env.Files`-routed open during a full render belongs to the allowed statusline path set | recording-filesystem wrapper test (seam scope per VP-022 §Property Statement) |
 

@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, architecture/ARCH-07-parity-harness.md, behavioral-contracts/ss-03/BC-3.02.001.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "7530de7"
+input-hash: "3e6513a"
 traces_to: prd.md
 source_bc: BC-3.02.001
 bcs: [BC-3.02.001]
@@ -64,6 +64,7 @@ macOS/Linux probe behaviour is not touched by this exclusion.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestWindowAge_D4EX1_Windows(t *testing.T) {
     for _, tc := range WindowAgeTable {

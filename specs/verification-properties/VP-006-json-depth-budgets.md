@@ -1,16 +1,16 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-19T03:00:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.01.002.md, behavioral-contracts/ss-05/BC-5.02.003.md, behavioral-contracts/ss-01/BC-1.03.004.md, prd-supplements/nfr-catalog.md]
-input-hash: "367ba60"
+input-hash: "6a89473"
 traces_to: prd.md
 source_bc: BC-5.02.003
-bcs: [BC-5.02.003, BC-1.01.002, BC-1.03.004, BC-1.07.003]
+bcs: [BC-5.02.003, BC-5.02.004, BC-1.01.002, BC-1.03.004, BC-1.07.003]
 module: internal/pyfmt (json.go)
 proof_method: fuzz
 feasibility: feasible
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — per-site table states both protocol sites at 993/994 (measured end to end on legacy 2026-11-17, superseding the 989/990 direct-probe figure); cache-load sites declared unmeasured/open, due before Phase 3 (A2-13); proof_file_hash field added (A2-29)", "1.3 2026-11-17: pass-2 follow-up — ADV-P2-A07 closed: governing formula limit = 999 − Python frames from <module> down to json.raw_decode recorded; all eight loader sites stated (stdin/transcript 993/994, session cache 991/992 and git cache 990/991 measured; get_sample, claude_window_start, mix cache and the cost-history loaders derived from equal chain depth); per-site measurement recipe added; harness asserts limit/limit+1 at every site", "1.4 2026-11-18T09:07:00Z: ADV-P3 fixes — main_subagent depth row added: same 6-frame chain as stdin, 993/994, over-limit input renders zero bytes (BC-1.07.003), not the degraded line (A2-22); line-number citations to BC-5.02.003 stripped in favor of content anchors (anchor drift, ADV-P3-D29)", "1.5 2026-11-18T14:38:00Z: ADV-P4 fixes — recipe observable corrected per BC-1.01.002: depth L+1 decodes to {} and renders the 45-byte default line, not the degraded line (A2-16); subagent chain re-labelled <module> → main_subagent (legacy calls main_subagent from <module>, SL:1240-1241); BC-1.07.003 added to bcs: to match the body's row (A2-11)", "1.6 2026-11-18T23:45:00Z: ADV-P5 fix (A2-05) — metrics-reply decode site added to the per-site table and harness: main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames, 992 accepted / 993 rejected — MEASURED end to end (localhost HTTP reply carrying a nested list under an ignored metric key, isolated HOME/cwd per run, python3 -I, 2026-11-18), confirming the 7-frame derivation; BC-5.02.004 names metrics replies pyfmt.Value decodes, so a Go budget drift here is now detected", "1.7 2026-11-19T03:00:00Z: ADV-P5 residual fix — the ModeText cache-loader citation's line-number pointer replaced with the ARCH-04 heading fragment anchor (anchor-drift lesson, ADV-P3-D29)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — per-site table states both protocol sites at 993/994 (measured end to end on legacy 2026-11-17, superseding the 989/990 direct-probe figure); cache-load sites declared unmeasured/open, due before Phase 3 (A2-13); proof_file_hash field added (A2-29)", "1.3 2026-11-17: pass-2 follow-up — ADV-P2-A07 closed: governing formula limit = 999 − Python frames from <module> down to json.raw_decode recorded; all eight loader sites stated (stdin/transcript 993/994, session cache 991/992 and git cache 990/991 measured; get_sample, claude_window_start, mix cache and the cost-history loaders derived from equal chain depth); per-site measurement recipe added; harness asserts limit/limit+1 at every site", "1.4 2026-11-18T09:07:00Z: ADV-P3 fixes — main_subagent depth row added: same 6-frame chain as stdin, 993/994, over-limit input renders zero bytes (BC-1.07.003), not the degraded line (A2-22); line-number citations to BC-5.02.003 stripped in favor of content anchors (anchor drift, ADV-P3-D29)", "1.5 2026-11-18T14:38:00Z: ADV-P4 fixes — recipe observable corrected per BC-1.01.002: depth L+1 decodes to {} and renders the 45-byte default line, not the degraded line (A2-16); subagent chain re-labelled <module> → main_subagent (legacy calls main_subagent from <module>, SL:1240-1241); BC-1.07.003 added to bcs: to match the body's row (A2-11)", "1.6 2026-11-18T23:45:00Z: ADV-P5 fix (A2-05) — metrics-reply decode site added to the per-site table and harness: main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames, 992 accepted / 993 rejected — MEASURED end to end (localhost HTTP reply carrying a nested list under an ignored metric key, isolated HOME/cwd per run, python3 -I, 2026-11-18), confirming the 7-frame derivation; BC-5.02.004 names metrics replies pyfmt.Value decodes, so a Go budget drift here is now detected", "1.7 2026-11-19T03:00:00Z: ADV-P5 residual fix — the ModeText cache-loader citation's line-number pointer replaced with the ARCH-04 heading fragment anchor (anchor-drift lesson, ADV-P3-D29)", "1.8 2026-11-19T12:00:00Z: pass-6 fixes (A2-17, OD-185: harness budgets are pinned literals (subagent row added; BC-5.02.004 in bcs:); production call sites reference named per-site constants; OD-185 oracle self-check leg re-measures the flip depths on the resolved 3.11.x oracle, fails closed, prints the resolved version)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -89,7 +89,13 @@ isolated HOME and cwd per run, ADV-P5-A2-05, measured 992/993 on 2026-11-18.
 - **Class:** invariant.
 - **Method:** fuzz + boundary tables — generate deeply nested Values around each
   budget; assert accept/reject at budget-1, budget, budget+1 for both modes; fuzz for
-  the absence of stack exhaustion below budget.
+  the absence of stack exhaustion below budget. Production call sites pass named
+  per-site budget constants pinned to the measured flips in the harness table, so a
+  wrong budget at a production call site is a detected defect, not an input the test
+  blesses (A2-17). OD-185: the harness self-checks the measured constants against the
+  resolved 3.11.x oracle at start (re-measure the flip depths; fail closed on any
+  mismatch, printing the resolved version; golden metadata records the resolved patch,
+  VP-010/RK-4).
 - **Honesty:** testable-only; the budget parameterisation is statically checkable
   (no global), the boundary rows are exact.
 
@@ -102,25 +108,43 @@ isolated HOME and cwd per run, ADV-P5-A2-05, measured 992/993 on 2026-11-18.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
-func TestDecode_DepthBudgetsPerCallSite(t *testing.T) {
-    // Flip depths measured end to end on legacy, isolated HOME, 2026-11-17
-    // (ADV-P2-A07 closed): limit = 999 − Python frames from <module> down to
-    // json.raw_decode. Peer loaders at equal chain depth share the row.
-    cases := []struct{ name string; mode pyfmt.DecodeMode; ok, reject int }{
-        {"stdin site", pyfmt.ModeText, 993, 994},
-        {"transcript site", pyfmt.ModeBytes, 993, 994},
-        {"metrics reply (get_sample → fetch_sample)", pyfmt.ModeBytes, 992, 993}, // ADV-P5-A2-05, measured 2026-11-18
-        {"session cache (+ get_sample, claude_window_start, mix cache)", pyfmt.ModeText, 991, 992},
-        {"git cache (+ record_cost, cost_thresholds)", pyfmt.ModeText, 990, 991},
+func TestDecode_DepthBudgetsPerCallSite(t *testing.T) { // A2-17: budgets are PINNED
+    // literals in this table, not looked up from the test's own label (budgetOf) —
+    // the flip assertions then fail any budget drift, not just Decode's obedience to
+    // whatever it is handed. Production call sites reference the same named per-site
+    // constants (below), so a call site passing the wrong budget is a compile-time
+    // fix, and the harness asserts the constants equal the measured flips.
+    cases := []struct{ name string; mode pyfmt.DecodeMode; budget, ok, reject int }{
+        {"stdin site", pyfmt.ModeText, 993, 993, 994},
+        {"subagent stdin site", pyfmt.ModeText, 993, 993, 994}, // A2-17: the :48 row is in the harness
+        {"transcript site", pyfmt.ModeBytes, 993, 993, 994},
+        {"metrics reply (get_sample → fetch_sample)", pyfmt.ModeBytes, 992, 992, 993}, // ADV-P5-A2-05, measured 2026-11-18
+        {"session cache (+ get_sample, claude_window_start, mix cache)", pyfmt.ModeText, 991, 991, 992},
+        {"git cache (+ record_cost, cost_thresholds)", pyfmt.ModeText, 990, 990, 991},
     }
     for _, c := range cases {
-        if _, err := pyfmt.Decode(nested(c.ok), c.mode, budgetOf(c.name)); err != nil {
+        if c.budget != c.ok { t.Fatalf("%s: pinned budget %d ≠ measured flip %d", c.name, c.budget, c.ok) } // OD-185-style fail-closed pin
+        if _, err := pyfmt.Decode(nested(c.ok), c.mode, c.budget); err != nil {
             t.Fatalf("%s: depth %d rejected", c.name, c.ok)
         }
-        if _, err := pyfmt.Decode(nested(c.reject), c.mode, budgetOf(c.name)); err == nil {
+        if _, err := pyfmt.Decode(nested(c.reject), c.mode, c.budget); err == nil {
             t.Fatalf("%s: depth %d accepted", c.name, c.reject)
         }
+    }
+}
+
+func TestOracleSelfCheck_MeasuredConstants(t *testing.T) { // OD-185: the measured
+    // constants were taken on 3.11.7 but CI resolves the latest 3.11.x patch — the
+    // harness self-checks them against the RESOLVED oracle at start and fails closed
+    // on any mismatch, printing the resolved version.
+    v := resolvedOracleVersion() // e.g. "3.11.9"; golden metadata records it (VP-010, RK-4)
+    if reMeasuredFlipDepth(resolvedOracle, stdinChain) != 993 {
+        t.Fatalf("resolved oracle %s disagrees with the pinned stdin flip depth 993", v)
+    }
+    if reMeasuredFlipDepth(resolvedOracle, metricsReplyChain) != 992 {
+        t.Fatalf("resolved oracle %s disagrees with the pinned metrics-reply flip depth 992", v)
     }
 }
 ```

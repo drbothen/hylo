@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.5"
+version: "1.0.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: BC-SL-097
 parity_class: byte-exact
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C07/C03) — clock base is the injected Env.Now() float seconds with the time.time()*1000 float-product rule (call 7); UnixMilli guidance removed; theme keys named for the token/clock colours", "1.0.5 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the CP-A04/A05 legs ride the never-blank ladder); no behavioral change"]
+introduced: "0.1"
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet rows replaced with VP-009 (dense grid) + VP-039 (clock ulp)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths catalogued as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919) (ADV-P3-C04); threshold/format order wording fixed (ADV-P3-C19); tok suffix and thresholds sourced from statusline.subagent.tokens.* config keys (ADV-P3-C05)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: tokens.suffix key minted (Text, default ` tok`, design call 3); k_from/m_from defined as display thresholds only with the 1e3/1e6 divisors ruled format constants, not config (ADV-P4-C05)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C07/C03) — clock base is the injected Env.Now() float seconds with the time.time()*1000 float-product rule (call 7); UnixMilli guidance removed; theme keys named for the token/clock colours", "1.0.5 2026-11-18: pass-5 residual sweep (ADV-P5-A2-11/C15 reciprocal) — VP-001 row added to Verification Properties and VP Anchors (the CP-A04/A05 legs ride the never-blank ladder); no behavioral change", "1.0.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null

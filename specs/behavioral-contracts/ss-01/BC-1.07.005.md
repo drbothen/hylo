@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.3"
+version: "1.1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md]
-input-hash: "fff619b"
+input-hash: "5c0f944"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_SUB_GLYPH + render_subagent_rows (SL:845-846, 893-896, 921-922)"
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: BC-SL-097
 parity_class: byte-exact
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 matrix leg", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: running glyph corrected to U+00BB with SL:845-846/921-922 cites (ADV-P3-C02); goldens re-derived ensure_ascii-escaped (ADV-P3-C01); glyph/color pairs sourced from statusline.subagent.* config keys, no Go map literal (ADV-P3-C05); str() rendering of non-string chain/status values specified (ADV-P3-C14)", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: PC3 suffix gate tied to the legacy `if st and st != \"running\"` truthy gate with a present-falsy-status edge case (ADV-P4-C06); unknown-status fallback named statusline.subagent.glyphs.unknown, independent of glyphs.killed (ADV-P4-C07, design call 4)"]
+introduced: "0.1"
+modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-010 matrix leg", "1.1.2 2026-11-18T07:00:00Z: adv-p3 remediation: running glyph corrected to U+00BB with SL:845-846/921-922 cites (ADV-P3-C02); goldens re-derived ensure_ascii-escaped (ADV-P3-C01); glyph/color pairs sourced from statusline.subagent.* config keys, no Go map literal (ADV-P3-C05); str() rendering of non-string chain/status values specified (ADV-P3-C14)", "1.1.3 2026-11-18T08:00:00Z: pass-4 remediation: PC3 suffix gate tied to the legacy `if st and st != \"running\"` truthy gate with a present-falsy-status edge case (ADV-P4-C06); unknown-status fallback named statusline.subagent.glyphs.unknown, independent of glyphs.killed (ADV-P4-C07, design call 4)", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C14) — EC-006 rewrote: the wire carries ensure_ascii \\uXXXX escapes, not verbatim UTF-8 (BC-1.07.004 PC3)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,7 +83,7 @@ else `?`. Rows with a non-running status append a grey status-text suffix.
 | EC-003 | `name = ""` with `label = "lab"` | shows `lab` (or-chain falls through empty string) |
 | EC-004 | All name fields missing | literal `?` after the glyph |
 | EC-005 | `failed` row (U+2718 red) with all name fields | U+2718 red + `?` + grey ` failed` trail |
-| EC-006 | Unicode names (accented letters, emoji, CJK) | rendered verbatim on the wire inside ensure-ASCII JSON (BC-1.07.004) |
+| EC-006 | Unicode names (accented letters, emoji, CJK) | rendered on the wire as their `ensure_ascii` `\uXXXX` escapes inside the JSON string — "verbatim" applies only to the decoded row content before dumping; no byte-for-byte UTF-8 passthrough (BC-1.07.004 PC3; ADV-P6-C14) |
 | EC-007 | Truthy non-string chain value (`name=True` / `1.0` / `['x']` / `{'a': 1}`) | displayed as the `str()` literal (`True`, `1.0`, `['x']`, `{'a': 1}`) — PC5 |
 | EC-008 | `status` present but falsy (`""`, `0`, `False`, `null`) | fallback glyph U+25CD grey (not a map key), NO status suffix — the `and` half of the SL:921 gate (ADV-P4-C06; oracle-checked 2026-11-18) |
 

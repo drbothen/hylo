@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "aac2048"
+input-hash: "5ecc7b2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:499-514)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2 pass-6 remediation (ADV-P6-B01, call 10): for-all window-shown row re-anchored from VP-028 to VP-041 (VP-028 keeps the sequence golden leg); 2026-11-19T04:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -99,8 +99,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; prefixes `claude-son
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For numeric reset, window shown ⇒ `reset > now` | property test |
-| VP-028 | Smoothed window disappears at its reset during a stdin-sequence replay (cache fresh, reset passed) | parity harness sequence (BC-6.02.002) |
+| VP-041 | For numeric reset, window shown ⇒ `reset > now` — for all renders | property test (for-all leg; VP-028 delivers the oracle legs) |
+| VP-028 | Smoothed window disappears at its reset during a stdin-sequence replay (cache fresh, reset passed) | parity harness sequence (BC-6.02.002) — golden leg |
 
 ## Traceability
 
@@ -134,7 +134,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — no past reset shown
+- VP-041 — no-past-reset for-all property (VP-028 retains the sequence golden leg)
 
 ---
 

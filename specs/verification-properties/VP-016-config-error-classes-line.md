@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:45:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-02-configuration.md, behavioral-contracts/ss-02/BC-2.02.001.md, behavioral-contracts/ss-02/BC-2.02.002.md, behavioral-contracts/ss-02/BC-2.02.003.md, behavioral-contracts/ss-02/BC-2.02.004.md, behavioral-contracts/ss-02/BC-2.02.005.md, behavioral-contracts/ss-02/BC-2.02.006.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "ca42daa"
+input-hash: "e0bc085"
 traces_to: prd.md
 source_bc: BC-2.02.001
 bcs: [BC-2.01.002, BC-2.01.003, BC-2.01.005, BC-2.02.001, BC-2.02.002, BC-2.02.003, BC-2.02.004, BC-2.02.005, BC-2.02.006, BC-2.03.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go", "1.3 2026-11-18: ADV-P4 pass-4 fix (D22) — test names canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}: the Number table covers both number-range and number-grammar rows; no Theme member (theme settings are rejected by the corpus validator, BC-6.02.003 EC-007)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-03, A2-25) — class register is seven with the OD-178 Text class (composite-shape, pill-label, runtime glyph-rule, empty-text; own table TestD4EX3_Text, exact reason strings in the taxonomy vocabulary); BC-2.01.003's two homeless legs carried here: TestTheme_DefaultGolden (SL:127-134 golden table) and TestTheme_SGREscapeFree (quick property over accepted values) — legs, not a D4-EX-3 class table; FirstErrorRegistryOrder expects a PINED literal instead of the function under test, so a consistently wrong order can no longer pass"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fixes — number-grammar (BC-2.02.003) got its own table and test name (A2-07); FirstErrorRegistryOrder rewritten as valid, failure-capable Go", "1.3 2026-11-18: ADV-P4 pass-4 fix (D22) — test names canonicalized to TestD4EX3_{Number,Boolean,URL,Enum}: the Number table covers both number-range and number-grammar rows; no Theme member (theme settings are rejected by the corpus validator, BC-6.02.003 EC-007)", "1.4 2026-11-18T23:45:00Z: ADV-P5 fixes (A2-03, A2-25) — class register is seven with the OD-178 Text class (composite-shape, pill-label, runtime glyph-rule, empty-text; own table TestD4EX3_Text, exact reason strings in the taxonomy vocabulary); BC-2.01.003's two homeless legs carried here: TestTheme_DefaultGolden (SL:127-134 golden table) and TestTheme_SGREscapeFree (quick property over accepted values) — legs, not a D4-EX-3 class table; FirstErrorRegistryOrder expects a PINED literal instead of the function under test, so a consistently wrong order can no longer pass", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-08, A2-03: seven-class count propagated (Proof Method table, feasibility); TestTheme_SGREscapeFree captures the quick.Check error, generates accepted-grammar values, builds expected bytes by append)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,7 +72,7 @@ for the same errors.
 ## Property Class and Verification Method
 
 - **Class:** invariant.
-- **Method:** unit/table test — one table per class under the four canonical ARCH-07
+- **Method:** unit/table test — one table per class under the five canonical ARCH-07
   names (`TestD4EX3_{Number,Boolean,URL,Enum,Text}`, pass-4 D22 + OD-178's Text member;
   the `Number` table covers
   both number-range and number-grammar rows, BC-2.02.002/BC-2.02.003) with
@@ -88,11 +88,12 @@ for the same errors.
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Class tables | Go test, `cmd/hylo` + `internal/config` | yes — six classes | every class x representative + boundary values |
+| Class tables | Go test, `cmd/hylo` + `internal/config` | yes — seven classes | every class x representative + boundary values |
 | Order property | Go test | yes — permutation check | registry-order stability |
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestD4EX3_Number(t *testing.T)  { runClassTable(t, numberRangeRows); runClassTable(t, numberGrammarRows) } // range BC-2.02.002 + grammar BC-2.02.003 (A2-07)
 func TestD4EX3_Boolean(t *testing.T) { runClassTable(t, booleanRows) }
@@ -111,12 +112,22 @@ func TestTheme_DefaultGolden(t *testing.T) { // BC-2.01.003 leg, carried here (A
 }
 
 func TestTheme_SGREscapeFree(t *testing.T) { // BC-2.01.003 leg: any ACCEPTED SGR value
-    quick.Check(func(sgr []string) bool { // renders ESC-free inside the parameter span
+    // A2-03: the generator produces ACCEPTED values (SGR parameter lists per the
+    // BC-2.01.003 grammar — ;-joined numeric parameters), not arbitrary []string;
+    // and the quick.Check ERROR is captured, so the property can actually fail.
+    sgrCfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
+        args[0] = reflect.ValueOf(genAcceptedSGR(r)) // accepted-grammar generator, not arbitrary strings
+    }}
+    err := quick.Check(func(sgr []string) bool { // renders ESC-free inside the parameter span
         out := renderPillWithTheme(sgr)
         // The accepted-value grammar is ESC-free; the rendered parameter span must
         // be exactly the ';' joined value — no ESC introduced by the splice.
-        return bytes.Equal(out, pillPreamble+[]byte(strings.Join(sgr, ";"))+pillPostamble)
-    }, nil)
+        want := append(append([]byte{}, pillPreamble...), append([]byte(strings.Join(sgr, ";")), pillPostamble...)...)
+        return bytes.Equal(out, want) // []byte built by append — no unsupported + on mixed types
+    }, sgrCfg)
+    if err != nil { // A2-03: a thrown-away error can never fail — capture and report
+        t.Fatalf("SGR-escape property violated: %v", err)
+    }
 }
 
 func TestConfigError_FirstErrorRegistryOrder(t *testing.T) {
@@ -147,7 +158,7 @@ the theme legs are `TestTheme_DefaultGolden` and `TestTheme_SGREscapeFree`
 
 | Factor | Assessment | Notes |
 |--------|-----------|-------|
-| Input space size | Six classes, small | registry-closed |
+| Input space size | Seven classes, small | registry-closed |
 | Proof complexity | N/A | |
 | Tool support | Full | |
 | Estimated proof time | Days | boundary values per class (TTL nan/inf/neg, 4_0, Unicode digits, TRACE, URL scheme, bool spellings) |

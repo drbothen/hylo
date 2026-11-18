@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:18:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.001.md, behavioral-contracts/ss-01/BC-1.05.002.md, behavioral-contracts/ss-01/BC-1.05.003.md, behavioral-contracts/ss-01/BC-1.05.005.md, behavioral-contracts/ss-01/BC-1.05.007.md, behavioral-contracts/ss-01/BC-1.05.008.md]
-input-hash: "d97cb9a"
+input-hash: "8a7b92e"
 traces_to: prd.md
 source_bc: BC-1.05.008
 bcs: [BC-1.05.001, BC-1.05.002, BC-1.05.003, BC-1.05.005, BC-1.05.007, BC-1.05.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)"]
+modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,8 +59,10 @@ oracle-pinned goldens byte-for-byte, including colour-band boundary rows.
   VP-tables route here (C2-08): testing/quick for-all legs for the invariants marked
   "property proof" in BC-1.05.001/002/003/005 (colour is a pure function of the lane
   percentile thresholds; p75 ≤ p95 whenever a pair is returned; ⛏ basis and $/h
-  banding are pure threshold functions — each property's oracle is that BC's
-  canonical table), and a Tier C differential formatting-fuzz row for the surface
+  banding are pure threshold functions — the quick-leg oracle INDEPENDENTLY RE-DERIVES
+  the BC-1.05.005 rule in the harness; a canonical table cannot oracle randomly
+  generated inputs, the VP-041 A2-08 lesson), and a Tier C differential formatting-fuzz
+  row for the surface
   marked "fuzz" in BC-1.05.007 ($ and $/h spellings), budgeted by
   `HYLO_PARITY_FUZZSECONDS`.
 - **Honesty:** testable-only; boundaries pinned, continuity between them rides corpus
@@ -76,6 +78,7 @@ oracle-pinned goldens byte-for-byte, including colour-band boundary rows.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestCostColouring_SeededSessions(t *testing.T) {
     for _, s := range SeededSessions21 { // 12 s + 8 g + sess-self (BC-1.05.008)
@@ -88,8 +91,12 @@ func TestCostProps_QuickLeg(t *testing.T) { // C2-08: for-all rows routed here b
     cfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
         // A2-05: a Values filler must ASSIGN each arg (args[i] = reflect.ValueOf(x));
         // args arrives filled with zero reflect.Values — Elem().Set panics.
-        args[0] = reflect.ValueOf(genThresholds(r)) // lane percentile thresholds
-        args[1] = reflect.ValueOf(genFiniteRates(r)) // recorded lane rates, FINITE only (BC-1.05.005 qualifier; OD-138 NaN usd rows are pinned table legs)
+        // A2-12: the thresholds ARE the percentiles of the rates (BC-1.05.005), so
+        // the generator produces rates and derives th from them — an independent th
+        // would be unconstrained by the percentile assertions.
+        rates := genFiniteRates(r) // recorded lane rates, FINITE only (BC-1.05.005 qualifier; OD-138 NaN usd rows are pinned table legs)
+        args[0] = reflect.ValueOf(derivePercentile(rates, 0.75))
+        args[1] = reflect.ValueOf(rates)
     }}
     if err := quick.Check(func(th thresholds, rates []float64) bool {
         c := costColor(th, rates)

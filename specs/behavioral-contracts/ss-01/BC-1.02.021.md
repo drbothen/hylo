@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "4f5dcbc"
+input-hash: "a99539e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,7 +19,8 @@ confidence: M
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-4 remediation (ADV-P4-B03): Str-vs-str fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "1.3 pass-4 remediation (ADV-P4-B03): Str-vs-str fuzz leg re-anchored to VP-041; 2026-11-17T12:00:00Z"
+  - "1.5 pass-6 remediation (ADV-P6-B16): history label version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null

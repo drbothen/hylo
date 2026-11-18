@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T02:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md, behavioral-contracts/ss-01/BC-1.01.010.md]
-input-hash: "ac7479c"
+input-hash: "aa6c5a2"
 traces_to: prd.md
 source_bc: BC-1.01.010
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007, BC-1.01.010]
@@ -70,6 +70,7 @@ oracle-pinned matrix exactly.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestTrim_BreakpointMatrix(t *testing.T) {
     for _, r := range BreakpointMatrix {

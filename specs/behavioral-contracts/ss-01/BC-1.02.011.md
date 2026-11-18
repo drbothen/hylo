@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "dc1eab2"
+input-hash: "1580f27"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:510-522, 531-532)"
@@ -19,8 +19,9 @@ confidence: H
 lifecycle_status: active
 introduced: v0.1.0
 modified:
-  - "pass-4 remediation (ADV-P4-B04): EC-010 names CP-O02 and states the exact int->float threshold; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
+  - "1.3 pass-4 remediation (ADV-P4-B04): EC-010 names CP-O02 and states the exact int->float threshold; canonical OV overflow vector added; 2026-11-17T12:00:00Z"
   - "1.4 pass-5 remediation (ADV-P5-B05): EC-010 scoped to huge positive resets_at; new EC-011 pins the huge-negative behavior — window passed at SL:506 (exact int/float compare), hidden at SL:513-514, no degrade (oracle-verified); CTV row added; 2026-11-18T05:42:56Z"
+  - "1.5 pass-6 remediation (ADV-P6-B02 + B10 + B16): EC-011 and its CTV row re-vectored from −10³⁰⁰ to −OV (the negated EC-010 boundary — discriminates a float64-at-decode port; −10³⁰⁰ converted cleanly); the OV CTV row now states a numeric used_percentage so the shown window reaches SL:515; history labels version-prefixed; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -85,7 +86,7 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 | EC-008 | pct 44.5 / 45.5 | text `44%` / `46%` (half-even) |
 | EC-009 | pct NaN | `7dnan%` grey, countdown kept (BC-1.02.024 family, pass-3 r1 BC-SL-061) |
 | EC-010 | `resets_at` a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 **on the positive side** (oracle-verified 2026-11-17: `2**1024 − 2**970 − 1` converts, `2**1024 − 2**970` raises; e.g. 10³⁰⁹) | `reset - now` raises OverflowError at SL:515 (mixed int/float arithmetic converts the int) → guard line (stdin-borne render overflow, OD-156; taxonomy **CP-O02**) |
-| EC-011 | `resets_at` a huge **negative** JSON integer, e.g. −10³⁰⁰ (same magnitudes as EC-010) | no OverflowError, no degrade: the exact int/float compare `reset <= now_rl` (SL:506; −10³⁰⁰ ≤ 1.7e9 is True — the comparison never converts the int) marks the window passed (pct = None) and the window is hidden at SL:513-514 (BC-1.02.010 unreported rule); SL:515 is never reached (oracle-verified 2026-11-17: loop simulation with resets_at = −10**400 hides the widget) |
+| EC-011 | `resets_at` a huge **negative** JSON integer at the EC-010 magnitude, e.g. −OV (pass-6 ADV-P6-B02: the vector is now the negated EC-010 boundary, so a port that converts to float64 at decode overflows and diverges — the former −10³⁰⁰ converted cleanly and discriminated nothing) | no OverflowError, no degrade: the exact int/float compare `reset <= now_rl` (SL:506; −OV ≤ 1.7e9 is True — the comparison never converts the int) marks the window passed (pct = None) and the window is hidden at SL:513-514 (BC-1.02.010 unreported rule); SL:515 is never reached (oracle-verified 2026-11-17: loop simulation with resets_at = −10**400 hides the widget; re-verified 2026-11-18 with −OV: `-OV <= 1.7e9` is True, while `float(-OV)` raises OverflowError) |
 
 ## Canonical Test Vectors
 
@@ -107,8 +108,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; `rate_limits` shown,
 | 7d -5 % no reset | `\e[90m7d0%\e[0m` | edge-case |
 | 7d 44.5 % / 45.5 % no reset | `\e[90m7d44%\e[0m` / `\e[90m7d46%\e[0m` | edge-case |
 | 7d `used_percentage` `"44"` | none (unreported, BC-1.02.010) | error |
-| 5h `resets_at` = OV (`2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792, the smallest positive integer that fails float conversion) | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (`reset - now` OverflowError at SL:515; CP-O02, EC-010) | error |
-| 7d `resets_at` = −10³⁰⁰, 5h absent | no limits segment (the window is marked passed at SL:506 and hidden, no degrade; EC-011) | edge-case |
+| 5h `used_percentage` 31, `resets_at` = OV (`2**1024 − 2**970` = 179769313486231580793728971405303415079934132710037826936173778980444968292764750946649017977587207096330286416692887910946555547851940402630657488671505820681908902000708383676273854845817711531764475730270069855571366959622842914819860834936475292719074168444365510704342711559699508093042880177904174497792, the smallest positive integer that fails float conversion; pass-6 ADV-P6-B10: a numeric `used_percentage` is now stated, so the window is shown and reaches SL:515) | stdout `\e[90mstatusline degraded\e[0m\n`, exit 0 (`reset - now` OverflowError at SL:515; CP-O02, EC-010) | error |
+| 7d `resets_at` = −OV (−`2**1024 − 2**970`, the negated EC-010 boundary; decimal digits as the positive row above), 5h absent | no limits segment (the window is marked passed at SL:506 and hidden, no degrade; EC-011) | edge-case |
 
 ## Verification Properties
 

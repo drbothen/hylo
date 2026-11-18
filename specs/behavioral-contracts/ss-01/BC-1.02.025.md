@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.1"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -19,9 +19,10 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B04/B03): EC-010 names CP-O04 with the exact int->float threshold; canonical OV overflow vector added; float64 fuzz leg re-anchored to VP-041; 2026-11-18T03:00:00Z"
+  - "1.3 pass-3 remediation (ADV-P3-B07): Inv 3 justification reworded to OD-162's actual test (non-default behavior cannot be defined); 2026-11-18T02:00:00Z"
+  - "1.4 pass-4 remediation (ADV-P4-B04/B03): EC-010 names CP-O04 with the exact int->float threshold; canonical OV overflow vector added; float64 fuzz leg re-anchored to VP-041; 2026-11-18T03:00:00Z"
   - "1.4.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.5 pass-6 remediation (ADV-P6-B03 + B16): EC-010 bearer relabeled — CP-O04 is not stdin-borne; the huge int arrives via an integer-only transcript accumulation (CP-O06 skip never fires) or the mix cache; history labels version-prefixed; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,7 +83,7 @@ boundary is not promoted: `999.5` → `1000`, `999500` → `1000k`. Rounding is 
 | EC-007 | `None`, `"abc"`, `[1]` | `?` |
 | EC-008 | `True` | `1` |
 | EC-009 | `-5` | `-5` |
-| EC-010 | a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17), e.g. 10³⁰⁹ | `float(n)` raises OverflowError (uncaught) → guard line (OD-156, stdin-borne render overflow; taxonomy **CP-O04**) |
+| EC-010 | a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17), e.g. 10³⁰⁹ | `float(n)` raises OverflowError (uncaught) → guard line (OD-156; taxonomy **CP-O04**). Bearer (pass-6 ADV-P6-B03: **not** stdin-borne — `_fmt_tok_c` only receives transcript/mix totals, BC-1.02.018 Inv 1, SL:576-578): the huge int arrives through an **integer-only transcript accumulation** (no float operand on the accumulation path, so the CP-O06 wrong-shape skip never fires; error-taxonomy CP-O06 row) or through the mix cache; a test author triggers it from the transcript/mix inputs, not from the current stdin JSON |
 
 ## Canonical Test Vectors
 

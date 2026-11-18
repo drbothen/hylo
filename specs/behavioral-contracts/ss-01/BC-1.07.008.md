@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.3"
+version: "1.1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md]
-input-hash: "2326dbf"
+input-hash: "929459e"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ guard over main_subagent (SL:1242-1245; sites SL:891, 894, 906, 878, 919)"
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: BC-SL-097
 parity_class: byte-exact
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.1.1 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths added to the catalog as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919), five crash paths total (ADV-P3-C04); guard anchor cites the real ARCH-03 Interfaces heading (ADV-P3-C15)", "1.1.2 2026-11-18T08:00:00Z: pass-4 remediation: row-write stdout failure ruled stop-and-exit-0 with no degraded attempt, riding cp-x03 per OD-172 (ADV-P4-C13); stale LOCAL_MODEL_PREFIXES cite corrected to SL:902-903 (ADV-P4-C12)", "1.1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C14/C11/C17) — refactoring note folds CP-A01..A05; stale ARCH-03 line anchor replaced with #statusline-guard; EC table reordered EC-001..009"]
+introduced: "0.1"
+modified: ["1.1.1 2026-11-18T07:00:00Z: adv-p3 remediation: huge-int overflow paths added to the catalog as CP-A04 (float(n), SL:878) and CP-A05 (now_ms - start, SL:919), five crash paths total (ADV-P3-C04); guard anchor cites the real ARCH-03 Interfaces heading (ADV-P3-C15)", "1.1.2 2026-11-18T08:00:00Z: pass-4 remediation: row-write stdout failure ruled stop-and-exit-0 with no degraded attempt, riding cp-x03 per OD-172 (ADV-P4-C13); stale LOCAL_MODEL_PREFIXES cite corrected to SL:902-903 (ADV-P4-C12)", "1.1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C14/C11/C17) — refactoring note folds CP-A01..A05; stale ARCH-03 line anchor replaced with #statusline-guard; EC table reordered EC-001..009", "1.1.4 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C07) — crash-register count reconciled to 47 (error-taxonomy register: 4+17+7+3+11+5)", "1.1.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -119,7 +120,7 @@ are the SL:127-133 defaults (GREY `\e[90m`, RESET `\e[0m`) as pinned in BC-1.01.
 | Architecture Module | `internal/statusline` guard (`guard.go`, design §2.2) shared with BC-1.01.001 |
 | Stories | TBD (filled by story-writer) |
 | Source | legacy/dgx_statusline.py: guard (SL:1242-1245); CP sites SL:891, 894, 906, 878, 919 |
-| Legacy contract | BC-SL-097 (CP-A01..A03 enumerated P3r1 §A7; CP-A04..A05 adv-p3, OD-156 + new ids; count fixed at 45 total) |
+| Legacy contract | BC-SL-097 (CP-A01..A03 enumerated P3r1 §A7; CP-A04..A05 adv-p3, OD-156 + new ids; crash register count 47 total, ADV-P6-C07) |
 | Decisions | OD-155 (restores CP-A family to scope), OD-156 ("like O2": catalogued crash paths reproduce the 29-byte line), OD-136 (EPIPE), OD-172 (cp-x03 extends to row writes: stop and exit 0, no degraded attempt — ADV-P4-C13), D4 |
 
 ## Related BCs (Recommended)

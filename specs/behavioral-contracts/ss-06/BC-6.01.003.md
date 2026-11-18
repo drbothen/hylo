@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "86ad321"
+input-hash: "3dc2513"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -29,7 +29,8 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D23+D10: shim contract lists the UTF-8/newline stdio reconfigure duty with a gating canary leg; tenth clock read SL:889 added to stepped read sites"
   - "2026-11-18T22:00:00Z (1.2.2) ADV-P4 remediation D24+D28 - HYLO_TEST_NOW grammar authority minted here (decimal regex + finite + time.Time range; runtime surpluses rejected); read-site count reconciled to ten (adds SL:889)"
   - "2026-11-19T00:05:00Z (1.2.3) ADV-P5 remediation D02+D19 — the parsed float64 IS the frozen time.time() value, never round-tripped through time.Time ns (owner call 7); grammar range fixed to the asymmetric epoch-seconds span [-62135596800, 253402300799] (D19); shim N anchored to the Pre-3 grammar; canary instant strengthened to the round-trip-discriminating 1794615009.4245193"
-  - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
+  - "2026-11-19T02:00:00Z (1.2.4): sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
+  - "2026-11-19T03:15:00Z (1.2.5): ADV-P6 remediation D11 — canonical vector row 1 realigned to PC-4's strengthened canary instant 1794615009.4245193 (exact stdout); the superseded 1794615009.5 value stays only as EC-004's fractional-grammar case"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -149,7 +150,7 @@ oracle case runs, that the shim actually took effect.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Canary probe, `-s`, `HYLO_TEST_NOW=1794615009.5`, shim present | stdout `1794615009.5\n`; harness proceeds | happy-path |
+| Canary probe, `-s`, `HYLO_TEST_NOW=1794615009.4245193`, shim present | stdout `1794615009.4245193\n`; harness proceeds (PC-4's round-trip-discriminating canary; ADV-P6-D11) | happy-path |
 | Step `k` with `now_k = 1794615009` and a case whose limits countdown depends on `now` | Oracle and Go both render the countdown computed from `1794615009.0` (e.g. golden A `->2h41m` for `resets_at = NOW+9690`, BC-6.03.001) | edge-case |
 | Canary probe with `-I` (negative control) | Reported "shim not loaded"; the negative-control test passes because it was detected | error |
 | Shim file containing `raise RuntimeError` | Canary FAIL: `parity: clock shim not loaded (OD-109 canary): got "<real time>"` | error |

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "650b999"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1104-1112)"
@@ -19,7 +19,7 @@ confidence: "M"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C04) — PC3 and EC-010 name the OD-167 in-flight-turn drop; timestamped CP-O06 turn-drop vector added: the drop is observable in `lr` (hylo null) against the plain-deletion oracle (lr [50.0, true], oracle-run 2026-11-18)"]
+modified: ["1.2.1 2026-11-17: CP-T08 overflow skip (OD-156) + 4,300-digit save failure (ADV-P2-C01/C02); oracle re-verified", "1.2.2 2026-11-17: overflow crash path cited by taxonomy id CP-O06 (OD-156 register)", "1.2.3 2026-11-17: pass-3 remediation (ADV-P3-C07/C08/C09/C10/C18/C22): overflow bound 2^1024−2^970, D4-EX-2 rides the closed id set (OD-156 cited, not an id), CP-O09 not moot (int-only totals), CP-O06 canonical vector, DI-012 cited, duplicate PC 5 renumbered", "1.2.4 2026-11-18T08:00:00Z: pass-4 remediation: PC3 generalized to the ADV-P4-C08 rule (any accumulation site); reviewer two-line vector added (ints-cancel x, then float c_wr meeting at SL:1110; hylo size 852 = 744 + 108, oracle-run 2026-11-18)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C01/C02/C04) — PC3 and EC-010 name the OD-167 in-flight-turn drop; timestamped CP-O06 turn-drop vector added: the drop is observable in `lr` (hylo null) against the plain-deletion oracle (lr [50.0, true], oracle-run 2026-11-18)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C06) — VP table and VP Anchors gain the owned CP-O06 D4-EX-2 legs (VP-013 register, VP-012 closure)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -121,6 +121,8 @@ Expected bytes are the complete cache files, re-pinned 2026-11-15 with the legac
 |--------|----------|-------------|
 | VP-029 | `pyfmt` Num addition equals CPython for int/big-int/float/bool operand pairs | Go property test (testing/quick) vs oracle table |
 | VP-029 | Cache repr of totals equals CPython `json.dumps` | fuzz (differential) |
+| VP-013 | The CP-O06 vector leg this contract owns is a D4-EX-2 wrong-shape leg: the overflow skip leaves no partial mutation and (OD-167) drops the in-flight turn (register VP-013; ADV-P6-C06) | Go property/table test over the owned vector |
+| VP-012 | The CP-O06 exclusion entry this contract owns rides the D4-EX-2 closure check (BC-1.03.018 PC5 names this contract's vector rows among the dedicated tests) | repository test over `exclusions.json` |
 
 ## Traceability
 
@@ -153,6 +155,8 @@ S-TBD — transcript parser
 ## VP Anchors (Recommended)
 
 - VP-029 — Num addition parity
+- VP-013 — the owned CP-O06 D4-EX-2 leg (no partial mutation, OD-167 drop)
+- VP-012 — closure cover for the owned D4-EX-2 exclusion entry
 
 ---
 

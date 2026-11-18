@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.4"
+version: "1.0.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
 phase: 1a
 inputs: [behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, specs/owner-decisions-log-2026-11-14.md]
-input-hash: "1fb201c"
+input-hash: "f6c4d27"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:__main__ dispatch (SL:1240-1241)"
@@ -16,9 +16,10 @@ capability: "CAP-009"
 legacy_id: BC-SL-097
 parity_class: byte-exact
 confidence: H
+priority: P0
 lifecycle_status: active
-introduced: v0.2.2
-modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: stale anchor labels refreshed — ARCH-03:137-138 for the subagent.go placement and legacy/claude-dgx:177 for the launcher wiring (ADV-P4-C12)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C11) — stale ARCH-03 line anchors replaced with the stable fragment #subagent (second drift after ADV-P4-C12; call 19)"]
+introduced: "0.1"
+modified: ["1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-002 (catalog lists this BC)", "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: routing ruling on ADV-P3-A01/D05 sharpened (any index incl. after '--', regardless of other flags); subagent.go placement cited per ARCH-03:133-135 (ADV-P3-C15); argv example clarified (ADV-P3-C22)", "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: stale anchor labels refreshed — ARCH-03:137-138 for the subagent.go placement and legacy/claude-dgx:177 for the launcher wiring (ADV-P4-C12)", "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C11) — stale ARCH-03 line anchors replaced with the stable fragment #subagent (second drift after ADV-P4-C12; call 19)", "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"]
 deprecated: null
 deprecated_by: null
 replacement: null

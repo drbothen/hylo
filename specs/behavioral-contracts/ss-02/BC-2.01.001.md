@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -12,7 +12,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - domain-spec/invariants.md
-input-hash: "f31cca2"
+input-hash: "46f5ff8"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy env reads at legacy/dgx_statusline.py SL:73-77, 89, 444, 902-903)"
@@ -28,6 +28,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D07+D37: all-defaults vector gains queue.false/subagent.true; reserved names extended with HYLO_TIMING_GATE and HYLO_PARITY_FUZZSECONDS"
   - "2026-11-18T12:00:00Z ADV-P4 remediation D01+D27: all-defaults vector queue.yellow corrected to true (OD-175); LOCAL_MODEL_PREFIXES second legacy read site SL:902-903 cited and BC-1.07.006 consumer listed"
   - "2026-11-19T00:55:00Z (1.2.4) ADV-P5 remediation D32+D25 — present-but-empty rule covers Text, SGR and composite types; env case-matching moved behind the platform.Environ seam (build-tagged fold, POSIX-testable double), raw Go maps out"
+  - "2026-11-19T04:30:00Z (1.2.5) ADV-P6 remediation D15 — PC-6 gains the backend-variable carve-out: a well-formed HYLO_BACKENDS_<i>_<FIELD> variable is a backend-entry variable (BC-2.01.002 PC-4/PC-5), never an unknown setting, closing the undefined-stderr gap for HYLO_BACKENDS_1_METRICS_URL"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -78,19 +79,24 @@ happens once per process, before any side effect.
    within one run).
 6. A present `HYLO_*` variable that names no registry key and is not a reserved name is
    ignored, with one stderr warning line `hylo: warning: unknown setting <NAME> (ignored)\n`
-   (OD-01). Name matching follows OS environment-variable case semantics (ADV-P2-D17
+   (OD-01). Carve-out (ADV-P6-D15): a well-formed `HYLO_BACKENDS_<i>_<FIELD>` variable is
+   NOT an unknown setting — even though `backends[<i>]` has no registry entry in P1 — it is
+   a backend-entry variable governed by BC-2.01.002 PC-4/PC-5 (a P1 `<FIELD>` establishes
+   the index and draws the cardinality error; a non-P1 `<FIELD>` warns as an unknown
+   setting per index, before any cardinality error). Name matching follows OS environment-variable case semantics (ADV-P2-D17
    disposition): on Windows matching is case-insensitive (`os.Environ` keeps the original
    name's case, and Windows env names are case-insensitive), so `hylo_foo` IS recognized
    as an unknown `HYLO_*` setting and warned, with the name shown as given; on POSIX,
    matching is case-sensitive, so a lowercase `hylo_foo` is not a `HYLO_*` variable at all
    and is ignored silently. **Platform seam (ADV-P5-D25):** the case semantics live behind
-   `internal/platform` (build-tag confined per D5): `platform.Environ` is a
+   `internal/platform` (build-tag confined per D5): `platform.EnvVars` is a
    case-preserving view over the process environment whose lookup folds case on Windows
    and is byte-exact on POSIX. `config.Load` receives the environment ONLY through that
    seam — never over a raw injected Go map, whose native lookup is case-sensitive — and
    the Windows folding rule is exercised on every OS by a table test against the seam's
    injected test double (feed both casings through the fold; no Windows CI leg is needed
-   to test the fold itself). Reserved names, never warned and never config keys: `HYLO_CONFIG` (config path
+   to test the fold itself). The seam is named `platform.EnvVars` (orchestrator call 9:
+   `EnvVars` everywhere, not `Environ`). Reserved names, never warned and never config keys: `HYLO_CONFIG` (config path
    override, BC-2.03.002), `HYLO_TEST_NOW` (harness clock hook, design §3.2; a malformed
    value is ignored with one stderr warning and the real clock is used — BC-6.01.003,
    ADV-P1-D22 spec choice), `HYLO_PARITY_PYTHON` (harness interpreter setting, OD-104),

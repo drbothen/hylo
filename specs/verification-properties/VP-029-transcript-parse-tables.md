@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T14:58:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.001.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.03.007.md, behavioral-contracts/ss-01/BC-1.03.016.md, prd-supplements/test-vectors.md, prd-supplements/nfr-catalog.md]
-input-hash: "d5be069"
+input-hash: "0cb9a48"
 traces_to: prd.md
 source_bc: BC-1.03.016
 bcs: [BC-1.03.001, BC-1.03.002, BC-1.03.003, BC-1.03.004, BC-1.03.005, BC-1.03.006, BC-1.03.007, BC-1.03.008, BC-1.03.009, BC-1.03.010, BC-1.03.011, BC-1.03.012, BC-1.03.013, BC-1.03.014, BC-1.03.015, BC-1.03.016, BC-1.03.017, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.021]
@@ -77,6 +77,7 @@ D4-EX-2 wrong-shape rows (VP-013).
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestTurnMachine_ExhaustiveTable(t *testing.T) {
     for _, r := range TurnTable20 {

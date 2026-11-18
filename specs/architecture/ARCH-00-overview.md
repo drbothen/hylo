@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "overview"
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 inputs: [prd.md, product-brief.md, domain-spec/invariants.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "e3cd41a"
+input-hash: "c646399"
 
 ---
 
@@ -17,7 +17,8 @@ input-hash: "e3cd41a"
 
 > hylo P1 is one static Go binary per OS (`github.com/drbothen/hylo`, D1) whose only
 > active subcommand family this cycle is `hylo statusline` (+ `version`, `config`).
-> The status line is a pure function of stdin + transcript + metrics + caches (DI-007),
+> The status line is a pure function of stdin + transcript + metrics + caches plus the
+> injected git, process, clock and env seams (DI-007; the seam set per AD-10, prd.md:66),
 > ported byte-exact from `legacy/dgx_statusline.py` under the CPython 3.11.x oracle
 > (OD-104). Rendering never fails: every fault lands on the degraded ladder — one-line
 > output, exit 0 (DI-008). Reference for all idiom rows (IM-nn), pitfalls (PR-nn),
@@ -28,11 +29,14 @@ input-hash: "e3cd41a"
 
 1. **D4 parity first** — the Go port reproduces legacy byte-for-byte on the fixture
    corpus and the owner's recorded inputs before any behavior change. Every deviation
-   rides the closed named exclusion set (DI-012) — the ELEVEN ids {D4-EX-1, D4-EX-2,
-   D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166}, spelled exactly
+   rides the closed named exclusion set (DI-012) — the TWELVE ids {D4-EX-1, D4-EX-2,
+   D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166, OD-181},
+   spelled exactly
    per BC-6.03.004 (pass-4 OD-169 adds `OD-166` — cost-history bytes written after a
    refresh whose `usd` or `api_ms` could not convert to float, nothing else — superseding
-   the pass-3 "ten ids" description).
+   the pass-3 "ten ids" description; pass-6 OD-181 adds `OD-181` — metrics transport
+   beyond plain http: non-http(s) redirect targets and TLS trust-store differences for
+   https; parity cases use plain http only).
 2. **D15 config over code** — every behavior-shaping value is a registry key with type,
    range, default and rationale; no magic numbers in logic. Protocol/format constants
    (29-byte line, D7 ledger schema, cache file-name formats) are named constants with a

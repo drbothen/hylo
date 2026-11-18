@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:10:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.01.002.md, behavioral-contracts/ss-01/BC-1.01.008.md, domain-spec/invariants.md]
-input-hash: "52c7931"
+input-hash: "3989b23"
 traces_to: prd.md
 source_bc: BC-1.01.002
 bcs: [BC-1.01.002, BC-1.01.008, BC-1.07.002, BC-1.07.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — skeleton asserts utf8.Valid(stdout) (A2-25); added the --subagent stdin-absorb totality leg (BC-1.07.003) and the subagent.enabled=false zero-lines leg (BC-1.07.002)", "1.3 2026-11-18T09:06:00Z: ADV-P3 fixes — 3-arg pyfmt.Decode(b, mode, per-site budget) everywhere (A2-08); subagent fuzz leg asserts rows-or-zero-bytes and never-the-degraded-line-via-the-parse-path, with OD-168 (subagent config error = zero bytes) in the output set (A2-07); enabled=false recast as a non-default config value, not a DI-012 named deviation (A2-21)", "1.4 2026-11-18T14:10:00Z: ADV-P4 fix (A2-02) — the never-the-degraded-line assert is coded with its parse-path condition: a decoded JSON object reaches the renderer, where CP-A01..A05 faults legitimately end in the degraded line (BC-1.07.008); the prohibition now fires only for non-object stdin (parse-borne regime)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — skeleton asserts utf8.Valid(stdout) (A2-25); added the --subagent stdin-absorb totality leg (BC-1.07.003) and the subagent.enabled=false zero-lines leg (BC-1.07.002)", "1.3 2026-11-18T09:06:00Z: ADV-P3 fixes — 3-arg pyfmt.Decode(b, mode, per-site budget) everywhere (A2-08); subagent fuzz leg asserts rows-or-zero-bytes and never-the-degraded-line-via-the-parse-path, with OD-168 (subagent config error = zero bytes) in the output set (A2-07); enabled=false recast as a non-default config value, not a DI-012 named deviation (A2-21)", "1.4 2026-11-18T14:10:00Z: ADV-P4 fix (A2-02) — the never-the-degraded-line assert is coded with its parse-path condition: a decoded JSON object reaches the renderer, where CP-A01..A05 faults legitimately end in the degraded line (BC-1.07.008); the prohibition now fires only for non-object stdin (parse-borne regime)", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-13: utf8.Valid([]byte(stdout)) cast so one of the two stdout uses compiles whichever type renderFromStdin returns)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,6 +80,7 @@ holds on every rendered output (BC-1.01.008 stdout property, formerly "no VP yet
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func FuzzStdinDecodeTotality(f *testing.F) {
     for _, s := range SeedStdinCorpus { f.Add(s) }
@@ -105,7 +106,7 @@ func FuzzStdinDecodeTotality(f *testing.F) {
         if subagent && !enabled && len(stdout) != 0 { // BC-1.07.002 off switch
             t.Fatal("subagent render with enabled=false must be zero JSON lines")
         }
-        if !utf8.Valid(stdout) { t.Fatal("stdout is not valid UTF-8 (BC-1.01.008)") }
+        if !utf8.Valid([]byte(stdout)) { t.Fatal("stdout is not valid UTF-8 (BC-1.01.008)") } // A2-13: utf8.Valid takes []byte — cast so one of the two stdout uses compiles whichever type renderFromStdin returns
     })
 }
 ```

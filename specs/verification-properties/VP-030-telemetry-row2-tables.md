@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:17:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.04.002.md, behavioral-contracts/ss-01/BC-1.04.004.md, behavioral-contracts/ss-01/BC-1.04.009.md, behavioral-contracts/ss-01/BC-1.04.014.md, behavioral-contracts/ss-01/BC-1.04.020.md, prd-supplements/test-vectors.md]
-input-hash: "88e60a7"
+input-hash: "20c5945"
 traces_to: prd.md
 source_bc: BC-1.04.002
 bcs: [BC-1.04.001, BC-1.04.002, BC-1.04.003, BC-1.04.004, BC-1.04.005, BC-1.04.006, BC-1.04.007, BC-1.04.008, BC-1.04.009, BC-1.04.010, BC-1.04.011, BC-1.04.012, BC-1.04.013, BC-1.04.014, BC-1.04.015, BC-1.04.016, BC-1.04.017, BC-1.04.018, BC-1.04.019, BC-1.04.020, BC-1.04.021]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — OD-130 not verified in P1; P1 asserts legacy ±Inf behavior per BC-1.04.014 (OD-157, A2-01)", "1.3 2026-11-18T09:17:00Z: ADV-P3 fix (C2-08) — the legs the BC VP-tables route here now exist in this document: testing/quick for-all leg (BC-1.04.002/004/006/007/009/013/017/021 invariants) and Tier C differential-fuzz rows (BC-1.04.001 fetch/redirect sampling, BC-1.04.009 sparkline scale), with skeleton", "1.4 2026-11-18T14:20:00Z: ADV-P4 fix (A2-05) — quick.Values filler rewritten to the assigning form args[0] = reflect.ValueOf(genRow2State(r))"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fix — OD-130 not verified in P1; P1 asserts legacy ±Inf behavior per BC-1.04.014 (OD-157, A2-01)", "1.3 2026-11-18T09:17:00Z: ADV-P3 fix (C2-08) — the legs the BC VP-tables route here now exist in this document: testing/quick for-all leg (BC-1.04.002/004/006/007/009/013/017/021 invariants) and Tier C differential-fuzz rows (BC-1.04.001 fetch/redirect sampling, BC-1.04.009 sparkline scale), with skeleton", "1.4 2026-11-18T14:20:00Z: ADV-P4 fix (A2-05) — quick.Values filler rewritten to the assigning form args[0] = reflect.ValueOf(genRow2State(r))", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-12, OD-181: quick-leg oracle respelled as harness re-derivation; TestMetricsClient_OD181_TransportTable transport rows (OD-181 rider per VP-012))"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,11 +63,16 @@ mismatch quirk.
   for-all legs for the row-2 invariants marked "property proof" in
   BC-1.04.002/004/006/007/009/013/017/021 (TTL/freshness monotonicity, redirect
   visited-cap sampling behaviour, cells caps, sparkline scale bounds, TTFT
-  rounding bands, idle-age ordering, power-format invariants — each property's
-  oracle is that BC's canonical table), and Tier C differential-fuzz rows for the
+  rounding bands, idle-age ordering, power-format invariants — the quick-leg oracle
+  INDEPENDENTLY RE-DERIVES each BC rule in the harness; a canonical table cannot
+  oracle randomly generated states, the VP-041 A2-08 lesson), and Tier C
+  differential-fuzz rows for the
   surfaces marked "fuzz" in BC-1.04.001 (fetch/redirect sampling) and BC-1.04.009
   (sparkline scale), budgeted by `HYLO_PARITY_FUZZSECONDS`, same oracle discipline
-  as VP-011.
+  as VP-011. The metrics-client transport table (`TestMetricsClient_OD181_TransportTable`,
+  OD-181 rider per VP-012) pins hylo's plain-http client behaviour here: urllib's
+  exact header set/order, the empty-`Location` urljoin rule, the visited-cap worst
+  case, and the OD-181 non-http/https table rows (no sample / OS trust store).
 - **Honesty:** testable-only; the 1.5 s timeout and first-wins semantics are
   fake-server integration rows.
 
@@ -83,6 +88,7 @@ mismatch quirk.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestGetSample_Pinned11StepSequence(t *testing.T) {
     for _, s := range SampleSequence11 {

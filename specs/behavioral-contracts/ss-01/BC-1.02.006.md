@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.6.1"
+version: "1.6.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "69ece43"
+input-hash: "5ecc7b2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -19,11 +19,12 @@ confidence: H
 lifecycle_status: active
 introduced: v0.1.0
 modified:
-  - "consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"
-  - "pass-3 remediation (ADV-P3-B07): PC3-PC5 parametrize on cells/plain_max/red_from, so Inv 3 now gives them real ranges (cells int >= 1; plain_max/red_from any finite number); only units.context stays default-only; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B13/B08/B04): duplicate modified keys merged; cells range 1..100 (B09 cap, same as kv.cells); units.context default-only reason cites the fixed M/K divisors; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
+  - "1.5.1 consolidated pass-2 follow-up: EC-010 overflow condition corrected (CPython converts the int operand to float first; e.g. 2·10³⁰⁸) + taxonomy id CP-O01, 2026-11-17T21:21:41Z"
+  - "1.5.2 pass-3 remediation (ADV-P3-B07): PC3-PC5 parametrize on cells/plain_max/red_from, so Inv 3 now gives them real ranges (cells int >= 1; plain_max/red_from any finite number); only units.context stays default-only; 2026-11-18T02:00:00Z"
+  - "1.5.3 pass-4 remediation (ADV-P4-B13/B08/B04): duplicate modified keys merged; cells range 1..100 (B09 cap, same as kv.cells); units.context default-only reason cites the fixed M/K divisors; canonical OV overflow vector added; 2026-11-18T03:00:00Z"
   - "1.6 pass-5 remediation (ADV-P5-B03/B15): thermometer cells named as registry keys statusline.glyphs.cell_on/cell_off (defaults U+25B0/U+25B1, 1 code point/1 column, SL:428); cells above 100 clarified as a number-range config error, never a clamp; 2026-11-18T05:42:56Z"
   - "1.6.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.6.2 pass-6 remediation (ADV-P6-B01 call 10 + OD-184 wording): for-all thermometer rows re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); glyph length respelled to the OD-184 canon; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,7 +64,7 @@ Notation: `\e` is the byte 0x1B.
 4. Bar = for `i` in `0..n-1`: `truecolor(heat((i+0.5)*d)) + cell_on` if `i < filled`, else
    `\e[90m▱`; then `\e[0m`, where the filled/empty cells are the registry keys
    `statusline.glyphs.cell_on` / `statusline.glyphs.cell_off` (OD-02; defaults ▰ U+25B0 and ▱ U+25B1, each exactly
-   1 code point / 1 column; SL:428). With the default heat theme the 10 cell colours are, in order,
+   1 code point, measured in legacy's render width — code points, the count legacy's layout uses (OD-184); SL:428). With the default heat theme the 10 cell colours are, in order,
    `\e[38;2;159;204;30m`, `\e[38;2;182;204;30m`, `\e[38;2;204;202;30m`,
    `\e[38;2;204;179;30m`, `\e[38;2;204;156;30m`, `\e[38;2;204;133;30m`,
    `\e[38;2;204;110;30m`, `\e[38;2;204;87;30m`, `\e[38;2;204;64;30m`,
@@ -142,9 +143,9 @@ prefixes listed in Postcondition 4; `E` = `\e[90m▱`.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | `filled == min(floor(pct/10 + 0.5), 10)` for all finite pct in [0,100] | property test |
-| VP-028 | Visible width of the segment = 10 + 1 + len(number text) + len(denominator text) | property test with `visible()` (BC-1.01.004) |
-| VP-028 | Bytes equal the oracle across a pct sweep 0..100 step 0.1 × totals {0, 500, 501, 200000, 999999, 1e6, 1048576} | table test against CPython goldens |
+| VP-041 | `filled == min(floor(pct/10 + 0.5), 10)` for all finite pct in [0,100] | property test (for-all leg; VP-028 delivers the oracle legs) |
+| VP-041 | Visible width of the segment = 10 + 1 + len(number text) + len(denominator text), for all inputs | property test with `visible()` (BC-1.01.004) — for-all leg |
+| VP-028 | Bytes equal the oracle across a pct sweep 0..100 step 0.1 × totals {0, 500, 501, 200000, 999999, 1e6, 1048576} | table test against CPython goldens — golden leg |
 
 ## Traceability
 
@@ -178,7 +179,7 @@ TBD — context widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — filled-cell formula
+- VP-041 — filled-cell for-all formula (VP-028 retains the oracle legs)
 
 ---
 

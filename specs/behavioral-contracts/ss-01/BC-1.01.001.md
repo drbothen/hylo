@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.7"
+version: "1.3.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -25,6 +25,7 @@ modified:
   - "1.3.5 pass-5 remediation (ADV-P5-B02): PC3 widens the guarded-site list to the E-REN-002-routed families (CP-N03, CP-O01..O05, CP-O10/O11; transcript CP-O06..O08/CP-O09 named as skip/no-write disciplines, not this guard); EC-003 no longer claims the parity diff always disagrees — mapped-degrade inputs agree on stdout; 2026-11-18T05:42:56Z"
   - "1.3.6 pass-5 residual sweep (ADV-P5-B14): EC-007's subagent crash-range corrected to CP-A01..A05; history re-dated ascending (the pass-4 stamps predated pass-3's); no behavioral change; 2026-11-18T06:25:00Z"
   - "1.3.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-17 sibling sweep) — EC-004 register row respelled to the OD-178 canon (five canonical tests incl. TestD4EX3_Text; register closed at seven) and history labels version-prefixed ascending; no behavioral change"
+  - "1.3.8 pass-6 remediation (ADV-P6-B11): PC3 guarded-site list now names the subagent crash family CP-A01..A05 (matching PC1's --subagent coverage and EC-007); no behavioral change; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,8 +58,8 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
    lone surrogate at output), CP-N01/N02/N03 (row-2 NaN paths and the metrics-borne numeric-`__name__` degrade,
    BC-1.04.014/015), the OD-156 overflow sites routed to E-REN-002 through this guard (CP-O01..O05 at the row-1
    render sites, CP-O10/O11 in the cost segment — the transcript family CP-O06..O08 and CP-O09 resolve to the
-   D4-EX-2 skip / no-write-save disciplines instead, not this guard; error-taxonomy E-REN-002), or any unexpected
-   Go panic.
+   D4-EX-2 skip / no-write-save disciplines instead, not this guard; error-taxonomy E-REN-002), the subagent
+   render family CP-A01..A05 (EC-007; BC-1.07.008), or any unexpected Go panic.
 
 ## Postconditions
 

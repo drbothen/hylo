@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "1b3c4df"
+input-hash: "e1dae94"
 
 ---
 
@@ -42,12 +42,14 @@ input-hash: "1b3c4df"
   excluded case `{id, case, expected_output_file, table_test}`; harness FAILs with a
   named reason on: an excluded case without a matching table test, an excluded case whose
   Go output differs from its own expected file, a glob ("no blanket exclusions"), or an
-  id outside the closed set — ELEVEN ids: {D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76,
-  temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166} (spelling exactly per BC-6.03.004;
+  id outside the closed set — TWELVE ids: {D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76,
+  temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166, OD-181} (spelling exactly per BC-6.03.004;
   ADV-P1-A05; OD-159 = Go reads files as UTF-8 on all OSes, OD-160 = foreign-cache
   shapes ruling Q-b, OD-161 = integer `transcript_path` → no transcript, never touch
   foreign descriptors, OD-166 = cost-history bytes written after a refresh whose `usd`
-  or `api_ms` could not convert to float — nothing else; OD-169).
+  or `api_ms` could not convert to float — nothing else; OD-169; OD-181 = metrics
+  transport beyond plain http — non-http(s) redirect targets and TLS trust-store
+  differences for https; parity cases use plain http only, pass-6 OD-181).
   stderr is never compared (Python tracebacks invisible to Claude Code).
 - **Verification feasibility:** comparison and exclusion machinery are
   **provably-closable**: a closure property test proves every exclusion id ∈ closed set,
@@ -57,6 +59,11 @@ input-hash: "1b3c4df"
 ## Oracle execution (BC-6.01.001..003)
 
 - Explicit absolute CPython 3.11.x interpreter path, never PATH discovery (OD-104);
+  oracle SELF-CHECK at harness start (OD-185, pass-6 A02: CI resolves the latest 3.11
+  patch while the measured constants were taken on 3.11.7): the harness measures the
+  JSON depth boundaries and `unicodedata.unidata_version` against the RESOLVED oracle
+  and FAILS CLOSED on any mismatch, printing the resolved version; Tier B golden
+  metadata records the resolved patch (RK-4).
   invoked with `-s`, never `-I`/`-E` — `-I` would drop the sitecustomize clock shim
   (OD-109). Child environment constructed from scratch — ALLOWLIST construction, never
   inherit-then-strip (BC-6.01.002:70/:157 authoritative; pass-5 A02 aligns VP-034 and
@@ -68,10 +75,17 @@ input-hash: "1b3c4df"
   - Windows: `USERPROFILE` (fixed per-case temp dir), `TMP`, `TEMP`, `SYSTEMROOT`
     (canonical NT spellings as constructed; the child env is built from scratch, so
     the host shell's case-insensitive key matching never applies — pass-5 A2-07),
-    `PATH`, `PYTHONPATH` (shim only), `TZ=UTC`.
+    `PATH`, `PYTHONPATH` (shim only), `TZ=UTC`, and exactly ONE extra variable,
+    `PYTHONIOENCODING=utf-8` (OD-183, pass-6 A03: CPython 3.11 piped stdio on
+    Windows otherwise uses the ANSI code page, so the strict-UTF-8 parity mode of
+    BC-1.01.008 could not be reached on the windows-2025 oracle and glyphs outside
+    cp1252 would degrade the Windows goldens; stdio only — a table test pins that
+    the variable changes stdio encoding and nothing else; `PYTHONUTF8` stays
+    forbidden).
   - Both OSes: NO other `PYTHON*` variable except `PYTHONPATH` (EC-002: no
-    `PYTHONUTF8`, no `PYTHONIOENCODING` — BC-1.01.008 inv 2: `PYTHONUTF8=1` is NOT
-    the parity mode), no `*_proxy`, no inherited GP-1..GP-6 variables (e.g. no
+    `PYTHONUTF8` on either OS — BC-1.01.008 inv 2: `PYTHONUTF8=1` is NOT
+    the parity mode; `PYTHONIOENCODING` appears on Windows only, as the OD-183
+    `=utf-8` stdio pin above), no `*_proxy`, no inherited GP-1..GP-6 variables (e.g. no
     `DGX_SL_TTL`, which changes legacy TTL).
 - Clock shim `internal/statusline/testdata/pyhooks/sitecustomize.py` on `PYTHONPATH`
   freezes `time.time`/`strftime`/`localtime`/`gmtime` from `HYLO_TEST_NOW` (decimal
@@ -124,7 +138,7 @@ input-hash: "1b3c4df"
 | Clock shim | `internal/statusline/testdata/pyhooks/sitecustomize.py` |
 | pyfmt generators/tables | `internal/pyfmt/testdata/gen/*.py`; tables `internal/pyfmt/testdata/*.golden` |
 | Replay captures (git-ignored) | `captures/` (repo root) |
-| D4-EX-3 class tests | `TestD4EX3_{Boolean,Enum,URL,Number,Text}` — FIVE names, five classes (OD-178, pass-5 A07; superseding the pass-4 four-name set): `Number` covers both number-range (BC-2.02.002) and number-grammar (BC-2.02.003; the grammar class maps to `_Number`); `Text` is the OD-178 seventh D4-EX-3 class covering composite-shape, pill-label, glyph and empty-text errors, with exact reason strings in the taxonomy vocabulary and its own table test `TestD4EX3_Text`. No Theme member — theme settings are rejected by the corpus validator (BC-6.02.003 EC-007), so a Theme D4-EX-3 case cannot exist in the corpus; superseding the earlier six-name list |
+| D4-EX-3 class tests | `TestD4EX3_{Boolean,Enum,URL,Number,Text}` — FIVE names, five classes (OD-178, pass-5 A07; superseding the pass-4 four-name set): `Number` covers both number-range (BC-2.02.002) and number-grammar (BC-2.02.003; the grammar class maps to `_Number`); `Text` is the OD-178 seventh D4-EX-3 class covering composite-shape, pill-label, glyph and empty-text errors, with exact reason strings in the taxonomy vocabulary and its own table test `TestD4EX3_Text`. No Theme member — theme settings are rejected by the corpus validator (BC-6.02.003 EC-007), so a Theme D4-EX-3 case cannot exist in the corpus and no `TestD4EX3_Theme` name is canonical; the split rationale is NOT legacy analogs — Text also has none, yet keeps its Go table test precisely because its keys ARE registry-declared (composite-shape, pill-label, glyph, empty-text): `TestD4EX3_Text` is a Go table test only, not a parity exclusion entry (pass-6 A20, call 1). Superseding the earlier six-name list |
 | D4-EX-1 test | `TestWindowAge_D4EX1_Windows` |
 | Seeds reference | `seed/` holds the four cache files under their legacy file-name formats (legacy-shared named constants, BC-1.06.001; not renamed by the harness) |
 

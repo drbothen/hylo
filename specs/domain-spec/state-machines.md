@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "state-machines"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T03:35:34Z
+timestamp: 2026-11-18T08:15:29Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r8.md, .factory/specs/owner-decisions-log-2026-11-14.md]
-input-hash: "9e57762"
+input-hash: "2d2ffaa"
 traces_to: L2-INDEX.md
 ---
 
@@ -96,7 +96,10 @@ OD-57]
 Per session: **closed turn → open turn → (compaction boundary resets composition and
 `pp` only) → rebuild counting (`↻n`) at 20,000 excess-write threshold**; wrong-shape
 transcript lines are skipped, never poisoning state (D4-EX-2, OD-21/OD-32).
-Poisoned legacy caches: treated as no open turn when `cur.t0` is numeric (OD-32).
+Poisoned legacy caches: `cur` is treated as absent — no open turn — only when
+`cur.t0` is a number (int, float or bool) AND `cur.out` is not a number (not
+int/float/bool); every other `cur` is kept verbatim (OD-32 as amended per
+CONV-ABS-15; BC-1.03.020).
 [LEGACY-OBSERVED P2r1 §2.3, §8; deviations DECIDED]
 
 Formerly open state-machine deltas now decided: SM-02's registration semantics

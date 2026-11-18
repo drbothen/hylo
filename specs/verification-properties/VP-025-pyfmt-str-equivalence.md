@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.03.001.md, behavioral-contracts/ss-05/BC-5.03.002.md, behavioral-contracts/ss-05/BC-5.03.003.md, behavioral-contracts/ss-05/BC-5.03.004.md, owner-decisions-log-2026-11-14.md]
-input-hash: "904a6b4"
+input-hash: "84db17e"
 traces_to: prd.md
 source_bc: BC-5.03.001
 bcs: [BC-5.03.001, BC-5.03.002, BC-5.03.003, BC-5.03.004]
@@ -66,6 +66,7 @@ not terminal cells), `Truncate`, `HasSurrogate`, `EncodeUTF8Replace` (lone surro
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestStr_OracleTables(t *testing.T) {
     for _, row := range LoadGolden("testdata/str.golden") {

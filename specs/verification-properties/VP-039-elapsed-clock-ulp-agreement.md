@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T14:32:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.07.007.md, owner-decisions-log-2026-11-14.md]
-input-hash: "b1dbe37"
+input-hash: "c323b21"
 traces_to: prd.md
 source_bc: BC-1.07.007
 bcs: [BC-1.07.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:01:00Z: ADV-P3 fixes (A2-03) — computation restated to legacy exactly: elapsed = max(now_ms - start, 0)/1000 with now_ms = time.time()*1000 (SL:889, 919; the 0.001-multiply form was wrong); fusion site named as time*1000 - start; oracle corrected from test-local helper agreement to bit-exact comparison against CPython-derived goldens, with the explicit float64() conversion the BC requires forbidding FMA contraction on EVERY arm64 target (darwin, linux, windows — not only darwin/arm64)", "1.2 2026-11-18T14:32:00Z: ADV-P4 fix (A2-09) — build constraint split and made valid: the golden-parity test carries NO build tag (pure float64 comparison, runs on every CI leg including amd64); only the fusion-regime detector is `//go:build arm64` with the comment on its own line; the grid now draws (start, now) pairs at wall-clock epoch-ms magnitude (~1.7e12) with deltas in the ulp neighbourhoods of MM:SS boundaries — the regime the FMA guard protects"]
+modified: ["1.1 2026-11-18T09:01:00Z: ADV-P3 fixes (A2-03) — computation restated to legacy exactly: elapsed = max(now_ms - start, 0)/1000 with now_ms = time.time()*1000 (SL:889, 919; the 0.001-multiply form was wrong); fusion site named as time*1000 - start; oracle corrected from test-local helper agreement to bit-exact comparison against CPython-derived goldens, with the explicit float64() conversion the BC requires forbidding FMA contraction on EVERY arm64 target (darwin, linux, windows — not only darwin/arm64)", "1.2 2026-11-18T14:32:00Z: ADV-P4 fix (A2-09) — build constraint split and made valid: the golden-parity test carries NO build tag (pure float64 comparison, runs on every CI leg including amd64); only the fusion-regime detector is `//go:build arm64` with the comment on its own line; the grid now draws (start, now) pairs at wall-clock epoch-ms magnitude (~1.7e12) with deltas in the ulp neighbourhoods of MM:SS boundaries — the regime the FMA guard protects", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-14, A2-13: golden-parity compares float64 BITS (bit-exact leg) with mmss as the rendered leg; the detector gains the production-vs-unfused bit-exact assertion and its own imports)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,6 +87,7 @@ only the detector is arm64-tagged.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 // TestElapsedClock_UnfusedGoldenParity has NO build tag (A2-09): comparing float64
 // evaluations against committed CPython-derived goldens is architecture-independent,
@@ -97,9 +98,17 @@ func TestElapsedClock_UnfusedGoldenParity(t *testing.T) { // PR-15, CONV-ABS-77
         // MM:SS rounding boundaries — at 1.7e12 the product time*1000 has an ulp
         // of ~2^-12 ms, exactly where FMA contraction can flip a rendered second.
         // CPython-derived golden: unfused max((time*1000 as float64) - start, 0)/1000
-        want := mmss(GoldenElapsed(p.Start, p.Now))
-        if got := mmss(ProductionElapsed(p.Start, p.Now)); got != want { // explicit float64() conversion
-            t.Fatalf("start=%d now=%d: rendered %s, CPython golden %s", p.Start, p.Now, got, want)
+        golden := GoldenElapsed(p.Start, p.Now)
+        got := ProductionElapsed(p.Start, p.Now) // explicit float64() conversion
+        // A2-14: the promise is BIT-EXACT — compare float64 BITS, not only the
+        // rendered MM:SS strings (an ulp drift that doesn't change the displayed
+        // second would otherwise pass). The mmss comparison stays as the rendered
+        // byte-identity leg.
+        if math.Float64bits(got) != math.Float64bits(golden) {
+            t.Fatalf("start=%d now=%d: production %b, CPython golden %b (bit-exact leg)", p.Start, p.Now, got, golden)
+        }
+        if mmss(got) != mmss(golden) {
+            t.Fatalf("start=%d now=%d: rendered %s, CPython golden %s", p.Start, p.Now, mmss(got), mmss(golden))
         }
     }
 }
@@ -110,15 +119,27 @@ with the //go:build constraint BEFORE the package clause (ADV-P5-A2-18): a const
 mid-file is not a build constraint, and go vet flags it; as a file-level constraint the
 detector compiles only on arm64 legs instead of breaking amd64 builds.
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 // ---------- elapsed_detector_arm64_test.go ----------
 //go:build arm64
 
 package statusline
 
+import (
+    "testing" // A2-13: the detector file needs its own imports
+    "math"
+)
+
 func TestElapsedClock_FusionRegimeDetector(t *testing.T) { // A2-09: tag on the detector only
     if !contractFMA(probePair()) { // detector: the fused regime is real on arm64
         t.Fatal("arm64 no longer contracts FMA; revisit the float64() fusion guard")
+    }
+    // A2-14: the detector's bit-exact leg — the production function agrees with the
+    // unfused reference bit-for-bit on the probe pair.
+    prod, ref := ProductionElapsed(probeStart, probeNow), unfusedReference(probeStart, probeNow)
+    if math.Float64bits(prod) != math.Float64bits(ref) {
+        t.Fatalf("production disagrees with the unfused reference bit-exactly: %b vs %b", prod, ref)
     }
 }
 ```

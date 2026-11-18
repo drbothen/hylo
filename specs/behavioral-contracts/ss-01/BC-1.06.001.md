@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:45:10Z
+timestamp: 2026-11-19T16:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -16,19 +16,19 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "c2d284a"
+input-hash: "57be01d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:load_cache/save_cache (SL:190-206)"
 subsystem: "SS-01"
 capability: "CAP-009"
 legacy_id: "BC-SL-052"
-parity_class: "byte-exact"
+parity_class: "temp-file"
 confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-019 added", "1.2.2 2026-11-17: own-temp-only cleanup on any save failure (OD-163) + EC-010; VP-022 unanchored to 'no VP yet' (ADV-P2-C05/C10/C12)", "1.2.3 2026-11-18T03:00:00Z: VP citation reconciliation — removed stale ledger-read-scope VP ID from row 1 note (deliberately absent from its bcs)", "1.2.4 2026-11-18T08:00:00Z: lone-surrogate sid encoding specified (Python surrogateescape vs Go WTF-8; ADV-P3-C21)", "1.2.5 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C10) — DI-012 lifted to the traceability row for the OD-163 own-temp-cleanup deviation (sibling convention)", "1.2.6 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C15/C16) — PC1 states the read-encoding pin: legacy opens caches with the locale encoding, hylo reads UTF-8 per named deviation OD-159 (OD-183 covers stdio only), divergence reachable only via foreign non-ASCII caches (OD-160), VP-012 closure; parity_class relabeled from byte-exact to temp-file, matching sibling BC-1.06.002 (the contract carries the OD-163 own-temp-cleanup divergence)", "1.2.7 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-24) — EC-009 respelled to the OD-186 single attempt count: three attempts total (initial attempt plus two retries), matching ARCH-04, VP-018, BC-6.03.003 and BC-2.01.004; no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,7 +65,16 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
    last-wins, trailing whitespace allowed. Return the parsed value **whatever its JSON
    type** (a top-level array is returned as an array). On any failure — missing file,
    permission error, empty file, invalid JSON, a UTF-8 BOM, invalid UTF-8, trailing
-   garbage — return `{}`.
+   garbage — return `{}`. Encoding (ADV-P6-C15): legacy `open(path)` (SL:191) uses the
+   **locale** encoding (cp1252 on Windows outside UTF-8 mode); hylo reads UTF-8 on all
+   OSes as the **named deviation, exclusion id `OD-159`** ("Go reads files as UTF-8 on all
+   OSes", sibling convention of BC-1.02.004 PC2/EC-012; OD-183 extends OD-159 to stdio
+   only — file reads are covered by OD-159 itself, and the Windows oracle's single extra
+   `PYTHONIOENCODING=utf-8` variable changes stdio encoding, not file reads). The
+   divergence is reachable only through foreign, non-ASCII caches: legacy's own writes are
+   ASCII (`json.dump` with `ensure_ascii`), so caches hylo or legacy authored decode
+   identically under either encoding; foreign-cache shapes ride `OD-160`. The `OD-159`
+   entry and its riding table test are validated by the VP-012 closure check.
 2. **Save** (SL:198-206): create the cache directory if missing (`os.makedirs(...,
    exist_ok=True)`); create a temp file **in the cache directory** (not the target's
    directory) named `basename(target) + "." + <random>`, mode 0600; write
@@ -105,7 +114,7 @@ embeds stdin's `session_id` raw, unsanitized (OD-03), unlike the mix cache.
 | EC-006 | cache dir path is a regular file | save fails silently; nothing persisted |
 | EC-007 | sid contains `/` | BC-1.06.002 |
 | EC-008 | Windows, sid with a character invalid in file names (`:` `*` `?` `"` `<` `>` `\|`) | save fails silently, nothing persists (same class as BC-1.06.002); expected from Win32 file-name rules, **not executed** (pin on the windows-2025 CI leg); kept as-is per OD-03 ("revisit only if Windows complains; real ids are UUIDs") |
-| EC-009 | Windows sharing violation on rename | 2-3 short retries, then swallow (design IM-17) |
+| EC-009 | Windows sharing violation on rename | three attempts total (initial attempt plus two retries, OD-186 single count), then swallow (design IM-17) |
 | EC-010 | Mid-write dump failure (accumulator int above the 4,300-digit conversion limit, BC-1.03.006 EC-009) | no write — the target keeps its previous bytes (reproduced from legacy, oracle-verified); legacy leaves a partial temp behind, hylo removes its own temp (OD-163); difference confined to the cache-dir listing (OD-110 class), stdout identical |
 | EC-011 | Sid with lone surrogates in the session-cache name (ADV-P3-C21): Python encodes file names with the filesystem encoding's `surrogateescape` handler — U+DC80..U+DCFF become the single raw bytes 0x80..0xFF; any other lone surrogate raises `UnicodeEncodeError`, which the bare `except Exception` swallows (no session cache, and a load of such a name returns `{}`) | legacy: the cache is named under the raw-byte form (U+DC80..DCFF) or not written (other surrogates). hylo: the sid is carried as UTF-8/WTF-8 — a lone surrogate encodes as its 3-byte WTF-8 sequence, so the file name differs byte-for-byte from legacy's raw-byte form; difference confined to synthetic ids (OD-03: real ids are UUIDs) |
 

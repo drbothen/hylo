@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "8e7e7cf"
+input-hash: "6625cfb"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -23,8 +23,9 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
-  - "1.2.3 2026-11-18: ADV-P4 remediation D20 — empty HYLO_PATHS_CACHE_DIR reports the same empty-path error as the status line (no platform-default fallback, OD-165)"
+  - "2026-11-18T00:30:00Z (1.2.3): ADV-P4 remediation D20 — empty HYLO_PATHS_CACHE_DIR reports the same empty-path error as the status line (no platform-default fallback, OD-165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D36: empty override = not present; trailing separator printed as given, OD-165 agreement held at Clean-ed granularity"
+  - "2026-11-19T04:45:00Z (1.2.4): ADV-P6 remediation D20 — PC-5 tension resolved: the no-validation claim is scoped to HYLO_* CONFIG-VALUE settings; the two path overrides the command consumes (HYLO_CONFIG, HYLO_PATHS_CACHE_DIR) keep their full path grammar including the empty-path error (PC-3/EC-011 stand)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,8 +95,12 @@ file layer does not exist yet (OD-107), so the output is informational. It ships
    lines in label order (config, cache, state) (ADV-P1-D13). `<VAR>` is the unset base of
    that line: `HOME` (macOS/Linux), `APPDATA`/`LOCALAPPDATA` (Windows), and for a `~`
    override on Windows `USERPROFILE` (OD-61).
-5. The files are not opened, stat'ed or created; `HYLO_*` settings are not validated (a
-   config error does not affect this command).
+5. The files are not opened, stat'ed or created; `HYLO_*` CONFIG-VALUE settings are not
+   validated — an invalid number, boolean, URL or Text value anywhere in the registry does
+   not affect this command (the resolved config is never loaded here). The exceptions are
+   the two path overrides this command itself consumes and expands: `HYLO_CONFIG` and
+   `HYLO_PATHS_CACHE_DIR`, whose path grammar (including the empty-path error, PC-3/EC-011)
+   applies in full (ADV-P6-D20 resolves the PC-3/PC-5 tension).
 6. Any other argument or flag: usage on stderr (BC-4.01.001 golden), exit 2.
 
 ## Invariants

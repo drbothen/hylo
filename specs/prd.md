@@ -1,10 +1,10 @@
 ---
 document_type: prd
 level: L3
-version: "0.2.14"
+version: "0.2.15"
 status: draft
 producer: product-owner
-timestamp: 2026-11-19T03:00:00Z
+timestamp: 2026-11-19T06:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs:
@@ -16,7 +16,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "a56b40f"
+input-hash: "e0eb887"
 traces_to: domain-spec/L2-INDEX.md
 supplements:
   - prd-supplements/interface-definitions.md
@@ -73,7 +73,7 @@ owner's recorded real inputs, on all three OSes (D4 parity is the definition of 
 Rendering never fails: faults produce the degraded ladder — one-line output, exit 0
 (DI-008). Approved deviations ride only the closed exclusion set pinned in BC-6.03.004
 (D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161,
-OD-166 — eleven ids; DI-012). Configuration in P1 is typed `HYLO_*` env over built-in
+OD-166, OD-181 — twelve ids; DI-012). Configuration in P1 is typed `HYLO_*` env over built-in
 defaults (file layer arrives P4, OD-107); invalid config renders the D4-EX-3 one-line
 error and exits 0 — except in `--subagent` mode, where a config error prints zero bytes
 on stdout with the diagnostics on stderr (OD-168; pass-5 A22).
@@ -450,7 +450,8 @@ One JSON object on stdin (Claude Code statusLine payload): text-mode
 `json.load` semantics — a BOM or invalid UTF-8 decodes to `{}` and the render continues
 (BC-1.01.002, BC-1.01.008); NaN/Infinity tokens accepted; nesting budget is a per-call-site
 constant (993 accepted / 994 rejected at stdin, BC-1.01.002). Objects read: `model`,
-`workspace`, `transcript_path`, `session_id`, `cost`, `rate_limits`, `version`, and the
+`workspace`, `cwd` (SL:452; BC-1.02.003), `context_window` (SL:463; BC-1.02.006/.020),
+`transcript_path`, `session_id`, `cost`, `rate_limits`, `version`, and the
 newer optional fields (`output_style.name`, `pr.kind`, `workspace.repo.*`,
 `prompt_cache.*`, `rate_limits.spend_limit` with and without its dollar fields;
 market-intel §6.1) — all tolerated absent or null. Wrong inner types degrade per the
@@ -586,12 +587,16 @@ priority = the P0/P1/P2 mix in Section 2; test type per the design §8 test colu
 - **DI-010 — typed, validated config.** Every key is registry-declared with a rationale
   (D15); invalid values render the D4-EX-3 line and continue (BC-2.01.004, BC-2.02.x).
 - **DI-012 — closed deviation set.** Behavior may differ from the oracle only via named,
-  tested exclusions — the closed eleven-id set: D4-EX-1/2/3, OD-30, OD-76, `temp-file`,
-  `cp-x03`, OD-159, OD-160, OD-161, OD-166 (OD-159/OD-160/OD-161 minted by the owner
+  tested exclusions — the closed twelve-id set: D4-EX-1/2/3, OD-30, OD-76, `temp-file`,
+  `cp-x03`, OD-159, OD-160, OD-161, OD-166, OD-181 (OD-159/OD-160/OD-161 minted by the owner
   rulings of 2026-11-17: OD-159 all files read as UTF-8 on every OS; OD-160 foreign-cache
   shapes, ruling Q-b; OD-161 integer `transcript_path`; OD-166 minted by the pass-4
   ruling OD-169, scoped to cost-history bytes written after a refresh whose `usd` or
-  `api_ms` could not convert to float — own table test and VP-012 closure row).
+  `api_ms` could not convert to float — own table test and VP-012 closure row; OD-181
+  minted by the pass-6 ruling OD-181: "metrics transport beyond plain http" — non-http(s)
+  redirect targets (hylo: no sample) and https TLS trust-store differences (hylo: OS
+  trust store); parity metrics cases use plain http only, table tests pin hylo's
+  behaviour).
   D4-EX-2 is extended by OD-156 to cover
   transcript-borne numeric-overflow lines (the offending line is skipped — see the
   OD-156 register in `prd-supplements/error-taxonomy.md`). The id set is closed
@@ -616,7 +621,8 @@ OD-118..OD-130 (owner-validation-list.md); none reopened here. Operating assumpt
 cycle relies on:
 
 - **ASM-001 — Oracle pin.** CPython 3.11.7 with a strict UTF-8 locale is the parity
-  oracle (OD-104) — validated.
+  oracle (OD-104); CI installs 3.11.x (floating patch) and the harness self-checks the
+  measured constants against the resolved oracle at start (OD-185) — validated.
 - **ASM-002 — Client surface stability.** Claude Code 2.1.325 is the tested statusLine
   surface; the stdin field list is unchanged since 2026-11-14 (BC-1.01.002) — validated.
 - **ASM-003 — Settings translation.** Legacy `DGX_SL_*`/`LOCAL_MODEL_PREFIXES` translate

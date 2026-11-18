@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "bebcc79"
+input-hash: "73c010e"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces os.path normpath/basename used at legacy/dgx_statusline.py SL:373-390, 460)"
@@ -18,7 +18,7 @@ parity_class: n.a.
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18: ADV-P4 remediation D18 - abspath/join/dirname de-scoped from pyfmt (ARCH-06 agreement); flavor selection pinned to runtime.GOOS incl. Basename", "1.2.2 2026-11-18: pass-4 residual sweep — BC-1.02.003 cross-reference updated to the enriched project-label title (ADV-P4-B17)", "1.2.3 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — 1.2.2 entry re-dated ascending (its stamp predated 1.2.1); no behavioral change"]
+modified: ["2026-11-18T00:00:00Z (1.2.1): ADV-P4 remediation D18 - abspath/join/dirname de-scoped from pyfmt (ARCH-06 agreement); flavor selection pinned to runtime.GOOS incl. Basename", "2026-11-18T00:00:00Z (1.2.2): pass-4 residual sweep — BC-1.02.003 cross-reference updated to the enriched project-label title (ADV-P4-B17)", "2026-11-18T00:00:00Z (1.2.3): pass-5 residual sweep (ADV-P5-B14) — 1.2.2 entry re-dated ascending (its stamp predated 1.2.1); no behavioral change", "2026-11-19T03:55:00Z (1.2.4): ADV-P6 remediation D22 — stale anchoring-gap wording replaced with the resolved anchor: BC-1.02.004 PC-1/EC-012 own the per-flavor abspath/join/dirname rules (Inv 3 and Source row updated)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,8 +64,8 @@ into `/`, BC-SL-059), so it is not used (design IM-11; pitfall PR-20).
    and `dirname` (git-walk sites SL:373, 375, 383, 390) are **NOT** pyfmt helpers (ARCH-06):
    the git-walk module composes them directly, and their per-flavor behavior (on Windows
    `abspath` resolves through `GetFullPathNameW`; posix/nt `join`/`dirname` flavors) is
-   pinned by that module's contract, not here — anchoring gap flagged to the architect
-   (ADV-P4-D18).
+   pinned by BC-1.02.004 (PC-1 and EC-012, the per-flavor Cwd/Files rules) — the
+   ADV-P4-D18 anchoring gap is closed (ADV-P6-D22).
 
 ## Edge Cases
 
@@ -108,7 +108,7 @@ committed Windows goldens are generated on the Windows runner).
 | L2 Domain Invariants | DI-012 |
 | Architecture Module | `internal/pyfmt/str.go` (design §2.6) (BC-COMPONENT-MAP: internal/pyfmt/str.go (Posix/Nt Normpath, Basename) — ARCH-06) |
 | Stories | TBD (filled by story-writer) |
-| Source | New contract. OD-103; design IM-11; pitfall PR-20; D5 (cross-platform). pyfmt-served legacy uses: SL:460 (project label normpath/basename); git-walk sites SL:373, 375, 383, 390 compose `abspath`/`join`/`dirname` OUTSIDE pyfmt (ADV-P4-D18 de-scope; architect to pin the owning contract) |
+| Source | New contract. OD-103; design IM-11; pitfall PR-20; D5 (cross-platform). pyfmt-served legacy uses: SL:460 (project label normpath/basename); git-walk sites SL:373, 375, 383, 390 compose `abspath`/`join`/`dirname` OUTSIDE pyfmt (ADV-P4-D18 de-scope; owning contract pinned: BC-1.02.004 PC-1/EC-012, ADV-P6-D22) |
 
 ## Related BCs (Recommended)
 

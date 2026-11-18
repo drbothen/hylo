@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T14:55:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.02.001.md, behavioral-contracts/ss-01/BC-1.02.007.md, behavioral-contracts/ss-01/BC-1.02.013.md, behavioral-contracts/ss-01/BC-1.02.020.md, behavioral-contracts/ss-01/BC-1.02.030.md, behavioral-contracts/ss-01/BC-1.07.006.md, prd-supplements/test-vectors.md]
-input-hash: "2560552"
+input-hash: "98bc1cc"
 traces_to: prd.md
 source_bc: BC-1.02.001
 bcs: [BC-1.02.001, BC-1.02.002, BC-1.02.003, BC-1.02.004, BC-1.02.005, BC-1.02.006, BC-1.02.007, BC-1.02.008, BC-1.02.009, BC-1.02.010, BC-1.02.011, BC-1.02.012, BC-1.02.013, BC-1.02.014, BC-1.02.015, BC-1.02.016, BC-1.02.017, BC-1.02.018, BC-1.02.019, BC-1.02.020, BC-1.02.021, BC-1.02.022, BC-1.02.023, BC-1.02.024, BC-1.02.025, BC-1.02.026, BC-1.02.027, BC-1.02.028, BC-1.02.029, BC-1.02.030, BC-1.07.006]
@@ -84,6 +84,7 @@ this VP delivers the bounded golden tables ("testable-only; authored corners").
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestRow1_WidgetTables(t *testing.T) {
     for _, w := range Row1WidgetTables {

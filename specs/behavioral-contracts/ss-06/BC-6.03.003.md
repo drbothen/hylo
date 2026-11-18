@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "5c180dc"
+input-hash: "723c432"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract; governs the comparison of the legacy behavior at legacy/dgx_statusline.py SL:198-206)"
@@ -26,11 +26,12 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "1.2.1 2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D10 sibling - exclusions.json path aligned with the canonical internal/parity/testdata home"
-  - "1.2.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json (fixtures stay with the subject package)"
-  - "1.2.4 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - "2026-11-18T00:00:00Z (1.2.2): ADV-P4 remediation D10 sibling - exclusions.json path aligned with the canonical internal/parity/testdata home"
+  - "2026-11-18T22:00:00Z (1.2.3): pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json (fixtures stay with the subject package)"
+  - "2026-11-18T23:00:00Z (1.2.4): pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - "2026-11-19T00:20:00Z (1.2.5) ADV-P5 remediation D20 — temp-file example entry completed to the six-key schema (package, scope=go-cache-listing) with the JSON-object expected file"
-  - "1.2.6 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19/SC-20) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - "2026-11-19T02:00:00Z (1.2.6): sync-check adv-p5 closure (SC-19/SC-20) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - "2026-11-19T03:25:00Z (1.2.7): ADV-P6 remediation OD-186 — temp-file scope widened by ruling to cover the Windows sharing-violation rename-retry outcome (a successful retry persists a cache write legacy would not); retry delay becomes the config key statusline.cache.rename_retry_delay_ms (registered in BC-2.01.004 PC-11); attempt count stated as three attempts total (initial attempt + two retries), matching VP-018 and ARCH-04"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -54,7 +55,13 @@ handles the difference in two parts:
   `temp-file`, with its own expected file and a dedicated table test
   `TestCacheStore_TempFile_CleanupOnFailedReplace`.
 
-It is never a blanket exclusion.
+It is never a blanket exclusion. By ruling (OD-186) the `temp-file` scope is widened to
+cover the Windows sharing-violation rename-retry outcome: Go retries the rename —
+`statusline.cache.rename_retry_delay_ms` (Int, default 10, range 1..1000, judgment
+call) between attempts, three attempts total (the initial attempt plus two retries,
+the one number VP-018 and ARCH-04 state) — so a retry that ultimately succeeds
+persists a cache write legacy would not. That byte difference rides the same named
+deviation.
 
 ## Preconditions
 
@@ -129,7 +136,7 @@ It is never a blanket exclusion.
 | EC-001 | sid `../x`, ROWS 2, stdin carries non-empty `rate_limits`, metrics canned | Legacy leaks two temps (`x.json.<8>` ×2); Go leaks none. stdout equal; named caches equal (the only named caches are git and mix, plus cost history if recorded) |
 | EC-002 | A sid containing `.json.` such as `a.json.b` | Session cache `statusline-a.json.b.json` ends in `.json` and is compared normally |
 | EC-003 | Go's `os.CreateTemp` random part is decimal digits (ADV-P2-D07: the `*` is replaced by a decimal of VARIABLE length, not always 8 chars — so a short Go random part can fail to match the 8-char pattern; the store invariant still forbids leftovers, and the table test requires that none remain) | Go temps are cleaned up before comparison regardless of length; none remain |
-| EC-004 | Windows: rename fails on a sharing violation under concurrent refreshes (RK-3) | Not a corpus case. Go retries, then swallows and cleans up; covered by Go unit tests only |
+| EC-004 | Windows: rename fails on a sharing violation under concurrent refreshes (RK-3) | Not a corpus case. Go retries the rename on `statusline.cache.rename_retry_delay_ms` between attempts — three attempts total (initial attempt + two retries; OD-186, the number VP-018 and ARCH-04 state) — then swallows and cleans up; a retry that ultimately succeeds persists a write legacy would not, riding the widened `temp-file` scope. Covered by Go unit tests only |
 | EC-005 | A temp-pattern file appears in a case with no `temp-file` entry | Ignored by the filter for comparison. If the file is on the Go side, the store invariant is violated, and the harness fails the case with `go left temp <name>` |
 
 ## Canonical Test Vectors

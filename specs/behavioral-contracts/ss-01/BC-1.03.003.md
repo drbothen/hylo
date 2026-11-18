@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c2f799c"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1041-1058)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: read_cap_bytes valid range >= 1 (OD-162; ADV-P2-C03)"]
+modified: ["1.2.1 2026-11-17: read_cap_bytes valid range >= 1 (OD-162; ADV-P2-C03)", "1.2.2 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02) — range bounded to Int 1..67108864 (64 MiB upper bound labeled judgment call J, pass-5 A13/call 16, interface-definitions.md registry)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -43,10 +43,13 @@ LF. A blob with no LF (a torn trailing line) leaves the offset and the cache unt
 1. BC-1.03.002 chose the incremental or reset path; `off` (bytes) and `size` (bytes, from the earlier size read)
    are known and `size > off`.
 2. `step = statusline.transcript.read_cap_bytes` (default 524,288; T-054, rationale: judgment, the per-refresh
-   parse budget; owner-confirmed as a step, design §2.4). **Valid range (OD-162):** `>= 1`, derived from legacy
-   semantics — the value feeds `fh.read(min(size − off, step))` and `fh.read(step)` (SL:1044, 1049): `0` hits the
-   no-more-bytes break with `cut < 0`, freezing the parse permanently; a negative value makes `read(−1)` pull the
-   whole remainder. Out-of-range values are number-range config errors (S2 schema, OD-114; BC-2.02.003 class).
+   parse budget; owner-confirmed as a step, design §2.4). **Valid range (OD-162): Int `1..67108864`** — the lower
+   bound is derived from legacy semantics: the value feeds `fh.read(min(size − off, step))` and `fh.read(step)`
+   (SL:1044, 1049): `0` hits the no-more-bytes break with `cut < 0`, freezing the parse permanently; a negative
+   value makes `read(−1)` pull the whole remainder. The upper bound 64 MiB is a **labeled judgment call (J)** (A13 /
+   NFR-005 / pass-5 call 16, interface-definitions.md registry): caps per-refresh read buffering far beyond any
+   real transcript step without adding a runtime cap (NFR-005: the legacy runtime cap list stays exhaustive).
+   Out-of-range values are number-range config errors (S2 schema, OD-114; BC-2.02.003 class).
 
 ## Postconditions
 

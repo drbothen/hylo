@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T09:19:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, behavioral-contracts/ss-03/BC-3.02.001.md, behavioral-contracts/ss-03/BC-3.02.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "2ed5662"
+input-hash: "e7d5ba8"
 traces_to: prd.md
 source_bc: BC-3.02.002
 bcs: [BC-3.02.001, BC-3.02.002]
@@ -71,6 +71,7 @@ measured in the probe test (OD-139 deferral).
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestFindAncestor_RuleRegister(t *testing.T) {
     for _, tc := range FakePIDChains { // WantStart is the pre-truncated expectation;

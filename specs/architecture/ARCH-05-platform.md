@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "platform"
-version: "1.4"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-19T14:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "c82dc09"
+input-hash: "3258e18"
 
 ---
 
@@ -31,8 +31,14 @@ input-hash: "c82dc09"
 | `envvars_unix.go` / `envvars_windows.go` | Windows implementation of the ARCH-01 `EnvVars` interface with case-insensitive `HYLO_*` name matching (NT names); injected into `config.Load` at the seam (ADV-P2-A02, ADV-P4-A20); the unix flavor is the plain `os.Environ()`-backed implementation. Seam rule (pass-5 D25): the case-insensitive matcher is implemented BEHIND the ARCH-01 `EnvVars` interface — `config` consumes only the interface, never a bare Go map (maps are case-sensitive; a matcher inside `internal/config` would be untestable on POSIX and unexercisable on Windows CI). The matcher is a PURE function over a name→value listing, compile-time GOOS-selected with BOTH flavors always compiled and table-pinned on every OS (the Basename rule, ARCH-06) — so the Windows case-insensitivity table runs on POSIX CI legs, and no new seam is minted: the existing EnvVars interface IS the seam |
 | `homedir.go` (+ per-OS flavor) | `HomeDir()` backs `~`/`~\` expansion (OD-61, BC-2.01.005): `$HOME` on unix, `USERPROFILE` on Windows; consumed by `internal/config`, never resolved ad hoc in grammars (ADV-P4-A20) |
 | `zone.go` | `LocalZone() *time.Location` (OD-171, refined by OD-177): resolves the local zone on EVERY OS with libc semantics (OD-177): `TZ` unset → the OS zone; `TZ` set but EMPTY or unparseable → UTC. `time.Local` is not used on Windows (it ignores `TZ`), so this is the single zone seam for `Env.Loc` (ARCH-03), the parity harness's child environments, and `Env.Loc` derivation being routed through `internal/platform` (ADV-P4-D21). Table test: TZ unset / `UTC` / IANA name / set-but-empty / unparseable. Documented limitation: POSIX-style TZ strings (e.g. `EST5EDT`) may differ between Go's tzdata loader and the MSVC CRT; the parity harness pins `TZ=UTC` for both binaries, so parity cases never hit the limitation (OD-171) |
-| `localtime_windows.go` (+ `localtime_other.go` flavor) | Windows naive-conversion failure domain (pass-5 D01, call 8): a naive local time whose conversion makes MSVC `localtime_s` raise OSError — an instant before 1970-01-01 or from year 3001 — degrades the line exactly as legacy does (the OSError propagates out of `_mix_counts` SL:1069 to the top-level guard, printing the degraded line). The rule lives HERE with a table test (epoch-negative and year-3001 probes); the POSIX flavor converts the whole time_t domain with no failure domain. Disposition rides the owning BC-5.04.001 legs (pass-5 D01); NO exclusion id — ruled in-band behavior, not a divergence. Consumed by py/time.go's `LocalToUnix` Windows error disposition (ARCH-06) |
+| `localtime_windows.go` (+ `localtime_other.go` flavor) | Windows naive-conversion failure domain (pass-5 D01, call 8): a naive local time whose conversion makes MSVC `localtime_s` raise OSError — an instant before 1970-01-01 or from year 3001 — degrades the line exactly as legacy does (the OSError propagates out of `_mix_counts` SL:1069 to the top-level guard, printing the degraded line). REHOMED pass-6 A05 (orchestrator call 2): the failure rule itself lives in PURE pyfmt (`LocalToUnix(fields, loc, msvcDomain)` returning `ErrLocaltimeDomain`, ARCH-06) with NO pyfmt→platform import — this section no longer hosts the conversion; it contributes the injected flag `IsWindows()` (compile-time `GOOS` constant) that `internal/statusline` passes as `msvcDomain`, and the epoch-negative / year-3001 probes here table-test pyfmt's `ErrLocaltimeDomain` disposition through that flag. The POSIX flavor converts the whole time_t domain with no failure domain. Disposition rides the owning BC-5.04.001 legs (pass-5 D01); NO exclusion id — ruled in-band behavior, not a divergence |
 | `proc_other.go` | `//go:build !darwin && !linux && !windows`: not found |
+
+Path-value encoding for syscalls (pass-6 orchestrator call 16, ADV-P6-B05): every `str` path value hylo passes to
+the OS on Windows is encoded WTF-8 → UTF-16 by `internal/platform` itself, keeping lone surrogates as single 16-bit
+units — never Go's native U+FFFD substitution — so a path whose name contains a lone surrogate stats the same
+directory CPython's wide-string call does (POSIX keeps the `surrogateescape` byte mapping, BC-1.02.004
+EC-013/EC-014). Table-tested on Windows CI.
 
 No descriptor helpers exist: OD-161 (pass-3 A06, superseding the "int `transcript_path`
 = fd semantics" reading) rules that an integer `transcript_path` means NO transcript

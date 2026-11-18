@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:45:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.003.md, behavioral-contracts/ss-01/BC-1.01.004.md, behavioral-contracts/ss-01/BC-1.01.005.md, behavioral-contracts/ss-01/BC-1.01.006.md, behavioral-contracts/ss-01/BC-1.01.007.md]
-input-hash: "1d6d1bd"
+input-hash: "eeeae1d"
 traces_to: prd.md
 source_bc: BC-1.01.004
 bcs: [BC-1.01.003, BC-1.01.004, BC-1.01.005, BC-1.01.006, BC-1.01.007]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-34) — P7 split into its own quick.Check: negated-int64 cols from its own generator (the shared anchorCols config could not serve it) and the rows > 2 constraint expressed by construction; the shared segCfg now serves P1/P5/P6 only"]
+modified: ["1.1 2026-11-18T09:03:00Z: ADV-P3 fixes (A2-05) — both quick.Check return errors are checked (the harness could never fail); *quick.Config with a Values filler supplies the LF/CR-free and SEP-free generators (a nil config would use default generators); “quick shrink” claims removed — testing/quick does not shrink", "1.2 2026-11-18T14:22:00Z: ADV-P4 fix (A2-05) — both Values fillers rewritten to the assigning form args[i] = reflect.ValueOf(x) and segCfg now sets BOTH arguments (text string, cols int); Elem().Set on the zero reflect.Values would panic", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (A2-34) — P7 split into its own quick.Check: negated-int64 cols from its own generator (the shared anchorCols config could not serve it) and the rows > 2 constraint expressed by construction; the shared segCfg now serves P1/P5/P6 only", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-15: P7 varies the statusline.rows setting (covering rows == 2) with cols < 0, instead of guarding on segment count)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -51,7 +51,8 @@ this VP delivers the quantified legs:
   at least one segment dropped), for generated rows whose segment text excludes the
   exact SEP bytes.
 - **P6 (BC-1.01.006):** after trim, `visible(out) <= cols` or out contains no SEP.
-- **P7 (BC-1.01.007):** for all cols < 0: rows untrimmed and row 2 present iff rows > 2.
+- **P7 (BC-1.01.007):** for all `statusline.rows` settings and all cols < 0: rows
+  untrimmed, and row 2 present iff rows > 2 (hidden exactly at rows == 2).
 
 ## Source Contract
 
@@ -82,7 +83,7 @@ this VP delivers the quantified legs:
 | P4 | Python int grammar corners crossed with random decimal/underscore/sign/whitespace permutations and invalid-UTF-8 bytes | pinned CPython 3.11 oracle (ARCH-07 recipe) |
 | P5 | segment lists with SEP-free text (filter), crossing drop counts | structural model re-derivation |
 | P6 | trim inputs from P5's generator at cols inside/outside the matrix | structural inequality check |
-| P7 | cols drawn from negated int64 spread | structural predicate check |
+| P7 | `statusline.rows` settings {-1,0,1,2,3,4,5,10} × cols drawn from negated int64 spread | structural predicate check (both iff halves: rows == 2 hides row 2) |
 
 ## Proof Method
 
@@ -93,6 +94,7 @@ this VP delivers the quantified legs:
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestFrameProp_All(t *testing.T) {
     // A2-05: custom generators via Values (a nil config would use defaults);
@@ -111,17 +113,19 @@ func TestFrameProp_All(t *testing.T) {
         t.Fatalf("P1/P5/P6 violated: %v", err)
     }
     // P7 has its own regime (A2-34): the negated-int64 cols spread and the
-    // rows > 2 constraint cannot come out of the shared anchorCols/text generators.
+    // statusline.rows SETTING vary here — A2-15: rows is the BC-1.01.007 setting,
+    // not the segment count; the rows==2 half of the iff (row 2 hidden) is tested.
     p7Cfg := &quick.Config{MaxCount: 500, Values: func(args []reflect.Value, r *rand.Rand) {
-        args[0] = reflect.ValueOf(genMultiRowSEPFreeText(r, 3)) // > 2 rows by construction
-        args[1] = reflect.ValueOf(negInt64ColSpread(r))          // negated int64 spread
+        args[0] = reflect.ValueOf(rowsSettingSpread(r)) // A2-15: statusline.rows ∈ {-1, 0, 1, 2, 3, 4, 5, 10}, covering rows == 2 and rows > 2
+        args[1] = reflect.ValueOf(negInt64ColSpread(r)) // negated int64 spread
+        args[2] = reflect.ValueOf(genSEPFreeText(r))    // enough segments to compose any row count
     }}
-    if err := quick.Check(func(text string, cols int) bool {
+    if err := quick.Check(func(rowsSetting, cols int, text string) bool {
         segs := splitSegments(text)
-        if len(segs) <= 2 {
-            return true // P7 quantifies rows > 2 only
-        }
-        return framePropMatches(renderFrame(segs, cols), segs, cols) // P7 model
+        out := renderFrameWithRows(rowsSetting, segs, cols)
+        // P7 model, iff both halves: untrimmed at cols < 0, and row 2 present
+        // IFF rows > 2 — hidden exactly at rows == 2 (A2-15).
+        return framePropMatchesP7(out, rowsSetting, segs, cols)
     }, p7Cfg); err != nil {
         t.Fatalf("P7 violated: %v", err)
     }

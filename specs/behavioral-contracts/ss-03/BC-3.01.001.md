@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, owner-decisions-log-2026-11-14.md, semport/hylo-legacy/statusline-target-design.md, research/general-go-port-parity-crossplatform-2026-11-14.md]
-input-hash: "fd7637c"
+input-hash: "f07d388"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy CACHE_DIR at legacy/dgx_statusline.py SL:78)"
@@ -20,8 +20,9 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D17: default exceptions aligned with BC-2.01.004 PC-4 (two exceptions, OD-101 + OD-111)"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D21/D30 — platform LocalZone contract added (OD-171: TZ honoured on every OS, OS-zone fallback, TZ=UTC parity pins); purity table rescoped to the paths functions (pure over injected env)"
+  - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D21/D30 — platform LocalZone contract added (OD-171: TZ honoured on every OS, OS-zone fallback, TZ=UTC parity pins); purity table rescoped to the paths functions (pure over injected env)"
   - "2026-11-19T01:05:00Z (1.2.3) ADV-P5 remediation D23+D24 — PC-6 refined to OD-177 libc semantics on every OS: TZ unset → OS zone; TZ empty or unparseable → UTC (was OS zone); leading-colon TZ form pinned; canonical table legs gain empty; H1/Description now name the LocalZone responsibility (P7)"
+  - "2026-11-19T04:05:00Z (1.2.4) ADV-P6 remediation D21+D26 — PC-6 accuracy: the UTC-on-unparseable verdict is a ruled hylo verdict (libc itself honors POSIX TZ strings; TZ=Local reaches Go's LoadLocation special case, a documented OS-dependent quirk); LocalZone's error result pinned (non-nil only on the TZ-unset path when OS resolution fails); EC table row order fixed (EC-010 row moved before EC-011/012, ids unchanged)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,16 +63,24 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
    never read (OD-101, OD-05).
 4. Paths are returned joined with the OS separator (`/` on Unix, `\` on Windows), with no trailing separator.
 5. No directory is created and no file is touched by these functions.
-6. **Local zone resolution (OD-171 as refined by OD-177, ADV-P4-D21):** `internal/platform`
+6. **Local zone resolution (OD-171 as refined by OD-177, ADV-P4-D21; accuracy notes ADV-P6-D21):** `internal/platform`
    also provides
    `LocalZone(env) (*time.Location, error)`, the only way hylo derives its local zone
    (`Env.Loc` is populated from it; BC-5.04.001, BC-6.01.002, BC-6.02.003 route through
-   it). On every OS it applies LIBC semantics (OD-177, ADV-P5-D23): (a) `TZ` set to a
+   it). On every OS it applies the OD-177 verdicts (ruled, and close to libc but not
+   identical — libc itself honors POSIX TZ strings that are not in the zone database,
+   which hylo maps to UTC per (b)): (a) `TZ` set to a
    non-empty IANA name present in the zone database → that zone (`LoadLocation(name)`;
    one leading `:` is stripped before the lookup — libc file-reference form, a judgment
-   call for `TZ=:Area/City`, non-parity-critical); (b) `TZ` set but EMPTY, or set and
-   unparseable/unknown → **UTC** (libc verdict on every OS; this refines OD-171's
+   call for `TZ=:Area/City`, non-parity-critical; a literal `TZ=Local` reaches Go's
+   `LoadLocation("Local")` special case, which returns `time.Local` and on Windows
+   ignores `TZ` — a documented OS-dependent quirk of the (a) leg, never used in parity);
+   (b) `TZ` set but EMPTY, or set and
+   unparseable/unknown → **UTC** (ruled hylo verdict, OD-177; this refines OD-171's
    earlier OS-zone fallback for these two cases); (c) `TZ` unset → the OS local zone.
+   The `error` result is non-nil ONLY on the (c) path when the runtime local-zone
+   resolution fails; (a) and (b) never return an error (an unknown name is the (b) UTC
+   verdict, EC-009).
    It never calls `time.Local` directly for the decision (Go's `time.Local`
    ignores `TZ` on Windows); the (c) fallback itself may resolve through the runtime's
    local-time machinery. Documented limitation (OD-171): POSIX-style TZ strings (e.g.
@@ -100,10 +109,10 @@ only compute paths; creating a directory is the cache store's job (BC-1.06.001).
 | EC-006 | Windows with `XDG_CACHE_HOME` set | Ignored; `%LOCALAPPDATA%\hylo\cache` |
 | EC-007 | Parity harness run (OD-101, design §3.2) | The harness sets `HYLO_PATHS_CACHE_DIR=<temp>/hylo-cache` and points `XDG_CACHE_HOME` and `LOCALAPPDATA` into the temp tree; caches are compared by file name across the two directories (design §5.3), so the directory difference is not a parity diff and needs no exclusion entry |
 | EC-008 | `TZ=Europe/Paris` (valid IANA name) | `LocalZone` returns that zone, on all three OSes (OD-171) |
-| EC-009 | `TZ=Not/AZone` (unparseable/unknown) | UTC (libc semantics, OD-177); no error surfaced to the renderer |
-| EC-011 | `TZ=` (set but empty) | UTC (libc semantics, OD-177; Go `LoadLocation("")` agrees) |
-| EC-012 | `TZ=:Europe/Paris` (leading colon) | the colon is stripped, Paris loads (libc file-reference form; judgment call, PC 6) |
+| EC-009 | `TZ=Not/AZone` (unparseable/unknown) | UTC (ruled verdict, OD-177); no error surfaced to the renderer |
 | EC-010 | windows-2025 leg, naive local-time parity cases | executed with no skip — the harness pins `TZ=UTC` for both binaries, so the cases are OS-neutral (OD-171; VP-026's `posix-only` tag removed) |
+| EC-011 | `TZ=` (set but empty) | UTC (ruled verdict, OD-177; Go `LoadLocation("")` agrees) |
+| EC-012 | `TZ=:Europe/Paris` (leading colon) | the colon is stripped, Paris loads (libc file-reference form; judgment call, PC 6) |
 
 ## Canonical Test Vectors
 

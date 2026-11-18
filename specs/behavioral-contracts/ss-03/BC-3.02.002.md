@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r2.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "bfe9ca6"
+input-hash: "49357ad"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -18,7 +18,10 @@ parity_class: OD-76
 confidence: M
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-18: ADV-P4 remediation D29 — fake-ps weekdays corrected to Fri (2026-11-06 and 2026-11-13)", "1.2.2 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — comma inside the flow-list element removed (YAML flow-scalar hazard); no behavioral change"]
+modified:
+  - "2026-11-18T00:00:00Z (1.2.1): ADV-P4 remediation D29 — fake-ps weekdays corrected to Fri (2026-11-06 and 2026-11-13)"
+  - "2026-11-18T00:00:00Z (1.2.2): pass-5 residual sweep (ADV-P5-B14) — comma inside the flow-list element removed (YAML flow-scalar hazard); no behavioral change"
+  - "2026-11-19T04:10:00Z (1.2.3): ADV-P6 remediation D05 / orchestrator call 3 — CTV intro states the D1-D4 difference rows and Chicago-valued vectors are GO TABLE TESTS under TZ=America/Chicago, never parity corpus cases (the corpus validator keeps rejecting non-UTC tz; the OD-76 parity half carries no D1 case)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -96,6 +99,11 @@ byte comparison.
 ## Canonical Test Vectors
 
 Legacy side: fake `ps` table (`pid|ppid comm lstart`), `startPID = 500`, `TZ=America/Chicago`, no cache.
+These vectors — and the D1-D4 difference rows above, including the America/Chicago repeated-DST hour
+(D1) and the Chicago-valued I1/I2 epochs — are exercised as GO TABLE TESTS in this package's own test
+binary, never as parity corpus cases: the P1 corpus validator rejects a non-UTC `tz` (BC-6.02.003 PC-8,
+orchestrator call 3, ADV-P6-D05), so the `OD-76` closed-set entry's parity half carries no D1 case and
+the corpus stays UTC-only.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|

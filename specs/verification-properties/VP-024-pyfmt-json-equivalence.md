@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:13:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.02.001.md, behavioral-contracts/ss-05/BC-5.02.002.md, behavioral-contracts/ss-05/BC-5.02.004.md, behavioral-contracts/ss-05/BC-5.02.005.md, behavioral-contracts/ss-05/BC-5.02.006.md, owner-decisions-log-2026-11-14.md]
-input-hash: "588ae19"
+input-hash: "69a6e59"
 traces_to: prd.md
 source_bc: BC-5.02.001
 bcs: [BC-5.02.001, BC-5.02.002, BC-5.02.003, BC-5.02.004, BC-5.02.005, BC-5.02.006]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:13:00Z: ADV-P3 fixes (A2-08) — both fuzz skeletons call the 3-arg Decode(b, mode, per-site budget); the single-variable multi-value assignment (again := pyfmt.Decode(...)) fixed to the two-value form; pyfmtDefaultBudget free constant removed in favour of the call-site budget rule of VP-006"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:13:00Z: ADV-P3 fixes (A2-08) — both fuzz skeletons call the 3-arg Decode(b, mode, per-site budget); the single-variable multi-value assignment (again := pyfmt.Decode(...)) fixed to the two-value form; pyfmtDefaultBudget free constant removed in favour of the call-site budget rule of VP-006", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-05: skeleton uses the (v, budget) → (result, error) DumpsLen/Dumps shapes per BC-5.02.001/BC-5.02.006 (D28); the BC-routed fuzz + oracle leg rides the Tier C harness (VP-011 discipline))"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,9 +61,14 @@ strings surviving lone surrogates); `Str` reproduces Python str() of values
   ordered Values, compared as byte spellings (NaN-aware: NaN never equals itself, so
   equality is on `Dumps` output bytes, not on `Value` identity); fuzz
   targets `DumpsLen`/`Decode` (length == bytes invariant is fuzzed directly:
-  `DumpsLen(v) == len(Dumps(v))`). Random-sample oracle: the committed CPython
+  `DumpsLen(v, budget) == len(Dumps(v, budget))`). Random-sample oracle: the committed
+  CPython
   3.11-generated tables pin equivalence; generated samples assert self-consistency
-  (round-trip spelling stability, length==bytes), never a live interpreter call.
+  (round-trip spelling stability, length==bytes) in-tree — the unit set never calls a
+  live interpreter (VP-038 discipline). The "fuzz + oracle" leg BC-5.02.001 and
+  BC-5.02.004 route here (A2-05) rides the Tier C differential harness: generated
+  Values compared against the live pinned-CPython `dumps` per input under the
+  `HYLO_PARITY_FUZZSECONDS` budget (VP-011 oracle discipline, ARCH-07 recipe).
 - **Honesty:** testable-only; the shared-code-path argument is a structural argument
   (one implementation), strengthened but not replaced by fuzzing.
 
@@ -74,9 +79,11 @@ strings surviving lone surrogates); `Str` reproduces Python str() of values
 | Oracle table | Go test, 63 cases, script-regenerated | yes | dump lengths/bytes |
 | Round-trip property | Go test + generator | no (random), seeded | ordered Values |
 | Length==bytes fuzz | `go test -fuzz DumpsLen` | budget-bounded | the cannot-drift invariant |
+| Tier C differential | parity harness, live CPython per input | `HYLO_PARITY_FUZZSECONDS` | BC-5.02.001/BC-5.02.004 fuzz + oracle legs (A2-05) |
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func FuzzDumpsLenAgreesWithDumps(f *testing.F) {
     f.Fuzz(func(t *testing.T, b []byte) { // primitives only: fuzz bytes, decode
@@ -84,7 +91,11 @@ func FuzzDumpsLenAgreesWithDumps(f *testing.F) {
         // defined at the call site, never a package-level free constant (A2-08).
         v, err := pyfmt.Decode(b, pyfmt.ModeBytes, jsonSiteBudget)
         if err != nil { return } // undecodable bytes: length invariant vacuous
-        if pyfmt.DumpsLen(v) != len(pyfmt.Dumps(v)) {
+        n, err := pyfmt.DumpsLen(v, jsonSiteBudget) // A2-05: (v, budget) → (int, error) per BC-5.02.001/BC-5.02.006 (D28)
+        if err != nil { t.Fatal("DumpsLen errored on decodable input") }
+        out, err := pyfmt.Dumps(v, jsonSiteBudget) // A2-05: (v, budget) → ([]byte, error)
+        if err != nil { t.Fatal("Dumps errored on decodable input") }
+        if n != len(out) {
             t.Fatal("DumpsLen/Dumps drift")
         }
     })
@@ -94,10 +105,13 @@ func FuzzJSONRoundTrip(f *testing.F) {
     f.Fuzz(func(t *testing.T, b []byte) {
         v, err := pyfmt.Decode(b, pyfmt.ModeBytes, jsonSiteBudget)
         if err != nil { return }
-        d, err := pyfmt.Decode(pyfmt.Dumps(v), pyfmt.ModeBytes, jsonSiteBudget) // 3-arg, two-value
+        dumped, err := pyfmt.Dumps(v, jsonSiteBudget) // A2-05: two-result, budget-taking shape
         if err != nil { t.Fatal("Dumps output must re-decode") }
+        d, err := pyfmt.Decode(dumped, pyfmt.ModeBytes, jsonSiteBudget) // 3-arg, two-value
+        if err != nil { t.Fatal("Dumps output must re-decode") }
+        redumped, _ := pyfmt.Dumps(d, jsonSiteBudget)
         // NaN-aware equality: compare byte spellings, never v == v on NaN
-        if !bytes.Equal(pyfmt.Dumps(d), pyfmt.Dumps(v)) {
+        if !bytes.Equal(redumped, dumped) {
             t.Fatal("round-trip drift")
         }
     })

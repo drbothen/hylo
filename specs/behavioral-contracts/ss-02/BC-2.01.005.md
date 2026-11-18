@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.3.0"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "9c2a9e3"
+input-hash: "10a26f4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy toggles SL:76-77, list split SL:444-445, expanduser SL:78)"
@@ -22,7 +22,12 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.2 2026-11-18: ADV-P3 remediation D07 — P1 Bool set completed with queue.yellow and subagent.enabled", "2026-11-18T22:00:00Z (1.2.3) ADV-P4 remediation D19+D26 — composite strict-JSON env grammar (PC-5) and OD-173 label-Text validation (PC-6) added; queue.yellow priority citation corrected to OD-175", "2026-11-19T00:40:00Z (1.2.4) ADV-P5 remediation D05+D06+D07+D12+D13 — PC-5 shapes written per key and matched to defaults (colors object spelling supersedes the positional triple-array; IntMap exact-keys/JSON-integer/int64/duplicate rules; scale is a 4-number array); PC-6 Text reasons minted for glyph and general Text keys; PC-7 default-only rule (byte-equal accepted, else out of range, OD-162); FloatPair example corrected to the registered [0.5,0.9] range (D12)", "2026-11-19T02:00:00Z (1.2.5) ADV-P5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] → [base, span] and law restated as base + span·i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"]
+modified:
+  - "2026-11-18T00:00:00Z (1.2.2): ADV-P3 remediation D07 — P1 Bool set completed with queue.yellow and subagent.enabled"
+  - "2026-11-18T22:00:00Z (1.2.3): ADV-P4 remediation D19+D26 — composite strict-JSON env grammar (PC-5) and OD-173 label-Text validation (PC-6) added; queue.yellow priority citation corrected to OD-175"
+  - "2026-11-19T00:40:00Z (1.2.4): ADV-P5 remediation D05+D06+D07+D12+D13 — PC-5 shapes written per key and matched to defaults (colors object spelling supersedes the positional triple-array; IntMap exact-keys/JSON-integer/int64/duplicate rules; scale is a 4-number array); PC-6 Text reasons minted for glyph and general Text keys; PC-7 default-only rule (byte-equal accepted, else out of range, OD-162); FloatPair example corrected to the registered [0.5,0.9] range (D12)"
+  - "2026-11-19T02:00:00Z (1.2.5): ADV-P5 remediation A03 correction — sparkline.colors fade elements renamed [lo, hi] to [base, span] and law restated as base + span-times-i/max(n-2, 1) per legacy SL:683 (a base and a span, not a range)"
+  - "2026-11-19T04:20:00Z (1.3.0): ADV-P6 remediation D01+D04+OD-184 — PC-7 default-only spellings minted per orchestrator call 8 (theme.heat env spelling is the strict-JSON array [0.22,0.85,0.80]; comparison on the PARSED value, not bytes; limits.windows 5h,7d; units.lines k; units.tokens M); EC-010/EC-011 realigned (0.5/0.5/0.5 is now the shape error it always was under PC-5); glyph PC-6 wording states the OD-184 code-point enforcement behind the fixed reason string; VP-016 row and VP anchor say seven classes"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -117,25 +122,35 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      violating value yields
      `<key>=<value> (expected non-empty control-free text of display width 1..16)`.
    - The glyph-family keys (`statusline.glyphs.*`, `statusline.subagent.glyphs.*`):
-     a value that is not non-empty control-free text of exactly 1 code point and 1
-     display column (OD-170 width function, BC-2.01.004 PC-9) yields
-     `<key>=<value> (expected exactly 1 code point and 1 display column)`.
+     a value that is not non-empty control-free text of exactly 1 code point — the
+     sparkline member exactly 8 ordered code points — yields
+     `<key>=<value> (expected exactly 1 code point and 1 display column)`. The reason
+     string is fixed vocabulary; the ENFORCED rule is the OD-184 code-point count
+     (legacy's render width), not a terminal-column check — the OD-170 validation width
+     is not consulted for glyph members (BC-2.01.004 PC-6/PC-9, ADV-P6-D02/D03).
    - Every other `Text` key with the non-empty/no-control-bytes range
      (`statusline.subagent.tokens.suffix`, `statusline.window_age.process_name`,
      `statusline.labels.input`, ...): a violating value yields
      `<key>=<value> (expected non-empty control-free text)`.
    All three reason strings ride the Text class (OD-178) on the E-CFG-001 surface.
 
-7. **Default-only keys (ADV-P5-D07 / owner call 3, OD-162):** for a key the registry
+7. **Default-only keys (ADV-P5-D07 / owner call 3, OD-162; spellings ADV-P6-D01 /
+   orchestrator call 8, pass 6):** for a key the registry
    marks default-only — the composite `statusline.theme.heat` and the `Text`/`List`
    keys `statusline.units.context`, `statusline.units.lines`, `statusline.units.tokens`
-   and `statusline.limits.windows` — an env value byte-equal to the default's env
-   spelling is accepted; any other value runs the key's own grammar first (a parse or
-   shape failure is that type's error), and a value that parses but differs from the
-   default is a config error on the E-CFG-001 surface riding the number-range class,
-   reason `out of range` (OD-162: the key's valid range is its default value only;
-   the number-range class is the OD-162-designated class even for Text/List
-   default-only keys). It is definite: `HYLO_STATUSLINE_THEME_HEAT` at any non-default
+   and `statusline.limits.windows` — the env value is first parsed under the key's OWN
+   grammar (a parse or shape failure is that type's error: strict-JSON shape errors for
+   the composite, the List/Text grammar otherwise), and the PARSED value is compared to
+   the default: equal → accepted; different → a config error on the E-CFG-001 surface
+   riding the number-range class, reason `out of range` (OD-162: the key's valid range
+   is its default value only; the number-range class is the OD-162-designated class even
+   for Text/List default-only keys). The default's env spelling — the exact string that
+   parses to the default — for each default-only key: `HYLO_STATUSLINE_THEME_HEAT` =
+   `[0.22,0.85,0.80]` (strict-JSON FloatTriple; the slash spelling `0.22/0.85/0.80` is
+   NOT the grammar and is a shape error); `HYLO_LIMITS_WINDOWS` = `5h,7d` (comma list);
+   `HYLO_UNITS_LINES` = `k`; `HYLO_UNITS_TOKENS` = `M`; `HYLO_UNITS_CONTEXT` = the
+   default Text of `statusline.units.context`. It is definite: `HYLO_STATUSLINE_THEME_HEAT`
+   at any parsed-non-default
    value is a config error, never a warning and never silence. (The former PC-5 claim
    that default-only keys "never read their env name" is superseded; the former
    listing of `statusline.units.context` as composite is corrected — it is `Text`.)
@@ -159,8 +174,8 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 | EC-007 | `HYLO_PATHS_CACHE_DIR=~other/c` | `~other/c` (literal) |
 | EC-008 | `HYLO_PATHS_CACHE_DIR=~/c`, `HOME` unset (Unix) | error `home directory unknown` |
 | EC-009 | `COLUMNS=" 80 "` | not a config input; renderer gives 80 (BC-1.01.005) |
-| EC-010 | `HYLO_STATUSLINE_THEME_HEAT='0.22/0.85/0.80'` (default spelling) | accepted, no error (PC 7) |
-| EC-011 | `HYLO_STATUSLINE_THEME_HEAT='0.5/0.5/0.5'` | `\e[90mhylo: config error: statusline.theme.heat=0.5/0.5/0.5 (out of range)\e[0m\n` (PC 7, OD-162) |
+| EC-010 | `HYLO_STATUSLINE_THEME_HEAT='[0.22,0.85,0.80]'` (the default's env spelling, strict JSON) | accepted, no error (PC 7, call 8) |
+| EC-011 | `HYLO_STATUSLINE_THEME_HEAT='0.5/0.5/0.5'` | `\e[90mhylo: config error: statusline.theme.heat=0.5/0.5/0.5 (expected JSON array of 3 numbers)\e[0m\n` — a SHAPE error riding the Text class, caught before the default comparison (PC 5, PC 7, ADV-P6-D01) |
 | EC-012 | `HYLO_STATUSLINE_COST_RATE_MIN_API_MS='{"cc":1.0,"other":2}'` | shape error: `expected JSON object {cc,other} of integers` (`1.0` has a fraction, PC 5) |
 | EC-013 | `HYLO_STATUSLINE_GLYPHS_TIMER='ab'` | `\e[90mhylo: config error: statusline.glyphs.timer=ab (expected exactly 1 code point and 1 display column)\e[0m\n` (PC 6, OD-178) |
 
@@ -180,7 +195,7 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
 |--------|----------|-------------|
 | VP-015 | Bool parse accepts exactly six strings | table test (exhaustive over the six plus a fuzz corpus) |
 | VP-015 | List parse equals Python `[p.strip() for p in s.split(",") if p.strip()]` on the CPython-generated table | table test against oracle goldens |
-| VP-016 | Bool and path-grammar error reasons ride the closed six-class register on the E-CFG-001 surface (PC-1 error strings; invariant 2) | table test (class register) |
+| VP-016 | Bool and path-grammar error reasons ride the closed SEVEN-class register on the E-CFG-001 surface (PC-1 error strings; invariant 2; OD-178) | table test (class register) |
 
 ## Traceability
 
@@ -211,7 +226,7 @@ S-TBD — config subset
 
 ## VP Anchors (Recommended)
 
-- VP-015 — bool grammar exact; VP-016 — error reasons on the six-class register
+- VP-015 — bool grammar exact; VP-016 — error reasons on the seven-class register
 
 #### Purity Classification
 

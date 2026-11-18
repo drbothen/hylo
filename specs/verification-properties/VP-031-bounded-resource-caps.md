@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.04.003.md, prd-supplements/nfr-catalog.md]
-input-hash: "84b1d96"
+input-hash: "f26f23e"
 traces_to: prd.md
 source_bc: BC-1.03.005
 bcs: [BC-1.03.003, BC-1.03.005, BC-1.04.003]
@@ -71,6 +71,7 @@ owning BC rules).
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestCaps_LegacyIdentical(t *testing.T) {
     if transcriptDedupMemory() != 256 { t.Fatal("dedup cap drifted (SL:1153 ids[-256:])") }

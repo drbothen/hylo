@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f0970c9"
+input-hash: "bad5bd1"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:effective_rl (SL:298-312)"
@@ -19,9 +19,10 @@ confidence: H
 lifecycle_status: active
 introduced: v0.1.0
 modified:
-  - "pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-005, EC-006, and the no-ts / empty-rl vectors) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
-  - "pass-4 remediation (ADV-P4-B05/B07): EC-008 and its vector row tagged OD-160; DI-012 cited; 2026-11-18T03:00:00Z"
+  - "1.2.1 pass-3 remediation (ADV-P3-B09): hand-edited-cache vectors (EC-005, EC-006, and the no-ts / empty-rl vectors) tagged exclusion OD-160; 2026-11-18T02:00:00Z"
+  - "1.2.2 pass-4 remediation (ADV-P4-B05/B07): EC-008 and its vector row tagged OD-160; DI-012 cited; 2026-11-18T03:00:00Z"
   - "1.2.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
+  - "1.2.4 pass-6 remediation (ADV-P6-B01, call 10): for-all used-age row re-anchored from VP-028 to VP-041 (VP-028 keeps the sequence golden leg); 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -115,7 +116,7 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 |--------|----------|-------------|
 | VP-028 | Sequence replay (report, silence ×n, report) reproduces oracle stdout and cache bytes at every step | parity harness stdin-sequence (BC-6.02.002) |
 | VP-019 | Cache written by Python is read identically by Go and vice versa | cache-swap test (BC-6.02.004) |
-| VP-028 | Used value age < keep_s always | property test |
+| VP-041 | Used value age < keep_s always — for all replay states | property test (for-all leg; VP-028 delivers the oracle legs) |
 
 ## Traceability
 
@@ -150,7 +151,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — smoothing sequence parity; VP-019 — four-cache swap (moved from VP-028, pass-1 finding ADV-P1-B11)
+- VP-041 — used-age for-all property; VP-028 — smoothing sequence parity (golden leg); VP-019 — four-cache swap (moved from VP-028, pass-1 finding ADV-P1-B11)
 
 ---
 

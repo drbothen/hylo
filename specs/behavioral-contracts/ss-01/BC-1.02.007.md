@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "aac2048"
+input-hash: "5ecc7b2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:mix_labels (SL:1157-1174), mix_segment (SL:1177-1183)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): for-all percentage row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the composition glyph/colour mapping names its registry keys tools/conversation/thinking instead of the wildcard statusline.glyphs.* (Inv 2 and Config keys row); 2026-11-19T04:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,7 +60,8 @@ Notation: `\e` is the byte 0x1B.
 
 1. Elements 4..n of `mix` (token totals, last-turn data) never affect this segment
    (SL:1158-1163: summing mixed units diluted the percentages).
-2. Bucket order and glyph/colour mapping are fixed (glyphs from `statusline.glyphs.*`,
+2. Bucket order and glyph/colour mapping are fixed (glyphs from the registry keys
+   `statusline.glyphs.tools`, `statusline.glyphs.conversation`, `statusline.glyphs.thinking`,
    colours from `statusline.theme.*`; defaults SL:1167).
 3. Rounding is half-even, never half-up: 12.5 → 12, 62.5 → 62.
 
@@ -99,8 +100,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15 (`mix_segment`).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For all non-negative int triples with positive sum, each pct equals CPython `round(n/total*100)` | property test against `pyfmt.Round` + CPython goldens |
-| VP-028 | Bytes equal the oracle on the pass-3 r1 vector table | table test |
+| VP-041 | For all non-negative int triples with positive sum, each pct equals CPython `round(n/total*100)` | property test against `pyfmt.Round` + CPython goldens — for-all leg (VP-028 delivers the oracle legs) |
+| VP-028 | Bytes equal the oracle on the pass-3 r1 vector table | table test — golden leg |
 
 ## Traceability
 
@@ -112,7 +113,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15 (`mix_segment`).
 | L2 Capability | CAP-009 |
 | L2 Domain Invariants | DI-008 |
 | Owner decisions | OD-103 (pyfmt Round), OD-113 (theme), OD-02 (glyph keys) |
-| Config keys | `statusline.glyphs.*` (▤ ❙ ◈), `statusline.theme.*` (cyan, green, magenta, reset) |
+| Config keys | `statusline.glyphs.tools` (▤), `statusline.glyphs.conversation` (❙), `statusline.glyphs.thinking` (◈), `statusline.theme.*` (cyan, green, magenta, reset) |
 | Architecture Module | `internal/statusline/context.go` |
 | Stories | TBD |
 
@@ -132,7 +133,7 @@ TBD — context widgets story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — half-even percentage property
+- VP-041 — half-even percentage for-all property (VP-028 retains the oracle legs)
 
 ---
 

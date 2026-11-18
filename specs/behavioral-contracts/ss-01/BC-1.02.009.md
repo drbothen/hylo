@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "038ee14"
+input-hash: "5ca0c29"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:444-445, 487-489)"
@@ -20,6 +20,7 @@ lifecycle_status: active
 introduced: v0.1.0
 modified:
   - "1.2 pass-5 remediation (ADV-P5-B09 disposition, OD-179): the reroute-all markers become the List key statusline.lane.reroute_all_prefixes (default [\"claude\", \"claude-\"], legacy; entries non-empty, no control bytes); PC1, Config keys, Owner decisions and Refactoring Notes aligned; 2026-11-18T05:42:56Z"
+  - "1.3 pass-6 remediation (ADV-P6-B01, call 10): the for-any-stdin no-limits-segment row re-anchored from VP-028 to VP-041 (VP-028 keeps the exhaustive oracle leg); 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -99,7 +100,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15, `T = 1800000000.0`, 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028 | `reroute_all(prefixes)` equals the oracle for all prefixes built from `{claude, claude-, Claude, claude-s, *, space, NBSP}` up to length 3 | exhaustive table test |
-| VP-028 | When `reroute_all`, row 1 contains no limits segment for any stdin | property test |
+| VP-041 | When `reroute_all`, row 1 contains no limits segment for any stdin | property test (for-all leg; VP-028 delivers the oracle legs) |
 
 ## Traceability
 
@@ -132,7 +133,7 @@ TBD — plan-window widget story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — reroute-all predicate
+- VP-041 — reroute-all for-all stdin property (VP-028 retains the exhaustive oracle leg)
 
 ---
 

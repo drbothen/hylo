@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "entities"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T05:40:00Z
+timestamp: 2026-11-18T08:15:29Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md]
-input-hash: "5bdadee"
+input-hash: "fd334b7"
 traces_to: L2-INDEX.md
 ---
 
@@ -36,7 +36,7 @@ traces_to: L2-INDEX.md
 | ENT-12 | **Session** | A Claude Code session: id (raw for the session cache name, sanitized for the mix cache — OD-03), owning status-line caches and rate-limit state | LEGACY-OBSERVED; raw/sanitized split DECIDED (OD-03) |
 | ENT-13 | **Transcript Record** | JSONL `{type, subtype, timestamp, message{id, usage, content[]}}`; blocks text/thinking/tool_use/tool_result/image; 512 KB window, 256-id dedup | LEGACY-OBSERVED (P2r1 §2) |
 | ENT-14 | **Status-Line Caches** | Session cache (`rl, rl_ts, fetch_ts, up, ts, sample, hist, proc_start`), mix cache (16 keys, `mixv6`), git cache (`{ts, branch}`), cost history (`sessions[sid] = {lane, usd, api_ms, ts, src}`) | LEGACY-OBSERVED (P2r1 §3); cache dir relocated DECIDED (OD-101, OD-95) |
-| ENT-15 | **Configuration** | Typed, validated key registry: file → `HYLO_*` env → default; every key has type, range, rationale; errors are one-line degraded output (D4-EX-3) — except in the `--subagent` agent-panel mode, where a config error prints zero stdout bytes with the diagnostic on stderr (OD-168) | DECIDED (D15, OD-05, OD-102, OD-113, OD-114, OD-95, OD-168) |
+| ENT-15 | **Configuration** | Typed, validated key registry: config file, overridden by `HYLO_*` env, then the key's default (PLAN §6: env overrides file); every key has type, range, rationale; errors are one-line degraded output (D4-EX-3) — except in the `--subagent` agent-panel mode, where a config error prints zero stdout bytes with the diagnostic on stderr (OD-168) | DECIDED (D15, OD-05, OD-102, OD-113, OD-114, OD-95, OD-168) |
 | ENT-16 | **Profile** | A coherent config overlay selecting backend/routing per user (default) or per window via `--profile` (P6 option) | DECIDED (OD-51, OD-74) |
 | ENT-17 | **Trust State** | The local CA (keypair, leaf certs) + its installation surface: `NODE_EXTRA_CA_CERTS` scoped to Claude Code; legacy also a login-keychain root (to be detected/removed) | LEGACY-OBSERVED; hylo shape DECIDED (D13, OD-41c) |
 | ENT-18 | **Hook Decision** | Stop-hook outcome: allow, or block-with-context (language reminder, fake stop); rendered as `hookSpecificOutput` + a repr-grammar log line | LEGACY-OBSERVED (P2r2 §6.4-6.5) |

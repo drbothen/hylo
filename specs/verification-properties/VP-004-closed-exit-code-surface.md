@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-17T20:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.001.md, behavioral-contracts/ss-02/BC-2.03.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, prd-supplements/error-taxonomy.md]
-input-hash: "c1ecf7f"
+input-hash: "10ac8f3"
 traces_to: prd.md
 source_bc: BC-4.01.001
 bcs: [BC-4.01.001, BC-4.01.003, BC-2.03.001, BC-2.03.002]
@@ -70,6 +70,7 @@ outside the table, and `runStatusline` cannot propagate a non-zero code.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestExitSurface_ClosedTable(t *testing.T) {
     for _, tc := range ExitTable { // {verb, args, env, validConfig} -> {exit, stdout golden, stderr golden}

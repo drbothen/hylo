@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "pyfmt"
-version: "1.9"
+version: "1.11"
 status: draft
 producer: architect
-timestamp: 2026-11-19T00:25:00Z
+timestamp: 2026-11-19T16:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "b73efc4"
+input-hash: "b74c8eb"
 
 ---
 
@@ -28,9 +28,9 @@ input-hash: "b73efc4"
 |---|---|
 | `num.go` | CPython 3.11 arithmetic on `Num` (int64 / *big.Int / float64 / bool-as-int); `Round` (ties-to-even + decimal re-round, big-int result beyond int64), `RoundN`, `F` ('f' format incl. -0, nan/inf spellings), `D`, `Int`/`Ceil` (exact `Num` results beyond int64, typed NaN/Overflow errors), `FloorDiv`/`Mod` (CPython `float_divmod` port — NOT `math.Floor(a/b)`; `ErrZeroDivision` on zero divisor), `FloorDivInt/ModInt` (integer `//`/`%`, exact for big ints), `Max`/`Min` (first-maximal-wins NaN argument order), `MaxSeq` (typed `ErrValue` on empty), `Repr` (Python repr recipe — see below), `ParseInt`/`ParseFloat` (Python grammar: underscores, Unicode digits, 4,300-digit limit, `1e400`, nan/inf), `NumToF`/`TrueDiv`/`NumCmp` (CPython mixed int/float semantics: `NumToF` float(int) conversion with typed `ErrOverflow` at `\|n\| >= 2**1024 - 2**970`, `TrueDiv` int/int exact rational quotient rounded once to float64 (operands not pre-truncated) with `ErrZeroDivision`, `NumCmp` exact cross-kind comparison — which also pins Max/Min exact tie-breaks) — BC-5.01.001..007, BC-5.01.003 |
 | `Repr` recipe (ADV-P2-D01, normative) | Python `repr(float)` = the shortest round-trip digit string, rendered **fixed** when the decimal exponent satisfies `-4 <= exp < 16`, else in exponent form; Go's shortest `'g'` instead switches to exponent form at `exp >= 6`, so `'g`'s notation decision is never reused — draw the shortest digits from `strconv`/`AppendFloat('g', -1, 64)` (the same shortest digit string the BC-5.01.005 recipe draws from the `'e'` form; `'g'` is a DIGIT SOURCE here, not a notation authority — the notation decision is always re-applied from Python's rule, which is how the two wordings reconcile), derive `exp = dp - 1` from the digit string, then apply **Python's** fixed/exponent rule; finish with the signed two-digit exponent (`e+09`), the `.0` suffix for integral values, and the `inf`/`nan` spellings. Following `'g'`'s own switching rule yields `1.794615009e+09` where the BC's canonical vector requires `1794615009.0`. — BC-5.01.005 |
-| `json.go` | Hand-written decoder/encoder over ordered `Value`/`Member`/`Kind`: `Decode(b, mode, depthBudget)` — the recursion budget is a **per-call-site parameter**, never a mode property and never a package global (BC-5.02.003 invariant 3): named constants pinned by the orchestrator end-to-end measurement of the real legacy program (isolated HOME, 2026-11-17; ADV-P2-A07 CLOSED): `depthStdinLoad = 993` (main → json.load, 6 frames; 993 accepted / 994 rejected, BC-1.01.002), `depthTranscriptLine = 993` (main → _mix_counts → json.loads, 6 frames; also 993/994 — supersedes the earlier frame-local 989/990 probe, which does not transfer across invocation depths), `depthSessionCache = 991` (main → effective_rl → load_cache, 8 frames; 991 accepted / 992 rejected, measured; the get_sample, claude_window_start and mix-cache loaders at the same 8-frame chain depth: 991/992, derived), `depthGitCache = 990` (main → render_lane → git_segment → load_cache, 9 frames; 990 accepted / 991 rejected, measured; the cost-history loaders record_cost and cost_thresholds, called from render_lane, at the same 9-frame depth: 990/991, derived), `depthMetricsReply = 992` (main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames; 992 accepted / 993 rejected, MEASURED end to end against a localhost HTTP reply, pass-5 ADV-P5-A2-05; BC-5.02.004 names metrics replies pyfmt.Value decodes). Governing formula: **limit = 999 − (Python frames from `<module>` down to json's raw_decode)**; full per-site table, measurement recipes and the limit/limit+1 test rule in VP-006. Mode-site pairing: **ModeText serves the stdin and cache loads; ModeBytes serves the transcript line loads** (BC-1.03.004, BC-5.02.003; ADV-P2-A06) — the transcript site's 993 boundary belongs to the ModeBytes site. The pyfmt gen scripts pin the boundaries by re-running the recorded measurement recipes under the pinned oracle — a moved boundary fails regeneration, and the committed tables then pin Go's constants. ModeText = `json.load` text semantics (BOM invalid, invalid-UTF-8 error, **NaN/Infinity tokens** — Python's json module accepts the spellings in BOTH modes; pass-5 A23 — the cache writer emits NaN tokens that are read back via ModeText, [AD-08 cache-writer decision](ARCH-04-data-files.md#decision-go-is-byte-exact-cache-writer-and-reader-across-pythongo-swaps-ad-08)); ModeBytes = `json.loads(bytes)` (BOM/UTF-16/32 detection, NaN/Infinity tokens, duplicates last-wins keeping position, WTF-8 strings surviving lone surrogates); `Dumps`/`DumpsLen` (json.dump byte defaults, shared escape/float-repr code with DumpsLen so lengths and bytes cannot drift); `Str` (Python str()/repr of values) — BC-5.02.001..006 |
-| `str.go` | WTF-8-aware `Len` (surrogate = 1 code point), `Truncate`, `HasSurrogate`, `EncodeUTF8Replace` (lone surrogate -> `?`), `Strip`/`RStrip` (Python whitespace incl. NBSP), `RSplit1`, `SplitLinesBytes` (\n \r\n \r only), `SubNonWord` (per code point before truncation), `PosixNormpath`/`NtNormpath`/`Basename` (per-OS selection, ntpath on Windows). Scope note (pass-3 D14, sharpened pass-4 D18): pyfmt contracts ONLY normpath (both flavors) and basename — `abspath`/`join`/`dirname` are NOT pyfmt functions, because Windows `abspath` needs cwd via GetFullPathNameW (an effect); any caller needing abs-path resolution performs it in `internal/statusline` against the `Cwd`/`Files` seams (ARCH-03), never inside pure pyfmt. BC-5.03.004 Inv 3's citation of `abspath`/`join`/`dirname` (SL:373-390) as "served by pyfmt" is SUPERSEDED by this scope rule (the underlying SL:373-390 behavior is served by `internal/statusline`); the flavor rule is uniform: `Basename` — and every per-OS flavor selection pyfmt makes — is a pure function of the build target (`runtime.GOOS`, compile-time constant per build; both flavors always compiled and table-pinned on every OS), never a caller choice. BC-5.03.004's posix/nt `join`/`dirname`/`abspath` flavor pinning is a product-owner obligation tracked for the next BC pass (pass-4 D18) — BC-5.03.001..004 |
-| `time.go` | `TimeFloat` (time.Time -> s float, once per render, BC-5.04.003); `FromISOFormat` (3.11 grammar, naive = local, fraction truncation beyond µs, BC-5.04.001); `LocalToUnix` (CPython `_mktime` port: gap/overlap semantics; 0 mismatches over 10,893 CPython goldens across four zone grids; Go `time.Date` differs) with embedded `time/tzdata` — BC-5.04.001..002 |
+| `json.go` | Hand-written decoder/encoder over ordered `Value`/`Member`/`Kind`: `Decode(b, mode, depthBudget)` — the recursion budget is a **per-call-site parameter**, never a mode property and never a package global (BC-5.02.003 invariant 3): named constants pinned by the orchestrator end-to-end measurement of the real legacy program (isolated HOME, 2026-11-17; ADV-P2-A07 CLOSED): `depthStdinLoad = 993` (main → json.load, 6 frames; 993 accepted / 994 rejected, BC-1.01.002), `depthTranscriptLine = 993` (main → _mix_counts → json.loads, 6 frames; also 993/994 — supersedes the earlier frame-local 989/990 probe, which does not transfer across invocation depths), `depthSessionCache = 991` (main → effective_rl → load_cache, 8 frames; 991 accepted / 992 rejected, measured; the get_sample, claude_window_start and mix-cache loaders at the same 8-frame chain depth: 991/992, derived), `depthGitCache = 990` (main → render_lane → git_segment → load_cache, 9 frames; 990 accepted / 991 rejected, measured; the cost-history loaders record_cost and cost_thresholds, called from render_lane, at the same 9-frame depth: 990/991, derived), `depthMetricsReply = 992` (main → get_sample → fetch_sample → json.loads(resp.read()), 7 frames; 992 accepted / 993 rejected, MEASURED end to end against a localhost HTTP reply, pass-5 ADV-P5-A2-05; BC-5.02.004 names metrics replies pyfmt.Value decodes). Governing formula: **limit = 999 − (Python frames from `<module>` down to json's raw_decode)**; full per-site table, measurement recipes and the limit/limit+1 test rule in VP-006. Mode-site pairing (three sites, not two): **ModeText serves the stdin and cache loads; ModeBytes serves the transcript line loads AND the metrics reply** (BC-1.03.004, BC-5.02.003, BC-5.02.004; ADV-P2-A06; metrics reply added pass-6 A07, call 5 — legacy decodes the fetch with `json.loads(resp.read())` on bytes, SL:171, so BOM/UTF-16/32 detection applies; 992 accepted / 993 rejected, `depthMetricsReply` above, VP-006; the owning BC-5.02.003 one-line precondition gains the multi-line-body case, pass-6 C2-06) — the transcript site's 993 boundary belongs to the ModeBytes site. The pyfmt gen scripts pin the boundaries by re-running the recorded measurement recipes under the pinned oracle — a moved boundary fails regeneration, and the committed tables then pin Go's constants. ModeText = `json.load` text semantics (BOM invalid, invalid-UTF-8 error, **NaN/Infinity tokens** — Python's json module accepts the spellings in BOTH modes; pass-5 A23 — the cache writer emits NaN tokens that are read back via ModeText, [AD-08 cache-writer decision](ARCH-04-data-files.md#decision-go-is-byte-exact-cache-writer-and-reader-across-pythongo-swaps-ad-08)); ModeBytes = `json.loads(bytes)` (BOM/UTF-16/32 detection, NaN/Infinity tokens, duplicates last-wins keeping position, WTF-8 strings surviving lone surrogates); `Dumps`/`DumpsLen` (json.dump byte defaults, shared escape/float-repr code with DumpsLen so lengths and bytes cannot drift); `Str` (Python str()/repr of values) — BC-5.02.001..006 |
+| `str.go` | WTF-8-aware `Len` (surrogate = 1 code point), `Truncate`, `HasSurrogate`, `EncodeUTF8Replace` (lone surrogate -> `?`), `Strip`/`RStrip` (Python whitespace incl. NBSP), `RSplit1`, `SplitLinesBytes` (\n \r\n \r only), `SubNonWord` (per code point before truncation), `PosixNormpath`/`NtNormpath`/`Basename` (per-OS selection, ntpath on Windows). Scope note (pass-3 D14, sharpened pass-4 D18): pyfmt contracts ONLY normpath (both flavors) and basename — `abspath`/`join`/`dirname` are NOT pyfmt functions, because Windows `abspath` needs cwd via GetFullPathNameW (an effect); any caller needing abs-path resolution performs it in `internal/statusline` against the dedicated `Env.Abs` seam (ARCH-03; pass-6 A18 — the bare `Cwd func() string` cannot express drive-relative `C:rel` resolution, which BC-1.02.004 EC-012 needs), never inside pure pyfmt. BC-5.03.004 Inv 3's citation of `abspath`/`join`/`dirname` (SL:373-390) as "served by pyfmt" is SUPERSEDED by this scope rule (the underlying SL:373-390 behavior is served by `internal/statusline`); the flavor rule is uniform: `Basename` — and every per-OS flavor selection pyfmt makes — is a pure function of the build target (`runtime.GOOS`, compile-time constant per build; both flavors always compiled and table-pinned on every OS), never a caller choice. The posix/nt `join`/`dirname`/`abspath` flavor pinning is OWNED HERE (architect — resolving the pass-4 D18 / BC-5.03.004 obligation ping-pong, pass-6 A18): per-flavor rules are owned by BC-5.03.004 with `abspath` per-flavor behavior pinned by BC-1.02.004 PC-1/EC-012 — BC-5.03.001..004 |
+| `time.go` | `TimeFloat` (time.Time -> s float, once per render, BC-5.04.003); `FromISOFormat` (3.11 grammar, naive = local, fraction truncation beyond µs; ERROR RESULT distinguishing None (`ErrValue`) from the Windows degrade (`ErrLocaltimeDomain`), pass-6 A05, call 2, BC-5.04.001); `LocalToUnix` (CPython `_mktime` port: gap/overlap semantics; 0 mismatches over 10,893 CPython goldens across four zone grids; Go `time.Date` differs; typed `ErrLocaltimeDomain` when `msvcDomain` and the instant is outside MSVC's `localtime_s` domain — before 1970-01-01 or from year ≥ 3001 — pass-6 A05, call 2) with embedded `time/tzdata` — BC-5.04.001..002 |
 
 ### Encoder depth law — one law, both directions (pass-5 D08/D17, call 10; measured sweep C)
 
@@ -116,7 +116,10 @@ in-band behavior (BC-5.02.006), not an exclusion.
   (OD-158) — pyfmt is simply reported first as the densest pure surface, not a P1
   gate (tool: gremlins, named in ARCH-00; ADR line AD-14 in ARCH-INDEX; pass-3 A25).
 - **Per-OS behavior (P18, ADV-P1-D21, explicitly justified):** the only GOOS-dependent
-  logic in `pyfmt` is `Basename` choosing ntpath on Windows. It is deliberately NOT
+  logic in `pyfmt` is `Basename` choosing ntpath on Windows. The Windows `localtime`
+  failure domain rides a caller-injected `msvcDomain bool` parameter (`LocalToUnix`,
+  above) — statusline passes `platform.IsWindows()` — so pyfmt still imports no
+  platform package and compiles portable logic only (pass-6 A05, call 2). It is deliberately NOT
   routed through `internal/platform`: `pyfmt` is the repo's lowest sink and importing
   infrastructure from it would invert AD-02's dependency direction. The selection is a
   pure function of the build target; both flavors are always compiled and always
@@ -163,8 +166,8 @@ func Decode(b []byte, mode DecodeMode, depthBudget int) (Value, error)
 // ErrDepth: typed encoder depth breach (pass-5 D08/D17, call 10) — Dumps/DumpsLen
 // return it when nesting exceeds the site's budget; Decode rejects at budget+1.
 var ErrDepth = errors.New("pyfmt: JSON nesting exceeds the call-site depth budget")
-func Dumps(v Value, depthBudget int) ([]byte, error) // (ADV-P4-D07; budget added pass-5 D08/call 10) encoder failure is typed: the 4,300-digit int-to-string limit (BC-5.02.001/.006) AND depth breach -> ErrDepth (pass-5 D08)
-func DumpsLen(v Value, depthBudget int) (int, error) // shared escape/float-repr code with Dumps so lengths and bytes cannot drift (BC-5.02.001); same depthBudget and ErrDepth disposition as Dumps (pass-5 D08/call 10)
+func Dumps(v Value, depthBudget int) ([]byte, error) // (ADV-P4-D07; budget added pass-5 D08/call 10) encoder failures are typed: the 4,300-digit int-to-string limit -> ErrValue (BC-5.02.006 PC-5; pass-6 D25); a depth breach -> ErrDepth (pass-5 D08)
+func DumpsLen(v Value, depthBudget int) (int, error) // shared escape/float-repr code with Dumps so lengths and bytes cannot drift (BC-5.02.001); same depthBudget and typed dispositions as Dumps (pass-5 D08/call 10; pass-6 D25)
 func Str(v Value) string
 
 func Len(s string) int
@@ -181,8 +184,8 @@ func NtNormpath(p string) string
 func Basename(p string) string        // runtime.GOOS selects ntpath on Windows; both flavors always compiled and table-pinned (see P18 note)
 
 func TimeFloat(t time.Time) float64
-func FromISOFormat(s string, loc *time.Location) (float64, bool)
-func LocalToUnix(loc *time.Location, wall time.Time) (int64, error) // BC-5.04.002: Unix seconds; ErrValue (not a bool)
+func FromISOFormat(s string, loc *time.Location, msvcDomain bool) (float64, error) // BC-5.04.001; ErrValue = unparsable (legacy None); ErrLocaltimeDomain = Windows MSVC domain failure (degrade) — msvcDomain threads through to LocalToUnix (pass-6 A05, call 2; arity synced to BC-5.04.001 by sync-check adv-p6 SC-22)
+func LocalToUnix(fields Naive, loc *time.Location, msvcDomain bool) (int64, error) // BC-5.04.002: Unix seconds from parsed naive fields; ErrValue (value error); DISTINCT ErrLocaltimeDomain when msvcDomain and the instant is outside MSVC's localtime_s domain (before 1970-01-01 or from year ≥ 3001) — the caller (statusline) passes msvcDomain = platform.IsWindows(); pure pyfmt imports no platform package (pass-6 A05, call 2)
 ```
 
 ### Unicode tables (OD-170, pass-4)
@@ -214,20 +217,31 @@ character-width functions with disjoint uses — do not merge them:
    function on hylo's own Unicode 14.0.0 tables: East-Asian Width
    Wide/Fullwidth = 2, combining marks and formats (Mn, Me, Cf) = 0, otherwise 1
    (Ambiguous counts 1; control bytes are range violations, not widths). Used ONLY
-   by config validation: the glyph rule "exactly 1 code point and 1 column" (OD-02)
-   and the pill-label bound "display width 1..16" (OD-173), per BC-2.01.004 PC-9
+   by config validation: the glyph rule (OD-184, superseding the OD-02 "exactly 1
+   code point and 1 column" wording that pitted the U+26A1 default against its own
+   range) — every `statusline.glyphs.*` / `statusline.subagent.glyphs.*` member is
+   exactly 1 code point, except `statusline.glyphs.sparkline` = exactly 8 ordered
+   code points, MEASURED IN LEGACY'S RENDER WIDTH (code points, the count legacy's
+   layout uses); the East-Asian-Width validation width (columns) applies ONLY to the
+   pill-label bound "display width 1..16" (OD-173), per BC-2.01.004 PC-9
    (which names the ARCH-06 coordination).
 
 Grounding (validation width): a glyph such as `▤` is 1 code point / 1 column and
-passes; a label such as `中文` measures 2 and passes the 1..16 bound; U+0301
-(combining acute) adds 0. Grounding (render width): the same `中文` also measures 2
+passes; a label such as `中文` measures 4 under the validation width (two
+East-Asian-Wide code points x 2 — corrected pass-6 D17; it passes the 1..16 bound);
+U+0301 (combining acute) adds 0. Grounding (render width): the same `中文` also
+measures 2
 (code points), but U+0301 adds 1 — the two functions intentionally differ on
 combining marks.
 
 ## Signature canon (ADV-P2-D08)
 
 The signatures above are the reconciled canon for the pass-2 remediation: `LocalToUnix`
-returns `(int64, error)` with `ErrValue` (BC-5.04.002), `TimeFloat` takes `time.Time`
+takes `(fields, loc, msvcDomain bool)` and returns `(int64, error)` with `ErrValue` plus
+the distinct Windows `ErrLocaltimeDomain` disposition, and `FromISOFormat` returns
+`(float64, error)` so the caller can tell None from degrade (pass-6 A05, call 2 —
+superseding the pass-2 `(loc, wall time.Time) -> (int64, error)` and
+`(float64, bool)` forms; BC-5.04.002), `TimeFloat` takes `time.Time`
 (BC-5.04.003), `MaxSeq(xs []Num) (Num, error)` with typed `ErrValue` (BC-5.01.006 PC-1 —
 its Description's `MaxSeq(vals ...Num) Num` sketch is superseded), and `Decode` takes the
 per-call-site `depthBudget` (BC-5.02.002/.003). Pass-4 D07 reconciles the encoder

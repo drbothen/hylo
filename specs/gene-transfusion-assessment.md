@@ -1,17 +1,17 @@
 ---
 document_type: gene-transfusion-assessment
 level: L3
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 inputs:
   - architecture/ARCH-INDEX.md
   - semport/hylo-legacy/semport-assessment.md
   - semport/hylo-legacy/statusline-target-design.md
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "a9b99f2"
+input-hash: "2eee464"
 
 ---
 
@@ -40,15 +40,14 @@ the reference ranges, and the risks. Scope: the six P1 code packages plus the pa
 |---|---|
 | Modules assessed | 7 P1 packages (SS-01…SS-06) |
 | Transfusion candidates | 2 full (`internal/statusline`, `internal/cost`) + 1 semantic (`internal/pyfmt`) + 2 hybrid (`internal/config`, `internal/platform`); 2 fresh (`cmd/hylo`, `internal/parity`) |
-| Estimated effort saved (story points) | ≈ **38 SP** (≈ 100 SP from scratch vs ≈ 62 SP transfused, range 50–80; SA §4; 1 SP = 1 ideal engineer-day) |
+| Estimated effort saved (story points) | ≈ **38 SP** (≈ 100 SP from scratch vs ≈ 62 SP transfused — SA §4 ALL-of-P1 totals, not the `internal/statusline` row alone; range 50–80; 1 SP = 1 ideal engineer-day; corrected pass-6 A2-25) |
 | Languages involved | Python 3 (CPython 3.11.x oracle, OD-104) → Go ≥ 1.26, standard library first |
 
 Strategy table (headline deliverable; legacy range citations are definitive in SA §1 / TD §2.2):
 
 | Package | SS | Strategy | Reference source (legacy file:function range) | License | Reference test coverage | Key risks |
 |---|---|---|---|---|---|---|
-| `internal/statusline` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F2–F9, F11, F12: telemetry+cache I/O SL:156–206; smoothing SL:298–312; sample machine SL:315–359; git SL:362–413; row 1 SL:416–637, 849–873; row 2 SL:640–835; transcript SL:938–1183; width/main/guard SL:1185–1245; subagent panel
-SL:837–847, 876–936 (OD-155) | Apache-2.0, same repo (D8) — compatible by construction | 0 tests in-repo (SA §2); Phase 0 oracle corpus substitutes: 103 BCs incl. 63-row `json.dumps` table (BC-SL-096), 20-row turn table (BC-SL-094), 21-row D4-EX-2 table (BC-SL-099), row goldens A/B/C (BC-SL-089), 11-step sample sequence (BC-SL-091), the catalogued crash-path register (error-taxonomy.md: 47 catalogued crash paths as of pass 4 — CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05); 100 % line citation coverage | R1 (Python JSON/number semantics), R2 (side-effect order), R3 (FMA on arm64), R4 (hidden exception paths), R5 (Windows), R10 (stdin churn) — SA §5 |
+| `internal/statusline` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F2–F9, F11, F12: telemetry+cache I/O SL:156–206; smoothing SL:298–312; sample machine SL:315–359; git SL:362–413; row 1 SL:416–637, 849–873; row 2 SL:640–835; transcript SL:938–1183; width/main/guard SL:1185–1245; subagent panel SL:837–847, 876–936 (OD-155) | Apache-2.0, same repo (D8) — compatible by construction | 0 tests in-repo (SA §2); Phase 0 oracle corpus substitutes: 103 BCs incl. 63-row `json.dumps` table (BC-SL-096), 20-row turn table (BC-SL-094), 21-row D4-EX-2 table (BC-SL-099), row goldens A/B/C (BC-SL-089), 11-step sample sequence (BC-SL-091), the catalogued crash-path register (error-taxonomy.md: 47 catalogued crash paths as of pass 4 — CP-X01..X04, CP-S01..S17, CP-T01..T07, CP-N01..N03, CP-O01..O11, CP-A01..A05); 100 % line citation coverage | R1 (Python JSON/number semantics), R2 (side-effect order), R3 (FMA on arm64), R4 (hidden exception paths), R5 (Windows), R10 (stdin churn) — SA §5 |
 | `internal/cost` | SS-01 | **gene-transfusion** | `legacy/dgx_statusline.py` F3: `record_cost` SL:224–237, `cost_thresholds` SL:240–262, constants SL:217–221 | Apache-2.0, same repo | 0 in-repo; fully pinned goldens: 21-session cost goldens (BC-SL-101), throttle boundary (BC-SL-102), OD-30 string-form key (BC-SL-079) | R1 (float repr/int-vs-float in writes); OD-30 ruled difference bookkeeping (R6) |
 | `internal/pyfmt` | SS-05 | **hybrid — semantic transfusion** | Authority is CPython 3.11 stdlib semantics (`round`, `json.dumps`/`loads`, `str`/`repr`, `int`/`float` parse, `//`/`%`, datetime), exercised by legacy call sites SL:72–153, 203, 983, 1061 and pinned by CPython-generated tables (TD §2.6); not a line port of legacy | Apache-2.0 + CPython PSF license (Python stdlib behavior; behavior reproduced, no code copied — no license conflict) | CPython-generated expectation tables per file (gen scripts in `internal/pyfmt/testdata/gen/`), 10,893 naive-time goldens (PR-14), fuzz targets `Decode`/`DumpsLen`/`FromISOFormat`/`ParseFloat` | R1 (decoder breadth: WTF-8, big ints, depth, NaN), R11 (oracle patch drift) |
 | `internal/config` | SS-02 | **hybrid** | Defaults and env-grammar behavior transfused from legacy import-time parsing SL:72–100 and render-time `LOCAL_MODEL_PREFIXES` SL:444 (D4-EX-3 boundary, TD IM-16); registry/types/errors fresh from BCs (D15, OD-01/05/57/102) | Apache-2.0, same repo | Threshold register P4r7 §B.2.1 (79 rows) + OD-57 rationales; D4-EX-3 test classes in TD S2 | R8 (D4-EX-3 boundary unspecified), R9 (P1 config source, tension T7) |
@@ -67,7 +66,7 @@ SL:837–847, 876–936 (OD-155) | Apache-2.0, same repo (D8) — compatible by 
 | License | Apache-2.0, same owner and same repository (D8) — compatible by construction |
 | Test coverage | 0 tests in legacy; Phase 0 corpus substitutes (103 BCs, oracle-pinned tables and goldens listed above) |
 | Translation complexity / paradigm gap | HIGH at byte level, LOW-MEDIUM at logic level (SA §2); gap moderate: dynamic dict/JSON values → `pyfmt.Value`, exceptions → `errDegraded` ladder, mutable caches → ordered effect script (TD §3.1) |
-| From-scratch vs transfusion effort | ≈ 100 SP vs ≈ 62 SP (dominant share of SA §4) |
+| From-scratch vs transfusion effort | ≈ 100 SP vs ≈ 62 SP are SA §4's ALL-of-P1 totals, not this row's share (corrected pass-6 A2-25 — reused verbatim until now); the dominant share holds, and this row's effort ROSE above its SA §4 share because OD-155 later added the subagent renderer (SL:837–847, 876–936; BC-1.07.001..008) which SA §4 predates |
 | Recommendation | **YES — transfuse** (D4 makes parity the definition of done; Phase 0 corpus already pins expected outputs) |
 
 ### `internal/cost` — YES, transfuse
@@ -113,7 +112,10 @@ exclusion list (OD-105) stays auditable.
 
 ## Effort and assumptions
 
-The SA §4 estimate carries over unchanged (62 SP, range 50–80; excludes owner review latency,
+The SA §4 estimate is reused as the P1 planning figure with one amendment (pass-6
+A2-25): SA §4 predates OD-155's subagent renderer (8 BCs), so the statusline row's
+share of the ALL-of-P1 totals (62 SP, range 50–80) rose — the increase is absorbed in
+the range's headroom, not re-estimated. The totals exclude owner review latency,
 tension rulings T1–T10, CI queue time, release tooling). Assumptions 1–4 in SA §4 apply,
 amended by later rulings (P12, ADV-P1-A2-18): tensions ruled before S2/S7; CPython 3.11.x
 is installed on ALL THREE CI legs (OD-104) — the Windows oracle run writes the

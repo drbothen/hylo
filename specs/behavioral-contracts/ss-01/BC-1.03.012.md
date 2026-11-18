@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "d937286"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1041-1058)"
@@ -19,7 +19,7 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified: ["1.2.1 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C11) — Pre3 added: len(G) > step (the PC2 extension claim presupposes the first step of refresh 2 ends inside G)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -42,6 +42,10 @@ the short line; refresh 2 starts at the long line, whose first step has no LF, s
 1. Transcript bytes from `off`: a complete line `S` (with LF) of length < step, then a line `G` whose length plus
    `len(S)` exceeds the step (default 524,288 B), so the first step ends inside `G`.
 2. No mix-cache reset applies between the refreshes.
+3. `len(G) > step` (ADV-P6-C11): the extension-read claim in PC2 presupposes the first step of refresh 2 ends
+   inside `G`, which holds only when `G` alone exceeds the step. With `len(G) ≤ step` the PC1 inequality can still
+   hold (via a large `S`), but no extension happens and the outcome differs from the PC2 assertion; the
+   two-refresh-shape claims below apply only under this precondition.
 
 ## Postconditions
 

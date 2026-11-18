@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "99bca80"
+input-hash: "7e9aa61"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -19,7 +19,8 @@ confidence: H
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted; 2026-11-17T12:00:00Z"
+  - "1.2 pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted; 2026-11-17T12:00:00Z"
+  - "1.4 pass-6 remediation (ADV-P6-B08 + B16): the pick glyph is named as the registry key statusline.glyphs.cost_pick instead of the wildcard statusline.glyphs.* (Config keys row); history label version-prefixed; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -115,7 +116,7 @@ Pinned 2026-11-15 with the legacy `render_lane` under CPython 3.11 (oracle, OD-1
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:render_lane (SL:633-635, inside the ⛏ block SL:626-636) |
 | Legacy contract | BC-SL-083 (deep pass-3 round 1, new) |
-| Config keys | `statusline.cost.display_floor_usd` (T-044, renamed from `cost.basis_min_shown_usd` by OD-174), `statusline.cost.basis_min_mtok_month`, `backends[0].model_prefixes` (OD-123), `statusline.glyphs.*` |
+| Config keys | `statusline.cost.display_floor_usd` (T-044, renamed from `cost.basis_min_shown_usd` by OD-174), `statusline.cost.basis_min_mtok_month`, `backends[0].model_prefixes` (OD-123), `statusline.glyphs.cost_pick` (⛏) |
 | Parity | byte-exact (no exclusion entry) |
 
 ## Related BCs (Recommended)

@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.6"
+version: "1.2.7"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T10:00:00Z
+timestamp: 2026-11-19T16:00:00Z
 phase: 1a
 inputs:
   - prd.md
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "2b6dfbe"
+input-hash: "7bcc36b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -26,7 +26,7 @@ parity_class: "OD-166"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["2026-11-17 (v1.2.1) VP citation reconciliation — VP-001 added", "2026-11-17 (v1.2.2) pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "2026-11-18 (v1.2.3) pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "2026-11-18 (v1.2.5) pass-4 remediation ADV-P4-C2-03 (OD-166 closed-set id per OD-169; DI-012 cited) + ADV-P4-C2-06 (guard pinned: usd OR api_ms, sign-agnostic, gate-independent; EC-011 + vector)", "2026-11-18 (v1.2.6) pass-5 remediation ADV-P5-C2-06 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)"]
+modified: ["2026-11-17 (v1.2.1) VP citation reconciliation — VP-001 added", "2026-11-17 (v1.2.2) pass-2 remediation ADV-P2-C2-07 (T-022 rationale signed off)", "2026-11-18 (v1.2.3) pass-3 remediation ADV-P3-C2-01 (OD-166 record guard) + ADV-P3-C2-02 (OD-160 exclusion id on EC-008)", "2026-11-18 (v1.2.5) pass-4 remediation ADV-P4-C2-03 (OD-166 closed-set id per OD-169; DI-012 cited) + ADV-P4-C2-06 (guard pinned: usd OR api_ms, sign-agnostic, gate-independent; EC-011 + vector)", "2026-11-18 (v1.2.6) pass-5 remediation ADV-P5-C2-06 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD166_RecordGuard)", "2026-11-19T16:00:00Z (v1.2.7) sync-check adv-p6 closure (SC-25) — the OD-166 postcondition parenthetical extends to the TWELVE-id closed set with OD-181; the ordinal (11th id) is unchanged; no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +62,7 @@ is visible to other sessions' thresholds in the same instant but never to its ow
    a number), return without touching the file (SL:226-227). Per ruling **OD-166**,
    closed-set-ratified by **OD-169** (exclusion id `OD-166`, the 11th id of the closed
    set — D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160,
-   OD-161, OD-166), the guard also rejects the refresh when **either** numeric field —
+   OD-161, OD-166, OD-181), the guard also rejects the refresh when **either** numeric field —
    `usd` **or** the paired `api_ms` — cannot convert to float: an exact stdin int with
    magnitude >= 2**1024 - 2**970 (smallest overflowing magnitude, oracle-verified
    CPython 3.11.7, 2026-11-17) — so an unconvertible value is **not recorded**. The

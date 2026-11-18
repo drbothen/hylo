@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "47e979d"
+input-hash: "5ecc7b2"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:451-462)"
@@ -19,7 +19,8 @@ confidence: H
 lifecycle_status: active
 introduced: v0.1.0
 modified:
-  - "pass-4 remediation (ADV-P4-B17): H1 retitled to match the PC3 selection chain (project_dir | current_dir | cwd), per bc_h1_is_title_source_of_truth; 2026-11-17T12:00:00Z"
+  - "1.1 pass-4 remediation (ADV-P4-B17): H1 retitled to match the PC3 selection chain (project_dir | current_dir | cwd), per bc_h1_is_title_source_of_truth; 2026-11-17T12:00:00Z"
+  - "1.3 pass-6 remediation (ADV-P6-B01 call 10 + B16): for-all label-derivation row re-anchored from VP-028 to VP-041 (VP-028 keeps the oracle/golden legs); history labels version-prefixed; 2026-11-19T04:00:00Z"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -101,8 +102,8 @@ disabled so only the label varies.
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For all non-empty strings, label = `pyfmt.Basename(pyfmt.Normpath(s))` or the normpath when empty, per host OS | property test against CPython goldens (BC-5.03.004) |
-| VP-028 | Label bytes equal the oracle on Tier A cases, per OS | parity harness |
+| VP-041 | For all non-empty strings, label = `pyfmt.Basename(pyfmt.Normpath(s))` or the normpath when empty, per host OS | property test against CPython goldens (BC-5.03.004) — for-all leg (VP-028 delivers the oracle legs) |
+| VP-028 | Label bytes equal the oracle on Tier A cases, per OS | parity harness — golden leg |
 
 ## Traceability
 
@@ -135,7 +136,7 @@ TBD — row-1 lane segments story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — label derivation property
+- VP-041 — label derivation for-all property (VP-028 retains the oracle legs)
 
 ---
 

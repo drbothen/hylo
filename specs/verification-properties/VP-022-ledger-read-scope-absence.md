@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T14:40:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-04-data-files.md, architecture/ARCH-09-reserved-boundaries.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "0b8f340"
+input-hash: "1f28bb5"
 traces_to: prd.md
 source_bc: BC-1.04.001
 bcs: [BC-1.04.001, BC-1.01.009]
@@ -104,6 +104,7 @@ this label, not a fetch-parity property.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestEnvScope_AllowedPathSet(t *testing.T) {
     for _, tc := range FaultInjectionTable { // full render, all faults

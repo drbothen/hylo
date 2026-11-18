@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "aeb3e9c"
+input-hash: "65d04ee"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -22,6 +22,7 @@ modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D13: POSIX-only ValueError claim qualified (Windows MSVC localtime_s raises OSError); range-end oracle rows restricted to Linux/macOS"
   - "2026-11-18T22:00:00Z (1.2.2) 2026-11-18: ADV-P4 remediation D21 - Env.Loc routed through internal/platform.LocalZone (OD-171); phantom HYLO_TEST_* zone citation replaced by TZ=UTC harness pin"
   - "2026-11-18T23:55:00Z (1.2.3) ADV-P5 remediation D01 — Windows MSVC localtime_s OSError (naive wall time on/before 1970-01-01 or from year 3001) now reproduces legacy: it propagates and DEGRADES the line (SL:984 catches ValueError only); rule in internal/platform with a table test; no exclusion id"
+  - "2026-11-19T04:00:00Z (1.2.4) ADV-P6 remediation D06 + D10 / orchestrator call 2 — signatures carry the third outcome in pure pyfmt: FromISOFormat(s, loc, msvcDomain bool) (float64, error) with sentinels ErrValue (None) and ErrLocaltimeDomain (caller degrades); LocalToUnix(fields, loc, msvcDomain bool) (int64, error); statusline injects msvcDomain = platform.IsWindows(), no platform import (AD-02); Pre-2 TZ reading aligned to OD-177 (empty or unparseable TZ → UTC; unset → OS-zone fallback)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -36,9 +37,17 @@ removal_reason: null
 
 Transcript timestamps feed the last-turn rate machine through `_iso_ts(s)` =
 `datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()`, with `ValueError` → None and non-str → None
-(SL:977-985). `pyfmt.FromISOFormat(s, loc) (float64, bool)` reproduces this composition exactly under CPython 3.11
+(SL:977-985). `pyfmt.FromISOFormat(s, loc, msvcDomain bool) (float64, error)` reproduces this composition exactly
+under CPython 3.11
 (3.10 rejects most of these forms): the accepted grammar, local-time reading of naive values through
 `LocalToUnix` (BC-5.04.002), truncation of fractions beyond microseconds, and the float arithmetic of `timestamp()`.
+Its `error` result carries the three caller outcomes (ADV-P6-D06, orchestrator call 2): nil = a value,
+`ErrValue` = None (parse failure, non-str, whitespace), `ErrLocaltimeDomain` = the Windows MSVC
+domain failure, which the CALLER degrades on — `LocalToUnix(fields, loc, msvcDomain bool) (int64, error)`
+returns that distinct sentinel when `msvcDomain` is set and the instant lies outside MSVC's
+[1970-01-01, year 3001) domain. The flag is injected — statusline passes
+`msvcDomain = platform.IsWindows()` — so the rule stays in pure pyfmt with no platform
+import (AD-02).
 
 ## Preconditions
 
@@ -46,7 +55,8 @@ Transcript timestamps feed the last-turn rate machine through `_iso_ts(s)` =
    parsing (SL:979-980).
 2. `loc` is the injected `*time.Location` (`Env.Loc`), derived exclusively through
    `internal/platform.LocalZone` (BC-3.01.001 PC-6, OD-171): `TZ` is honored on every OS
-   (named zone → OS-zone fallback), in production and in the parity harness alike — the
+   (named zone → that zone; empty or unparseable `TZ` → UTC, OD-177; unset `TZ` →
+   OS-zone fallback), in production and in the parity harness alike — the
    harness pins `TZ=UTC` for both binaries; no `HYLO_TEST_*` zone variable exists or is
    reserved (ADV-P4-D21).
 
@@ -62,19 +72,24 @@ Transcript timestamps feed the last-turn rate machine through `_iso_ts(s)` =
 5. **Offset:** `+HH`, `+HHMM`, `+HH:MM`, `+HH:MM:SS[.ffffff]` (and `-`); `-00:00` accepted; an offset of 24 h or more
    → None.
 6. **Result:** aware value → `(total microseconds since the epoch) / 1e6` as one correctly rounded division; naive
-   value → `float64(LocalToUnix(loc, wall seconds)) + float64(µs) / 1e6` (CPython C `datetime_timestamp` arithmetic).
-   Leading/trailing whitespace → None. POSIX: any failure is `ValueError` → `(0, false)` (P3r8 R-3). **Windows
-   (ADV-P5-D01, owner call 8):** the naive conversion goes through MSVC `localtime_s`, whose range starts at
+   value → `float64(LocalToUnix(fields, loc, msvcDomain)) + float64(µs) / 1e6` (CPython C `datetime_timestamp`
+   arithmetic).
+   Leading/trailing whitespace → None. POSIX (`msvcDomain = false`): any failure is `ValueError` →
+   `(0, ErrValue)` (P3r8 R-3). **Windows
+   (ADV-P5-D01, owner call 8; signatures ADV-P6-D06 / orchestrator call 2):** with
+   `msvcDomain = platform.IsWindows()` the naive conversion goes through MSVC `localtime_s`, whose range
+   starts at
    1970-01-01 and ends in year 3001; outside it MSVC raises `OSError` (CPython's fold-0 `u1-86400` probe hits
    it for any naive wall time on or before 1970-01-01 or at or after year 3001). Legacy's `_iso_ts` catches
    `ValueError` only (SL:984), so the `OSError` propagates out of `_mix_counts` (SL:1069) to the top-level
-   guard and the whole line **degrades** — hylo reproduces this exactly: the rule lives in
-   `internal/platform` (the naive-local-time conversion raises there, with a table test over the
-   before-1970 / in-range / from-3001 legs); it is not a helper-level `(0, false)`, and no closed-set
+   guard and the whole line **degrades** — hylo reproduces this exactly: `LocalToUnix` returns the
+   distinct `ErrLocaltimeDomain` sentinel in pure pyfmt (no platform import; statusline injects the
+   flag and degrades on that sentinel, with a table test over the
+   before-1970 / in-range / from-3001 legs); it is not `ErrValue`, and no closed-set
    exclusion id covers it. The range-end oracle rows remain pinned on Linux and macOS only (ADV-P3-D13).
 7. **Range ends** (Linux/macOS oracle rows only — on Windows MSVC `localtime_s` raises `OSError` and the line degrades, PC 6 / ADV-P5-D01):
-   naive values whose `LocalToUnix` probes leave years 1..9999 → None (TZ-dependent): naive
-   `0001-01-01T*` → None in every zone; naive `9999-12-31T23:59:59` → float under UTC but None under UTC+14.
+   naive values whose `LocalToUnix` probes leave years 1..9999 → `ErrValue` (TZ-dependent): naive
+   `0001-01-01T*` → `ErrValue` in every zone; naive `9999-12-31T23:59:59` → float under UTC but `ErrValue` under UTC+14.
 
 ## Invariants
 

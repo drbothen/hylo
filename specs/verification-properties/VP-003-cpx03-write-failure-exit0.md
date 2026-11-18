@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:45:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.001.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "8f19607"
+input-hash: "045a9a1"
 traces_to: prd.md
 source_bc: BC-1.01.001
 bcs: [BC-1.01.001, BC-1.07.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18: BC-1.07.008 added to bcs — shared-guard write-failure leg (BC-1.07.008's Verification Properties table anchors VP-003)", "1.3 2026-11-18T14:12:00Z: ADV-P4 fix (A2-14) — skeleton test renamed to the canonical rider name TestCPX03_WriteFailureExit0 fixed by BC-1.01.001's traceability register and quoted by VP-012", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-12) — the harness now OBSERVES the degraded write: counting failing writer, call count ≥ 1 on both the main and the --subagent entry (BC-1.07.008 write-failure leg row added) — an implementation that never writes fails the test"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18: BC-1.07.008 added to bcs — shared-guard write-failure leg (BC-1.07.008's Verification Properties table anchors VP-003)", "1.3 2026-11-18T14:12:00Z: ADV-P4 fix (A2-14) — skeleton test renamed to the canonical rider name TestCPX03_WriteFailureExit0 fixed by BC-1.01.001's traceability register and quoted by VP-012", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-12) — the harness now OBSERVES the degraded write: counting failing writer, call count ≥ 1 on both the main and the --subagent entry (BC-1.07.008 write-failure leg row added) — an implementation that never writes fails the test", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-18: per-entry faulting stdin — the subagent entry no longer reuses the main-entry fault stdin, whose legal zero-byte subagent output cannot false-red the Writes()>0 assert; every fenced sketch labelled non-normative (OD-182))"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,14 +67,18 @@ OD-105 closed set with its own table test.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestCPX03_WriteFailureExit0(t *testing.T) { // canonical rider name, BC-1.01.001 (A2-14)
-    for _, tc := range []struct{ name, entry string }{
-        {"main entry", "main"},                  // BC-1.01.001 EC-005
-        {"--subagent entry", "subagent"},        // BC-1.07.008 write-failure leg (A2-12)
+    for _, tc := range []struct{ name, entry, stdin string }{
+        // A2-18: each entry gets ITS OWN faulting stdin — a stdin that faults the
+        // main entry is usually not a CP-A fault for the subagent renderer, which
+        // then legally emits zero bytes and the Writes()>0 assert would false-red.
+        {"main entry", "main", "mainEntryFaultStdin"},           // BC-1.01.001 EC-005
+        {"--subagent entry", "subagent", "subagentRendererFaultStdin"}, // BC-1.07.008 write-failure leg: a decoded JSON object reaching the renderer with a CP-A fault
     } {
         w := &countingFailingWriter{}            // fails every Write, COUNTS attempts
-        exit := runStatuslineWith_stdoutWriter(w, degradedStdin, tc.entry)
+        exit := runStatuslineWith_stdoutWriter(w, tc.stdin, tc.entry) // A2-18: per-entry stdin
         if exit != 0 { t.Fatalf("%s: exit = %d, want 0 (OD-136)", tc.name, exit) }
         if w.Writes() == 0 { // the degraded write must have been attempted:
             t.Fatalf("%s: no write attempt observed — an implementation that "+ // A2-12

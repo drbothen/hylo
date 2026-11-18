@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:45:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.01.009.md, prd-supplements/nfr-catalog.md]
-input-hash: "5241649"
+input-hash: "840c9dc"
 traces_to: prd.md
 source_bc: BC-1.01.009
 bcs: [BC-1.01.009]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fix — removed the BC-1.06.002 partial-coverage claim (A2-04); that property is VP-018's, and this VP's fakes do not exercise the slash-sid fault site", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (B01 sibling) — OrderTable scope widened past the CP-S/CP-N triggers: the O-site rows join the sequence table (CP-O06..O08 skip-and-turn-drop per OD-167, CP-O09, the OD-166 record skip at 7c, CP-O10/O11 conversion degrades at 7d), matching the corrected ARCH-03 step table and the error taxonomy"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 pass-2 fix — removed the BC-1.06.002 partial-coverage claim (A2-04); that property is VP-018's, and this VP's fakes do not exercise the slash-sid fault site", "1.3 2026-11-18T23:45:00Z: ADV-P5 fix (B01 sibling) — OrderTable scope widened past the CP-S/CP-N triggers: the O-site rows join the sequence table (CP-O06..O08 skip-and-turn-drop per OD-167, CP-O09, the OD-166 record skip at 7c, CP-O10/O11 conversion degrades at 7d), matching the corrected ARCH-03 step table and the error taxonomy", "1.4 2026-11-19T12:00:00Z: pass-6 fixes (A2-13: unused err declaration removed)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,6 +67,7 @@ therefore observable. No step reordering, buffering, or post-error commit exists
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestEffectOrder_LegacySequence(t *testing.T) {
     for _, tc := range OrderTable { // happy + degrade-at-k for k in 0..8 (CP-S/CP-N)
@@ -76,7 +77,7 @@ func TestEffectOrder_LegacySequence(t *testing.T) {
         // skip; CP-O10/O11 the 7d conversion degrades (BC-1.05.007). Sibling of
         // ADV-P5-B01: the step table outdates these sites no longer.
         rec := newRecordingEnv(tc.DegradeAt)
-        _, err := statusline.Render(tc.Stdin, rec)
+        _, _ = statusline.Render(tc.Stdin, rec) // A2-13: the render error is observed through the recorded sequence and cache states, not the return — no unused declaration
         if got := rec.Log(); got != tc.WantSequence {
             t.Fatalf("%s: sequence %s", tc.Name, got)
         }

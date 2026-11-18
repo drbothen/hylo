@@ -2,13 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: "ubiquitous-language"
-version: "1.6"
+version: "1.7"
 status: draft
 producer: business-analyst
-timestamp: 2026-11-18T05:40:00Z
+timestamp: 2026-11-18T08:15:29Z
 phase: 1a
 inputs: [.factory/specs/product-brief.md, .factory/semport/hylo-legacy/hylo-legacy-pass-8-deep-synthesis.md, .factory/semport/hylo-legacy/hylo-legacy-pass-2-deep-domain-r4.md]
-input-hash: "5bdadee"
+input-hash: "fd334b7"
 traces_to: L2-INDEX.md
 ---
 
@@ -43,7 +43,7 @@ traces_to: L2-INDEX.md
 | **Fake stop / Kev / verdict** | Optional Stop-hook oracle mediating turn completion; median-of-3, `p < 0.40`; regex fallback | LEGACY-OBSERVED; optional DECIDED D11 |
 | **Composition** | Byte-share of context since the last compaction boundary (`▤❙◈`) | LEGACY-OBSERVED |
 | **Plan window** | The 5h/7d subscription usage windows, computed by the status line from stdin `rate_limits` when a refresh carries them, else from the session cache's last-seen `rl` (shown-unless-stale, kept RL_KEEP = 1800 s, legacy `effective_rl` SL:297-312) — captured headers stay in the ledger (ADV-P2-A2-19, ADV-P5-A2-27) | LEGACY-OBSERVED |
-| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle; the closed id set is D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166 (BC-6.03.004) | DECIDED OD-105/OD-110/OD-136, OD-169 |
+| **Approved deviation / exclusion list** | Named, individually tested byte differences vs the oracle; the closed id set is D4-EX-1, D4-EX-2, D4-EX-3, OD-30, OD-76, temp-file, cp-x03, OD-159, OD-160, OD-161, OD-166, OD-181 (BC-6.03.004); OD-183 widens OD-159's UTF-8 rule to stdin and stdout | DECIDED OD-105/OD-110/OD-136, OD-169/OD-181 |
 | **Parity** | Byte/decision equality with the frozen prototype on recorded inputs; definition of done P1-P3 (D4) | DECIDED D4 |
 | **Rebuild (exporter)** | Full rescan of ledger + hook log into exporter state | LEGACY-OBSERVED; trigger DECIDED OD-39 |
 | **Exposition** | The 28-name Prometheus text rendering on `/metrics` | LEGACY-OBSERVED |

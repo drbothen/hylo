@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-19T00:20:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-01/BC-1.03.004.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, owner-decisions-log-2026-11-14.md]
-input-hash: "97f3072"
+input-hash: "4284b09"
 traces_to: prd.md
 source_bc: BC-1.03.004
 bcs: [BC-1.03.004, BC-5.03.002]
@@ -89,6 +89,7 @@ CPython equivalence rests entirely on the committed corner tables.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func FuzzSplitLinesBytes(f *testing.F) {
     f.Fuzz(func(t *testing.T, b []byte) {

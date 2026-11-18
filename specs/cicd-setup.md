@@ -1,14 +1,14 @@
 ---
 document_type: infrastructure-report
 level: infra
-version: "1.5"
+version: "1.6"
 status: draft
 producer: devops-engineer
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1c
 inputs: [architecture/ARCH-08-build-ci-release.md, architecture/ARCH-07-parity-harness.md]
 traces_to: [ARCH-INDEX.md]
-input-hash: "45214f0"
+input-hash: "10118cd"
 
 ---
 
@@ -48,11 +48,11 @@ Triggers: `pull_request`, `push` to `main`, `workflow_dispatch`, and `schedule`
 
 | Job | Matrix | Timeout | What it does |
 |---|---|---|---|
-| `lint (gofmt + vet)` | ubuntu-24.04 | 10 min | `gofmt -l .` fails on any unformatted file; `go vet ./...` |
-| `test (ubuntu-24.04)` / `(macos-15)` / `(windows-2025)` | 3 OSes (BC-6.04.001) | 30 min | setup-python runs FIRST and exports `HYLO_PARITY_PYTHON` before `go test -race -count=1 ./...` (pass-3 D22: GitHub always sets `CI=true`, and Tier A lives inside the plain test step, so the interpreter must exist before `go test`, never after; `-race` on Linux/macOS only, per ARCH-08) |
+| `lint (gofmt + vet + staticcheck)` | ubuntu-24.04 | 10 min | `gofmt -l .` fails on any unformatted file; `go vet ./...`; version-pinned `staticcheck` beside them (pass-6 A11, call 13 — the check-run name drops the stale gofmt+vet-only spelling) |
+| `test (ubuntu-24.04)` / `(macos-15)` / `(windows-2025)` | 3 OSes (BC-6.04.001) | 30 min | setup-python runs FIRST and exports `HYLO_PARITY_PYTHON` before `go test -race -count=1 ./...` (pass-3 D22: GitHub always sets `CI=true`, and Tier A lives inside the plain test step, so the interpreter must exist before `go test`, never after; `-race` on Linux/macOS only, per ARCH-08). The plain test step EXCLUDES the Tier A selector (pass-6 A12, call 13: the dedicated tier A job is the one authoritative run — one run, one timeout) |
 | `gitleaks (full history)` | ubuntu-24.04 | 10 min | `gitleaks detect --log-opts="--all"` (fetch-depth 0) **plus** the category pattern scan |
 | `locate harness packages` (probe) | ubuntu-24.04 | 5 min | emits `parity`/`statusline` outputs gating the placeholder jobs |
-| `parity tier A (live corpus)` | 3 OSes | 45 min | placeholder; skipped until `internal/parity` exists |
+| `parity tier A (live corpus)` | 3 OSes | 45 min | placeholder; skipped until `internal/parity` exists. Once activated this is the SINGLE authoritative Tier A run (pass-6 A12, call 13) with its own 45-minute timeout — the plain test step never also runs the corpus |
 | `parity tier B (committed goldens)` | 3 OSes | 30 min | placeholder; no Python needed (goldens committed; Windows included) |
 | `parity tier C (nightly differential fuzz)` | 3 OSes | 60 min | schedule-only; `HYLO_PARITY_FUZZSECONDS=1800` = 30 min/OS (OD-149); non-gating |
 | `timing report (non-gating)` | 3 OSes | 15 min | runs `go test ./internal/parity -run '^TestTiming$' -count=1` once `internal/parity` exists (pass-3 D39 wiring; upload the report as a workflow artifact); `HYLO_TIMING_GATE` intentionally unset (OD-117: gate binds only where the owner opts in). Positive coverage (pass-3 A16): the job fails unless it prints `timing: N cases timed > 0` with `N >= 1` — an activated timing job reporting on zero cases must not pass |
@@ -76,9 +76,9 @@ fail when it checked nothing. Per job, the required line is:
 
 | Job | Positive-coverage line | Fail condition |
 |---|---|---|
-| `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0` or `N` ≠ case-directory census (partially lost corpus must not pass, ADV-P2-A15) |
+| `parity tier A` | `parity: N cases compared, M exclusions validated, K caches swapped` | `N == 0` or `N` ≠ case-directory census (partially lost corpus must not pass, ADV-P2-A15), or `K == 0` while any compared case declares swap seeds (pass-6 A10, call 13 — the swap tier must not check nothing and pass) |
 | `parity tier B` | `tier-b: N goldens compared` | `N == 0` OR `N` ≠ committed-golden-file census (partially lost golden set must not pass, pass-5 A19) |
-| `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); PR-side `t.Skip` is fine only because the job is non-gating |
+| `parity tier C` (nightly) | `tier-c: N inputs per side, M oracle spawns` | 0/unset `HYLO_PARITY_FUZZSECONDS` FAILS on the schedule (never skips); a scheduled run comparing `N == 0` inputs or spawning `M == 0` oracles FAILS (pass-6 A10, call 13); PR-side `t.Skip` is fine only because the job is non-gating |
 | exclusion machinery / canary | `exclusions: M entries validated against the closed set` | `M` ≠ file entry count, or the file is missing |
 | `lint` / `test` / `govulncheck` | `go: K files scanned` + `go test: N tests run, S skipped` (test jobs) | guard path prints `go: 0 Go files — guard path, NOT a vet/test pass`; after Phase 3 lands sources, `K == 0` or `N == 0` fails; an all-skip suite is reported via `S` and investigated, not accepted (ADV-P2-A15) |
 | gitleaks + category pattern scan | `hygiene: K files scanned, H hits` | `K == 0` (scan ran over nothing) or `H > 0` (any flagged hit fails the job — pass-3 A18: "found hits" is a failure, never an accepted pass) |
@@ -156,16 +156,20 @@ Each lag carries its own "change required before" deadline.
    `go generate ./...` followed by `git diff --exit-code` over the generated paths; any
    diff fails the leg, so a stale committed Unicode 14.0 table or pyfmt oracle table can
    never pass CI — runs AFTER setup-python (pass-5 A04: the generators are
-   `testdata/gen/*.py` under the pinned 3.11.7 oracle, so setup-python must precede
+   `testdata/gen/*.py` under the 3.11.x oracle (OD-185: floating latest patch, harness
+   self-checks the measured constants), so setup-python must precede
    `go generate`, never follow it) and on ubuntu-24.04 ONLY (the Windows Tier B leg
-   consumes committed goldens and needs no Python). The interpreter pin is 3.11.7
-   EXACTLY (ASM-001 dual pin), not a floating 3.11.x — a floating patch can regenerate
-   depth/oracle tables that drift and flap the check.
+   consumes committed goldens and needs no Python). The interpreter is the floating
+   3.11.x latest patch (OD-104/OD-185 — the pass-5 exact-3.11.7 pin is withdrawn):
+   the harness self-checks the 3.11.7-era measured constants against the resolved
+   oracle at start (depth boundaries + `unicodedata.unidata_version`, fail closed,
+   resolved version printed) and golden metadata records the resolved patch, so a
+   moved boundary fails loudly instead of flapping silently on patch drift.
    **Landed ci.yml lags:** no such step. **Change required
    before the pyfmt generators land (Phase 3).**
 7. **Release job interpreter (pass-5 A17, call 6).** REQUIRED: `release.yml`'s final
    `go test ./...` includes Tier A (the plain test step), so the release job gets the
-   SAME `actions/setup-python` (3.11.7 exact, ASM-001) + `HYLO_PARITY_PYTHON` export
+   SAME `actions/setup-python` (3.11.x, OD-185) + `HYLO_PARITY_PYTHON` export
    as the test job, before `go test`. **Landed release.yml lags:** the committed job
    runs `go test ./...` with no setup-python step and no `HYLO_PARITY_PYTHON` — once
    `internal/parity` lands, the release job's Tier A leg runs with no interpreter and
@@ -176,7 +180,7 @@ Each lag carries its own "change required before" deadline.
 
 Single job on `tags: v*` (timeout 30 min, `permissions: contents: write` scoped to
 the job): final `go test ./...`, then cross-compiled static builds per ARCH-08 —
-with setup-python (3.11.7 exact, ASM-001) exporting
+with setup-python (3.11.x, OD-185) exporting
 `HYLO_PARITY_PYTHON` BEFORE the test step, the same discipline as the test job
 (pass-5 A17, lag note 7 above). Builds:
 `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w -X main.version=<tag>"` (binary
@@ -246,17 +250,21 @@ behavior of the `-race` split is asserted from ARCH-08's design, not yet observe
 
 ## Branch protection — to apply AFTER the first green run (owner action, OD-150)
 
-`required_status_checks.contexts` (exact check-run names as the workflows emit them):
+`required_status_checks.contexts` (exact check-run names as the workflows emit them;
+updated pass-6 A11, call 13 — the list now includes the coverage gate, the required
+govulncheck check and the staticcheck-extended lint name):
 
 ```
-lint (gofmt + vet)
+lint (gofmt + vet + staticcheck)
 test (ubuntu-24.04)
 test (macos-15)
 test (windows-2025)
+coverage
+govulncheck (required)
 gitleaks (full history)
 ```
 
-With: `strict: true` (require branches up to date), 0 approving reviews, `enforce_admins: false` (**admin bypass**, per OD-150), no restrictions. The parity/timing placeholders should be added to required checks only after Phase 3 makes them run. `security.yml` also produces PR check runs (`govulncheck`, `gitleaks (weekly)`) but they are informational and NOT in the required set.
+With: `strict: true` (require branches up to date), 0 approving reviews, `enforce_admins: false` (**admin bypass**, per OD-150), no restrictions. Disambiguation (pass-6 A11, call 13): the coverage gate is a required STEP of the test job (ARCH-08), surfaced as the single required check named `coverage` — not a separate job. The parity/timing placeholders should be added to required checks only after Phase 3 makes them run. `security.yml` also produces PR check runs (`govulncheck`, `gitleaks (weekly)`) but they are informational and NOT in the required set.
 
 ## Deferred to Phase 3 (deliberately not done here)
 

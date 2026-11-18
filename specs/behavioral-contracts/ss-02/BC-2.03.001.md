@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - BC-ALLOCATION.md
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "7c5b42b"
+input-hash: "2c02b9f"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; no legacy counterpart)"
@@ -23,7 +23,8 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D16: validate stderr order aligned with statusline emission order (warnings then errors)"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D33 — unknown-setting warning order pinned to lexicographic byte-wise name order (os.Environ order is OS-dependent)"
+  - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D33 — unknown-setting warning order pinned to lexicographic byte-wise name order (os.Environ order is OS-dependent)"
+  - "2026-11-19T04:30:00Z (1.2.3): ADV-P6 remediation D15 — EC-005 expected stderr pinned: exactly one line, the backends cardinality error with [from HYLO_BACKENDS_1_METRICS_URL]; no unknown-setting warning (backend-entry variables are not unknown settings, BC-2.01.001 PC-6 carve-out)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,7 +80,7 @@ when `config.Load` returns any error. The error set is identical to the set that
 | EC-002 | Two invalid keys | two stderr lines (registry order), exit 1 |
 | EC-003 | Only `HYLO_FOO=1` | stdout `hylo: config ok\n`, stderr warning, exit 0 |
 | EC-004 | `DGX_SL_TTL=nan` only | ok, exit 0 (legacy names never read) |
-| EC-005 | `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11` | stderr `hylo: config error: backends=2 (exactly one backend entry until P6) [from HYLO_BACKENDS_1_METRICS_URL]`, exit 1 |
+| EC-005 | `HYLO_BACKENDS_1_METRICS_URL=http://192.0.2.11` | stderr is exactly ONE line — `hylo: config error: backends=2 (exactly one backend entry until P6) [from HYLO_BACKENDS_1_METRICS_URL]\n`, exit 1. No unknown-setting warning draws: the variable names a P1 backend `<FIELD>` and is a backend-entry variable, not an unknown setting (BC-2.01.001 PC-6 carve-out, ADV-P6-D15); the `[from ...]` detail follows BC-2.01.002 PC-4 |
 
 ## Canonical Test Vectors
 

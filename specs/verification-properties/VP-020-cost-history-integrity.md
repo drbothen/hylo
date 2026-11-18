@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:45:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.004.md, behavioral-contracts/ss-01/BC-1.05.006.md, behavioral-contracts/ss-01/BC-1.05.009.md, owner-decisions-log-2026-11-14.md]
-input-hash: "4859354"
+input-hash: "0da668d"
 traces_to: prd.md
 source_bc: BC-1.05.004
 bcs: [BC-1.05.004, BC-1.05.006, BC-1.05.009]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)", "1.3 2026-11-18T14:50:00Z: ADV-P4 fix (A2-03/OD-169) — OD-166 record-guard leg added: record_cost SKIPS a cost value whose usd or api_ms cannot convert to float (legacy persisted the raw int); the current refresh still degrades; the resulting cache-byte divergence cites exclusion id OD-166 with its own table test TestCostHistory_OD166_RecordGuard and its own VP-012 closure row — no 'rides D4-EX-2' wording", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-26) — the OD-166 leg is exercised through the RENDERED refresh over both guard fields (usd and api_ms): the P1 cost.Record signature takes no api_ms and a library call renders nothing, so file-unchanged and the E-REN-002 degrade are observed in the rendered bytes"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)", "1.3 2026-11-18T14:50:00Z: ADV-P4 fix (A2-03/OD-169) — OD-166 record-guard leg added: record_cost SKIPS a cost value whose usd or api_ms cannot convert to float (legacy persisted the raw int); the current refresh still degrades; the resulting cache-byte divergence cites exclusion id OD-166 with its own table test TestCostHistory_OD166_RecordGuard and its own VP-012 closure row — no 'rides D4-EX-2' wording", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-26) — the OD-166 leg is exercised through the RENDERED refresh over both guard fields (usd and api_ms): the P1 cost.Record signature takes no api_ms and a library call renders nothing, so file-unchanged and the E-REN-002 degrade are observed in the rendered bytes", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (C2-04, A2-02: the OD-166 guard legs put the unconvertible exact int on STDIN (BC-1.05.004 EC-010/011) over a valid history; outcomes are field-specific (usd degrades per EC-010, api_ms renders normally per EC-011); a seeded-history huge value is the OD-160/CP-O10/O11 class)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,10 +49,18 @@ this VP's parity scope: legacy raises on them (CP-C09/C10 crash paths, BC-1.05.0
 EC-008 — degraded, no write); they are foreign-cache forms carrying exclusion id
 **OD-160** (ruling Q-b). The throttle is strict `<`; numeric sids write one
 string-form key (OD-30) under which the throttle applies and self-exclusion **holds**
-(BC-1.05.006 PC2/PC3). Record guard (OD-166): a cost value (`usd` or `api_ms`) that
-cannot convert to float (magnitude >= 2**1024 - 2**970 as an exact int) is **not
-recorded** — the file is unchanged, where legacy persisted the raw int — while the
-current refresh still degrades (E-REN-002); the cache-byte divergence cites exclusion
+(BC-1.05.006 PC2/PC3). Record guard (OD-166): a cost value on the refresh's **stdin**
+usage block — field `usd` or `api_ms` (BC-1.05.004 EC-010/EC-011) — that cannot
+convert to float (magnitude >= 2**1024 - 2**970 as an exact int) is **not recorded** —
+the file is unchanged, where legacy persisted the raw int. The refresh outcome is
+field-specific: an unconvertible `usd` degrades the current refresh (EC-010, the $/h
+display math overflows, CP-O10/BC-1.05.007, E-REN-002); an unconvertible `api_ms`
+renders normally (EC-011 — `-(2**1024) >= burn_min_api_ms` is false, no $/h segment).
+A huge value SEEDED INTO the history file is a different input path: it is the
+OD-160 foreign-history class exercising the CP-O10/O11 conversion sites
+(BC-1.05.005/BC-1.05.007, VP-001's fault ladder), where the step-7c `record_cost`
+write precedes `cost_thresholds` and may legitimately rewrite the file. The
+stdin-borne divergence cites exclusion
 id **OD-166** with its own table test (`TestCostHistory_OD166_RecordGuard`) and its
 own VP-012 closure row — it does not ride D4-EX-2 and is not an OD-156 case.
 
@@ -85,6 +93,7 @@ own VP-012 closure row — it does not ride D4-EX-2 and is not an OD-156 case.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestCostHistory_ParseFailure_LegacyReloadSemantics(t *testing.T) {
     dir := tempCacheDir(t)
@@ -102,21 +111,28 @@ func TestCostHistory_ParseFailure_LegacyReloadSemantics(t *testing.T) {
 }
 
 func TestCostHistory_OD166_RecordGuard(t *testing.T) { // OD-166/OD-169 record guard
-    // A2-26: the guard covers usd OR api_ms, so both legs are exercised THROUGH THE
-    // RENDERED REFRESH (a library cost.Record call neither takes an api_ms parameter
-    // in P1 nor renders, leaving degradeAttempted nothing to observe).
-    for _, tc := range []struct{ name, field string }{
-        {"huge recorded usd", "usd"},       // e.g. 2**1024 as a 309-digit int
-        {"huge recorded api_ms", "api_ms"}, // EC-011's other converting field
+    // C2-04 (with A2-02): the guard checks the value on STDIN (BC-1.05.004
+    // EC-010/011) — NOT a value seeded into the history file. A seeded huge history
+    // value is the OD-160/CP-O10/O11 class, where the 7c write legitimately happens
+    // first; asserting "file unchanged" there would fail a correct implementation.
+    // The guard covers usd OR api_ms, so both legs are exercised THROUGH THE
+    // RENDERED REFRESH over a VALID seeded history.
+    for _, tc := range []struct {
+        name    string
+        stdin   string // usage block bytes carrying the unconvertible exact int
+        wantOut string // EC-010: degraded line; EC-011: renders normally
+    }{
+        {"huge stdin usd", usageBlockUSD(exactIntAboveFloat64Max), degradedLine},          // EC-010: degrades (CP-O10 display overflow)
+        {"huge stdin api_ms", usageBlockAPIMS(exactNegIntAboveFloat64Max), normalRender},  // EC-011: renders normally
     } {
         dir := tempCacheDir(t)
-        seedCostHistory(dir, map[string]any{tc.field: exactIntAboveFloat64Max})
-        out := renderRefresh(dir) // refresh reads the cache, conversion fails, guard skips
+        seedValidHistory(dir) // the history itself is valid — the fault is on stdin
+        out := renderRefresh(dir, tc.stdin)
         if !fileUnchanged(dir, "cost-history.json") {
-            t.Fatalf("%s: unconvertible cost recorded — guard skipped nothing", tc.name)
+            t.Fatalf("%s: unconvertible stdin cost recorded — guard skipped nothing", tc.name)
         }
-        if out != degradedLine { // E-REN-002: the current refresh still degrades —
-            t.Fatalf("%s: guard suppressed the refresh degrade", tc.name) // observable bytes
+        if out != tc.wantOut { // field-specific: degrade (usd) vs normal render (api_ms)
+            t.Fatalf("%s: refresh outcome %q, want %q", tc.name, out, tc.wantOut)
         }
     }
 }

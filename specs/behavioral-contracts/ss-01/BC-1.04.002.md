@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T01:45:00Z
+timestamp: 2026-11-18T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md]
-input-hash: "75b8bd6"
+input-hash: "74cdc97"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:get_sample (SL:315-359)"
@@ -23,7 +23,8 @@ modified:
   - "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-008)"
   - "1.3.2 2026-11-18: pass-4 residual sweep \u2014 D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22; entry redated into the pass-4 burst date to keep the modified sequence monotonic)"
   - "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (KeyError site added to Invariant 1 alongside the IndexError site)"
-  - "1.3.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-19) \u2014 version field aligned with the trailing modified entry; no behavioral change"
+  - "1.3.4 2026-11-18: sync-check adv-p5 closure (SC-19) \u2014 version field aligned with the trailing modified entry; no behavioral change"
+  - "1.3.5 2026-11-18: pass-6 remediation ADV-P6-C2-09 (Invariant 1 now actually names the KeyError site alongside the IndexError site \u2014 the v1.3.3 changelog claim was ahead of the invariant text) + ADV-P6-C2-15 (SC-19 entry redated 2026-11-19 \u2192 2026-11-18; timestamp aligned)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,7 +72,10 @@ it is younger than KEEP_DEAD.
 
 ## Invariants
 
-1. Total except the typed history-point site (a malformed point raises IndexError → errDegraded, BC-1.04.003 EC-009); cache write errors are swallowed.
+1. Total except the typed history-point site (a malformed point raises → errDegraded:
+   IndexError from a non-dict point `hist[-1]` (BC-1.04.003 EC-009) and KeyError from a
+   dict point without `"t"` (BC-1.04.003 EC-008, SL:337) — both sites; cache write
+   errors are swallowed.
 2. KEEP_DEAD is applied **only** on the fetch path (pinned quirk: inside a TTL window
    after a failed fetch an over-300 s sample renders stale instead of `◌ DGX ?`).
 3. A failed fetch never deletes the stored sample.

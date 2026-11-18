@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r6.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "8bfd1bc"
+input-hash: "c6b7230"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:442, 453)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified: ["1.2 pass-6 remediation (ADV-P6-B01, call 10): for-all label-fallback row re-anchored from VP-028 to VP-041 (VP-028 keeps the oracle/golden legs); 2026-11-19T04:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -88,8 +88,8 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15; prefixes `claude-son
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-028 | For string inputs, label = first non-empty of (display_name, id, "?") | property test + table test |
-| VP-028 | Label bytes equal the oracle on the Tier A corpus | parity harness (BC-6.03.002) |
+| VP-041 | For string inputs, label = first non-empty of (display_name, id, "?") — for all strings | property test (VP-041 for-all leg; VP-028 delivers the oracle legs) |
+| VP-028 | Label bytes equal the oracle on the Tier A corpus | parity harness (BC-6.03.002) — golden leg |
 
 ## Traceability
 
@@ -122,7 +122,7 @@ TBD — row-1 lane segments story
 
 ## VP Anchors (Recommended)
 
-- VP-028 — label fallback property
+- VP-041 — label fallback for-all property (VP-028 retains the oracle legs)
 
 ---
 

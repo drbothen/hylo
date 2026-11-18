@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg", "1.2.3 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B13/B10): vector table merged (blank line removed); ARCH-03 anchor normalized to #statusline-guard", "1.2.4 2026-11-18T12:00:00Z: pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set ids", "1.2.5 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — 1.2.4 entry re-dated ascending (its stamp predated 1.2.3); no behavioral change"]
+modified: ["1.2.1 2026-11-17: VP citation reconciliation — VP-005 stdout leg", "1.2.3 2026-11-18T02:00:00Z: pass-3 remediation (ADV-P3-B13/B10): vector table merged (blank line removed); ARCH-03 anchor normalized to #statusline-guard", "1.2.4 2026-11-18T12:00:00Z: pass-4 remediation (ADV-P4-B07): DI-012 cited for the carried closed-set ids", "1.2.5 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — 1.2.4 entry re-dated ascending (its stamp predated 1.2.3); no behavioral change", "1.2.6 pass-6 remediation (ADV-P6-B06 + OD-183 wording): new EC-007 pins raw encoded-surrogate bytes (ED A0 80) on stdin as invalid UTF-8 -> {} with an oracle-verified vector; PC2 adds the pyfmt code-point-iteration (never plain rune ranges) discipline for WTF-8 values; 2026-11-19T04:00:00Z"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,7 +49,8 @@ JSON `\uXXXX` escape) cannot be encoded at output and degrades the refresh (CP-S
 1. stdin containing any invalid UTF-8 sequence (e.g. `{"model":{"id":"A\xffB"}}` with raw byte 0xFF) -> render input
    `{}` -> `?` defaults; exit 0. The bytes are never echoed back.
 2. A JSON escape decoding to a lone surrogate (U+D800..U+DFFF, any sub-range incl. U+DC80..U+DCFF) is accepted by
-   the decoder and kept (WTF-8 in Go, design IM-01).
+   the decoder and kept (WTF-8 in Go, design IM-01); Go decodes and iterates these WTF-8 values by code point
+   through pyfmt, never plain rune ranges (OD-183 stdio leg; design IM-01).
 3. If such a string reaches stdout as a **str** (model display name or id, project label, or a cached git `branch` —
    a JSON `\udXXX` escape in `statusline-git-<key>.json` is returned as a str by the loader and rendered verbatim,
    SL:412-413), the refresh degrades: stdout is the 29-byte line (BC-1.01.001), exit 0, and every cache write of the
@@ -77,6 +78,7 @@ JSON `\uXXXX` escape) cannot be encoded at output and degrades the refresh (CP-S
 | EC-004 | `\udcff` escape in `model.display_name` | degraded 29 bytes (strict mode) |
 | EC-005 | `\ud800` escape in a key or field that is never rendered | no effect on output |
 | EC-006 | Valid astral characters (e.g. emoji) in display name | rendered as UTF-8 bytes |
+| EC-007 | Raw encoded-surrogate bytes on stdin — a UTF-8 sequence encoding a surrogate code point, e.g. `ED A0 80` (U+D800) inside a string value, structurally valid JSON | invalid UTF-8: CPython's strict text-mode decoder rejects it (`UnicodeDecodeError`; oracle-verified 2026-11-18) → `{}` -> defaults (45-byte line). Contrast with the same code point arriving as the six-ASCII-character JSON `\ud800` escape, which parses and is kept as WTF-8 (EC-003/PC2) |
 
 ## Canonical Test Vectors
 
@@ -86,6 +88,7 @@ Config: defaults, `HYLO_STATUSLINE_ROWS=1`, git disabled, COLUMNS unset, empty c
 |-------|----------------|----------|
 | `{"model":{"display_name":"Opus 5.5"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97mOpus 5.5\e[0m\n` | happy-path |
 | `{"model":{"id":"A` `FF` `B"}}` | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m\n` (45 bytes) | error |
+| `{"model":{"id":"A` `ED A0 80` `B"}}` (raw encoded-surrogate bytes, EC-007) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m?\e[0m\n` (45 bytes), exit 0 | error |
 | `{"model":{"display_name":"\ud800"}}` | `\e[90mstatusline degraded\e[0m\n` (29 bytes), exit 0 | edge-case |
 | `{"session_id":"s1","model":{"display_name":"\ud800"},"rate_limits":{"five_hour":{"used_percentage":1,"resets_at":9999999999}}}` | degraded 29 bytes; `statusline-s1.json` written with exactly `rl`, `rl_ts` before the fault (window-start probe pinned: harness fake `ps` with no `claude` ancestor, BC-3.02.002 case I4 — no `proc_start` key) | edge-case |
 | `{"model":{"display_name":["\ud800"]}}` (list -> `repr`) | `\e[100;37;1m ◨ ? \e[0m\e[2m · \e[0m\e[97m['\ud800']\e[0m\n` (the six ASCII characters `\ud800` inside quotes; no degrade) | edge-case |

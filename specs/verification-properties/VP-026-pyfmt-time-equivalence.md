@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.4"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-18T23:45:00Z
+timestamp: 2026-11-19T16:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-06-pyfmt.md, behavioral-contracts/ss-05/BC-5.04.001.md, behavioral-contracts/ss-05/BC-5.04.002.md, behavioral-contracts/ss-05/BC-5.04.003.md, owner-decisions-log-2026-11-14.md]
-input-hash: "efe94ae"
+input-hash: "4d6f1b8"
 traces_to: prd.md
 source_bc: BC-5.04.002
 bcs: [BC-5.04.001, BC-5.04.002, BC-5.04.003]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P2 fixes — golden count stated consistently; tzdata wording corrected; Windows-CRT note added (A2-24)", "1.2 2026-11-18T09:14:00Z: ADV-P3 fix (A2-11) — corpus rule added: naive local-time conversion cases are tagged posix-only and run on the Linux/macOS legs; the Windows Tier A leg skips them by rule, so no unexplained diff can arise", "1.3 2026-11-18T14:25:00Z: ADV-P4 fix (A2-06, OD-171) — the posix-only class skip is REMOVED: hylo resolves the local zone through internal/platform honouring TZ on every OS (named zone, OS-zone fallback); the parity harness pins TZ=UTC for both binaries so the naive local-time cases run on all three legs with no skip and no blanket carve-out; TZ table test added; documented POSIX-TZ-string limitation recorded", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-06, OD-177) — TZ semantics refined to libc on every OS: TZ unset → OS zone (via os.Unsetenv with original-TZ cleanup — t.Setenv(TZ, empty) is a DIFFERENT case), TZ empty or unparseable → UTC; fallback rows guarded against vacuity on UTC runners with an explicit skip reason"]
+modified: ["1.1 2026-11-17: ADV-P2 fixes — golden count stated consistently; tzdata wording corrected; Windows-CRT note added (A2-24)", "1.2 2026-11-18T09:14:00Z: ADV-P3 fix (A2-11) — corpus rule added: naive local-time conversion cases are tagged posix-only and run on the Linux/macOS legs; the Windows Tier A leg skips them by rule, so no unexplained diff can arise", "1.3 2026-11-18T14:25:00Z: ADV-P4 fix (A2-06, OD-171) — the posix-only class skip is REMOVED: hylo resolves the local zone through internal/platform honouring TZ on every OS (named zone, OS-zone fallback); the parity harness pins TZ=UTC for both binaries so the naive local-time cases run on all three legs with no skip and no blanket carve-out; TZ table test added; documented POSIX-TZ-string limitation recorded", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-06, OD-177) — TZ semantics refined to libc on every OS: TZ unset → OS zone (via os.Unsetenv with original-TZ cleanup — t.Setenv(TZ, empty) is a DIFFERENT case), TZ empty or unparseable → UTC; fallback rows guarded against vacuity on UTC runners with an explicit skip reason", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (A2-04: the OD-177 rows are independent t.Run subtests — a UTC-runner vacuity skip no longer ends the whole test)", "1.6 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-28) — the zone-grid harness sketch respelled to the call-2 signature LocalToUnix(fields, loc, msvcDomain bool) (int64, error), returning the pair; sketch-only (OD-182); no property change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,7 +71,9 @@ under the Windows MS CRT than under IANA loading; parity cases use `TZ=UTC` only
   `internal/platform` — the unset case via `os.Unsetenv` with original-TZ cleanup
   (`t.Setenv("TZ", "")` sets an EMPTY TZ, a different case), and the fallback rows
   guarded against vacuity on UTC runners (skip with reason when the ambient OS zone
-  is UTC, since "OS zone" and "UTC" are then indistinguishable, ADV-P5-A2-06).
+  is UTC, since "OS zone" and "UTC" are then indistinguishable, ADV-P5-A2-06) — every
+  row is an independent `t.Run` subtest, so a vacuity skip suppresses only that row,
+  never the OD-177 matrix (A2-04).
   Goldens are TZ-independent input/output rows — with `TZ=UTC` pinned for both binaries
   they run identically on every leg.
 - **Honesty:** testable-only; zone-grid breadth is the strongest table-pinning in the
@@ -87,16 +89,21 @@ under the Windows MS CRT than under IANA loading; parity cases use `TZ=UTC` only
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestLocalToUnix_ZoneGridGoldens(t *testing.T) {
     for _, g := range LoadGolden("testdata/mktime.golden") {
-        if got := pyfmt.LocalToUnix(g.Loc, g.Wall); got != g.Unix {
+        got, err := pyfmt.LocalToUnix(g.Fields, g.Loc, g.MsvcDomain)
+        if err != nil || got != g.Unix {
             t.Fatalf("%s %v: got %v want %v", g.Zone, g.Wall, got, g.Unix)
         }
     }
 }
 
 func TestPlatform_LocalZoneResolution(t *testing.T) { // OD-171 refined by OD-177 (A2-06)
+    // A2-04: every row runs as its own t.Run subtest — a vacuity skip on the
+    // OS-zone fallback row (UTC runners) must not end the WHOLE test, or the
+    // OD-177 empty/UTC/IANA/unparseable rows never execute on CI.
     // The unset case needs a REAL unset: t.Setenv("TZ", "") sets an EMPTY TZ, which
     // libc reads as UTC — a different row. Restore the ambient TZ on cleanup.
     orig, had := os.LookupEnv("TZ")
@@ -107,20 +114,24 @@ func TestPlatform_LocalZoneResolution(t *testing.T) { // OD-171 refined by OD-17
             _ = os.Unsetenv("TZ")
         }
     })
-    _ = os.Unsetenv("TZ") // row 1: TZ truly unset
-    if got := platform.ResolveLocalZone(); !zoneMatches(got, osZoneExpectation(t)) {
-        t.Fatalf("TZ unset: resolved %v", got)
-    }
+    t.Run("TZ truly unset", func(t *testing.T) {
+        _ = os.Unsetenv("TZ") // row 1: TZ truly unset
+        if got := platform.ResolveLocalZone(); !zoneMatches(got, osZoneExpectation(t)) {
+            t.Fatalf("TZ unset: resolved %v", got)
+        }
+    })
     for _, tc := range []struct{ tz, want string }{
         {"", "UTC"}, // OD-177: TZ EMPTY → UTC (libc semantics, every OS)
         {"UTC", "UTC"},
         {"Europe/Berlin", "UTC+1 offset via IANA load"}, // sanity: the seam distinguishes zones
         {"@@not~a~zone@@", "UTC"},                       // OD-177: unparseable → UTC
     } {
-        t.Setenv("TZ", tc.tz) // per-case env (t.Setenv restores it on cleanup)
-        if got := platform.ResolveLocalZone(); !zoneMatches(got, tc.want) {
-            t.Fatalf("TZ=%q: resolved %v", tc.tz, got)
-        }
+        t.Run("TZ="+tc.tz, func(t *testing.T) { // A2-04: per-row subtest
+            t.Setenv("TZ", tc.tz) // per-case env (t.Setenv restores it on cleanup)
+            if got := platform.ResolveLocalZone(); !zoneMatches(got, tc.want) {
+                t.Fatalf("TZ=%q: resolved %v", tc.tz, got)
+            }
+        })
     }
 }
 

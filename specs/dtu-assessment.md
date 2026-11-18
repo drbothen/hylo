@@ -1,15 +1,15 @@
 ---
 document_type: dtu-assessment
 level: L3
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 DTU_REQUIRED: false
 inputs: [architecture/ARCH-03-statusline.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-09-reserved-boundaries.md, prd-supplements/interface-definitions.md, domain-spec/state-machines.md]
 traces_to: architecture/ARCH-INDEX.md
-input-hash: "f95bc4f"
+input-hash: "e8df28a"
 
 ---
 
@@ -25,7 +25,7 @@ input-hash: "f95bc4f"
 | Estimated Wave 1 capacity needed | 0 points |
 
 **Verdict: `DTU_REQUIRED: false`.** P1 has exactly one network edge (the metrics query
-API, ARCH-03) and four non-network external contracts (statusLine stdin, the
+API, ARCH-03) and five non-network external contracts (statusLine stdin, the
 `subagentStatusLine` agent-panel stdin, the transcript JSONL, git state, process
 tables). All six are
 reproducible at seam level with fakes the parity harness
@@ -88,6 +88,7 @@ None identified — P1 emits no telemetry. The P2 exporter and its separate orac
 | 3 | git repository state | Enrichment/lookup (local) | L1 | No | 0 | Seeded `.git` trees behind `Files`/`Cwd` seams; already scheduled |
 | 4 | Per-OS process tables | Enrichment/lookup (local) | L1 | No | 0 | `ProcStarter` recording fake + `TestWindowAge_D4EX1_Windows`; already scheduled |
 | 5 | Claude Code `subagentStatusLine` agent-panel stdin | Inbound | L3 (decode + render) | No | ≈0.5 | Second stdin push contract (OD-155); cloned by the `subagent`-family corpus rows with the new `argv` field (ARCH-07); BC-1.07.001..008 + ASSUMP-107-1 capture pending |
+| 6 | Claude Code transcript JSONL (pass-5 A2-23) | Inbound | L3 (line-machine decode) | No | ≈0.5 | Third upstream push contract, read through a seek/read window; cloned by the `transcript`-family corpus rows plus the seeded mix/`BASE` caches (BC-1.03.019's 21-row D4-EX-2 table); 2.x line-schema stability pinned by capture replay from git-ignored `captures/` before Phase 3 (pass-6 A2-20: row was missing from this summary though present in the inventory) |
 
 ## Boundary Reproduction Register (what each fake must pin)
 
@@ -164,6 +165,7 @@ above; no further extension beyond the platform-family cases already scheduled
 | 3 | git repository state | Local filesystem content; seeded tree behind `Files`/`Cwd` seams is exact |
 | 4 | Per-OS process tables | Host-fidelity impossible in containers on macOS/Windows; seam fake is the only faithful clone |
 | 5 | Claude Code `subagentStatusLine` agent-panel stdin (OD-155) | Second upstream push contract — same reason as #2: its clone is the `subagent`-family harness corpus rows (pass-4 A2-21: row was missing from this table though present in the inventory and Dependency Summary; ASSUMP-107-1 capture still pending) |
+| 6 | Claude Code transcript JSONL | Upstream push contract — clone is the `transcript`-family corpus rows plus the seeded mix/`BASE` caches (pass-6 A2-20: row was missing from this table though present in the inventory and Dependency Summary; same discipline as rows #2/#5) |
 
 ## DTU Architecture
 

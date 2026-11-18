@@ -14,7 +14,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - docs/PLAN.md
-input-hash: "d53f404"
+input-hash: "ea0e40d"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -74,8 +74,8 @@ together form the P1 success criterion (OD-107).
 3b. **Captures exclusion path (ADV-P4-D12, orchestrator design call 12).** Replays from
    `captures/` validate against a git-ignored `captures/exclusions.json` — never committed
    (PC-2 hygiene; real session ids and paths stay local) — using the SAME closed-set
-   machinery as the committed exclusion file: identical id registry (the eleven minted ids,
-   BC-6.03.004), per-entry expected-output and table-test rules, no blanket exclusions, and
+   machinery as the committed exclusion file: identical id registry (the twelve minted ids,
+   BC-6.03.004, OD-181 included), per-entry expected-output and table-test rules, no blanket exclusions, and
    fail-the-run on an entry without its test. CI never runs captures, so the committed
    suite's closed set is unaffected. This makes the local "0 unexplained diffs on real
    inputs" criterion reachable: real sessions that diverge through D4-EX-2-, OD-76- or

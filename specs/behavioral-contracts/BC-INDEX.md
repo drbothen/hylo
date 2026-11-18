@@ -2,17 +2,17 @@
 artifact_type: bc-index
 document_type: bc-index
 level: L3
-version: "0.2.7"
+version: "0.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T06:25:00Z
+timestamp: 2026-11-19T14:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 origin: greenfield
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.7"
+modified: "0.2.8"
 extracted_from: "behavioral-contracts/ss-01..ss-06 frontmatter and H1 headings (generated; do not hand-edit rows)"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -22,7 +22,7 @@ removed: "n.a."
 removal_reason: "n.a."
 inputs:
   - behavioral-contracts/BC-ALLOCATION.md
-input-hash: "9dfecf3"
+input-hash: "fde676f"
 traces_to: ../prd.md
 
 ---
@@ -180,7 +180,7 @@ traces_to: ../prd.md
 
 | BC ID | Title | Subsystem / section | Legacy | Parity class | Conf | Status | File |
 |---|---|---|---|---|---|---|---|
-| BC-1.06.001 | Cache load/save: never-raise, raw sid in file names | S1.06 | BC-SL-052 | byte-exact | H | draft | [BC-1.06.001](ss-01/BC-1.06.001.md) |
+| BC-1.06.001 | Cache load/save: never-raise, raw sid in file names | S1.06 | BC-SL-052 | temp-file | H | draft | [BC-1.06.001](ss-01/BC-1.06.001.md) |
 | BC-1.06.002 | Sid with / : failed replace persists nothing; temp handling | S1.06 | BC-SL-078 | temp-file | M | draft | [BC-1.06.002](ss-01/BC-1.06.002.md) |
 
 ### S1.07 — Subagent panel rows (OD-155 revision, 2026-11-17)

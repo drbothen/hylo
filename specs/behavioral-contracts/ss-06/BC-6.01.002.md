@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -14,7 +14,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r5.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "d61c8cb"
+input-hash: "cfc7cd2"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -26,8 +26,9 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D21 - TZ=UTC pinned for both binaries on every leg (OD-171, VP-026 posix-only tag removed); Env.Loc routed through internal/platform.LocalZone"
+  - "2026-11-17T21:45:00Z: patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
+  - "2026-11-18T23:00:00Z (1.2.2): ADV-P4 remediation D21 - TZ=UTC pinned for both binaries on every leg (OD-171, VP-026 posix-only tag removed); Env.Loc routed through internal/platform.LocalZone"
+  - "2026-11-19T03:10:00Z (1.2.3): ADV-P6 remediation D27 + OD-183 - Description pins restated (GP-1..GP-4 forbidden outright, GP-5/GP-6 set to case temp values, nothing inherited); Windows oracle child gains exactly one extra variable PYTHONIOENCODING=utf-8 (stdio only; PYTHONUTF8 stays forbidden; POSIX unchanged), EC-002/CTV/VP rows aligned"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,8 +46,10 @@ covers the oracle interpreter, its version probe and the built `hylo` binary. No
 inherited from the `go test` process. The child gets only an explicit allowlist: per-case
 temp `HOME`/`USERPROFILE`/`TMPDIR`, a fixed UTF-8 locale, the case's `TZ` and `COLUMNS`,
 and the translated settings. Proxy variables, `PYTHON*` variables other than
-`PYTHONPATH`, and the Go-side pins GP-1..GP-6 can never leak in from the developer's or
-the CI runner's shell (DET-43).
+`PYTHONPATH`, and the pinned variables GP-1..GP-6 are never inherited from the
+developer's or the CI runner's shell (DET-43): PC-3 forbids GP-1..GP-4 outright, and
+GP-5/GP-6 (temp and home locations) are never inherited either — the builder sets them
+to the case's fixed temp values (PC-1), so nothing from the parent shell leaks (ADV-P6-D27).
 
 ## Preconditions
 
@@ -110,7 +113,10 @@ the CI runner's shell (DET-43).
      `all_proxy` and the upper-case forms (GP-3);
    - `REQUEST_METHOD`;
    - every `PYTHON*` variable except `PYTHONPATH`, including `PYTHONUTF8`,
-     `PYTHONIOENCODING`, `PYTHONHOME`, `PYTHONSTARTUP` and `PYTHONSAFEPATH`;
+     `PYTHONIOENCODING`, `PYTHONHOME`, `PYTHONSTARTUP` and `PYTHONSAFEPATH` — with the
+     single OD-183 exception: the WINDOWS oracle child adds exactly one variable,
+     `PYTHONIOENCODING=utf-8` (stdio only; `PYTHONUTF8` stays forbidden on every OS;
+     the POSIX oracle child carries no `PYTHON*` variable beyond `PYTHONPATH`);
    - `GODEBUG` (GP-2), `ZONEINFO` (GP-1), `SSL_CERT_FILE` and `SSL_CERT_DIR` (GP-4);
    - every `HYLO_*` key the case does not set;
    - `DGX_*` and `LOCAL_MODEL_PREFIXES` in the Go child (OD-05);
@@ -118,7 +124,11 @@ the CI runner's shell (DET-43).
      the harness, not the runner's value.
 4. **Locale and stdio are pinned.** The shim reconfigures oracle `stdin` and `stdout`
    to UTF-8 strict with `newline="\n"`. Windows text-mode stdout would otherwise write
-   `\r\n` and encode as cp1252 (research P25). The harness captures child stdout as raw
+   `\r\n` and encode as cp1252 (research P25). By OD-183 the Windows oracle child's
+   stdio encoding additionally comes from the builder's `PYTHONIOENCODING=utf-8` —
+   exactly one variable, stdio only; a table test proves it changes stdio encoding
+   only (the constructed env differs from the POSIX builder in that key alone).
+   The harness captures child stdout as raw
    bytes, never through text-mode decoding.
 5. **Assertion.** Before the first case, an env-builder unit test checks the exact
    key set of both child envs. It runs with a parent env that contains every forbidden
@@ -143,7 +153,7 @@ the CI runner's shell (DET-43).
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | Developer shell exports `HTTPS_PROXY=http://192.0.2.1:8090` (the launcher exports a proxy for its client) | Absent from both children. Legacy would bypass it anyway at SL:168, but it is not present |
-| EC-002 | CI runner sets `PYTHONUTF8=1` or `PYTHONIOENCODING=cp1252` | Absent. Stdio encoding comes only from the shim's reconfigure |
+| EC-002 | CI runner sets `PYTHONUTF8=1` or `PYTHONIOENCODING=cp1252` | Absent (inherited values are never copied). Stdio encoding comes only from the shim's reconfigure — except the builder's own `PYTHONIOENCODING=utf-8` on the Windows oracle child (OD-183, stdio only); `PYTHONUTF8` stays absent on every OS |
 | EC-003 | Parent sets `HYLO_STATUSLINE_*` or `DGX_SL_TTL=nan` | Absent unless the case declares the setting; a case cannot inherit config by accident |
 | EC-004 | Windows child built without `SYSTEMROOT` | Not allowed: the builder always adds it on Windows. CPython would fail at startup otherwise |
 | EC-005 | `PYTHONPATH` missing from the oracle env | Not allowed. If a bug removes it, the shim canary (BC-6.01.003) fails the run |
@@ -156,7 +166,7 @@ the CI runner's shell (DET-43).
 |-------|----------------|----------|
 | Parent env `{HTTPS_PROXY, no_proxy, PYTHONUTF8, GODEBUG, SSL_CERT_FILE, HYLO_X, DGX_SL_TTL, HOME=/real}`; case `TZ=UTC`, no COLUMNS, settings `{}` (Linux) | Oracle env keys exactly `{HOME, USERPROFILE, TMPDIR, LANG, TZ, PYTHONPATH, HYLO_TEST_NOW, LOCAL_MODEL_PREFIXES}`, with `HOME` under the case temp tree | happy-path |
 | Same parent env; Go binary child (Linux) | Keys exactly `{HOME, USERPROFILE, TMPDIR, XDG_CACHE_HOME, LOCALAPPDATA, <paths.cache_dir env>, LANG, TZ, HYLO_TEST_NOW, <backends[0].model_prefixes env>}` | happy-path |
-| Same inputs on Windows | As above plus `TMP`, `TEMP`, `SYSTEMROOT` | edge-case |
+| Same inputs on Windows | As above plus `TMP`, `TEMP`, `SYSTEMROOT` and, on the oracle child only, `PYTHONIOENCODING=utf-8` (OD-183) | edge-case |
 | Env builder modified to copy `os.Environ()` | Env-builder unit test fails, listing the leaked keys | error |
 
 ## Verification Properties
@@ -164,7 +174,7 @@ the CI runner's shell (DET-43).
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-034 | For any parent environment, the constructed child env key set equals the per-side allowlist (case-dependent keys aside) | Go property test (testing/quick)-style table test with randomized parent envs |
-| VP-034 | No forbidden key (proxy, PYTHON* except PYTHONPATH, GP-1..GP-4, DGX_* on Go side) appears in any child env | table test + probe child |
+| VP-034 | No forbidden key (proxy, PYTHON* except PYTHONPATH and the Windows OD-183 variable, GP-1..GP-4, DGX_* on Go side) appears in any child env, and the Windows oracle child carries exactly that one extra variable (`PYTHONIOENCODING=utf-8`) | table test + probe child |
 
 ## Traceability
 

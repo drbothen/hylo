@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.2"
+version: "1.0.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -10,7 +10,7 @@ inputs:
   - behavioral-contracts/BC-ALLOCATION.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md
-input-hash: "59089af"
+input-hash: "d788bd5"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces CPython mixed int/float coercion behind legacy/dgx_statusline.py arithmetic: SL:435, 599, 882-885, 919)"
@@ -25,6 +25,7 @@ modified:
   - "2026-11-18T01:42:00Z (1.0.0) new contract (ADV-P3-D08): mixed int/float Num semantics — float(int) conversion with ErrOverflow, true division, exact comparison, Max/Min exact tie-breaks"
   - "2026-11-18T22:00:00Z (1.0.1) ADV-P4 remediation D15+D16 — ErrZeroDivision for ANY zero divisor (float zero included, CPython-verified); NumCmp NaN verdict (unordered → 0) and Max/Min Python-derivation formulas; Inv 3 rewritten (cross-multiplication, no quotient); phantom NumToInt64Aware name dropped from EC-011"
   - "2026-11-18T23:45:00Z (1.0.2) ADV-P5 remediation D09+D27 — relational helpers NumLT/NumLE/NumGT/NumGE/NumEQ/NumNE added (PC 3b: any NaN operand → false except NumNE); NumCmp narrowed to ordered operands; Inv 1 mandates the helpers at every cross-kind comparison site (SL:254 case pinned EC-014); TrueDiv precedence pinned: dividend overflow precedes zero-divisor check (10**400 / 0.0 → OverflowError, EC-013)"
+  - "2026-11-19T03:50:00Z (1.0.3) ADV-P6 remediation D09+D18 — NumCmp error return specified: total, nil on every path (PC 3), so Max/Min NaN folds cannot error (PC 4); TrueDiv EC-005 rationale corrected — int/int operands are never converted (float(10**310) itself raises; the overflow is a quotient-range error, measured under CPython 3.11.7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,8 +71,11 @@ OD-141. ADV-P3-D08 disposition.
    - int/int: exact rational quotient correctly rounded to the nearest float64 — operands are NOT first
      truncated to float64; the division is computed on the exact rational and rounded once (`10**400 / 10**300`
      is `1e+100`, `1 / 3` is `0.3333333333333333`). `OverflowError` (`ErrOverflow`) when the correctly rounded
-     result exceeds the float64 range (`10**310 / 3` raises even though both operands convert individually —
-     verified: the operand-range rule of PC 1 does NOT apply to the quotient's computation). `b == 0` → typed
+     result exceeds the float64 range (`10**310 / 3` raises with the quotient out of
+     float64 range — the dividend itself is NOT individually convertible, `float(10**310)`
+     raises per PC 1, but int/int division computes on the exact rational and never
+     converts its operands; CPython's message is `integer division result too large for
+     a float`, a quotient-range error, ADV-P6-D18). `b == 0` → typed
      `ErrZeroDivision` (CPython `ZeroDivisionError`).
    - mixed (int op float, float op int, float/float): the int operand is converted per PC 1 first (possible
      `ErrOverflow`), then IEEE-754 division (`10**310 / 1e300` raises `ErrOverflow` from the operand
@@ -85,8 +89,11 @@ OD-141. ADV-P3-D08 disposition.
 3. **NumCmp (exact comparison):** int-vs-float comparison is performed on exact values — the int is never
    rounded to float64 first. Observable at 2^53: `(2**53 + 1) > 9007199254740992.0` is true and
    `(2**53 + 1) == 9007199254740992.0` is false (a rounding conversion would collapse both). Bool
-   `Num`s compare as 0/1. **NaN (unordered) verdict (ADV-P4-D16, narrowed by ADV-P5-D09):** when either
-   operand is NaN, `NumCmp`'s `-1/0/1` verdict is `0`, but `NumCmp` is defined **only for ordered
+   `Num`s compare as 0/1. **NaN (unordered) verdict (ADV-P4-D16, narrowed by ADV-P5-D09, error
+   return specified ADV-P6-D09):** when either
+   operand is NaN, `NumCmp`'s `-1/0/1` verdict is `0`, and its `error` result is nil on EVERY
+   path — `NumCmp(a, b) (int, error)` is total and never errors, on NaN or otherwise; but `NumCmp` is
+   defined **only for ordered
    operands**: contract-carrier of comparison SEMANTICS moves to the relational helpers of PC 3b, which
    every cross-kind comparison site must use; derived operators written over `NumCmp` alone
    (`NumCmp(a, b) >= 0` for `>=`, etc.) are NOT Python-conformant for NaN operands and must not appear at
@@ -106,7 +113,9 @@ OD-141. ADV-P3-D08 disposition.
    `Min(-(2**53) - 1, -9007199254740992.0)` returns the int `-9007199254740993`. The int-versus-float kind of
    the winner is preserved (serialization differs: `1` vs `1.0`, BC-5.02.006 EC-004). NaN folds into the
    "else a" arm, deriving CPython exactly (verified `python3 -I`): `max(1, nan) == 1`, `max(nan, 1) == nan`,
-   `min(1, nan) == 1`, `min(nan, 1) == nan` (ADV-P4-D16).
+   `min(1, nan) == 1`, `min(nan, 1) == nan` (ADV-P4-D16). The `NumCmp` error result is nil on every
+   path (PC 3), so a NaN fold cannot break `Max(0, NaN)`: the verdict is `0`, the else-arm picks `a`,
+   and no error surfaces (ADV-P6-D09: the formerly unspecified error return).
 5. All helpers are pure and deterministic; expectations generated from CPython 3.11.7 (`python3 -I` verified
    2026-11-18, ADV-P3-D08) under the OD-104 oracle discipline.
 
@@ -131,7 +140,7 @@ OD-141. ADV-P3-D08 disposition.
 | EC-002 | `NumToF(2**1024 - 2**970 - 1)` | `DBL_MAX` exactly (`1.7976931348623157e+308`) |
 | EC-003 | `f"{10**400:.0f}"` shape: format a 401-digit int as `.0f` via float conversion | `ErrOverflow` → the site degrades (SL:599 shape) |
 | EC-004 | `TrueDiv(10**400, 10**300)` | `1e+100` (int/int exact, no operand conversion) |
-| EC-005 | `TrueDiv(10**310, 3)` | `ErrOverflow` (quotient out of float64 range; operands individually convertible) |
+| EC-005 | `TrueDiv(10**310, 3)` | `ErrOverflow` (quotient out of float64 range; the int/int path never converts its operands — `float(10**310)` would itself raise, ADV-P6-D18) |
 | EC-006 | `TrueDiv(10**310, 1e300)` | `ErrOverflow` (mixed: the int operand fails PC-1 conversion) |
 | EC-007 | `TrueDiv(1, 3)` | `0.3333333333333333` |
 | EC-008 | `NumCmp(2**53 + 1, 9007199254740992.0)` | `1` (greater; rounding conversion would say 0) |
@@ -162,7 +171,7 @@ All values verified 2026-11-18 against CPython 3.11.7 with `python3 -I` (ADV-P3-
 |--------|----------|-------------|
 | VP-023 | `NumCmp(a, b)` agrees with the CPython oracle comparison for all int/float pairs in the generated boundary table (2^-10 around 2^53 and 2^63) | CPython oracle table |
 | VP-023 | `TrueDiv(int,int)` equals `Fraction(a,b)` rounded once to float64 (CPython `long_true_divide`) on 2M random samples plus EC-004/005 boundaries | Go property test (testing/quick) + oracle |
-| VP-023 | `NumToF` raises `ErrOverflow` exactly at the `|n| >= 2**1024 - 2**970` bound | Go property test over the bound neighborhood |
+| VP-023 | `NumToF` raises `ErrOverflow` exactly at the `\|n\| >= 2**1024 - 2**970` bound | Go property test over the bound neighborhood |
 
 ## Traceability
 

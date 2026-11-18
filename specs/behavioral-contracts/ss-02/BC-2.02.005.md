@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T11:45:00Z
@@ -11,7 +11,7 @@ inputs:
   - owner-decisions-log-2026-11-14.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "720fc73"
+input-hash: "10a26f4"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; legacy URL handling at legacy/dgx_statusline.py SL:73, SL:165-187)"
@@ -22,7 +22,8 @@ parity_class: D4-EX-3
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: []
+modified:
+  - "2026-11-19T04:40:00Z (1.2.1): ADV-P6 remediation D19 — PC-4 pins the empty-host test: Go's u.Host after net/url.Parse (a port-only form http://:8428 has Host == :8428, is accepted, and builds a query URL with an empty hostname), resolving the Hostname()-vs-Host ambiguity"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,7 +58,11 @@ BC-2.02.001 with `<key>` = `backends[0].metrics_url`):
    `192.0.2.10:8428` (no scheme), `ftp://...`, `file:///...`, `unix:///...`.
 3. Go `net/url.Parse` fails (e.g. a non-numeric port `http://h:abc`, a bad escape `%zz`)
    → `(not a URL)`.
-4. The parsed host is empty (`http://`, `http:///path`) → `(missing host)`.
+4. The parsed host is empty (`http://`, `http:///path`) → `(missing host)`. "Host is
+   empty" means Go's `u.Host` is empty after `net/url.Parse` — a port-only form such as
+   `http://:8428` HAS `u.Host == ":8428"` and is therefore NOT missing-host: it is
+   accepted with `Hostname() == ""` (kept as given minus trailing slashes; the query URL
+   then has an empty host, exactly what the stored value builds — ADV-P6-D19).
 5. Otherwise the value is accepted and stored with all trailing `/` removed (legacy
    `rstrip("/")`, SL:73). Path, port and query parts are kept as given; the query URL is
    `<stored>/api/v1/query?query=<encoded>` (SL:165).

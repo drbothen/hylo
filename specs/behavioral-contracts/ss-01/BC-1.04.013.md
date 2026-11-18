@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.4"
+version: "1.3.5"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T06:25:00Z
+timestamp: 2026-11-18T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "6e32f96"
+input-hash: "ff09775"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:main (SL:1217-1227)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-13 (request count counts redirect hops)", "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-16 (bool-is-a-number semantics on dgx_mtok: True kept; False none)", "1.3.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.3.4 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — history re-spun version-first and re-dated ascending; comma removed from the 1.3.2 flow element; no behavioral change"]
+modified: ["1.3 2026-11-17: pass-2 remediation ADV-P2-C2-02 (NaN dgx_mtok passthrough)", "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-13 (request count counts redirect hops)", "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-16 (bool-is-a-number semantics on dgx_mtok: True kept; False none)", "1.3.3 2026-11-18: pass-4 residual sweep — D4-EX-3 table-test name canonicalized to TestD4EX3_* (ADV-P4-D22)", "1.3.4 2026-11-18: pass-5 residual sweep (ADV-P5-B14) — history re-spun version-first and re-dated ascending; comma removed from the 1.3.2 flow element; no behavioral change", "1.3.5 2026-11-18: pass-6 remediation ADV-P6-C2-14 (inserted id EC-006b renumbered to EC-010, row moved after EC-009; append-only numbering; no other change)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -76,10 +76,10 @@ MTok and the monthly-volume basis guard). With rows below 2 no sample is obtaine
 | EC-004 | rows 3, cols 60 | row 2 shown (then trimmed by BC-1.01.006) |
 | EC-005 | rows 1 | no fetch; cache gains no `fetch_ts` from this step |
 | EC-006 | `dgx_cost:dgx_usd_per_mtok` = 0, -1, or a string | `dgx_mtok` none |
-| EC-006b | `dgx_cost:dgx_usd_per_mtok` = NaN | `dgx_mtok` stays NaN (raw); ⛏ then renders `⛏n/a` (BC-1.05.003 EC-005) |
 | EC-007 | `dgx_tokens:rate_mtok_month` = NaN | passed raw as NaN |
 | EC-008 | sample none (dead) | `dgx_mtok = dgx_rate = none`; row 2 = `◌ DGX ?` when shown |
 | EC-009 | rows value `2_0` (legacy parsed it as 20 and forced row 2) | not reproduced: approved deviation D4-EX-3 — config error line, no cache writes (BC-2.02.003); OD-105 exclusion entry `D4-EX-3`, dedicated test `TestD4EX3_Number` |
+| EC-010 | `dgx_cost:dgx_usd_per_mtok` = NaN | `dgx_mtok` stays NaN (raw); ⛏ then renders `⛏n/a` (BC-1.05.003 EC-005) (ADV-P6-C2-14: renumbered from the inserted id EC-006b; append-only numbering) |
 
 ## Canonical Test Vectors
 

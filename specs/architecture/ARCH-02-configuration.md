@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: "L3"
 section: "configuration"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
-timestamp: 2026-11-17T22:30:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "69fc7fe"
+input-hash: "c1f2422"
 
 ---
 
@@ -56,9 +56,9 @@ drawn in ARCH-00's dependency graph; pyfmt and platform remain the two sinks.
   **registry order** on stdout, full list + `[from <ENVNAME>]` on stderr, and **no cache
   writes** (BC-2.02.001; OD-102).
 - **Rationale:** closed registry makes the valid domain of every key enumerable and the
-  error set closable at six classes (number-range, number-grammar, enum, URL, boolean,
-  theme/SGR — OD-114/OD-134/OD-140). The register being closed, a seventh class needs an
-  owner decision.
+  error set closable at SEVEN classes (number-range, number-grammar, enum, URL, boolean,
+  theme/SGR, text — OD-114/OD-134/OD-140; the seventh Text class closed by OD-178,
+  pass-6 A01). The register being closed, an eighth class needs an owner decision.
 - **Consequences:** every threshold row of P4r7 §B.2.1 becomes a registry entry; two
   documented default exceptions to "defaults equal legacy": `paths.cache_dir` (OD-101)
   and `backends[0].model_prefixes` = `claude-sonnet` (OD-111/OD-123). Per OD-162 every
@@ -81,9 +81,13 @@ type Config struct{ Statusline Statusline; Cost Cost; Paths Paths; Backends []Ba
 // Load returns the FULL ordered error list in stable registry order (ADV-P2-A01):
 // the stdout line renders Errors.First(), the full list goes to stderr
 // (BC-2.02.001), and `config validate` prints one plain line per error (E-VAL-001,
-// BC-2.03.001) — a single *Error cannot carry either.
-func Load(opts LoadOptions) (*Config, *ErrorSet) // P1: env -> defaults
+// BC-2.03.001) — a single *Error cannot carry either. Warnings (unknown HYLO_*
+// settings) come back ordered ahead of the errors; the CALLER (Main, `config
+// validate`) prints them BEFORE any load error on stderr, exit status untouched —
+// "warning first, then load error" (BC-2.01.001 PC-6/Inv-3; pass-6 A08, call 9).
+func Load(opts LoadOptions) (*Config, []Warning, *ErrorSet) // P1: env -> defaults
 func EnvName(key string) string                  // OD-01, collision-tested
+type Warning struct{ Key, EnvName string } // unknown-setting warning (BC-2.01.001 PC-6)
 type Error struct{ Key, Value, Reason, EnvName string }
 type ErrorSet struct{ Errors []Error } // registry-ordered
 func (es *ErrorSet) First() *Error     // highest-precedence error, first in registry order (nil-safe)
@@ -113,7 +117,7 @@ Skeleton obligations for later phases: `LoadOptions.FileLayer` extension point (
 ## Fragment anchors (pass-4 A01; stable targets for BC-body fragment links)
 
 BC bodies link fragments like `architecture/ARCH-02-configuration.md#registry`; the
-eleven anchors below are the complete, closed set for this section — new BC fragment
+twelve anchors below are the complete, closed set for this section — new BC fragment
 links must target one of these.
 
 <a id="registry"></a>
@@ -127,6 +131,7 @@ links must target one of these.
 <a id="url"></a>
 <a id="classes"></a>
 <a id="theme"></a>
+<a id="text"></a>
 
 | Anchor | Target |
 |---|---|
@@ -135,12 +140,13 @@ links must target one of these.
 | `#load` | `Load` in the Interfaces block (full ordered error list, ADV-P2-A01) |
 | `#backends` | the "Backends" paragraph (exactly-one-entry cardinality, OD-123) |
 | `#errors` | the D4-EX-3 config-error line decision (first error in registry order on stdout, full list + `[from <ENVNAME>]` on stderr, no cache writes) |
-| `#seconds` | the Seconds grammar class (BC-2.02.002) inside the closed six-class register |
+| `#seconds` | the Seconds grammar class (BC-2.02.002) inside the closed seven-class register |
 | `#numbers` | the number-grammar/number-range classes (BC-2.02.002/.003) |
 | `#enum` | the enum class (BC-2.02.004) |
 | `#url` | the URL class (BC-2.02.005) |
-| `#classes` | the boolean class and the closed six-class register as a whole (BC-2.02.006; theme/SGR validation per OD-113/OD-134) |
+| `#classes` | the boolean class and the closed seven-class register as a whole (BC-2.02.006; theme/SGR validation per OD-113/OD-134) |
 | `#theme` | `statusline.theme.*` SGR key validation (OD-113/OD-134) in the Backends paragraph |
+| `#text` | the Text class (BC-2.01.005, OD-178) — composite-shape, pill-label, glyph and empty-text errors from registry-declared keys, exact reason strings in the taxonomy vocabulary. Text keys have no legacy analog, so `TestD4EX3_Text` is a Go table test only, not a parity exclusion entry (pass-6 A01, call 1) |
 
 ## Mapping
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T18:40:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "c2f799c"
+input-hash: "bd55d2b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_finish_turn, _mix_counts (SL:988-996, 1073-1079, 1150-1153)"
@@ -19,7 +19,9 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: dropped uncited DI-012 (byte-exact, no exclusion entry; ADV-P2-C11)"]
+modified:
+  - "1.2.1 2026-11-17: dropped uncited DI-012 (byte-exact, no exclusion entry; ADV-P2-C11)"
+  - "1.2.2 2026-11-19T14:00:00Z: pass-6 residual sweep (ADV-P6-A2-07) — Decisions row states both amended OD-32 conditions (numeric cur.t0 AND non-numeric cur.out, BC-1.03.020)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -95,7 +97,7 @@ legacy oracle (hylo must produce identical bytes).
 | Source | legacy/dgx_statusline.py:_finish_turn (SL:988-996), _mix_counts (SL:1073-1079, 1150-1153) |
 | Legacy contract | BC-SL-103 (pass-3 r4 §1.2; confirmed r5) |
 | Parity class | byte-exact (design §8: BX, OD-32) |
-| Decisions | OD-32 (amended: rule only when `t0` is numeric); ruling b (exact cache format) |
+| Decisions | OD-32 (amended: the reader rule fires only when `cur.t0` is numeric AND `cur.out` is non-numeric — both conditions, BC-1.03.020); ruling b (exact cache format) |
 | Architecture Module | `internal/statusline/mixcache.go`, `transcript_turn.go` |
 | Stories | S-TBD |
 

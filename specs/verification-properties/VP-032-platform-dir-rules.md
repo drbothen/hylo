@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T09:22:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-05-platform.md, behavioral-contracts/ss-03/BC-3.01.001.md, behavioral-contracts/ss-02/BC-2.03.002.md, owner-decisions-log-2026-11-14.md]
-input-hash: "65c2fc6"
+input-hash: "e8f096c"
 traces_to: prd.md
 source_bc: BC-3.01.001
 bcs: [BC-3.01.001, BC-2.03.002]
@@ -70,6 +70,7 @@ this resolution.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestPaths_XDGAndLocalappdataRules(t *testing.T) {
     for _, tc := range PathEnvMatrices {

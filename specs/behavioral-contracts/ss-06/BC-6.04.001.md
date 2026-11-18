@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T13:05:00Z
@@ -13,7 +13,7 @@ inputs:
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
   - CLAUDE.md
-input-hash: "6737e0c"
+input-hash: "b5ddad6"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -25,9 +25,10 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2.1 2026-11-17: VP citation reconciliation — VP-010 added"
-  - "1.2.2 2026-11-18: ADV-P4 remediation D08 - setup-python reordered BEFORE go test (Tier A cannot skip under CI=true; aligns with ARCH-08)"
-  - "1.2.3 2026-11-18: pass-4 sync-check SC-08 — converted the mixed flow/block modified history to uniform block style (the mix broke YAML parsing); no behavioral change"
+  - "2026-11-17T00:00:00Z (1.2.1): VP citation reconciliation — VP-010 added"
+  - "2026-11-18T00:00:00Z (1.2.2): ADV-P4 remediation D08 - setup-python reordered BEFORE go test (Tier A cannot skip under CI=true; aligns with ARCH-08)"
+  - "2026-11-18T12:00:00Z (1.2.3): pass-4 sync-check SC-08 — converted the mixed flow/block modified history to uniform block style (the mix broke YAML parsing); no behavioral change"
+  - "2026-11-19T03:35:00Z (1.2.4): ADV-P6 remediation D16/OD-185 — PC-3.3 gains the Tier A oracle self-check: the harness measures the resolved oracle's JSON depth boundaries and unicodedata.unidata_version at start and fails closed on mismatch (constants measured on 3.11.7; OD-185), printing the resolved patch; setup-python keeps installing floating 3.11.x"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,7 +74,11 @@ gitleaks scans the full history. The workflow is gating: any red leg blocks the 
       `HYLO_PARITY_PYTHON` (OD-108), with `CI=true`, so Tier A cannot skip
       (BC-6.01.001 PC-6) when the test step below runs it — setup-python must precede
       `go test ./...` or every leg fails (ADV-P4-D08, aligning this BC with ARCH-08's
-      corrected order). The clock-shim canary runs first (BC-6.01.003).
+      corrected order). The clock-shim canary runs first (BC-6.01.003), then the
+      OD-185 oracle self-check: the harness measures the resolved oracle's JSON depth
+      boundaries and `unicodedata.unidata_version` (constants measured on 3.11.7,
+        floating 3.11.x install) and fails closed on any mismatch, printing the
+      resolved version (BC-6.01.001 PC-4).
    4. `go test ./...`, which includes Tier A (live differential, now with
       `HYLO_PARITY_PYTHON` set), the Tier B goldens (BC-6.03.001), the exclusion
       table tests (BC-6.03.004) and the corpus hygiene test (BC-6.02.001). Linux and

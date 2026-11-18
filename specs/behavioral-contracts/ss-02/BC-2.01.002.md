@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -13,7 +13,7 @@ inputs:
   - domain-spec/ubiquitous-language.md
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions-r3.md
-input-hash: "090b47c"
+input-hash: "af0ed3c"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield; replaces legacy DGX_SL_VM_URL at SL:73 and LOCAL_MODEL_PREFIXES at SL:444-445, 902-903)"
@@ -25,8 +25,9 @@ confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.2.3 2026-11-18: ADV-P4 remediation D27 — second LOCAL_MODEL_PREFIXES read site SL:902-903 cited; BC-1.07.006 consumer listed"
+  - "2026-11-18T23:00:00Z (1.2.3): ADV-P4 remediation D27 — second LOCAL_MODEL_PREFIXES read site SL:902-903 cited; BC-1.07.006 consumer listed"
   - "2026-11-19T01:00:00Z (1.2.4) ADV-P5 remediation D31 — cardinality counts distinct REPRESENTED indices (a set HYLO_BACKENDS_0_* no longer double-counts); [from] tie-break redefined as the lexicographically smallest FIELD, defined for non-P1 fields"
+  - "2026-11-19T04:30:00Z (1.2.5) ADV-P6 remediation D04 — VP-016 row restated: the backends-cardinality reason rides the closed SEVEN-class register (OD-178); no eighth class"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -132,7 +133,7 @@ metrics store the backend telemetry strip queries; legacy `DGX_SL_VM_URL`) and
 |--------|----------|-------------|
 | VP-017 | Successful `Load` ⇒ exactly one backend entry | Go property test (testing/quick) over env maps |
 | VP-017 | `metrics_url` stored value never ends with `/` | Go property test (testing/quick) |
-| VP-016 | The backends-cardinality reason rides the closed six-class register (no seventh class): exact one-line E-CFG-001 stdout, exit 0, no cache writes (vector 3) | table test (class register) |
+| VP-016 | The backends-cardinality reason rides the closed SEVEN-class register (OD-178; no eighth class): exact one-line E-CFG-001 stdout, exit 0, no cache writes (vector 3) | table test (class register) |
 
 ## Traceability
 

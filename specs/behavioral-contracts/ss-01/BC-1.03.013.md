@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "6ff22b8"
+input-hash: "6a5b563"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1016-1017; _MIX_CACHE SL:951)"
@@ -22,6 +22,7 @@ introduced: "0.1"
 modified:
   - "1.3 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C12) — `日本` row promoted to the canonical vectors as the per-code-point discriminator; EC-002 corrected (per-byte gives 100, masked by truncation) and EC-002/EC-006 remarks aligned"
   - "1.3.1 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — frontmatter YAML repaired (stray leading comma removed from the modified list); no behavioral change"
+  - "1.3.2 2026-11-19T03:00:00Z: pass-6 remediation (ADV-P6-C09 / call 12) — Inv3 points to `pyfmt.SubNonWord` over Value code points (BC-5.03.003), never plain rune iteration (WTF-8 surrogate bytes would give three RuneErrors, not one `_`)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +60,10 @@ scope).
 
 1. The substitution happens before truncation (so multi-byte characters never produce more than one `_` each).
 2. The session cache (`statusline-<sid>.json`) uses the **raw** sid, not this sanitized form (OD-03; BC-1.06.001).
-3. The regex is RE2-safe; Go must iterate runes, never bytes.
+3. The regex is RE2-safe; Go iterates code points via `pyfmt.SubNonWord` over the decoded `Value` (BC-5.03.003
+   PC1: every code point outside `A-Za-z0-9_-` becomes one `_`), never plain `range` rune iteration — a plain
+   range over WTF-8 surrogate bytes (`ED A0 80`) yields three `RuneError`s, which would give `___` where the
+   contract pins one `_` (BC-1.03.013 PC2; ADV-P6-C09 / call 12).
 
 ## Edge Cases
 

@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "data-files"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
-timestamp: 2026-11-18T07:00:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "fea48f5"
+input-hash: "e1dae94"
 ---
 
 # ARCH-04 — Data files: cache dir, atomic writes, reserved ledger
@@ -59,15 +59,23 @@ tests):
   hit sharing violations (RK-3).
 - **Options considered:** (1) replica leaks temps like legacy; (2) Go cleans up temps.
 - **Option 2.** `os.CreateTemp(dir, base+".")`, chmod 0600, write, `os.Rename`; Go
-  removes the temp on failure; exactly `renameRetryLimit = 2` retries on Windows
-  sharing violations, `renameRetryDelay = 10 ms` fixed sleep between attempts (design
-  doc §4b; rationale under Policy 16 below).
-- **Rationale:** stdout parity is unaffected; the difference is the ruled temp-file
-  exclusion (OD-110), excluded only from the cache-file comparison (BC-6.03.003).
+  removes the temp on failure; on Windows sharing violations the INITIAL rename attempt
+  plus `renameRetryLimit = 2` retries — three attempts in total, the one consistently
+  stated count (VP-018's fails = limit+1 = 3; pass-6 A09, ruling OD-186) — sleeping
+  `statusline.cache.rename_retry_delay_ms` between attempts (registry key, Int,
+  default 10, range 1..1000, rationale code J — judgment call; D15: the timing value
+  moves out of the code literal into the registry, OD-186).
+- **Rationale:** stdout parity is unaffected; the Windows retry can PERSIST a cache
+  write legacy (no retry, IM-17) would not — that byte divergence is covered by
+  WIDENING the ruled `temp-file` exclusion's scope BY RULING (OD-186: temp names and
+  cleanup AND the Windows sharing-violation rename-retry outcome), excluded only from
+  the cache-file comparison (BC-6.03.003).
   Retry constants (Policy 16): `renameRetryLimit = 2` is exactly what VP-018 pins
-  (`renameRetryLimit`, derived: two attempts cover the transient sharing violation a
+  (`renameRetryLimit`, derived: the initial attempt plus two retries cover the
+  transient sharing violation a
   live antivirus/indexer hold leaves on the just-written temp — more retries cannot
-  shrink that window further on a sub-second refresh, RK-3); `renameRetryDelay = 10 ms`
+  shrink that window further on a sub-second refresh, RK-3);
+  `statusline.cache.rename_retry_delay_ms` default 10 ms
   is a labeled judgment call (J, RK-3 carries no timing data): far below the 25 ms p95
   render budget, above scheduler noise, outlasting typical transient holds.
 - **Verification feasibility:** fault-injection table tests (failed rename, closed dir,
@@ -79,7 +87,8 @@ tests):
 Failed or interrupted saves remove **only their own temp** — the exact path
 `os.CreateTemp` returned, removed on the failure path and nonexistent after a
 successful rename (difference from legacy, named exclusion `temp-file` in the closed
-set, comparison carve-out per BC-6.03.003). **No sweeping** (OD-163): a Save never
+set — scope widened by ruling OD-186 to cover the Windows sharing-violation
+rename-retry outcome, pass-6 A09 — comparison carve-out per BC-6.03.003). **No sweeping** (OD-163): a Save never
 scans for or deletes other temps, regardless of age or name. Several Claude Code
 windows render concurrently and share `cost-history.json` and the caches, so one
 process's Save must never delete another process's in-flight temp — the pass-2 defect
@@ -97,6 +106,8 @@ places no ledger code and defines no ledger types. REVISIT flag at P7 per OD-125
 
 ## Mapping
 
-BC-1.06.001/.002 -> `cache.go`; BC-1.02.013/.005 git cache; BC-1.03.002/.013 mix cache;
+BC-1.06.001/.002 -> `cache.go`; BC-1.02.005 -> git cache (BC-1.02.013 rate-limit
+smoothing is a SESSION-cache contract — mis-anchor fixed pass-6 A15; its home is the
+`cache.go` session row, not the git cache); BC-1.03.002/.013 mix cache;
 BC-1.05.004/.006/.009 -> `internal/cost` (ARCH-03 script step 7c); BC-6.02.004 swap
 machinery (ARCH-07); BC-3.01.001 dir resolution (ARCH-05).

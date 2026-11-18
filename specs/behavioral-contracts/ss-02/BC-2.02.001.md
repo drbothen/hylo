@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - domain-spec/invariants.md
-input-hash: "8c12aa0"
+input-hash: "3f24c18"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py (SL:73-100 import-time tunables)"
@@ -26,9 +26,10 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "2026-11-18T01:42:00Z ADV-P3 remediation D18+D32: subagent-mode config error = zero bytes stdout + stderr detail + exit 0 (OD-168); [from ENVNAME] rule covers indexed entries and defaults layer"
-  - "1.2.2 2026-11-18T22:00:00Z: pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
+  - "2026-11-18T22:00:00Z (1.2.2): pass-4 correction (item 10) - exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
   - "2026-11-19T00:45:00Z (1.2.3) ADV-P5 remediation D05 + OD-178 — reason vocabulary gains the four Text-class strings (composite shape, pill-label width, glyph 1-code-point/1-column, general non-empty control-free text); class register closed at SEVEN classes with Text minted by OD-178; canonical D4-EX-3 test list is the five names incl. TestD4EX3_Text"
-  - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
+  - "2026-11-19T02:00:00Z (1.2.4): sync-check adv-p5 closure (SC-20) — modified history re-ordered chronologically; no behavioral change"
+  - "2026-11-19T04:35:00Z (1.2.5) ADV-P6 remediation D12+D13+D14 — PC-6 [from] tie-break restated to ADV-P5-D31 (lexicographically smallest FIELD, no registry order); Refactoring Notes seam restated: Load receives the environment only through platform.EnvVars (call 9), never a raw Go map; class-count paragraph scoped to the parity half (five TestD4EX3 members; theme rejected by the validator; TestD4EX3_Text is a Go table test backing no parity entry; Text reasons minted in BC-2.01.005/2.02.003 with no separate class contract)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,7 +83,8 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
    `hylo: config error: <key>=<value> (<reason>) [from <ENVNAME>]\n`, where `<ENVNAME>` is
    the `HYLO_*` variable that actually supplied the value: `EnvName(key)` for scalar keys;
    for array keys the indexed indexed-entry form BC-2.01.002 pins (lowest extra index,
-   tie-broken by registry field order, e.g. `HYLO_BACKENDS_1_METRICS_URL` — the `EnvName`
+   tie-broken by the lexicographically smallest `<FIELD>` name byte-exact — non-P1 fields
+   have no registry order, ADV-P5-D31; ADV-P6-D12, e.g. `HYLO_BACKENDS_1_METRICS_URL` — the `EnvName`
    of the key alone does not fit these entries, ADV-P3-D32); no `[from ...]` suffix when
    the failing value came from the defaults layer. stderr is not part of the parity
    comparison; it is asserted by Go table tests only.
@@ -116,14 +118,21 @@ reason vocabulary that the class contracts BC-2.02.002..006 and BC-2.01.002/003/
 | `home directory unknown` | path | BC-2.01.005 |
 | `expected JSON <shape>` | text (composite shape) | BC-2.01.005 (PC 5; `<shape>` spells the key's declared shape, e.g. `array of 2 numbers`) |
 | `expected non-empty control-free text of display width 1..16` | text | BC-2.01.005 (PC 6, pill-label keys) |
-| `expected exactly 1 code point and 1 display column` | text (glyph) | BC-2.01.005 (PC 6, glyph-family keys; BC-2.01.004 PC-6/PC-9) |
+| `expected exactly 1 code point and 1 display column` | text (glyph) | BC-2.01.005 (PC 6, glyph-family keys; BC-2.01.004 PC-6/PC-9; fixed vocabulary — the enforced rule is the OD-184 code-point count, sparkline 8) |
 | `expected non-empty control-free text` | text | BC-2.01.005 (PC 6, other Text keys) |
 | `exactly one backend entry until P6` | backends | BC-2.01.002 |
 
 Class-count reconciliation (ADV-P1-D33, mirrored from error-taxonomy.md; the seventh class
-minted by owner ruling OD-178, ADV-P5-D05): the class register is closed at exactly SEVEN
-classes with dedicated class contracts and D4-EX-3 table tests — number-range,
+minted by owner ruling OD-178, ADV-P5-D05; parity-half scope per ADV-P6-D14 / orchestrator
+call 1): the class register is closed at exactly SEVEN
+classes — number-range,
 number-grammar, enum, URL (OD-114), theme (OD-134), boolean (OD-140) and **Text** (OD-178).
+Of these, five have a parity D4-EX-3 table-test member (`TestD4EX3_{Number,Boolean,URL,Enum,Text}`);
+theme has none (theme settings are rejected by the corpus validator, so no parity case can
+exist) and Text's parity half is the GO TABLE TEST ONLY — `TestD4EX3_Text` backs no parity
+exclusion entry (Text keys have no legacy analog). Dedicated CLASS CONTRACTS exist for the
+numeric/enum/URL/theme/boolean classes (BC-2.02.002..006); the Text class's reasons are
+minted in BC-2.01.005/BC-2.02.003 with no separate BC-2.02.00x contract (OD-178 disposition).
 The Text class carries the composite-shape, pill-label, glyph and empty-text errors: the
 four `expected ...` reasons in the table above. The
 `path` and `backends` columns above are reason categories without dedicated class contracts;
@@ -254,5 +263,7 @@ S-TBD — config subset + D4-EX-3 (design §4 step S2)
 
 #### Refactoring Notes
 
-`config.Load` takes the environment as a map (seam) so the error set is table-testable
-without a process; `Error.StatusLine()` is pure.
+`config.Load` receives the environment ONLY through `platform.EnvVars` — the
+case-preserving seam of BC-2.01.001 PC-6 (ADV-P5-D25; orchestrator call 9 fixes the seam
+name `EnvVars`, not `Environ`) — never over a raw injected Go map; that is what makes the
+error set table-testable without a process. `Error.StatusLine()` is pure.

@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T23:45:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-01-binary-cli.md, behavioral-contracts/ss-04/BC-4.01.002.md, domain-spec/invariants.md, owner-decisions-log-2026-11-14.md]
-input-hash: "870f32d"
+input-hash: "b2c9f30"
 traces_to: prd.md
 source_bc: BC-4.01.002
 bcs: [BC-4.01.002, BC-4.01.001, BC-1.07.001]
@@ -89,6 +89,7 @@ config resolution (E-CLI-001 outranks E-CFG-001); stdlib `flag` with `ExitOnErro
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestStatusline_UnknownFlag(t *testing.T) { // BC-4.01.002 named test
     for _, argv := range [][]string{

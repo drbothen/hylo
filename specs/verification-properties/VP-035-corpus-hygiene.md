@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-11-18T09:10:00Z
+timestamp: 2026-11-19T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-07-parity-harness.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.02.001.md, prd-supplements/nfr-catalog.md]
-input-hash: "89fd12d"
+input-hash: "07e1432"
 traces_to: prd.md
 source_bc: BC-6.02.001
 bcs: [BC-6.02.001, BC-6.04.001]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:10:00Z: ADV-P3 fixes (A2-06) — provenance test asserts a non-zero computed fixture count and logs “N fixtures validated” (POL-11)"]
+modified: ["1.1 2026-11-18T09:10:00Z: ADV-P3 fixes (A2-06) — provenance test asserts a non-zero computed fixture count and logs “N fixtures validated” (POL-11)", "1.2 2026-11-19T12:00:00Z: pass-6 fixes (A2-27, A2-21: the provenance walk covers every committed testdata tree (statusline/config/pyfmt/cmd-hylo); planted-canary self-test for the scan leg)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -34,7 +34,9 @@ removal_reason: null
 
 ## Property Statement
 
-Every committed fixture under `internal/statusline/testdata/` is synthetic; the
+Every committed fixture in every committed testdata tree —
+`internal/statusline/testdata/`, `internal/config/`, `internal/pyfmt/testdata/` and
+`cmd/hylo/` (A2-27) — is synthetic; the
 owner's real inputs exist only as git-ignored copies under `captures/` (OD-107) and are
 never committed; `gitleaks detect --source . --log-opts="--all"` plus the category
 pattern scan are clean on every push and CI leg. `TestCorpusHygiene` enforces the
@@ -61,15 +63,19 @@ committed-corpus provenance in-tree.
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Provenance test | `TestCorpusHygiene` | yes — testdata tree | synthetic markers, no committed captures |
+| Provenance test | `TestCorpusHygiene` | yes — every committed testdata tree | synthetic markers, no committed captures |
 | Secret scan | gitleaks + category pattern scan | process gate | every push and CI leg |
+| Scan self-test | `TestHygieneScan_PlantedCanary` | 1 canary flagged | the scan leg can check nothing and pass (A2-21) |
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestCorpusHygiene(t *testing.T) {
     n := 0
-    for _, fx := range CommittedFixtures() {
+    for _, fx := range CommittedFixtures() { // A2-27: walks EVERY committed testdata
+        // tree — internal/statusline/testdata/, internal/config/,
+        // internal/pyfmt/testdata/ and cmd/hylo/ — not just the statusline one.
         if !fx.ProvenanceSynthetic() { t.Fatalf("%s: not marked synthetic", fx.Path) }
         n++
     }
@@ -78,6 +84,17 @@ func TestCorpusHygiene(t *testing.T) {
     }
     t.Logf("%d committed fixtures validated", n)
     if committedCapturesExist() { t.Fatal("captures/ content committed") }
+}
+
+func TestHygieneScan_PlantedCanary(t *testing.T) { // A2-21 (P11): the scan leg
+    // self-tests: one synthetic canary string matching the category pattern is
+    // planted in a temp file, and the scanner MUST flag it — a run that scans
+    // nothing cannot pass green (VP-022's planted-mutant discipline).
+    dir := t.TempDir()
+    plantCanary(dir, "hylo synthetic canary key ghp_syntheticCanaryNeverReal0000")
+    if !categoryScanFlags(dir) {
+        t.Fatal("category scan did not flag the planted canary — scan checks nothing")
+    }
 }
 ```
 

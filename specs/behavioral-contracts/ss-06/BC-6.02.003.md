@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T22:00:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - research/general-go-port-parity-crossplatform-2026-11-14.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "e1469f0"
+input-hash: "70c10a9"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (new contract, no legacy source)"
@@ -27,11 +27,12 @@ introduced: "0.1"
 modified:
   - "1.2.1 2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "1.2.2 2026-11-17T22:00:00Z: patch bump: case.json schema gains optional argv (+ subagent case family) per ARCH-07, sync-check SC-03"
-  - "1.2.3 2026-11-18: ADV-P4 remediation D09+D11+D21 - argv minted handler-relative (design call 9, validator admits [] and [\"--subagent\"]); Bool settings translated by value (true=1/false=0); TZ=UTC pinned for both binaries on every leg (OD-171), windows leg unskipped"
-  - "1.2.4 2026-11-18T22:00:00Z: pass-4 correction (item 10) - corpus root restored to the OD-148 home internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
-  - "1.2.5 2026-11-18: pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
+  - "2026-11-18T00:00:00Z (1.2.3): ADV-P4 remediation D09+D11+D21 - argv minted handler-relative (design call 9, validator admits [] and [\"--subagent\"]); Bool settings translated by value (true=1/false=0); TZ=UTC pinned for both binaries on every leg (OD-171), windows leg unskipped"
+  - "2026-11-18T22:00:00Z (1.2.4): pass-4 correction (item 10) - corpus root restored to the OD-148 home internal/statusline/testdata/parity/cases/ (fixtures stay with the subject package)"
+  - "2026-11-18T23:30:00Z (1.2.5): pass-4 sync-check SC-11 — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change"
   - '2026-11-19T00:10:00Z (1.2.6) ADV-P5 remediation D03+D21 — placeholder substitution only inside JSON string values with JSON-escaped path insertion (Windows \U/\t round-trip table test); Bool settings mapped by parsed value through the BC-2.01.005 grammar (operator strings, not JSON literals); outside-grammar Bool verbatim only in D4-EX-3 cases'
-  - "1.2.7 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-15) — 1.2.6 entry requoted single-quoted (the Windows path-escape spelling is not a YAML double-quoted-scalar escape); no behavioral change"
+  - "2026-11-19T02:00:00Z (1.2.7): sync-check adv-p5 closure (SC-15) — 1.2.6 entry requoted single-quoted (the Windows path-escape spelling is not a YAML double-quoted-scalar escape); no behavioral change"
+  - "2026-11-19T03:20:00Z (1.2.8): ADV-P6 remediation D05 / orchestrator call 3 — PC-8 gains the OD-76 disposition: the difference-table rows (America/Chicago repeated-DST hour, identical-row epochs) close the exclusion as Go table tests, never parity corpus cases; the corpus validator keeps rejecting non-UTC tz, so the corpus stays UTC-only"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -159,7 +160,13 @@ directory.
    NO skip (VP-026's `posix-only` tag removed by the architect; superseding the
    ADV-P2-D02 OS restriction). LocalZone's own verdicts (`TZ` unset / `UTC` / IANA name /
    unparseable) are Go table tests of `internal/platform` (BC-3.01.001 PC-6), never
-   corpus cases.
+   corpus cases. The OD-76 difference-table rows — including the America/Chicago
+   repeated-DST hour and the identical-row epochs I1/I2, which are Chicago values
+   (BC-3.02.002 Pre-3, CTV) — close the exclusion as GO TABLE TESTS run under
+   `TZ=America/Chicago`, never parity corpus cases (orchestrator call 3, ADV-P6-D05):
+   the repeated DST hour cannot exist in UTC, the corpus validator rejects non-UTC
+   `tz` values, so the OD-76 closed-set entry's parity half carries no D1 case and the
+   corpus stays UTC-only.
 
 ## Invariants
 

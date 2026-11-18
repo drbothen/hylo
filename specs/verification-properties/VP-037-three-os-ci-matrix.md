@@ -7,7 +7,7 @@ producer: architect
 timestamp: 2026-11-18T09:11:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-08-build-ci-release.md, behavioral-contracts/ss-06/BC-6.04.001.md, prd-supplements/nfr-catalog.md]
-input-hash: "00083a4"
+input-hash: "e523e49"
 traces_to: prd.md
 source_bc: BC-6.04.001
 bcs: [BC-6.04.001]
@@ -70,6 +70,7 @@ validated” count > 0 before passing.
 
 ## Proof Harness Skeleton
 
+*Illustrative sketch (non-normative, not compiled; OD-182).*
 ```yaml
 # ARCH-08 workflow sketch; no in-tree test object — conformance is observational.
 matrix: [ubuntu-24.04, macos-15, windows-2025]

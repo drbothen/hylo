@@ -2,10 +2,10 @@
 artifact_type: bc-allocation
 document_type: bc-allocation
 level: L3
-version: "0.2.7"
+version: "0.2.8"
 status: draft
 producer: product-owner
-timestamp: 2026-11-18T06:25:00Z
+timestamp: 2026-11-19T14:00:00Z
 phase: 1a
 stage: "1 of 3 (allocation only — individual BC files are created in stage 2 by the writer groups)"
 origin: greenfield
@@ -13,7 +13,7 @@ subsystem: register
 capability: register
 lifecycle_status: active
 introduced: "0.1"
-modified: "0.2.7"
+modified: "0.2.8"
 extracted_from: "statusline-target-design.md §8 + hylo-legacy-pass-3-deep-behavioral-contracts-r4.md §7.3"
 deprecated: "n.a."
 deprecated_by: "n.a."
@@ -28,7 +28,7 @@ inputs:
   - semport/hylo-legacy/statusline-target-design.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "358b55e"
+input-hash: "7fca1d0"
 traces_to: ../prd.md
 ---
 
@@ -216,7 +216,7 @@ mkstemp temp handling difference (OD-110); `n.a.` = not ported.
 
 | New BC ID | Title | Legacy | Parity class | Primary source | Conf | Writer |
 |---|---|---|---|---|---|---|
-| BC-1.06.001 | Cache load/save: never-raise, raw sid in file names | BC-SL-052 | byte-exact | SL:190-206; OD-03 | H | E |
+| BC-1.06.001 | Cache load/save: never-raise, raw sid in file names | BC-SL-052 | temp-file | SL:190-206; OD-03 | H | E |
 | BC-1.06.002 | Sid with / : failed replace persists nothing; temp handling | BC-SL-078 | temp-file | SL:198-206; OD-110 | M | E |
 
 ### S1.07 — Subagent panel rows (writer A2, OD-155 revision 2026-11-17)

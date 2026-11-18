@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
-timestamp: 2026-11-18T00:30:00Z
+timestamp: 2026-11-19T04:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "c82dc09"
+input-hash: "3258e18"
 
 ---
 
@@ -39,7 +39,7 @@ input-hash: "c82dc09"
 flowchart LR
     PR["pull_request / push"] --> L["lint: gofmt, vet, staticcheck"]
     L --> M{"matrix:<br/>ubuntu-24.04 / macos-15 (arm64) / windows-2025"}
-    M --> PY["setup-python 3.11.7 EXACT (ASM-001 dual pin) -> absolute path -> HYLO_PARITY_PYTHON<br/>(pass-5 A04: setup-python precedes go generate, so the<br/>staleness step never falls back to PATH Python, OD-104)"]
+    M --> PY["setup-python 3.11.x (floating latest patch, OD-104/OD-185;<br/>harness self-checks measured constants, fail closed on drift) -> absolute path -> HYLO_PARITY_PYTHON<br/>(pass-5 A04: setup-python precedes go generate, so the<br/>staleness step never falls back to PATH Python, OD-104)"]
     PY --> GEN["go generate ./... staleness check: git diff --exit-code (OD-170)<br/>ubuntu-24.04 ONLY — the Windows Tier B leg needs no Python (goldens committed)"]
     GEN --> T["go test -race (Linux/macOS) -count=1 ./... — Tier A included; setup-python BEFORE go test (pass-3 D22, pass-4 D08)"]
     T --> TB["Tier B goldens (no Python needed on Windows leg: committed)"]
@@ -56,10 +56,18 @@ flowchart LR
   `test` job installs setup-python and exports `HYLO_PARITY_PYTHON` BEFORE the
   `go test` step; the plain test step never discovers the interpreter afterwards.
   Alternatively a leg may exclude the Tier A selector from the plain step, but env-first
-  is the designed default. Pin: setup-python installs **3.11.7 exactly** (ASM-001 dual
-  pin, python-version: '3.11.7'), not a floating 3.11.x — the staleness step's
-  regenerated depth/oracle tables must come from the same interpreter the oracle runs
-  under, or the check flaps on patch drift.
+  is the designed default. RULED (pass-6 A12, orchestrator call 13): the dedicated
+  `parity tier A (live corpus)` job (45-minute budget) is the ONE authoritative Tier A
+  run — the plain `go test` step EXCLUDES the Tier A selector, so the corpus never
+  executes under the test job's tighter 30-minute cap: one run, one timeout.
+  Pin: setup-python installs **3.11.x** (python-version: '3.11', the latest patch —
+  OD-104 stands; the pass-5 exact-3.11.7 pin is WITHDRAWN by OD-185, pass-6 A02).
+  Because the measured constants (JSON depth limits, Unicode 14.0 tables) were taken on
+  3.11.7, the harness SELF-CHECKS them against the resolved oracle at start — measuring
+  the depth boundaries and `unicodedata.unidata_version`, failing closed on any mismatch
+  and printing the resolved version — and Tier B golden metadata records the resolved
+  patch (RK-4); a moved boundary fails the staleness check loudly instead of flapping
+  silently on patch drift.
 - **Generated-table staleness (OD-170):** the staleness step runs `go generate ./...` and then
   `git diff --exit-code` over the generated paths (Unicode 14.0 class tables and the
   pyfmt oracle tables, ARCH-06); any diff fails the leg — a stale committed table can
@@ -90,14 +98,18 @@ flowchart LR
   - Tier A: `parity: N cases compared, M exclusions validated, K caches swapped` — job
     fails if `N == 0` or if `N` differs from the number of case directories found (same
     runtime census the exclusions check applies to `M`; a partially lost corpus must not
-    pass — ADV-P2-A15).
+    pass — ADV-P2-A15), or if `K == 0` while any compared case declares swap seeds — the
+    four-cache swap tier (BC-6.02.004, VP-019, R-001 mitigation) must be unable to check
+    nothing and pass (pass-6 A10, call 13).
   - Tier B: `tier-b: N goldens compared` — fails if `N == 0` OR if `N` differs from
     the number of committed golden files found by the same runtime census
     (pass-5 A19: a partially lost golden set must not pass — the Tier A
     case-directory census discipline applied to Tier B).
   - Tier C: `tier-c: N inputs per side, M oracle spawns`; the PR-side budget skip
     (`t.Skip` on unset/0 `HYLO_PARITY_FUZZSECONDS`) is allowed only because the job is
-    non-gating — on the nightly schedule a 0/unset budget FAILS, it does not skip.
+    non-gating — on the nightly schedule a 0/unset budget FAILS, it does not skip, and
+    a scheduled run that compares `N == 0` inputs or spawns `M == 0` oracles FAILS
+    (pass-6 A10, call 13; one clean nightly run is the P1 exit condition, OD-149).
   - Exclusion machinery / canary: `exclusions: M entries validated against the closed
     set` — `M` must equal the file's entry count; a missing exclusions file fails.
   - Go jobs (lint/test/vet/govulncheck): `go: K files scanned` counts source files, so
@@ -124,6 +136,12 @@ flowchart LR
   are added to branch protection's required set only when they can execute (Phase 3),
   and from then on every activation of the job must satisfy its coverage line —
   `skip` on a required detector is investigated, not accepted.
+  R-004 mitigation restated for P1 (pass-6 A17 adjudication inside call 13): the
+  HIGH-impact fake-pass-parity risk is mitigated in P1 NOT by the HIGH kill-rate tier
+  (a Phase 6 target, OD-158) but by THIS census discipline plus the >= 95 % line-coverage
+  gate over the referee's own packages (`internal/parity` included via the gate's
+  census lines) — the referee must demonstrably check something on every run; the
+  kill-rate tier takes over in Phase 6.
 
 ### Decision: gate on three OSes per change; release via GitHub Releases (AD-11)
 
