@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "8e821c7"
+input-hash: "ff74134"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:772-785)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (config keys statusline.glyphs.sess_rate / box_rate named beside their default literals in PC1/PC2) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)", "1.2.2 2026-11-18: pass-11 OD-194 consumer (PC1/PC2 name statusline.labels.tps beside its default, both t/s sites; surrounding-space scaffolding carries the named-format-constant note)"]
+modified: ["1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (config keys statusline.glyphs.sess_rate / box_rate named beside their default literals in PC1/PC2) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, pass-8 call 12)", "1.2.2 2026-11-18: pass-11 OD-194 consumer (PC1/PC2 name statusline.labels.tps beside its default, both t/s sites; surrounding-space scaffolding carries the named-format-constant note)", "1.2.3 2026-11-18: pass-14 remediation ADV-P14-C2-01 (EC-007 foreign cached-sample register for the box-rate series: the SL:782 fallback get and the SL:783 .0f render, every fault class; DI-008 and DI-012 lifted into the L2 row; VP-001/VP-012 rows added)", "1.2.4 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-007 cites its register ids (CP-C38, CP-C39) explicitly; no behavioral change", "1.2.5 2026-11-26T16:00:00Z: pass-14 remediation addendum (coordinator): the 1.2.3 history entry claimed VP-001/VP-012 rows for EC-007 but the Verification Properties table and VP Anchors listed only VP-030 — the missing VP-001 (never-blank degrade on the EC-007 raising cells) and VP-012 (OD-160 exclusion closure, citation carrier) rows and matching VP Anchors entries added, mirroring BC-1.04.007; no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -79,6 +79,7 @@ things and are never combined. Notation: `\e` is byte 0x1B.
 | EC-004 | Neither rate key present | no box segment |
 | EC-005 | Sparkline disabled | box only; main also passes `[]` as hist (SL:1227) |
 | EC-006 | `gen_rate1m` NaN | `▣nant/s`; sparkline then hits CP-N02 if NaN is among plotted points (BC-1.04.014) |
+| EC-007 | Foreign cached values of `dgx_sl:gen_rate1m`/`dgx_tokens:gen_rate5m` (legacy sites: the 1-minute/5-minute fallback get SL:782 and the box-rate render `f"{rate:.0f}"` SL:783) per fault class {string, null, list, dict, positive giant int, negative giant int}; e.g. a string rate raises ValueError at the render ("Unknown format code 'f' for object of type 'str'"), a list or dict rate raises TypeError there, a giant exact int (both signs) raises OverflowError at the `.0f` float conversion (BC-1.04.018 PC-1's oracle leg), `null` is the pinned non-raise no-segment leg (`rate is not None`) | raising cells → errDegraded (DI-008); every (site, class) cell's legacy outcome is recorded in the error-taxonomy OD-160 matrix; foreign cached values: CP-C38, CP-C39, OD-160, Go table tests; ids in the error-taxonomy CP-C matrix (ADV-P14-C2-01/C2-02) |
 
 ## Canonical Test Vectors
 
@@ -95,6 +96,8 @@ things and are never combined. Notation: `\e` is byte 0x1B.
 |--------|----------|-------------|
 | VP-030 | Box segment never ends in a space | Go property test (testing/quick) (routed to the VP-030 quick leg, pass-8 call 12) |
 | VP-030 | Six-case review #16 table reproduces legacy bytes | manual (table) |
+| VP-001 | The promised output set holds on the EC-007 foreign cached-sample value degrade cells: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P14-C2-01) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-007 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P14-C2-01) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -125,6 +128,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — throughput segment shape
+- VP-001 — never-blank/exit-0 ladder; the EC-007 degrade cells ride it (ADV-P14-C2-01)
+- VP-012 — OD-160 exclusion-closure citation (EC-007; ADV-P14-C2-01)
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.2.10"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -35,6 +35,7 @@ modified:
   - "2026-11-22T00:00:00Z (1.2.7): ADV-P12 remediation A02 sibling propagation (orchestrator call 1) — PC-4 tail and the Related BCs line follow BC-6.04.001 PC-4 to the FULL-HISTORY scan `--log-opts=\"--all\"` with the count compared against `git rev-list --count --all` (supersedes the two-ref scan of 1.2.6)"
   - "2026-11-23T00:00:00Z (1.2.8): ADV-P13 remediation D15 — PC-3b defines the captures exclusion file's RESOLUTION ROOT: `case` and `expected_output_file` in captures/exclusions.json resolve relative to captures/ (the captures root playing the role the committed corpus root plays for the committed file), so BC-6.03.004's case-existence and expected-file checks are defined for capture cases"
   - "2026-11-24T19:00:00Z (v1.2.9): pass-13 residual (orchestrator residual sweep) - PC-4's hygiene-scan tree list becomes runtime discovery of every testdata/ directory plus the cmd/hylo fixture dir, walked-tree count compared against the runtime census, matching VP-035 v1.6; no behavioral change"
+  - "2026-11-25T00:00:00Z (1.2.10): ADV-P14 remediation D12 (orchestrator call 17) — VP-035's property rescoped to PC-4's runtime-discovered testdata walk; EC-001's path updated to the OD-148 flat corpus grammar internal/statusline/testdata/parity/cases/<case-id>/"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -135,7 +136,7 @@ together form the P1 success criterion (OD-107).
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Developer copies a real transcript into `testdata/cases/x/` | `TestCorpusHygiene` fails on the home path or real IP if present. A pattern-clean real transcript is still forbidden by policy; review and the pre-push scan are the backstop |
+| EC-001 | Developer copies a real transcript into a runtime-discovered fixture tree (`internal/statusline/testdata/parity/cases/<case-id>/`, the OD-148 flat grammar) | `TestCorpusHygiene` fails on the home path or real IP if present. A pattern-clean real transcript is still forbidden by policy; review and the pre-push scan are the backstop |
 | EC-002 | `-update` run against a captures case | Expected files written under `captures/<case>/`; nothing under `internal/` changes (`git status` clean for tracked files) |
 | EC-003 | `captures/` absent | Real-input suite skips with the documented message; exit status of `go test` unaffected |
 | EC-004 | Synthetic fixture uses `http://192.0.2.10:8428` | Passes (RFC 5737 placeholder; SL:73 legacy default) |
@@ -154,7 +155,7 @@ together form the P1 success criterion (OD-107).
 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
-| VP-035 | No file under `internal/statusline/testdata/` matches a forbidden-category pattern | `TestCorpusHygiene` (table of patterns + allowlist) |
+| VP-035 | No file under any committed `testdata/` tree discovered by PC-4's runtime walk matches a forbidden-category pattern | `TestCorpusHygiene` (table of patterns + allowlist) |
 | VP-035 | No harness write path places captures-derived bytes outside `captures/` | table test on the output-path resolver |
 
 ## Traceability

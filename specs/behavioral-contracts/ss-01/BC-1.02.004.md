@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.8"
+version: "1.3.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "cb4f6f6"
+input-hash: "f3906fd"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:git_branch (SL:364-396)"
@@ -30,6 +30,7 @@ modified:
   - "2026-11-20T18:00:00Z (v1.3.6): pass-10 remediation (ADV-P10-B02/B06, orchestrator call 12): PC2.3 chunk boundary re-pinned to the orchestrator measurement — the text reader decodes the first 8192 bytes in one chunk (invalid byte at offset < 8192 fails, at >= 8192 the whole line reads, independent of st_blksize (4096 on the measuring filesystem)); the 4096-byte-prefetch note removed; boundary probes at offsets 8191/8192 stated; PC2.2/PC2.4 and PC3 state the stat semantics (isdir/isfile follow symlinks, unlike PC1's purely lexical abspath) so a port cannot pick lstat-only or DirEntry-type checks and diverge on a symlinked .git or HEAD"
   - "2026-11-21T12:00:00Z (v1.3.7): pass-11 remediation (ADV-P11-B02): PC2.4 pins the whole-read universal-newline translation — any interior CR or CRLF inside the HEAD file becomes LF before the strip (bytes ref: refs/heads/a\rb\n give branch a\nb, interpreter-verified CPython 3.11.7), also written to the git cache; new EC-015 and canonical vector; no behavioral change"
   - "2026-11-24T00:00:00Z (v1.3.8): pass-13 remediation (ADV-P13-B08c): PC2 step 3's severed clause repaired - the inserted Stat-semantics note no longer cuts the strip-whitespace lead-in away from its if-it-starts-with-gitdir continuation; the continuation is its own sentence; history canonicalized date-first (undated pass entries defaulted to the stamps the same passes carry in sibling files); no behavioral change"
+  - "2026-11-24T01:00:00Z (v1.3.9): pass-14 remediation (ADV-P14-B09): the VP-028 golden row's layout-table count updated from the stale 10 to the table's current 14 rows (rows 11-14 added in passes 9 and 11); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -199,7 +200,7 @@ the real entry point (`python3 -I -s legacy/dgx_statusline.py`, isolated HOME an
 |--------|----------|-------------|
 | VP-041 | Walk terminates for every start path (strictly shorter `d` each step until `dirname(d)==d`) | table test + reasoning (VP-028 retains the bounded golden tables) |
 | VP-041 | No write syscalls during the walk | fake FileSystem test (VP-028 retains the bounded golden tables) |
-| VP-028 | Results equal the oracle on the 10-layout table (pass-3 #3) on all three OSes | table test against CPython goldens |
+| VP-028 | Results equal the oracle on the layout table (pass-3 #3; 14 rows after the pass-9 and pass-11 additions) on all three OSes | table test against CPython goldens |
 | VP-012 | The named deviation this contract defines — exclusion id `OD-159` (Go reads files as UTF-8 on all OSes; Windows HEAD/`.git` decoding) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-159` entry and its riding table test `TestGitTextReads_OD159_StrictUTF8`, and the mutation test fails closed if that entry is dropped | property test (VP-012 `TestParityExclusions_ClosedSet` / `TestParityExclusions_MutationFailClosed`, go test) |
 
 ## Traceability

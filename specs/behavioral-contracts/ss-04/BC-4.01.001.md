@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1.5"
+version: "1.1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -22,7 +22,13 @@ parity_class: "n.a."
 confidence: "—"
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)", "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout", "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - PC-3 notes config path's flag ownership (--config[=]<value>; a bare --config is a flag error, exit 2, this contract's golden usage surface)", "1.1.4 2026-11-19T21:00:00Z: ADV-P8 remediation D12+A2-07 — Pre-1/PC-1 signatures per ARCH-01: run(os.Args[1:], env, stdin, stdout, stderr) with the platform.EnvVars seam; runStatusline(env, stdin, stdout, stderr) takes no arg slice (the unknown-flag scan runs in run); VP-004 row names the for-all leg VP-004 carries per pass-8 call 12", "1.1.5 2026-11-21T06:00:00Z: ADV-P10 remediation A2-01 (orchestrator call 9) — the VP-004 row states the full legal subagent output set: zero or more NDJSON lines OR, on a catalogued renderer fault (CP-A01..A05), the 29-byte degraded line (BC-1.07.008, DI-008 carve-out)"]
+modified:
+  - "1.1.1 2026-11-18T03:00:00Z: VP citation reconciliation: VP-002 partial-coverage row added (catalog lists this BC)"
+  - "1.1.2 2026-11-18: ADV-P4 remediation D03 — --subagent routed to BC-1.07.001 in PC-1; never-blank invariant and VP-004 fuzz property qualified for legitimate zero-byte subagent stdout"
+  - "2026-11-19T17:45:00Z: ADV-P7 remediation D27 - PC-3 notes config path's flag ownership (--config[=]<value>; a bare --config is a flag error, exit 2, this contract's golden usage surface)"
+  - "1.1.4 2026-11-19T21:00:00Z: ADV-P8 remediation D12+A2-07 — Pre-1/PC-1 signatures per ARCH-01: run(os.Args[1:], env, stdin, stdout, stderr) with the platform.EnvVars seam; runStatusline(env, stdin, stdout, stderr) takes no arg slice (the unknown-flag scan runs in run); VP-004 row names the for-all leg VP-004 carries per pass-8 call 12"
+  - "1.1.5 2026-11-21T06:00:00Z: ADV-P10 remediation A2-01 (orchestrator call 9) — the VP-004 row states the full legal subagent output set: zero or more NDJSON lines OR, on a catalogued renderer fault (CP-A01..A05), the 29-byte degraded line (BC-1.07.008, DI-008 carve-out)"
+  - "2026-11-25T00:00:00Z (1.1.6): ADV-P14 remediation D09 (orchestrator call 12) — PC-1 restated per ARCH-01: run routes the exact --subagent argument to runStatuslineSubagent(args, ...); runStatusline renders main mode only; the within-runStatusline dispatch wording withdrawn"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,11 +55,14 @@ including panics (recovered to the degraded line), matching the legacy guard (SL
 
 ## Postconditions
 
-1. `args[0] == "statusline"` → `runStatusline(env, stdin, stdout, stderr)`, which
-   **always returns 0** (per ARCH-01 it takes no argument slice: the unknown-flag scan
-   of `args[1:]` runs in `run`, which dispatches here; pass-8 D12).
-   Within it: argv carrying `--subagent` anywhere in `args[1:]` selects the subagent
-   renderer (BC-1.07.001), whose stdout may be ZERO bytes (zero eligible rows, BC-1.07.004
+1. `args[0] == "statusline"` → `run` routes the verb (ARCH-01 dispatch order): the
+   exact argument `--subagent` anywhere in `args[1:]` (any index, including after a
+   bare `--`) dispatches to `runStatuslineSubagent(args, env, stdin, stdout, stderr)`,
+   which **always returns 0** (BC-1.07.001); every other argv dispatches to
+   `runStatusline(env, stdin, stdout, stderr)`, which **always returns 0** (per
+   ARCH-01 it takes no argument slice: the unknown-flag scan of `args[1:]` runs in
+   `run`, which dispatches here; pass-8 D12; dispatch restated pass-14 D09).
+   The subagent renderer's stdout may be ZERO bytes (zero eligible rows, BC-1.07.004
    PC-6) — main mode otherwise: unknown flags → BC-4.01.002; config errors → BC-2.02.001;
    any render fault →
    the degraded line (BC-1.01.001); any panic is recovered and mapped to the degraded line.

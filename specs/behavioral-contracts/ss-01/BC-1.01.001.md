@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.5"
+version: "1.4.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -33,6 +33,7 @@ modified:
   - "1.4.3 pass-12 remediation (ADV-P12-B08): the 1.4.1/1.4.2 history entries reordered ascending (1.4.2 was listed before 1.4.1) and the 1.4.2 stamp re-dated ascending per the pass-5 B14 precedent; no behavioral change; 2026-11-23T00:00:00Z"
   - "1.4.4 pass-12 residual sweep (orchestrator pass-12 residual call 8): the lone-surrogate display-name vector restates its window-start pin per the corrected cache-003 design (every corpus case seeds proc_start or is cache-003, no probe on either side, no fake process table); no behavioral change; 2026-11-23T14:00:00Z"
   - "1.4.5 pass-13 remediation (ADV-P13-B01/B03): the CP-S17 vector's setup states its seed ('statusline-s1.json' seeded with the JSON object {'proc_start': 900.0}) and the expected cache content is respelled to the measured append mechanics (seeded proc_start first, then rl/rl_ts, SL:306-308) — the empty-cache setup text and the exact-rl/rl_ts self-contradiction are gone; EC-003's hiding guard credited to the VP-001 trigger catalogue and the VP-008 per-site write-set check (VP-012 covers named deviation entries, not CP sites); rows 1-2 re-verified and row 3 re-measured 2026-11-24 (CPython 3.11.7, isolated temporary HOME and cwd); no behavioral change; 2026-11-24T00:00:00Z"
+  - "2026-11-24T01:00:00Z (1.4.6): pass-14 remediation (ADV-P14-B07): PC3's persistence statement now covers within-step writes — the step-7c record_cost write lands before the history-borne CP-O10/O11 raise and the CP-C10 cost_thresholds-site fault (BC-1.01.009 PC2), so the write persists although the degrade is raised inside step 7c; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,7 +78,9 @@ line is never blank and never non-zero (DI-008); the `--subagent` mode carves ou
    `\e[90mstatusline degraded\e[0m\n` — hex `1b 5b 39 30 6d` + ASCII `statusline degraded` (19 bytes) +
    `1b 5b 30 6d 0a`.
 2. The process exit code is 0.
-3. Cache writes performed by steps that completed before the fault persist unchanged (BC-1.01.009); no write
+3. Cache writes performed by steps that completed before the fault persist unchanged (BC-1.01.009) — including
+   writes earlier within the faulting step itself: the step-7c record_cost write lands before the history-borne
+   CP-O10/O11 raise and the CP-C10 `cost_thresholds`-site fault, both inside step 7c (BC-1.01.009 PC2); no write
    planned after the fault point happens.
 4. Diagnostic detail, if any, goes to stderr only; stderr is never compared for parity (design §5.3).
 

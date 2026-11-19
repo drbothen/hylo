@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.1"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T17:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-5-deep-conventions.md, owner-decisions-log-2026-11-14.md]
-input-hash: "f0bdf5e"
+input-hash: "9e29fea"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 extracted_from: "n.a. (greenfield helper; reproduces Python len()/slicing and the strict UTF-8 print check of legacy/dgx_statusline.py)"
@@ -20,6 +20,8 @@ lifecycle_status: active
 introduced: "0.1"
 modified:
   - "1.2.1 2026-11-19T17:00:00Z: ADV-P7 remediation D21 — Inv 1's go-runewidth/East-Asian-width ban restricted to the RENDER PATH; the OD-170 EA-width table function is registry range-validation only (pill-label 1..16 bound, OD-173/OD-184), consulted at config-load time, never while rendering"
+  - "2026-11-25T00:00:00Z (1.2.2): ADV-P14 remediation D01 (orchestrator call 5) — Inv 1's validation-only ban scope extends to the nine width-bounded statusline.labels.* members (OD-194) beside the pill-label bound"
+  - "2026-11-25T00:00:00Z (1.2.3): pass-14 sync closure (orchestrator call 5) — Inv 1's live parenthetical spells the pill-label 1..16 display-width bound as covering the three `pill.label_*` keys (OD-173/OD-184, pass-7 D21) and extends the OD-170 width-check scope to the nine width-bounded statusline.labels.* members (old, rate, queue, kv, host, tps, max, idle, na; OD-194), matching BC-2.01.004/BC-2.01.005 PC-6; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,8 +57,11 @@ counts 1; a combining mark counts 1; a CJK or emoji character counts 1), never t
 1. `go-runewidth` or any East-Asian-width logic is never used IN THE RENDER PATH (legacy
    counts code points there, research P12). The ban does NOT cover the registry's
    range-validation side: the OD-170 East-Asian-Width table function exists solely for
-   registry range VALIDATION (the pill-label 1..16 display-width bound, OD-173/OD-184;
-   pass-7 D21), consulted only at config-load time, never while rendering.
+   registry range VALIDATION (the pill-label 1..16 display-width bound on the three
+   `pill.label_*` keys, OD-173/OD-184, pass-7 D21, and the nine width-bounded
+   `statusline.labels.*` members — old, rate, queue, kv, host, tps, max, idle, na —
+   OD-194, per BC-2.01.004/BC-2.01.005 PC-6), consulted only at config-load time, never
+   while rendering.
 2. `len()` of a Go string (bytes) and `utf8.RuneCountInString` over WTF-8 surrogates (which counts 3 invalid bytes
    as 3 runes) are never used for these measures.
 3. Uses served (IM-11, PR-11): `visible()` width after SGR strip (SL:153), composition `len(content)`/`len(inner)`/

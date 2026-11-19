@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.6.6"
+version: "1.6.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "682e6df"
+input-hash: "6ca6b1f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:fmt_ctx (SL:418-437)"
@@ -29,6 +29,7 @@ modified:
   - "2026-11-20T18:00:00Z (v1.6.4): pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O01 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
   - "2026-11-21T12:00:00Z (v1.6.5): pass-11 remediation (ADV-P11-B01): EC-008 names the taxonomy id CP-S05 with its faithful trigger and raise site (SL:419), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change"
   - "2026-11-24T00:00:00Z (v1.6.6): pass-13 remediation (ADV-P13-B08b): EC-010's parenthetical no longer mislabels the CP-O01 overflow as the CP-S07 family - BC-1.02.020 is credited as the co-owner of the CP-O01 register row; history canonicalized date-first; no behavioral change"
+  - "2026-11-24T01:00:00Z (v1.6.7): pass-14 remediation (ADV-P14-B02): the existing VP-001 row extended to cover the CP-S05 stdin type-confusion degrade (EC-008) beside the CP-O01 overflow leg, and EC-008 cites it — the owner-side reciprocity for VP-001's existing bcs: entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -120,7 +121,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-005 | pct -3 | clamped to 0: 0 cells, `0%` |
 | EC-006 | `context_window_size` 0/missing/null | no denominator |
 | EC-007 | total 999999 | `/1000K` (K branch, half-even on 999.999); quirks `/0K`, `True`, NaN → BC-1.02.020 |
-| EC-008 | `context_window` a truthy non-object (`"x"`) — taxonomy **CP-S05** (`context_window` truthy and not a dict, raise site SL:419) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table) |
+| EC-008 | `context_window` a truthy non-object (`"x"`) — taxonomy **CP-S05** (`context_window` truthy and not a dict, raise site SL:419) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table; VP-001 cps05 fault-injection row) |
 | EC-009 | pct NaN; non-numeric truthy total | crash cases CP-S06 / CP-S07 → guard line (BC-1.02.020) |
 | EC-010 | `context_window_size` above float max (~1.8e308), e.g. 2·10³⁰⁸ | `total >= 1e6` compares exact (no error); CPython converts the int operand to float first, so `total / 1e6` raises OverflowError at SL:435 (taxonomy CP-O01) → guard line (BC-1.02.020 co-owner of the CP-O01 register row; stdin-borne render overflow, OD-156) |
 
@@ -150,7 +151,7 @@ prefixes listed in Postcondition 4; `E` = `\e[90m▱`.
 | VP-041 | `filled == min(floor(pct/10 + 0.5), 10)` for all finite pct in [0,100] | property test (for-all leg; VP-028 delivers the oracle legs) |
 | VP-041 | Visible width of the segment = 10 (bar) + 1 (space) + len(number text) + 1 (the `%` of PC7) + len(denominator text), for all inputs | property test with `visible()` (BC-1.01.004) — for-all leg |
 | VP-028 | Bytes equal the oracle across a pct sweep 0..100 step 0.1 × totals {0, 500, 501, 200000, 999999, 1e6, 1048576} | table test against CPython goldens — golden leg |
-| VP-028, VP-001 | The CP-O01 overflow degrade (EC-010: `context_window_size` at or beyond the int→float threshold) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
+| VP-028, VP-001 | The CP-O01 overflow degrade (EC-010: `context_window_size` at or beyond the int→float threshold) and the CP-S05 stdin type-confusion degrade (EC-008: `context_window` truthy and not a dict) stay on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection rows of VP-001's ladder; cpo01/cps05) |
 
 ## Traceability
 
@@ -185,6 +186,7 @@ TBD — context widgets story
 ## VP Anchors (Recommended)
 
 - VP-041 — filled-cell for-all formula (VP-028 retains the oracle legs)
+- VP-001 — cps05 stdin type-confusion degrade and the CP-O01 overflow degrade stay on the never-blank ladder (EC-008, EC-010)
 
 ---
 

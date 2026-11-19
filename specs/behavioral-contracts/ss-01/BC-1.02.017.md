@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.8"
+version: "1.3.10"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -28,7 +28,9 @@ modified:
   - "2026-11-20T18:00:00Z (v1.3.5): pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O05 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
   - "2026-11-20T18:00:00Z (v1.3.6): pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
   - "2026-11-24T00:00:00Z (v1.3.7): pass-13 remediation (ADV-P13-B06): Inv 3's D4-EX-1 closure mechanism respelled to the BC-3.02.001 EC-008 canon (ADV-P9-D01) - an OD-105 named difference with NO exclusions.json entry, closed by the dedicated rider test alone because no Windows gnomo parity case can exist (every corpus case seeds proc_start or is cache-003); history canonicalized date-first; no behavioral change"
-  - "v1.3.8 2026-11-18: pass-13 residual (orchestrator residual sweep): Verification Properties gains the VP-014 row and VP Anchors gains the VP-014 entry (Inv 3's D4-EX-1 rider test, pass-13 A2-04 reciprocity — VP-014 v1.6 gained this contract in bcs:); no behavioral change"
+  - "2026-11-24T00:30:00Z (v1.3.8): pass-13 residual (orchestrator residual sweep): Verification Properties gains the VP-014 row and VP Anchors gains the VP-014 entry (Inv 3's D4-EX-1 rider test, pass-13 A2-04 reciprocity — VP-014 v1.6 gained this contract in bcs:); no behavioral change [stamp re-dated date-first ascending in pass-14: the entry predated v1.3.7's stamp in list order]"
+  - "2026-11-24T01:00:00Z (v1.3.9): pass-14 remediation (ADV-P14-B01): Verification Properties and VP Anchors gain the VP-012 row for EC-004..006 — the OD-160 exclusion-set register riders VP-012 already names (the hand-edited proc_start shapes NaN / +Infinity / -Infinity, dedicated directional tests); the contract is already in VP-012 bcs: (pass-7 SC-29); no behavioral change"
+  - "2026-11-26T15:00:00Z (v1.3.10): pass-14 residual sweep (OD-160 owner id-range alignment): EC-011 minted — a giant exact-int session-cache proc_start (both signs) raises OverflowError at the win_ms subtraction (SL:558), the CP-C34 register id (co-owner BC-3.02.001); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -96,7 +98,7 @@ start time is acquired (native per-OS probe) is BC-3.02.001/002.
 | EC-007 | `win_start` = `true` (only reachable through a hand-edited cache `proc_start`, **OD-160**; cf. BC-1.02.028 EC-005) | treated as epoch second 1; at now = 1794600000 renders `⌂20770d19h` |
 | EC-008 | stdin has no `session_id` | acquisition is skipped (SL:1229), `win_start = None` → no suffix |
 | EC-009 | FMA contraction of `(now - win_start)*1000 - dur` | forbidden; tests for this site run on arm64 (macos-15 runner), where fusion is detectable (design IM-10) |
-| EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17), e.g. 10³⁰⁹, **with `win_start` numeric** (the SL:559 subtraction is reached) | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int; taxonomy **CP-O05**). With a *non-numeric* `win_start` the gate block is skipped and legacy renders the exact huge `_hm(10**309)` timer text (integer arithmetic only) with no degrade — PC1's "timer shown" plus numeric `win_start` is what reaches the crash site |
+| EC-010 | `dur` (`cost.total_duration_ms`) a JSON integer at or beyond the int→float conversion threshold \|n\| ≥ 2**1024 − 2**970 (oracle-verified 2026-11-17), e.g. 10³⁰⁹, **with `win_start` numeric** (the SL:559 subtraction is reached) | `win_ms - dur` raises OverflowError at SL:559 (mixed float/int arithmetic converts the int; taxonomy **CP-O05**). With a *non-numeric* `win_start` the gate block is skipped and legacy renders the exact huge `_hm(10**309)` timer text (integer arithmetic only) with no degrade — PC1's "timer shown" plus numeric `win_start` is what reaches the crash site |\n| EC-011 | Session cache `proc_start` an exact giant integer (magnitude >= 2**1024 - 2**970, both signs; passes the SL:557 `isinstance` gate; the CP-C34 cache bearer of this site; foreign cache, exclusion **OD-160**) | `win_ms = (time.time() - win_start) * 1000` raises OverflowError (\"int too large to convert to float\") at SL:558 → guard line, exit 0; foreign cached values: CP-C34, OD-160, Go table tests (measured pass-14) |
 
 ## Canonical Test Vectors
 
@@ -124,6 +126,7 @@ confirmed by golden A (deep pass-3 round 2).
 | VP-028 | Suffix position is after the API-time suffix | table test |
 | VP-028, VP-001 | The CP-O05 overflow degrade (EC-010: `win_ms - dur` at or beyond the int→float threshold, numeric `win_start`) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 | VP-014 | Inv 3's D4-EX-1 rider: the ruled Windows ⌂ difference is admitted only through the exclusion id `D4-EX-1`, closed by the dedicated fake-probe test `TestWindowAge_D4EX1_Windows_AncestorFound` (VP-012 concrete name); the rider's expected output is this contract's canonical vector table's expected column, and the fake-probe table pins the three walk behaviours the BC-3.02.001 vector table routes to VP-014 jointly with VP-033 (pass-13 A2-04 reciprocity: VP-014 `bcs:` gained this contract; this row is its owner-side fix) | dedicated rider test (fake ProcStarter, per VP-014) |
+| VP-012 | EC-004..006 are the OD-160 exclusion-set register riders VP-012 names for this contract (the hand-edited `proc_start` shapes NaN / +Infinity / -Infinity): each degrade stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 — closed by VP-012's dedicated directional tests (pass-14 B01 owner-side reciprocity) | dedicated directional tests (per VP-012); Go table tests, not byte-parity |
 
 ## Traceability
 
@@ -158,6 +161,7 @@ TBD — filled by story-writer
 
 - VP-028 — gate without FMA
 - VP-014 — D4-EX-1 Windows window-age rider (Inv 3)
+- VP-012 — OD-160 register riders for EC-004..006 (dedicated directional tests)
 
 ---
 

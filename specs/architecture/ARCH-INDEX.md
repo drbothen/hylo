@@ -1,10 +1,10 @@
 ---
 document_type: architecture-index
 level: L3
-version: "1.13"
+version: "1.14"
 status: draft
 producer: architect
-timestamp: 2026-11-19T03:00:00Z
+timestamp: 2026-11-25T16:00:00Z
 phase: 1b
 inputs: [prd.md, behavioral-contracts/BC-INDEX.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
 input-hash: "b153c99"
@@ -41,7 +41,7 @@ deployment_topology: single-service
 | Story decomposition inputs | ARCH-03 + ARCH-02 + BC-COMPONENT-MAP.md |
 | Verification plan for a module | ARCH-00 purity table + owning section + prd-supplements/test-vectors.md |
 | Harness implementation | ARCH-07 + prd-supplements/nfr-catalog.md (timing) |
-| Risk register / mitigations | ../prd-supplements/risk-register.md (R-001..R-008, OD-152) |
+| Risk register / mitigations | ../prd-supplements/risk-register.md (R-001..R-009, OD-152) |
 | P1-exit vs later phases | ARCH-09 + docs/PLAN.md phases |
 
 ## Subsystem Registry (canonical; Policy 6)

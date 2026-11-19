@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.0"
+version: "1.4.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T10:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "9875ccc"
+input-hash: "e6772b7"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -29,10 +29,11 @@ introduced: v0.1.0
 modified:
   - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-01/14 (H1 now describes Go postconditions)"
   - "1.3.2 2026-11-17: pass-4 residual sweep — exclusions.json path canonicalized to internal/parity/testdata/exclusions.json"
-  - "1.3.3 2026-11-18T22:00:00Z: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
+  - "1.3.3 2026-11-18: pass-4 correction (item 10) — exclusions.json path restored to the OD-148 home internal/statusline/testdata/parity/exclusions.json"
   - "1.3.4 2026-11-18: pass-5 remediation ADV-P5-C2-05 (VP-012 riding-test name aligned to the canonical TestCostHistory_OD30_NumericSidStringKey)"
   - "1.3.5 2026-11-18: pass-8 remediation ADV-P8-C2-14 (Invariant 2 casing caveat: sid true's history key is JSON \"true\" but the session-cache file name is Python str()'s statusline-True.json — same file only on case-insensitive filesystems) + ADV-P8-C2-07 (row-2 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"
   - "2026-11-21T12:00:00Z (v1.4.0) pass-13 sync closure — Owning component line and Purity Classification I/O cell respelled to the ARCH-03 declared cost API (§Interfaces, 'package internal/cost — DECLARED API'): internal/cost is pure core with no I/O; internal/statusline loads and saves the cost-history file through its CacheStore (sync-check adv-p13 finding 1, call-7 residual); no behavioral change"
+  - "2026-11-21T12:40:00Z (v1.4.1) pass-14 remediation ADV-P14-C2-04 (the declared symbols RecordCost/CostThresholds respelled in the Architecture Module row and Owning-component line) + ADV-P14-C2-05 (Purity Classification respelled: pure core, no store fake, no injected seam; no behavioral change)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -138,7 +139,7 @@ now − 3600; now = 1794615009.0; model `claude-opus-5-5` (cloud lane); usd 30.0
 |-------|-------|
 | L2 Capability | CAP-011 |
 | L2 Domain Invariants | DI-007, DI-012 (OD-30 named deviation) |
-| Architecture Module | `internal/cost` history.go (`Record`/`ForLane` take the sid as a raw `pyfmt.Value`, design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (numeric sid, OD-30) — ARCH-03) |
+| Architecture Module | `internal/cost` history.go (`RecordCost`/`CostThresholds` take the sid as a raw `pyfmt.Value`, design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (numeric sid, OD-30) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237, lookup SL:230); cost_thresholds (SL:240-262, compare SL:246) |
 | Legacy contract | BC-SL-079 (P3 deep r1; refined P3r3 §4.2; re-confirmed P3r4 §1.1 with sid 777) |
@@ -187,8 +188,8 @@ S-N.MM — cost history (filled by story-writer)
 |----------|-----------|
 | **I/O operations** | none in hylo — the legacy functions write and read the history file; per ARCH-03's declared cost API (§Interfaces, 'package internal/cost — DECLARED API') the fold into the loaded history and the scan over it are pure, and `internal/statusline` loads and saves the file through its `CacheStore` |
 | **Global state access** | none |
-| **Deterministic** | yes (given samples and a store fake) |
-| **Thread safety** | Safe for concurrent use (store injected) |
-| **Overall classification** | boundary |
+| **Deterministic** | yes (given the loaded history, session numbers, config and `now` passed in) |
+| **Thread safety** | Safe for concurrent use (pure) |
+| **Overall classification** | pure core |
 
-Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (numeric sid, OD-30) - ARCH-03); per ARCH-03's declared cost API ('package internal/cost — DECLARED API' in the §Interfaces section, ADV-P13-A02 / orchestrator call 7), the package is pure core with no I/O — `Record` folds this session's entry into the loaded history under the string-form key and `ForLane` scans it, and `internal/statusline` loads and saves the cost-history file through its `CacheStore`.
+Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (numeric sid, OD-30) - ARCH-03); per ARCH-03's declared cost API ('package internal/cost — DECLARED API' in the §Interfaces section, ADV-P13-A02 / orchestrator call 7), the package is pure core with no I/O — `RecordCost` folds this session's entry into the loaded history under the string-form key and `CostThresholds` scans it, and `internal/statusline` loads and saves the cost-history file through its `CacheStore`.

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T21:00:00Z
@@ -22,9 +22,11 @@ modified:
   - "1.3 2026-11-17: pass-2 remediation ADV-P2-C2-05/12"
   - "1.3.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.idle with default ☾, OD-189 sibling treatment)"
   - "1.3.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC1 names the registered keys statusline.idle.after_s and statusline.idle.running_below beside their default literals)"
-  - "1.3.5 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-006 cites crash id CP-C32, minted by error-taxonomy 1.20 for this contract's foreign cached-sample value leg; no behavioral change"
   - "1.3.3 2026-11-18: pass-11 remediation ADV-P11-C2-09 (version field raised to match the trailing modified entry — it sat behind v1.3.2) + OD-194 consumer (PC4 names statusline.labels.idle beside its default; separating-space scaffolding carries the named-format-constant note)"
   - "1.3.4 2026-11-18: pass-13 remediation ADV-P13-C2-01 (foreign cached-sample value edge case added: EC-006 string last TypeError at the SL:825 gate comparison; OD-160 class; VP-012 closure and VP-001 never-blank rows added; oracle-verified CPython 3.11.7)"
+  - "1.3.5 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-006 cites crash id CP-C32, minted by error-taxonomy 1.20 for this contract's foreign cached-sample value leg; no behavioral change"
+  - "1.3.6 2026-11-18: pass-14 remediation ADV-P14-C2-10 (PC2's 60 divisor — and BC-1.04.017's 1440 — named as unit constants, named constants not config, the ADV-P13-C2-05 pattern) + ADV-P14-C2-02 (EC-006 broadened to the contract's register: the running comparison and now-minus-last cells beside the string-last exemplar) + ADV-P14-C2-08 (the 1.3.5 entry restored to the end of this list)"
+  - "1.3.7 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-006 cites its register ids (CP-C32, CP-C47) explicitly; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +61,9 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
    `(m.get("vllm:num_requests_running") or 0) < statusline.idle.running_below`
    (default 1).
 2. `idle_min = int((now - last) // 60)` (float floor division, CPython `float_divmod`
-   semantics, BC-5.01.003).
+   semantics, BC-5.01.003; the seconds-per-minute divisor 60 — and the minute-per-day
+   divisor 1440 in BC-1.04.017 PC3 — are unit constants, named constants not config:
+   time-unit conversions, the ADV-P13-C2-05 pattern).
 3. Age text and boundaries per BC-1.04.017: `<d>d<hh>h` from 1440 min, `<h>h<mm>m` from
    60 min, else `<m>m`.
 4. Segment = `"\e[36m" + glyphs.idle + " " + labels.idle + " " + age + "\e[0m"`, appended last in row 2,
@@ -83,7 +87,7 @@ cloud-lane traffic cannot mask an idle backend. Notation: `\e` is byte 0x1B.
 | EC-003 | running 0.5 | shown (`< 1`) |
 | EC-004 | running NaN | no segment (`nan < 1` false) |
 | EC-005 | running absent or 0.0 | treated as 0 → shown |
-| EC-006 | `last` a non-empty string (foreign cached sample, exclusion id **OD-160**; truthy, so the gate continues) | TypeError at the `last > 0` gate comparison (SL:825, ">" not supported between instances of 'str' and 'int', oracle-verified CPython 3.11.7; crash id **CP-C32**) → errDegraded — the idle sibling of the render sites BC-1.04.004 invariant 3 registers (ADV-P13-C2-01) |
+| EC-006 | Foreign cached values at the idle gate — `dgx_llm_last_dgx_request_timestamp_seconds` (truthiness, `last > 0`, the `now - last` subtraction, SL:825) and `vllm:num_requests_running` (the `< 1` compare, SL:825) — per fault class {string, null, list, dict, positive giant int, negative giant int}; exemplars: a non-empty (truthy) string `last` raises TypeError at `last > 0` (SL:825, ">" not supported between instances of 'str' and 'int', oracle-verified CPython 3.11.7); a positive giant-int `last` passes truthy/`> 0` and raises OverflowError at `now - last` (BC-1.04.002 Inv 1's oracle leg; negative fails `> 0` first — pinned non-raise); a truthy string running raises TypeError at `< 1` | raising cells → errDegraded (DI-008); every (site, class) cell's legacy outcome is recorded in the error-taxonomy OD-160 matrix; foreign cached values: CP-C32, CP-C47, OD-160, Go table tests; ids in the error-taxonomy CP-C matrix (ADV-P13-C2-01; ADV-P14-C2-02) — the idle sibling of the render sites BC-1.04.004 invariant 3 registers |
 
 ## Canonical Test Vectors
 

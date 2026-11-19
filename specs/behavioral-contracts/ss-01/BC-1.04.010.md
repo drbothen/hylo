@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "8e821c7"
+input-hash: "ff74134"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:792-799)"
@@ -22,6 +22,8 @@ modified:
   - "1.2.1 2026-11-18: pass-8 remediation ADV-P8-C2-01 (the marker named as the config key statusline.glyphs.ttft with default ◔, OD-189 sibling treatment)"
   - "1.2.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC2/PC3/PC4 name the registered keys statusline.ttft.integer_from_s, statusline.ttft.min_samples and statusline.ttft.yellow_s beside their default literals)"
   - "1.2.3 2026-11-18: pass-11 OD-194 consumer (PC3 names statusline.labels.max beside its default; the separating-space scaffolding carries the named-format-constant note)"
+  - "1.2.4 2026-11-18: pass-14 remediation ADV-P14-C2-02 (PC1's NaN-hide rule qualified: a cached giant exact int passes the isinstance filter and math.isnan raises OverflowError on it, both signs — EC-008 register; DI-012 lifted into the L2 row; VP-001/VP-012 rows added)"
+  - "1.2.5 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-008 cites its register ids (CP-C40) explicitly; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,7 +51,7 @@ otherwise. A NaN value hides the segment. Notation: `\e` is byte 0x1B.
 
 ## Postconditions
 
-1. Segment exists only if `ttft` is a number and not NaN.
+1. Segment exists only if `ttft` is a number and not NaN (a cached giant exact int, |n| >= 2**1024 - 2**970, passes the isinstance filter and `math.isnan` raises OverflowError on it — both signs — so the segment dies as errDegraded, EC-008, not via the NaN hide).
 2. `val = F(ttft,0) + "s"` if `ttft >= statusline.ttft.integer_from_s` (default 10), else
    `F(ttft,1) + "s"` (formatting boundaries pinned in BC-1.04.019).
 3. If `n` is a number and `n < statusline.ttft.min_samples` (default 20): segment =
@@ -78,6 +80,7 @@ otherwise. A NaN value hides the segment. Notation: `\e` is byte 0x1B.
 | EC-005 | n 20 | normal rule |
 | EC-006 | ttft +inf | `\e[33m◔infs\e[0m` (BC-1.04.016) |
 | EC-007 | ttft -1.0 | `\e[90m◔-1.0s\e[0m` |
+| EC-008 | Foreign cached values of `dgx_ttft:p95_30m`/`dgx_sl:ttft_n30m` (legacy sites: the isinstance/isnan gate SL:793, the n compare SL:796, the renders SL:794-795) per fault class {string, null, list, dict, positive giant int, negative giant int}; raising cell: a giant exact-int ttft, both signs — `math.isnan` converts it to float and raises OverflowError; pinned non-raise cells: a non-number ttft hides the segment, a giant-int or non-number n passes the isinstance gate (`giant < 20` is int-int) into the max branch | raising cells → errDegraded (DI-008); every (site, class) cell's legacy outcome is recorded in the error-taxonomy OD-160 matrix; foreign cached values: CP-C40, OD-160, Go table tests; ids in the error-taxonomy CP-C matrix (ADV-P14-C2-02) |
 
 ## Canonical Test Vectors
 
@@ -93,6 +96,8 @@ otherwise. A NaN value hides the segment. Notation: `\e` is byte 0x1B.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Eight-case review #18 table reproduces legacy bytes | manual (table) |
+| VP-001 | The promised output set holds on the EC-008 foreign cached-sample value degrade cells: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P14-C2-02) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P14-C2-02) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -101,7 +106,7 @@ otherwise. A NaN value hides the segment. Notation: `\e` is byte 0x1B.
 | Source | legacy/dgx_statusline.py:render_telemetry_fields (SL:792-799); TTFT_MIN_N (SL:124) |
 | Legacy contract | BC-SL-049 (P3 base, review #18, 8 cases) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 (EC-008 foreign cached-sample value shapes under the OD-160 named-deviation rule) |
 | Decisions | OD-113 |
 | Architecture Module | `internal/statusline/row2.go` |
 | Stories | TBD |
@@ -122,6 +127,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — TTFT table
+- VP-001 — never-blank/exit-0 ladder; the EC-008 degrade cells ride it (ADV-P14-C2-02)
+- VP-012 — OD-160 exclusion-closure citation (EC-008; ADV-P14-C2-02)
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.12"
+version: "1.2.13"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -37,6 +37,7 @@ modified:
   - "2026-11-21T07:00:00Z (1.2.10): ADV-P11 remediation D01 (orchestrator call 2) — the canonical temp-file case cache-003 DECLARES a subprocess-fake table (fake ps on the conditional fake PATH for the oracle, a ProcStarter fake for Go), so it needs no proc_start seed and never consults the real process tree — the fake-PATH machinery's first P1 consumer; its session-cache target stays intentionally UNSEEDED (seeding statusline-../x.json would mkdir statusline-.., os.replace would succeed and no temp would leak); Pre-2, PC-3 note and the cache-003 CTV row state it"
   - "2026-11-22T00:00:00Z (1.2.11): ADV-P12 remediation D02/D13 (orchestrator call 2, superseding pass-11 call 2) — NO fake process table: cache-003 declares the conditional fake PATH with an EMPTY bin directory (oracle ps subprocess raises FileNotFoundError at SL:280-281, caught SL:293-294, claude_window_start returns None, legacy never reaches the SL:286-288 extra save — the leak count stays 'up to two'); the Go child gets HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 (zero probes); Pre-2 hermeticity, PC-3 note and the CTV row respelled"
   - "2026-11-24T19:30:00Z (1.2.12): pass-13 residual (orchestrator call 15 rider) - the temp-file passage's statusline.cache.rename_retry_delay_ms range respelled 1..100 (limit 0..10; limit x delay at most 1000 ms per Save, labeled judgment call), matching BC-2.01.004 PC-11, interface-definitions and ARCH-04; no behavioral change"
+  - "2026-11-25T00:00:00Z (1.2.13): ADV-P14 remediation D10 (orchestrator call 17) — the get_sample save-site cite corrected SL:350->SL:351 (SL:350 is entry.update; the save_cache call is SL:351) in PC-2 and Traceability"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -83,7 +84,7 @@ difference rides the same named deviation.
    `statusline-../x.json` points into a nonexistent subdirectory, `mkstemp` succeeds in
    `CACHE_DIR`, and `os.replace` fails. Legacy leaves `x.json.<8 chars>` behind
    (BC-SL-078, OD-03). Each failed session-cache write leaks one temp. A refresh can
-   leak up to two, from `effective_rl` (SL:308) and `get_sample` (SL:350 or 355) —
+   leak up to two, from `effective_rl` (SL:308) and `get_sample` (SL:351 or 355) —
    under the call-2 design legacy never adds the SL:288 extra save, because the
    `FileNotFoundError` at the `ps` call ends the probe before any parse or save.
    Hermeticity (pass-12 call 2, superseding pass-11 call 2): the canonical case
@@ -185,7 +186,7 @@ difference rides the same named deviation.
 
 | Field | Value |
 |-------|-------|
-| Source | OD-110 (Go cleaning up temp files legacy leaks: named exclusion entry, excluded only from the cache-file comparison since stdout is unaffected; own table tests); OD-105 (named exclusion list, no blanket exclusions); design §5.3 (files named `<name>.<random>` are ignored), §7.1 T2(c); legacy behavior `legacy/dgx_statusline.py:save_cache` (SL:198-206), write sites `effective_rl` (SL:308), `get_sample` (SL:350, 355); BC-SL-078 |
+| Source | OD-110 (Go cleaning up temp files legacy leaks: named exclusion entry, excluded only from the cache-file comparison since stdout is unaffected; own table tests); OD-105 (named exclusion list, no blanket exclusions); design §5.3 (files named `<name>.<random>` are ignored), §7.1 T2(c); legacy behavior `legacy/dgx_statusline.py:save_cache` (SL:198-206), write sites `effective_rl` (SL:308), `get_sample` (SL:351, 355); BC-SL-078 |
 | Approved deviation | `temp-file` (OD-110) — exclusion entry id `temp-file`; dedicated table test `TestCacheStore_TempFile_CleanupOnFailedReplace` |
 | Parity class | temp-file |
 | L2 Capability | CAP-009 |

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.0"
+version: "1.4.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-4-nfr-catalog.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "530237d"
+input-hash: "6526f96"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:cost_thresholds (SL:240-262)"
@@ -38,6 +38,8 @@ modified:
   - "1.3.8 2026-11-21T09:00:00Z: pass-11 residual — the Pre 3 defaults re-spelled to the env spellings {\"cc\":300000,\"other\":1800000} (T-023) and [0.75,0.95] (T-024; PC4's default statement follows), matching the interface-definitions.md Default cells exactly (pass-11 A09/call 4); no behavioral change"
   - "1.3.9 2026-11-21T10:00:00Z: pass-12 remediation ADV-P12-C2-09 (modified list restored to ascending version order — the 1.3.8 entry had been inserted before 1.3.7; no behavioral change)"
   - "1.4.0 2026-11-21T11:30:00Z: pass-13 sync closure — Owning component line and Purity Classification I/O cell respelled to the ARCH-03 declared cost API (§Interfaces, 'package internal/cost — DECLARED API'): internal/cost is pure core with no I/O; internal/statusline loads the cost-history file through its CacheStore before the call, step-7c record-before-percentile order noted (sync-check adv-p13 finding 1, call-7 residual); no behavioral change"
+  - "2026-11-21T12:35:00Z (v1.4.1) pass-14 remediation ADV-P14-C2-04 (the Architecture Module row names the declared symbol CostThresholds, taking the cost config, orchestrator call 2) + ADV-P14-C2-05 (Purity Classification respelled: pure core, no store fake, no injected seam; no behavioral change)"
+  - "2026-11-26T15:00:00Z (v1.4.2) pass-14 residual sweep — OD-160 owner id-range alignment: EC-010 gains the giant entry-ts OverflowError leg CP-C50 (SL:247); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -120,7 +122,7 @@ qualifying sessions exist (cold start).
 | EC-007 | backfill entry with api 1,000,000 | dollar list only (other gate 1,800,000) |
 | EC-008 | entry usd `Infinity` | counted; sorts last |
 | EC-009 | entry usd `NaN` (only writable by the backfill tool, BC-BF-012, or by hand) | Ruled OD-138: pin legacy byte-for-byte; the expected bytes come from the CPython 3.11 oracle (frozen clock, temp HOME, synthetic history; oracle run 2026-11-15). For the 10-session cc history [`sess-00`=NaN, `sess-01..09` = 90.0…10.0] (file order) with `ts = now - 3600`, `api_ms = 400000`, `src = cc`, `now = 1794615009.0`: sorted order `[NaN, 10, …, 90]` and thresholds `((60.0, 80.0), (540.0, 720.0))`. For file order [`10.0 … 90.0`, NaN]: sorted `[10, …, 90, NaN]` and thresholds `((70.0, 90.0), (630.0, 810.0))`. The outcome is deterministic per exact file order (Python `sorted` stability); Go must reproduce it per order, table-tested over both pinned histories |
-| EC-010 | corrupt shapes (top level, `sessions` or entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10: out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule) |
+| EC-010 | corrupt shapes (top level, `sessions` or entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10 (a giant exact-int entry `ts` raises OverflowError at the window subtraction, **CP-C50**): out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule) |
 | EC-011 | foreign history holds an exact-int `usd` **or an exact-int `api_ms`** >= 2**1024 − 2**970 (the smallest magnitude Python's int→float coercion raises at — the same threshold BC-1.05.004 PC4 and BC-1.05.007 PC6 pin; ADV-P7-C2-10) recorded by legacy `record_cost` (SL:234-237 stores `api_ms` unrounded) or by hand | any later refresh on the lane whose qualifying entry passes its API-time gate raises OverflowError at `usd / (api / 3.6e6)` (SL:255 — the int→float coercion of the giant exact int; no try in `cost_thresholds`) → degraded line on **every** qualifying refresh for up to the 30 d window (ADV-P3-C2-01). Crash ids: the `usd` leg is **CP-O10**, the `api_ms` leg **CP-O11** (taxonomy bearer note: the history-borne raise happens at the SL:255 division, not at SL:616/623; ADV-P5-C2-10). Foreign-history class (exclusion id **OD-160**): hylo's writer never writes it (OD-166, BC-1.05.004), so this is a Go table test, not a parity obligation |
 
 ## Canonical Test Vectors
@@ -149,7 +151,7 @@ qualifying sessions exist (cold start).
 |-------|-------|
 | L2 Capability | CAP-011 (percentile bands) |
 | L2 Domain Invariants | DI-007, DI-008 (the EC-011 CP-O10/CP-O11 OverflowError degrades ride the never-blank ladder: 29-byte line, exit 0; ADV-P8-C2-05), DI-012 (foreign-history shapes OD-160 under the named-deviation rule) |
-| Architecture Module | `internal/cost` history.go `ForLane` (BC-COMPONENT-MAP: internal/cost/history.go (p75/p95; NaN usd OD-138) — ARCH-03) |
+| Architecture Module | `internal/cost` history.go `CostThresholds` (the declared cost API, ARCH-03 §Interfaces; the declared API takes the cost config, orchestrator call 2; BC-COMPONENT-MAP: internal/cost/history.go (p75/p95; NaN usd OD-138) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:cost_thresholds (SL:240-262); constants (SL:217-221) |
 | Legacy contract | BC-SL-029 (P3r1 row 58; index table P3 deep r1; goldens P3r3 §4.1) |
@@ -196,8 +198,8 @@ S-N.MM — cost history (filled by story-writer)
 |----------|-----------|
 | **I/O operations** | none in hylo — the legacy function only reads the history file (SL:240-262); per ARCH-03's declared cost API (§Interfaces, 'package internal/cost — DECLARED API') the scan is pure over the loaded history passed in, and `internal/statusline` loads it through its `CacheStore` |
 | **Global state access** | none |
-| **Deterministic** | yes (given samples and a store fake) |
-| **Thread safety** | Safe for concurrent use (store injected) |
-| **Overall classification** | boundary |
+| **Deterministic** | yes (given the loaded history, lane, sid, config and `now` passed in) |
+| **Thread safety** | Safe for concurrent use (pure) |
+| **Overall classification** | pure core |
 
 Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (p75/p95; NaN usd OD-138) - ARCH-03); per ARCH-03's declared cost API ('package internal/cost — DECLARED API' in the §Interfaces section, ADV-P13-A02 / orchestrator call 7), the package is pure core with no I/O — `CostThresholds` scans the loaded history passed in and returns the pairs, and `internal/statusline` loads the cost-history file through its `CacheStore` before the call (step 7c: the record runs before the percentile read).

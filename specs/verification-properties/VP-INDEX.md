@@ -2,13 +2,13 @@
 artifact_type: verification-property-index
 document_type: vp-index
 level: L4
-version: "1.27"
+version: "1.30"
 status: draft
 producer: architect
-timestamp: 2026-11-24T16:00:00Z
+timestamp: 2026-11-25T16:00:00Z
 phase: 1b
 inputs: [behavioral-contracts/BC-INDEX.md, architecture/ARCH-INDEX.md, domain-spec/invariants.md, prd-supplements/nfr-catalog.md, behavioral-contracts/BC-ALLOCATION.md]
-input-hash: "14f830a"
+input-hash: "284d67e"
 traces_to: ../architecture/ARCH-INDEX.md
 lifecycle_status: active
 introduced: "1.0"
@@ -39,6 +39,9 @@ modified:
   - "1.25 2026-11-22T00:00:00Z: pass-12 residual (item 1) — VP-001 bcs: gains BC-1.05.001 (that contract's VP-table row routes its stdin-borne CP-O10 overflow leg, PC5 + EC-009, to the never-blank ladder; ADV-P12-C2-07), the Source Contract partial-coverage sentence in VP-001 names the leg, the BC-1.05.001 coverage-map row gains VP-001 appended, and the scripted recount over all 41 VP files reads 289 directed VP→BC bcs: edges, 0 forward-only, standing residue unchanged"
   - "1.26 2026-11-22T03:00:00Z: pass-13 agent-4 end-sync — end-of-burst scripted recount re-reading all 41 VP bcs: lists against the coverage map (yaml-parsed frontmatter, 154 map rows): 289 directed VP→BC bcs: edges, 0 forward-only, 0 reverse-only among live citations, no unknown VP ids in map cells — disk state equals the 1.25 stamp, so no coverage-map row changes this pass; agent 4's own pass-13 statement edits (VP-033 depth bound + zero-probe leg, VP-035 tree discovery + runtime-composed canaries, VP-036 per-(case, step) unit) change no bcs: frontmatter; the orchestrator-named agent-3/BC-agent deltas (VP-012 gaining BC-1.04.004, VP-014 gaining BC-1.02.017) were NOT yet on disk at re-read time — if they land post-burst, the next residual sweep syncs the corresponding map rows and recounts; the count-propagation hook's '153'-class citations are historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative — SC-32 precedent), live counts agree at 41 VPs / 154 BCs / 289 edges"
   - "1.27 2026-11-24T16:00:00Z: pass-13 residual sweep (architect) — the pass-13 bcs: deltas synced from all 41 VP files: VP-012 gains BC-1.04.004, BC-1.04.006, BC-1.04.011 and BC-1.04.012 (OD-160-tagged foreign cached-sample value shapes; ADV-P13-C2-01), VP-001 gains BC-1.04.006, BC-1.04.011 and BC-1.04.012 (the never-blank ladder legs of the same shapes), and agent 3's pass-13 delta VP-014 gains BC-1.02.017 (A2-04, landed mid-burst); the five coverage-map rows gain the ids. Scripted recount over all 41 VP files (yaml-parsed bcs: frontmatter): 297 directed VP→BC bcs: edges. Reciprocity both directions at VP-table level: no mismatches. ONE TRANSIENT forward-only edge: VP-014 in BC-1.02.017 — the reciprocal VP-table row is owed by the ss-01 contract owner (VP-014 v1.6 discloses the carriage); three body-text method credits outside VP tables enumerated for routing, not table mismatches: VP-008 in BC-1.01.001 EC-003 (new this pass, ADV-P13-B01/B03) and the pre-existing VP-009/VP-011 credit in BC-6.01.002's LF-normalization passage"
+  - "1.28 2026-11-25T09:00:00Z: pass-14 agent-4 end-sync — ADV-P14-A2-08: the pass-13 recount recorded in the Uncovered-BCs prose (297 directed VP→BC bcs: edges, 2026-11-24T16:00:00Z) and the pass-13 ONE-TRANSIENT forward-only edge VP-014 in BC-1.02.017 RESOLVED (BC-1.02.017 v1.3.8 delivered the reciprocal VP-table row and VP Anchor; disk-verified); agent 3's pass-14 bcs: delta synced: VP-012 gains BC-1.01.008 (ADV-P14-B01 reciprocity; the reciprocal BC-body row verified on disk) and the BC-1.01.008 map row gains VP-012; scripted recount over all 41 VP files × 154 map rows: 298 directed VP→BC bcs: edges, 0 forward-only, 0 reverse-only among live citations; Module column re-machine-checked against all 41 module: fields — zero mismatches after the call-13 sync (VP-018, VP-020); standing residue unchanged; the count-propagation hook's '153'-class citations are historical narrative lines (this file's 1.4 entry, STATE.md's pass-2 narrative — SC-32 precedent), live counts agree at 41 VPs / 154 BCs / 298 edges"
+  - "1.29 2026-11-25T16:00:00Z: pass-14 residual sweep (architect, item 1 reciprocity) — VP-001 bcs: gains BC-1.02.030 (its second VP-table row routes the sticky CP-S09 malformed-window-cache degrade to the never-blank ladder's cps09 row; ADV-P14-B02) and BC-1.04.007, BC-1.04.010, BC-1.04.013 (each contract's pass-14 VP-table row routes its OD-160-tagged foreign cached-sample value degrade cells to the ladder; ADV-P14-C2-02); VP-012 bcs: gains BC-1.04.007, BC-1.04.010 and BC-1.04.013 (same ADV-P14-C2-02 citation class); the four map rows gain the ids (BC-1.02.030: VP-001 appended; BC-1.04.007/.010/.013: VP-001, VP-012 before VP-030); BC-1.04.008 NOT added despite its 1.2.3 history stamp claiming VP-001/VP-012 rows — the stamp's table rows are not on disk (ss-01 owner defect, reported); EC-respelling companions fixed in VP-001/VP-012 carrier text (BC-1.04.006 register is EC-007, BC-1.04.011 register is EC-008); scripted recount over all 41 VP files x 154 map rows reads 310 directed VP→BC bcs: edges, 0 forward-only among routed citations; the recount also surfaced five map rows lagging VP-001's 2.9 CP-S-owner bcs: delta (BC-1.02.001/.003/.008/.010/.013 gain VP-001 — the 12:00:00Z B02 leg landed after the 09:00:00Z end-sync count of 298); standing residue unchanged (3 design references + 3 removal-note citations + 2 VP-041 scope-split contrast mentions; the BC-1.02.017 VP-033 attributive joint-routing mention reported for adjudication)"
+  - "1.30 2026-11-26T17:00:00Z: pass-14 residual closure — the ss-01 owner defect reported in 1.29 is resolved: BC-1.04.008 v1.2.5 (coordinator addendum, EC-007 consolidated OD-160 foreign cached-sample register, CP-C38/CP-C39) delivered the VP-001 and VP-012 VP-table rows and matching VP Anchors, mirroring BC-1.04.007; disk-verified this burst; VP-001 bcs: and VP-012 bcs: gain BC-1.04.008, the carrier/citation-carrier sentences name the contract, and the BC-1.04.008 map row becomes VP-001, VP-012, VP-030; scripted recount over all 41 VP files x 154 map rows reads 312 directed VP→BC bcs: edges (the recorded 310 plus the two new edges), and the both-direction table-level check over all 154 BC bodies reads 0 forward-only and 0 reverse-only among routed citations — the sweep's two withheld one-way links are closed; standing residue unchanged (the 4 frontmatter-rider edges keyed to PC text with no VP-table mention are the standing SC-29 rider class); the count-propagation hook's '153'-class citations remain historical narrative lines (SC-32 precedent), live counts agree at 41 VPs / 154 BCs / 312 edges"
 ---
 
 # VP-INDEX: hylo P1 verification properties (catalog source of truth)
@@ -96,9 +99,9 @@ modified:
 | VP-015 | VP-015-config-resolution-totality.md | Config resolution is total over the environment; the registry is closed | safety | property/fuzz | internal/config | BC-2.01.001 | ARCH-02 |
 | VP-016 | VP-016-config-error-classes-line.md | D4-EX-3 config-error classes, line format, and no-cache-writes guarantee | invariant | unit/table | internal/config (errors.go), cmd/hylo | BC-2.02.001 | ARCH-02 |
 | VP-017 | VP-017-exactly-one-backend.md | Exactly-one-backend cardinality until P6 | invariant | unit/table | internal/config (backends validator) | BC-2.01.002 | ARCH-02 |
-| VP-018 | VP-018-atomic-cache-writes.md | Atomic cache writes — no partial files, temp cleanup, failed replace persists nothing | safety | unit/table | internal/statusline (cache.go), internal/cost | BC-1.06.001 | ARCH-04 |
+| VP-018 | VP-018-atomic-cache-writes.md | Atomic cache writes — no partial files, temp cleanup, failed replace persists nothing | safety | unit/table | internal/statusline (cache.go, cost-history CacheStore) | BC-1.06.001 | ARCH-04 |
 | VP-019 | VP-019-four-cache-swap-parity.md | Four-cache swap — Python-writes/Go-reads and reverse are byte-identical | invariant | parity | internal/parity (swap), internal/statusline (cache.go) | BC-6.02.004 | ARCH-04/ARCH-07 |
-| VP-020 | VP-020-cost-history-integrity.md | Cost-history parse failure — legacy reload; next record regenerates the file | invariant | unit/table | internal/cost | BC-1.05.004 | ARCH-04/ARCH-03 |
+| VP-020 | VP-020-cost-history-integrity.md | Cost-history parse failure — legacy reload; next record regenerates the file | invariant | unit/table | internal/statusline (cost-history CacheStore I/O), internal/cost (pure record/throttle properties) | BC-1.05.004 | ARCH-04/ARCH-03 |
 | VP-021 | VP-021-cost-colour-goldens.md | Dynamic dollar colours and percentile goldens over 21 seeded sessions | invariant | golden | internal/statusline (cost.go), internal/cost | BC-1.05.008 | ARCH-03 |
 | VP-022 | VP-022-ledger-read-scope-absence.md | The status line never reads the ledger (DI-007) — architectural absence, REVISIT P7 | invariant | static analysis | internal/statusline (Env read scope) | BC-1.04.001 | ARCH-03/ARCH-04/ARCH-09 |
 | VP-023 | VP-023-pyfmt-num-equivalence.md | pyfmt number semantics equivalent to CPython 3.11 on oracle tables | invariant | property/fuzz | internal/pyfmt (num.go) | BC-5.01.001 | ARCH-06 |
@@ -133,7 +136,7 @@ modified:
 | BC-1.01.005 | VP-027, VP-040 |
 | BC-1.01.006 | VP-027, VP-040 |
 | BC-1.01.007 | VP-027, VP-040 |
-| BC-1.01.008 | VP-005 |
+| BC-1.01.008 | VP-005, VP-012 |
 | BC-1.01.009 | VP-008, VP-009, VP-019, VP-022 |
 | BC-1.01.010 | VP-027 |
 
@@ -141,19 +144,19 @@ modified:
 
 | BC | VPs |
 |---|---|
-| BC-1.02.001 | VP-028, VP-041 |
+| BC-1.02.001 | VP-001, VP-028, VP-041 |
 | BC-1.02.002 | VP-028, VP-041 |
-| BC-1.02.003 | VP-028, VP-041 |
+| BC-1.02.003 | VP-001, VP-028, VP-041 |
 | BC-1.02.004 | VP-012, VP-028, VP-041 |
 | BC-1.02.005 | VP-019, VP-028 |
 | BC-1.02.006 | VP-001, VP-028, VP-041 |
 | BC-1.02.007 | VP-028, VP-041 |
-| BC-1.02.008 | VP-028 |
+| BC-1.02.008 | VP-001, VP-028 |
 | BC-1.02.009 | VP-028, VP-041 |
-| BC-1.02.010 | VP-028, VP-041 |
+| BC-1.02.010 | VP-001, VP-028, VP-041 |
 | BC-1.02.011 | VP-001, VP-028 |
 | BC-1.02.012 | VP-001, VP-028 |
-| BC-1.02.013 | VP-019, VP-028, VP-041 |
+| BC-1.02.013 | VP-001, VP-019, VP-028, VP-041 |
 | BC-1.02.014 | VP-001, VP-028 |
 | BC-1.02.015 | VP-028, VP-041 |
 | BC-1.02.016 | VP-028, VP-041 |
@@ -170,7 +173,7 @@ modified:
 | BC-1.02.027 | VP-001, VP-028, VP-041 |
 | BC-1.02.028 | VP-028, VP-041 |
 | BC-1.02.029 | VP-001, VP-028 |
-| BC-1.02.030 | VP-019, VP-028 |
+| BC-1.02.030 | VP-001, VP-019, VP-028 |
 
 ### S1.03 (21)
 
@@ -208,13 +211,13 @@ modified:
 | BC-1.04.004 | VP-001, VP-030, VP-012 |
 | BC-1.04.005 | VP-001, VP-030 |
 | BC-1.04.006 | VP-030, VP-001, VP-012 |
-| BC-1.04.007 | VP-030 |
-| BC-1.04.008 | VP-030 |
+| BC-1.04.007 | VP-001, VP-012, VP-030 |
+| BC-1.04.008 | VP-001, VP-012, VP-030 |
 | BC-1.04.009 | VP-030, VP-001, VP-012 |
-| BC-1.04.010 | VP-030 |
+| BC-1.04.010 | VP-001, VP-012, VP-030 |
 | BC-1.04.011 | VP-030, VP-001, VP-012 |
 | BC-1.04.012 | VP-030, VP-001, VP-012 |
-| BC-1.04.013 | VP-030 |
+| BC-1.04.013 | VP-001, VP-012, VP-030 |
 | BC-1.04.014 | VP-001, VP-030, VP-012 |
 | BC-1.04.015 | VP-001, VP-030 |
 | BC-1.04.016 | VP-001, VP-030 |
@@ -363,7 +366,7 @@ the for-all fuzz; the reciprocal BC-body VP-table row delivered in BC-1.07.001
 v1.0.7), VP-012 gains BC-1.03.002/.005/.014/.016 and VP-013 gains
 BC-1.03.014/.016 (reciprocal BC-body VP-table rows verified on disk, ADV-P8-C03);
 the five map rows gain the ids; the 1.18 TRANSIENT forward-only edge VP-024 in
-BC-1.05.009 is RESOLVED (BC-1.05.009 v1.3.3 delivered the VP-024 VP-table row)). Pass-12 agent-4 end-sync 2026-11-21T23:30:00Z, scripted over all 41 VP files × 154 BC bodies: 288 directed VP→BC `bcs:` edges — agent 3's pass-12 `bcs:` deltas (C2-02) landed on disk mid-burst and are synced here: VP-001's `bcs:` gains BC-1.04.009, VP-012's gains BC-1.04.009 and BC-1.04.014 (VP-001's BC-1.04.014 edge was already recorded at pass-11), and the two map rows gain the appended ids (BC-1.04.009: VP-001, VP-012 after VP-030; BC-1.04.014: VP-012 appended). The burst's one TRANSIENT forward-only edge, VP-012 in BC-1.04.014 (v1.18 precedent), is RESOLVED on re-check at burst end: BC-1.04.014's VP table delivered the reciprocal row mid-burst, and the re-run union reads 288 directed VP→BC `bcs:` edges, 0 forward-only. Pass-12 residual recount 2026-11-22T00:00:00Z, scripted over all 41 VP files: VP-001's `bcs:` gains BC-1.05.001 (that contract's VP-table row routes its stdin-borne CP-O10 overflow leg, PC5 + EC-009, to the never-blank ladder; ADV-P12-C2-07), the BC-1.05.001 map row gains VP-001 appended, and the recount reads 289 directed VP→BC `bcs:` edges, 0 forward-only — standing residue unchanged.
+BC-1.05.009 is RESOLVED (BC-1.05.009 v1.3.3 delivered the VP-024 VP-table row)). Pass-12 agent-4 end-sync 2026-11-21T23:30:00Z, scripted over all 41 VP files × 154 BC bodies: 288 directed VP→BC `bcs:` edges — agent 3's pass-12 `bcs:` deltas (C2-02) landed on disk mid-burst and are synced here: VP-001's `bcs:` gains BC-1.04.009, VP-012's gains BC-1.04.009 and BC-1.04.014 (VP-001's BC-1.04.014 edge was already recorded at pass-11), and the two map rows gain the appended ids (BC-1.04.009: VP-001, VP-012 after VP-030; BC-1.04.014: VP-012 appended). The burst's one TRANSIENT forward-only edge, VP-012 in BC-1.04.014 (v1.18 precedent), is RESOLVED on re-check at burst end: BC-1.04.014's VP table delivered the reciprocal row mid-burst, and the re-run union reads 288 directed VP→BC `bcs:` edges, 0 forward-only. Pass-12 residual recount 2026-11-22T00:00:00Z, scripted over all 41 VP files: VP-001's `bcs:` gains BC-1.05.001 (that contract's VP-table row routes its stdin-borne CP-O10 overflow leg, PC5 + EC-009, to the never-blank ladder; ADV-P12-C2-07), the BC-1.05.001 map row gains VP-001 appended, and the recount reads 289 directed VP→BC `bcs:` edges, 0 forward-only — standing residue unchanged. Pass-13 agent-4 end-sync stamp recorded per ADV-P14-A2-08: the 1.27 history entry's scripted recount read 297 directed VP→BC `bcs:` edges (2026-11-24T16:00:00Z) and its ONE TRANSIENT forward-only edge, VP-014 in BC-1.02.017, is RESOLVED — BC-1.02.017 v1.3.8 delivered the reciprocal VP-table row and VP Anchor (disk-verified this burst). Pass-14 agent-4 end-sync 2026-11-25T09:00:00Z, scripted over all 41 VP files × 154 map rows: agent 3's pass-14 `bcs:` delta synced — VP-012's `bcs:` gains BC-1.01.008 (its PC3 cached-`branch` lone-surrogate clause is an OD-160 register rider; ADV-P14-B01 reciprocity, the reciprocal BC-body VP-table row and VP Anchor verified on disk in the same burst) — and the BC-1.01.008 map row gains VP-012; the recount reads 298 directed VP→BC `bcs:` edges, 0 forward-only, 0 reverse-only among live citations; the Catalog Module column re-machine-checked against all 41 `module:` frontmatter fields — agent 3's call-13 module-home edits (VP-018, VP-020: cost-history file I/O and temp-dir tests in `internal/statusline` per pass-13 call 7) landed mid-burst and their two Module cells are synced here, recounted after the sync. Disclosure (1.26 precedent): VP-018/VP-020's earlier poll showed the edits not yet on disk; the end-of-burst re-read superseded it. Standing residue unchanged. Pass-14 residual sweep 2026-11-25T16:00:00Z, scripted over all 41 VP files × 154 map rows: VP-001's `bcs:` gains BC-1.02.030 (sticky CP-S09 row; ADV-P14-B02) and BC-1.04.007/.010/.013 (OD-160-tagged foreign cached-sample cells; ADV-P14-C2-02), VP-012's `bcs:` gains BC-1.04.007/.010/.013 (same citation class), the four map rows gain the ids, and the recount reads 310 directed VP→BC `bcs:` edges, 0 forward-only — standing residue unchanged; the recount also surfaced five map rows lagging VP-001's 2.9 CP-S-owner `bcs:` delta (BC-1.02.001/.003/.008/.010/.013 gain VP-001; the 12:00:00Z B02 leg landed after the 09:00:00Z end-sync count of 298); BC-1.04.008 withheld (its 1.2.3 stamp claims VP-001/VP-012 VP-table rows that are not on disk — ss-01 owner defect, reported). Pass-14 residual closure 2026-11-26T17:00:00Z, scripted over all 41 VP files × 154 map rows: the 16:00:00Z sweep's withheld rows are on disk (BC-1.04.008 v1.2.5 coordinator addendum: VP-001 and VP-012 VP-table rows and matching VP Anchors, mirroring BC-1.04.007), VP-001's and VP-012's `bcs:` gain BC-1.04.008, the BC-1.04.008 map row becomes VP-001, VP-012, VP-030, and the recount reads 312 directed VP→BC `bcs:` edges, 0 forward-only, 0 reverse-only among routed citations — standing residue unchanged.
 Standing residuals otherwise unchanged: exactly 3 reverse-only VP-table residuals plus the 3
 removal-note citations and the 2 VP-041 scope-split contrast mentions enumerated
 below — the lists are therefore exactly the residue). Design references, not

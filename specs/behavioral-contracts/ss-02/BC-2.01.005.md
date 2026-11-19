@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.4.5"
+version: "1.4.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -35,6 +35,7 @@ modified:
   - "2026-11-21T07:00:00Z (1.4.3): ADV-P11 remediation D12 (orchestrator call 16) — PC-6's control-byte rule states the ANY-TEXT verdict: a control byte in an any-text key value (e.g. statusline.telemetry.query) yields the same Text-class reason 'control character' (its only bounds are the control-byte bound and valid UTF-8; the empty string stays in range); sibling A09/D08 respell — PC-5 band defaults to strict-JSON env spellings [80,100] and [70,90]"
   - "2026-11-22T00:00:00Z (1.4.4): ADV-P12 remediation D06 (orchestrator call 9) + D07 (call 10) + D12 — PC-2 List: strip-then-validate order STATED (Python str.strip() FIRST, then control-byte/emptiness checks on the stripped item; legacy-identical; applies to limits.windows and reroute-all entries too); PC-3: the ~-expansion home source is platform.HomeDir(env) — a relative HOME (macOS/Linux) or relative USERPROFILE (Windows) is treated as UNSET (BC-3.01.001 PC-2 kind discipline), yielding 'home directory unknown' (with a relative home, ~/c reports home-unknown, never 'not an absolute path'); PC-3 absoluteness gains the per-OS filepath.IsAbs rule (Windows: \\foo and C:foo are relative), propagated from BC-3.01.001 PC-3 / BC-2.03.002 PC-3"
   - "2026-11-23T00:00:00Z (1.4.5): ADV-P13 remediation D09 — PC-6 pins the List-item invalid-byte verdict legacy performs: POSIX env values arrive surrogateescape-decoded (byte b = code point U+DC00+b; measured on CPython 3.11.7: raw 0xFF = U+DCFF, Cs, kept by strip), so a List item with invalid POSIX bytes is strip-mapped and ACCEPTED — no invalid-UTF-8 verdict exists for List items and no new reason string enters the BC-2.02.001 vocabulary; 0xFF vector added"
+  - "2026-11-25T00:00:00Z (1.4.6): ADV-P14 remediation D01+D07 (orchestrator calls 5, 11) — PC-6 extends the display-width 1..16 bound and its reason string to the nine width-bounded statusline.labels.* members (OD-194); the List-item passage pins the U+DC00+b mapping as stored in the BC-5.02.004 WTF-8 form with prefix matching over those bytes"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -169,6 +170,10 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      `label_unknown` (display width 1..16, judgment call keeping the pill short): a
      violating value yields
      `<key>=<value> (expected non-empty control-free text of display width 1..16)`.
+     The same bound and the same reason string cover the nine width-bounded
+     `statusline.labels.*` members (OD-194, BC-2.01.004 PC-13): a value outside
+     1..16 columns yields `expected non-empty control-free text of display width
+     1..16` (pass-14 D01).
    - The glyph-family keys (`statusline.glyphs.*`, `statusline.subagent.glyphs.*`):
      a value that is not non-empty control-free text of exactly 1 code point yields
      `<key>=<value> (expected exactly 1 code point)`; the sparkline member yields
@@ -217,9 +222,11 @@ Number grammars are BC-2.02.003; URL is BC-2.02.005; enum is BC-2.02.004.
      strip-then-validate and the key is ACCEPTED. No new reason exists: invalid
      bytes in a List item yield NO Text-class verdict, and the BC-2.02.001 reason
      vocabulary is unchanged. The decoded-item decision itself (prefix matching for
-     `backends[0].model_prefixes`) is bytewise on Go strings, decision-equivalent to
-     legacy's mapped-string comparison because model names on both sides arrive
-     through the same stdin JSON decode (BC-5.02.003). Pin: with
+     `backends[0].model_prefixes`) runs bytewise over Go strings holding the mapped
+     code points STORED in the BC-5.02.004 WTF-8 form (a lone surrogate kept as
+     written, three bytes), decision-equivalent to legacy's mapped-string comparison
+     because model names on both sides arrive through the same stdin JSON decode
+     (BC-5.02.003) (pass-14 D07). Pin: with
      `HYLO_BACKENDS_0_MODEL_PREFIXES` carrying the raw byte 0xFF on POSIX, the item
      is stripped (no-op), passes the control-free check, and the value is accepted
      with no config error.

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.9"
+version: "1.2.10"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T09:00:00Z
@@ -34,6 +34,7 @@ modified:
   - "2026-11-21T09:00:00Z (1.2.7): pass-11 residual — PC-3 step 6 respelled to the ORACLE_TESTS -run/-skip pattern (BC-6.01.001 PC-7; ARCH-07 OD-145 binding), removing the minted `oracle` build tag; PC-3 item 4 and the Description state the two-ref scan `--log-opts=\"main factory-artifacts\"` with the scanned-commit count compared against `git rev-list --count main factory-artifacts` (ARCH-08 hygiene bullet); EC-004 respelled 'old commit of either ref'; the VP-table row says the gitleaks two-ref scan step"
   - "2026-11-22T00:00:00Z (1.2.8): ADV-P12 remediation A02/D04/D16 (orchestrator call 1) + A06 (call 5) + D15 — PC-4 and the Description respelled to the FULL-HISTORY scan `--log-opts=\"--all\"` after checkout with fetch-depth: 0 (--all includes HEAD, so a PR run scans the PR head and every fetched ref; scanned-commit count asserted equal to `git rev-list --count --all`; matches the CLAUDE.md pre-push command; supersedes the two-ref scan of 1.2.7); EC-004 and the VP-table row follow; PC-3 restructured per call 5: gofmt -l and govulncheck run ONCE in the ubuntu lint job, go vet and staticcheck on every OS leg, setup-python ONLY in the ORACLE_TESTS jobs (Tier A, timing, nightly fuzz; each -runs its own member(s) and prints the resolved CPython patch, PC-6), plain legs install none; D15: the Tier B goldens / exclusion-table / corpus-hygiene sentence now attaches to the plain -skip step; Source row: Go 1.26.0 floor leg (D16)"
   - "2026-11-23T00:00:00Z (1.2.9): ADV-P13 remediation D06 (orchestrator call 5) + call 6 — Description respelled: Tier B runs in the plain test legs ONLY (no separate Tier B job; the plain legs own the tier-b census), and the Tier A job and the timing job EACH run on all three OSes with setup-python (CPython 3.11) on every leg of each, printing the resolved patch (PC-3 step 4, PC-6); PC-3 step 5 restructured per call 6: the lint job runs gofmt -l only and is required, govulncheck is its OWN job that runs and reports on every change and becomes a required check with the go.mod toolchain line (ARCH-08 ordering rule); EC-001 and EC-005 follow (Tier A job matrix named; gofmt fails in the lint job, not at step 1); CTV row tightened"
+  - "2026-11-25T00:00:00Z (1.2.10): ADV-P14 remediation D16 (orchestrator call 17) — the HYLO_PARITY_PYTHON export generalized to every oracle-consuming job (Tier A, timing per BC-6.04.002 Pre-3, nightly fuzz); the setup-python ordering now precedes the job's go test -run <member> invocation, not go test ./..."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -95,14 +96,16 @@ pull request's own commits are scanned before merge. The workflow is gating: any
    4. The ORACLE_TESTS jobs are separate from the plain legs: the dedicated Tier A
       job and the timing job (BC-6.04.002) EACH run on all three OSes
       (ubuntu-24.04 / macos-15 / windows-2025; pass-13 orchestrator call 5), and the
-      nightly fuzz job runs its own member(s) nightly; every Tier A and timing leg
-      installs CPython 3.11 by `actions/setup-python` BEFORE its `go test` and prints
-      the resolved patch, and each runs its
-      own member(s) with `-run`. In the Tier A job the interpreter's reported absolute
-      path is exported as `HYLO_PARITY_PYTHON` (OD-108), with `CI=true`, so Tier A
-      cannot skip (BC-6.01.001 PC-6) — setup-python must precede
-      `go test ./...` or the job fails (ADV-P4-D08, aligning this BC with ARCH-08's
-      corrected order). The clock-shim canary runs first (BC-6.01.003), then the
+      nightly fuzz job runs its own member(s) nightly; every Tier A, timing and
+      nightly-fuzz leg installs CPython 3.11 by `actions/setup-python` BEFORE its
+      `go test -run <member>` invocation and prints the resolved patch. In every
+      oracle-consuming job (Tier A; the timing job, BC-6.04.002 Pre-3; the nightly
+      fuzz job) the interpreter's reported absolute path is exported as
+      `HYLO_PARITY_PYTHON` (OD-108), with `CI=true`, so the oracle cannot skip
+      (BC-6.01.001 PC-6) — setup-python must precede the job's
+      `go test -run <member>` invocation or the job fails (ADV-P4-D08, aligning this
+      BC with ARCH-08's corrected order; export generalized to all oracle-consuming
+      jobs, pass-14 D16). The clock-shim canary runs first (BC-6.01.003), then the
       OD-185 oracle self-check: the harness measures the resolved oracle's JSON depth
       boundaries and `unicodedata.unidata_version` (constants measured on 3.11.7,
         floating 3.11.x install) and fails closed on any mismatch, printing the

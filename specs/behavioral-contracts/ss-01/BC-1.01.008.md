@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.11"
+version: "1.2.12"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T06:25:00Z
@@ -29,6 +29,7 @@ modified:
   - "2026-11-23T00:00:00Z (1.2.9): pass-12 remediation (ADV-P12-B02): Architecture Anchors re-anchored from #statusline-guard (target guard.go) to the input.go family anchor #input; no behavioral change"
   - "2026-11-23T14:00:00Z (1.2.10): pass-12 residual sweep (orchestrator pass-12 residual call 8): the lone-surrogate display-name vector restates its window-start pin per the corrected cache-003 design (every corpus case seeds proc_start or is cache-003, no probe on either side, no fake process table); no behavioral change"
   - "2026-11-24 (1.2.11): pass-13 remediation (ADV-P13-B01): the lone-surrogate edge-case row states its seed (statusline-s1.json = {\"proc_start\": 900.0}, corpus admission rule BC-3.02.001 Inv 4) instead of a bare empty-cache setup, and the expected cache content respells to the measured append mechanics (seeded proc_start first, then rl/rl_ts, SL:306-308); the row re-measured  (CPython 3.11.7, isolated temporary HOME and cwd); modified list converted from flow to block form with the 1.2.5 bare stamp re-dated faithfully ascending (precedent: pass-5 ADV-P5-B14); no behavioral change; 2026-11-24T00:00:00Z"
+  - "2026-11-24T01:00:00Z (1.2.12): pass-14 remediation (ADV-P14-B01): Verification Properties and VP Anchors gain the VP-012 row for PC3's cached-`branch` lone-surrogate clause — the OD-160 exclusion-set register rider VP-012 already names (dedicated directional test; Go table test, not byte-parity); the reciprocal VP-012 bcs: entry is the architect's half of the finding; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -131,6 +132,7 @@ Contrast (not parity): the invalid-UTF-8 input under `PYTHONUTF8=1` printed `...
 |--------|----------|-------------|
 | VP-005 (stdout codec leg) | stdout is always valid UTF-8 — VP-005's symmetric stdout half ("stdout is valid UTF-8" for every render state) | fuzz |
 | VP-005 | Any invalid-UTF-8 stdin yields the same output as `{}` with the same caches | go test -fuzz |
+| VP-012 | PC3's cached-`branch` lone-surrogate clause is a foreign-cache shape carrying exclusion id **OD-160** (ruling Q-b: Go authors well-formed caches), closed by VP-012's dedicated directional test — the exclusion-set register names BC-1.01.008 PC3, the cached-`branch` lone-surrogate clause | dedicated directional test (per VP-012); Go table test, not byte-parity |
 
 ## Traceability
 
@@ -164,6 +166,8 @@ TBD — status line frame (design step S2)
 
 - VP-005 — decode-failure equivalence and the stdout-always-valid-UTF-8 property (VP-005 1.1 spans both
   stdio halves; resolves pass-1 finding ADV-P1-B11)
+- VP-012 — OD-160 register rider for the PC3 cached-`branch` lone-surrogate clause (dedicated directional
+  test; Go table test, not byte-parity)
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -26,6 +26,7 @@ introduced: "0.1"
 modified:
   - "patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165), 2026-11-17T21:45:00Z"
   - "1.2.2 2026-11-18: ADV-P4 remediation D14 — Nd classification pinned to hylo's generated Unicode 14.0.0 tables (OD-170); TestD4EX3_Name rename (D22)"
+  - "2026-11-25T00:00:00Z (1.2.3): ADV-P14 remediation D03 (orchestrator call 9) — PC-4 moves the int64-overflow verdict out of the grammar checks: a ParseInt result outside int64 is an exact big integer that goes to the range check (BC-2.02.001 range rule 3, after rule 2 negative)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,7 +68,10 @@ BC-2.02.001):
    rejected by range, BC-2.02.002).
 4. `Int`: `pyfmt.ParseInt` (Python `int(x)` base-10 grammar) fails →
    `<key>=<value> (not an integer)` (e.g. `2.0`, `1e1`, `nan`, `""`, `0x2`). A result
-   outside int64 → `<key>=<value> (out of range)`.
+   outside int64 parses as an exact big integer — it is NOT a grammar failure; it
+   goes to the range check, where int64 overflow is range rule 3 `out of range`
+   AFTER rule 2 `negative` (BC-2.02.001's canonical precedence; moved out of the
+   grammar checks pass-14 D03).
 5. Otherwise the parsed number goes to the range check (BC-2.02.002 for `Seconds`; the key's
    registry range for `Int`/`Float`, whose exact reason bytes and precedence are the
    'Numeric-range failures by type' section of BC-2.02.001 — pass-7 D03). `statusline.rows` (legacy `DGX_SL_ROWS`, SL:75) has

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -28,6 +28,7 @@ modified:
   - "2026-11-19T17:00:00Z (1.2.2): ADV-P7 remediation D24 - PC-2 exit-code rule gains the pinned crash-leg exception: a closed id's pinned non-zero ORACLE exit (cp-x03, D4-EX-3 Number grammar-failure leg: exit 1) is the expectation, and equality with it is still required"
   - "2026-11-21T07:00:00Z (1.2.3): ADV-P11 remediation A2-02 (orchestrator call 1, OD-190 applied literally) — PC-1 states the ONE open normalization: on the Windows legs the comparator converts the ORACLE's stdout CRLF to LF openly, BEFORE the byte comparison; hylo's bytes are never converted (hylo writes LF itself); apart from that conversion no normalization (no trimming, no SGR stripping, no Unicode normalization); EC-006 rewritten to the same disposition (the shim performs no newline reconfigure)"
   - "2026-11-23T00:00:00Z (1.2.4): ADV-P13 remediation D01 (orchestrator call 2) — PC-1 generalized: the open CRLF→LF conversion is THE definition for EVERY comparison of the ORACLE's stdout on the Windows legs (this per-step case comparator, the version probe of BC-6.01.001 PC-3, the clock-shim canary of BC-6.01.003 PC-4, and any other), each of which applies the same conversion before its comparison; BC-6.01.001 and BC-6.01.003 cite it"
+  - "2026-11-25T00:00:00Z (1.2.5): ADV-P14 remediation D05 (orchestrator call 6) — PC-1's open-conversion consumer enumeration gains the -update golden write of BC-6.03.001 PC-6 (committed goldens are LF on every OS)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,7 +71,9 @@ exit criterion (D4, PLAN §7) and the OD-117 parity target of "0 unexplained dif
    to LF openly, BEFORE the byte comparison (orchestrator call 1, OD-190 applied
    literally). This conversion is THE definition for EVERY comparison of the ORACLE's
    stdout on the Windows legs — this per-step case comparator, the version probe of
-   BC-6.01.001 PC-3, the clock-shim canary of BC-6.01.003 PC-4, and any other
+   BC-6.01.001 PC-3, the clock-shim canary of BC-6.01.003 PC-4, the `-update`
+   golden write of BC-6.03.001 PC-6 (the conversion runs before any golden is
+   written, so every committed golden is LF on every OS; pass-14 D05), and any other
    oracle-stdout comparison — each of which applies the same open CRLF→LF conversion
    before its comparison (pass-13 orchestrator call 2). Hylo's bytes are never
    converted — hylo writes LF itself. Apart from

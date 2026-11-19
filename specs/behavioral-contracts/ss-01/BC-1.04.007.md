@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T21:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md]
-input-hash: "8e821c7"
+input-hash: "ff74134"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_telemetry_fields (SL:754-763)"
@@ -25,6 +25,8 @@ modified:
   - "1.3.3 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC4/PC5 name the registered keys statusline.kv.host_yellow_pct and statusline.kv.host_shown_pct beside their default literals)"
   - "1.3.4 2026-11-18: pass-11 remediation — OD-194 consumer (PC5 names statusline.labels.kv and statusline.labels.host beside their defaults; %-unit scaffolding carries the named-format-constant note) + ADV-P11-C2-08 (THRESHOLDS §8b comment site SL:790 → SL:789)"
   - "1.3.5 2026-11-18: pass-13 remediation ADV-P13-C2-07 (signed zero pinned: kv -0.0 — the PC3 clamp keeps -0.0 because Python max returns the first equal operand, ceil gives 0 cells and .0f prints -0; EC-012 + vector row, oracle-verified CPython 3.11.7) + ADV-P13-C2-05 (the PC1/PC3 fraction-to-percent factor 100 named as a unit constant — named constant, not config, the ADV-P10-C2-12 pattern)"
+  - "1.3.6 2026-11-18: pass-14 remediation ADV-P14-C2-02 (EC-013 foreign cached-sample register: the kv/host-share clamp, compares and .0f renders — positive-giant kv pinned non-raise KV▰▰▰▰ 100%, positive-giant host share OverflowError; DI-012 lifted into the L2 row; VP-001/VP-012 rows added)"
+  - "1.3.7 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-013 cites its register ids (CP-C37) explicitly; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -104,6 +106,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 | EC-010 | host +Inf | warn and suffix both fire (`inf > 5`, `inf > 0.5`): yellow ` ↺host inf%` (ADV-P5-C2-12) |
 | EC-011 | host -Inf | no warn (`-inf > 5` false), no suffix (`-inf > 0.5` false): cyan, no suffix (ADV-P5-C2-12) |
 | EC-012 | kv -0.0 (signed zero) | clamp keeps `-0.0` (`Max` returns the first equal operand), `ceil` gives 0 cells, `.0f` prints `-0`: cyan `KV▱▱▱▱ -0%` (oracle-verified CPython 3.11.7; a port that normalises signed zero in the clamp prints `0%` — ADV-P13-C2-07) |
+| EC-013 | Foreign cached values of `vllm:kv_cache_usage_perc` and `dgx_kv:host_hit_share` (legacy sites: the clamp SL:759, the warn/suffix compares SL:760 and SL:762, the `.0f` renders SL:761-762) per fault class {string, null, list, dict, positive giant int, negative giant int}; pinned non-raise cells: a non-number kv or host share hides the segment or the suffix (isinstance gates, EC-009), a positive giant-int kv clamps to `KV▰▰▰▰ 100%` (`min(int, 100.0)` returns `100.0`), a negative giant-int kv clamps to `0%` (`max` returns `0.0`); raising cell: a positive giant-int host share passes the suffix compare and raises OverflowError at its `.0f` (SL:762; negative fails the compare and never renders) | raising cells → errDegraded (DI-008); every (site, class) cell's legacy outcome is recorded in the error-taxonomy OD-160 matrix; foreign cached values: CP-C37, OD-160, Go table tests; ids in the error-taxonomy CP-C matrix (ADV-P14-C2-02) |
 
 ## Canonical Test Vectors
 
@@ -121,6 +124,8 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 |--------|----------|-------------|
 | VP-030 | For the default `C = 4`, cell count = `min(ceil(kv/25), 4)`; under any other configured `C` the count is `min(ceil(kv / (100 / C)), C)` — the PC3 form, normative; `ceil(kv·C/100)` agrees at `C = 4` but can round differently for other `C` — and the pad is `C − n` | Go property test (testing/quick) |
 | VP-030 | 11-case review #15 table reproduces legacy bytes | manual (table) |
+| VP-001 | The promised output set holds on the EC-013 foreign cached-sample value degrade cells: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P14-C2-02) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-013 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P14-C2-02) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -129,7 +134,7 @@ history exceeds 5 %, else cyan; a dimmed `↺host N%` suffix follows when that s
 | Source | legacy/dgx_statusline.py:render_telemetry_fields (SL:754-763) |
 | Legacy contract | BC-SL-046 (P3 base, review #15, 11 cases) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008 |
+| L2 Domain Invariants | DI-008, DI-012 (EC-013 foreign cached-sample value shapes under the OD-160 named-deviation rule) |
 | Decisions | OD-57 E-0 (T-050), OD-113 |
 | Architecture Module | `internal/statusline/row2.go` |
 | Stories | TBD |
@@ -150,6 +155,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — KV cell math
+- VP-001 — never-blank/exit-0 ladder; the EC-013 degrade cells ride it (ADV-P14-C2-02)
+- VP-012 — OD-160 exclusion-closure citation (EC-013; ADV-P14-C2-02)
 
 ---
 

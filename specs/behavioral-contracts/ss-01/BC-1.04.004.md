@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.9"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T21:00:00Z
@@ -23,9 +23,11 @@ modified:
   - "2026-11-18 (v1.2.2) pass-7 remediation ADV-P7-C2-07 (dead-marker word sourced to statusline.pill.label_local per OD-189, glyph named glyphs.degraded) + ADV-P7-C2-14 BC side (CP-N03 canonical vector row added; the sole-key AttributeError raise type oracle-verified)"
   - "2026-11-18 (v1.2.3) pass-10 remediation ADV-P10-C2-11 (VP-001 row added to Verification Properties for the metrics-borne CP-N03 sole-key degrade leg; VP Anchors entry)"
   - "2026-11-18 (v1.2.4) pass-11 OD-194 consumer (PC2 names statusline.labels.old beside its default; the (~/s/) scaffolding around the word carries the named-format-constant note)"
-  - "2026-11-18 (v1.2.7) pass-13 residual (orchestrator residual sweep, CP-C register alignment): Invariant 3 cites crash id CP-C24 (the OD-160 exact-giant-int lr[0] OverflowError, minted by error-taxonomy 1.20); no behavioral change"
   - "2026-11-18 (v1.2.5) pass-12 remediation ADV-P12-C2-06 (Invariant 3's dict-sample failure list completed: the OD-160 exact-giant-int lr[0] OverflowError at the SL:778-779 .0f render format, BC-1.04.018 PC-1, and the foreign cached-sample value shapes, e.g. a string vllm:num_requests_running ValueError at the SL:741 .0f format, BC-1.04.006's segment; both oracle-verified CPython 3.11.7)"
   - "2026-11-18 (v1.2.6) pass-13 remediation ADV-P13-C2-01 (sibling lift: L2 row carries DI-012 beside DI-008; VP-012 OD-160 exclusion-closure row added; the VP-001 row extended beyond CP-N03 to the Inv 3 OD-160 foreign cached-sample value legs, with VP Anchors entries; Inv 3's segment pointer names the new sibling edge cases BC-1.04.006 EC-007/EC-008, BC-1.04.011 EC-008/EC-009, BC-1.04.012 EC-006)"
+  - "2026-11-18 (v1.2.7) pass-13 residual (orchestrator residual sweep, CP-C register alignment): Invariant 3 cites crash id CP-C24 (the OD-160 exact-giant-int lr[0] OverflowError, minted by error-taxonomy 1.20); no behavioral change"
+  - "2026-11-18 (v1.2.8) pass-14 remediation ADV-P14-C2-01/C2-02 (Invariant 3's per-site pointer list replaced by the pass-14 call-4 single-register method: EC-009 registers the row-2 foreign cached-sample value class — every series and legacy site, each fault class, citing the error-taxonomy OD-160 matrix; sibling pointers updated to each contract's single register) + ADV-P14-C2-08 (the 1.2.7 entry restored to the end of this list)"
+  - "1.2.9 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-009 cites its register ids (CP-C24 (co-owner, with BC-1.04.018 PC-1)) explicitly; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,14 +82,13 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
    after the session-cache write it returns as string `"5"` and no longer degrades; the
    OD-160 exact-giant-int `lr[0]` OverflowError at the `f"{x:.0f}"` render format
    (SL:778-779 inside `render_telemetry_fields`, BC-1.04.018 PC-1, crash id **CP-C24**; both signs —
-   oracle-verified CPython 3.11.7); and the foreign cached-sample VALUE shapes (OD-160,
-   BC-1.04.002 EC-008): a sample value whose render site formats a non-number — e.g. a
-   string `vllm:num_requests_running` reaches the `r{r:.0f}·q{q:.0f}` format and raises
-   ValueError (SL:741, "Unknown format code 'f' for object of type 'str'",
-   oracle-verified CPython 3.11.7; segment contract BC-1.04.006 EC-007); equivalent
-   unguarded render sites in the sibling segment contracts are pinned in their own
-   edge cases: BC-1.04.006 EC-007/EC-008, BC-1.04.011 EC-008/EC-009, BC-1.04.012
-   EC-006 (ADV-P12-C2-06).
+   oracle-verified CPython 3.11.7); and the foreign cached-sample value class (OD-160):
+   every read of a cache-sourced sample value at an unguarded row-2 render site is
+   registered once per contract — EC-009 here, and BC-1.04.006 EC-007, BC-1.04.007
+   EC-013, BC-1.04.008 EC-007, BC-1.04.010 EC-008, BC-1.04.011 EC-008, BC-1.04.012
+   EC-006, BC-1.04.013 EC-011 in the sibling segment contracts (the pass-14 call-4
+   single-register method replacing the pass-13 per-site pointers,
+   ADV-P14-C2-01/C2-02).
 
 ## Edge Cases
 
@@ -101,6 +102,7 @@ stale mode plus a dimmed `(~Ns old)` suffix; otherwise the fields in fresh mode.
 | EC-006 | `up=false`, age 302.0 (cached path, BC-1.04.002 EC-003) | `(~302s old)` |
 | EC-007 | sample `{}` (foreign cache) | dead rung |
 | EC-008 | age negative (clock step) with `up=false` | stale, no suffix |
+| EC-009 | Foreign cached values (cached path, BC-1.04.002) reaching any unguarded row-2 render site, per fault class {string, null, list, dict, positive giant int, negative giant int}: `vllm:num_requests_running`/`vllm:num_requests_waiting`/`dgx_preempt:rate5m` (busy compare SL:740, render SL:741), `vllm:kv_cache_usage_perc`/`dgx_kv:host_hit_share` (clamp SL:759, renders SL:761-762), `dgx_sl:gen_rate1m`/`dgx_tokens:gen_rate5m` (render SL:783), `dgx_ttft:p95_30m`/`dgx_sl:ttft_n30m` (gate SL:793), `DCGM_FI_DEV_POWER_USAGE`/`DCGM_FI_DEV_GPU_TEMP`/`dgx_power:est_wall_watts`/`dgx_power:rate_usd_per_kwh` (colour compare SL:812, renders SL:813/815/816, tariff SL:818), `dgx_llm_last_dgx_request_timestamp_seconds` (gate SL:825) | legacy's outcome for every (site, class) cell — a raise with its exception type, or a pinned non-raise result such as the positive-giant KV rendering `KV▰▰▰▰ 100%` — is recorded in the error-taxonomy OD-160 matrix; raising cells give errDegraded (never blank, exit 0, DI-008); foreign cached values: CP-C24 (co-owner, with BC-1.04.018 PC-1), OD-160, Go table tests; ids in the error-taxonomy CP-C matrix (ADV-P14-C2-01/C2-02) |
 
 ## Canonical Test Vectors
 
@@ -119,8 +121,8 @@ Sample `{"up:vllm": 1.0}` unless noted; output = list of segments.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Rung selection is a total function of `(truthy(sample), up, age > fresh_s, age > 0)` matching legacy | Go property test (testing/quick) |
-| VP-001 | The promised output set holds on the metrics-borne CP-N03 sole-key degrade leg (invariant 3 / canonical vector row) and on the OD-160 foreign cached-sample value legs (invariant 3: the exact-giant-int lr[0] OverflowError, the string running ValueError, and the equivalent sibling sites pinned in BC-1.04.006/011/012's edge cases): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P13-C2-01) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
-| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (invariant 3 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P13-C2-01) | property test (VP-012, go test) |
+| VP-001 | The promised output set holds on the metrics-borne CP-N03 sole-key degrade leg (invariant 3 / canonical vector row) and on the OD-160 foreign cached-sample value legs (invariant 3 / EC-009: the exact-giant-int lr[0] OverflowError and every foreign cached-sample value cell of EC-009 and the sibling single registers): render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P13-C2-01; ADV-P14-C2-01/C2-02) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (invariant 3 / EC-009 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P13-C2-01) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -151,8 +153,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — ladder totality
-- VP-001 — never-blank/exit-0 ladder; the metrics-borne CP-N03 sole-key leg rides it (ADV-P10-C2-11); the OD-160 foreign cached-sample value legs ride it too (ADV-P13-C2-01)
-- VP-012 — OD-160 exclusion-closure citation (Inv 3; ADV-P13-C2-01)
+- VP-001 — never-blank/exit-0 ladder; the metrics-borne CP-N03 sole-key leg rides it (ADV-P10-C2-11); the OD-160 foreign cached-sample value legs ride it too — invariant 3 / EC-009 and the sibling single registers (ADV-P13-C2-01; ADV-P14-C2-01/C2-02)
+- VP-012 — OD-160 exclusion-closure citation (Inv 3 / EC-009; ADV-P13-C2-01, ADV-P14-C2-01/C2-02)
 
 ---
 

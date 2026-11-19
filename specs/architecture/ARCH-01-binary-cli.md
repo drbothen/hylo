@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "binary-cli"
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
 timestamp: 2026-11-21T18:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/interface-definitions.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "f34b208"
+input-hash: "3948059"
 
 ---
 
@@ -98,8 +98,8 @@ OD-112: adapt or hand-roll the scan).
   unknown-flag), `version`, `config path` when all three directories resolve, `config
   validate` when valid. Exit 1: `config validate` on invalid config (E-VAL-001, plain
   reasons, no SGR) and `config path` when a directory cannot be determined (BC-2.03.002
-  PC-3, EC-008/010/011 — the verb's contract is three printed paths, so an unresolvable
-  directory is a failure, not a degradation; pass-5 A01). Exit 2: usage
+  PC-3, EC-008/010/011/012 — the verb's contract is three printed paths, so an unresolvable
+  directory is a failure, not a degradation; pass-5 A01; EC-012 added ADV-P14-A10). Exit 2: usage
   errors on non-statusline verbs (E-CLI-002, golden text `cmd/hylo/testdata/usage.golden`).
   Non-zero harness exits never occur inside `hylo` (E-HAR-001 is the harness process).
 - **Rationale:** one closed table (error-taxonomy.md) is testable exhaustively; a global
@@ -130,7 +130,8 @@ resolved as `--config` flag, then `HYLO_CONFIG`, then `internal/platform` per-OS
 line honors (cache/state lines resolve per BC-3.01.001), so `config path` can never
 disagree with actual use. Paths are computed by `platform`, never assembled here.
 Exit surface (BC-2.03.002, pass-5 A01): exit 0 when all three lines print; exit 1 when
-any of the three directories cannot be determined (EC-008/010/011); exit 2 is usage
+any of the three directories cannot be determined (EC-008/010/011/012 — EC-012 is the
+relative `HYLO_PATHS_CACHE_DIR` case, ADV-P14-A10); exit 2 is usage
 errors only.
 
 ## Fragment anchors (pass-4 A01; stable targets for BC-body fragment links)

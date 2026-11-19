@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.13"
+version: "1.3.14"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T18:00:00Z
@@ -33,6 +33,7 @@ modified:
   - "2026-11-18 (v1.3.11) pass-10 remediation ADV-P10-C2-01 (the two guard-first passages reordered: loop-key normalization and the normative Go step list now put the urlsplit sanitization BEFORE the scheme guard, matching the scheme-guard paragraph and the stdlib parse-sanitize-guard order; the normative Go rule respelled to the minimal net.Conn HTTP/1.1 client driving the hops itself — no http.Client/CheckRedirect in the path, the pass-5 recipe noted as superseded), ADV-P10-C2-08 (PC1 one INITIAL GET plus the Inv 1 hops — a loop re-keys A, so a literal single-request assertion fails), ADV-P10-C2-11 (VP-001 row added for the metrics-borne CP-N03 leg, EC-013)"
   - "2026-11-18 (v1.3.12) pass-11 remediation ADV-P11-C2-05 (the portless Host explanation now credits Request.host — set by Request._parse's _splithost plus unquote and added by do_request_ — instead of putrequest's urlsplit-netloc branch, which skip_host makes unreachable once Host is in the headers; wire output unchanged), ADV-P11-C2-08 (resp.read() site SL:172 → SL:171, matching ARCH-03)"
   - "2026-11-18 (v1.3.13) pass-12 remediation ADV-P12-C2-03 (the request target drops only the text after the LAST '#' — urllib's _splittag is url.rpartition('#') — then _splithost forms the selector; a path '#' survives the wire: Location /a#b gives GET /a#b; pinned for the initial selector and every redirect hop; oracle-verified CPython 3.11.7)"
+  - "2026-11-18 (v1.3.14) pass-14 remediation ADV-P14-C2-09 (PC1(ii)'s ABSENT test pinned to Python's int grammar — optional sign, surrounding whitespace stripped, underscores between digits and Unicode digits accepted, so `Content-Length: 1_0` reads 10 bytes and a Go strconv parse would reject it — and the de-chunk ladder's chunk-size parse pinned as int(everything up to the first ';', 16), base-16 Python int grammar whose whitespace tolerance absorbs the CRLF"
 
 deprecated: null
 deprecated_by: null
@@ -130,7 +131,10 @@ is byte 0x1B.
    for parity — named constants in hylo with a "why not config" comment, not config
    keys (P16). Body framing is `http.client`'s `HTTPResponse.read()` ladder, because
    legacy `resp.read()` (SL:171) reads through `http.client`: (i)
-   `Transfer-Encoding: chunked` → the DE-CHUNKED concatenation, and chunked wins over
+   `Transfer-Encoding: chunked` → the DE-CHUNKED concatenation (each chunk-size line is
+   `int(everything up to the first ";", 16)` after the `;` extension strip — base-16
+   Python int grammar, whose whitespace tolerance absorbs the CRLF and which accepts
+   underscores and an explicit sign; a Go `strconv` hex parse differs), and chunked wins over
    a `Content-Length` (RFC 2616 §4.4 #3 as coded in `HTTPResponse.begin`) — where
    "chunked" means the EXACT equality `tr_enc.lower() == "chunked"` on the lowercased
    compat32 value, NOT a trimmed or membership test: `Transfer-Encoding: Chunked␠`
@@ -141,8 +145,11 @@ is byte 0x1B.
    `3\r\n{"a\r\n4\r\n: 1}\r\n0\r\n\r\n` verbatim while `TE: chunked` reads
    `{"a: 1}` (ADV-P8-C2-03, replacing the former "case-insensitive" wording — the
    only case rule is the `.lower()` inside the exact equality); (ii) else
-   `Content-Length` → exactly that many bytes (a value that fails `int()` or is negative
-   is treated as ABSENT; a truncated body raises `IncompleteRead` → outer
+   `Content-Length` → exactly that many bytes (a value that fails `int()` — Python's
+   int grammar: optional `+`/`-` sign, surrounding whitespace stripped, underscores
+   between digits and Unicode digits accepted, so `Content-Length: 1_0` reads 10 bytes
+   where a Go `strconv` parse would reject it — or a negative value is treated as
+   ABSENT; a truncated body raises `IncompleteRead` → outer
    `except Exception` → no sample); (iii) else (neither header) → read to EOF
    (connection close). Oracle-verified on CPython 3.11.7, 2026-11-18: chunks
    `3\r\n{"a\r\n4\r\n: 1}\r\n0\r\n\r\n` read as

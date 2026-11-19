@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.6"
+version: "1.3.7"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/ubiquitous-language.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r2.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md, owner-decisions-log-2026-11-14.md]
-input-hash: "700e4fb"
+input-hash: "f3d196b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py"
@@ -28,6 +28,7 @@ modified:
   - "1.3.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
   - "1.3.5 pass-11 residual: the PC3 membership-set default re-spelled to the env spelling `claude,claude-` (legacy display form kept as the citation), matching BC-1.02.009 and the interface-definitions.md Default cell; no behavioral change; 2026-11-21T09:00:00Z"
   - "1.3.6 pass-12 remediation (ADV-P12-B08): the 1.3.4/1.3.5 history entries reordered ascending (1.3.5 preceded 1.3.4 was inverted); entry text unchanged; no behavioral change; 2026-11-23T00:00:00Z"
+  - "2026-11-24T01:00:00Z (1.3.7): pass-14 remediation (ADV-P14-B02): PC4 and the second Verification Properties row cite VP-001's cps09 fault-injection rows for the sticky degrade (BC-1.02.010 EC-009 is the first-crash owner of the register id); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -77,7 +78,8 @@ repeats on every refresh until stdin sends a good object or 1800 s pass. This co
    SL:503 (CP-S09) → whole stdout is `\e[90mstatusline degraded\e[0m\n`, with the cache write of step 1 already
    done — **unless** reroute-all is in effect (Precondition 3; BC-1.02.009): SL:489 then binds `rl = {}` without evaluating
    `d["rate_limits"]` (short-circuited conditional, oracle-verified 2026-11-17), so the malformed window is never
-   touched and nothing raises; the widget is hidden.
+   touched and nothing raises; the widget is hidden. The degrade legs are the cps09 fault-injection rows of
+   VP-001's never-blank ladder (BC-1.02.010 EC-009 is the first-crash owner of the register id).
 
 ## Invariants
 
@@ -133,7 +135,7 @@ Unstripped form of the first row: `\e[90m7d44%\e[0m \e[90m->4h18m\e[0m`. Pinned 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-028, VP-019 | For any interleaving of good/absent/malformed stdin, Go's shown output and cache bytes equal the oracle's at every step | multi-step (M) sequence harness vs oracle |
-| VP-028, VP-019 | A malformed window is cached before the degrade | multi-step table test |
+| VP-028, VP-019 | A malformed window is cached before the degrade; the sticky degrade itself is the cps09 fault-injection row of VP-001's never-blank ladder (exactly the 29-byte line, exit 0, on every refresh while the cache stays fresh) | multi-step table test |
 
 ## Traceability
 
@@ -167,6 +169,7 @@ TBD — filled by story-writer
 ## VP Anchors (Recommended)
 
 - VP-028, VP-019 — sequence equality
+- VP-001 — cps09 sticky degrade stays on the never-blank ladder (PC4; BC-1.02.010 EC-009 is the first-crash owner)
 
 ---
 

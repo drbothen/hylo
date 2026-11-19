@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.5"
+version: "1.5.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "97409c7"
+input-hash: "6ca6b1f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_fmt_lines (SL:849-860), render_lane (SL:534-537)"
@@ -27,6 +27,7 @@ modified:
   - "1.5.3 pass-8 remediation (ADV-P8-B05, orchestrator call 10): Inv 3 registered range respelled to the interface-definitions canon — units.lines = {`k`} (the `M` divisor is a registered render semantic, not an accepted value); no behavioral change; 2026-11-19T08:00:00Z"
   - "1.5.4 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O03 overflow degrade (EC-013) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
   - "1.5.5 pass-11 remediation (ADV-P11-B01 + B06): EC-010 names the taxonomy id CP-S10 with its faithful trigger and raise site (SL:535); PC3.1's `?` fallback pinned as a named format constant, not config (D15); no behavioral change; 2026-11-21T12:00:00Z"
+  - "2026-11-24T01:00:00Z (1.5.6): pass-14 remediation (ADV-P14-B02): the existing VP-001 row extended to cover the CP-S10 stdin type-confusion degrade (EC-010) beside the cpo03 overflow leg, and EC-010 cites it — the owner-side reciprocity for VP-001's existing bcs: entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,7 +107,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-007 | `"1e3"`, `"abc"`, `[1]`, NaN | `?` (NaN is truthy, so `▲?/▼0` shows) |
 | EC-008 | `true` | `1` |
 | EC-009 | negative below threshold, e.g. -20000 | `-20000` (thresholds are `>=` on signed value) |
-| EC-010 | `cost` truthy non-object — taxonomy **CP-S10** (`cost` truthy and not a dict, raise site SL:535) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table) |
+| EC-010 | `cost` truthy non-object — taxonomy **CP-S10** (`cost` truthy and not a dict, raise site SL:535) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table; VP-001 cps10 fault-injection row) |
 | EC-011 | ±Infinity | OverflowError not caught → guard line (BC-1.02.026, CP-S11) |
 | EC-012 | `total_lines_added` a JSON integer beyond int64 but within float64, e.g. int(1e300) | `int(n)` is exact (Python arbitrary precision); `n / 1e6` converts `n` to float first (exact here) and rounds twice — the result is `float(n)/1e6`, not the correctly rounded exact quotient (e.g. n = 2**53+1 → 9007199254.740992, where the exact quotient rounds to …93; oracle-verified 2026-11-18) → hylo reproduces the oracle bytes by emulating the double rounding (OD-156, extends OD-137; oracle: `format(int(1e300)/1e6, ".1f")` = the 298-character `……1056.0M` string) |
 | EC-013 | a JSON integer beyond the int→float conversion threshold, e.g. 2·10³¹⁵ or 10**310 | **Positive side:** `n / 1e6` raises OverflowError because the int operand cannot be converted to float (|n| ≥ 2**1024 − 2**970 ≈ 1.8·10³⁰⁸; taxonomy **CP-O03**) — even though a 1e304 quotient would fit — uncaught at SL:857 → guard line (stdin-borne render overflow, OD-156; oracle-verified 2026-11-18). A huge **negative** integer never divides: it fails both `>=` tests and renders exactly via `str(n)` (SL:860; oracle-verified 2026-11-17: `_fmt_lines(−10**400)` emits the exact decimal) |
@@ -142,7 +143,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 |--------|----------|-------------|
 | VP-028 | fmt equals CPython `_fmt_lines` for ints in [-1e7, 1e8] sampled around thresholds and ties | property test vs CPython goldens — a bounded golden sweep on an authored fixed sampling grid, staying on VP-028 per the VP-041 scope split (VP-041 takes generator-based for-all legs only) |
 | VP-028 | fmt of strings equals CPython for the BC-5.01.002 grammar corpus | table test |
-| VP-028, VP-001 | The CP-O03 overflow degrade (EC-013 positive side: `n / 1e6` at or beyond the int→float threshold) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
+| VP-028, VP-001 | The CP-O03 overflow degrade (EC-013 positive side: `n / 1e6` at or beyond the int→float threshold) and the CP-S10 stdin type-confusion degrade (EC-010: `cost` truthy and not a dict) stay on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection rows of VP-001's ladder; cpo03/cps10) |
 
 ## Traceability
 
@@ -176,6 +177,7 @@ TBD — session widgets story
 ## VP Anchors (Recommended)
 
 - VP-028 — `_fmt_lines` parity property
+- VP-001 — cps10 stdin type-confusion degrade and the cpo03 overflow degrade stay on the never-blank ladder (EC-010, EC-013)
 
 ---
 

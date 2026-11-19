@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -34,6 +34,7 @@ modified:
   - "2026-11-20T18:30:00Z (1.2.8): ADV-P9 remediation D06+A12+D07 — carve-out notes per-key backend errors sort after all registry keys (index then field name, BC-2.01.002); the platform seam paragraph states internal/platform as the SINGLE HOME of EnvVars (cmd/hylo and statusline consume it, ARCH-00); PC-2 keys default-only Text/List empty values to the Text-class non-empty reason (checks run first, BC-2.01.005 PC-7)"
   - "2026-11-21T07:00:00Z (1.2.9): ADV-P11 remediation D13 (orchestrator call 16) — PC-5 states that an unknown-flag run never reaches resolution: config.Load is not called at all (BC-4.01.002 PC-4), so stderr on such a run carries no unknown-setting warning"
   - "2026-11-22T00:00:00Z (1.3.0): ADV-P12 remediation D08 (orchestrator call 8) - the Platform-seam passage states the Windows environment decode: platform.EnvVars reads the UTF-16 environment through Go's standard decoding, which substitutes U+FFFD for an unpaired surrogate (documented unicode/utf16 behavior; not oracle-measured), pinned by a table test - a lone surrogate cannot reach the Windows env path"
+  - "2026-11-25T00:00:00Z (1.3.1): ADV-P14 remediation D02 (orchestrator call 8) — Inv 2's default-only disposition splits by type: the empty-value non-empty reason applies to TEXT keys only; the default-only LIST key's empty value is the empty list and gives out of range (BC-2.01.005 PC 7)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -73,9 +74,11 @@ happens once per process, before any side effect.
    or ANY TEXT (`statusline.telemetry.query`) ACCEPT the empty string — it carries no
    control byte, so it is in range (pass-7 D08; an empty value still renders the
    separator/joiner as the empty string) — a DEFAULT-ONLY Text/List key (BC-2.01.005
-   PC 7) instead runs its Text-class checks FIRST, so an empty value yields the
-   Text-class non-empty reason `expected non-empty control-free text`, not the default
-   comparison (ADV-P9-D07) — an
+   PC 7) instead runs its Text-class checks FIRST, so an empty value of a TEXT key
+   yields the Text-class non-empty reason `expected non-empty control-free text`,
+   not the default comparison (ADV-P9-D07); for the default-only LIST key an empty
+   value IS the empty list (the entry checks see no character to reject) and gives
+   the number-range reason `out of range` (BC-2.01.005 PC 7, pass-14 D02) — an
    empty SGR value is not a parameter list (BC-2.01.003 PC 2), and an empty composite
    value fails the shape check (BC-2.01.005 PC 5) (type coverage completed, ADV-P5-D32).
 3. No config file is opened: not the per-OS default path (BC-2.03.002), not `HYLO_CONFIG`,

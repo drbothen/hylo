@@ -1,14 +1,16 @@
 ---
 document_type: risk-register
 level: L3
-version: "1.9"
+version: "1.10"
 status: draft
 producer: architect
 timestamp: 2026-11-24T14:25:00Z
 phase: 1b
 inputs: [architecture-feasibility-report.md, prd.md, prd-supplements/nfr-catalog.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "5f8d8d8"
+input-hash: "076100a"
 traces_to: prd.md
+modified:
+  - "1.10 2026-11-18: pass-14 remediation - the open-NFR-candidates gate note names R-009's existing NFR-003 link beside R-001/R-008 (A09); no behavioral change"
 ---
 
 # Risk Register: hylo P1
@@ -41,7 +43,9 @@ traces_to: prd.md
 - Security-category risks: R-009 (hand-written HTTP/1.1 + TLS client over untrusted
   bytes; minted pass-13 A11/call 16) — the audit's vacuous pass predates it.
 - Open NFR candidates with no matching NFR: none. R-001 and R-008 link to existing
-  NFR-003, R-002 to NFR-001 and R-003 to NFR-004; R-004, R-005, R-006 and R-007 are not
+  NFR-003, R-002 to NFR-001 and R-003 to NFR-004; R-009 likewise links to NFR-003 (its
+  fuzz-target and parser-limit mitigations ride the parity/hardening machinery the NFR
+  already gates; pass-14 A09); R-004, R-005, R-006 and R-007 are not
   NFR candidates — their mitigations are verification machinery, documentation, and spec
   decisions, not missing non-functional targets.
 - Holdout scenarios are a Phase 2 artifact; HIGH/HIGH holdout coverage is n/a until

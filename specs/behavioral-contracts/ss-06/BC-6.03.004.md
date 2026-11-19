@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -39,6 +39,7 @@ modified:
   - "2026-11-20T18:30:00Z (1.3.3): ADV-P9 remediation D01 (orchestrator call 7) — rider-test closure pinned: NO exclusions.json entry exists for OD-76 or D4-EX-1 (no corpus case can exercise either id); register rows and a post-table note respelled; EC-006's example respelled to an OD-30 + D4-EX-2 pair (the former OD-76 repeated-DST corpus case is impossible under the UTC-only corpus)"
   - "2026-11-21T06:00:00Z (1.3.4): ADV-P10 remediation D07 (orchestrator call 7) — example corpus ids flattened to the ARCH-07 grammar's flat cases/<case-id>/ form with <family>-<nnn>[-<variant>] ids: config/ttl-nan → cfgerr-001, cache/sid-slash-temp → cache-003, transcript/cp-t01 → cpt01-001, EC-001's glob respelled cpt01-* (EC and CTV examples only; no schema change)"
   - "2026-11-22T00:00:00Z (1.3.5): ADV-P12 remediation D01 (orchestrator call 2) — the D4-EX-1 row and the rider-test-closure paragraph restated per the corrected cache-003 design: every corpus case either seeds proc_start or is cache-003 (empty fake PATH raises FileNotFoundError on the oracle; Go child at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0 — no probe on either side); the former 'every corpus case seeds proc_start' universal is dissolved"
+  - "2026-11-25T00:00:00Z (1.3.6): ADV-P14 remediation A2-01 (orchestrator call 1) + D06 (call 7) — PC-3 gains the machine-readable rider register for all TWELVE closed ids (package + concrete test names, no globs) as the spec source of the committed internal/parity/testdata/exclusion-riders.json (VP-012's leg reads it, checks the key set equals the closed set and every listed test exists via go test -list); TestWindowStart_OD76_TrueStart minted as the final concrete OD-76 name per BC-3.02.002's deferral; the oracle self-consistency leg's member scope pinned — clock-rewritten members excluded by legacy site (session rl_ts/fetch_ts/ts, sparkline hist, git-cache ts, cost-history entry ts) with the compared remainder stated"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -122,6 +123,53 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    when an entry is minted; a future phase that adds such a case mints the entry then. The
    ids stay in the closed set (owner-approved deviation classes, DI-012).
 
+#### Rider register (machine-readable; A2-01, pass-14 orchestrator call 1)
+
+The committed, machine-readable rider register in the code tree,
+`internal/parity/testdata/exclusion-riders.json`, carries EXACTLY this content: one
+entry per closed id, each a non-empty list of concrete `{package, test}` pairs, no
+globs (`.factory/` is git-ignored on main, so no Go test can read a BC file — this
+register is the machine-readable copy of the spec table above; the factory-side sync
+check compares the JSON content with the table). VP-012's leg reads the committed
+JSON, checks its key set equals the closed set, and checks that every listed test
+exists (`go test -list` over the named package), failing on any missing name:
+
+| `id` | `{package}` | tests |
+|---|---|---|
+| `D4-EX-1` | `internal/platform` | `TestWindowAge_D4EX1_Windows_AncestorFound` |
+| `D4-EX-2` | `internal/statusline` | `TestTranscript_D4EX2_T01` |
+| `D4-EX-3` | `internal/config` | `TestD4EX3_Number`, `TestD4EX3_Boolean`, `TestD4EX3_URL`, `TestD4EX3_Enum`, `TestD4EX3_Text` |
+| `OD-30` | `internal/statusline` | `TestCostHistory_OD30_NumericSidStringKey` |
+| `OD-76` | `internal/platform` | `TestWindowStart_OD76_TrueStart` |
+| `temp-file` | `internal/statusline` | `TestCacheStore_TempFile_CleanupOnFailedReplace` |
+| `cp-x03` | `internal/statusline` | `TestCPX03_WriteFailureExit0` |
+| `OD-159` | `internal/statusline` | `TestGitTextReads_OD159_StrictUTF8` |
+| `OD-160` | `internal/statusline` | `TestForeignCacheShape_OD160_Vectors` |
+| `OD-161` | `internal/statusline` | `TestTranscriptPath_OD161_IntMeansNoTranscript` |
+| `OD-166` | `internal/statusline` | `TestCostHistory_OD166_RecordGuard` |
+| `OD-181` | `internal/statusline` | `TestMetricsClient_OD181_TransportTable` |
+
+Each pair is the riding test its owning contract already names:
+`TestWindowAge_D4EX1_Windows_AncestorFound` (BC-3.02.001 VP-014);
+`TestTranscript_D4EX2_T01` (the T01-row test this contract's CTV pins; each
+`exclusions.json` entry names its own row's concrete test in the same
+`TestTranscript_D4EX2_<row>` form, BC-1.03.019); the five `TestD4EX3_*` names
+(BC-2.02.001, OD-178; `TestD4EX3_Text` is the Go-table-only member backing no parity
+entry); `TestCostHistory_OD30_NumericSidStringKey` (BC-1.05.006);
+`TestWindowStart_OD76_TrueStart` (FINAL concrete name minted here per BC-3.02.002's
+deferral: one dedicated table test carrying the D1-D4 exclusion rows and the
+I1-I6 identical-column rows); `TestCacheStore_TempFile_CleanupOnFailedReplace`
+(BC-6.03.003); `TestCPX03_WriteFailureExit0` (BC-1.01.001 EC-005, OD-145 settled);
+`TestGitTextReads_OD159_StrictUTF8` (BC-1.02.004);
+`TestForeignCacheShape_OD160_Vectors` (BC-1.05.004 VP-012, with BC-1.02.017
+EC-004..006 and BC-1.01.008 PC3 as the directional anchors);
+`TestTranscriptPath_OD161_IntMeansNoTranscript` (BC-1.03.015 VP-012);
+`TestCostHistory_OD166_RecordGuard` (BC-1.05.004 VP-012, OD-169);
+`TestMetricsClient_OD181_TransportTable` (BC-1.04.001 VP-012, defined in VP-030).
+The cost-history record-path riders (`OD-30`, `OD-166`) are declared in
+`internal/statusline`, where pass-13 orchestrator call 7 places cost-history file
+I/O and temp-dir tests — not in the pure `internal/cost` core.
+
 ## Postconditions
 
 1. **Load-time validation.** Before any case runs, the harness validates every entry.
@@ -155,7 +203,7 @@ This is the only mechanism by which a parity case may differ from the oracle (DI
    after step k are compared against its own caches after step k-1; when the case has a
    SINGLE step, the harness runs the oracle TWICE at the same step instant (two
    consecutive refreshes) and compares the second refresh's caches against the first's
-   — so "previous refresh" always exists. For the NUMBER class the degeneration holds
+   — so "previous refresh" always exists. MEMBER SCOPE of the leg (pass-14 D06, orchestrator call 7): the leg compares only the cache members legacy does NOT rewrite from the clock on every refresh in which their write path fires — excluded by legacy site: session cache `rl_ts` (SL:307), `fetch_ts` (SL:349 update and SL:353) and `ts` (SL:349), plus the sparkline `hist` member (rewritten at SL:349-350, its appended points embedding `t: now`, SL:342); git cache `ts` (SL:410); cost-history per-session entry `ts` (SL:236). COMPARED REMAINDER: session cache `rl`, `up`, `sample`, `proc_start`; git cache `branch`; cost history `lane`, `usd`, `api_ms`, `src`; the mix cache fully (every member content-derived, SL:1150-1153). For the NUMBER class the degeneration holds
    ONLY for its grammar-failure values: `""`, `four`, `0x4` and rows `2.0` crash legacy
    at import (SL:74 `TTL = float(...)` / SL:75 `ROWS = int(...)`; CP-X01/X02: exit 1,
    empty stdout), so the oracle leg pins exactly that — exit 1, zero stdout bytes, empty

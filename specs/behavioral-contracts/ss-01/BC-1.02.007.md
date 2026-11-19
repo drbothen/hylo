@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "8dd801c"
+input-hash: "84514f5"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:mix_labels (SL:1157-1174), mix_segment (SL:1177-1183)"
@@ -18,7 +18,7 @@ parity_class: byte-exact
 confidence: H
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): for-all percentage row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the composition glyph/colour mapping names its registry keys tools/conversation/thinking instead of the wildcard statusline.glyphs.* (Inv 2 and Config keys row); 2026-11-19T04:00:00Z", "1.2.1 pass-8 remediation (ADV-P8-B08): new Inv 4 pins the ` <1%` zero-bucket body as a named format constant, not config (D15); no behavioral change; 2026-11-19T08:00:00Z", "1.2.2 pass-12 remediation (ADV-P12-B01; orchestrator call 12): new EC-010 and vector row — non-numeric buckets restored from a hand-edited mix cache reach sum(counts[:3]) (SL:1181), the OD-160 foreign-cache vector CP-C07 (allocated from the formerly reserved id, rows built by the architect in error-taxonomy); Go table test, not byte-parity; no behavioral change; 2026-11-23T00:00:00Z", "1.2.3 pass-12 residual sweep (orchestrator pass-12 residual register alignment): EC-010, its vector row and the 1.2.2 note renumber CP-C12 to CP-C07 per the orchestrator ruling that the formerly reserved id is ALLOCATED, keeping the register label CP-C01..C10 true; no behavioral change; 2026-11-23T14:00:00Z"]
+modified: ["1.2 pass-6 remediation (ADV-P6-B01 call 10 + B08): for-all percentage row re-anchored from VP-028 to VP-041 (VP-028 keeps the golden leg); the composition glyph/colour mapping names its registry keys tools/conversation/thinking instead of the wildcard statusline.glyphs.* (Inv 2 and Config keys row); 2026-11-19T04:00:00Z", "1.2.1 pass-8 remediation (ADV-P8-B08): new Inv 4 pins the ` <1%` zero-bucket body as a named format constant, not config (D15); no behavioral change; 2026-11-19T08:00:00Z", "1.2.2 pass-12 remediation (ADV-P12-B01; orchestrator call 12): new EC-010 and vector row — non-numeric buckets restored from a hand-edited mix cache reach sum(counts[:3]) (SL:1181), the OD-160 foreign-cache vector CP-C07 (allocated from the formerly reserved id, rows built by the architect in error-taxonomy); Go table test, not byte-parity; no behavioral change; 2026-11-23T00:00:00Z", "1.2.3 pass-12 residual sweep (orchestrator pass-12 residual register alignment): EC-010, its vector row and the 1.2.2 note renumber CP-C12 to CP-C07 per the orchestrator ruling that the formerly reserved id is ALLOCATED, keeping the register label CP-C01..C10 true; no behavioral change; 2026-11-23T14:00:00Z", "2026-11-24T01:00:00Z (1.2.4): pass-14 remediation (ADV-P14-B06): PC3 declares the single-space bit joiner (SL:1174) a named format constant of this widget, not config (D15 rationale, sibling of the Inv-4 zero-bucket declaration); no behavioral change", "1.2.5 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-010 gains the positive-giant bucket OverflowError leg CP-C52 (ratio-dependent, SL:1173; negative giant skipped by n > 0); no behavioral change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -53,7 +53,10 @@ Notation: `\e` is the byte 0x1B.
    `pct = pyfmt.Round(n / total * 100)` (ties to even; IM-06, BC-5.01.001);
    body = `pct` right-aligned in width 2 followed by `%` (Python `f"{pct:>2d}%"`) when
    `pct > 0`, else ` <1%`; bit = colour + glyph + body + `\e[0m`.
-3. Segment = bits joined by a single space; no segment if no bit.
+3. Segment = bits joined by a single space; no segment if no bit. The single-space joiner is a
+   **named format constant** of this widget, not config (D15 rationale: intra-segment output markup,
+   parity-bound at one byte; the theme's `statusline.theme.separator` governs inter-segment
+   separators, not intra-segment markup — no ruling mints a key for this site).
 4. Position: after the thermometer (BC-1.02.006), before cache hit (BC-1.02.008).
 
 ## Invariants
@@ -81,7 +84,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-007 | negative bucket `(-1,3,0)` (sum 2 > 0) | negative bucket skipped (`n > 0`), others divided by the net total: `\e[32m❙150%\e[0m` |
 | EC-008 | float buckets `(0.5,0.5,0)` | `▤50% ❙50%` |
 | EC-009 | 5-tuple `(30,50,20,999,999)` | only first three used: `▤30% ❙50% ◈20%` |
-| EC-010 | a restored mix cache holds non-numeric bucket values that reach the `sum(counts[:3])` total (SL:1181; foreign-cache shape, **OD-160**, **CP-C07**) | legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0; unreachable on Go-authored caches; Go's foreign-cache behavior carries exclusion **OD-160** (ruling Q-b) — Go table test, not byte-compared |
+| EC-010 | a restored mix cache holds non-numeric bucket values that reach the `sum(counts[:3])` total (SL:1181; foreign-cache shape, **OD-160**, **CP-C07** scalars, **CP-C52** giants) | legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0; unreachable on Go-authored caches; Go's foreign-cache behavior carries exclusion **OD-160** (ruling Q-b) — Go table test, not byte-compared; a bucket a POSITIVE giant exact int passes `sum` and `n > 0` exactly and raises OverflowError at `round(n / total * 100)` only when the true-division quotient exceeds float64 (ratio-dependent, SL:1173; a negative giant is skipped by `n > 0`; **CP-C52**, measured pass-14) |
 
 ## Canonical Test Vectors
 

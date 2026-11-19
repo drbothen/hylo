@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.2"
+version: "1.3.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -27,6 +27,7 @@ modified:
   - "2026-11-19T21:00:00Z (1.3.0): ADV-P8 remediation D01+D08+D16 — PC-1/PC-2 directory resolvers canonized with full signatures and error results (ConfigDir/StateDir/CacheDir all (env EnvVars) (string, error)); Inv 1 names the PC-11 rename-retry keys as the no-legacy-analog default exceptions; TZ-unset canonical leg oracle qualified (runner-relative: assert non-nil zone + nil error, never a parity oracle)"
   - "2026-11-21T06:00:00Z (1.3.1): ADV-P10 remediation D03+D10 (orchestrator call 3) — PC-3 states the pass-9 A11 absoluteness rule for paths.cache_dir (relative value = config error `not an absolute path`, BC-2.01.005 PC-3; filepath.IsAbs semantics per OS); PC-1 states the relative-base rule: a relative HOME (Unix) or relative LOCALAPPDATA/APPDATA (Windows) is treated as unset, falling to the next source, then to the existing 'cannot be determined' error (new EC-013)"
   - "2026-11-23T00:00:00Z (1.3.2): ADV-P13 remediation D05 — Inv 2 and the VP-032 row carve out the two OD-144 Windows subdirectory results (CacheDir ends in cache, StateDir ends in state), so the last-component-is-hylo universal no longer fails a property test on windows-2025; PC-2 and the CTVs already stated the subdirectories"
+  - "2026-11-25T00:00:00Z (1.3.3): ADV-P14 remediation D15 (orchestrator call 17) — Purity Classification amended: LocalZone performs zone-file/runtime reads (leg a LoadLocation, leg c runtime); determinism scoped to the runner's zone database; overall classification split accordingly"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -199,10 +200,10 @@ TBD — platform paths (design step S7)
 
 | Property | Assessment |
 |----------|-----------|
-| **I/O operations** | none — pure computation over the injected env lookup (PC-5: no directory created, no file touched); the enclosing `internal/platform` package is infrastructure (process and OS probes live in its other files) |
+| **I/O operations** | zone-file and runtime reads only: `LocalZone` leg (a) calls `LoadLocation` (zone files) and leg (c) resolves the OS zone through the runtime (PC-6); the path and directory functions are pure computation over the injected env lookup (PC-5: no directory created, no file touched); the enclosing `internal/platform` package is infrastructure (process and OS probes live in its other files) |
 | **Global state access** | none (env lookup is a parameter, Inv 3) |
-| **Deterministic** | yes (given the injected environment; ADV-P4-D30) |
+| **Deterministic** | yes given the injected environment and the runner's zone database (ADV-P4-D30; the TZ-unset leg is runner-relative by construction, PC-6) |
 | **Thread safety** | safe (stateless functions); build-tag confined per OS |
-| **Overall classification** | pure core (package: infrastructure) |
+| **Overall classification** | pure core for the path functions; `LocalZone` performs deterministic zone-file/runtime reads (package: infrastructure) |
 
 Owning component `internal/platform` (BC-COMPONENT-MAP: plat/paths*.go (per-OS dirs, OD-144) - ARCH-05); the ARCH-00 package table classifies the package infrastructure - syscalls, `/proc`, `sysctl`, Win32, build-tag confined.

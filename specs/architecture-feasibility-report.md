@@ -1,27 +1,30 @@
 ---
 document_type: architecture-feasibility-report
 level: ops
-version: "1.15"
+version: "1.16"
 status: approved
 producer: architect
-timestamp: 2026-11-24T16:00:00Z
-modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change", "1.13 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A09) — both 'AD-03 overlay decision' cells respelled per R-001: the AD-03 decision — the in-memory overlay option was rejected (AD-03 rejected the overlay option; the old cells misdescribed it as an overlay decision)", "1.14 2026-11-21T20:00:00Z: pass-12 fix (A2-13) — prd_version re-pinned 0.1 → 0.2.22 (tracks prd.md) and the settled-rulings range widened OD-115..OD-149 → OD-115..OD-194 with the re-pin disclosed in the intro", "1.15 2026-11-24T16:00:00Z: pass-13 residual (item 6) — the S1 Subsystem-to-Module Mapping row classifies `internal/cost` as pure core (no I/O; `internal/statusline` loads and saves the cost-history file through its `CacheStore`), per orchestrator call 7 / ADV-P13-A02 and the amended ARCH-00 package table"]
+timestamp: 2026-11-25T09:00:00Z
+modified: ["1.9 2026-11-18: pass-5 sync A2-21 — catalog count amended to 41 VPs (VP-041); pass-5 remediation burst 6", "1.10 2026-11-18: pass-6 A2-08 — six error classes amended to seven (OD-178 Text class)", "1.11 2026-11-19: pass-6 residual sweep — BC-1.06.001 parity class synced to temp-file in the §8 constraint row (OD-163 own-temp-cleanup divergence; ADV-P6-C16)", "1.12 2026-11-19T16:00:00Z: sync-check adv-p6 closure (SC-26) — modified history re-spun oldest-first so the version field matches the last entry; no behavioral change", "1.13 2026-11-21T00:00:00Z: pass-9 residual sweep (ADV-P9-A09) — both 'AD-03 overlay decision' cells respelled per R-001: the AD-03 decision — the in-memory overlay option was rejected (AD-03 rejected the overlay option; the old cells misdescribed it as an overlay decision)", "1.14 2026-11-21T20:00:00Z: pass-12 fix (A2-13) — prd_version re-pinned 0.1 → 0.2.22 (tracks prd.md) and the settled-rulings range widened OD-115..OD-149 → OD-115..OD-194 with the re-pin disclosed in the intro", "1.15 2026-11-24T16:00:00Z: pass-13 residual (item 6) — the S1 Subsystem-to-Module Mapping row classifies `internal/cost` as pure core (no I/O; `internal/statusline` loads and saves the cost-history file through its `CacheStore`), per orchestrator call 7 / ADV-P13-A02 and the amended ARCH-00 package table", "1.16 2026-11-25T09:00:00Z: pass-14 fix (ADV-P14-A2-09) — prd_version re-pinned 0.2.22 → 0.2.25 (tracks prd.md) and the settled-rulings range widened OD-115..OD-194 → OD-115..OD-195 (OD-195 is the pass-14 stop rule), re-pin disclosed in the intro"]
 phase: 1b
 inputs: [prd.md, prd-supplements/nfr-catalog.md, prd-supplements/module-criticality.md, prd-supplements/interface-definitions.md, architecture/ARCH-INDEX.md, verification-properties/VP-INDEX.md]
-input-hash: "e11a89d"
+input-hash: "00c5cc7"
 traces_to: prd.md
-prd_version: "0.2.22"
+prd_version: "0.2.25"
 
 ---
 
 # Architecture Feasibility Report
 
-Architect review of the L3 PRD (`prd.md` v0.2.22, 145 BCs at v0.1 review time, subsystem
+Architect review of the L3 PRD (`prd.md` v0.2.25 at review, re-pinned from v0.2.22,
+pass-14 A2-09; 145 BCs at v0.1 review time, subsystem
 breakdown S1-S6 active
 / S7-S12 reserved) for subsystem-grouping feasibility. Scope: NFR coherence, integration
-feasibility, purity-boundary alignment, verifiability. Owner rulings OD-115..OD-194 are
-treated as settled and were not reopened (re-pinned from the review-time OD-115..OD-149
-range, pass-12 A2-13; the body tracks the amended PRD through pass 9 and this pass).
+feasibility, purity-boundary alignment, verifiability. Owner rulings OD-115..OD-195 are
+treated as settled and were not reopened (range re-widened OD-115..OD-194 →
+OD-115..OD-195 with the pass-14 stop rule, after the pass-12 re-pin from the
+review-time OD-115..OD-149 range, pass-12 A2-13; the body tracks the amended PRD
+through pass 9 and this pass).
 
 ## Executive Summary
 

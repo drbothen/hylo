@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.15"
+version: "1.2.16"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -40,6 +40,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.2.13): ADV-P10 remediation D01+D02+D04 (orchestrator calls 1, 2, 4) — PC-5 gains the run-time injection rule (DGX_SL_VM_URL / HYLO_BACKENDS_0_METRICS_URL always injected, case value wins on the Go side); PC-4 states the one subagent-family rule (id of the form subagent-<nnn>[-<variant>], argv [\"--subagent\"] for exactly that family; the erroneous '-sub shorthand' notation removed here and from the 1.2.9 entry); PC-6/PC-7 gain the every-sid seeding rule (fixed synthetic proc_start for EVERY session id any step's stdin uses; validator rejects a case whose step introduces an unseedable sid; no replay ever consults the real process tree)"
   - "2026-11-21T07:00:00Z (1.2.14): ADV-P11 remediation D02 (orchestrator call 3) + D01 (call 2) — PC-5: a case metrics URL wins on BOTH sides (oracle DGX_SL_VM_URL and hylo HYLO_BACKENDS_0_METRICS_URL get the same value), and the validator admits it only as a placeholder resolving to the fake server, optionally with a path suffix — one value per key, no non-fake URL (the 1.5 s timeout ban holds); PC-6: the canonical temp-file case cache-003 is named as the fake-table branch's first P1 consumer, its session-cache target intentionally unseeded"
   - "2026-11-22T00:00:00Z (1.2.15): ADV-P12 remediation D02 propagation (orchestrator call 2, superseding pass-11 call 2) - PC-6 hermeticity rule: the admission branch is the conditional fake PATH (EMPTY bin directory), not a fake process table; the cache-003 paragraph states the two-sided no-probe design (oracle FileNotFoundError at SL:293-294; Go child at HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0)"
+  - "2026-11-25T00:00:00Z (1.2.16): ADV-P14 remediation D11 (orchestrator call 17) — the stale 'fake-table branch' term respelled to the conditional fake PATH declaration (there is no fake process table, pass-12 call 2)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -178,8 +179,9 @@ directory.
      synthetic `proc_start` for every `session_id` that any step's stdin of the case or
      capture uses (a step's replacement stdin template may change the sid mid-sequence,
      e.g. `/clear`), and the case-load validator rejects a case whose step introduces a
-     sid it cannot seed. NO replay ever consults the real process tree. The fake-table
-     branch's first P1 consumer is the canonical `temp-file` case `cache-003` (sid
+     sid it cannot seed. NO replay ever consults the real process tree. The conditional fake
+     `PATH` declaration's first P1 consumer is the canonical `temp-file` case
+     `cache-003` (sid
      `../x`): its session-cache target stays INTENTIONALLY unseeded — seeding
      `statusline-../x.json` would create the directory `statusline-..`, legacy's
      `os.replace` would then succeed and no temp file would leak, defeating the case

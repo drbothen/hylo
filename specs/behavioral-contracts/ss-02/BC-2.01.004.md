@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.7"
+version: "1.3.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -38,6 +38,7 @@ modified:
   - "2026-11-21T07:00:00Z (1.3.5): ADV-P11 remediation OD-194 + A09/D08 (orchestrator calls 4, 16) — new PC-13 registers the nine statusline.labels.* word keys (old, rate, queue, kv, host, tps, max, idle, na; Text; default = the exact legacy WORD; range = the label rule: non-empty, no control bytes, valid UTF-8, display width 1..16 per OD-173) with env names via PC-2; punctuation and unit marks (->, ·, /, [, ], ?, the dead-rung ?, <1%) stay named format constants with why-not-config notes; PC-9's reroute_all_prefixes default respelled to the env spelling claude,claude- (List grammar, call 4)"
   - "2026-11-23T00:00:00Z (1.3.6): ADV-P13 remediation D13 (pending-intent verified against PC-8/PC-11 on disk) — PC-13's 'exactly these nine members' scoped to the WIDTH-BOUNDED label-word registry: the three further statusline.labels.* keys without the width bound (labels.input PC-8; labels.vllm_down, labels.lmcache_down PC-11) are named in PC-13 so the namespace and the bounded registry no longer read as the same set"
   - "2026-11-24T19:30:00Z (1.3.7): pass-13 residual (orchestrator call 15 rider) - PC-11's statusline.cache.rename_retry_delay_ms range respelled 1..100 (limit 0..10; limit x delay at most 1000 ms per Save, labeled judgment call), matching BC-6.03.003, interface-definitions and ARCH-04; no behavioral change"
+  - "2026-11-25T00:00:00Z (1.3.8): ADV-P14 remediation D01+D08 (orchestrator calls 5, 17) — the OD-170 validation-width scope passages (PC-6 glyph text and the OD-184 Scope passage) extend the ONLY-consulted set from the pill-label bound to the nine width-bounded statusline.labels.* members (OD-194); PC-13's namespace cross-anchors corrected (labels.input PC-8->PC-6; vllm_down/lmcache_down PC-11->PC-12)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -169,7 +170,8 @@ incomplete, whose default fails its own validation, or whose env name collides.
    point (sparkline: exactly 8 ordered code points) fails the build-time tests of PC-3.
    The East-Asian-Width validation width (PC-9, OD-170 tables) is NOT applied to glyph
    members (OD-184): it is consulted only for ranges that state a display width — the
-   pill-label 1..16 bound (OD-173) — so the W-class `watts` default ⚡ is in range.
+   pill-label 1..16 bound (OD-173) and the nine width-bounded `statusline.labels.*`
+   members of PC-13 (OD-194) — so the W-class `watts` default ⚡ is in range.
 7. **Label and floor keys (OD-173/OD-174):** the lane-pill words are the `Text` keys
    `statusline.pill.label_local` (default `DGX`), `statusline.pill.label_cloud` (default
    `ANTH`) and `statusline.pill.label_unknown` (default `?`), range: non-empty, no control
@@ -228,9 +230,10 @@ incomplete, whose default fails its own validation, or whose env name collides.
      widths). The OD-170 generated-table set grows the East-Asian-Width table
      (coordination: ARCH-06 adds the width class to its OD-170 table list).
      Punctuation-or-format characters are not widths; the width function is total over
-     valid UTF-8 input. Scope (OD-184, tightened pass-7 D21): this validation width is
-     consulted ONLY for the registry range that states a display width — the pill-label
-     1..16 bound (OD-173). The general Text ranges of BC-2.01.005 PC-6 state NO display
+     valid UTF-8 input. Scope (OD-184, tightened pass-7 D21, extended pass-14 D01):
+     this validation width is consulted ONLY for the registry ranges that state a
+     display width — the pill-label 1..16 bound (OD-173) and the nine width-bounded
+     `statusline.labels.*` members of PC-13 (OD-194). The general Text ranges of BC-2.01.005 PC-6 state NO display
      width (non-empty, control-free, code-point counts for glyphs) and do not consult
      it; never for glyph-family
      validation, which counts code points (PC-6). Invalid UTF-8 (pass-9 D08): a glyph or
@@ -300,8 +303,9 @@ incomplete, whose default fails its own validation, or whose env name collides.
    namespace: three further `statusline.labels.*` keys sit in the same namespace
    WITHOUT the width bound, ranged by the general Text class instead (PC-6:
    non-empty, control-free, valid UTF-8) — `statusline.labels.input` (default `in`,
-   PC-8), `statusline.labels.vllm_down` (default `vLLM down`, PC-11) and
-   `statusline.labels.lmcache_down` (default `LMCache down`, PC-11) (pass-13 D13):
+   PC-6), `statusline.labels.vllm_down` (default `vLLM down`, PC-12) and
+   `statusline.labels.lmcache_down` (default `LMCache down`, PC-12) (pass-13 D13;
+   anchors corrected pass-14 D08):
 
    | Key | Default | Legacy site | Inline-literal owner (ADV-P11-C2-03) |
    |-----|---------|-------------|--------------------------------------|

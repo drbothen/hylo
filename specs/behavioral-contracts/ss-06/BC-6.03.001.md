@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -32,6 +32,7 @@ modified:
   - "2026-11-19T00:25:00Z (1.2.3) ADV-P5 remediation D29 — -update per-OS write path defined: .windows.golden variants are written by an -update run ON Windows; a Linux run never fabricates them; metadata records the writing OS"
   - "2026-11-19T17:00:00Z (1.2.4): ADV-P7 remediation D14 - subagent cases identified by the ARCH-07 `subagent` case-id family, not a bare id suffix; oracle argv text unchanged"
   - "2026-11-21T06:00:00Z (1.2.5): ADV-P10 remediation D02 (orchestrator call 2) — the erroneous 'older -sub shorthand' notation removed from the Description and the 1.2.4 entry: a subagent case is an id of the form subagent-<nnn>[-<variant>] and that family alone receives argv [\"--subagent\"] (no -sub suffix rule)"
+  - "2026-11-25T00:00:00Z (1.2.6): ADV-P14 remediation D05 (orchestrator call 6) — PC-6 write rule gains the LF-on-every-OS rule: -update applies BC-6.03.002 PC-1's open CRLF->LF conversion to the oracle stdout before writing any golden, including the .windows.golden variants"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -154,6 +155,11 @@ Go must reproduce them on every OS without Python installed. OS-dependent cases 
      `-update` run on Linux writes only the Linux (and, when its flavors match, the
      shared) golden files and never fabricates a `.windows.golden`. Golden metadata
      records the writing OS and the resolved CPython patch version (RK-4).
+   - LF on every OS (pass-14 D05): `-update` applies BC-6.03.002 PC-1's open
+     CRLF→LF conversion to the oracle's stdout BEFORE writing any golden — including
+     the `<name>.windows.golden` variants written on Windows, whose raw oracle
+     stdout carries CRLF (Windows text-mode `print()`, SL:1234) and would otherwise
+     fail Tier B's byte equality against Go's LF output.
    - `-update` without a valid oracle interpreter fails; it never falls back to writing
      Go's output.
    - Golden metadata records the resolved CPython patch version (RK-4).

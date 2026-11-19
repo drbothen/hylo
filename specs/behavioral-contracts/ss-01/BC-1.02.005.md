@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.5"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
@@ -24,6 +24,7 @@ modified:
   - "1.2.3 pass-5 remediation (ADV-P5-B03): the branch glyph is named as the registry key statusline.glyphs.git (default U+2387, 1 code point/1 column, SL:413) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
   - "1.2.4 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.2.5 pass-6 remediation (OD-184 wording + B16): PC5 glyph length respelled to the OD-184 canon (exactly 1 code point, measured in legacy's render width); history labels version-prefixed; no behavioral change; 2026-11-19T04:00:00Z"
+  - "1.2.6 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-009 gains the giant exact-int ts OverflowError leg CP-C49 (same SL:409 subtraction); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,7 +95,7 @@ Notation: `\e` is the byte 0x1B; `T` = the injected clock (`HYLO_TEST_NOW` /
 | EC-006 | cached `branch` `5` (non-string; foreign-cache shape, **OD-160**) | segment `\e[90m⎇ 5\e[0m` |
 | EC-007 | cached `ts` in the future (clock moved back) | negative age → fresh; cached branch kept until `now > ts + ttl_s` |
 | EC-008 | cached `ts` `true` (foreign-cache shape, **OD-160**) | counts as 1 → stale → recompute |
-| EC-009 | cached `ts` a string (`"x"`) | foreign-cache vector (CP-C08, BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0; Go's foreign-cache behavior carries exclusion id **OD-160** (ruling Q-b) — not byte-compared |
+| EC-009 | cached `ts` a string (`"x"`) or an exact giant integer | foreign-cache vector (CP-C08 scalar, CP-C49 giant; BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0; Go's foreign-cache behavior carries exclusion id **OD-160** (ruling Q-b) — not byte-compared; a giant exact-int `ts` (both signs; the `> GIT_TTL` comparison is exact) raises OverflowError at the same `now - ts` subtraction (**CP-C49**, same guard line; measured pass-14) |
 | EC-010 | cache file holds a JSON array (`[1,2]`) | foreign-cache vector (CP-C08): unreachable on Go-authored caches; legacy AttributeError → guard line, exit 0; Go's foreign-cache behavior carries exclusion id **OD-160** (ruling Q-b) — not byte-compared |
 | EC-011 | `HYLO_STATUSLINE_GIT_ENABLED=no` | disabled under hylo's typed bool (OD-05); legacy `DGX_SL_GIT` disabled only on `"0"`. Config-layer difference only; harness cases translate settings (BC-6.02.003); invalid values are D4-EX-3 Boolean class (BC-2.02.001) |
 | EC-012 | mkstemp temp names / Go temp cleanup | outside this BC's output; covered by the temp-file exclusion (BC-6.03.003, OD-110) |

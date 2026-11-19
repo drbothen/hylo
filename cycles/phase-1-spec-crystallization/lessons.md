@@ -348,7 +348,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   conversion should be adopted as the standard); either way the hook and the
   formatting convention must agree.
 
-**Closes:** recorded as a Drift Item in STATE.md (plugin owner, tooling drift)
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md; plugin owner, tooling drift)
 
 ## L-PG-32 [process-gap] — For-all properties are derived from the owning BC's postconditions
 
@@ -361,7 +361,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   and walked against legacy's code paths before it is written; if any legal input
   breaks it, the domain is narrowed explicitly.
 
-**Closes:** burst gate 2 (for-all derivation) — recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (burst gate 2, for-all derivation; recorded as a Drift Item in STATE.md)
 
 ## L-PG-33 [process-gap] — Every changed file is YAML-parsed before handoff
 
@@ -373,7 +373,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   last edit, and the orchestrator re-parses the whole changed set before commit; a
   commit-time frontmatter-parse hook is the candidate mechanization.
 
-**Closes:** burst gate 1 (YAML-safe_load) — recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (burst gate 1, YAML-safe_load; recorded as a Drift Item in STATE.md)
 
 ## L-PG-34 [process-gap] — State only what was measured
 
@@ -385,7 +385,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   class claim ("any 1xx") requires measuring — or reading the source for — every
   class member before it is written.
 
-**Closes:** burst gate 3 (no generalized measurements) — recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (burst gate 3, no generalized measurements; recorded as a Drift Item in STATE.md)
 
 ## L-PG-35 [process-gap] — ARCH-doc anchors are section anchors, never line numbers
 
@@ -396,7 +396,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   anchors; line numbers in agent briefs are recreated from a numbered read at
   dispatch time, never stored in specs.
 
-**Closes:** recorded as a Drift Item in STATE.md (section-anchor rule)
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md; section-anchor rule)
 
 ## L-PG-36 [process-gap] — Fix-agent findings are routed by target file
 
@@ -407,7 +407,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   table is checked — every finding's target file ∈ the agent's assigned set — before
   dispatch (companion to L-PG-24's out-of-set-edit rule).
 
-**Closes:** recorded as a Drift Item in STATE.md (routing check; companion to L-PG-24)
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md; routing check, companion to L-PG-24)
 
 ## L-PG-37 [process-gap] — Synthetic values use the pre-push hook's allowlist
 
@@ -418,7 +418,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   example.com/.org/.net addresses, 192.0.2.x (RFC 5737) IPs, `/home/example...`
   paths — or are scrubbed by a committed, reviewed script.
 
-**Closes:** recorded as a Drift Item in STATE.md (fixture-placeholder allowlist)
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md; fixture-placeholder allowlist)
 
 ## L-PG-38 [process-gap] — Sync checks verify required presence in every mandated file
 
@@ -430,7 +430,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   file whose spec mandates it — enumerate the mandated files from the mandating spec,
   then assert the string in each, on disk, by script.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-39 [process-gap] — Residue noticed during verification is routed immediately
 
@@ -442,7 +442,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   routed to a fix owner in the same burst; verification notes are finding intake, not
   commentary.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-40 [process-gap] — Report briefs forbid quoting flagged or private strings
 
@@ -453,7 +453,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   private strings, never quote them; the orchestrator scans every report against the
   hook patterns before staging.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-41 [process-gap] — BC pointers cite id plus PC/EC/Invariant/row, never line numbers
 
@@ -464,7 +464,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   or table row; line numbers are recreated from a numbered read at dispatch time,
   never stored in specs.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-42 [process-gap] — Bracket the boundary on both sides before pinning a constant
 
@@ -475,7 +475,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   and reports the bracket, not one sample; the orchestrator re-runs any probe that
   mints a new constant value.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-43 [process-gap] — Walk canonical vector outputs field by field against the setting code
 
@@ -485,7 +485,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** A canonical vector's expected output is walked field by field, on disk, against the legacy
   line that sets each field before the vector is accepted — paragraph-level plausibility is not a check.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-44 [process-gap] — Per-agent diffs are scanned for emoji before acceptance
 
@@ -495,7 +495,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** Every fix agent's diff is scanned for emoji and non-ASCII additions before acceptance,
   regardless of what the agent's report claims; the scan runs at acceptance, not at commit.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-45 [process-gap] — Binding calls name exactly one mechanism
 
@@ -505,7 +505,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** A binding call in a remediation plan names exactly one mechanism; where a genuine choice
   exists, the call assigns the decision to one agent or escalates it before dispatch, never "X or Y".
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-46 [process-gap] — Security-gate and harness-wiring binding calls are checked against the CI event model before issue
 
@@ -515,7 +515,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** A binding call that changes a security gate or harness wiring is checked against the CI event
   model and the built-binary env contract before it is issued, not discovered broken by the next pass.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-47 [process-gap] — Fix briefs grep every sibling that states a changed rule
 
@@ -524,7 +524,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** A fix brief requires grepping every sibling that states the changed rule and applying the same
   fix there before the agent reports done; the orchestrator's sibling grep is part of acceptance.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-48 [process-gap] — New ids and anchors are minted centrally before the burst
 
@@ -533,7 +533,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** Every new id and anchor is minted centrally in the remediation plan before the burst; agents
   consume the allocation and never mint their own names.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-49 [process-gap] — Escape-bearing text is written by script and verified
 
@@ -542,7 +542,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** Text bearing escape sequences is written with a script, never a bare edit, and the on-disk bytes
   are verified against the intended escape afterward.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-50 [process-gap] — A vector's setup text is part of the vector
 
@@ -552,7 +552,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** The setup text (config, seeded files, inputs) is part of the vector and is walked against legacy
   together with its expected output, field by field, before acceptance.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-51 [process-gap] — A binding call states explicitly which files it applies to
 
@@ -561,7 +561,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** Binding calls say explicitly that they apply to every file they name; an agent that believes a
   call names files beyond its assigned set lists the hit back instead of narrowing the call's scope.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-52 [process-gap] — Retired phrases are re-grepped over all of specs/ before commit
 
@@ -570,7 +570,7 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
 - **Remedy:** The orchestrator re-greps every retired phrase over all of specs/ immediately before commit
   instead of trusting the checker's sibling list.
 
-**Closes:** recorded as a Drift Item in STATE.md
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
 
 ## L-PG-53 [owner-ruling] — Stop rule moved to a severity gate (OD-195)
 
@@ -580,3 +580,34 @@ See `cycles/phase-0-ingestion/lessons.md` for Phase 0 entries L-PG-01..03.
   CRITICAL/HIGH/MEDIUM findings; every finding of every severity is still fixed each pass (OD-176 unchanged
   on that point).
 - **Remedy:** Decide whether Phase 1d continues by counting the severity gate, not total finding counts.
+
+**Closes:** D-448(b) codified (owner ruling OD-195 — severity-gate stop rule; recorded in the OD log, not a Drift Item)
+
+## L-PG-54 [process-gap] — Spec artifacts a test must read live in the code tree
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-14 burst) A pass-13 fix made VP-012's Go test read a BC file
+  out of `.factory/`, but `.factory/` is git-ignored on main — the test could not work on a fresh clone.
+- **Remedy:** Any spec artifact a test must read at runtime lives in the code tree as a committed,
+  machine-readable file — the exclusion-rider register moved to `internal/parity/testdata/exclusion-riders.json`
+  with its content pinned in BC-6.03.004, and the factory-side sync check compares the two.
+
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
+
+## L-PG-55 [process-gap] — One systematic fault matrix replaces site-by-site discovery
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-14 burst) Foreign-cache crash cases trickled in a few per pass
+  for five passes — site-by-site discovery kept paying out more of the same class every pass.
+- **Remedy:** One systematic matrix replaces the trickle: every cache read site × six fault classes, each cell
+  measured on legacy — raising cells become CP-C rows, non-raising cells are pinned outcomes, and the matrix
+  is declared complete under its stated method (OD-160 foreign-cache completeness matrix, CP-C01..C57).
+
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)
+
+## L-PG-56 [process-gap] — Claimed table rows are verified on disk, not trusted from history text
+
+- **Lesson:** (discovered 2026-11-18, ADV pass-14 burst) A fix agent's history entry claimed VP rows it had
+  not actually added (BC-1.04.008) — the history read as done while the body was stale.
+- **Remedy:** The orchestrator checks claimed table rows against the file body on disk, not the history entry;
+  a body-vs-history spot check is part of acceptance (same drift class as the pass-14 sync check's F1).
+
+**Closes:** D-448(b) codified (recorded as a Drift Item in STATE.md)

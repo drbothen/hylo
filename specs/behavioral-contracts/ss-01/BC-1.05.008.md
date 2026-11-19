@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.2"
+version: "1.2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
@@ -13,7 +13,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md
   - semport/hylo-legacy/statusline-target-design.md
-input-hash: "430cb73"
+input-hash: "07d9f83"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:601-625)"
@@ -24,7 +24,7 @@ parity_class: "byte-exact"
 confidence: "H"
 lifecycle_status: active
 introduced: v0.1.0
-modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-14 (seed count corrected to 21)", "1.2.2 2026-11-18: pass-8 remediation ADV-P8-C2-15 (every seed row spells its lane explicitly — the committed seed file needs it; anth unless noted)"]
+modified: ["1.2.1 2026-11-18: pass-3 remediation ADV-P3-C2-14 (seed count corrected to 21)", "1.2.2 2026-11-18: pass-8 remediation ADV-P8-C2-15 (every seed row spells its lane explicitly — the committed seed file needs it; anth unless noted)", "1.2.3 2026-11-18: pass-14 remediation ADV-P14-C2-05 (the Owning-components line respelled to the ARCH-00 package table: internal/cost is pure core, no store, no injected seam; internal/statusline owns the file I/O through its CacheStore; no behavioral change)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -183,4 +183,4 @@ S-N.MM — cost colouring (filled by story-writer)
 | **Thread safety** | single-threaded render loop |
 | **Overall classification** | mixed (core-dominant) |
 
-Owning components `internal/statusline` and `internal/cost` (BC-COMPONENT-MAP: sl/cost.go + cost/history.go (goldens) - ARCH-03); ARCH-00 classifies the former mixed (core-dominant) and the latter boundary, so the contract's render-side logic stays `Env`-seam pure with store writes behind the `Store` seam.
+Owning components `internal/statusline` and `internal/cost` (BC-COMPONENT-MAP: sl/cost.go + cost/history.go (goldens) - ARCH-03); ARCH-00 classifies the former mixed (core-dominant) and the latter **pure core** (ARCH-00 package table; ARCH-03 §Interfaces: internal/cost does no I/O of any kind), so the render-side logic stays `Env`-seam pure and internal/cost stays a pure function over the loaded history — no store, no injected seam; `internal/statusline` loads and saves the cost-history file through its `CacheStore`.

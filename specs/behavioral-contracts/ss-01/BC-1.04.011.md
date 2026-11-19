@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T21:00:00Z
@@ -23,6 +23,8 @@ modified:
   - "1.2.2 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC2 names the registered keys statusline.power.wall_red_w and statusline.power.wall_yellow_w beside their default literals)"
   - "1.2.3 2026-11-18: pass-13 remediation ADV-P13-C2-01 (foreign cached-sample value edge cases added: EC-008 string watts ValueError at the SL:813 .0f format, EC-009 string wall TypeError at the SL:812 colour comparison; OD-160 class; VP-012 closure and VP-001 never-blank rows added; oracle-verified CPython 3.11.7) + ADV-P13-C2-05 (PC6's W-to-kW divisor 1000 and dollar-to-cent factor 100 named as unit constants — named constants, not config, the P20 sibling of BC-1.05.002's 3.6e6 and BC-1.05.003's 1e6 notes, ADV-P10-C2-12)"
   - "1.2.4 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-008 cites crash id CP-C30 and EC-009 cites CP-C31, minted by error-taxonomy 1.20 for this contract's foreign cached-sample value legs; no behavioral change"
+  - "1.2.5 2026-11-18: pass-14 remediation ADV-P14-C2-01/C2-02 (EC-008 and EC-009 consolidated into the single EC-008 register: w/t/wall/rate_c, the colour comparison, the three .0f renders and the tariff expression, every fault class, error-taxonomy OD-160 matrix citation; no behavioral change)"
+  - "1.2.6 2026-11-26T15:00:00Z: pass-14 residual sweep (OD-160 owner id-range alignment): EC-008 cites its register ids (CP-C30, CP-C31, CP-C41, CP-C42, CP-C43, CP-C44, CP-C45, CP-C46) explicitly; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,8 +83,7 @@ wall estimate `·<wall>W` carrying the color (red above 95 %, yellow above 80 % 
 | EC-005 | wall 1280.0 | white `1280W` |
 | EC-006 | rate 0 | no ¢/h |
 | EC-007 | all NaN | `⚡nanW·nanW nan° nan¢/h` with white wall (BC-1.04.016) |
-| EC-008 | `w` a string (foreign cached sample, exclusion id **OD-160**) | ValueError at the `F(w,0)` render format (SL:813, "Unknown format code 'f' for object of type 'str'", oracle-verified CPython 3.11.7; crash id **CP-C30**) → errDegraded (ADV-P13-C2-01) |
-| EC-009 | `wall` a non-empty string (foreign cached sample, **OD-160**; truthy, so the colour consult runs) | TypeError at the `wall > 1520` colour comparison (SL:812, ">" not supported between instances of 'str' and 'int', oracle-verified CPython 3.11.7; crash id **CP-C31**) → errDegraded (ADV-P13-C2-01) |
+| EC-008 | Foreign cached values of the segment's series — `DCGM_FI_DEV_POWER_USAGE`, `DCGM_FI_DEV_GPU_TEMP`, `dgx_power:est_wall_watts`, `dgx_power:rate_usd_per_kwh` (legacy sites: the colour comparison SL:812, the w/wall/t renders SL:813/815/816, the tariff expression `wall / 1000 * rate_c` SL:818) — per fault class {string, null, list, dict, positive giant int, negative giant int}; e.g. a string watts raises ValueError at the `F(w,0)` render ("Unknown format code 'f' for object of type 'str'", oracle-verified CPython 3.11.7), a non-empty (truthy) string wall raises TypeError at the `wall > 1520` colour comparison, a string rate_c with a truthy numeric wall raises TypeError at `wall / 1000 * rate_c` | raising cells → errDegraded (DI-008); every (site, class) cell's legacy outcome is recorded in the error-taxonomy OD-160 matrix; foreign cached values: CP-C30, CP-C31, CP-C41, CP-C42, CP-C43, CP-C44, CP-C45, CP-C46, OD-160, Go table tests; ids in the error-taxonomy CP-C matrix (ADV-P13-C2-01; ADV-P14-C2-01/C2-02) |
 
 ## Canonical Test Vectors
 
@@ -98,8 +99,8 @@ wall estimate `·<wall>W` carrying the color (red above 95 %, yellow above 80 % 
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-030 | Review #19 table reproduces legacy bytes | manual (table) |
-| VP-001 | The promised output set holds on the EC-008/EC-009 foreign cached-sample value degrade legs: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P13-C2-01) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
-| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008/EC-009 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P13-C2-01) | property test (VP-012, go test) |
+| VP-001 | The promised output set holds on the EC-008 foreign cached-sample value degrade cells: render output or the 29-byte degraded line — never blank, exit 0 (DI-008) (ADV-P13-C2-01; ADV-P14-C2-01/C2-02) | fault-injection ladder (assertPromisedOutputSet, DI-008) |
+| VP-012 | The named deviation this contract carries — exclusion id `OD-160` (EC-008 foreign cached-sample value shapes) — is covered by the exclusion-closure check: `TestParityExclusions_ClosedSet` validates the `OD-160` entry and its riding table test `TestForeignCacheShape_OD160_Vectors` (this contract has no riding test of its own, same citation class as BC-1.04.002/BC-1.04.003/BC-1.04.018), and the mutation test fails closed if that entry is dropped (ADV-P13-C2-01) | property test (VP-012, go test) |
 
 ## Traceability
 
@@ -108,7 +109,7 @@ wall estimate `·<wall>W` carrying the color (red above 95 %, yellow above 80 % 
 | Source | legacy/dgx_statusline.py:render_telemetry_fields (SL:801-820) |
 | Legacy contract | BC-SL-050 (P3 base, review #19) |
 | L2 Capability | CAP-010 |
-| L2 Domain Invariants | DI-008, DI-012 (EC-008/EC-009 foreign cached-sample value shapes under the OD-160 named-deviation rule) |
+| L2 Domain Invariants | DI-008, DI-012 (EC-008 foreign cached-sample value shapes under the OD-160 named-deviation rule) |
 | Decisions | OD-113 |
 | Architecture Module | `internal/statusline/row2.go` |
 | Stories | TBD |
@@ -128,8 +129,8 @@ TBD — row 2 + metrics client (design §4 step S5)
 ## VP Anchors (Recommended)
 
 - VP-030 — power table
-- VP-001 — never-blank/exit-0 ladder; the EC-008/EC-009 degrade legs ride it (ADV-P13-C2-01)
-- VP-012 — OD-160 exclusion-closure citation (EC-008/EC-009; ADV-P13-C2-01)
+- VP-001 — never-blank/exit-0 ladder; the EC-008 degrade cells ride it (ADV-P13-C2-01; ADV-P14-C2-01/C2-02)
+- VP-012 — OD-160 exclusion-closure citation (EC-008; ADV-P13-C2-01, ADV-P14-C2-01/C2-02)
 
 ---
 

@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.7"
+version: "1.2.8"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:10Z
 phase: 1a
 inputs: [domain-spec/L2-INDEX.md, domain-spec/capabilities.md, domain-spec/invariants.md, behavioral-contracts/BC-ALLOCATION.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r4.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "19605e7"
+input-hash: "05d958d"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:_mix_counts (SL:1029-1034, 1096-1103, 1153)"
@@ -19,7 +19,15 @@ confidence: "H"
 priority: P0
 lifecycle_status: active
 introduced: "0.1"
-modified: ["1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified", "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)", "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02/C13) — dedup_memory range bounded to Int 1..65536 (upper bound labeled judgment call J, pass-5 A13/call 16, registry); PC5 qualifies duplicates-can-not-occur to caches hylo authored and carries foreign duplicate/non-list `ids` shapes as OD-160 table tests", "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row for the PC5 foreign-`ids` legs (VP-012) mirroring sibling BC-1.03.015", "1.2.5 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C04, ADV-P10-C05) — the VP-029/031 duplicates row qualified to caches hylo authors (a foreign cached ids carried or list()-split per PC5 re-writes duplicates; SL:1033, 1153); the PC5 OD-160 foreign-ids legs lifted to the traceability DI row (sibling convention)", "1.2.6 2026-11-24T12:00:00Z: pass-13 remediation (ADV-P13-C07) - the CP-O09 trigger now has the required canonical vector (error-taxonomy: edge case + canonical vector per owning BC): CTV gains the parse leg (both 4,300-digit usages counted exactly, at-limit sum stored) measured end-to-end with the legacy oracle in an isolated temp HOME/cwd", "1.2.7 2026-11-24T13:00:00Z: pass-13 sync closure - the CP-O09 parse-leg setup seeds the session cache statusline-probe.json with the leading proc_start key (900.0) per the corpus admission rule (BC-3.02.001 Inv 4), mirroring BC-1.02.029 v1.8; expected output gains the measured session-cache outcome (byte-unchanged from the seed, consult short-circuit SL:273-275); stdout, byte counts and mix-cache contents re-verified against the legacy oracle with the seed present (CPython 3.11.7, isolated temp HOME/cwd, -I); no outcome field changed"]
+modified:
+  - "1.2.1 2026-11-17: dedup_memory range >= 1 (OD-162); Python set-key semantics NaN/1/1.0/true (ADV-P2-C03/C07); oracle-verified"
+  - "1.2.2 2026-11-17: CP-O09 co-owner edge case EC-008 (int-only totals defeat the skip rule; ADV-P3-C09/C10)"
+  - "1.2.3 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C02/C13) — dedup_memory range bounded to Int 1..65536 (upper bound labeled judgment call J, pass-5 A13/call 16, registry); PC5 qualifies duplicates-can-not-occur to caches hylo authored and carries foreign duplicate/non-list `ids` shapes as OD-160 table tests"
+  - "1.2.4 2026-11-19T23:59:00Z: pass-8 remediation (ADV-P8-C03) — VP table and VP Anchors gain the OD-160 closure row for the PC5 foreign-`ids` legs (VP-012) mirroring sibling BC-1.03.015"
+  - "1.2.5 2026-11-21T12:00:00Z: pass-10 remediation (ADV-P10-C04, ADV-P10-C05) — the VP-029/031 duplicates row qualified to caches hylo authors (a foreign cached ids carried or list()-split per PC5 re-writes duplicates; SL:1033, 1153); the PC5 OD-160 foreign-ids legs lifted to the traceability DI row (sibling convention)"
+  - "1.2.6 2026-11-24T12:00:00Z: pass-13 remediation (ADV-P13-C07) - the CP-O09 trigger now has the required canonical vector (error-taxonomy: edge case + canonical vector per owning BC): CTV gains the parse leg (both 4,300-digit usages counted exactly, at-limit sum stored) measured end-to-end with the legacy oracle in an isolated temp HOME/cwd"
+  - "1.2.7 2026-11-24T13:00:00Z: pass-13 sync closure - the CP-O09 parse-leg setup seeds the session cache statusline-probe.json with the leading proc_start key (900.0) per the corpus admission rule (BC-3.02.001 Inv 4), mirroring BC-1.02.029 v1.8; expected output gains the measured session-cache outcome (byte-unchanged from the seed, consult short-circuit SL:273-275); stdout, byte counts and mix-cache contents re-verified against the legacy oracle with the seed present (CPython 3.11.7, isolated temp HOME/cwd, -I); no outcome field changed"
+  - "1.2.8 2026-11-26T12:00:00Z: pass-14 remediation (ADV-P14-C01) — EC-008 states the operand bound: the save failure needs the counted sum to reach 10^4300 (4,301 digits; e.g. 5·10^4299 each, the operand choice of BC-1.03.006's save-failure vector), not merely two 4,300-digit operands — two 10^4299 operands sum to the 4,300-digit at-limit total that writes (the parse-leg CTV); boundary measured with the pinned oracle interpreter (-I, isolated temp HOME/cwd): json.dump of a 4,301-digit int raises ValueError after partial bytes stream, a 4,300-digit total converts"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -95,7 +103,7 @@ refreshes as the last `dedup_memory` (256) ids recorded; within a single refresh
 | EC-005 | `msg_A`, 300 others, `msg_A` in the **same** refresh | ignored (in-refresh memory unbounded) |
 | EC-006 | Id present but `usage` absent | not recorded; a later line of that id with usage is counted |
 | EC-007 | Reset (BC-1.03.002) | memory cleared before parsing |
-| EC-008 | CP-O09 save path (co-owner with BC-1.03.006 PC5/EC-009; ADV-P3-C09): two distinct ids each count a 4,300-digit exact int `input_tokens` — int-only arithmetic, no float operand, so the CP-O06..O08 skip never trips | both usages counted exactly; at save the 4,301-digit accumulator exceeds CPython's int↔str limit, `json.dump` raises `ValueError` mid-write, `save_cache` swallows it: no cache write, previous bytes retained, re-failing every later refresh (not moot in hylo — hylo reproduces the no-write; OD-163 rules the temp) |
+| EC-008 | CP-O09 save path (co-owner with BC-1.03.006 PC5/EC-009; ADV-P3-C09): two distinct ids each count an exact int `input_tokens`, with 4,300-digit operands large enough that the **sum reaches 10^4300** (4,301 digits — e.g. 5·10^4299 each, the operand choice of BC-1.03.006's save-failure vector; two 10^4299 operands sum to only 2·10^4299, a 4,300-digit total at the limit that DOES write, the parse-leg CTV below) — int-only arithmetic, no float operand, so the CP-O06..O08 skip never trips | both usages counted exactly; at save the 4,301-digit accumulator exceeds CPython's int↔str limit, `json.dump` raises `ValueError` mid-write, `save_cache` swallows it: no cache write, previous bytes retained, re-failing every later refresh (not moot in hylo — hylo reproduces the no-write; OD-163 rules the temp). Boundary measured with the pinned oracle interpreter 2026-11-18 (-I, isolated temp HOME/cwd): `json.dump` of a 4,301-digit int raises `ValueError` after partial bytes stream; a 4,300-digit total converts and writes |
 
 ## Canonical Test Vectors
 

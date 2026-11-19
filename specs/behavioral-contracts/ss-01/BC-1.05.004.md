@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-19T16:00:00Z
@@ -15,7 +15,7 @@ inputs:
   - semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r3.md
   - semport/hylo-legacy/statusline-target-design.md
   - owner-decisions-log-2026-11-14.md
-input-hash: "265543f"
+input-hash: "c3d663b"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:record_cost (SL:224-237)"
@@ -36,6 +36,8 @@ modified:
   - "2026-11-18 (v1.2.8) pass-8 remediation ADV-P8-C2-07 (row-1 testing/quick leg routed to the VP-020 property leg per pass-8 call 12)"
   - "2026-11-18 (v1.2.9) pass-9 remediation ADV-P9-C2-03 (OD-166 convertibility skip moved out of the PC1 guard to the write step, PC4 — after the history load and the sessions.get(sid) lookup, so CP-S15 at SL:230 still fires first; OD-166 scope unchanged) + ADV-P9-C2-05 (DI-008 lifted into the L2 row)"
   - "2026-11-21T11:00:00Z (v1.3.0) pass-13 sync closure — Owning component line and Purity Classification I/O cell respelled to the ARCH-03 declared cost API (§Interfaces, 'package internal/cost — DECLARED API'): internal/cost is pure core with no I/O; internal/statusline loads and saves the cost-history file through its CacheStore, step-7c order kept (sync-check adv-p13 finding 1, call-7 residual); no behavioral change"
+  - "2026-11-21T12:30:00Z (v1.3.1) pass-14 remediation ADV-P14-C2-04 (the Architecture Module row names the declared symbol RecordCost and notes the declared API takes the cost config, orchestrator call 2) + ADV-P14-C2-05 (Purity Classification respelled to the ARCH-00 package table: pure core, no store fake, no injected seam; no behavioral change)"
+  - "2026-11-26T15:00:00Z (v1.3.2) pass-14 residual sweep — OD-160 owner id-range alignment: EC-008 gains the giant entry-ts OverflowError leg CP-C50 (SL:247 window, SL:232 throttle); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -123,7 +125,7 @@ is visible to other sessions' thresholds in the same instant but never to its ow
 | EC-005 | `session_id` unhashable (non-empty list/object) | legacy `sessions.get(sid)` raises TypeError (CP-S15, SL:230) after the load, before any write → degraded line (BC-1.01.001); Go degrades at the same step — the OD-166 write-step skip (PC4) never preempts it: an unhashable `sid` with a huge unconvertible `api_ms` still degrades via CP-S15, it does not render normally (ADV-P9-C2-03) |
 | EC-006 | numeric `session_id` | OD-30 known difference, see BC-1.05.006 |
 | EC-007 | entry `ts` missing | default 0 → throttle not applied → written |
-| EC-008 | corrupt history shapes (top level not an object; `sessions` or an entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10 foreign-cache crash paths: out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); the Go writer only ever writes legacy's exact format |
+| EC-008 | corrupt history shapes (top level not an object; `sessions` or an entry not an object; entry `ts` non-numeric) | CP-C09/CP-C10 foreign-cache crash paths (a giant exact-int entry `ts` raises OverflowError at the window/throttle subtraction, **CP-C50**): out of parity scope (P3r2 ruling b); the foreign-cache class carries named exclusion id **OD-160** (DI-012 named-deviation rule); the Go writer only ever writes legacy's exact format |
 | EC-009 | `api_ms` = `"x"` | stored as `null` |
 | EC-010 | `usd` = 2**1024 (309-digit exact stdin int; numeric guard passes) | not recorded (OD-166 write-step skip, PC4: magnitude >= 2**1024 - 2**970 cannot convert to float); file unchanged; the current refresh degrades via CP-O10 (BC-1.05.007); legacy did record it (ADV-P3-C2-01) |
 | EC-011 | `usd` = 2.0, `api_ms` = -(2**1024) (negative huge exact int) | not recorded (OD-166 write-step skip, PC4, is sign-agnostic: the value cannot convert to float); the current refresh renders normally — `-(2**1024) >= burn_min_api_ms` is false, so no $/h segment (BC-1.05.002 PC4); legacy recorded it harmlessly (writes diverge; exclusion `OD-166`, ADV-P4-C2-06) |
@@ -158,7 +160,7 @@ Clock `now = 1794615009.0`, empty history unless noted.
 |-------|-------|
 | L2 Capability | CAP-011 (cost history; format is status-line-owned, OD-124) |
 | L2 Domain Invariants | DI-007, DI-008 (the EC-005 CP-S15 TypeError degrade rides the never-blank ladder: 29-byte line, exit 0; ADV-P9-C2-05), DI-012 (exclusion id `OD-166` under the named-deviation rule, OD-169) |
-| Architecture Module | `internal/cost` history.go `Record` (design §2.3; BC-COMPONENT-MAP: internal/cost/history.go (throttled write) — ARCH-03) |
+| Architecture Module | `internal/cost` history.go `RecordCost` (the declared cost API, ARCH-03 §Interfaces; the declared API takes the cost config — `CostConfig` carries the registered cost keys including `statusline.cost.record_throttle_s`, orchestrator call 2; BC-COMPONENT-MAP: internal/cost/history.go (throttled write) — ARCH-03) |
 | Stories | S-N.MM (filled by story-writer) |
 | Source | legacy/dgx_statusline.py:record_cost (SL:224-237); call site render_lane (SL:603-606) |
 | Legacy contract | BC-SL-028 (P3r1 row 57; refined P3 deep r1) |
@@ -206,8 +208,8 @@ S-N.MM — cost history (filled by story-writer)
 |----------|-----------|
 | **I/O operations** | none in hylo — the legacy function writes the history file; per ARCH-03's declared cost API (§Interfaces, 'package internal/cost — DECLARED API') the fold into the loaded history is pure, and `internal/statusline` loads and saves the file through its `CacheStore` |
 | **Global state access** | none |
-| **Deterministic** | yes (given samples and a store fake) |
-| **Thread safety** | Safe for concurrent use (store injected) |
-| **Overall classification** | boundary |
+| **Deterministic** | yes (given the loaded history, session numbers, config and `now` passed in) |
+| **Thread safety** | Safe for concurrent use (pure) |
+| **Overall classification** | pure core |
 
 Owning component `internal/cost` (BC-COMPONENT-MAP: cost/history.go (throttled write) - ARCH-03); per ARCH-03's declared cost API ('package internal/cost — DECLARED API' in the §Interfaces section, ADV-P13-A02 / orchestrator call 7), the package is pure core with no I/O — `RecordCost` folds this session's entry into the loaded history and returns it, and `internal/statusline` loads and saves the cost-history file through its `CacheStore`, legacy's exact step-7c order (the record before the percentile read) kept.

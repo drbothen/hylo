@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0.9"
+version: "1.0.10"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T08:00:00Z
@@ -20,15 +20,16 @@ priority: P0
 lifecycle_status: active
 introduced: "0.1"
 modified:
-  - "1.0.1 2026-11-18T03:00:00Z: VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)"
-  - "1.0.2 2026-11-18T07:00:00Z: adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)"
-  - "1.0.3 2026-11-18T08:00:00Z: pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)"
-  - "1.0.4 2026-11-18T23:00:00Z: pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)"
-  - "1.0.5 2026-11-18T23:45:00Z: pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
-  - "1.0.6 2026-11-20T12:00:00Z: pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
-  - "1.0.7 2026-11-20T18:00:00Z: pass-9 remediation (ADV-P9-C02/C05) — frontmatter modified list repaired to block style (lost closing quote restored); enabled=false recast as ruled new behavior (OD-155), not a DI-012 named deviation, in Description, VP-005 row and Traceability — agrees with VP-005"
-  - "1.0.8 2026-11-23T12:00:00Z: pass-12 remediation (ADV-P12-C03) — PC5/Inv3/EC-004 state the plural diagnostic: each invalid key contributes one `hylo: config error: ...` line on stderr, the full list in registry order, not a single line (pass-5 A08 supplement correction propagated to the owning BC)"
-  - "1.0.9 2026-11-24T12:00:00Z: pass-13 remediation (ADV-P13-C06/C09) — Inv 3 and Traceability cite DI-010 (invalid config never silently falls back) for the no-masquerade rule instead of DI-012, which stays for the pinned-quirk vocabulary only; PC2, PC5 and EC-003 pin the disabled/errored half's stdin drain: stdin is read to EOF (content unused) before exit, matching legacy's unconditional stdin consumption (SL:930) and preventing a broken-pipe error in the Claude Code writer"
+  - "2026-11-18T03:00:00Z (v1.0.1): VP citation reconciliation: no-VP-yet row replaced with VP-005 (off leg) + VP-009 (on-leg parity rows)"
+  - "2026-11-18T07:00:00Z (v1.0.2): adv-p3 remediation: OD-168 config-error behavior in this mode pinned (zero bytes stdout, diagnostic stderr — ADV-P3-D18); invalid-boolean vector given concrete bytes (ADV-P3-C20)"
+  - "2026-11-18T08:00:00Z (v1.0.3): pass-4 remediation: invalid-boolean vector re-pinned to grammar-invalid `on` with the canonical reason string and from-ENVNAME suffix (ADV-P4-C01; `yes` resolves true per BC-2.01.005)"
+  - "2026-11-18T23:00:00Z (v1.0.4): pass-5 remediation (ADV-P5-C16) — parity_class brought into the closed vocabulary: byte-exact, scoped per the BC-INDEX parity-class note to the ENABLED half (default true = legacy rows); the disabled OD-155 off-switch half is new behavior contracted here, not a parity class (the ruled off-switch and OD-168 behavior stay named in the body)"
+  - "2026-11-18T23:45:00Z (v1.0.5): pass-6 remediation (ADV-P6-C12) — frontmatter template conformance: priority P0 added (prd.md S1.07), introduced normalized to the sibling \"0.1\" format"
+  - "2026-11-20T12:00:00Z (v1.0.6): pass-8 residual sweep (task 9) — ASSUMP-107-1 capture timing respelled per OD-192: 'before Phase 3' -> 'before Phase 2 writes the S1.07 stories'; body wording only"
+  - "2026-11-20T18:00:00Z (v1.0.7): pass-9 remediation (ADV-P9-C02/C05) — frontmatter modified list repaired to block style (lost closing quote restored); enabled=false recast as ruled new behavior (OD-155), not a DI-012 named deviation, in Description, VP-005 row and Traceability — agrees with VP-005"
+  - "2026-11-23T12:00:00Z (v1.0.8): pass-12 remediation (ADV-P12-C03) — PC5/Inv3/EC-004 state the plural diagnostic: each invalid key contributes one `hylo: config error: ...` line on stderr, the full list in registry order, not a single line (pass-5 A08 supplement correction propagated to the owning BC)"
+  - "2026-11-24T12:00:00Z (v1.0.9): pass-13 remediation (ADV-P13-C06/C09) — Inv 3 and Traceability cite DI-010 (invalid config never silently falls back) for the no-masquerade rule instead of DI-012, which stays for the pinned-quirk vocabulary only; PC2, PC5 and EC-003 pin the disabled/errored half's stdin drain: stdin is read to EOF (content unused) before exit, matching legacy's unconditional stdin consumption (SL:930) and preventing a broken-pipe error in the Claude Code writer"
+  - "2026-11-26T14:00:00Z (v1.0.10): pass-14 remediation (ADV-P14-C05) — Purity table reconciled with PC2/PC5: the I/O cell states the stdin drain to EOF on the disabled and config-error paths (ADV-P13-C09) and the overall classification becomes boundary; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -170,11 +171,11 @@ TBD — filled by story-writer
 
 | Property | Assessment |
 |----------|-----------|
-| **I/O operations** | none (pure config predicate + early-out) |
+| **I/O operations** | stdin drained to EOF on the disabled and config-error paths (PC2, PC5 — ADV-P13-C09; content unused); no cache write, no ledger access (PC4, DI-007) |
 | **Global state access** | reads resolved config |
 | **Deterministic** | yes |
 | **Thread safety** | safe for concurrent use (read-only config) |
-| **Overall classification** | pure |
+| **Overall classification** | boundary (the entry-point early-out consumes stdin on the subtractive paths; the enabled half's byte parity is pinned by BC-1.07.003..008) |
 
 #### Refactoring Notes
 

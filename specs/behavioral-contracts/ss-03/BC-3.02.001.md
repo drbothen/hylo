@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T21:45:00Z
@@ -26,6 +26,7 @@ modified:
   - "2026-11-20T18:30:00Z (1.3.1): ADV-P9 remediation D02+D01 (orchestrator call 7) — Inv 4 respelled: NO unseeded corpus case exists (pass-8 D10 aligned); the probe is exercised by the dedicated Go table tests with a fake process table, never by parity cases; EC-008 states the D4-EX-1 rider-test closure (NO exclusions.json entry)"
   - "2026-11-22T00:00:00Z (1.3.2): ADV-P12 remediation D01 (orchestrator call 2, superseding pass-11 call 2) — Inv 4 and EC-008 restated: every corpus case either seeds proc_start or is cache-003, which probes on NEITHER side (oracle: empty fake PATH raises FileNotFoundError at the ps call, caught SL:293-294; hylo: HYLO_STATUSLINE_WINDOW_AGE_MAX_DEPTH=0, zero probes); the load-time rejection's admission branch is the conditional fake PATH, whose only committed declarer is cache-003; the former 'no P1 corpus case declares the fake process table' universal dissolved"
   - "2026-11-23T00:00:00Z (1.3.3): ADV-P13 remediation A2-04 BC half — the three probe-mechanics VP rows keep VP-014 (whose amended v1.6 statement pins the three walk behaviours jointly with VP-033, so a routed row no longer outruns the verifying statement) alongside VP-033 and the VP-012 frontmatter-closure citation; a fourth VP-014 row + VP-Anchors entry minted for the ruled ⌂ Windows canonical-table pin itself; reciprocity (VP-014 bcs: gains BC-1.02.017) is the architect's half, done in VP-014 v1.6"
+  - "2026-11-26T15:00:00Z (1.3.4): pass-14 residual sweep (OD-160 owner id-range alignment): EC-011 minted — a giant exact-int cache proc_start (both signs) is returned as is and the window-age consumer raises OverflowError at SL:558, the CP-C34 register id (co-owner BC-1.02.017); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -131,7 +132,7 @@ Windows this can show `⌂` where legacy never could: approved deviation **D4-EX
 | EC-007 | Ancestor named `Claude` or `claude.exe` on macOS/Linux | No match (case-sensitive; `.exe` strip is Windows-only) |
 | EC-008 | **Windows**, ancestor `claude.exe` found | Go returns its start and `⌂` can show; legacy has no `ps` on Windows, catches `FileNotFoundError`, and never shows `⌂`. Approved deviation **D4-EX-1** (D4, design §5.4): OD-105 named difference entry `D4-EX-1`, dedicated table tests `TestWindowAge_D4EX1_Windows*` with a fake `ProcStarter` that returns a start; each excluded case matches its own expected output file. ADV-P9-D01 / orchestrator call 7: NO `exclusions.json` entry exists for `D4-EX-1` — every corpus case either seeds `proc_start` or is `cache-003` (no probe on either side), so no Windows ⌂ case can exist; the id is closed by the rider test alone (BC-6.03.004) |
 | EC-009 | Sub-second start (e.g. 1794615009.734) | Stored `1794615009.0` |
-| EC-010 | Session cache file is a JSON non-object (e.g. `[]`) | Unreachable here: `effective_rl` degrades first (CP-C01, P3r1 §A7) |
+| EC-010 | Session cache file is a JSON non-object (e.g. `[]`) | Unreachable here: `effective_rl` degrades first (CP-C01, P3r1 §A7) |\n| EC-011 | Session cache `proc_start` an exact giant integer (magnitude >= 2**1024 - 2**970, both signs; 309..4300-digit literal; passes the SL:274-275 `isinstance(int)` gate; foreign cache, exclusion **OD-160**) | returned as is (exact); the consuming window-age subtraction `(time.time() - win_start) * 1000` (BC-1.02.017's `win_ms`, SL:558) raises OverflowError → the render degrades per DI-008; foreign cached values: CP-C34, OD-160, Go table tests (measured pass-14) |
 
 ## Canonical Test Vectors
 

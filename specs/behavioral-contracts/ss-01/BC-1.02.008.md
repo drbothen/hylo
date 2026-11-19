@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.1"
+version: "1.3.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-15T18:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md]
-input-hash: "8dd801c"
+input-hash: "6ca6b1f"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:477-479)"
@@ -22,6 +22,7 @@ modified:
   - "1.2 pass-5 remediation (ADV-P5-B03): the cache-hit glyph is named as the registry key statusline.glyphs.cache_hit (default U+267B) instead of the wildcard statusline.glyphs.*; 2026-11-18T05:42:56Z"
   - "1.3 pass-11 remediation (ADV-P11-B01): EC-006 names the taxonomy id CP-S08 with its faithful trigger and raise site (SL:477), closing the specs-alone mapping gap for VP-001's fault-injection rows; no behavioral change; 2026-11-21T12:00:00Z"
   - "1.3.1 pass-12 remediation (ADV-P12-B04): Invariant 2 carves negative zero out of the 0%..100% range claim — hr = -0.0 renders -0% (BC-1.02.023 PC2/EC-005); no behavioral change; 2026-11-23T00:00:00Z"
+  - "2026-11-24T01:00:00Z (1.3.2): pass-14 remediation (ADV-P14-B02): Verification Properties and VP Anchors gain the VP-001 row (cps08 never-blank ladder leg) and EC-006 cites it — the owner-side reciprocity for VP-001's existing bcs: entry; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -71,7 +72,7 @@ Notation: `\e` is the byte 0x1B.
 | EC-003 | `hr` 0.015 / 0.025 | `2%` / `2%` (binary value of the product decides; oracle-pinned) |
 | EC-004 | `hr` 0.995 | `100%` |
 | EC-005 | `hr` `true` / `false` | `100%` / `0%` (bool is a number in Python) |
-| EC-006 | `prompt_cache` truthy non-object (`"x"`) — taxonomy **CP-S08** (`prompt_cache` truthy and not a dict, raise site SL:477) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table) |
+| EC-006 | `prompt_cache` truthy non-object (`"x"`) — taxonomy **CP-S08** (`prompt_cache` truthy and not a dict, raise site SL:477) | AttributeError → guard line `\e[90mstatusline degraded\e[0m\n`, exit 0 (error-taxonomy CP-S table; VP-001 cps08 fault-injection row) |
 | EC-007 | `hr` string `"0.9"`, null, missing | no segment |
 | EC-008 | `hr` NaN / ±inf | BC-1.02.023 (`♻ nan%`, `100%`/`0%`) |
 
@@ -99,6 +100,7 @@ Verified against the oracle (CPython 3.11.7) on 2026-11-15.
 |--------|----------|-------------|
 | VP-028 | For finite hr, text equals CPython `f"{min(max(hr,0.0),1.0)*100:.0f}%"` | property test vs CPython goldens (sweep 0..1 step 0.0005) — a bounded golden sweep on an authored fixed grid, staying on VP-028 per the VP-041 scope split (VP-041 takes generator-based for-all legs only) |
 | VP-028 | Segment absent iff hr is not a number | table test |
+| VP-001 | The CP-S08 stdin type-confusion degrade (EC-006: `prompt_cache` truthy and not a dict) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder; cps08) |
 
 ## Traceability
 
@@ -131,6 +133,7 @@ TBD — context widgets story
 ## VP Anchors (Recommended)
 
 - VP-028 — cache-hit formatting property
+- VP-001 — cps08 stdin type-confusion degrade stays on the never-blank ladder (EC-006)
 
 ---
 

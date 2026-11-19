@@ -1,17 +1,17 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
 timestamp: 2026-11-21T12:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-04-data-files.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.004.md, behavioral-contracts/ss-01/BC-1.05.006.md, behavioral-contracts/ss-01/BC-1.05.009.md, owner-decisions-log-2026-11-14.md]
-input-hash: "485e8d4"
+input-hash: "c18b32f"
 traces_to: prd.md
 source_bc: BC-1.05.004
 bcs: [BC-1.05.004, BC-1.05.006, BC-1.05.009]
-module: internal/cost
+module: internal/statusline (cost-history CacheStore I/O), internal/cost (pure record/throttle properties)
 proof_method: manual
 feasibility: feasible
 verification_lock: false
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)", "1.3 2026-11-18T14:50:00Z: ADV-P4 fix (A2-03/OD-169) — OD-166 record-guard leg added: record_cost SKIPS a cost value whose usd or api_ms cannot convert to float (legacy persisted the raw int); the current refresh still degrades; the resulting cache-byte divergence cites exclusion id OD-166 with its own table test TestCostHistory_OD166_RecordGuard and its own VP-012 closure row — no 'rides D4-EX-2' wording", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-26) — the OD-166 leg is exercised through the RENDERED refresh over both guard fields (usd and api_ms): the P1 cost.Record signature takes no api_ms and a library call renders nothing, so file-unchanged and the E-REN-002 degrade are observed in the rendered bytes", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (C2-04, A2-02: the OD-166 guard legs put the unconvertible exact int on STDIN (BC-1.05.004 EC-010/011) over a valid history; outcomes are field-specific (usd degrades per EC-010, api_ms renders normally per EC-011); a seeded-history huge value is the OD-160/CP-O10/O11 class)", "1.6 2026-11-20T08:00:00Z: pass-8 fixes (C2-06, C2-07) — the record-guard refresh outcome stated field- AND sign-specific per BC-1.05.004 PC1: usd degrades (CP-O10 at the .2f site SL:616, before the $/h math SL:622), POSITIVE huge api_ms passes the gate and degrades via CP-O11, NEGATIVE huge api_ms fails the gate and renders normally (EC-011); sketch gains the positive-api_ms row; the BC-1.05.004/006 testing/quick rows gained a matching property leg (TestCostRecord_QuickProperties: at-most-one-write under a fake clock; no duplicate keys), Method/Proof Method/Named Tests updated", "1.7 2026-11-18T21:00:00Z: pass-11 fix (C2-07) — the field-/sign-specific refresh-outcome citations moved from BC-1.05.004 PC1 to PC4 in the statement and the sketch comment: pass-9 (ADV-P9-C2-03) relocated the OD-166 convertibility skip out of the PC1 guard to the write step (PC4), and PC1 now explicitly says the skip is not part of the guard; the 1.6 history entry keeps its as-of-pass-8 figures", "1.8 2026-11-21T12:00:00Z: pass-12 fix (A2-19, cosmetic) — sketch identifier unified with the named interval: recordThrottleMS() respelled recordThrottleS(), agreeing with the throttle key statusline.cost.record_throttle_s (seconds, interface-definitions T-022) that the Method prose and BC-1.05.004 spell"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-17: ADV-P2 fixes — honest title (A2-03); wrong-type shapes out of parity scope, exclusion id OD-160; numeric-sid self-exclusion holds (C2-06)", "1.3 2026-11-18T14:50:00Z: ADV-P4 fix (A2-03/OD-169) — OD-166 record-guard leg added: record_cost SKIPS a cost value whose usd or api_ms cannot convert to float (legacy persisted the raw int); the current refresh still degrades; the resulting cache-byte divergence cites exclusion id OD-166 with its own table test TestCostHistory_OD166_RecordGuard and its own VP-012 closure row — no 'rides D4-EX-2' wording", "1.4 2026-11-18T23:45:00Z: ADV-P5 fix (A2-26) — the OD-166 leg is exercised through the RENDERED refresh over both guard fields (usd and api_ms): the P1 cost.Record signature takes no api_ms and a library call renders nothing, so file-unchanged and the E-REN-002 degrade are observed in the rendered bytes", "1.5 2026-11-19T12:00:00Z: pass-6 fixes (C2-04, A2-02: the OD-166 guard legs put the unconvertible exact int on STDIN (BC-1.05.004 EC-010/011) over a valid history; outcomes are field-specific (usd degrades per EC-010, api_ms renders normally per EC-011); a seeded-history huge value is the OD-160/CP-O10/O11 class)", "1.6 2026-11-20T08:00:00Z: pass-8 fixes (C2-06, C2-07) — the record-guard refresh outcome stated field- AND sign-specific per BC-1.05.004 PC1: usd degrades (CP-O10 at the .2f site SL:616, before the $/h math SL:622), POSITIVE huge api_ms passes the gate and degrades via CP-O11, NEGATIVE huge api_ms fails the gate and renders normally (EC-011); sketch gains the positive-api_ms row; the BC-1.05.004/006 testing/quick rows gained a matching property leg (TestCostRecord_QuickProperties: at-most-one-write under a fake clock; no duplicate keys), Method/Proof Method/Named Tests updated", "1.7 2026-11-18T21:00:00Z: pass-11 fix (C2-07) — the field-/sign-specific refresh-outcome citations moved from BC-1.05.004 PC1 to PC4 in the statement and the sketch comment: pass-9 (ADV-P9-C2-03) relocated the OD-166 convertibility skip out of the PC1 guard to the write step (PC4), and PC1 now explicitly says the skip is not part of the guard; the 1.6 history entry keeps its as-of-pass-8 figures", "1.8 2026-11-21T12:00:00Z: pass-12 fix (A2-19, cosmetic) — sketch identifier unified with the named interval: recordThrottleMS() respelled recordThrottleS(), agreeing with the throttle key statusline.cost.record_throttle_s (seconds, interface-definitions T-022) that the Method prose and BC-1.05.004 spell", "1.9 2026-11-25T12:00:00Z: pass-14 fix (A2-03, orchestrator call 13) — cost-history FILE I/O and temp-dir legs re-anchored to internal/statusline's CacheStore (ARCH-00 purity table: internal/cost is pure core, no I/O; ARCH-03 declared API), the former single internal/cost module anchor the residue the pass-13 ruling left; the parse-failure skeleton's load goes through the CacheStore seam and its record call respelled to the declared RecordCost(history, sess, cfg, now) API (ARCH-03, call 2); no property, oracle or test change"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,7 +81,10 @@ own VP-012 closure row — it does not ride D4-EX-2 and is not an OD-156 case.
 
 - **Class:** invariant.
 - **Method:** unit/table test — poisoned-file fault injection: malformed/truncated
-  JSON, wrong permissions, plus load-succeeds rows (NaN-bearing history); assert the
+  JSON, wrong permissions, plus load-succeeds rows (NaN-bearing history) — the
+  file-I/O and temp-dir legs run in internal/statusline at the CacheStore seam
+  (pass-14 A2-03, orchestrator call 13: internal/cost is pure core with no I/O,
+  ARCH-00/ARCH-03); assert the
   load yields an empty history and the next record regenerates the exact legacy-format
   file from scratch (the corrupt bytes are replaced, as the oracle replaces them);
   format rows compare exact bytes against oracle-pinned expectations. Valid-JSON
@@ -97,7 +100,7 @@ own VP-012 closure row — it does not ride D4-EX-2 and is not an OD-156 case.
 
 | Method | Tool | Bounded? | Coverage |
 |--------|------|----------|----------|
-| Poisoned-file tables | Go test, temp dirs | yes — enumerated malformation classes | legacy-reload semantics + write-format rows |
+| Poisoned-file tables | Go test, temp dirs (internal/statusline CacheStore seam, A2-03) | yes — enumerated malformation classes | legacy-reload semantics + write-format rows |
 | Byte pins | oracle-pinned expectations | yes | record_cost JSON format incl. NaN usd |
 | Throttle/keys property | Go property test (testing/quick), fake clock + fake store | generated refresh sequences | at-most-one-write (BC-1.05.004); no duplicate keys (BC-1.05.006) |
 
@@ -106,11 +109,11 @@ own VP-012 closure row — it does not ride D4-EX-2 and is not an OD-156 case.
 *Illustrative sketch (non-normative, not compiled; OD-182).*
 ```go
 func TestCostHistory_ParseFailure_LegacyReloadSemantics(t *testing.T) {
-    dir := tempCacheDir(t)
-    writeFile(dir, "cost-history.json", garbage) // unreadable/truncated — load => {}
-    hist := cost.Load(dir)
+    dir := tempCacheDir(t) // internal/statusline: the CacheStore seam (A2-03 —
+    writeFile(dir, "cost-history.json", garbage) // internal/cost does no I/O; unreadable/truncated — load => {})
+    hist := newCacheStore(dir).LoadCostHistory() // CacheStore load (internal/statusline)
     if !hist.Empty() { t.Fatal("poisoned load not empty") }
-    cost.Record(hist, session, usd) // throttle-through record
+    RecordCost(hist, session, costCfg, now) // throttle-through record (pure fold, internal/cost; ARCH-03 declared API, call 2)
     got := readFile(dir, "cost-history.json")
     if !parsesAsJSON(got) { t.Fatal("corrupt file not regenerated (legacy reloads from scratch, SL:190-197)") }
     if got != legacyOneSessionBytes(session, usd) {

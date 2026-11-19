@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "parity-harness"
-version: "1.20"
+version: "1.21"
 status: draft
 producer: architect
 timestamp: 2026-11-24T16:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "b97e850"
+input-hash: "cda6fc6"
 
 ---
 
@@ -136,7 +136,11 @@ input-hash: "b97e850"
   mechanisms — the builder's `PYTHONIOENCODING=utf-8` (encoding) and the comparator's
   open CRLF→LF conversion of the ORACLE's stdout on the Windows legs, BEFORE the byte
   comparison (hylo's bytes are NEVER converted — hylo writes LF itself — and the shim
-  does NO newline reconfigure). Conditional `PATH`: `PATH=<case>/bin`,
+  does NO newline reconfigure). The SAME conversion governs the golden WRITE path:
+  `-update` applies the BC-6.03.002 PC-1 CRLF→LF conversion to the oracle's stdout
+  before writing ANY golden, so every committed golden is LF on every OS — Windows
+  goldens never hold CRLF (pass-14 orchestrator call 6, ADV-P14-D05). Conditional
+  `PATH`: `PATH=<case>/bin`,
   ONLY when the case declares the fake-`PATH` condition — and that condition has
   ONE trigger: the `cache-003` EMPTY-bin declaration (orchestrator call 4,
   pass-13, ADV-P13-D04 — there is no subprocess-fake table in any parity case,
@@ -209,7 +213,7 @@ input-hash: "b97e850"
 |---|---|
 | Runner package | `internal/parity` |
 | Interpreter setting | `HYLO_PARITY_PYTHON` (settled, OD-104/OD-108) |
-| Golden update flag | `-update` (`go test ./internal/parity -run TestParityTierB -update`); writes Python output; fails if interpreter unset. Writes ONLY the host's NATIVE golden set — `*.golden` from a Linux oracle run, `*.windows.golden` from a WINDOWS oracle run (pass-5 D29: a Linux `-update` run never touches `*.windows.golden`, resolving the BC-6.03.001 PC-6/PC-8 contradiction); regenerating the Windows set therefore requires the same command on a Windows host with the pinned interpreter (owner-periodic action; both sets committed together) |
+| Golden update flag | `-update` (`go test ./internal/parity -run TestParityTierB -update`); writes Python output; fails if interpreter unset. Writes ONLY the host's NATIVE golden set — `*.golden` from a Linux oracle run, `*.windows.golden` from a WINDOWS oracle run (pass-5 D29: a Linux `-update` run never touches `*.windows.golden`, resolving the BC-6.03.001 PC-6/PC-8 contradiction); regenerating the Windows set therefore requires the same command on a Windows host with the pinned interpreter (owner-periodic action; both sets committed together). LF ON EVERY OS (pass-14 orchestrator call 6, ADV-P14-D05): `-update` applies the BC-6.03.002 PC-1 CRLF→LF conversion to the oracle's stdout BEFORE writing any golden, so every committed golden is LF — a Windows `-update` run never commits CRLF goldens |
 | Tier A test | `TestParityTierA_Corpus` |
 | Tier B test | `TestParityTierB_Goldens` |
 | Tier C test | `TestParityTierC_DiffFuzz`, budget env `HYLO_PARITY_FUZZSECONDS` (0 = skip; nightly sets 1800 = 30 min per OS, OD-149) |

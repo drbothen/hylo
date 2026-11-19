@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "build-ci-release"
-version: "1.14"
+version: "1.15"
 status: draft
 producer: architect
 timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "8cd1924"
+input-hash: "e0b60d4"
 
 ---
 
@@ -188,13 +188,21 @@ flowchart LR
   refreshes see earlier refreshes' cache writes, which is the production shape legacy
   exhibits too. The p95 <= 25 ms
   gate fails the build only with `HYLO_TIMING_GATE=1` (binds on the owner's Mac target).
-  TIMEOUT DERIVATION (orchestrator call 18, pass-13, ADV-P13-A13): the timing job's
+  TIMEOUT DERIVATION (orchestrator call 18, pass-13, ADV-P13-A13; oracle term made
+  explicit ADV-P14-A12): the timing job's
   timeout-minutes is derived from corpus size —
-  headroom × (N_cases × S_steps × 21 × T_ceiling) + oracle-spawn overhead, where
-  T_ceiling is the measured per-run ceiling on the slowest leg and the headroom factor
-  is a committed named constant written BESIDE the formula in the workflow, sized so the
+  headroom × (P × 21 × (T_ceiling + T_oracle_ceiling)) + fixed startup, where P is the
+  corpus's (case, step) PAIR count — the sum over cases of that case's step count,
+  a quantity defined even when cases differ in step count, and the same pair count the
+  timing census asserts — T_ceiling is the measured per-hylo-run ceiling on the slowest
+  leg, and T_oracle_ceiling is the measured per-oracle-invocation ceiling on the slowest
+  leg: the report also samples the CPython oracle median the same 1-warm-up + 20-timed
+  way per (case, step) (BC-6.04.002 PC-2), so the oracle spawns are charged per pair at
+  their own measured ceiling, not lumped into a vague allowance. The headroom factor and
+  both ceilings are committed named constants written BESIDE the formula in the
+  workflow, sized so the
   job cannot be killed before its positive-coverage line prints (D15: a named constant
-  with its rationale, not a magic number). 
+  with its rationale, not a magic number).
   CONDITIONAL EXEMPTION (OD-187 + OD-191, pass-7 A02, orchestrator call 3): the >512 KB
   fixture is exempt from the 25 ms p95 target, but the gate FAILS if its p95 exceeds
   100.0 ms — fails when p95 > 100.0 ms; exactly 100.0 ms passes at the 0.1 ms report
@@ -222,34 +230,48 @@ flowchart LR
 - **Positive coverage (ADV-P1-A09, process gap — implementation lands on main later with
   owner approval):** every regression-detector job must print a runtime-computed
   positive-coverage line and must treat "checked nothing" as failure, never as a pass:
-  - Tier A: `parity: N cases compared, M exclusions validated, K caches swapped` — job
+  - Tier A: `parity: N cases, P case-step comparisons, M exclusions validated, K caches
+    swapped` — job
     fails if `N == 0`, if `N` differs from the COMMITTED expected case count (a committed
     manifest of the corpus, ADV-P10-A04) or if `N` differs from the number of case
     directories found (same runtime census the exclusions check applies to `M`; a deleted
     case directory shrinks the runtime count and the runtime census equally, so the
-    committed manifest is what catches a partially lost corpus — ADV-P2-A15), or if
+    committed manifest is what catches a partially lost corpus — ADV-P2-A15); it fails
+    the same way on the comparison PAIR count `P` — `P == 0`, `P` ≠ the committed
+    expected pair count (sum over cases of each case's step count), or `P` ≠ the runtime
+    (case, step) pair census — so a harness that compares only the first step of a
+    multi-step case cannot pass (ADV-P14-A04); or if
     `K == 0` while any compared case declares swap seeds — the
     four-cache swap tier (BC-6.02.004, VP-019, R-001 mitigation) must be unable to check
     nothing and pass (pass-6 A10, call 13). TIMEOUT DERIVATION (orchestrator call 18,
-    pass-13, ADV-P13-A13): the Tier A job's timeout-minutes is derived from corpus
-    size — headroom × (N_cases × S_steps × R_runs × T_ceiling) + oracle-spawn overhead,
-    where T_ceiling is the measured per-run ceiling on the slowest OS leg, R_runs the
-    replays per (case, step), and the headroom factor is a committed named constant
+    pass-13, ADV-P13-A13; oracle term made explicit ADV-P14-A12): the Tier A job's
+    timeout-minutes is derived from corpus
+    size — headroom × (P × R_runs × (T_ceiling + T_oracle_ceiling)) + fixed startup,
+    where P is the corpus's (case, step) PAIR count (sum over cases of that case's step
+    count — the same pair count the Tier A census asserts), T_ceiling the measured
+    per-hylo-run ceiling on the slowest OS leg, R_runs the replays per (case, step),
+    and T_oracle_ceiling the measured per-oracle-invocation ceiling on the slowest leg
+    (the live leg drives both sides per (case, step), so the oracle spawn is charged
+    per pair at its own measured ceiling); the headroom factor and both ceilings are
+    committed named constants
     written BESIDE the formula in the workflow (D15: a named constant with its
     rationale, not a magic number) — sized so the job cannot die before its
     positive-coverage census line prints.
   - Tier B: `tier-b: N goldens compared` — printed by the plain test legs, which OWN
     the census (no separate Tier B job exists; orchestrator call 5, pass-13,
-    ADV-P13-A14) — fails if `N == 0`, if `N` differs from the
-    COMMITTED expected golden count for the host OS (a committed manifest,
-    ADV-P10-A04), or if `N` differs from
-    the number of committed golden files found by the same runtime census
-    (pass-5 A19: a partially lost golden set must not pass — the Tier A
-    case-directory census discipline applied to Tier B). The census counts ONLY the
-    HOST OS's golden set — `*.golden` on POSIX legs, `*.windows.golden` on the
-    Windows leg (the same native-set discipline as `-update`, pass-5 D29): a lost
-    `*.windows.golden` variant is caught by the Windows leg's census, and a POSIX
-    census never recounts Windows variants as present (pass-7 A18).
+    ADV-P13-A14) — counts golden COMPARISONS MADE (ADV-P14-A03): each corpus case is
+    compared exactly ONCE, against the host-OS variant when one exists and otherwise
+    against the DEFAULT golden (the BC-6.03.001 PC-8 fallback — the norm on the Windows
+    leg, where goldens A/B/C have no Windows variant) — and it fails if `N == 0`, if
+    `N` differs from that leg's COMMITTED expected CASE count (a committed manifest,
+    ADV-P10-A04), or if `N` differs from the runtime case-directory census — the
+    comparison count equals the case count, never a windows-only file census. The
+    native-set FILE census stays a separate checker over the committed golden files —
+    `*.golden` on POSIX legs, `*.windows.golden` on the Windows leg (the same
+    native-set discipline as `-update`, pass-5 D29): a lost `*.windows.golden` variant
+    shrinks the file census and fails its manifest comparison, and a POSIX file census
+    never recounts Windows variants as present (pass-7 A18; pass-5 A19: a partially
+    lost golden set must not pass).
   - Tier C: `tier-c: N inputs per side, M oracle spawns`; the PR-side budget skip
     (`t.Skip` on unset/0 `HYLO_PARITY_FUZZSECONDS`) is allowed only because the job is
     non-gating — on the nightly schedule a 0/unset budget FAILS, it does not skip, and
@@ -257,12 +279,19 @@ flowchart LR
     (pass-6 A10, call 13; one clean nightly run is the P1 exit condition, OD-149).
   - Exclusion machinery / canary: `exclusions: M entries validated against the closed
     set` — `M` must equal the file's entry count; a missing exclusions file fails.
-  - Go jobs (lint/test/vet/govulncheck): `go: K files scanned` counts source files, so
-    it is paired with a **test-run line**: `go test: N tests run, S skipped` — fails if
+  - Go jobs (lint/test/vet): `go: K files scanned` counts source files, so
+    it is paired with a **test-run line**: `go test: N tests run, S skipped` (test jobs
+    only — lint and govulncheck run no tests) — fails if
     `N == 0`; the reported skip count keeps an all-skip suite visible (an all-skip pass
     standing in for coverage is investigated, not accepted — ADV-P2-A15). The skeleton-era
     empty-module guard prints `go: 0 Go files — guard path, NOT a vet/test pass` and is
     removed once Phase 3 lands sources (after which `K == 0` fails).
+  - govulncheck (ADV-P14-A08): its positive-coverage line is `govulncheck: P packages
+    analysed`, derived from what the TOOL actually analysed — the package count in
+    govulncheck's JSON output — and COMPARED with the `go list ./...` package count
+    (fails if `P == 0` or `P` differs from the list count): a repo source-file count
+    (`go: K files scanned`) stays healthy when the scan's package pattern is narrowed,
+    so it cannot serve as govulncheck's coverage assertion.
   - Pattern scan: `hygiene: K files scanned, H hits` — fails if `K == 0` (scan ran over
     nothing) AND if `H > 0` (a found hit is a failure, pass-3 A18), so the scan cannot
     pass while flagging hygiene terms.
@@ -303,7 +332,12 @@ flowchart LR
     on zero cases must not pass), AND if `N` differs from the COMMITTED expected case
     count (the same manifest discipline Tier A applies — ADV-P10-A04) or from the
     corpus case census (timing 1 of N cases
-    must not pass; pass-7 A20).
+    must not pass; pass-7 A20). The census counts (case, STEP) PAIRS
+    (ADV-P14-A04, per pass-14 orchestrator call 15): the report's pair count `P` — the
+    (case, step) pairs actually timed, each pair's 20-sample series intact — fails the
+    job when `P == 0`, when `P` differs from the committed expected pair count (sum over
+    cases of each case's step count), or when `P` differs from the runtime pair census,
+    so timing only the first step of a multi-step case cannot pass.
   A skipped required check must never stand in for a pass: probe-gated placeholder jobs
   are added to branch protection's required set only when they can execute (Phase 3),
   and from then on every activation of the job must satisfy its coverage line —
@@ -344,7 +378,15 @@ flowchart LR
   superseded. The branch-protection required list names EXACTLY the check-run contexts
   the jobs emit — one required context per emitted context, none omitted, none
   invented (the retired separate `govulncheck (required)` context that no job emitted
-  is replaced by the dedicated job's own context, same name, now actually emitted).
+  is replaced by the dedicated job's own context, same name, now actually emitted) —
+  with ONE activation-conditional member (ADV-P14-A05, pass-14 orchestrator call 14):
+  the list carries `govulncheck (required)` ONLY FROM the change that adds go.mod's
+  `toolchain` line — the same change that promotes the job (activation-is-same-change,
+  Build section's ORDERING rule); until that change the list says govulncheck reports
+  on every change but is NOT required, and the context stays out of
+  `required_status_checks`. Applying the unconditional list today would do exactly
+  what the ORDERING rule forbids: promote a required check onto the current no-patch
+  1.26.0 toolchain.
   Workflow edits land on main with the owner's approval (spec-only here).
 
 ## Mapping

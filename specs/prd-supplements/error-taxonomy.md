@@ -1,14 +1,14 @@
 ---
 document_type: prd-supplement-error-taxonomy
 level: L3
-version: "1.19"
+version: "1.22"
 status: draft
 producer: product-owner
 timestamp: 2026-11-24T14:00:00Z
 phase: 1a
 stage: "3 of 3 (integration)"
 inputs: [prd.md]
-input-hash: "85adb2b"
+input-hash: "006ef5f"
 traces_to: prd.md
 modified:
   - "1.6 2026-11-18: pass-4 sync-check SC-10 — foreign-cache crash family CP-C01..C10 registered under the named exclusion OD-160, outside the 47-path crash register; no behavioral change"
@@ -23,9 +23,11 @@ modified:
   - "1.15 2026-11-21T00:30:00Z: pass-10 remediation — path-grammar reason `not an absolute path` (minted pass-9 A11, BC-2.01.005 PC-3) added to the reason table and the E-CFG-001 reconciliation sentence (A07); numeric-range vocabulary sentence fixed to the six strings above (A14); stale minting-source-of-record note removed from `invalid UTF-8` (A15); CP-O08 owner set corrected to BC-1.03.010 (EC-009) and BC-1.03.018 (PC3) (C06); CP-A01..A03 site cells cite the raise sites SL:891/894/906, matching the CP-A04/A05 rows and BC-1.07.008 (C09); CP-C10 within-step order claim qualified — the current session's own src-cc entry faults at the SL:232 throttle check before save_cache (B05); CP-S disposition anchor names the BC-1.03.x outliers CP-S14 (BC-1.03.013 PC3) and CP-S16 (BC-1.03.015 PC5) (C10); no behavioral change"
   - "1.16 2026-11-21T03:00:00Z: pass-11 remediation — new CP-S table defines the six range-only stdin type-confusion ids with (id, site, owner BC/EC): CP-S02 (SL:446, BC-1.02.001 EC-007), CP-S03 (SL:452, BC-1.02.003 EC-006), CP-S04 (SL:405/460, BC-1.02.003 EC-006), CP-S05 (SL:419, BC-1.02.006 EC-008), CP-S08 (SL:477, BC-1.02.008 EC-006), CP-S10 (SL:535, BC-1.02.014 EC-010) (B01/call 14; the owning ECs gain the id names in the same burst); E-REN-002 carrier list gains BC-1.02.003 and BC-1.02.008 (B07); no behavioral change"
   - "1.17 2026-11-21T14:10:00Z: pass-12 remediation — E-REN-002 carrier set restated as DERIVED (every owner BC of a degrade-disposition register row, walked against each owner BC's EC text; 36 carriers; hand-maintenance discontinued) (A01/call 11); foreign-cache family allocates the formerly reserved CP-C06 (mix-cache non-numeric cached tin, SL:586, BC-1.02.018 EC-009) and CP-C07 (non-numeric cached count bucket at sum(counts[:3]), SL:1181, BC-1.02.007) with OD-160 tags (B01/call 12); no behavioral change"
+  - "1.18 2026-11-23T14:00:00Z: pass-12 residual sweep — the invalid-UTF-8 minting row mirrors BC-2.02.001 1.3.4: the reason is reachable from POSIX byte values only, on Windows platform.EnvVars substitutes U+FFFD (call 8); CP-A04/A05 triggers bounded to 309..4300-digit decimal literals (call 15); no behavioral change"
   - "1.19 2026-11-24T14:00:00Z: pass-13 remediation - the foreign-cache family is renamed THE CP-C FAMILY (OD-160) and extended CP-C11..C27: seventeen rows minted, one per distinct legacy site and fault that the owning BCs name and the register lacked (session-cache sample consult faults SL:324/325/335/336/337/356 with their giant-int OverflowError legs; sparkline slice and plotted-value faults SL:664/671/674; mix-cache giant lr[0] SL:778-779; mix-cache load-frame faults SL:1019/1033), each with the nearest existing row's disposition - typed 29-byte degrade, Go table test, not byte-parity (C2-03/C05, orchestrator call 1; the residual sweep adds the ids to the owning BCs); E-CLI-003 minted for the hylo config path directory-undetermined exit 1 (A01, orchestrator call 8); CP-C07 trigger cell corrected to the composition byte-count buckets (B07); CP-O10 owner list gains BC-1.05.001 (EC-009 stdin bearer; C2-04); E-NET-001 dead rung states the closing reset follows statusline.theme.reset (A18); crash-path coverage paragraph states the CP-T01..T07 disposition (A15); no behavioral change"
   - "1.20 2026-11-24T18:00:00Z: pass-13 residual sweep - the CP-C family extended CP-C28..C32: five rows minted, one per distinct legacy site and fault, for the foreign cached-sample value edge cases the pass-13 BC additions name that the register lacked (capacity chip SL:741 string-running ValueError and SL:740 string-waiting TypeError; power chip SL:813 string-watts ValueError and SL:812 string-wall TypeError; idle gate SL:825 string-last TypeError), each copying the pass-13 rows' disposition; CP-C25/CP-C27 owner cells aligned to the citing ECs (EC-010/EC-011 - EC-007 keeps only CP-C26, its string-size leg); outro sentence updated; no behavioral change"
-  - "1.18 2026-11-23T14:00:00Z: pass-12 residual sweep — the invalid-UTF-8 minting row mirrors BC-2.02.001 1.3.4: the reason is reachable from POSIX byte values only, on Windows platform.EnvVars substitutes U+FFFD (call 8); CP-A04/A05 triggers bounded to 309..4300-digit decimal literals (call 15); no behavioral change"
+  - "1.21 2026-11-18: pass-14 remediation - the OD-160 foreign-cache completeness matrix added under the CP-C family (call 4): every load site (eight load_cache calls, five cache files) and every consulted field walked to every downstream operation, six fault classes each, outcomes measured on the pinned interpreter; CP-C01 step attribution corrected (session-cache non-object faults at step 3, SL:307-308/311, and at step 4, SL:324 - never at step 6, SL:274; B03/call 4); CP-C26 names both raise sites (SL:1027/SL:1033; C04); CP-C33..C57 minted - twenty-five raising cells for the giant-int and non-numeric cached-value fates the owning BCs' sweeps missed (C2-01/C2-02/call 4) - reusing CP-C24, CP-C28..C32 and the CP-O06..O08/O10..O12 bearers where they already match; non-raising cells pinned in the matrix; E-REN-002 carrier derivation extended to the Surface 2 skip-render owners (CP-O06..O09) and every CP-C owner BC, 59 derived carriers (A06/call 16); the width-1..16 reason rescoped to the pill-label keys AND the nine OD-194 statusline.labels.* keys (D01); the misplaced 1.18 entry re-slotted ascending (oldest-first standing rule); no behavioral change"
+  - "1.22 2026-11-26T15:00:00Z: pass-14 residual sweep - owner id-range alignment executed against the completeness matrix: BC-1.02.013 co-owns CP-C01 (its pass-14 EC-012, orchestrator call 4) in the CP-C01 row and the owner table (BC-1.02.013: CP-C01, C02, C33); BC-1.04.002's range gains CP-C01 (retention-gate citation, Inv 1); BC-1.04.009's range gains CP-C20 (matching the CP-C20 row's EC-011 co-owner cite); CP-C29 owner cell repointed to BC-1.04.006 EC-007 and CP-C31 to BC-1.04.011 EC-008 (their per-site ECs consolidated pass-14); the two-way BC-vs-register id check scripted, passes; no behavioral change"
 ---
 
 # Error Taxonomy: hylo P1 statusline
@@ -54,7 +56,7 @@ modified:
 | Error Code | Category | Severity | Exit Code | Observable / Message Format |
 |-----------|----------|----------|-----------|----------------------------|
 | E-REN-001 | REN | broken | 0 | `\e[90mstatusline degraded\e[0m\n` (29 bytes) — BC-1.01.001. Failure of the degraded-line write itself (legacy CP-X03, stdout closed) is the named exclusion `cp-x03` (OD-136): Go swallows the write error and still exits 0, per DI-008 |
-| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade). Carrier set DEFINED as every owner BC of a degrade-disposition row in this register (X/S/T/N/O/A rows whose disposition is the typed 29-byte degrade; the hand-maintained list is discontinued — pass-12 A01/call 11); the derived set, walked against each owner BC's EC text (37 carriers): BC-1.01.001 (CP-S01; BC-1.01.002 EC-008 delegates: "degrades via BC-1.01.001"), BC-1.01.008 (CP-S17), BC-1.02.001 (CP-S02), BC-1.02.003 (CP-S03/S04), BC-1.02.006 (CP-S05/S06/S07, CP-O01), BC-1.02.008 (CP-S08), BC-1.02.010 (CP-S09), BC-1.02.011 (CP-O02), BC-1.02.012 (CP-O02), BC-1.02.013 (CP-S09), BC-1.02.014 (CP-S10/S11, CP-O03), BC-1.02.015 (CP-S12), BC-1.02.016 (CP-S13), BC-1.02.017 (CP-O05), BC-1.02.020 (CP-S06/S07, CP-O01), BC-1.02.025 (CP-O04), BC-1.02.026 (CP-S11), BC-1.02.027 (CP-S12/S13), BC-1.02.029 (CP-O12 owner), BC-1.02.030 (CP-S09 sticky sequence), BC-1.03.013 (CP-S14), BC-1.03.015 (CP-S16), BC-1.04.001/.004/.005 (CP-N03), BC-1.04.014 (CP-N02), BC-1.04.015 (CP-N01), BC-1.05.001 (EC-009 stdin-borne CP-O10 leg), BC-1.05.002 (CP-O11 co-owner), BC-1.05.003 (CP-O12 co-owner), BC-1.05.004 (CP-S15), BC-1.05.005 (CP-O10/O11 history bearer), BC-1.05.007 (CP-O10/O11 stdin bearer), BC-1.07.006 (CP-A03), BC-1.07.007 (CP-A04/A05), BC-1.07.008 (CP-A01/A02/A03), BC-5.04.001 (CP-T09) |
+| E-REN-002 | REN | broken | 0 | same line, via typed CP-* degrades (overflow/NaN/type confusion): CP-S01..S17, CP-N01/N02/N03, the OD-156 Surface 1 overflow family CP-O01..O05, CP-O10/O11 and the cost-pick sum CP-O12, the Surface 3 subagent family CP-A01..A05, and the Windows localtime-domain transcript degrade CP-T09 (pass-7 call 8/B03; CP-O12 minted pass-9 call 4/B03; the Surface 2 transcript family CP-O06..O08 resolves to the D4-EX-2 skip discipline; CP-O09 reproduces the legacy no-write save, not a skip — BC-1.03.006 PC5; none of them a line degrade). Carrier set DEFINED as every owner BC of a degrade-disposition row in this register (X/S/T/N/O/A rows whose disposition is the typed 29-byte degrade; the hand-maintained list is discontinued — pass-12 A01/call 11); the derived set, walked against each owner BC's EC text (37 carriers): BC-1.01.001 (CP-S01; BC-1.01.002 EC-008 delegates: "degrades via BC-1.01.001"), BC-1.01.008 (CP-S17), BC-1.02.001 (CP-S02), BC-1.02.003 (CP-S03/S04), BC-1.02.006 (CP-S05/S06/S07, CP-O01), BC-1.02.008 (CP-S08), BC-1.02.010 (CP-S09), BC-1.02.011 (CP-O02), BC-1.02.012 (CP-O02), BC-1.02.013 (CP-S09), BC-1.02.014 (CP-S10/S11, CP-O03), BC-1.02.015 (CP-S12), BC-1.02.016 (CP-S13), BC-1.02.017 (CP-O05), BC-1.02.020 (CP-S06/S07, CP-O01), BC-1.02.025 (CP-O04), BC-1.02.026 (CP-S11), BC-1.02.027 (CP-S12/S13), BC-1.02.029 (CP-O12 owner), BC-1.02.030 (CP-S09 sticky sequence), BC-1.03.013 (CP-S14), BC-1.03.015 (CP-S16), BC-1.04.001/.004/.005 (CP-N03), BC-1.04.014 (CP-N02), BC-1.04.015 (CP-N01), BC-1.05.001 (EC-009 stdin-borne CP-O10 leg), BC-1.05.002 (CP-O11 co-owner), BC-1.05.003 (CP-O12 co-owner), BC-1.05.004 (CP-S15), BC-1.05.005 (CP-O10/O11 history bearer), BC-1.05.007 (CP-O10/O11 stdin bearer), BC-1.07.006 (CP-A03), BC-1.07.007 (CP-A04/A05), BC-1.07.008 (CP-A01/A02/A03), BC-5.04.001 (CP-T09); pass-14 A06/call 16: the derivation additionally carries the Surface 2 skip-render owners (CP-O06..O09: BC-1.03.005, BC-1.03.006, BC-1.03.007, BC-1.03.010, BC-1.03.018 — skip-render is the degrade-observable for the in-flight turn) and every owner BC of a CP-C row (the OD-160 register is degrade-observable with a Go-table disposition; 27 owner BCs, enumerated with their id ranges in the completeness matrix below), for 59 derived carriers in all |
 | E-CFG-001 | CFG | degraded | 0 | `\e[90mhylo: config error: <key>=<value> (<reason>)\e[0m\n`; stderr detail `[from <ENVNAME>]` — BC-2.02.001 |
 | E-CLI-001 | CLI | degraded | 0 | `\e[90mhylo: unknown flag <flag>\e[0m\n` — BC-4.01.002 |
 | E-CLI-002 | CLI | broken | 2 | golden usage text on stderr — BC-4.01.001 |
@@ -79,7 +81,7 @@ config error — OD-162; int64-overflow and Duration-ceiling values are number-r
 OD-164), number-grammar (BC-2.02.003), enum (BC-2.02.004), URL (BC-2.02.005), boolean
 (BC-2.02.006; OD-140 — dedicated class contract; grammar pinned in BC-2.01.005), theme/SGR
 (BC-2.01.003 — reason string `not an SGR parameter list`, named class per OD-134, resolving
-PRD OQ-6), and **Text** (BC-2.01.005 — composite-shape, pill-label, glyph and empty-text
+PRD OQ-6), and **Text** (BC-2.01.005 — composite-shape, pill-label, label, glyph and empty-text
 errors; named seventh class by **OD-178**, pass-5 A06/D05). The class register is closed
 at seven (OD-114 four + OD-134 + OD-140 + OD-178). Unknown-flag precedence: E-CLI-001 is
 checked before E-CFG-001.
@@ -104,7 +106,7 @@ checked before E-CFG-001.
 | `expected non-empty control-free text in every entry` | Text (List-entry violations, e.g. `statusline.lane.reroute_all_prefixes` empty or control-byte entry; OD-179 range + OD-178 class; pass-6 A14) | BC-2.01.004 |
 | `not an SGR parameter list` | theme | BC-2.01.003 |
 | `expected JSON <shape>` (`<shape>` = e.g. `array of 2 numbers`, `object {cc,other} of integers`) | Text (composite shape; OD-178) | BC-2.01.005 |
-| `expected non-empty control-free text of display width 1..16` | Text (pill labels; OD-178) | BC-2.01.005 |
+| `expected non-empty control-free text of display width 1..16` | Text (the three `pill.label_*` keys AND the nine OD-194 `statusline.labels.*` keys; OD-178, OD-194, pass-14 D01) | BC-2.01.005, BC-2.01.004 |
 | `expected non-empty control-free text` | Text (generic non-empty Text keys: `window_age.process_name`, `subagent.tokens.suffix`, `labels.input`, ...; OD-178) | BC-2.01.005 |
 | `empty path` / `home directory unknown` / `not an absolute path` | path (BC-2.01.005 grammar; no dedicated class contract; `not an absolute path` minted pass-9 A11 — BC-2.01.005 PC-3, a relative `paths.cache_dir`; pass-10 A07) | BC-2.01.005 |
 | `exactly one backend entry until P6` | backends (BC-2.01.002 cardinality rule; no dedicated class contract) | BC-2.01.002 |
@@ -284,13 +286,15 @@ longer enumerates the family**: pass-13 C2-03/orchestrator call 1 ruled the fami
 (OD-160 names the CLASS - every hand-edited cache shape is under OD-160 - and the old
 label was the register at ruling time, not a membership cap), and the register extended to
 the open range CP-C11..C27 by call 1 and to CP-C28..C32 by the pass-13 residual sweep
-(five foreign cached-sample value faults in the serving-state and idle chips), one row per
+(five foreign cached-sample value faults in the serving-state and idle chips) and to
+CP-C33..C57 by the pass-14 completeness matrix (call 4: twenty-five further raising cells,
+one row per distinct site and exception type, with every non-raising cell pinned), one row per
 distinct legacy site and fault named by the owning
 BCs; cite the family as **the CP-C family (OD-160)**.
 
 | Trigger id | Site (legacy SL) | Owning BC(s) | Trigger |
 |-----------|------------------|--------------|---------|
-| CP-C01 | session-cache load / `effective_rl` consult (SL:273-275, 307-312) | BC-1.01.009, BC-3.02.001 | session cache holds a JSON non-object (e.g. `[]`): the consult yields None or faults outside the load's try |
+| CP-C01 | session-cache load / `effective_rl` consult (SL:306-312) | BC-1.01.009, BC-3.02.001, BC-1.02.013 (EC-012), BC-1.04.002 (retention-gate citation, Inv 1) | session cache holds a JSON non-object (e.g. `[]`): step 3 faults first — item assignment raises TypeError at SL:308 when stdin carries a non-empty `rate_limits` dict, `.get` raises AttributeError at SL:311 otherwise — and `.get` raises AttributeError at SL:324 at step 4; claude_window_start's SL:274 consult (step 6) is UNREACHABLE with a non-object cache because `effective_rl` always loads it first (step attribution corrected, B03/call 4 — the former "the consult yields None" clause was wrong: no JSON non-object has `.get`) |
 | CP-C02 | `effective_rl` short-circuit (SL:312) | BC-1.02.013, BC-1.01.009 | cached `rl_ts` a string while cached `rl` is an object — TypeError at the `isinstance(rl, dict) and` short-circuit |
 | CP-C03 | metrics sample, rows >= 2 (SL:1217-1218) | BC-1.01.009 | wrong-shape metrics fetch result restored from the session cache |
 | CP-C04 | metrics sample, rows >= 2 (SL:1217-1218) | BC-1.01.009 | wrong-shape `up` flag (`up: false` bearer) restored from the session cache |
@@ -315,20 +319,184 @@ BCs; cite the family as **the CP-C family (OD-160)**.
 | CP-C23 | sparkline cell index (SL:674) | BC-1.04.009 (EC-011), BC-1.04.014 (EC-010) | a plotted point's value a non-numeric scalar — TypeError at the same division. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
 | CP-C24 | last-turn rate render (SL:778-779) | BC-1.04.018 (PC-1), BC-1.04.004 (Invariant 3) | mix-cache `lr[0]` an exact integer of magnitude >= 2**1024 - 2**970 (passes the SL:776 isinstance guard) — OverflowError at the `f"{x:.0f}"` render format; the exact analogue of CP-C06's `tin`. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
 | CP-C25 | mix-cache load frame (SL:1019) | BC-1.03.002 (EC-010) | hand-edited mix cache whose top level is not an object (e.g. `[]`): the never-raise loader returns it and the `c.get` consults raise AttributeError. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
-| CP-C26 | mix-cache load frame (SL:1033) | BC-1.03.002 (EC-007) | cached `size` a string — TypeError at the `size < off` comparison (`==` is False cleanly; a JSON bool is NOT in this class, BC-1.03.002 EC-007). Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C26 | mix-cache load frame (SL:1027, SL:1033) | BC-1.03.002 (EC-007) | cached `size` a string (or null/list/dict) — TypeError at `off > 0` (SL:1027) when any of `tin`/`c_wr`/`mixv6` is missing from the cache, else at the `size < off` comparison (SL:1033) with the transcript file size (`==` is False cleanly; a JSON bool is NOT in this class, BC-1.03.002 EC-007; both raise sites named, C04). Pass-13 mint, sites completed pass-14; typed 29-byte degrade, Go table test, not byte-parity |
 | CP-C27 | mix-cache load frame (SL:1033) | BC-1.03.002 (EC-011) | cached `ids` a non-iterable (number) — TypeError at `list(...)`. Pass-13 mint; typed 29-byte degrade, Go table test, not byte-parity |
 | CP-C28 | capacity chip running count render (SL:741) | BC-1.04.006 (EC-007) | foreign session cache restores a metrics sample whose `vllm:num_requests_running` is a string — ValueError at the `r{r:.0f}·q{q:.0f}` render format ("Unknown format code 'f' for object of type 'str'", oracle-verified CPython 3.11.7). Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
-| CP-C29 | capacity chip busy comparison (SL:740) | BC-1.04.006 (EC-008) | foreign session cache restores a metrics sample whose `vllm:num_requests_waiting` is a string — TypeError at the `q > 0` busy comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C29 | capacity chip busy comparison (SL:740) | BC-1.04.006 (EC-007) | foreign session cache restores a metrics sample whose `vllm:num_requests_waiting` is a string — TypeError at the `q > 0` busy comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
 | CP-C30 | power chip watts render (SL:813) | BC-1.04.011 (EC-008) | foreign session cache restores a metrics sample whose `DCGM_FI_DEV_POWER_USAGE` is a string — ValueError at the `⚡{w:.0f}W` render format. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
-| CP-C31 | power chip wall colour comparison (SL:812) | BC-1.04.011 (EC-009) | foreign session cache restores a metrics sample whose `dgx_power:est_wall_watts` is a non-empty (truthy) string — TypeError at the `wall > 1520` colour comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C31 | power chip wall colour comparison (SL:812) | BC-1.04.011 (EC-008) | foreign session cache restores a metrics sample whose `dgx_power:est_wall_watts` is a non-empty (truthy) string — TypeError at the `wall > 1520` colour comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
 | CP-C32 | idle-recency gate comparison (SL:825) | BC-1.04.012 (EC-006) | foreign session cache restores a metrics sample whose `dgx_llm_last_dgx_request_timestamp_seconds` is a non-empty (truthy) string — TypeError at the `last > 0` gate comparison. Pass-13 residual mint (call 1); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C33 | `effective_rl` freshness subtraction (SL:312) | BC-1.02.013, BC-1.01.009 | cached `rl_ts` an exact integer of magnitude >= 2**1024 - 2**970 (both signs; 309..4300-digit literal) while cached `rl` is an object — OverflowError at `now - ts` (float minus giant int; measured). Pass-14 matrix mint (call 4/C2-01 sibling); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C34 | window-age `win_ms` subtraction (SL:558) via cached `proc_start` (SL:274-275) | BC-3.02.001, BC-1.02.017 | session cache `proc_start` an exact giant integer (both signs; passes the SL:557 isinstance gate) — OverflowError at `(time.time() - win_start) * 1000` (measured). Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C35 | capacity chip render format (SL:741) | BC-1.04.006 | sample `vllm:num_requests_running` or `vllm:num_requests_waiting` an exact giant integer (both signs; `q > 0` compares exactly) — OverflowError at `r{r:.0f}·q{q:.0f}`. Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C36 | capacity chip busy comparison, second operand (SL:740) | BC-1.04.006 | sample `dgx_preempt:rate5m` a non-numeric non-giant (string, null, list, dict) while `q > 0` is False — TypeError at the `> 0` comparison (measured; a giant passes exactly). Pass-14 matrix mint (C2-01d); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C37 | host-share render (SL:762) | BC-1.04.007 | sample `dgx_kv:host_hit_share` an exact giant integer, positive only — `hs_raw * 100` stays exact and the `↺host {host_share:.0f}%` format raises OverflowError; a negative giant is pinned non-raising (the `> 0.5` rung gate omits the segment). Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C38 | box-rate render (SL:783) | BC-1.04.008 | sample `dgx_sl:gen_rate1m` (or the 5-min fallback) a non-empty non-numeric non-giant (string, list, dict) — ValueError at `{rate:.0f}` ("Unknown format code 'f'"; oracle-verified CPython 3.11.7). Pass-14 matrix mint (C2-01a); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C39 | box-rate render (SL:783) | BC-1.04.008 | the same cached rate an exact giant integer (both signs) — OverflowError at `{rate:.0f}`. Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C40 | TTFT NaN gate (SL:793) | BC-1.04.010 | sample `dgx_ttft:p95_30m` an exact giant integer (both signs; passes the isinstance gate) — OverflowError at `math.isnan(ttft)` (measured on the pinned interpreter; BC-1.04.010 PC-1's "exists only if a number and not NaN" wording amends to admit this faulted input). Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C41 | watts render (SL:813) | BC-1.04.011 | sample `DCGM_FI_DEV_POWER_USAGE` an exact giant integer (both signs; passes `is not None`) — OverflowError at `⚡{w:.0f}W`. Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C42 | wall-watts render (SL:815) | BC-1.04.011 | sample `dgx_power:est_wall_watts` an exact giant integer (both signs; the `> 1520`/`> 1280` comparisons are exact and the value is truthy) — OverflowError at `{wall:.0f}W`. Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C43 | GPU-temp render (SL:816) | BC-1.04.011 | sample `DCGM_FI_DEV_GPU_TEMP` a non-empty non-numeric non-giant (string, list, dict; passes `is not None`) — ValueError at `{t:.0f}°`. Pass-14 matrix mint (C2-01b); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C44 | GPU-temp render (SL:816) | BC-1.04.011 | the same cached temperature an exact giant integer (both signs) — OverflowError at `{t:.0f}°`. Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C45 | tariff product (SL:818) | BC-1.04.011 | sample `dgx_power:rate_usd_per_kwh` a truthy non-numeric non-giant (string, list, dict) while `wall` is truthy — TypeError at `wall / 1000 * rate_c`. Pass-14 matrix mint (C2-01c); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C46 | tariff product (SL:818) | BC-1.04.011 | the same cached tariff an exact giant integer (both signs; truthy gate) — OverflowError at the float*int product. Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C47 | idle-recency subtraction (SL:825) | BC-1.04.012 | sample `dgx_llm_last_dgx_request_timestamp_seconds` an exact giant integer, positive only (passes `last > 0` exactly) — OverflowError at `time.time() - last`; a negative giant is pinned non-raising (gate False). Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C48 | utilization product (SL:633) via cached `dgx_cost:dgx_usd_per_mtok` (main, SL:1230-1232) | BC-1.04.013, BC-1.02.029 | the restored sample's `dgx_mtok` an exact giant integer (both signs; passes the basis gate's isinstance and `> 0` exactly) — OverflowError at `tot * dgx_mtok / 1e6` (the CP-O12 site, cache-borne bearer). Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C49 | git-cache TTL subtraction (SL:409) | BC-1.02.005, BC-1.01.009 | git cache `ts` an exact giant integer (both signs; the `> GIT_TTL` comparison is exact) — OverflowError at `now - c.get("ts", 0)`. Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C50 | cost_thresholds window subtraction (SL:247; the current session's own src-cc entry at the record_cost throttle, SL:232, per CP-C10's counter-case) | BC-1.05.004, BC-1.05.005, BC-1.01.009 | cost-history entry `ts` an exact giant integer (both signs; the window and throttle comparisons are exact) — OverflowError at `now - e.get("ts", 0)`. Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C51 | mix-cache seek (SL:1046) | BC-1.03.002 | mix-cache `size` a negative exact giant integer — the comparisons (`size < off`, `size == off`) are exact and pinned non-raising, then `fh.seek(off)` raises ValueError ("cannot fit 'int' into an offset-sized integer"; measured — a FITTING negative int seeks to OSError, which is BC-1.03.002 EC-009's case). Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C52 | composition percentage division (SL:1173) | BC-1.02.007 | a composition byte-count bucket an exact giant integer, positive only — `sum`, `<= 0` and `n > 0` stay exact, then `round(n / total * 100)` raises OverflowError when the true-division quotient exceeds float64 (ratio-dependent: a giant quotient over a comparable-magnitude total converts silently; measured); a negative giant is pinned non-raising (skipped by `n > 0`). Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C53 | token-segment render conversions (SL:869 `float()` inside _fmt_tok_c; SL:596 `↻{rb:.0f}`) | BC-1.02.018 | cached `tin`/`tout`/`c_in`/`c_wr`/`c_rd`/`rb` exact giant integers (both signs; pass the SL:586 guard's isinstance exactly) — OverflowError at the render conversion, uncaught by _fmt_tok_c's `except (TypeError, ValueError)` (measured). Pass-14 matrix mint (C2-02); typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C54 | usage-update accumulators (SL:1108-1112, SL:1118) | BC-1.03.006 | cached `tin`/`tout`/`c_wr`/`c_rd`/`c_in`/`rb` a non-numeric non-giant (string, null, list, dict) meeting a new counted transcript line — TypeError at the respective `+=` (exact for giant-plus-int; a giant meeting a transcript-borne float is the CP-O06 bearer). Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C55 | rebuild predicate (SL:1117) | BC-1.03.007 | cached `pp` a non-numeric non-giant (string, list, dict; null is the fresh state and skips the predicate) meeting a new counted line — TypeError at `prompt - pp` (the float-pp overflow leg stays CP-O07). Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C56 | turn-machine in-flight consult (SL:1073) | BC-1.03.010 | cached `cur` a truthy non-dict (string, number, list) with a new assistant line — AttributeError at `cur.get("id")`. Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
+| CP-C57 | turn-close arithmetic (SL:992, SL:994) | BC-1.03.010 | cached `cur` a dict whose `t0`/`t1`/`out` are non-numeric non-giants — TypeError at the span subtraction or the `TURN_STALE * out` comparison (measured: float*str is TypeError, no sequence repeat); a giant `out` raises at the same site as the CP-O08 bearer. Pass-14 matrix mint; typed 29-byte degrade, Go table test, not byte-parity |
 
 Family-level citations: BC-1.06.001 EC-001 (the cache loader) and BC-1.04.002 EC-008
 (retention path) cite the CP-C family (OD-160) as a class; VP-001 and VP-020 exercise
 CP-C09/C10 by fault injection (out of parity scope; never-blank/exit-0 per DI-008). The
 pass-13 rows CP-C11..C27 are named in their owning BC edge cases (the pass-13 residual
-sweep, this pass); the same sweep minted CP-C28..C32 for the five serving-state/idle
-foreign cached-sample value faults and named them beside the legacy sites (call 1).
+sweep); the same sweep minted CP-C28..C32 for the five serving-state/idle
+foreign cached-sample value faults and named them beside the legacy sites (call 1). The
+pass-14 matrix rows CP-C33..C57 are cited by their owner BCs through the id ranges in the
+completeness matrix below (one id-range edge case per owner BC, added by the residual
+sweep); the family register ends at CP-C57 and every non-raising cell is pinned in the
+matrix, so site-by-site rediscovery is discontinued.
+
+## OD-160 foreign-cache completeness matrix (pass-14, orchestrator call 4)
+
+**Method.** (1) Every cache load in legacy/dgx_statusline.py was grepped: eight
+`load_cache(` calls across five cache files — session cache (SL:306 and SL:310 in
+`effective_rl`, SL:323 in `get_sample`, SL:273 in `claude_window_start`), git cache
+(SL:407), cost history (SL:228 `record_cost`, SL:245 `cost_thresholds`), mix cache
+(SL:1018 `_mix_counts`); the sparkline history is the session cache's `hist` field.
+(2) Every consulted field of every load was followed to every downstream operation
+(gate, comparison, arithmetic, iteration, format conversion, seek, write-back).
+(3) Six fault classes apply to each operation: string, null, list, dict, positive giant
+int, negative giant int — "giant" = an exact JSON integer with |n| >= 2**1024 - 2**970
+(the OD-156 conversion threshold; 309..4300-digit literal, since 4301+ digits fail the
+loader's parse earlier). (4) Every outcome was recorded — raise with its exception type,
+or a pinned non-raise with its fate — measuring each operation's precise semantics on the
+pinned interpreter instead of assuming.
+
+**Measured semantics bank** (pinned CPython 3.11.7, small expressions per site): float
+minus/plus giant int, an f-format `:.0f`/`:.1f` on a giant, `math.isnan(giant)`,
+`float(giant)` and a float*giant product all raise OverflowError ("int too large to
+convert to float"); int-float comparisons (`>`, `>=`, `<`) are EXACT and never raise;
+int/int true division raises OverflowError only when the quotient magnitude exceeds
+float64 (ratio-dependent); item assignment `c[k] = v` on any JSON non-object raises
+TypeError; `.get`/`setdefault` on any JSON non-object raises AttributeError;
+`fh.seek(+/-giant)` raises ValueError ("cannot fit 'int' into an offset-sized integer";
+a fitting negative int seeks to OSError); `>` with null/list/dict/str raises TypeError.
+Caps already oracle-verified in the specs: `min(giant, 100.0)` is `100.0`,
+`max(giant, 0.0)` is the giant itself, `max(-giant, 0.0)` is `0.0`.
+
+Cell legend: TE = TypeError, AE = AttributeError, OE = OverflowError, VE = ValueError,
+KE = KeyError, IE = IndexError; "pinned" = legacy does not raise and the stated fate
+holds for the whole class list. A CP-C id in a cell marks the raising cell's register row.
+
+| Cache file | Field / consult | Operation (SL) | string | null | list | dict | +giant | -giant | Raising id(s) |
+|-----------|-----------------|----------------|--------|------|------|------|--------|--------|---------------|
+| session | top-level object | `effective_rl` item assignment, 308 | TE | TE | TE | TE | TE | TE | CP-C01 |
+| session | top-level object | `effective_rl` `.get`, 311 | AE | AE | AE | AE | AE | AE | CP-C01 |
+| session | `rl` | 312 isinstance short-circuit | pinned: None returned | pinned: None returned | pinned: None returned | object: normal path | pinned: None returned | pinned: None returned | — |
+| session | `rl_ts` | 312 `now - ts` (`rl` an object) | TE | TE | TE | TE | OE | OE | CP-C02 (scalars), CP-C33 (giants) |
+| session | `fetch_ts` | 324 `>` TTL | TE | TE | TE | TE | pinned: exact, "fresh" | pinned: exact, "fresh" | CP-C11 |
+| session | `ts` (cached path) | 325 `now - ts` | TE | TE | TE | TE | OE | OE | CP-C12, CP-C13 |
+| session | `sample` | main isinstance gate, 1228 | pinned: no row-2 telemetry | pinned | pinned | normal path | pinned | pinned | — |
+| session | `up` | 325 `bool()` | pinned | pinned | pinned | pinned | pinned | pinned | — |
+| session | `hist` (raw return) | sparkline `hist[-N:]` | pinned: chars normalize to `{}`, <2 pts, "" | TE | TE (slice unhashable) | TE | pinned | pinned | CP-C20 |
+| session | `hist` (normalize) | 335 comprehension | pinned: chars to `{}` | TE | pinned: points to `{}` | pinned: keys to `{}` | pinned | pinned | CP-C14 |
+| session | point `t` | 336 age filter | TE | TE | TE | TE | OE | OE | CP-C15, CP-C16 |
+| session | newest kept point | 337 gap check | — | — | — | KE (bare `{}` newest kept; needs canned now < SPARK_MAX_AGE) | pinned: filter raises first | pinned | CP-C17 |
+| session | `proc_start` | 274 isinstance | pinned: ps walk | pinned: ps walk | pinned: ps walk | pinned: ps walk | OE at 558 | OE at 558 | CP-C34 |
+| git | top-level object | 409 `.get` | AE | AE | AE | object: normal | AE | AE | CP-C08 |
+| git | `ts` | 409 `now - ts` | TE | TE | TE | TE | OE | OE | CP-C08, CP-C49 |
+| git | `branch` | 411-412 f-string | pinned | pinned: falsy, no segment | pinned | pinned | pinned | pinned | — |
+| cost | top-level object | 229 `setdefault` | AE | AE | AE | AE | AE | AE | CP-C09 |
+| cost | `sessions` value | 245 `.get("sessions") or {}` then `.items()` | AE | pinned: `or {}` | AE | object: normal | AE | AE | CP-C09 |
+| cost | entry object | 247 `e.get` | AE | AE | AE | object: normal | AE | AE | CP-C09 |
+| cost | entry `ts` | 247 window (own src-cc entry: 232) | TE | TE | TE | TE | OE | OE | CP-C10, CP-C50 |
+| cost | entry `usd` | 249-252 gate, 255 division | pinned: continue | pinned: continue | pinned: continue | pinned: continue | OE at 255 (`api` qualifying) | OE at 255 | CP-O10 (bearer) |
+| cost | entry `api_ms` | 253-255 gate, division | pinned: skipped | pinned: skipped | pinned: skipped | pinned: skipped | OE at 255 | OE at 255 | CP-O11 (bearer) |
+| cost | consumed thresholds | 610-614 comparisons | pinned | pinned | pinned | pinned | pinned: exact colour verdicts | pinned | — |
+| mix | top-level object | 1020 `.get("size", 0)` | AE | AE | AE | AE | AE | AE | CP-C25 |
+| mix | `size` | 1027 `off > 0` / 1033 `size < off` / 1039 `==` | TE | TE | TE | TE | pinned: `size < off` True, clean full re-parse | pinned at comparisons; VE at seek 1046 | CP-C26; CP-C51 |
+| mix | `ids` | 1033 `list()` (only when not (need_reset or size < off)) | pinned: list(chars) | TE | TE | pinned: list(keys) | TE | TE | CP-C27 |
+| mix | `res`/`conv`/`think` | 1181 sum, 1171 `n > 0`, 1173 division | TE | TE | TE | TE | OE at 1173, ratio-dependent | pinned: skipped by `n > 0` | CP-C07; CP-C52 |
+| mix | `tin`/`tout` | 586 guard, 587 format | TE at 586 (truthy) | pinned: "?" path (falsy) | TE at 586 (non-empty) | TE at 586 (non-empty) | OE at 869 `float()` | OE at 869 | CP-C06; CP-C53 |
+| mix | `c_in`/`c_wr`/`c_rd` | 588-592 isinstance gates | pinned: skipped | pinned | pinned: skipped | pinned: skipped | OE at 869 | OE at 869 | CP-C53 |
+| mix | `rb` | 596 gate + `.0f` | pinned: skipped | pinned | pinned: skipped | pinned: skipped | OE at 596 | OE at 596 | CP-C53 |
+| mix | `kv_raw` | 758-759 min/max/ceil | pinned: segment skipped | pinned | pinned | pinned | pinned: full bar "100%" (measured) | pinned: empty bar "0%" (measured) | — |
+| mix | `hs_raw` (host share) | 756 product, 762 format | pinned: None | pinned: None | pinned: None | pinned: None | OE at 762 | pinned: `> 0.5` gate omits | CP-C37 |
+| mix | `lr` | 777-779 mine segment | pinned: isinstance gate | pinned | pinned | pinned: gate | OE (in `[g,...]`) | OE | CP-C24 |
+| mix | `cur` | 1073 `cur.get("id")` | AE | pinned: falsy, normal flow | AE | object: normal | AE | AE | CP-C56 |
+| mix | `cur` dict fields `t0`/`t1`/`out` | 992 span, 994 comparison | TE | pinned: None skips predicate | TE | TE | OE (out) at 994 | OE | CP-C57; CP-O08 (bearer) |
+| mix | `lu` | 1074 stored, no arithmetic | pinned | pinned | pinned | pinned | pinned | pinned | — |
+| mix | totals `tin`/`tout`/`c_wr`/`c_rd`/`c_in`/`rb` | 1108-1112, 1118 `+=` (needs a new counted line) | TE | TE | TE | TE | pinned: exact (float meeting: OE, CP-O06 bearer) | pinned: exact | CP-C54 |
+| mix | `pp` | 1117 `prompt - pp` (needs a new counted line) | TE | pinned: None skips | TE | TE | OE: CP-O06-class bearer | OE | CP-C55 |
+| sample (restored m) | `num_requests_running`/`waiting` | 740-741 | r: VE at `.0f`; q: TE at `> 0` | q: TE; r: pinned gate | r: VE; q: TE | r: VE; q: TE | OE at 741 | OE at 741 | CP-C28, CP-C29, CP-C35 |
+| sample | `dgx_preempt:rate5m` | 740 second operand (when `q > 0` False) | TE | TE | TE | TE | pinned: exact | pinned | CP-C36 |
+| sample | `kv_cache_usage_perc` | 758-759 | pinned: skipped | pinned | pinned | pinned | pinned: "100%" | pinned: "0%" | — |
+| sample | `host_hit_share` | 756, 762 | pinned: None | pinned | pinned | pinned | OE at 762 | pinned: gate omits | CP-C37 |
+| sample | `gen_rate1m`/fallback | 782-783 | VE | pinned: gate | VE | VE | OE at 783 | OE at 783 | CP-C38, CP-C39 |
+| sample | `ttft` | 793 isinstance + isnan | pinned: gate | pinned | pinned | pinned | OE at isnan | OE at isnan | CP-C40 |
+| sample | `ttft_n30m` | 796 gate + `< 20` | pinned: gate | pinned | pinned | pinned | pinned: exact | pinned | — |
+| sample | `DCGM_FI_DEV_POWER_USAGE` | 813 | VE | pinned: gate | VE | VE | OE at 813 | OE at 813 | CP-C30, CP-C41 |
+| sample | `est_wall_watts` | 812-815 | TE at `> 1520` | pinned: falsy | TE | TE | OE at 815 | OE at 815 | CP-C31, CP-C42 |
+| sample | `DCGM_FI_DEV_GPU_TEMP` | 816 | VE | pinned: gate | VE | VE | OE at 816 | OE at 816 | CP-C43, CP-C44 |
+| sample | `rate_usd_per_kwh` | 818 product | TE | pinned: falsy gate | TE | TE | OE at 818 | OE at 818 | CP-C45, CP-C46 |
+| sample | `last_dgx_request...` | 825 gate + subtraction | TE at `> 0` | pinned: falsy | TE | TE | OE at 825 | pinned: gate False | CP-C32, CP-C47 |
+| sample | `dgx_cost:dgx_usd_per_mtok` | 1230-1232 basis gate; 633 product | pinned: `⛏n/a` | pinned | pinned | pinned | OE at 633 | OE at 633 | CP-C48 |
+
+**Pinned non-raise outcomes worth pinning explicitly** (each measured or gated): a
+positive-giant KV gauge renders the full bar and a negative-giant one the empty bar
+(`min(max(n*100, 0.0), 100.0)`); a positive-giant sparkline value is capped by
+`max(v, 0.0)` then overflows only at the division (CP-C22's register row); a negative-giant
+host share and a negative-giant idle timestamp gate out; a giant `fetch_ts`/entry-`ts`
+comparison verdicts exactly without raising; a string `hist` or dict `hist` normalizes to
+empty through SL:335/336 and proceeds (CP-C14's null/number cells are the raisers); `bool()`
+of any `up` is safe; a non-dict `sample` renders no row-2 telemetry; a falsy non-numeric
+`tin`/`tout` takes the "?" helper path; string `ids`/dict `ids` listify to
+chars/keys; git `branch` of any shape is f-string-straightened, falsy rendering no segment.
+
+**Owner-BC id ranges (residual sweep input — ONE id-range edge case per owner BC):**
+
+| Owner BC | CP-C id range |
+|----------|---------------|
+| BC-1.01.009 | CP-C01..C04, C08..C10, C33, C49, C50 |
+| BC-1.02.005 | CP-C08, C49 |
+| BC-1.02.007 | CP-C07, C52 |
+| BC-1.02.013 | CP-C01, C02, C33 |
+| BC-1.02.017 | CP-C34 |
+| BC-1.02.018 | CP-C06, C53 |
+| BC-1.02.029 | CP-C48 (co-owner) |
+| BC-1.03.002 | CP-C25..C27, C51 |
+| BC-1.03.006 | CP-C54 |
+| BC-1.03.007 | CP-C55 |
+| BC-1.03.010 | CP-C56, C57 |
+| BC-1.04.002 | CP-C01 (retention-gate citation), C11..C15, C18, C19 |
+| BC-1.04.003 | CP-C05, C16, C17 |
+| BC-1.04.004 | CP-C24 (co-owner) |
+| BC-1.04.006 | CP-C28, C29, C35, C36 |
+| BC-1.04.007 | CP-C37 |
+| BC-1.04.008 | CP-C38, C39 |
+| BC-1.04.009 | CP-C20..C23 |
+| BC-1.04.010 | CP-C40 |
+| BC-1.04.011 | CP-C30, C31, C41..C46 |
+| BC-1.04.012 | CP-C32, C47 |
+| BC-1.04.013 | CP-C48 |
+| BC-1.04.014 | CP-C20..C23 |
+| BC-1.04.018 | CP-C24 |
+| BC-1.05.004 | CP-C09, C10, C50 |
+| BC-1.05.005 | CP-C09, C10, C50 |
+| BC-3.02.001 | CP-C01, C34 |
+
+**Completeness declaration.** Declared complete under the method above: every load site
+was grepped (eight calls, five files), every consulted field was walked to every downstream
+operation, and every (operation, fault class) pair is represented in the matrix either by a
+CP-C register row or a pinned outcome. A cached-value read outside this matrix is a spec
+gap and fails the consistency check.
 
 ## CP-S stdin type-confusion ids that were defined only as ranges (pass-11 B01)
 

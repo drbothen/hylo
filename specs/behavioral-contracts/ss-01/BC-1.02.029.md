@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.8"
+version: "1.8.2"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
@@ -21,10 +21,12 @@ introduced: "0.1"
 modified:
   - "2026-11-17T12:00:00Z (v1.2): pass-4 remediation (ADV-P4-B21): cost.basis_min_shown_usd renamed to statusline.cost.display_floor_usd per OD-174; misleading-name disclaimers deleted"
   - "2026-11-19T04:00:00Z (v1.4): pass-6 remediation (ADV-P6-B08 + B16): the pick glyph is named as the registry key statusline.glyphs.cost_pick instead of the wildcard statusline.glyphs.* (Config keys row); history label version-prefixed"
-  - "2026-11-18 (v1.5): pass-9 remediation (ADV-P9-B03, orchestrator call 4): the legacy exact-int overflow leg registered as CP-O12 — PC1 qualifies float64 to converting tot values and states the SL:633 OverflowError degrade; EC-009 + a CP-O12 canonical vector minted (oracle-checked  through the real entry point, isolated HOME and cwd); Related BCs gains the bearer kin BC-1.02.025; crash register now 49 paths (X4 S17 T8 N3 O12 A5); 2026-11-19T16:00:00Z"
+  - "2026-11-19T16:00:00Z (v1.5): pass-9 remediation (ADV-P9-B03, orchestrator call 4): the legacy exact-int overflow leg registered as CP-O12 — PC1 qualifies float64 to converting tot values and states the SL:633 OverflowError degrade; EC-009 + a CP-O12 canonical vector minted (oracle-checked  through the real entry point, isolated HOME and cwd); Related BCs gains the bearer kin BC-1.02.025; crash register now 49 paths (X4 S17 T8 N3 O12 A5); leading bare 2026-11-18 date canonicalized to the entry's own trailing stamp in pass-14"
   - "2026-11-20T18:00:00Z (v1.6): pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O12 overflow degrade (EC-009) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
   - "2026-11-20T18:00:00Z (v1.7): pass-10 remediation (ADV-P10-B07): Architecture Anchors bullet gains the file-family fragment anchor (sibling convention of BC-1.02.001..015); the Stories placeholder respelled from S-N.MM to the TBD convention; no behavioral change"
   - "2026-11-24T00:00:00Z (v1.8): pass-13 remediation (ADV-P13-B02): the CP-O12 vector's session-cache seed gains the leading proc_start key (900.0) per the corpus admission rule BC-3.02.001 Inv 4 (truthy session_id plus unseeded proc_start is rejected at case load), the setup states rows 2 and the legacy prefix variable, and the outcome respells to the measured regime - the session cache stays byte-unchanged from the seed (the seeded numeric proc_start returns at the consult short-circuit, SL:273-275; no probe, no rewrite), replacing the machine-dependent trailing-key observation and its EC-003-style citation; re-measured 2026-11-24 (CPython 3.11.7, isolated temporary HOME and cwd, control leg renders); history canonicalized date-first (the v1.7 entry was undated); no behavioral change"
+  - "2026-11-24T01:00:00Z (v1.8.1): pass-14 remediation (ADV-P14-B05): the CP-O12 vector's seed disambiguates its placeholders — transcript_path and project_dir no longer share the single <T>: <TP> names the regular transcript file (os.path.isfile, SL:1010) and <PD> the existing project directory, with the non-directory consequence stated (no counts, no tot, no degrade); no behavioral change"
+  - "2026-11-26T15:00:00Z (v1.8.2): pass-14 residual sweep (OD-160 owner id-range alignment): EC-010 minted — a giant exact-int cached dgx_mtok (both signs) passes the basis gate and raises OverflowError at tot * dgx_mtok / 1e6 (SL:633), the CP-C48 register id; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,7 +89,7 @@ case, BC-1.05.003).
 | EC-006 | mtok NaN or `None`, or rate below 30.4 | basis invalid → ` ⛏n/a` (BC-1.05.003, not this contract) |
 | EC-007 | tot = 0 | no `⛏` part at all |
 | EC-008 | cloud-lane model | no `⛏` part |
-| EC-009 | `tin`/`tout` each below the int→float conversion threshold but their exact-int sum `tot` (SL:626) at or above it; local lane, valid basis | the multiply `tot * mtok` (SL:633) raises uncaught OverflowError → guard line (OD-156; taxonomy **CP-O12**): exactly the 29-byte degraded line, exit 0, earlier writes kept — **not** `⛏inf` (a float64 port that computes `inf` and renders `⛏inf` is a parity diff) |
+| EC-009 | `tin`/`tout` each below the int→float conversion threshold but their exact-int sum `tot` (SL:626) at or above it; local lane, valid basis | the multiply `tot * mtok` (SL:633) raises uncaught OverflowError → guard line (OD-156; taxonomy **CP-O12**): exactly the 29-byte degraded line, exit 0, earlier writes kept — **not** `⛏inf` (a float64 port that computes `inf` and renders `⛏inf` is a parity diff) |\n| EC-010 | Cached basis `dgx_cost:dgx_usd_per_mtok` an exact giant integer (magnitude >= 2**1024 - 2**970, both signs; passes the basis gate's `isinstance` and `> 0` exactly; foreign cache, exclusion **OD-160**) | the consumer expression `tot * dgx_mtok / 1e6` (SL:633) raises OverflowError (int→float) — the cache-borne bearer of this contract's CP-O12 site (register owner BC-1.04.013, this contract co-owner) → guard line, exit 0; foreign cached values: CP-C48, OD-160, Go table tests (measured pass-14) |
 
 ## Canonical Test Vectors
 
@@ -112,8 +114,12 @@ CP-O12 cost-pick equivalence overflow (pass-9 ADV-P9-B03; oracle-checked 2026-11
 `python3 -I -s legacy/dgx_statusline.py` with an isolated HOME and cwd, CPython 3.11.7; re-pinned 2026-11-24 to the
 seeded corpus regime, rows 2, legacy prefix variable `LOCAL_MODEL_PREFIXES=claude-sonnet`): the bearer is the
 integer-only transcript accumulation (kin of CP-O04, BC-1.02.025 EC-010). Seed: stdin `{"session_id":"r4",
-"transcript_path":"<T>","workspace":{"project_dir":"<T>"},"model":{"id":"claude-sonnet-x"},
-"cost":{"total_cost_usd":0.5}}` (local lane, prefixes `claude-sonnet`); session cache `statusline-r4.json` seeded
+"transcript_path":"<TP>","workspace":{"project_dir":"<PD>"},"model":{"id":"claude-sonnet-x"},
+"cost":{"total_cost_usd":0.5}}` (local lane, prefixes `claude-sonnet`; `<TP>` names a regular transcript file —
+the loader stats it with `os.path.isfile`, SL:1010 — and `<PD>` names an existing directory, e.g. `<T>/r4/`
+with `<T>/r4/msg.jsonl` the transcript; the two placeholders are distinct on purpose — if `<PD>` were read as
+the transcript file (or any non-directory), `_mix_counts` returns no counts, `tot` is never formed, and the
+vector does not degrade); session cache `statusline-r4.json` seeded
 `{"proc_start": 900.0, "fetch_ts": <now>, "ts": <now>, "up": true, "sample": {"dgx_cost:dgx_usd_per_mtok": 2.0,
 "dgx_tokens:rate_mtok_month": 1000000000}}` (valid basis, fresh TTL; the leading `"proc_start"` is the corpus
 admission rule, BC-3.02.001 Inv 4 — a truthy `session_id` with an unseeded `proc_start` is rejected at case load —

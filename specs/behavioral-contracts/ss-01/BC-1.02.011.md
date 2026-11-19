@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.5.2"
+version: "1.5.3"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T23:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts.md, semport/hylo-legacy/statusline-target-design.md, semport/hylo-legacy/hylo-legacy-pass-4-deep-nfr-r7.md]
-input-hash: "aba3e47"
+input-hash: "ea236ef"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:render_lane (SL:510-522, 531-532)"
@@ -24,6 +24,7 @@ modified:
   - "1.5 pass-6 remediation (ADV-P6-B02 + B10 + B16): EC-011 and its CTV row re-vectored from −10³⁰⁰ to −OV (the negated EC-010 boundary — discriminates a float64-at-decode port; −10³⁰⁰ converted cleanly); the OV CTV row now states a numeric used_percentage so the shown window reaches SL:515; history labels version-prefixed; 2026-11-19T04:00:00Z"
   - "1.5.1 pass-8 remediation (ADV-P8-B10): EC-011's hiding mechanism cited precisely — SL:510 widget drop for the canonical 5h-absent vector, SL:513-514 per-window continue when the other window is reported; outcome unchanged; 2026-11-19T08:00:00Z"
   - "1.5.2 2026-11-20T18:00:00Z: pass-10 remediation (ADV-P10-B03): Verification Properties gains the VP-001 ladder row for the CP-O02 overflow degrade (EC-010) — 29-byte line, exit 0; reciprocal VP-001 bcs: sync is the architect's"
+  - "2026-11-24T01:00:00Z (1.5.3): pass-14 remediation (ADV-P14-B06): PC5 declares the two-space inter-window joiner (SL:532) a named format constant of this widget, not config (D15 rationale, sibling of the BC-1.02.007/018 intra-segment declarations); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,7 +64,10 @@ Notation: `\e` is the byte 0x1B; `T = 1800000000.0`; `D7` = 604800.
 4. Window text = `col` + `label` + F(pct, 0) + `%` + `\e[0m` (F = Python `'f'`, half-even,
    BC-5.01.001), followed by the countdown when BC-1.02.012 applies.
 5. Limits segment = the window texts joined by exactly two spaces; it is one row-1
-   element, placed after the cache-hit segment.
+   element, placed after the cache-hit segment. The two-space inter-window joiner is a **named format
+   constant** of this widget, not config (D15 rationale: intra-segment output markup, parity-bound at
+   two bytes; the theme's `statusline.theme.separator` governs inter-segment separators, not
+   intra-segment markup — no ruling mints a key for this site).
 
 ## Invariants
 

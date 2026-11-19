@@ -1,17 +1,18 @@
 ---
 document_type: assumption-register
 level: L3
-version: "1.3.3"
+version: "1.3.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T14:40:00Z
 phase: 1a
 inputs: [prd.md]
-input-hash: "6807344"
+input-hash: "006ef5f"
 traces_to: prd.md
 modified:
   - "1.3.2 2026-11-19T12:00:00Z: pass-7 remediation — ASM-007 validation vehicle moved up to before Phase 2 S1.07 story writing per OD-192 (owner capture into git-ignored captures/); ASSUMP-107-1 precondition cites corrected (BC-1.07.001 PC-2, BC-1.07.002 PC-1; pass-7 A22/C13)"
   - "1.3.3 2026-11-21T14:40:00Z: pass-12 remediation — ASM-001's OD-185 harness self-check enumeration gains the normpath NUL-retention probe (BC-6.01.001 PC-4; A09); ASM-007's ASSUMP-107-1 cites corrected to the BCs' own Pre-N labels (Pre-2/Pre-1; C04 sibling of the prd.md correction)"
+  - "1.3.4 2026-11-18: pass-14 remediation — the companion-register note states R-001..R-009 after the pass-13 R-009 mint (A09); no behavioral change"
 ---
 
 # Assumptions Register: hylo P1
@@ -19,7 +20,7 @@ modified:
 > Minted 2026-11-17 per owner ruling OD-152 (consistency audit CA-04). One ASM-NNN row
 > per operating assumption formerly held in prd.md §9 prose; Status, Validation Method
 > and Impact populated per the de facto mapping in consistency-audit-2026-11-17.md §10.1.
-> The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-008).
+> The companion R-NNN risk register is minted in `prd-supplements/risk-register.md` (R-001..R-009).
 
 | ASM ID | Assumption | Status | Validation Method | Impact | Traced To |
 |--------|-----------|--------|-------------------|--------|-----------|

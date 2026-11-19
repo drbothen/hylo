@@ -1,13 +1,13 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.4"
+version: "1.2.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T02:00:00Z
 phase: 1a
 inputs: [prd.md, behavioral-contracts/BC-ALLOCATION.md, domain-spec/L2-INDEX.md, semport/hylo-legacy/hylo-legacy-pass-3-behavioral-contracts.md, semport/hylo-legacy/hylo-legacy-pass-3-deep-behavioral-contracts-r8.md, semport/hylo-legacy/statusline-target-design.md, owner-decisions-log-2026-11-14.md]
-input-hash: "bad5bd1"
+input-hash: "83527c6"
 traces_to: domain-spec/L2-INDEX.md
 origin: brownfield
 extracted_from: "legacy/dgx_statusline.py:effective_rl (SL:298-312)"
@@ -23,6 +23,8 @@ modified:
   - "1.2.2 pass-4 remediation (ADV-P4-B05/B07): EC-008 and its vector row tagged OD-160; DI-012 cited; 2026-11-18T03:00:00Z"
   - "1.2.3 2026-11-19T02:00:00Z: sync-check adv-p5 closure (SC-20) — pass-4 stamp re-dated ascending (it predated pass-3's); no behavioral change"
   - "1.2.4 pass-6 remediation (ADV-P6-B01, call 10): for-all used-age row re-anchored from VP-028 to VP-041 (VP-028 keeps the sequence golden leg); 2026-11-19T04:00:00Z"
+  - "2026-11-24T01:00:00Z (1.2.5): pass-14 remediation (ADV-P14-B04, call 4): new EC-012 and vector row — a session cache that parses as a JSON non-object (e.g. []) is neither missing nor corrupt; legacy faults at SL:307 (stdin rl present, item assignment TypeError) or SL:311 (absent, .get AttributeError), the CP-C01 register id, OD-160, Go table test (measured CPython 3.11.7, isolated temp HOME/cwd); PC1 qualifies its missing/corrupt fallback accordingly; Verification Properties gains the VP-001 row for EC-010's CP-S09 sticky leg and EC-010 cites it (B02 co-owner symmetry); no behavioral change"
+  - "2026-11-26T15:00:00Z (1.2.6): pass-14 residual sweep (OD-160 owner id-range alignment): EC-008 gains the giant rl_ts OverflowError leg CP-C33 (same SL:312 site; scalars stay CP-C02); EC-012's CP-C01 co-ownership recorded in the error-taxonomy row and owner table; no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -55,7 +57,8 @@ Notation: `T = 1800000000.0` is the injected clock.
 
 ## Postconditions
 
-1. If `rl_stdin` is a non-empty object: load the cache object `c` (missing/corrupt → `{}`),
+1. If `rl_stdin` is a non-empty object: load the cache object `c` (missing/corrupt → `{}`; a cache that parses as a
+   JSON non-object is neither missing nor corrupt — it faults the consult, EC-012/CP-C01),
    set `c["rl"] = rl_stdin` and `c["rl_ts"] = now` (existing keys keep their position;
    new keys are appended; BC-5.02.004), save atomically (failures ignored), and return
    `rl_stdin`.
@@ -87,10 +90,11 @@ Notation: `T = 1800000000.0` is the injected clock.
 | EC-005 | cache has `rl` but no `rl_ts` (foreign-cache shape, **OD-160**: Go stores only non-empty rl dicts with `rl_ts`, SL:305-308) | ts 0 → stale → None |
 | EC-006 | cached `rl` is `{}` (foreign-cache shape, **OD-160**: `effective_rl` stores only non-empty dicts) | returned (object); renders nothing |
 | EC-007 | cached `rl_ts` in the future | negative age → used |
-| EC-008 | cached `rl_ts` a string **while cached `rl` is an object** (the `isinstance(rl, dict) and` short-circuit at SL:312: with a non-object `rl` and a string `rl_ts` the result is None and there is no crash) | foreign-cache vector (CP-C02, BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n` (`\e` = 0x1B), exit 0; Go's foreign-cache behavior carries exclusion id **OD-160** (ruling Q-b) |
+| EC-008 | cached `rl_ts` a string or an exact giant integer **while cached `rl` is an object** (the `isinstance(rl, dict) and` short-circuit at SL:312: with a non-object `rl` and a string `rl_ts` the result is None and there is no crash) | foreign-cache vector (CP-C02 scalar, CP-C33 giant; BC-1.06.001 EC-001): unreachable on Go-authored caches; legacy TypeError → guard line `\e[90mstatusline degraded\e[0m\n` (`\e` = 0x1B), exit 0; Go's foreign-cache behavior carries exclusion id **OD-160** (ruling Q-b); a giant exact-int `rl_ts` (both signs) raises OverflowError at the same `now - ts` subtraction (**CP-C33**, measured pass-14) |
 | EC-009 | no `session_id` | shared `statusline-nosession.json` |
-| EC-010 | cached window that later crashes rendering (CP-S09) | sticky for up to 1800 s — BC-1.02.030 |
+| EC-010 | cached window that later crashes rendering (CP-S09) | sticky for up to 1800 s — BC-1.02.030 (VP-001 cps09 fault-injection row; the sticky consequence is stated at BC-1.02.030 PC4) |
 | EC-011 | temp-file names during save | covered by the temp-file exclusion, cache comparison only (BC-6.03.003, OD-110) |
+| EC-012 | session cache that parses as a JSON non-object (e.g. `[]`) — neither missing nor corrupt (PC1's `{}` fallback does not apply); foreign-cache vector, **CP-C01** (OD-160) | legacy faults the consult before any shape is read: stdin `rl` present — TypeError at the `c["rl"] = ...` item assignment (SL:307); absent — AttributeError at `.get` (SL:311); both measured CPython 3.11.7, isolated temp HOME/cwd (pass-14); unreachable on Go-authored caches; guard line `\e[90mstatusline degraded\e[0m\n`, exit 0; Go's foreign-cache behavior carries exclusion id **OD-160** (ruling Q-b) — Go table test, not byte-parity |
 
 ## Canonical Test Vectors
 
@@ -109,6 +113,7 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 | cache `{"rl": {}, "rl_ts": T}` (foreign-cache shape, **OD-160**) | `{}` | edge-case |
 | cache `{"proc_start": 1.5, "rl": {"old": 1}, "rl_ts": 1.0, "zz": 2}`, stdin `{"seven_day": {"used_percentage": 44}}`, `T` | cache bytes `{"proc_start": 1.5, "rl": {"seven_day": {"used_percentage": 44}}, "rl_ts": 1800000000.0, "zz": 2}` | edge-case |
 | cache `{"rl": {"a": 1}, "rl_ts": "x"}`, stdin absent | TypeError → full run prints the guard line, exit 0 (foreign-cache vector, CP-C02 — EC-008; exclusion **OD-160**, ruling Q-b) | error |
+| cache `[]` (JSON non-object; foreign-cache vector, **CP-C01** — EC-012), stdin `RL`, `T` | TypeError (item assignment, SL:307) → full run prints the guard line, exit 0 (exclusion **OD-160**, ruling Q-b; measured CPython 3.11.7, isolated temp HOME/cwd) | error |
 
 ## Verification Properties
 
@@ -117,6 +122,7 @@ with a frozen clock. `RL` = `{"seven_day":{"used_percentage":44,"resets_at":1800
 | VP-028 | Sequence replay (report, silence ×n, report) reproduces oracle stdout and cache bytes at every step | parity harness stdin-sequence (BC-6.02.002) |
 | VP-019 | Cache written by Python is read identically by Go and vice versa | cache-swap test (BC-6.02.004) |
 | VP-041 | Used value age < keep_s always — for all replay states | property test (for-all leg; VP-028 delivers the oracle legs) |
+| VP-001 | The CP-S09 sticky leg (EC-010: a cached malformed window keeps degrading every refresh for up to 1800 s) stays on the never-blank ladder — exactly the 29-byte degraded line, exit 0 | table test (fault-injection row of VP-001's ladder) |
 
 ## Traceability
 
@@ -152,6 +158,7 @@ TBD — plan-window widget story
 ## VP Anchors (Recommended)
 
 - VP-041 — used-age for-all property; VP-028 — smoothing sequence parity (golden leg); VP-019 — four-cache swap (moved from VP-028, pass-1 finding ADV-P1-B11)
+- VP-001 — cps09 sticky degrade stays on the never-blank ladder (EC-010; BC-1.02.010 EC-009 is the first-crash owner)
 
 ---
 

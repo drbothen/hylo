@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-11-21T22:30:00Z
+timestamp: 2026-11-25T09:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.05.001.md, behavioral-contracts/ss-01/BC-1.05.002.md, behavioral-contracts/ss-01/BC-1.05.003.md, behavioral-contracts/ss-01/BC-1.05.005.md, behavioral-contracts/ss-01/BC-1.05.007.md, behavioral-contracts/ss-01/BC-1.05.008.md]
-input-hash: "b49f33e"
+input-hash: "ab6bf0f"
 traces_to: prd.md
 source_bc: BC-1.05.008
 bcs: [BC-1.05.001, BC-1.05.002, BC-1.05.003, BC-1.05.005, BC-1.05.007, BC-1.05.008]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))", "1.4 2026-11-19T18:00:00Z: pass-7 fix (A2-14) — the quick leg's quantifier is the filtered population (SL:240-262): recorded sid/lane, 30-day window, rates length >= COST_MIN_N (= 10), $1 gate on the goldens side; the COST_MIN_N cold-start case (no threshold, no colour) is pinned as a table leg, so a correct implementation no longer false-fails on arbitrary-length rates", "1.5 2026-11-20T18:00:00Z: pass-11 fix (A2-03, orchestrator call 10) — the percentile property derived from BC-1.05.005 exactly: the quantifier runs over qualified HISTORY ENTRIES building TWO lists (dollar list per PC1/PC2 — the $ colour thresholds come from THIS list, not the rate list; rate list further gated by PC3's per-src api_ms need, cc 300000 vs other 1800000); PC1's self-exclusion (k == sid skipped) replaces the 'single recorded sid' misstatement; the NaN finite restriction (EC-009, Python sorted with a NaN is non-monotone) carried normatively in the Method, not only a sketch comment; skeleton generator rewritten to entries → two lists", "1.6 2026-11-21T09:00:00Z: pass-11 residual — the Method paragraph's corrupted glyph line (a stray wrench emoji) repaired to its clause text '⛏ basis and $/h'; no other change", "1.7 2026-11-21T22:30:00Z: pass-12 fix (A2-19, sketch only) — the quick.Values filler assigns each argument its SIGNATURE type: args[0]/[2] take assembled thresholds structs, args[1]/[3] take the underlying []float64 lists (a scalar percentile float was assigned to the []float64 parameters)"]
+modified: ["1.1 2026-11-18T09:18:00Z: ADV-P3 fixes — the legs the BC VP-tables route here now exist in this document: testing/quick for-all legs (BC-1.05.001/002/003/005 threshold/percentile invariants) and a Tier C differential formatting-fuzz row (BC-1.05.007) (C2-08); OD-135 invariant claim recast per OD-158, mutation non-gating in P1 (A2-23)", "1.2 2026-11-18T14:18:00Z: ADV-P4 fixes — seeded-session count corrected to 21 (12 s + 8 g + sess-self, BC-1.05.008; A09/C2-04), fixture slice renamed SeededSessions21; quick.Values filler rewritten to the assigning form args[i] = reflect.ValueOf(x) (A2-05)", "1.3 2026-11-19T12:00:00Z: pass-6 fixes (A2-12: the quick-leg oracle respelled as the harness re-derivation of the BC-1.05.005 rule; the generator derives th from rates (no unconstrained th))", "1.4 2026-11-19T18:00:00Z: pass-7 fix (A2-14) — the quick leg's quantifier is the filtered population (SL:240-262): recorded sid/lane, 30-day window, rates length >= COST_MIN_N (= 10), $1 gate on the goldens side; the COST_MIN_N cold-start case (no threshold, no colour) is pinned as a table leg, so a correct implementation no longer false-fails on arbitrary-length rates", "1.5 2026-11-20T18:00:00Z: pass-11 fix (A2-03, orchestrator call 10) — the percentile property derived from BC-1.05.005 exactly: the quantifier runs over qualified HISTORY ENTRIES building TWO lists (dollar list per PC1/PC2 — the $ colour thresholds come from THIS list, not the rate list; rate list further gated by PC3's per-src api_ms need, cc 300000 vs other 1800000); PC1's self-exclusion (k == sid skipped) replaces the 'single recorded sid' misstatement; the NaN finite restriction (EC-009, Python sorted with a NaN is non-monotone) carried normatively in the Method, not only a sketch comment; skeleton generator rewritten to entries → two lists", "1.6 2026-11-21T09:00:00Z: pass-11 residual — the Method paragraph's corrupted glyph line (a stray wrench emoji) repaired to its clause text '⛏ basis and $/h'; no other change", "1.7 2026-11-21T22:30:00Z: pass-12 fix (A2-19, sketch only) — the quick.Values filler assigns each argument its SIGNATURE type: args[0]/[2] take assembled thresholds structs, args[1]/[3] take the underlying []float64 lists (a scalar percentile float was assigned to the []float64 parameters)", "1.8 2026-11-25T09:00:00Z: pass-14 fix (ADV-P14-A2-02) — the COST_MIN_N cold-start parenthetical no longer says 'no colour': with no threshold pair the $ amount takes the fallback ladder (grey below min_usd $1, yellow at or above cold_yellow_usd fallback 25, else white; BC-1.05.001 PC-1, SL:610-615) and $/h is grey (BC-1.05.002 PC-2, SL:624), matching legacy and the owning BCs"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -52,9 +52,12 @@ counts, EC-004), and (PC2) `e.usd` is a number (bool counts) with `usd >= min_us
 and `api_ms >= need`, the PER-SRC gate: `need = rate_min_api_ms.cc` = 300000 when
 `e.src == "cc"`, `rate_min_api_ms.other` = 1800000 for every other src (absent
 included); the rate value is `usd / (api_ms / 3.6e6)`. Each list independently
-returns None below COST_MIN_N (= 10; the cold-start case — no threshold, no colour
-— pinned as a table leg, not a quick leg); else sort ascending and floor-index
-(PC4). NaN-bearing histories are LEGAL inputs (EC-009, OD-138: pinned
+returns None below COST_MIN_N (= 10; the cold-start case — no threshold, but NOT
+no colour: the $ amount still takes the fallback ladder, grey below `min_usd`
+($1), yellow at or above `cold_yellow_usd` (fallback 25), else white
+(BC-1.05.001 PC-1, SL:610-615), and the $/h segment is grey (BC-1.05.002 PC-2,
+SL:624) — pinned as a table leg, not a quick leg); else sort ascending and
+floor-index (PC4). NaN-bearing histories are LEGAL inputs (EC-009, OD-138: pinned
 byte-for-byte per exact file order); a NaN can land on a picked index (Python
 `sorted` with a NaN is non-monotone), so the ordering corollary is stated only
 over NaN-free populations — the finite restriction is carried in the Method, not

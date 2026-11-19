@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2.3"
+version: "1.2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:42:00Z
@@ -22,6 +22,7 @@ modified:
   - "2026-11-17T21:45:00Z patch bump + ADV-P2 pass-2 remediation (owner rulings OD-155..165)"
   - "2026-11-18T01:42:00Z ADV-P3 remediation D09: EC-003/EC-004 expected bytes as escape notation; notation anchor corrected to BC-5.02.001 PC-4"
   - "2026-11-19T14:00:00Z pass-6 residual sweep (ADV-P6-A2-17 reciprocal) — Verification Properties gains VP-006: the metrics-reply decode site's per-site depth budget (992 accepted / 993 rejected, whole-body ModeBytes decode), whose bcs: already lists this contract"
+  - "2026-11-25T00:00:00Z (1.2.4): ADV-P14 remediation D07 (orchestrator call 11) — Strings section ties the env-parse path into the WTF-8 repr: a POSIX byte mapped to U+DC00+b is stored in the same WTF-8 form and prefix matching runs over those bytes"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,6 +59,9 @@ lone surrogates. Cache bytes depend on this order (IM-03), and length measures d
 5. **Strings** hold code points U+0000-U+10FFFF including lone surrogates U+D800-U+DFFF, stored in a WTF-8-style byte
    encoding where every surrogate code point is kept **as written** (two adjacent surrogates from raw bytes are **not**
    merged into one character, unlike strict WTF-8). `Len` counts one per code point (BC-5.03.001).
+   The env-parse path feeds the same encoding: a POSIX byte mapped to U+DC00+b
+   (surrogateescape, BC-2.01.005 PC-6) is stored in this WTF-8 form, and prefix
+   matching over such values runs on those WTF-8 bytes (pass-14 D07).
 6. **Copy:** `Clone()` (Python `dict(c)`) preserves order; mutating the clone does not affect the original.
 
 ## Invariants

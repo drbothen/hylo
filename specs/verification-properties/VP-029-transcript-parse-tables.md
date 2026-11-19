@@ -1,13 +1,13 @@
 ---
 document_type: verification-property
 level: L4
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
-timestamp: 2026-11-19T22:00:00Z
+timestamp: 2026-11-25T09:00:00Z
 phase: 1b
 inputs: [prd.md, architecture/ARCH-03-statusline.md, behavioral-contracts/ss-01/BC-1.03.001.md, behavioral-contracts/ss-01/BC-1.03.003.md, behavioral-contracts/ss-01/BC-1.03.005.md, behavioral-contracts/ss-01/BC-1.03.007.md, behavioral-contracts/ss-01/BC-1.03.016.md, prd-supplements/test-vectors.md, prd-supplements/nfr-catalog.md]
-input-hash: "099d578"
+input-hash: "219a44e"
 traces_to: prd.md
 source_bc: BC-1.03.016
 bcs: [BC-1.03.001, BC-1.03.002, BC-1.03.003, BC-1.03.004, BC-1.03.005, BC-1.03.006, BC-1.03.007, BC-1.03.008, BC-1.03.009, BC-1.03.010, BC-1.03.011, BC-1.03.012, BC-1.03.013, BC-1.03.014, BC-1.03.015, BC-1.03.016, BC-1.03.017, BC-1.03.018, BC-1.03.019, BC-1.03.020, BC-1.03.021]
@@ -19,7 +19,7 @@ proof_completed_date: null
 proof_file_hash: null
 lifecycle_status: active
 introduced: "1.0"
-modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:16:00Z: ADV-P3 fix (A2-18) — int-transcript_path property recast per OD-161/BC-1.03.015 PC3: truthy int means no transcript, no descriptor I/O (the fd-semantics wording predates the ruling)", "1.3 2026-11-18T14:58:00Z: ADV-P4 fixes — OD-167 leg added: a transcript line whose numbers overflow float64 conversion is skipped whole AND drops the in-flight turn (cur → null), overlapping the D4-EX-2 skip discipline (A2-03); skeleton comparison made compile-plausible: parser state holds slices, so reflect.DeepEqual replaces struct equality; runStatusline call shape unified (A2-22)", "1.4 2026-11-19T22:00:00Z: pass-8 fix (ADV-P8-A2-07c, orchestrator call 12) — the two property legs BC-1.03.018's VP-table routes here now exist in this document, stated normatively in the Property Statement: the testing/quick W-line consume-no-op for-all and the delete-the-line metamorphic equivalence fuzz (oracle = the parser on the W-deleted transcript, state-adjusted per OD-167/PC4(b)); Method bullet, Proof Method table, skeleton and Named Tests updated; no bcs: change (BC-1.03.018 already present)", "1.5 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-02/A2-03, orchestrator call 3) — leg (a) restated: state-after equals state-before EXCEPT as BC-1.03.018 PC2 says (the byte offset advances; a CP-O06..O08 W-line drops cur → null); bit-identity claimed for the other committed fields only; leg (b)'s oracle adjusted for PC4(a) as well as PC4(b) — hylo's size = legacy's plus each deleted line's bytes and terminator (the unadjusted comparison false-failed on every W-line-bearing input)", "1.6 2026-11-20T18:00:00Z: pass-11 fix (A2-08) — leg (a)'s bit-identical field list gains `cur` for ordinary (non-overflow) W-lines: the CP-O06..O08 drop clause covers only overflow lines, so a `cur` mutation on an ordinary W-line now fails the leg (VP-013:54's 'every other tracked variable' form)"]
+modified: ["1.1 2026-11-17: ADV-P1 pass-1 fixes", "1.2 2026-11-18T09:16:00Z: ADV-P3 fix (A2-18) — int-transcript_path property recast per OD-161/BC-1.03.015 PC3: truthy int means no transcript, no descriptor I/O (the fd-semantics wording predates the ruling)", "1.3 2026-11-18T14:58:00Z: ADV-P4 fixes — OD-167 leg added: a transcript line whose numbers overflow float64 conversion is skipped whole AND drops the in-flight turn (cur → null), overlapping the D4-EX-2 skip discipline (A2-03); skeleton comparison made compile-plausible: parser state holds slices, so reflect.DeepEqual replaces struct equality; runStatusline call shape unified (A2-22)", "1.4 2026-11-19T22:00:00Z: pass-8 fix (ADV-P8-A2-07c, orchestrator call 12) — the two property legs BC-1.03.018's VP-table routes here now exist in this document, stated normatively in the Property Statement: the testing/quick W-line consume-no-op for-all and the delete-the-line metamorphic equivalence fuzz (oracle = the parser on the W-deleted transcript, state-adjusted per OD-167/PC4(b)); Method bullet, Proof Method table, skeleton and Named Tests updated; no bcs: change (BC-1.03.018 already present)", "1.5 2026-11-20T15:00:00Z: pass-9 fixes (ADV-P9-A2-02/A2-03, orchestrator call 3) — leg (a) restated: state-after equals state-before EXCEPT as BC-1.03.018 PC2 says (the byte offset advances; a CP-O06..O08 W-line drops cur → null); bit-identity claimed for the other committed fields only; leg (b)'s oracle adjusted for PC4(a) as well as PC4(b) — hylo's size = legacy's plus each deleted line's bytes and terminator (the unadjusted comparison false-failed on every W-line-bearing input)", "1.6 2026-11-20T18:00:00Z: pass-11 fix (A2-08) — leg (a)'s bit-identical field list gains `cur` for ordinary (non-overflow) W-lines: the CP-O06..O08 drop clause covers only overflow lines, so a `cur` mutation on an ordinary W-line now fails the leg (VP-013:54's 'every other tracked variable' form)", "1.7 2026-11-25T09:00:00Z: pass-14 fix (ADV-P14-A2-06) — leg (b)'s PC4(a) size rule respelled 'hylo's size equals legacy's plus' to 'equals THE DELETION ORACLE'S plus' (VP-013's pass-12 A2-16 form; the oracle is hylo's own parser on the transformed transcript, never a CPython run)"]
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,8 +60,8 @@ per CP); and (b)
 delete-the-line equivalence — on random transcripts with injected W-lines, the state
 computed over the transcript equals the state computed over the same transcript with
 every W-line deleted, modulo TWO oracle adjustments: PC4(a) — hylo's `size` equals
-legacy's plus each deleted line's full consumed span, the line's bytes plus its
-terminator (a final unterminated piece contributes nothing) — and the OD-167
+the deletion oracle's plus each deleted line's full consumed span, the line's
+bytes plus its terminator (a final unterminated piece contributes nothing) — and the OD-167
 exception of PC4(b): at each overflow skip the
 post-skip state additionally includes `cur` → null (the open turn discarded, never
 finished) — the oracle is the parser itself on the transformed transcript,

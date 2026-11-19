@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "statusline"
-version: "1.17"
+version: "1.18"
 status: draft
 producer: architect
 timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, prd-supplements/error-taxonomy.md, semport/hylo-legacy/statusline-target-design.md, behavioral-contracts/BC-INDEX.md]
 traces_to: ARCH-INDEX.md
-input-hash: "a7238b7"
+input-hash: "ed463e4"
 
 ---
 
@@ -349,7 +349,7 @@ type FileSystem interface {
 // Step 7c therefore reads: load via CacheStore -> RecordCost -> Save via
 // CacheStore -> (re)load via CacheStore -> CostThresholds, in legacy's exact
 // side-effect order (BC-1.05.004 Description: the record runs before the
-// percentile read; BC-1.05.005 PC-2: the percentile scan loads with the
+// percentile read; BC-1.05.005 Pre 2: the percentile scan loads with the
 // BC-1.06.001 load).
 //
 // Anchor justification: these declarations are the home the cost BCs
@@ -370,17 +370,22 @@ type SessionCost struct {
     APIMs pyfmt.Value
 }
 
-// CostConfig spells the config inputs (D15 registry keys, BC-1.05.005 PC-3):
+// CostConfig spells the config inputs (D15 registry keys; BC-1.05.005 Pre 3 and
+// BC-1.05.004 Pre 2 — every cost key the cost BCs list, none hard-coded):
 // WindowS (statusline.cost.window_s), MinUSD (statusline.cost.min_usd),
 // MinSessions (statusline.cost.min_sessions), RateMinAPIMs
 // (statusline.cost.rate_min_api_ms, the cc/other map), Percentiles
-// (statusline.cost.percentiles, the ascending pair).
+// (statusline.cost.percentiles, the ascending pair), RecordThrottleS
+// (statusline.cost.record_throttle_s, the record_cost throttle bound —
+// BC-1.05.004 Pre 2/T-022; ADV-P14-A01: the throttle rule now gets its value
+// through the declared API).
 type CostConfig struct {
-    WindowS      pyfmt.Value
-    MinUSD       pyfmt.Value
-    MinSessions  pyfmt.Value
-    RateMinAPIMs pyfmt.Value
-    Percentiles  pyfmt.Value
+    WindowS        pyfmt.Value
+    MinUSD         pyfmt.Value
+    MinSessions    pyfmt.Value
+    RateMinAPIMs   pyfmt.Value
+    Percentiles    pyfmt.Value
+    RecordThrottleS pyfmt.Value
 }
 
 // RecordCost appends this session's cc-tagged entry to the LOADED history and
@@ -389,8 +394,10 @@ type CostConfig struct {
 // Dispositions:
 //   - guard (falsy Sid, Lane not exactly "dgx"/"anth", non-numeric USD) ->
 //     (history unchanged, false, nil) (BC-1.05.004 PC-1);
-//   - throttle (stored entry src "cc" and now - ts < record_throttle_s, strict)
-//     -> (history unchanged, false, nil) (BC-1.05.004 PC-3);
+//   - throttle (stored entry src "cc" and now - ts < cfg.RecordThrottleS, the
+//     statusline.cost.record_throttle_s config value — strict <; NO hard-coded
+//     bound, ADV-P14-A01/ADV-P14-C2-03) -> (history unchanged, false, nil)
+//     (BC-1.05.004 PC-3);
 //   - OD-166 write-step convertibility skip (either numeric field unconvertible)
 //     -> (history unchanged, false, nil) — the caller persists nothing (step 7c;
 //     BC-1.05.004 PC-4);
@@ -398,19 +405,29 @@ type CostConfig struct {
 //     entry ts non-numeric) -> err wrapping errDegraded: CP-C09, and CP-C10 at
 //     the record_cost throttle-check site, where the raise precedes save_cache
 //     and NOTHING is written (the CP-C family, OD-160; BC-1.05.004 owners).
-func RecordCost(history pyfmt.Value, sess SessionCost, now float64) (pyfmt.Value, bool, error)
+func RecordCost(history pyfmt.Value, sess SessionCost, cfg CostConfig, now float64) (pyfmt.Value, bool, error)
 
 // CostThresholds scans the LOADED history and returns the two percentile pairs,
-// each (p75, p95) by floor-index selection or nil when fewer than MinSessions
-// entries qualify (cold start), excluding the current session's own entries
-// (self-exclusion by Sid, BC-1.05.005 Inv 3), entries outside WindowS (strict
-// bound: an entry exactly 30 d old counts, BC-1.05.005 PC-1) and usd < MinUSD.
-// Pure function of (history, lane, sid, now, config) — BC-1.05.005 Inv 1. The
-// usd / (api_ms / 3.6e6) exact-int division (SL:255) lives HERE; its int->float
-// overflow legs CP-O10/O11 return err wrapping errDegraded and surface in step
-// 7c (owner BC-1.05.005 EC-011); CP-C10's cost_thresholds site faults after the
+// each (p75, p95) by floor-index selection or nil when fewer than
+// cfg.MinSessions entries qualify (cold start), excluding the current session's
+// own entries (self-exclusion by Sid, BC-1.05.005 Inv 3), entries outside
+// cfg.WindowS (strict bound: an entry exactly 30 d old counts, BC-1.05.005
+// PC-1) and usd < cfg.MinUSD. Pure function of (history, lane, sid, now,
+// config) — BC-1.05.005 Inv 1. Each pair element is a pyfmt.Num carrying the
+// RAW history value's exact kind — an exact int stays an exact int (hylo's own
+// writer keeps ints as ints, BC-1.05.009 PC-3) — and comparison sites use
+// pyfmt.NumCmp (BC-5.01.007: exact cross-kind comparison, never rounds the int
+// to float64). float64 is a PARITY BUG here, not a style choice
+// (ADV-P14-A02/C2-07): the dollar list holds the raw history usd, and a
+// threshold int above 2**53 round-tripped through float64 flips the $
+// colour — pinned example, orchestrator-measured on CPython 3.11.7:
+// 9007199254740995 >= 9007199254740996.0 is False, while the float64-rounded
+// comparison of the same operands is True. The usd / (api_ms / 3.6e6)
+// exact-int division (SL:255) lives HERE; its int->float overflow legs
+// CP-O10/O11 return err wrapping errDegraded and surface in step 7c (owner
+// BC-1.05.005 EC-011); CP-C10's cost_thresholds site faults after the
 // record_cost write (BC-1.01.009 step 7c).
-func CostThresholds(history pyfmt.Value, sess SessionCost, now float64, cfg CostConfig) (usdPair, ratePair *[2]float64, err error)
+func CostThresholds(history pyfmt.Value, sess SessionCost, cfg CostConfig, now float64) (usdPair, ratePair *[2]pyfmt.Num, err error)
 ```
 
 A `recover()` backstop in `Main` maps any panic to `degradedLine` (mirrors

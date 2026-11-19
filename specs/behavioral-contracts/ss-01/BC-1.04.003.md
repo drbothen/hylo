@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.10"
+version: "1.3.11"
 status: draft
 producer: product-owner
 timestamp: 2026-11-18T01:45:00Z
@@ -23,13 +23,14 @@ modified:
   - "1.3.1 2026-11-18: pass-3 remediation ADV-P3-C2-02 (OD-160 exclusion id on EC-009)"
   - "1.3.2 2026-11-18: pass-4 remediation ADV-P4-C2-13/14/15 (preempt_marker_above config key + queue.yellow independence; output-neutrality qualified by points <= history_cap; EC-008 KeyError degrade outcome)"
   - "1.3.3 2026-11-18: pass-5 remediation ADV-P5-C2-09 (EC-008 KeyError scoped to hist[-1] + OD-160 tag) and ADV-P5-C2-17 (DI-012 + VP-012 closure citations) and design call 16 (history_cap range 1..1000; preempt_marker_above Float >= 0)"
-  - "1.3.10 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-008 cites crash id CP-C17 and EC-010 cites CP-C16, minted by error-taxonomy 1.20 for this contract's foreign cached-sample legs; no behavioral change"
   - "1.3.4 2026-11-18: pass-8 remediation ADV-P8-C2-05 (DI-008 lifted into the L2 row — the EC-008/EC-009 degrades ride the never-blank ladder) + ADV-P8-C2-08 (row-1 testing/quick leg routed to the VP-030 quick leg, VP-031 de-cited; pass-8 call 12)"
   - "1.3.5 2026-11-18: pass-9 remediation ADV-P9-C2-09 (PC2/PC3 name the registered keys statusline.sparkline.max_age_s and statusline.sparkline.min_gap_s beside their default literals)"
   - "1.3.6 2026-11-18: pass-9 residual sweep (call 9, ADV-P9-A2-04 disk sync) — the VP-030 quick-leg row names the registered keys (statusline.sparkline.history_cap, statusline.sparkline.max_age_s) instead of the 32/90 literals, states the pruning invariant on the success path only, and adds the failure-path verbatim re-save (SL:327, SL:353-355; Inv 2), matching VP-030's statement"
   - "1.3.7 2026-11-18: pass-10 remediation ADV-P10-C2-02 (EC-010 added — a dict point whose t is a huge exact JSON integer, magnitude >= 2**1024 - 2**970, raises OverflowError at the SL:336 age filter → errDegraded; OD-160 class; oracle-verified CPython 3.11.7)"
   - "1.3.8 2026-11-18: pass-11 remediation ADV-P11-C2-01 (the VP-031 row names the four varied series v/k/f/p by their series names and pins the gen_rate5m fallback position — v inserted AFTER k and f — so the 16-subset table can no longer be misread as varying the insertion order)"
   - "1.3.9 2026-11-18: pass-12 remediation ADV-P12-C2-04 (the VP-031 row's proof method tracks VP-031 v1.6: the key-order table is 24 rows — 16 primary-v plus 8 fallback-v series subsets, primary and fallback v mutually exclusive)"
+  - "1.3.10 2026-11-18: pass-13 residual (orchestrator residual sweep, CP-C register alignment): EC-008 cites crash id CP-C17 and EC-010 cites CP-C16, minted by error-taxonomy 1.20 for this contract's foreign cached-sample legs; no behavioral change"
+  - "1.3.11 2026-11-18: pass-14 process fix ADV-P14-C2-08 (the 1.3.10 pass-13 residual entry restored to the end of this list — ascending version order; no behavioral change)"
 deprecated: null
 deprecated_by: null
 replacement: null

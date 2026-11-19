@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.5"
+version: "1.3.6"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T06:00:00Z
@@ -36,6 +36,7 @@ modified:
   - "2026-11-21T06:00:00Z (1.3.3): ADV-P10 remediation D06+A07 (orchestrator calls 6+17) — PC-3 gains the default-layer <value> rule: when no variable supplied the failing value, <value> is the default's env spelling per the interface-definitions Default column (e.g. m_from's 1000000, not 1000000.0/1e+06) and PC-6 omits [from <ENVNAME>]; ascending-pair CTV text pins the example; the path-grammar reason `not an absolute path` (minted pass-9 A11) added to the exact-strings table"
   - "2026-11-22T00:00:00Z (1.3.4): ADV-P12 remediation D08 (orchestrator call 8) - the invalid-UTF-8 vocabulary row scopes the Windows leg: a lone surrogate cannot occur on the Windows env path (platform.EnvVars decodes UTF-16 with Go's standard U+FFFD substitution, BC-2.01.001 PC-6); the reason is reachable from POSIX byte values only"
   - "1.3.5 pass-12 residual sweep (orchestrator pass-12 residual call 5): the VP-016 for-all row states the operative rule (if the config-error line is printed it is exactly one LF-terminated line) instead of the tautological either/or, consistent with VP-016 1.9 (A2-17); no behavioral change; 2026-11-23T14:00:00Z"
+  - "2026-11-25T00:00:00Z (1.3.6): ADV-P14 remediation D03 (orchestrator call 9) — rule 2 pins the precedence example: a negative int64-overflow value on a floor>=0 range is negative (rule 2) before any out-of-range (rule 3); rule order confirmed canonical"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -189,7 +190,10 @@ and the Float members of composites) all four fire in order:
 1. NaN or ±Inf → `not finite` (e.g. `turn.floor_tps=nan`, `context.plain_max=inf`).
 2. v < 0 against a range whose floor is 0 or higher (`>= 0` or `> 0`) → `negative`
    (an Int with such a floor fires this too; e.g. `cost.min_sessions=-5` against
-   `>= 1`).
+   `>= 1`). This rule fires BEFORE the int64-overflow clause of rule 3: the pinned
+   example `-99999999999999999999` on an Int key with a floor of 0 or higher is
+   `negative`, not `out of range` (canonical precedence confirmed pass-14 D03; the
+   value parses as an exact big integer, so no grammar check rejects it).
 3. outside a BOUNDED registered range (below a positive minimum, above a maximum,
    int64 overflow) → `out of range` (e.g. `kv.cells=0` against `1..100`,
    `cost.min_sessions=0` against `>= 1`).

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3.0"
+version: "1.3.1"
 status: draft
 producer: product-owner
 timestamp: 2026-11-21T07:00:00Z
@@ -36,6 +36,7 @@ modified:
   - "2026-11-21T07:00:00Z (1.2.8): ADV-P11 remediation A2-02 sibling (orchestrator call 1, OD-190 applied literally) — the shim's stdio duty is ENCODING only: sys.stdin/sys.stdout reconfigured to UTF-8 strict, NO newline reconfigure (the former newline=\\n claim withdrawn); Pre-1 cites the comparator's open CRLF→LF conversion (BC-6.03.002 PC-1/EC-006) as the Windows-leg LF disposition, and the canary's \\r\\n-free observation is scoped to the POSIX leg"
   - "2026-11-22T00:00:00Z (1.2.9): ADV-P12 remediation D13 - PC-1's mktime/strptime note respelled: no parity case reaches the parse (a seeded proc_start short-circuits at SL:273-275; cache-003's empty fake PATH raises FileNotFoundError at the ps call SL:280-281, caught SL:293-294, before the parse), dissolving the stale 'which the seeded proc_start bypasses' wording"
   - "2026-11-23T00:00:00Z (1.3.0): ADV-P13 remediation D02 (orchestrator call 3, applying pass-12 call 7) + D01 (call 2) — PC-4: the stdio leg CHECKS THE UTF-8 ROUND TRIP ONLY (the shim performs no newline reconfigure, so the shim-loaded Windows run also writes CRLF and no newline observation discriminates a lost shim; the CLOCK leg is the gating shim detector); 'discriminates the LF half' removed; PC-5's stdio no-shim negative control WITHDRAWN (a no-shim CRLF observation is not discriminating); PC-4's clock-canary stdout matched after the ONE open CRLF→LF conversion of BC-6.03.002 PC-1"
+  - "2026-11-25T00:00:00Z (1.3.1): ADV-P14 remediation D13 (orchestrator call 17) — Pre-3's identical-split claim pinned on both sides: the Python shim's malformed branch is the Go shim's warn-once/real-clock fallback; both malformed branches unreachable in the harness (env builder guarantees well-formedness; EC-003 forbids the missing state)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,7 +76,12 @@ oracle case runs, that the shim actually took effect.
    within the `time.Time` representable range expressed in epoch seconds,
    `-62135596800 ≤ s ≤ 253402300799` (year 1 .. year 9999; asymmetric about the 1970
    epoch — ADV-P5-D19 disposes the previously contradictory single-span statement); values
-   like `1e300` are malformed. Both shims implement this split identically, rejecting each
+   like `1e300` are malformed. Both shims implement this split identically — the same
+   well-formed set and, on the malformed side, the SAME disposition: exactly one
+   stderr warning and the real clock thereafter (the Python shim's malformed branch
+   is pinned to the Go shim's warn-once/real-clock fallback, pass-14 D13; both
+   malformed branches are unreachable in the harness — the env builder guarantees
+   well-formedness and EC-003 forbids the missing state) — while rejecting each
    runtime's surplus: the Go shim does NOT accept `strconv.ParseFloat`'s extras (`inf`,
    `NaN`, hex floats like `0x1p3` are malformed), and the Python shim's `float()` surplus
    (surrounding whitespace, `_`, `nan`/`inf` spellings) is likewise malformed. Both sides

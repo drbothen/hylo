@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.7.2"
+version: "1.7.4"
 status: draft
 producer: product-owner
 timestamp: 2026-11-17T12:00:00Z
@@ -26,6 +26,8 @@ modified:
   - "1.7 pass-11 remediation (ADV-P11-B06): PC2.3's dim token brackets pinned as named format constants, not config (D15; the theme separator governs inter-segment separators, not intra-segment markup); no behavioral change; 2026-11-21T12:00:00Z"
   - "1.7.1 pass-12 remediation (ADV-P12-B01; orchestrator call 12): EC-009 and its vector row re-tagged as the OD-160 foreign-cache vector CP-C06 — a non-numeric cached tin is a hand-edited-cache shape only (transcript-borne usage fields die at SL:1108), not a byte-parity leg; CP-C06 allocated by the product-owner from the formerly reserved id, rows built by the architect in error-taxonomy; no behavioral change; 2026-11-23T00:00:00Z"
   - "1.7.2 pass-12 residual sweep (orchestrator pass-12 residual register alignment): EC-009, its vector row and the 1.7.1 note renumber CP-C11 to CP-C06 per the orchestrator ruling that the formerly reserved id is ALLOCATED, keeping the register label CP-C01..C10 true; no behavioral change; 2026-11-23T14:00:00Z"
+  - "2026-11-24T01:00:00Z (1.7.3): pass-14 remediation (ADV-P14-B06): PC2.3 declares the one-space joiner between inner parts a named format constant (D15, sibling of the SL:596 dim-bracket declaration); no behavioral change"
+  - "2026-11-26T15:00:00Z (1.7.4): pass-14 residual sweep (OD-160 owner id-range alignment): EC-009 gains the giant exact-int render-conversion legs CP-C53 (SL:869/596, uncaught by _fmt_tok_c's except clause); no behavioral change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -65,7 +67,9 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
       (a single part equals `↑` and is omitted entirely). The dim brackets (SL:596) are **named format
       constants** of this widget, not config (D15 rationale: display-format markup of the output, parity-bound
       at four bytes each; why not config = the theme's `statusline.theme.separator` governs inter-segment
-      separators, not intra-segment markup — no ruling mints a key for this site);
+      separators, not intra-segment markup — no ruling mints a key for this site), and the one-space
+      joiner between the parts is likewise a **named format constant** (D15, sibling of the bracket
+      declaration; pass-14 ADV-P14-B06);
    4. `\e[90m ↓\e[0m\e[97m` + `_fmt_tok_c(tout or 0)` + `\e[0m`;
    5. if `rb` is numeric and `> 0`: ` \e[2m\e[33m↻` + `format(rb, ".0f")` (half-even) + `\e[0m`.
 3. When not shown, no segment is appended.
@@ -95,7 +99,7 @@ only from the transcript accumulation (S1.03), never from stdin. Every count is 
 | EC-006 | `tout` = `None` with `tin > 0` | `↓0` |
 | EC-007 | `rb = 1.5` | `↻2` (half-even `.0f`) |
 | EC-008 | `mix` of length 7 (no `c_in`, no `rb`) | only `✍`/`⟳` can be inner parts; no `↻` |
-| EC-009 | `tin` a non-numeric truthy value with numeric `tout` | foreign-cache vector (**OD-160**, **CP-C06**): a non-numeric `tin` cannot arrive from a transcript (a string or list usage field raises TypeError back at step 2, SL:1108 — a D4-EX-2 skip); the only legacy source is a hand-edited mix cache, whose early return (SL:1039-1040) hands back the cached `tin`; legacy TypeError at SL:586 → degraded line, exit 0; Go's foreign-cache behavior carries exclusion **OD-160** (ruling Q-b) — Go table test, not byte-compared |
+| EC-009 | `tin` a non-numeric truthy value with numeric `tout` | foreign-cache vector (**OD-160**, **CP-C06** scalars, **CP-C53** giants): a non-numeric `tin` cannot arrive from a transcript (a string or list usage field raises TypeError back at step 2, SL:1108 — a D4-EX-2 skip); the only legacy source is a hand-edited mix cache, whose early return (SL:1039-1040) hands back the cached `tin`; legacy TypeError at SL:586 → degraded line, exit 0; Go's foreign-cache behavior carries exclusion **OD-160** (ruling Q-b) — Go table test, not byte-compared; a giant exact-int `tin`/`tout`/`c_in`/`c_wr`/`c_rd`/`rb` (both signs) passes the SL:586-596 isinstance gates exactly and raises OverflowError at the render conversions (SL:869 `float()` inside _fmt_tok_c — uncaught by its `except (TypeError, ValueError)` — and SL:596 `↻{rb:.0f}`; **CP-C53**, measured pass-14) |
 
 ## Canonical Test Vectors
 

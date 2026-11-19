@@ -2,14 +2,14 @@
 document_type: architecture-section
 level: L3
 section: "overview"
-version: "1.10"
+version: "1.11"
 status: draft
 producer: architect
 timestamp: 2026-11-23T10:00:00Z
 phase: 1b
 inputs: [prd.md, product-brief.md, domain-spec/invariants.md, semport/hylo-legacy/statusline-target-design.md]
 traces_to: ARCH-INDEX.md
-input-hash: "b457141"
+input-hash: "b46063b"
 
 ---
 
@@ -18,7 +18,8 @@ input-hash: "b457141"
 > hylo P1 is one static Go binary per OS (`github.com/drbothen/hylo`, D1) whose only
 > active subcommand family this cycle is `hylo statusline` (+ `version`, `config`).
 > The status line is a pure function of stdin + transcript + metrics + caches plus the
-> injected git, process, clock and env seams (DI-007; the seam set per AD-10, prd.md:70),
+> injected git, process, clock and env seams (DI-007; the seam set per AD-10,
+> prd.md §1.1),
 > ported byte-exact from `legacy/dgx_statusline.py` under the CPython 3.11.x oracle
 > (OD-104). Rendering never fails: every fault lands on the degraded ladder — one-line
 > output, exit 0 (DI-008). Reference for all idiom rows (IM-nn), pitfalls (PR-nn),
